@@ -69,6 +69,7 @@ public class LauncherActivity extends AppCompatActivity implements LauncherViewM
     @Override
     public void onRequestUpgrade() {
         startActivity(new Intent(this, UpgradeWalletActivity.class));
+        finish();
     }
 
     @Override
