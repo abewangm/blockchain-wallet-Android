@@ -3,6 +3,9 @@ package info.blockchain.wallet.util;
 
 import android.util.Log;
 
+import info.blockchain.api.ExchangeTicker;
+import info.blockchain.wallet.rxjava.RxUtil;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -11,6 +14,7 @@ import java.util.HashMap;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.di.Injector;
+import rx.Observable;
 
 /**
  * This class obtains info on the currencies communicated via https://blockchain.info/ticker
@@ -96,6 +100,21 @@ public class ExchangeRateFactory {
 
     public String[] getCurrencyLabels() {
         return currencyLabels;
+    }
+
+    /**
+     * Returns the historic value of a number of Satoshi at a given time in a given currency.
+     * NOTE: Currently only works with USD. May support other currencies in the future.
+     *
+     * @param satoshis      The amount of Satoshi to be converted
+     * @param currency      The currency to be converted to as a 3 letter acronym, eg USD, GBP
+     * @param timeInMillis  The time at which to get the price, in milliseconds since epoch
+     * @return              A double value
+     */
+    public Observable<Double> getHistoricPrice(long satoshis, String currency, long timeInMillis) {
+        return Observable.fromCallable(() -> new ExchangeTicker().getHistoricPrice(satoshis, currency, timeInMillis))
+                .map(Double::parseDouble)
+                .compose(RxUtil.applySchedulers());
     }
 
     /**

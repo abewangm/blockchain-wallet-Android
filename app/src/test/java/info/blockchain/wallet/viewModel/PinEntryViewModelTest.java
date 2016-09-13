@@ -7,6 +7,11 @@ import android.widget.TextView;
 
 import info.blockchain.wallet.callbacks.DialogButtonCallback;
 import info.blockchain.wallet.datamanagers.AuthDataManager;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.exceptions.PayloadException;
+import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.HDWallet;
@@ -179,7 +184,6 @@ public class PinEntryViewModelTest {
         //noinspection WrongConstant
         verify(mActivity).showToast(anyInt(), anyString());
         verify(mActivity).showMaxAttemptsDialog();
-        verify(mPayloadManager).getPayload();
     }
 
     @Test
@@ -408,7 +412,7 @@ public class PinEntryViewModelTest {
     }
 
     @Test
-    public void validatePasswordThrowsException() throws Exception {
+    public void validatePasswordThrowsGenericException() throws Exception {
         // Arrange
         CharSequenceX password = new CharSequenceX("1234567890");
         when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new Throwable()));
@@ -425,7 +429,103 @@ public class PinEntryViewModelTest {
     }
 
     @Test
-    public void updatePayloadSuccessfulVersionNotSupported() throws Exception {
+    public void validatePasswordThrowsServerConnectionException() throws Exception {
+        // Arrange
+        CharSequenceX password = new CharSequenceX("1234567890");
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new ServerConnectionException()));
+        // Act
+        mSubject.validatePassword(password);
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        verify(mPayloadManager).setTempPassword(new CharSequenceX(""));
+        verify(mActivity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(mActivity).showToast(anyInt(), anyString());
+    }
+
+    @Test
+    public void updatePayloadInvalidCredentialsException() throws Exception {
+        // Arrange
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new InvalidCredentialsException()));
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        mSubject.updatePayload(new CharSequenceX(""));
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        verify(mActivity).goToPasswordRequiredActivity();
+    }
+
+    @Test
+    public void updatePayloadServerConnectionException() throws Exception {
+        // Arrange
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new ServerConnectionException()));
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        mSubject.updatePayload(new CharSequenceX(""));
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        //noinspection WrongConstant
+        verify(mActivity).showToast(anyInt(), anyString());
+    }
+
+    @Test
+    public void updatePayloadDecryptionException() throws Exception {
+        // Arrange
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new DecryptionException()));
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        mSubject.updatePayload(new CharSequenceX(""));
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        verify(mActivity).goToPasswordRequiredActivity();
+    }
+
+    @Test
+    public void updatePayloadPayloadExceptionException() throws Exception {
+        // Arrange
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new PayloadException()));
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        mSubject.updatePayload(new CharSequenceX(""));
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        //noinspection WrongConstant
+        verify(mActivity).showToast(anyInt(), anyString());
+        verify(mAppUtil).restartApp();
+    }
+
+    @Test
+    public void updatePayloadHDWalletException() throws Exception {
+        // Arrange
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new HDWalletException()));
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        mSubject.updatePayload(new CharSequenceX(""));
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        //noinspection WrongConstant
+        verify(mActivity).showToast(anyInt(), anyString());
+        verify(mAppUtil).restartApp();
+    }
+
+    @Test
+    public void updatePayloadVersionNotSupported() throws Exception {
         // Arrange
         when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new UnsupportedVersionException()));
         Payload mockPayload = mock(Payload.class);

@@ -29,15 +29,18 @@ import java.util.List;
 import java.util.Locale;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.di.ApiModule;
 import piuk.blockchain.android.di.ApplicationModule;
 import piuk.blockchain.android.di.DataManagerModule;
 import piuk.blockchain.android.di.Injector;
 import piuk.blockchain.android.di.InjectorTestUtils;
 import rx.Observable;
+import rx.observers.TestSubscriber;
 
 import static info.blockchain.wallet.view.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -48,7 +51,7 @@ import static org.mockito.Mockito.when;
 
 @SuppressLint("UseSparseArrays")
 @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
-public class TransactionDetailViewModelTest {
+public class TransactionDetailViewModelTest extends RxTest {
 
     @Mock PrefsUtil mPrefsUtil;
     @Mock PayloadManager mPayloadManager;
@@ -67,6 +70,7 @@ public class TransactionDetailViewModelTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         MockitoAnnotations.initMocks(this);
 
         when(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(MonetaryUtil.UNIT_BTC);
@@ -151,7 +155,11 @@ public class TransactionDetailViewModelTest {
         verify(mActivity).setTransactionColour(R.color.blockchain_transfer_blue_50);
         verify(mActivity).setDescription(null);
         verify(mActivity).setDate(anyString());
-        verify(mActivity).pageFinish();
+        verify(mActivity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+        verify(mActivity).setToAddresses(any());
+        verify(mActivity).setTransactionValueFiat(anyString());
+        verify(mActivity).setFromAddress(anyString());
+        verify(mActivity).onDataLoaded();
     }
 
     @Test
@@ -193,6 +201,30 @@ public class TransactionDetailViewModelTest {
         verify(mActivity).setTransactionValueFiat(anyString());
         verify(mActivity).onDataLoaded();
         verifyNoMoreInteractions(mActivity);
+    }
+
+    @Test
+    public void getTransactionValueStringUsd() {
+        // Arrange
+        TestSubscriber<String> subscriber = new TestSubscriber<>();
+        // Act
+        mSubject.getTransactionValueString("USD", new Tx("", "", "", 0D, 0L, new HashMap<>())).toBlocking().subscribe(subscriber);
+        // Assert
+        assertNotNull(subscriber.getOnNextEvents().get(0));
+        subscriber.onCompleted();
+        subscriber.assertNoErrors();
+    }
+
+    @Test
+    public void getTransactionValueStringNonUsd() {
+        // Arrange
+        TestSubscriber<String> subscriber = new TestSubscriber<>();
+        // Act
+        mSubject.getTransactionValueString("GBP", new Tx("", "", "", 0D, 0L, new HashMap<>())).toBlocking().subscribe(subscriber);
+        // Assert
+        assertNotNull(subscriber.getOnNextEvents().get(0));
+        subscriber.onCompleted();
+        subscriber.assertNoErrors();
     }
 
     @Test

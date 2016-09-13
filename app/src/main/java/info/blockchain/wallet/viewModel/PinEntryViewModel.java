@@ -285,6 +285,7 @@ public class PinEntryViewModel implements ViewModel {
                         }, throwable -> {
 
                             if (throwable instanceof ServerConnectionException) {
+                                mDataListener.dismissProgressDialog();
                                 mDataListener.showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
 
                             } else {
