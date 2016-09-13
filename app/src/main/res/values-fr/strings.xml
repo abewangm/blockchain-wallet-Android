@@ -450,7 +450,7 @@
     <string name="default_label_brackets">(par défaut)</string>
     <string name="not_now">Pas maintenant</string>
     <string name="high_fee_not_necessary">Il n\'est pas nécessaire d\'inclure des frais aussi élevés.</string>
-    <string name="high_fee_not_necessary_info">Vous avez spécifié des frais de transaction anormalement élevés de %10$s.\n\nMême si vous diminuez les frais à %1$s, vous pouvez vous attendre à la confirmation de la transaction dans les 10 prochaines minutes ~ (1 bloc).</string>
+    <string name="high_fee_not_necessary_info">Vous avez spécifié des frais de transaction anormalement élevés de %1$s.\n\nMême si vous diminuez les frais à %2$s, vous pouvez vous attendre à la confirmation de la transaction dans les 10 prochaines minutes ~ (1 bloc).</string>
 
     <string name="low_fee_not_recommended">Utiliser des frais personnalisés faibles n\'est pas recommandé</string>
     <string name="low_fee_suggestion">Vous avez spécifié des frais de transaction exceptionnellement faibles de %1$s.\n\nVotre transaction pourrait se retrouver bloquée et ne jamais être confirmée. Pour augmenter les chances que votre transaction soit confirmée dans environ une heure (6 blocs), nous recommandons fortement des frais non inférieurs à %2$s.</string>

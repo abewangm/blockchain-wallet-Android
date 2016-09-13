@@ -836,7 +836,7 @@ public class SendViewModel implements ViewModel {
     private boolean isFeeAdequate(){
 
         //Push tx endpoint only accepts > 10000 per kb fees
-        if(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs() != null
+        if(sendModel.pendingTransaction.unspentOutputBundle != null && sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs() != null
         && !FeeUtil.isAdequateFee(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(),
                 2,//assume change
                 sendModel.pendingTransaction.bigIntFee)){
@@ -1045,6 +1045,10 @@ public class SendViewModel implements ViewModel {
     }
 
     private boolean isValidAmount(BigInteger bAmount){
+
+        if(bAmount == null){
+            return false;
+        }
 
         //Test that amount is more than dust
         if (bAmount.compareTo(SendCoins.bDust) == -1) {
