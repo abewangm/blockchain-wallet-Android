@@ -1,6 +1,11 @@
 package info.blockchain.wallet.util;
 
 
+import android.util.Log;
+
+import info.blockchain.api.ExchangeTicker;
+import info.blockchain.wallet.rxjava.RxUtil;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -9,13 +14,14 @@ import java.util.HashMap;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.di.Injector;
+import rx.Observable;
 
 /**
  * This class obtains info on the currencies communicated via https://blockchain.info/ticker
  */
 public class ExchangeRateFactory {
 
-    private static String strData = null;
+    private static JSONObject jsonObject = null;
     @Inject protected PrefsUtil mPrefsUtil;
 
     private static HashMap<String, Double> fxRates = null;
@@ -96,13 +102,32 @@ public class ExchangeRateFactory {
         return currencyLabels;
     }
 
-    public void setData(String data) {
-        strData = data;
+    /**
+     * Returns the historic value of a number of Satoshi at a given time in a given currency.
+     * NOTE: Currently only works with USD. May support other currencies in the future.
+     *
+     * @param satoshis      The amount of Satoshi to be converted
+     * @param currency      The currency to be converted to as a 3 letter acronym, eg USD, GBP
+     * @param timeInMillis  The time at which to get the price, in milliseconds since epoch
+     * @return              A double value
+     */
+    public Observable<Double> getHistoricPrice(long satoshis, String currency, long timeInMillis) {
+        return Observable.fromCallable(() -> new ExchangeTicker().getHistoricPrice(satoshis, currency, timeInMillis))
+                .map(Double::parseDouble)
+                .compose(RxUtil.applySchedulers());
     }
 
     /**
      * Parse the data supplied to this instance.
      */
+    public void setData(String data) {
+        try {
+            jsonObject = new JSONObject(data);
+        } catch (JSONException e) {
+            Log.e(getClass().getSimpleName(), "setData: ", e);
+        }
+    }
+
     public void updateFxPricesForEnabledCurrencies() {
         for (String currency : currencies) {
             setFxPriceForCurrency(currency);
@@ -111,17 +136,25 @@ public class ExchangeRateFactory {
 
     private void setFxPriceForCurrency(String currency) {
         try {
-            JSONObject jsonObject = new JSONObject(strData);
-            JSONObject jsonCurr = jsonObject.getJSONObject(currency);
-            if (jsonCurr != null) {
-                double last_price = jsonCurr.getDouble("last");
-                fxRates.put(currency, last_price);
-                String symbol = jsonCurr.getString("symbol");
-                fxSymbols.put(currency, symbol);
+            if (jsonObject.has(currency)) {
+                JSONObject jsonCurr = jsonObject.getJSONObject(currency);
+                if (jsonCurr != null) {
+                    double last_price = jsonCurr.getDouble("last");
+                    fxRates.put(currency, last_price);
+                    String symbol = jsonCurr.getString("symbol");
+                    fxSymbols.put(currency, symbol);
+                }
+            } else {
+                setDefaultExchangeRate(currency);
             }
-        } catch (JSONException je) {
-            fxRates.put(currency, -1.0);
-            fxSymbols.put(currency, null);
+        } catch (JSONException e) {
+            Log.e(getClass().getSimpleName(), "setData: ", e);
+            setDefaultExchangeRate(currency);
         }
+    }
+
+    private void setDefaultExchangeRate(String currency) {
+        fxRates.put(currency, -1.0);
+        fxSymbols.put(currency, null);
     }
 }
