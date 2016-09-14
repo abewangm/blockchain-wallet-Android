@@ -463,7 +463,7 @@
     <string name="estimate_confirm_block_count">Geschatte bevestigingstijd: ~%1$d minuten (%2$d blokken)</string>
     <string name="fee_too_low_no_confirm">Uw tarief is zo laag dat uw transactie wellicht nooit bevestigd wordt.</string>
     <string name="transaction_surge">De Bitcoin Mining Network heeft momenteel een hoog activiteitenvolume, waardoor de aanbevolen tarieven hoger zijn dan normaal.</string>
-    <string name="unsupported_encryption_version">Portemonnee-versie %1$d niet ondersteund.</string>
+    <string name="unsupported_encryption_version">Portemonnee-versie %1$s niet ondersteund.</string>
     <string name="logout">Uitloggen</string>
     <string name="to_field_helper">Voer Bitcoin-adres in of selecteer</string>
 

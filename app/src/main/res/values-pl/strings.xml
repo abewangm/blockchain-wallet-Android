@@ -463,7 +463,7 @@
     <string name="estimate_confirm_block_count">Szacowany czas potwierdzenia: ok. %1$d minut (%2$d bloków)</string>
     <string name="fee_too_low_no_confirm">Twoja opłata jest tak niska, że transakcja może nie zostać potwierdzona.</string>
     <string name="transaction_surge">Sieć Kopalni Bitcoin odnotowuje w tej chwili wysoką aktywność, co powoduje, że zalecane opłaty transakcyjne są wyższe niż zwykle.</string>
-    <string name="unsupported_encryption_version">Wersja portfela %1$d nie jest wspierana.</string>
+    <string name="unsupported_encryption_version">Wersja portfela %1$s nie jest wspierana.</string>
     <string name="logout">Wyloguj</string>
     <string name="to_field_helper">Podaj adres bitcoin lub wybierz</string>
 

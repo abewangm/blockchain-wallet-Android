@@ -463,7 +463,7 @@
     <string name="estimate_confirm_block_count">เวลาการยืนยันโดยประมาณ: ~%1$d นาที (%2$d บล็อก)</string>
     <string name="fee_too_low_no_confirm">ค่าธรรมเนียมของคุณต่ำเกินไปจนอาจไม่มีการยืนยันธุรกรรมของคุณก็เป็นได้</string>
     <string name="transaction_surge">เครือข่ายการทำเหมือง Bitcoin กำลังประสบปัญหาเนื่องจากปริมาณกิจกรรมที่สูงซึ่งส่งผลให้ค่าธรรมเนียมที่แนะนำสูงกว่าปกติ</string>
-    <string name="unsupported_encryption_version">ไม่รองรับเวอร์ชันกระเป๋าเงิน %1$d</string>
+    <string name="unsupported_encryption_version">ไม่รองรับเวอร์ชันกระเป๋าเงิน %1$s</string>
     <string name="logout">ออกจากระบบ</string>
     <string name="to_field_helper">กรอกที่อยู่ Bitcoin หรือเลือก</string>
 

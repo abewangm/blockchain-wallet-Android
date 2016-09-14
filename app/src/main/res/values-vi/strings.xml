@@ -463,7 +463,7 @@
     <string name="estimate_confirm_block_count">Thời gian xác nhận ước tính: ~%1$d phút (%2$d khối)</string>
     <string name="fee_too_low_no_confirm">Phí của bạn quá thấp nên giao dịch của bạn có thể không bao giờ được xác nhận.</string>
     <string name="transaction_surge">Mạng lưới dò tìm Bitcoin hiện đang rất đông, dẫn đến các phí được yêu cầu cao hơn thông thường.</string>
-    <string name="unsupported_encryption_version">Phiên bản ví %1$d không được hỗ trợ.</string>
+    <string name="unsupported_encryption_version">Phiên bản ví %1$s không được hỗ trợ.</string>
     <string name="logout">Đăng xuất</string>
     <string name="to_field_helper">Nhập hoặc chọn địa chỉ Bitcoin</string>
 
