@@ -1,13 +1,11 @@
 package info.blockchain.wallet.datamanagers;
 
-import android.app.Application;
-
-import info.blockchain.api.PinStore;
 import info.blockchain.api.WalletPayload;
 import info.blockchain.wallet.access.AccessState;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -30,8 +28,6 @@ import java.util.concurrent.TimeUnit;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.RxTest;
-import piuk.blockchain.android.di.ApiModule;
-import piuk.blockchain.android.di.ApplicationModule;
 import rx.observers.TestSubscriber;
 
 import static org.mockito.Matchers.any;
@@ -272,6 +268,23 @@ public class AuthDataManagerTest extends RxTest {
     }
 
     /**
+     * Update payload returns a Payload exception, Observable should throw {@link PayloadException}
+     */
+    @Test
+    public void initiatePayloadFail() throws Exception {
+        // Arrange
+        TestSubscriber<Void> subscriber = new TestSubscriber<>();
+
+        doThrow(new PayloadException()).when(mPayloadManager).initiatePayload(
+                anyString(), anyString(), any(CharSequenceX.class), any(PayloadManager.InitiatePayloadListener.class));
+        // Act
+        mSubject.updatePayload("1234567890", "1234567890", new CharSequenceX("1234567890")).toBlocking().subscribe(subscriber);
+        // Assert
+        subscriber.assertNotCompleted();
+        subscriber.assertError(Throwable.class);
+    }
+
+    /**
      * Update payload returns a connection failure, Observable should throw {@link ServerConnectionException}
      */
     @Test
@@ -315,18 +328,10 @@ public class AuthDataManagerTest extends RxTest {
         subscriber.assertNoErrors();
     }
 
-    @Test
-    public void attemptDecryptPayloadInvalidPayload() throws Exception {
-        AuthDataManager.DecryptPayloadListener listener = mock(AuthDataManager.DecryptPayloadListener.class);
-        // Act
-        mSubject.attemptDecryptPayload(
-                new CharSequenceX("1234567890"),
-                "1234567890",
-                "1234567890",
-                listener);
-        // Assert
-        verify(listener).onFatalError();
-    }
+//    @Test
+//    public void attemptDecryptPayloadV1Payload() throws Exception {
+        // Currently can't be tested in any reasonable way
+//    }
 
     @Test
     public void attemptDecryptPayloadSuccessful() throws Exception {
@@ -349,6 +354,27 @@ public class AuthDataManagerTest extends RxTest {
         verify(mPrefsUtil).setValue(anyString(), anyString());
         verify(mAppUtil).setSharedKey(anyString());
         verify(listener).onSuccess();
+    }
+
+    @Test
+    public void attemptDecryptPayloadNoSharedKey() throws Exception {
+        AuthDataManager.DecryptPayloadListener listener = mock(AuthDataManager.DecryptPayloadListener.class);
+
+        doAnswer(invocation -> {
+            ((PayloadManager.InitiatePayloadListener) invocation.getArguments()[3]).onSuccess();
+            return null;
+        }).when(mPayloadManager).initiatePayload(
+                anyString(), anyString(), any(CharSequenceX.class), any(PayloadManager.InitiatePayloadListener.class));
+
+        when(mAesUtils.decrypt(anyString(), any(CharSequenceX.class), anyInt())).thenReturn(DECRYPTED_PAYLOAD_NO_SHARED_KEY);
+        // Act
+        mSubject.attemptDecryptPayload(
+                new CharSequenceX("1234567890"),
+                "1234567890",
+                TEST_PAYLOAD,
+                listener);
+        // Assert
+        verify(listener).onFatalError();
     }
 
     @Test
@@ -441,46 +467,6 @@ public class AuthDataManagerTest extends RxTest {
         verify(listener).onFatalError();
     }
 
-    private class MockApplicationModule extends ApplicationModule {
-
-        MockApplicationModule(Application application) {
-            super(application);
-        }
-
-        @Override
-        protected AppUtil provideAppUtil() {
-            return mAppUtil;
-        }
-
-        @Override
-        protected PrefsUtil providePrefsUtil() {
-            return mPrefsUtil;
-        }
-
-        @Override
-        protected AESUtilWrapper provideAesUtils() {
-            return mAesUtils;
-        }
-
-        @Override
-        protected AccessState provideAccessState() {
-            return mAccessState;
-        }
-    }
-
-    private class MockApiModule extends ApiModule {
-
-        @Override
-        protected WalletPayload provideAccess() {
-            return mAccess;
-        }
-
-        @Override
-        protected PayloadManager providePayloadManager() {
-            return mPayloadManager;
-        }
-    }
-
     private static final String TEST_PAYLOAD = "{\n" +
             "  \"payload\": \"test payload\",\n" +
             "  \"pbkdf2_iterations\": 2000\n" +
@@ -489,6 +475,12 @@ public class AuthDataManagerTest extends RxTest {
     private static final String DECRYPTED_PAYLOAD = "{\n" +
             "\t\"sharedKey\": \"1234567890\"\n" +
             "}";
+
+    private static final String DECRYPTED_PAYLOAD_NO_SHARED_KEY = "{\n" +
+            "\t\"test\": \"1234567890\"\n" +
+            "}";
+
+    private static final String V1_PAYLOAD_ENCRYPTED = "4gen70mZdnKx0YRnjpPSHTqz2UOMiEUGev9ZaU0L5daWQpqCBqZUgCIqEEbyNzmBQk6DhaQsReAOkzJz4L8q8VMeKk+/h5JXIQTqxOwz0M470ZiyGnmKe7DFtEQGft3oAQAvc/SA89gdu/50SASEQk6fQPyRigkPunIrjmnxzWuO+Mak040Lea3qoScJXBY3xZG4C4ukJaFFhcZUTi+e45JYAg7AtmyONFFdcVLNpGjwRTkDvpAPobGJqMfOfFLHkdxNos+51khXYuyxEp3grU8jvwZbl2pCVgC1Z50IWFSUvSaZGvKkZaK5Ohw0Tn7RF4T4oUA4IrRYGpHY2F8yLUpcSJ47ctC90UPT7GITpDHA/eQNpzdhtIv7Inkkza/Okd5blx+59he+x/AQFTdyc5YZmsEgN+g/RUN06UNibe78iyqEEN4q88RiLDAwFMoHY4cYtzyd25CSza0NP+yBFFLf+NbKA64Ck2pItMgr4JXkCVU8shQmtKnVKfO8mC3MQSF+kZE0mClr7URa8LIbMhmGgQ3o2vGNbRiutzdO7/L52F7GWTHJzKEo5FdWK2K218Spd0L31TpBn3aKXg6BLgw6WiggztP4hP4pVf6LK21KvgPKf3NegF4Or7wfDz1/mP4uiz+xf18trCuFHoityhXduwrrtA9bhhf2SwLE4+Md9R+m1KOQ6q63ynujM0oeIGVj6NIH4uJS6pz/3iIKZTkr/4/5TdEw8uBlKHHxJHBHBuHPsYN3bpd4A+VMiNn3EPV02aD7xCq6anFPvoYbj8BHW0p6kUHP32fcuETciO7NF0NLGSIoE3iTNHRSpXt58BEHIU/p4Tx4KczwLfUiVvARzjnkF8KQMPrgzhZysiXhH8cwdw3LPU1hi0zDuyW3RR7UQxuCTOa/T8v0ZnGZhFNIFkocwSvcDStef807vg6bu2Fe4BewCLzHLQDEudTUHxiFsWWfzo4E4/3pCTNgAkI4N0swvUR7aBTQHminudxrdSxC2f/6pgBnd4TqBv+W16qcWLf31x/yV1wHFyG2rfTpbpTx07W4r3G4zoDq8XHecpfuDy2H+GKgctSyUSDO9BTb6Q93+JyrMDvuw2o4ennAmll8gQ8C5WjxsQ78oES2//yeCqTgKQiEx121Dwa2/MiposMiRg82pwMXZ7lERx74CQnII54z4YAHGA2EqtQwwNdzdCufJqGV8oHaEPAXRNnGuAK6fbDUlM10GiSQoCpvzmDtv5n3RYlXXgmXAjmDb1CodLEFqCps/lPyAvav";
 
 
 

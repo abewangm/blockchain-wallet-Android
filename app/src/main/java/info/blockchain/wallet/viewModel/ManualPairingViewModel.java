@@ -15,15 +15,17 @@ import info.blockchain.wallet.view.helpers.ToastCustom;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.annotations.Thunk;
 import piuk.blockchain.android.di.Injector;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
 
+@SuppressWarnings("WeakerAccess")
 public class ManualPairingViewModel implements ViewModel {
 
     @Inject protected AppUtil mAppUtil;
     @Inject protected AuthDataManager mAuthDataManager;
-    private DataListener mDataListener;
+    @Thunk DataListener mDataListener;
     @VisibleForTesting boolean mWaitingForAuth = false;
     @VisibleForTesting CompositeSubscription mCompositeSubscription;
 
@@ -140,7 +142,7 @@ public class ManualPairingViewModel implements ViewModel {
                 .subscribe(new Subscriber<Integer>() {
                     @Override
                     public void onCompleted() {
-
+                        // No-op
                     }
 
                     @Override
@@ -167,14 +169,14 @@ public class ManualPairingViewModel implements ViewModel {
     }
 
     @UiThread
-    private void showErrorToast(@StringRes int message) {
+    @Thunk void showErrorToast(@StringRes int message) {
         mDataListener.dismissProgressDialog();
         mDataListener.resetPasswordField();
         mDataListener.showToast(message, ToastCustom.TYPE_ERROR);
     }
 
     @UiThread
-    private void showErrorToastAndRestartApp(@StringRes int message) {
+    @Thunk void showErrorToastAndRestartApp(@StringRes int message) {
         mDataListener.resetPasswordField();
         mDataListener.dismissProgressDialog();
         mDataListener.showToast(message, ToastCustom.TYPE_ERROR);
