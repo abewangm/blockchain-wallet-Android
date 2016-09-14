@@ -100,7 +100,7 @@ android {
 }
 
 ext {
-    supportVersion = '24.2.0'
+    supportVersion = '24.2.1'
 }
 
 dependencies {
@@ -129,9 +129,9 @@ dependencies {
     compile 'io.reactivex:rxjava:1.1.10'
     compile 'io.reactivex:rxandroid:1.2.1'
     // Dagger2
-    compile 'com.google.dagger:dagger:2.6.1'
+    compile 'com.google.dagger:dagger:2.7'
     apt 'com.google.guava:guava:19.0'
-    apt 'com.google.dagger:dagger-compiler:2.6.1'
+    apt 'com.google.dagger:dagger-compiler:2.7'
 
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
