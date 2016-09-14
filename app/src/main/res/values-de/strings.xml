@@ -463,7 +463,7 @@
     <string name="estimate_confirm_block_count">Geschätzte Bestätigungszeit: ~%1$d minutes (%2$d blocks)</string>
     <string name="fee_too_low_no_confirm">Ihre Gebühr ist so niedrig, dass Ihre Transaktion eventuell nie bestätigt wird.</string>
     <string name="transaction_surge">Das Bitcoin-Mining-Netzwerk wird derzeit stark beansprucht, weshalb der empfohlene Gebührensatz über dem regulären liegt.</string>
-    <string name="unsupported_encryption_version">Wallet-Version %1$d wird nicht unterstütz.</string>
+    <string name="unsupported_encryption_version">Wallet-Version %1$s wird nicht unterstütz.</string>
     <string name="logout">Abmelden</string>
     <string name="to_field_helper">Geben Sie die Bitcoin-Adresse ein oder wählen Sie</string>
 

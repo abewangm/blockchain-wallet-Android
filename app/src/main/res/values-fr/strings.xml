@@ -450,7 +450,7 @@
     <string name="default_label_brackets">(par défaut)</string>
     <string name="not_now">Pas maintenant</string>
     <string name="high_fee_not_necessary">Il n\'est pas nécessaire d\'inclure des frais aussi élevés.</string>
-    <string name="high_fee_not_necessary_info">Vous avez spécifié des frais de transaction anormalement élevés de %10$s.\n\nMême si vous diminuez les frais à %1$s, vous pouvez vous attendre à la confirmation de la transaction dans les 10 prochaines minutes ~ (1 bloc).</string>
+    <string name="high_fee_not_necessary_info">Vous avez spécifié des frais de transaction anormalement élevés de %1$s.\n\nMême si vous diminuez les frais à %2$s, vous pouvez vous attendre à la confirmation de la transaction dans les 10 prochaines minutes ~ (1 bloc).</string>
 
     <string name="low_fee_not_recommended">Utiliser des frais personnalisés faibles n\'est pas recommandé</string>
     <string name="low_fee_suggestion">Vous avez spécifié des frais de transaction exceptionnellement faibles de %1$s.\n\nVotre transaction pourrait se retrouver bloquée et ne jamais être confirmée. Pour augmenter les chances que votre transaction soit confirmée dans environ une heure (6 blocs), nous recommandons fortement des frais non inférieurs à %2$s.</string>
@@ -463,7 +463,7 @@
     <string name="estimate_confirm_block_count">Durée estimée pour la confirmation : ~%1$d minutes (%2$d blocs)</string>
     <string name="fee_too_low_no_confirm">Vos frais de transaction sont si bas que votre transaction pourrait ne jamais être confirmée.</string>
     <string name="transaction_surge">Le réseau de minage Bitcoin connaît actuellement un fort volume d\'activité. En conséquence, les frais de transactions que nous vous recommandons d\'appliquer sont plus élevés que d\'habitude.</string>
-    <string name="unsupported_encryption_version">Version %1$d du portefeuille non prise en charge.</string>
+    <string name="unsupported_encryption_version">Version %1$s du portefeuille non prise en charge.</string>
     <string name="logout">Déconnexion</string>
     <string name="to_field_helper">Saisissez l\’adresse Bitcoin ou sélectionnez</string>
 

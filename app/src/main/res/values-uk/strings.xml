@@ -463,7 +463,7 @@
     <string name="estimate_confirm_block_count">Розрахунковий час підтвердження: ~%1$d хвилин (%2$d блоків)</string>
     <string name="fee_too_low_no_confirm">Розмір вашої комісії такий низький, що ваша транзакція може ніколи не підтвердитись.</string>
     <string name="transaction_surge">Через високу активність мережа Bitcoin сильно перевантажена, ніж зазвичай, тому рекомендована плату за транзакцію незвично висока.</string>
-    <string name="unsupported_encryption_version">Версія гаманця %1$d не підтримується.</string>
+    <string name="unsupported_encryption_version">Версія гаманця %1$s не підтримується.</string>
     <string name="logout">Вихід</string>
     <string name="to_field_helper">Введіть Bitcoin-адресу або виберіть</string>
 

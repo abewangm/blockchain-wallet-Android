@@ -463,7 +463,9 @@
     <string name="estimate_confirm_block_count">Tempo stimato per la conferma: ~%1$d minuti (%2$d blocchi)</string>
     <string name="fee_too_low_no_confirm">La tua commissione è talmente bassa che la tua transazione potrebbe non essere mai confermata.</string>
     <string name="transaction_surge">La rete di mining Bitcoin sta al momento registrando un alto volume di attività, e questo comporta che le commissioni raccomandate siano più alte del normale.</string>
-    <string name="unsupported_encryption_version">La versione del portafoglio %1$d non è supportata.</string>
+    <string name="unsupported_encryption_version">La versione del portafoglio %1$s non è
+        supportata.
+    </string>
     <string name="logout">Esci</string>
     <string name="to_field_helper">Inserisci l\'indirizzo Bitcoin o seleziona</string>
 
