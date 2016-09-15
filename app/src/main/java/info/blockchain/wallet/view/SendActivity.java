@@ -6,6 +6,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
@@ -15,6 +16,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
@@ -59,6 +61,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
     @Thunk ActivitySendBinding binding;
     @Thunk SendViewModel viewModel;
+    @Thunk AlertDialog transactionSuccessDialog;
 
     private CustomKeypad customKeypad;
 
@@ -423,16 +426,41 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
             LayoutInflater inflater = getLayoutInflater();
             View dialogView = inflater.inflate(R.layout.modal_transaction_success, null);
-            final AlertDialog alertDialog = dialogBuilder.setView(dialogView).create();
-            alertDialog.setOnDismissListener(dialogInterface -> finish());
-            alertDialog.show();
+            transactionSuccessDialog = dialogBuilder.setView(dialogView)
+                    .setPositiveButton(getString(R.string.done), null)
+                    .create();
+            transactionSuccessDialog.setTitle(R.string.transaction_submitted);
 
-            new AppRate(getActivity())
+            AppRate appRate = new AppRate(getActivity())
                     .setMinTransactionsUntilPrompt(3)
-                    .incrementTransactionCount()
-                    .init();
+                    .incrementTransactionCount();
+
+            // If should show app rate, success dialog shows first and launches
+            // rate dialog on dismiss. Dismissing rate dialog then closes the page. This will
+            // happen if the user choses to rate the app - they'll return to the main page.
+            if (appRate.shouldShowDialog()) {
+                AlertDialog ratingDialog = appRate.getRateDialog();
+                ratingDialog.setOnDismissListener(d ->  finish());
+                transactionSuccessDialog.show();
+                transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
+            } else {
+                transactionSuccessDialog.show();
+                transactionSuccessDialog.setOnDismissListener(dialogInterface -> finish());
+            }
+
+            dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
         });
     }
+
+    private final Handler dialogHandler = new Handler();
+    private final Runnable dialogRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (transactionSuccessDialog != null && transactionSuccessDialog.isShowing()) {
+                transactionSuccessDialog.dismiss();
+            }
+        }
+    };
 
     @Override
     public void onShowBIP38PassphrasePrompt(String scanData) {
@@ -446,9 +474,9 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
                     .setMessage(R.string.bip38_password_entry)
                     .setView(password)
                     .setCancelable(false)
-                    .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
-                        viewModel.spendFromWatchOnlyBIP38(password.getText().toString(), scanData);
-                    }).setNegativeButton(android.R.string.cancel, null).show();
+                    .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
+                            viewModel.spendFromWatchOnlyBIP38(password.getText().toString(), scanData))
+                    .setNegativeButton(android.R.string.cancel, null).show();
         });
     }
 
