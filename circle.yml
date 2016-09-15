@@ -32,7 +32,7 @@ dependencies:
 
 test:
   override:
-    - ./gradlew assembleDevDebug testDevDebugUnitTest testDevDebugUnitTestCoverage coveralls --no-daemon -Dpre-dex=false --stacktrace
+    - ./gradlew assembleDevDebug testDevDebugUnitTest testDevDebugUnitTestCoverage coveralls --no-daemon -Dpre-dex=false -Porg.gradle.parallel=false -Pcom.android.build.threadPoolSize=1 --stacktrace
   post:
     # Move unit test XML to correct directory
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/

@@ -163,13 +163,28 @@ public class SendViewModel implements ViewModel {
         void onShowBIP38PassphrasePrompt(String scanData);
     }
 
-    public int getDefaultAccount(){
+    public int getDefaultAccount() {
 
         int result = 0;
         if (payloadManager.getPayload().isUpgraded()) {
             result = payloadManager.getPayload().getHdWallet().getDefaultIndex();
         }
-        return Math.max(result,0);
+        return Math.max(getCorrectedAccountIndex(result), 0);
+    }
+
+    private int getCorrectedAccountIndex(int accountIndex) {
+        // Filter accounts by active
+        List<Account> activeAccounts = new ArrayList<>();
+        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        for (int i = 0; i < accounts.size(); i++) {
+            Account account = accounts.get(i);
+            if (!account.isArchived()) {
+                activeAccounts.add(account);
+            }
+        }
+
+        // Find corrected position
+        return activeAccounts.indexOf(payloadManager.getPayload().getHdWallet().getAccounts().get(accountIndex));
     }
 
     /**

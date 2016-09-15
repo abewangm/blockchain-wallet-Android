@@ -90,8 +90,6 @@ import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 
 public class AccountActivity extends BaseAuthActivity implements AccountViewModel.DataListener {
 
-    private final String TAG = getClass().getSimpleName();
-
     private static final int IMPORT_PRIVATE_REQUEST_CODE = 2006;
     private static final int EDIT_ACTIVITY_REQUEST_CODE = 2007;
 
@@ -552,10 +550,10 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             }
         }
 
-        AccountActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(accountsAdapter != null)accountsAdapter.notifyDataSetChanged();
+        AccountActivity.this.runOnUiThread(() -> {
+            if (accountsAdapter != null) {
+                accountsAdapter.notifyDataSetChanged();
+                binding.accountsList.setAdapter(accountsAdapter);
             }
         });
     }
