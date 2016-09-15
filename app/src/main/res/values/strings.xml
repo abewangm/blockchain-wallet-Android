@@ -17,11 +17,12 @@
     <string name="receive_bitcoin">Receive</string>
     <string name="blockchain">Blockchain</string>
 
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="polite_no">No thanks</string>
+    <string name="done">Done</string>
 
     <string name="YESTERDAY">Yesterday</string>
     <string name="TODAY">Today</string>
@@ -598,5 +599,5 @@
     <string name="transaction_detail_value_at_time">Value when received:\u0020</string>
     <string name="transaction_detail_value">Value:\u0020</string>
     <string name="transaction_details_unknown">Unknown</string>
-    <string name="done">Done</string>
+
 </resources>
