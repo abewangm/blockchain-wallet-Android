@@ -18,13 +18,11 @@ import piuk.blockchain.android.R;
 
 public class AppRate implements android.content.DialogInterface.OnClickListener, OnCancelListener {
 
-    private static final String TAG = "AppRater";
-
-    public static final String SHARED_PREFS_NAME = "apprate_prefs";
-    public static final String PREF_DATE_REMIND_START = "date_remind_start";
-    public static final String PREF_TRANSACTION_COUNT = "transaction_count";
-    public static final String PREF_DONT_SHOW_AGAIN = "dont_show_again";
-    public static final String PREF_DAYS_UNTIL_PROMPT = "days_until_prompt";
+    private static final String SHARED_PREFS_NAME = "apprate_prefs";
+    private static final String PREF_DATE_REMIND_START = "date_remind_start";
+    private static final String PREF_TRANSACTION_COUNT = "transaction_count";
+    private static final String PREF_DONT_SHOW_AGAIN = "dont_show_again";
+    private static final String PREF_DAYS_UNTIL_PROMPT = "days_until_prompt";
 
     private Activity hostActivity;
     private OnClickListener clickListener;
@@ -45,7 +43,7 @@ public class AppRate implements android.content.DialogInterface.OnClickListener,
     public AppRate setMinDaysUntilPrompt(long minDaysUntilPrompt) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putLong(AppRate.PREF_DAYS_UNTIL_PROMPT, minDaysUntilPrompt);
-        editor.commit();
+        editor.apply();
         return this;
     }
 
@@ -54,20 +52,20 @@ public class AppRate implements android.content.DialogInterface.OnClickListener,
      * @param context A context.
      */
     public static void reset(Context context) {
-        context.getSharedPreferences(AppRate.SHARED_PREFS_NAME, 0).edit().clear().commit();
+        context.getSharedPreferences(AppRate.SHARED_PREFS_NAME, 0).edit().clear().apply();
     }
 
     /**
-     * Display the rate dialog if needed.
+     * Returns true if the Rating dialog should be shown
      */
-    public void init() {
+    public boolean shouldShowDialog() {
 
         SharedPreferences.Editor editor = preferences.edit();
         long transactionCount = preferences.getLong(AppRate.PREF_TRANSACTION_COUNT, 0);
         long minDaysUntilPrompt = preferences.getLong(AppRate.PREF_DAYS_UNTIL_PROMPT, 0);
         boolean dontShowAgain = preferences.getBoolean(AppRate.PREF_DONT_SHOW_AGAIN, false);
 
-        if(!dontShowAgain) {
+        if (!dontShowAgain) {
             // Get date of 'remind me later'.
             Long dateRemindStart = preferences.getLong(AppRate.PREF_DATE_REMIND_START, 0);
             if (dateRemindStart == 0) {
@@ -78,28 +76,30 @@ public class AppRate implements android.content.DialogInterface.OnClickListener,
             // Show the rate dialog if needed.
             if (transactionCount >= minTransactionsUntilPrompt) {
                 if (System.currentTimeMillis() >= dateRemindStart + (minDaysUntilPrompt * DateUtils.DAY_IN_MILLIS)) {
-                    showDefaultDialog();
+                    editor.apply();
+                    return true;
                 }
             }
         }
 
-        editor.commit();
+        editor.apply();
+        return false;
     }
 
-    public AppRate incrementTransactionCount(){
+    public AppRate incrementTransactionCount() {
 
         SharedPreferences.Editor editor = preferences.edit();
         long transactionCount = preferences.getLong(AppRate.PREF_TRANSACTION_COUNT, 0) + 1;
         editor.putLong(AppRate.PREF_TRANSACTION_COUNT, transactionCount);
-        editor.commit();
+        editor.apply();
         return this;
     }
 
     /**
-     * Shows the default rate dialog.
-     * @return
+     * Returns the Rating dialog.
+     * @return  An {@link AlertDialog}
      */
-    private void showDefaultDialog() {
+    public AlertDialog getRateDialog() {
 
         String title = hostActivity.getString(R.string.rate_title);
         String message = hostActivity.getString(R.string.rate_message);
@@ -107,7 +107,7 @@ public class AppRate implements android.content.DialogInterface.OnClickListener,
         String remindLater = hostActivity.getString(R.string.rate_later);
         String dismiss = hostActivity.getString(R.string.rate_no);
 
-        new AlertDialog.Builder(hostActivity, R.style.StackedAlertDialogStyle)
+        return new AlertDialog.Builder(hostActivity, R.style.StackedAlertDialogStyle)
                 .setIcon(R.drawable.ic_launcher)
                 .setTitle(title)
                 .setMessage(message)
@@ -115,7 +115,7 @@ public class AppRate implements android.content.DialogInterface.OnClickListener,
                 .setNegativeButton(dismiss, this)
                 .setNeutralButton(remindLater, this)
                 .setOnCancelListener(this)
-                .create().show();
+                .create();
     }
 
     @Override
@@ -124,7 +124,7 @@ public class AppRate implements android.content.DialogInterface.OnClickListener,
         SharedPreferences.Editor editor = preferences.edit();
         editor.putLong(AppRate.PREF_DATE_REMIND_START, System.currentTimeMillis());
         editor.putLong(AppRate.PREF_TRANSACTION_COUNT, 0);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -167,7 +167,7 @@ public class AppRate implements android.content.DialogInterface.OnClickListener,
                 break;
         }
 
-        editor.commit();
+        editor.apply();
         dialog.dismiss();
 
         if(clickListener != null){
