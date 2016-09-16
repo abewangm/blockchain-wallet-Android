@@ -25,13 +25,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.annotations.Thunk;
 
+@SuppressWarnings("WeakerAccess")
 public class AccountViewModel implements ViewModel{
 
     private final String TAG = getClass().getSimpleName();
 
     private Context context;
-    private DataListener dataListener;
+    @Thunk DataListener dataListener;
 
     private PayloadManager payloadManager;
     private PrefsUtil prefsUtil;
@@ -47,8 +49,7 @@ public class AccountViewModel implements ViewModel{
         void onShowTransferableLegacyFundsWarning(boolean isAutoPopup, ArrayList<PendingTransaction> pendingTransactionList, long totalBalance, long totalFee);
         void onSetTransferLegacyFundsMenuItemVisible(boolean visible);
         void onShowProgressDialog(String title, String message);
-        void onShowTransactionSuccess();
-        void onShowArchiveDialog(ArrayList<PendingTransaction> pendingSpendList);
+        void onShowTransactionSuccess(ArrayList<PendingTransaction> pendingSpendList);
 
         void onDismissProgressDialog();
 
@@ -186,8 +187,7 @@ public class AccountViewModel implements ViewModel{
                                         if (finalI == pendingSpendList.size() - 1) {
                                             dataListener.onUpdateAccountsList();
                                             dataListener.onSetTransferLegacyFundsMenuItemVisible(false);
-                                            dataListener.onShowTransactionSuccess();
-                                            dataListener.onShowArchiveDialog(pendingSpendList);
+                                            dataListener.onShowTransactionSuccess(pendingSpendList);
                                             PayloadBridge.getInstance().remoteSaveThread(null);
                                         }
                                     }
