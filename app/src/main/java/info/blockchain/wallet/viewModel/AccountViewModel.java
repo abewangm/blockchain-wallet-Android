@@ -65,7 +65,7 @@ public class AccountViewModel implements ViewModel{
      * Silently check if there are any spendable legacy funds that need to be sent to default account.
      * Prompt user when done calculating.
      */
-    public void checkTransferableLegacyFunds(boolean isAutoPopup){
+    public void checkTransferableLegacyFunds(boolean isAutoPopup) {
 
         new AsyncTask<Void, Void, Void>() {
 
@@ -121,14 +121,14 @@ public class AccountViewModel implements ViewModel{
                 super.onPostExecute(voids);
                 dataListener.onDismissProgressDialog();
 
-                if(payloadManager.getPayload().isUpgraded() && pendingTransactionList.size() > 0){
+                if (payloadManager.getPayload().isUpgraded() && pendingTransactionList.size() > 0) {
                     dataListener.onSetTransferLegacyFundsMenuItemVisible(true);
 
-                    if(prefsUtil.getValue("WARN_TRANSFER_ALL", true)){
+                    if (prefsUtil.getValue("WARN_TRANSFER_ALL", true) || !isAutoPopup) {
                         dataListener.onShowTransferableLegacyFundsWarning(isAutoPopup, pendingTransactionList, totalToSend, totalFee);
                     }
 
-                }else{
+                } else {
                     dataListener.onSetTransferLegacyFundsMenuItemVisible(false);
                 }
             }

@@ -1,86 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:background="@color/blockchain_pearl_white"
-                  android:gravity="center_vertical"
-                  android:orientation="horizontal"
-                  android:paddingLeft="16dp"
-                  android:paddingRight="16dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <include layout="@layout/divider_grey" />
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
+
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="6">
+                android:layout_weight="5"
+                android:orientation="vertical">
 
-            <TextView
+                <TextView
                     android:id="@+id/currency_btc"
-                    android:layout_width="50dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:layout_marginTop="8dp"
                     android:gravity="center_vertical"
                     android:text="BTC"
-                    android:textColor="@color/blockchain_grey"
-            />
+                    android:textColor="@color/blockchain_grey" />
 
-            <EditText
+                <EditText
                     android:id="@+id/amount_btc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="48dp"
-                    android:background="@color/blockchain_pearl_white"
+                    android:background="@android:color/transparent"
+                    android:digits="0123456789.,"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
                     android:hint="0.00"
                     android:imeOptions="actionDone"
                     android:inputType="number|numberDecimal"
+                    android:maxLength="17"
+                    android:minHeight="48dp"
                     android:selectAllOnFocus="true"
-                    android:digits="0123456789.,"
                     android:textColor="@color/primary_text_default_material_light"
                     android:textColorHint="@color/blockchain_light_grey"
-                    android:textCursorDrawable="@null"
-                    android:maxLength="17"
-            >
+                    android:textCursorDrawable="@null">
 
-                <requestFocus/>
-            </EditText>
+                    <requestFocus />
+                </EditText>
 
-        </LinearLayout>
+            </LinearLayout>
 
-        <LinearLayout
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/blockchain_light_grey" />
+
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="5">
+                android:layout_weight="5"
+                android:orientation="vertical">
 
-            <TextView
+                <TextView
                     android:id="@+id/currency_fiat"
-                    android:layout_width="50dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:text="USD"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="8dp"
                     android:gravity="center_vertical"
-                    android:textColor="@color/blockchain_grey"
-            />
+                    android:text="USD"
+                    android:textColor="@color/blockchain_grey" />
 
-            <EditText
+                <EditText
                     android:id="@+id/amount_fiat"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="48dp"
-                    android:background="@color/blockchain_pearl_white"
+                    android:layout_marginLeft="16dp"
+                    android:background="@android:color/transparent"
+                    android:digits="0123456789.,"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
                     android:hint="0.00"
-                    android:selectAllOnFocus="true"
                     android:imeOptions="actionDone"
                     android:inputType="number|numberDecimal"
-                    android:digits="0123456789.,"
+                    android:maxLength="17"
+                    android:minHeight="48dp"
+                    android:selectAllOnFocus="true"
                     android:textColor="@color/primary_text_default_material_light"
                     android:textColorHint="@color/blockchain_light_grey"
-                    android:textCursorDrawable="@null"
-                    android:maxLength="17"
-            />
+                    android:textCursorDrawable="@null" />
 
+            </LinearLayout>
         </LinearLayout>
+
+        <include layout="@layout/divider_grey" />
 
     </LinearLayout>
 </layout>

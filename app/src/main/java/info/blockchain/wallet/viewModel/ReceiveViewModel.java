@@ -16,8 +16,6 @@ import android.util.Pair;
 import android.util.SparseIntArray;
 
 import info.blockchain.wallet.datamanagers.ReceiveDataManager;
-import info.blockchain.wallet.util.SSLVerifyUtil;
-import info.blockchain.wallet.view.helpers.WalletAccountHelper;
 import info.blockchain.wallet.model.ItemAccount;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
@@ -26,9 +24,11 @@ import info.blockchain.wallet.util.AppUtil;
 import info.blockchain.wallet.util.BitcoinLinkGenerator;
 import info.blockchain.wallet.util.MonetaryUtil;
 import info.blockchain.wallet.util.PrefsUtil;
+import info.blockchain.wallet.util.SSLVerifyUtil;
 import info.blockchain.wallet.util.StringUtils;
 import info.blockchain.wallet.view.helpers.ReceiveCurrencyHelper;
 import info.blockchain.wallet.view.helpers.ToastCustom;
+import info.blockchain.wallet.view.helpers.WalletAccountHelper;
 
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
@@ -53,7 +53,7 @@ import rx.subscriptions.CompositeSubscription;
 public class ReceiveViewModel implements ViewModel {
 
     public static final String TAG = ReceiveViewModel.class.getSimpleName();
-    private static final int DIMENSION_QR_CODE = 260;
+    private static final int DIMENSION_QR_CODE = 600;
 
     private DataListener mDataListener;
     @Inject PayloadManager mPayloadManager;
