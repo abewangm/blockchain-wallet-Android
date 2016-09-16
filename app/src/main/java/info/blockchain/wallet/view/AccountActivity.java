@@ -84,6 +84,7 @@ import javax.annotation.Nullable;
 import piuk.blockchain.android.BaseAuthActivity;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.annotations.Thunk;
 import piuk.blockchain.android.databinding.ActivityAccountsBinding;
 import piuk.blockchain.android.databinding.AlertPromptTransferFundsBinding;
 import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
@@ -103,15 +104,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
-
             if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
-
-                AccountActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        onUpdateAccountsList();
-                    }
-                });
+                AccountActivity.this.runOnUiThread(() -> onUpdateAccountsList());
 
             }
         }
@@ -132,7 +126,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     private ActivityAccountsBinding binding;
     private String secondPassword;
 
-    private AccountViewModel viewModel;
+    @Thunk AccountViewModel viewModel;
+    private AlertDialog transactionSuccessDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -1178,7 +1173,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         dialogBinding.tvCustomizeFee.setVisibility(View.GONE);
 
         dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialog != null && alertDialog.isShowing()) {
+            if (alertDialog.isShowing()) {
                 alertDialog.cancel();
             }
         });
@@ -1208,22 +1203,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         runOnUiThread(() -> transferFundsMenuItem.setVisible(visible));
     }
 
-    private void showProgressDialog(){
-        dismissProgressDialog();
-
-        progress = new MaterialProgressDialog(this);
-        progress.setMessage(context.getResources().getString(R.string.please_wait));
-        progress.setCancelable(false);
-        progress.show();
-    }
-
-    private void dismissProgressDialog(){
-        if (progress != null && progress.isShowing()) {
-            progress.dismiss();
-            progress = null;
-        }
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
@@ -1238,18 +1217,33 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     }
 
     @Override
-    public void onShowTransactionSuccess() {
-
+    public void onShowTransactionSuccess(ArrayList<PendingTransaction> pendingSpendList) {
         runOnUiThread(() -> {
-
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
             LayoutInflater inflater = getLayoutInflater();
             View dialogView = inflater.inflate(R.layout.modal_transaction_success, null);
-            final AlertDialog alertDialog = dialogBuilder.setView(dialogView).create();
-            alertDialog.setOnDismissListener(dialogInterface -> finish());
-            alertDialog.show();
+            transactionSuccessDialog  = dialogBuilder.setView(dialogView).create();
+            transactionSuccessDialog = dialogBuilder.setView(dialogView)
+                    .setPositiveButton(getString(R.string.done), null)
+                    .create();
+            transactionSuccessDialog.setTitle(R.string.transaction_submitted);
+            transactionSuccessDialog.setOnDismissListener(dialog -> {
+                if (pendingSpendList != null && !pendingSpendList.isEmpty()) {
+                    onShowArchiveDialog(pendingSpendList);
+                }
+            });
+            transactionSuccessDialog.show();
+
+            dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
         });
     }
+
+    private final Handler dialogHandler = new Handler();
+    private final Runnable dialogRunnable = () -> {
+        if (transactionSuccessDialog != null && transactionSuccessDialog.isShowing()) {
+            transactionSuccessDialog.dismiss();
+        }
+    };
 
     @Override
     public void onShowProgressDialog(String title, String message) {
@@ -1268,24 +1262,21 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         }
     }
 
-    @Override
     public void onShowArchiveDialog(ArrayList<PendingTransaction> pendingSpendList) {
+        int numberOfAddresses = pendingSpendList.size();
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.transfer_success_archive_prompt_title)
+                .setMessage(getResources().getQuantityString(R.plurals.transfer_success_archive_prompt_plurals, numberOfAddresses, numberOfAddresses))
+                .setPositiveButton(R.string.archive, (dialogInterface, i) -> {
+                    for (PendingTransaction spend : pendingSpendList) {
+                        ((LegacyAddress) spend.sendingObject.accountObject).setTag(PayloadManager.ARCHIVED_ADDRESS);
+                    }
 
-        runOnUiThread(() -> {
-            int numberOfAddresses = pendingSpendList.size();
-            new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                    .setTitle(R.string.transfer_success_archive_prompt_title)
-                    .setMessage(getResources().getQuantityString(R.plurals.transfer_success_archive_prompt_plurals, numberOfAddresses, numberOfAddresses))
-                    .setPositiveButton(R.string.archive, (dialogInterface, i) -> {
-                        for (PendingTransaction spend : pendingSpendList) {
-                            ((LegacyAddress)spend.sendingObject.accountObject).setTag(PayloadManager.ARCHIVED_ADDRESS);
-                        }
-
-                        new ArchiveAsync(this, payloadManager).execute();
-                    })
-                    .setNegativeButton(android.R.string.no, null)
-                    .show();
-        });
+                    new ArchiveAsync(this, payloadManager).execute();
+                })
+                .setNegativeButton(android.R.string.no, null)
+                .setOnDismissListener(dialog -> onResume())
+                .show();
     }
 
     private static class ArchiveAsync extends AsyncTask<Void, Void, Void> {
