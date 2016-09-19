@@ -84,7 +84,7 @@ public class SecurityPromptDialog extends AppCompatDialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.dialog_verify_email, container, false);
+        return inflater.inflate(R.layout.dialog_security_centre, container, false);
     }
 
     @Override
@@ -161,5 +161,9 @@ public class SecurityPromptDialog extends AppCompatDialogFragment {
 
     public void setNegativeButtonListener(View.OnClickListener listener) {
         mNegativeButtonListener = listener;
+    }
+
+    public boolean isChecked() {
+        return mCheckBox.isChecked();
     }
 }

@@ -68,10 +68,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     private final static int SHOW_HIDE = 3;
     private static int BALANCE_DISPLAY_STATE = SHOW_BTC;
     public int balanceBarHeight;
-    ArrayAdapter<String> accountsAdapter = null;
-    LinearLayoutManager layoutManager;
-    HashMap<View, Boolean> rowViewState = null;
-    Communicator comm;
+    private ArrayAdapter<String> accountsAdapter = null;
+    private LinearLayoutManager layoutManager;
+    private HashMap<View, Boolean> rowViewState = null;
+    private Communicator comm;
     //
     // main balance display
     //
@@ -89,6 +89,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     private PrefsUtil prefsUtil;
     private DateUtil dateUtil;
 
+    private FragmentBalanceBinding binding;
+    private BalanceViewModel viewModel;
+
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -98,12 +101,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 viewModel.updateAccountList();
                 viewModel.updateBalanceAndTransactionList(intent, accountSpinner.getSelectedItemPosition(), isBTC);
                 binding.swipeContainer.setRefreshing(false);
+                // Check backup status on receiving funds
+                viewModel.onViewReady();
             }
         }
     };
-
-    FragmentBalanceBinding binding;
-    BalanceViewModel viewModel;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -128,6 +130,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         setupViews();
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        viewModel.onViewReady();
     }
 
     private void setAccountSpinner(){
@@ -191,6 +199,67 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         comm = (Communicator) activity;
+    }
+
+    @Override
+    public void show2FaDialog() {
+        SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
+                R.string.two_fa,
+                getString(R.string.security_centre_two_fa_message),
+                R.drawable.vector_mobile,
+                R.string.enable,
+                true,
+                true
+        );
+
+        securityPromptDialog.setPositiveButtonListener(v -> {
+            securityPromptDialog.dismiss();
+            if (securityPromptDialog.isChecked()) {
+                viewModel.neverPrompt2Fa();
+            }
+            Intent intent = new Intent(getActivity(), SettingsActivity.class);
+            intent.putExtra(SettingsFragment.EXTRA_SHOW_TWO_FA_DIALOG, true);
+            startActivity(intent);
+        });
+
+        securityPromptDialog.setNegativeButtonListener(v -> {
+            securityPromptDialog.dismiss();
+            if (securityPromptDialog.isChecked()) {
+                viewModel.neverPrompt2Fa();
+            }
+        });
+
+        securityPromptDialog.showDialog(((AppCompatActivity) getActivity()).getSupportFragmentManager());
+    }
+
+    @Override
+    public void showBackupPromptDialog(boolean showNeverAgain) {
+        SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
+             R.string.security_centre_backup_title,
+                getString(R.string.security_centre_backup_message),
+                R.drawable.vector_padlock,
+                R.string.security_centre_backup_positive_button,
+                true,
+                showNeverAgain
+        );
+
+        securityPromptDialog.setPositiveButtonListener(v -> {
+            securityPromptDialog.dismiss();
+            if (securityPromptDialog.isChecked()) {
+                viewModel.neverPromptBackup();
+            }
+            Intent intent = new Intent(getActivity(), BackupWalletActivity.class);
+            startActivity(intent);
+        });
+
+        securityPromptDialog.setNegativeButtonListener(v -> {
+            securityPromptDialog.dismiss();
+            if (securityPromptDialog.isChecked()) {
+                viewModel.neverPromptBackup();
+            }
+        });
+
+        securityPromptDialog.showDialog(((AppCompatActivity) getActivity()).getSupportFragmentManager());
     }
 
     private void initFab(){
