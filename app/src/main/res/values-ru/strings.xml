@@ -260,13 +260,13 @@
     <string name="backup_step_2">Введите контрольную фразу для восстановления из 12 слов</string>
     <string name="START">НАЧАТЬ</string>
     <string name="backup_write_down_words">Важно записывать слова точно в таком же виде, как они появляются здесь, и в том же порядке.</string>
-    <string name="NEXT_WORD">СЛЕДУЮЩЕЕ СЛОВО</string>
+    <string name="backup_next_word">СЛЕДУЮЩЕЕ СЛОВО</string>
     <string name="press_to_reveal">нажмите и удерживайте, чтобы показать слово</string>
     <string name="VERIFY">ВЕРИФИЦИРОВАТЬ</string>
     <string name="backup_verify_heading">Введите следующие слова из вашей фразы для восстановления, чтобы завершить процесс создания резервной копии.</string>
-    <string name="VERIFY_BACKUP">ВЕРИФИЦИРОВАТЬ РЕЗЕРВНУЮ КОПИЮ</string>
-    <string name="Word">Слово</string>
-    <string name="of">из</string>
+    <string name="backup_verify_button">ВЕРИФИЦИРОВАТЬ РЕЗЕРВНУЮ КОПИЮ</string>
+    <string name="backup_word">Слово</string>
+    <string name="backup_of">из</string>
     <string name="backup_confirmed">Резервное копирование подтверждено</string>
     <string name="backup_word_mismatch">Несоответствие слова</string>
     <string name="backup_days_ago">Вы скопировали кошелек %1$s %2$s назад</string>
@@ -510,11 +510,11 @@
     <string name="preferences">Предпочтения</string>
     <string name="two_fa_summary">Защитите свой кошелек от несанкционированного доступа, активировав 2-шаговую верификацию. Для обеспечения безопасности кошелька можно использовать номер мобильного телефона. Этот код будет запрашиваться, когда вы предпримете попытку зайти в свой кошелек через веб-браузер.\n\nЕсли вы вместо этого хотите использовать другие методы аутентификации, выполняйте вход в наш веб-кошелек.</string>
 
-    <string name="PREVIOUS_WORD">ПРЕДЫДУЩЕЕ СЛОВО</string>
-    <string name="DONE">ГОТОВО</string>
-    <string name="backup_funds">Создать резервную копию средств</string>
+    <string name="backup_previous_word">ПРЕДЫДУЩЕЕ СЛОВО</string>
+    <string name="backup_done">ГОТОВО</string>
+    <string name="backup_funds_title">Создать резервную копию средств</string>
     <string name="backup_funds_again">Сделать резервную копию средств еще раз</string>
-    <string name="lost_mnemonic">Потеряли свою фразу для восстановления из 12 слов?</string>
+    <string name="backup_lost_mnemonic">Потеряли свою фразу для восстановления из 12 слов?</string>
     <string name="backup_write_down_12_words">Напишите следующие 12 слов на листе бумаги. Любой человек, имеющий доступ к вашей фразе для восстановления, может получить доступ к вашим биткойнам, поэтому фразу нужно хранить в надежном и недоступном для других месте.</string>
     <string name="rate_title">Оценить кошелек Blockchain Wallet</string>
     <string name="rate_message">Вам нравится кошелек Blockchain Wallet? Пожалуйста, найдите минутку, чтобы оставить отзыв в Google Play и дайте другим знать об этом.</string>

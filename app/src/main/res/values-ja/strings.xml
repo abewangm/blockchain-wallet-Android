@@ -260,13 +260,13 @@
     <string name="backup_step_2">12語句のリカバリーフレーズを入力してください</string>
     <string name="START">開始</string>
     <string name="backup_write_down_words">画面の通り、語句が表示されている順番で書き留めることが重要です。</string>
-    <string name="NEXT_WORD">次の語句</string>
+    <string name="backup_next_word">次の語句</string>
     <string name="press_to_reveal">長押しして語句を表示してください</string>
     <string name="VERIFY">確認</string>
     <string name="backup_verify_heading">バックアッププロセスを完了するため、次の語句をリカバリーフレーズから入力してバックアッププロセスを完了してください。</string>
-    <string name="VERIFY_BACKUP">バックアップを確認</string>
-    <string name="Word">語句</string>
-    <string name="of">の</string>
+    <string name="backup_verify_button">バックアップを確認</string>
+    <string name="backup_word">語句</string>
+    <string name="backup_of">の</string>
     <string name="backup_confirmed">バックアップが確認されました</string>
     <string name="backup_word_mismatch">語句が一致しません</string>
     <string name="backup_days_ago">%1$s %2$s前に財布をバックアップしました</string>
@@ -510,11 +510,11 @@
     <string name="preferences">環境設定</string>
     <string name="two_fa_summary">2段階認証を有効にして財布を不正アクセスから保護しましょう。財布を保護するために携帯電話番号を使用することができます。このコードはウェブブラウザで財布にアクセスしようとする際に要求されます。\n\n別の認証方法を使用するには当社のウェブ財布にログインしてください。</string>
 
-    <string name="PREVIOUS_WORD">前の語句</string>
-    <string name="DONE">完了</string>
-    <string name="backup_funds">資金のバックアップ</string>
+    <string name="backup_previous_word">前の語句</string>
+    <string name="backup_done">完了</string>
+    <string name="backup_funds_title">資金のバックアップ</string>
     <string name="backup_funds_again">資金を再度バックアップ</string>
-    <string name="lost_mnemonic">12語句のリカバリーフレーズをなくしましたか？</string>
+    <string name="backup_lost_mnemonic">12語句のリカバリーフレーズをなくしましたか？</string>
     <string name="backup_write_down_12_words">紙に次の12の語句を書き留めてください。リカバリーフレーズを所持している人なら誰でもあなたのビットコインにアクセスできるようになります。オフラインの安全な場所に厳重に保管してください。</string>
     <string name="rate_title">ブロックチェーンウォレットを評価</string>
     <string name="rate_message">ブロックチェーンウォレットをお楽しみいただいていますか？ブロックチェーンウォレットをもっと知ってもらうためにGoogle Playでのレビューをお願いします。</string>

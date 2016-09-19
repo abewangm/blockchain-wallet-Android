@@ -260,13 +260,13 @@
     <string name="backup_step_2">Nhập nhóm 12 từ khôi phục của bạn</string>
     <string name="START">BẮT ĐẦU</string>
     <string name="backup_write_down_words">Điều quan trọng là bạn cần phải đảm bảo viết chính xác các từ hiển thị ở đây và theo đúng thứ tự.</string>
-    <string name="NEXT_WORD">TỪ TIẾP THEO</string>
+    <string name="backup_next_word">TỪ TIẾP THEO</string>
     <string name="press_to_reveal">nhấn và giữ để hiện từ</string>
     <string name="VERIFY">XÁC MINH</string>
     <string name="backup_verify_heading">Nhập các từ tiếp theo trong Nhóm từ khôi phục của bạn để hoàn thành quá trình sao lưu.</string>
-    <string name="VERIFY_BACKUP">XÁC MINH SAO LƯU</string>
-    <string name="Word">Từ</string>
-    <string name="of">của</string>
+    <string name="backup_verify_button">XÁC MINH SAO LƯU</string>
+    <string name="backup_word">Từ</string>
+    <string name="backup_of">của</string>
     <string name="backup_confirmed">Xác nhận sao lưu</string>
     <string name="backup_word_mismatch">Từ không khớp</string>
     <string name="backup_days_ago">Bạn đã sao lưu ví của mình %1$s %2$s trước</string>
@@ -510,11 +510,11 @@
     <string name="preferences">Ưu tiên</string>
     <string name="two_fa_summary">Bảo vệ ví của bạn khỏi các truy cập trái phép bằng Xác minh 2 bước. Bạn có thể lựa chọn sử dụng số điện thoại để bảo vệ ví của mình. Mã này sẽ được yêu cầu khi bạn truy cập vào ví của mình thông qua trình duyệt web.\n\nĐể sử dụng các phương pháp xác thực thay thế khác, vui lòng đăng nhập ví trên trang web của chúng tôi.</string>
 
-    <string name="PREVIOUS_WORD">TỪ TRƯỚC</string>
-    <string name="DONE">XONG</string>
-    <string name="backup_funds">Sao lưu các khoản tiền</string>
+    <string name="backup_previous_word">TỪ TRƯỚC</string>
+    <string name="backup_done">XONG</string>
+    <string name="backup_funds_title">Sao lưu các khoản tiền</string>
     <string name="backup_funds_again">Sao lưu lại các khoản tiền</string>
-    <string name="lost_mnemonic">Mất nhóm 12 từ khôi phục?</string>
+    <string name="backup_lost_mnemonic">Mất nhóm 12 từ khôi phục?</string>
     <string name="backup_write_down_12_words">Viết 12 từ tiếp theo vào một tờ giấy. Bất cứ ai truy cập vào Nhóm từ khôi phục sẽ có thể truy cập vào bitcoin của bạn, hãy lưu trữ ở một nơi an toàn và đảm bảo.</string>
     <string name="rate_title">Đánh giá Ví Blockchain</string>
     <string name="rate_message">Bạn có thích Ví Blockchain? Hãy để lại nhận xét trên Google Play.</string>
