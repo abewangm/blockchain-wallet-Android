@@ -260,13 +260,13 @@
     <string name="backup_step_2">Zadejte svoji 12ti slovnou frázi pro obnovení</string>
     <string name="START">SPUSTIT</string>
     <string name="backup_write_down_words">Je důležité, abyste si slova zapsali přesně tak, jak jsou zobrazena zde a v tomto pořadí.</string>
-    <string name="NEXT_WORD">DALŠÍ SLOVO</string>
+    <string name="backup_next_word">DALŠÍ SLOVO</string>
     <string name="press_to_reveal">stisknutím a podržením slovo zobrazíte</string>
     <string name="VERIFY">OVĚŘIT</string>
     <string name="backup_verify_heading">Zadáním následujících slov z fráze pro obnovení dokončíte proces zálohování.</string>
-    <string name="VERIFY_BACKUP">OVĚŘIT ZÁLOHU</string>
-    <string name="Word">Slovo</string>
-    <string name="of">/</string>
+    <string name="backup_verify_button">OVĚŘIT ZÁLOHU</string>
+    <string name="backup_word">Slovo</string>
+    <string name="backup_of">/</string>
     <string name="backup_confirmed">Záloha potvrzena</string>
     <string name="backup_word_mismatch">Neshoda slov</string>
     <string name="backup_days_ago">Svoji peněženku jste zálohovali před %1$s %2$s</string>
@@ -510,11 +510,11 @@
     <string name="preferences">Předvolby</string>
     <string name="two_fa_summary">Chraňte svoji peněženku před neoprávněným přístupem povolením dvoufázového ověření. Svoji peněženku můžete zabezpečit pomocí čísla mobilního telefonu. Kód bude vyžadován, pokud se pokusíte otevřít peněženku přes webové rozhraní.\n\nInPokud chcete využít jiné způsoby autentikace, přihlaste se k naší webové peněžence.</string>
 
-    <string name="PREVIOUS_WORD">PŘEDCHOZÍ SLOVO</string>
-    <string name="DONE">HOTOVO</string>
-    <string name="backup_funds">Zálohovat prostředky</string>
+    <string name="backup_previous_word">PŘEDCHOZÍ SLOVO</string>
+    <string name="backup_done">HOTOVO</string>
+    <string name="backup_funds_title">Zálohovat prostředky</string>
     <string name="backup_funds_again">Zálohovat prostředky znovu</string>
-    <string name="lost_mnemonic">Ztratili jste 12ti slovnou frázi pro obnovení?</string>
+    <string name="backup_lost_mnemonic">Ztratili jste 12ti slovnou frázi pro obnovení?</string>
     <string name="backup_write_down_12_words">Zapište si následujících 12 slov na kousek papíru. Kdokoli s přístupem k Vaší frázi pro obnovení má přístup i k Vašim bitcoinům. Uschovejte frázi offline na velmi bezpečném místo.</string>
     <string name="rate_title">Ohodnoťte peněženku Blockchain</string>
     <string name="rate_message">Líbí se Vám peněženka Blockchain? Napište nám recenzi na webu Google Play a podělte se o své zkušenosti s ostatními.</string>

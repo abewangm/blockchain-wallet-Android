@@ -120,7 +120,7 @@
                         android:background="@android:color/transparent"
                         android:ellipsize="end"
                         android:hint="@string/transaction_detail_description_hint"
-                        android:imeActionLabel="@string/DONE"
+                        android:imeActionLabel="@string/backup_done"
                         android:imeOptions="actionDone"
                         android:inputType="textCapSentences|textShortMessage"
                         android:maxLength="140"

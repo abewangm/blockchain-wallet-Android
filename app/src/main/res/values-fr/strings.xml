@@ -260,13 +260,13 @@
     <string name="backup_step_2">Entrez votre phrase de récupération de 12 mots</string>
     <string name="START">COMMENCER</string>
     <string name="backup_write_down_words">Il est important de veiller à écrire les mots exactement comme ils apparaissent ici et dans cet ordre.</string>
-    <string name="NEXT_WORD">MOT SUIVANT</string>
+    <string name="backup_next_word">MOT SUIVANT</string>
     <string name="press_to_reveal">appuyez et maintenez pour dévoiler le mot</string>
     <string name="VERIFY">VÉRIFIER</string>
     <string name="backup_verify_heading">Pour terminer le processus de récupération, saisissez les mots suivants de votre phrase de récupération.</string>
-    <string name="VERIFY_BACKUP">VÉRIFIEZ LA PROCÉDURE DE RÉCUPÉRATION SÉCURISÉE</string>
-    <string name="Word">Mot</string>
-    <string name="of">de</string>
+    <string name="backup_verify_button">VÉRIFIEZ LA PROCÉDURE DE RÉCUPÉRATION SÉCURISÉE</string>
+    <string name="backup_word">Mot</string>
+    <string name="backup_of">de</string>
     <string name="backup_confirmed">Procédure de récupération sécurisée confirmée</string>
     <string name="backup_word_mismatch">Le mot ne correspond pas</string>
     <string name="backup_days_ago">Vous avez effectué la procédure de récupération sécurisée de votre portefeuille il y a %1$s %2$s</string>
@@ -510,11 +510,11 @@
     <string name="preferences">Préférences</string>
     <string name="two_fa_summary">Protégez votre portefeuille contre tout accès non autorisé en activant la validation en 2 étapes. Vous pouvez choisir d\’utiliser votre numéro de téléphone portable pour sécuriser votre portefeuille. Ce code vous sera demandé lorsque vous essayerez d\'accéder à votre portefeuille par le biais du serveur web.\n\nAfin d\'utiliser d\'autres méthodes d\'authentification, vous devez vous connecter à notre portefeuille web.</string>
 
-    <string name="PREVIOUS_WORD">MOT PRÉCÉDENT</string>
-    <string name="DONE">C\'EST FAIT</string>
-    <string name="backup_funds">Procédure de récupération des fonds sécurisée</string>
+    <string name="backup_previous_word">MOT PRÉCÉDENT</string>
+    <string name="backup_done">C\'EST FAIT</string>
+    <string name="backup_funds_title">Procédure de récupération des fonds sécurisée</string>
     <string name="backup_funds_again">Sauvegarder de nouveau les fonds</string>
-    <string name="lost_mnemonic">Vous avez perdu votre phrase de récupération de 12 mots ?</string>
+    <string name="backup_lost_mnemonic">Vous avez perdu votre phrase de récupération de 12 mots ?</string>
     <string name="backup_write_down_12_words">Écrivez les 12 mots suivants sur un morceau de papier. Toute personne ayant accès à votre phrase de récupération a accès à vos bitcoins, assurez-vous donc de toujours la conserver hors ligne dans un endroit sûr.</string>
     <string name="rate_title">Noter le portefeuille Blockchain</string>
     <string name="rate_message">Vous aimez utiliser le portefeuille Blockchain ? Prenez quelques instants pour laisser un commentaire sur Google Play et partagez-le avec d\'autres personnes.</string>

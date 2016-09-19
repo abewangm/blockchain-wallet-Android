@@ -260,13 +260,13 @@
     <string name="backup_step_2">Voer uw uit 12 woorden bestaande herstelregel in</string>
     <string name="START">START</string>
     <string name="backup_write_down_words">Het is belangrijk om ervoor te zorgen dat u uw woorden precies opschrijft zoals ze hier verschijnen en in deze volgorde.</string>
-    <string name="NEXT_WORD">VOLGENDE WOORD</string>
+    <string name="backup_next_word">VOLGENDE WOORD</string>
     <string name="press_to_reveal">Ingedrukt houden om het woord te onthullen</string>
     <string name="VERIFY">VERIFIËREN</string>
     <string name="backup_verify_heading">Voer de volgende woorden uit uw Herstelregel in om de back-up te voltooien.</string>
-    <string name="VERIFY_BACKUP">BACK-UP VERIFIËREN</string>
-    <string name="Word">Woord</string>
-    <string name="of">van</string>
+    <string name="backup_verify_button">BACK-UP VERIFIËREN</string>
+    <string name="backup_word">Woord</string>
+    <string name="backup_of">van</string>
     <string name="backup_confirmed">Back-up bevestigd</string>
     <string name="backup_word_mismatch">Verkeerde combinatie van woorden</string>
     <string name="backup_days_ago">U heeft %1$s %2$s geleden een back-up gemaakt van uw portemonnee</string>
@@ -510,11 +510,11 @@
     <string name="preferences">Voorkeuren</string>
     <string name="two_fa_summary">Bescherm uw portemonnee tegen onbevoegde toegang door de 2-ledige verificatie in te schakelen. U kunt ervoor kiezen om uw mobiele telefoonnummer te gebruiken om uw portemonnee te beveiligen. Deze code wordt gevraagd wanneer u uw portemonnee probeert te openen via de webbrowser.\n\nOm in plaats daarvan andere authenticatiemethoden te gebruiken, kunt u inloggen op onze webportemonnee.</string>
 
-    <string name="PREVIOUS_WORD">VORIG WOORD</string>
-    <string name="DONE">KLAAR</string>
-    <string name="backup_funds">Back-up van uw tegoeden maken</string>
+    <string name="backup_previous_word">VORIG WOORD</string>
+    <string name="backup_done">KLAAR</string>
+    <string name="backup_funds_title">Back-up van uw tegoeden maken</string>
     <string name="backup_funds_again">Opnieuw back-up van uw tegoeden maken</string>
-    <string name="lost_mnemonic">Bent u uw uit 12 woorden bestaande herstelregel vergeten?</string>
+    <string name="backup_lost_mnemonic">Bent u uw uit 12 woorden bestaande herstelregel vergeten?</string>
     <string name="backup_write_down_12_words">Schrijf de volgende 12 woorden op een papiertje. Iedereen met toegang tot uw Herstelregel heeft toegang tot uw Bitcoins, dus zorg ervoor dat u deze offline ergens zeer veilig bewaard.</string>
     <string name="rate_title">Blockchain Portemonnee beoordelen</string>
     <string name="rate_message">Geniet u van de Blockchain Portemonnee? Neem even de tijd om een recensie te schrijven op Google Play en vertel het anderen.</string>

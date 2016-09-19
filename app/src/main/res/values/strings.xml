@@ -263,28 +263,6 @@
     <string name="next">Next</string>
     <string name="address_lookup_fail">Could not retrieve address. Please enter address manually.</string>
 
-    <string name="backup_1_heading">You have not backed up your funds yet.</string>
-    <string name="backup_1_subheading">Oh no! You haven’t backed up your funds yet. Please take a few minutes to ensure you can access your bitcoin (except in imported addresses), even if you forget your password or if our service becomes unavailable. We promise doing so is quick, painless and worth it.</string>
-    <string name="BACKUP_WALLET">BACKUP WALLET</string>
-    <string name="backup_how_to">Instructions below:</string>
-    <string name="backup_step_1">Go to https://blockchain.info/wallet/recover</string>
-    <string name="backup_step_2">Enter your 12 word recovery phrase</string>
-    <string name="START">START</string>
-    <string name="backup_write_down_words">It is important to make sure you write down your words exactly as they appear here and in this order.</string>
-    <string name="NEXT_WORD">NEXT WORD</string>
-    <string name="press_to_reveal">press and hold to reveal the word</string>
-    <string name="VERIFY">VERIFY</string>
-    <string name="backup_verify_heading">Enter the following words from your Recovery Phrase to complete the backup process.</string>
-    <string name="VERIFY_BACKUP">VERIFY BACKUP</string>
-    <string name="Word">Word</string>
-    <string name="of">of</string>
-    <string name="backup_confirmed">Backup Confirmed</string>
-    <string name="backup_word_mismatch">Word Mismatch</string>
-    <string name="backup_days_ago">You backed your wallet up %1$s %2$s ago</string>
-    <string name="day">day</string>
-    <string name="days">days</string>
-    <string name="backup_only_need_to_once_reminder">Well done! Should you lose your password, you can restore funds in this wallet even if received in the future (except imported addresses) using the 12 word recovery phrase. Remember to keep your Recovery Phrase offline somewhere very safe and secure. Anyone with access to your Recovery Phrase has access to your bitcoin.</string>
-
     <string name="received_bitcoin">Received Bitcoin</string>
     <string name="refresh_balance">Refresh balance</string>
 
@@ -538,12 +516,6 @@
     <string name="preferences">Preferences</string>
     <string name="two_fa_summary">Protect your wallet from unauthorized access by enabling 2-Step Verification. You can choose to use your mobile phone number to secure your wallet. This code will be requested when you try to access your wallet via the web browser.\n\nIn order to use other authentication methods instead, please login to our web wallet.</string>
 
-    <string name="PREVIOUS_WORD">PREVIOUS WORD</string>
-    <string name="DONE">DONE</string>
-    <string name="backup_funds">Backup Funds</string>
-    <string name="backup_funds_again">Backup Funds Again</string>
-    <string name="lost_mnemonic">Lost your 12 word recovery phrase?</string>
-    <string name="backup_write_down_12_words">Write the following 12 words onto a piece of paper. Anyone with access to your Recovery Phrase has access to your bitcoin so be sure to keep it offline somewhere very safe and secure.</string>
     <string name="rate_title">Rate Blockchain Wallet</string>
     <string name="rate_message">Enjoying the Blockchain Wallet? Please take a moment to leave a review in Google Play and let others know about it.</string>
     <string name="rate_yes">Yes, rate Blockchain Wallet</string>
@@ -600,7 +572,6 @@
     <string name="transaction_detail_value">Value:\u0020</string>
     <string name="transaction_details_unknown">Unknown</string>
 
-
     <!-- SECURITY CENTRE -->
     <string name="security_centre_email_title">Check your email</string>
     <string name="security_centre_email_message">We sent an email to %1$s. Look for an email from Blockchain and click the verification link to complete your wallet setup.</string>
@@ -608,4 +579,25 @@
     <string name="security_centre_backup_message">For your security, we do not keep any passwords on file. Backup your wallet to ensure your bitcoins are safe in case you lose your password. </string>
     <string name="security_centre_backup_positive_button">Backup</string>
     <string name="security_centre_two_fa_message">Prevent unauthorized access to your wallet. Enable 2-Step Verification to increase wallet security.</string>
+
+    <!-- BACKUP -->
+    <string name="backup_header">Recovery Phrase</string>
+    <string name="backup_explanation">For your security, Blockchain does not keep any passwords on file. The following 12 word Recovery Phrase will give you access to your funds in case you lose your password. Be sure to write in on a piece of paper and to keep it somewhere safe and secure. </string>
+    <string name="backup_button_start">Start backup</string>
+    <string name="backup_write_down_words">It is important to make sure you write down your words exactly as they appear here and in this order.</string>
+    <string name="backup_header_complete">Backup Complete</string>
+    <string name="backup_complete_message">You can use your Recovery Phrase to restore your funds if you lose your password. Anyone with access to your Recovery Phrase can access your bitcoin so remember to keep it offline somewhere safe and secure.</string>
+    <string name="backup_again">Backup again</string>
+    <string name="backup_confirmed">Backup confirmed</string>
+    <string name="backup_last">Last backup: %1$s</string>
+    <string name="backup_verify_heading">Enter the following words from your Recovery Phrase to complete the backup process.</string>
+    <string name="backup_next_word">NEXT WORD</string>
+    <string name="backup_previous_word">PREVIOUS WORD</string>
+    <string name="backup_verify_button">VERIFY BACKUP</string>
+    <string name="backup_word">Word</string>
+    <string name="backup_of">of</string>
+    <string name="backup_word_mismatch">Word Mismatch</string>
+    <string name="backup_done">DONE</string>
+    <string name="backup_funds_title">Backup Funds</string>
+    <string name="backup_lost_mnemonic">Lost your 12 word recovery phrase?</string>
 </resources>
