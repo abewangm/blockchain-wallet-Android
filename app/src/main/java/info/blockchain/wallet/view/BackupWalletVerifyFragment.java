@@ -65,15 +65,13 @@ public class BackupWalletVerifyFragment extends Fragment {
                         hideProgressDialog();
                         new PrefsUtil(getActivity()).setValue(BackupWalletActivity.BACKUP_DATE_KEY, (int) (System.currentTimeMillis() / 1000));
                         ToastCustom.makeText(getActivity(), getString(R.string.backup_confirmed), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
-                        popAllAndStartFragment(new BackUpWalletCompleteFragment(), BackUpWalletCompleteFragment.TAG);
+                        popAllAndStartFragment(BackUpWalletCompleteFragment.newInstance(true), BackUpWalletCompleteFragment.TAG);
                     }
 
                     @Override
                     public void onSaveFail() {
                         hideProgressDialog();
-                        ToastCustom.makeText(getActivity(), getActivity().getString(R.string.remote_save_ko), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                        getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                        popAllAndStartFragment(new BackupWalletStartingFragment(), BackupWalletStartingFragment.TAG);
+                        ToastCustom.makeText(getActivity(), getActivity().getString(R.string.api_fail), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                     }
                 });
 
@@ -96,7 +94,7 @@ public class BackupWalletVerifyFragment extends Fragment {
 
     private void showProgressDialog() {
         mProgressDialog = new MaterialProgressDialog(getActivity());
-        mProgressDialog.setMessage(getString(R.string.saving_changes));
+        mProgressDialog.setMessage(getString(R.string.please_wait) + "…");
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
     }

@@ -141,7 +141,7 @@
 
     <string name="support">Support</string>
     <string name="rate_us">Rate us</string>
-    <string name="email_chooser">Send e-mail...</string>
+    <string name="email_chooser">Send e-mail…</string>
     <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Free Merchant app</string>
     <string name="feedback">Send Feedback</string>
@@ -205,7 +205,7 @@
     <string name="latitude">Latitude:</string>
     <string name="longitude">Longitude:</string>
     <string name="get_location">I am here. Use my location.</string>
-    <string name="merchant_cat_hint">Choose a category...</string>
+    <string name="merchant_cat_hint">Choose a category…</string>
     <string name="merchant_cat1">Café</string>
     <string name="merchant_cat2">Bars/Drinking</string>
     <string name="merchant_cat3">Food and Dining</string>
@@ -317,7 +317,7 @@
     <string name="confirm_upgrade">Confirm Upgrade</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
     <string name="confirm_upgrade_header">Hey we\'ve added these new features to your Blockchain wallet:</string>
-    <string name="upgrading">Upgrading...</string>
+    <string name="upgrading">Upgrading…</string>
     <string name="upgrading_started_info">Your wallet is upgrading, please be patient this may take some time depending on the size and age of your wallet.</string>
     <string name="upgrade_success_heading">Your wallet has been upgraded!</string>
     <string name="upgrade_interrupted">Wallet upgrade has been interrupted. Please re-pair your wallet and try again.</string>
@@ -439,12 +439,22 @@
     <string name="success">Success</string>
     <string name="default_label">Default</string>
     <string name="try_again">Try Again</string>
+
+    <!-- FUNDS TRANSFER -->
     <string name="transfer">Transfer</string>
-    <string name="transfer_funds">Transfer Funds</string>
-    <string name="transfer_recommend">For your safety, we recommend you to transfer any balances in your imported addresses into your Blockchain wallet.</string>
-    <string name="transfer_funds_safe">Your transferred funds will be safe and secure, and you’ll benefit from increased privacy and convenient backup and recovery features.</string>
+    <string name="transfer_funds">Transfer Imported Addresses?</string>
+    <string name="transfer_recommend">Looks like you have some bitcoins in imported addresses. Imported addresses are not backed up by your Recovery Phrase. To secure these funds, we recommend transferring these balances to include in your backup.</string>
     <string name="spendable_addresses">spendable addresses</string>
     <string name="total_fees">Total fees</string>
+    <string name="transfer_confirmed">Transfer Confirmed</string>
+    <string name="transfer_confirm">Confirm Transfer</string>
+    <string name="transfer_all">Transfer all</string>
+    <string name="transfer_amount">Transfer Amount</string>
+    <string name="transfer_archive_message">Archive imported addresses after transfer</string>
+    <plurals name="transfer_label_plural">
+        <item quantity="one">1 imported address</item>
+        <item quantity="other">%d imported addresses</item>
+    </plurals>
 
     <string name="dont_ask_again">Don\'t ask me again.</string>
     <string name="insufficient_fee">Transaction fee is too low.</string>

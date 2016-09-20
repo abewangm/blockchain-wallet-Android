@@ -23,14 +23,12 @@
             android:layout_height="wrap_content"
             android:text="@string/backup_explanation" />
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/backup_wallet_action"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:fontFamily="sans-serif"
             android:text="@string/backup_button_start"
-            android:textColor="@color/white"
             android:theme="@style/ButtonBlue" />
     </LinearLayout>
 

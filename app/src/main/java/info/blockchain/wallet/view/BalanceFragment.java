@@ -229,7 +229,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             }
         });
 
-        securityPromptDialog.showDialog(((AppCompatActivity) getActivity()).getSupportFragmentManager());
+        if (getActivity() != null && !getActivity().isFinishing() && isAdded()) {
+            securityPromptDialog.showDialog(((AppCompatActivity) getActivity()).getSupportFragmentManager());
+        }
     }
 
     @Override
@@ -259,7 +261,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             }
         });
 
-        securityPromptDialog.showDialog(((AppCompatActivity) getActivity()).getSupportFragmentManager());
+        if (getActivity() != null && !getActivity().isFinishing() && isAdded()) {
+            securityPromptDialog.showDialog(((AppCompatActivity) getActivity()).getSupportFragmentManager());
+        }
     }
 
     private void initFab(){
