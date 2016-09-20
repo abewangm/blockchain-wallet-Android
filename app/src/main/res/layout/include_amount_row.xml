@@ -45,8 +45,6 @@
                     android:maxLength="17"
                     android:minHeight="48dp"
                     android:selectAllOnFocus="true"
-                    android:textColor="@color/primary_text_default_material_light"
-                    android:textColorHint="@color/blockchain_light_grey"
                     android:textCursorDrawable="@null">
 
                     <requestFocus />
@@ -90,8 +88,6 @@
                     android:maxLength="17"
                     android:minHeight="48dp"
                     android:selectAllOnFocus="true"
-                    android:textColor="@color/primary_text_default_material_light"
-                    android:textColorHint="@color/blockchain_light_grey"
                     android:textCursorDrawable="@null" />
 
             </LinearLayout>

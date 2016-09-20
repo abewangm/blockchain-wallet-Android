@@ -187,7 +187,8 @@ public class PinEntryViewModel implements ViewModel {
         }
     }
 
-    @Thunk void validateAndConfirmPin() {
+    @Thunk
+    void validateAndConfirmPin() {
         // Validate
         if (!mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "").isEmpty()) {
             mDataListener.setTitleVisibility(View.INVISIBLE);
@@ -209,7 +210,8 @@ public class PinEntryViewModel implements ViewModel {
         }
     }
 
-    @Thunk void clearPinViewAndReset() {
+    @Thunk
+    void clearPinViewAndReset() {
         clearPinBoxes();
         mUserEnteredConfirmationPin = null;
     }
@@ -247,6 +249,7 @@ public class PinEntryViewModel implements ViewModel {
 
                             } else if (throwable instanceof ServerConnectionException) {
                                 mDataListener.showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+                                mAppUtil.restartApp();
 
                             } else if (throwable instanceof UnsupportedVersionException) {
                                 mDataListener.showWalletVersionNotSupportedDialog(throwable.getMessage());

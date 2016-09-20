@@ -108,7 +108,6 @@
                                 android:hint="@string/to_field_helper"
                                 android:inputType="textNoSuggestions"
                                 android:text="@{viewModel.sendModel.destinationAddress}"
-                                android:textColor="@color/primary_text_default_material_light"
                                 android:textCursorDrawable="@null"
                                 android:textSize="16sp" />
 
