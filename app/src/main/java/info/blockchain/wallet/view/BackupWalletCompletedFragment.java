@@ -31,17 +31,17 @@ import piuk.blockchain.android.databinding.AlertPromptTransferFundsBinding;
 import piuk.blockchain.android.databinding.FragmentBackupCompleteBinding;
 import rx.subscriptions.CompositeSubscription;
 
-public class BackupWalletCompleteFragment extends Fragment {
+public class BackupWalletCompletedFragment extends Fragment {
 
-    public static final String TAG = BackupWalletCompleteFragment.class.getSimpleName();
+    public static final String TAG = BackupWalletCompletedFragment.class.getSimpleName();
     private static final String KEY_CHECK_TRANSFER = "check_transfer";
 
     private CompositeSubscription mCompositeSubscription;
 
-    public static BackupWalletCompleteFragment newInstance(boolean checkTransfer) {
+    public static BackupWalletCompletedFragment newInstance(boolean checkTransfer) {
         Bundle args = new Bundle();
         args.putBoolean(KEY_CHECK_TRANSFER, checkTransfer);
-        BackupWalletCompleteFragment fragment = new BackupWalletCompleteFragment();
+        BackupWalletCompletedFragment fragment = new BackupWalletCompletedFragment();
         fragment.setArguments(args);
         return fragment;
     }
