@@ -474,7 +474,7 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
                     .create();
 
             dialogBinding.confirmCancel.setOnClickListener(v -> {
-                mBinding.content.accounts.spinner.setSelection(0, true);
+                mBinding.content.accounts.spinner.setSelection(mViewModel.getDefaultSpinnerPosition(), true);
                 if (dialogBinding.confirmDontAskAgain.isChecked()) {
                     mViewModel.setWarnWatchOnlySpend(false);
                 }

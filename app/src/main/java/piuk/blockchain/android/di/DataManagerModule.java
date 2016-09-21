@@ -5,6 +5,7 @@ import info.blockchain.wallet.datamanagers.ReceiveDataManager;
 import info.blockchain.wallet.datamanagers.TransactionListDataManager;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.view.helpers.TransactionHelper;
+import info.blockchain.wallet.view.helpers.TransferFundsDataManager;
 import info.blockchain.wallet.view.helpers.WalletAccountHelper;
 
 import javax.inject.Singleton;
@@ -39,8 +40,14 @@ public class DataManagerModule {
 
     @Provides
     @Singleton
-    protected TransactionListDataManager provideTransactionListDataManager() {
-        return new TransactionListDataManager();
+    protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager) {
+        return new TransactionListDataManager(payloadManager);
+    }
+
+    @Provides
+    @Singleton
+    protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager) {
+        return new TransferFundsDataManager(payloadManager);
     }
 
     @Provides

@@ -1,5 +1,7 @@
 package info.blockchain.wallet.view.helpers;
 
+import android.support.v4.util.Pair;
+
 import info.blockchain.api.Unspent;
 import info.blockchain.wallet.cache.DynamicFeeCache;
 import info.blockchain.wallet.model.ItemAccount;
@@ -13,40 +15,42 @@ import info.blockchain.wallet.payment.data.SweepBundle;
 import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.rxjava.RxUtil;
 import info.blockchain.wallet.send.SendCoins;
+import info.blockchain.wallet.util.CharSequenceX;
 
 import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import rx.Observable;
 
-public class TransferFundsHelper {
+public class TransferFundsDataManager {
 
     private PayloadManager mPayloadManager;
-    private long mTotalToSend = 0;
-    private long mTotalFee = 0;
 
-    public TransferFundsHelper(PayloadManager payloadManager) {
+    public TransferFundsDataManager(PayloadManager payloadManager) {
         mPayloadManager = payloadManager;
     }
 
     /**
      * Check if there are any spendable legacy funds that need to be sent to default account.
-     * Returns a list of {@link PendingTransaction} if there are funds to be moved
      *
-     * @return A list of PendingTransaction objects
+     * @return Returns a Map which bundles together the List of {@link PendingTransaction} objects,
+     * as well as a Pair which contains the total to send and the total fees, in that order.
      */
-    public Observable<List<PendingTransaction>> getTransferableFundTransactionList() {
+    public Observable<Map<List<PendingTransaction>, Pair<Long, Long>>> getTransferableFundTransactionList(int addressToReceiveIndex) {
         return Observable.fromCallable(() -> {
                     Payment payment = new Payment();
                     BigInteger suggestedFeePerKb = DynamicFeeCache.getInstance().getSuggestedFee().defaultFeePerKb;
                     List<PendingTransaction> pendingTransactionList = new ArrayList<>();
-
-                    int defaultIndex = mPayloadManager.getPayload().getHdWallet().getDefaultIndex();
-
                     List<LegacyAddress> legacyAddresses = mPayloadManager.getPayload().getLegacyAddresses();
+
+                    long totalToSend = 0L;
+                    long totalFee = 0L;
+
                     for (LegacyAddress legacyAddress : legacyAddresses) {
 
                         if (!legacyAddress.isWatchOnly() && MultiAddrFactory.getInstance().getLegacyBalance(legacyAddress.getAddress()) > 0) {
@@ -63,25 +67,24 @@ public class TransferFundsHelper {
                                     pendingSpend.bigIntFee = pendingSpend.unspentOutputBundle.getAbsoluteFee();
                                     pendingSpend.bigIntAmount = sweepBundle.getSweepAmount();
                                     // assign new receive address for each transfer
-                                    pendingSpend.receivingAddress = mPayloadManager.getReceiveAddress(defaultIndex);
-                                    mTotalToSend += pendingSpend.bigIntAmount.longValue();
-                                    mTotalFee += pendingSpend.bigIntFee.longValue();
+                                    pendingSpend.receivingAddress = mPayloadManager.getReceiveAddress(addressToReceiveIndex);
+                                    totalToSend += pendingSpend.bigIntAmount.longValue();
+                                    totalFee += pendingSpend.bigIntFee.longValue();
                                     pendingTransactionList.add(pendingSpend);
                                 }
                             }
                         }
                     }
-                    return pendingTransactionList;
+
+                    Map<List<PendingTransaction>, Pair<Long, Long>> map = new HashMap<>();
+                    map.put(pendingTransactionList, new Pair<>(totalToSend, totalFee));
+                    return map;
                 }
         ).compose(RxUtil.applySchedulers());
     }
 
-    public long getTotalToSend() {
-        return mTotalToSend;
-    }
-
-    public long getTotalFee() {
-        return mTotalFee;
+    public Observable<Map<List<PendingTransaction>, Pair<Long, Long>>> getTransferableFundTransactionListForDefaultAccount() {
+        return getTransferableFundTransactionList(mPayloadManager.getPayload().getHdWallet().getDefaultIndex());
     }
 
     /**
@@ -93,7 +96,12 @@ public class TransferFundsHelper {
      * @param secondPassword        The double encryption password if necessary
      * @return                      An {@link Observable<String>}
      */
-    public Observable<String> sendPayment(List<PendingTransaction> pendingTransactions, String secondPassword) {
+    public Observable<String> sendPayment(List<PendingTransaction> pendingTransactions, CharSequenceX secondPassword) {
+        return getPaymentObservable(pendingTransactions, secondPassword)
+                .compose(RxUtil.applySchedulers());
+    }
+
+    private Observable<String> getPaymentObservable(List<PendingTransaction> pendingTransactions, CharSequenceX secondPassword) {
         return Observable.create(subscriber -> {
             for (int i = 0; i < pendingTransactions.size(); i++) {
                 PendingTransaction pendingTransaction = pendingTransactions.get(i);
@@ -115,7 +123,7 @@ public class TransferFundsHelper {
                             pendingTransaction.bigIntFee,
                             pendingTransaction.bigIntAmount,
                             isWatchOnly,
-                            secondPassword,
+                            secondPassword != null ? secondPassword.toString() : null,
                             new Payment.SubmitPaymentListener() {
                                 @Override
                                 public void onSuccess(String s) {
@@ -138,5 +146,10 @@ public class TransferFundsHelper {
                 }
             }
         });
+    }
+
+    public Observable<Boolean> savePayloadToServer() {
+        return Observable.fromCallable(() -> mPayloadManager.savePayloadToServer())
+                .compose(RxUtil.applySchedulers());
     }
 }

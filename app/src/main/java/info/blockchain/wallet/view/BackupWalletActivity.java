@@ -25,7 +25,7 @@ public class BackupWalletActivity extends BaseAuthActivity {
         setSupportActionBar(toolbar);
 
         if (isBackedUp()) {
-            startFragment(BackUpWalletCompleteFragment.newInstance(false), BackUpWalletCompleteFragment.TAG);
+            startFragment(BackupWalletCompleteFragment.newInstance(false), BackupWalletCompleteFragment.TAG);
         } else {
             startFragment(new BackupWalletStartingFragment(), BackupWalletStartingFragment.TAG);
         }

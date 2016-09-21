@@ -455,6 +455,7 @@
         <item quantity="one">1 imported address</item>
         <item quantity="other">%d imported addresses</item>
     </plurals>
+    <string name="transfer_archive">Archive Confirmed</string>
 
     <string name="dont_ask_again">Don\'t ask me again.</string>
     <string name="insufficient_fee">Transaction fee is too low.</string>
@@ -592,7 +593,7 @@
 
     <!-- BACKUP -->
     <string name="backup_header">Recovery Phrase</string>
-    <string name="backup_explanation">For your security, Blockchain does not keep any passwords on file. The following 12 word Recovery Phrase will give you access to your funds in case you lose your password. Be sure to write in on a piece of paper and to keep it somewhere safe and secure. </string>
+    <string name="backup_explanation">For your security, Blockchain does not keep any passwords on file. The following 12 word Recovery Phrase will give you access to your funds in case you lose your password. Be sure to write it on a piece of paper and to keep it somewhere safe and secure. </string>
     <string name="backup_button_start">Start backup</string>
     <string name="backup_write_down_words">It is important to make sure you write down your words exactly as they appear here and in this order.</string>
     <string name="backup_header_complete">Backup Complete</string>

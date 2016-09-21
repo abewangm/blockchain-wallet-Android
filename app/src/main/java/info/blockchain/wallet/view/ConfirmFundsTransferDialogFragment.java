@@ -1,43 +1,55 @@
 package info.blockchain.wallet.view;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatCheckBox;
+import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.RelativeLayout;
 
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.ExchangeRateFactory;
-import info.blockchain.wallet.util.MonetaryUtil;
-import info.blockchain.wallet.util.PrefsUtil;
-import info.blockchain.wallet.view.helpers.ReselectSpinner;
-import info.blockchain.wallet.view.helpers.TransferFundsHelper;
+import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.view.customviews.MaterialProgressDialog;
+import info.blockchain.wallet.view.helpers.SecondPasswordHandler;
+import info.blockchain.wallet.view.helpers.ToastCustom;
+import info.blockchain.wallet.viewModel.ConfirmFundsTransferViewModel;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.annotations.Thunk;
 
-public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment {
+public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
+        implements ConfirmFundsTransferViewModel.DataListener {
 
     public static final String TAG = ConfirmFundsTransferDialogFragment.class.getSimpleName();
 
-    private TransferFundsHelper mFundsHelper;
+    @Thunk ConfirmFundsTransferViewModel mViewModel;
+    private MaterialProgressDialog mProgressDialog;
+
+    // Views
+    @Thunk AppCompatSpinner mToSpinner;
     private AppCompatTextView mFromLabel;
-    private AppCompatTextView mToLabel;
-    private ReselectSpinner mToSpinner;
     private AppCompatTextView mTransferAmountBtc;
     private AppCompatTextView mTransferAmountFiat;
     private AppCompatTextView mFeeAmountBtc;
     private AppCompatTextView mFeeAmountFiat;
     private AppCompatCheckBox mArchiveCheckbox;
     private AppCompatButton mTransferButton;
+    // Layouts
+    private RelativeLayout mLoadingLayout;
 
     public static ConfirmFundsTransferDialogFragment newInstance() {
         ConfirmFundsTransferDialogFragment fragment = new ConfirmFundsTransferDialogFragment();
@@ -51,7 +63,6 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment 
         View view = inflater.inflate(R.layout.dialog_transfer_funds, container, false);
         view.setFocusableInTouchMode(true);
         view.requestFocus();
-
         return view;
     }
 
@@ -74,9 +85,10 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment 
         toolbar.setNavigationOnClickListener(v -> dismiss());
         toolbar.setTitle(R.string.transfer_confirm);
 
+        mViewModel = new ConfirmFundsTransferViewModel(this);
+
         mFromLabel = (AppCompatTextView) view.findViewById(R.id.label_from);
-        mToLabel = (AppCompatTextView) view.findViewById(R.id.label_destination);
-        mToSpinner = (ReselectSpinner) view.findViewById(R.id.spinner_destination);
+        mToSpinner = (AppCompatSpinner) view.findViewById(R.id.spinner_destination);
         mTransferAmountBtc = (AppCompatTextView) view.findViewById(R.id.label_transfer_amount_btc);
         mTransferAmountFiat = (AppCompatTextView) view.findViewById(R.id.label_transfer_amount_fiat);
         mFeeAmountBtc = (AppCompatTextView) view.findViewById(R.id.label_fee_amount_btc);
@@ -84,33 +96,132 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment 
         mArchiveCheckbox = (AppCompatCheckBox) view.findViewById(R.id.checkbox_archive);
         mTransferButton = (AppCompatButton) view.findViewById(R.id.button_transfer_all);
 
-        mFundsHelper = new TransferFundsHelper(PayloadManager.getInstance());
-        mFundsHelper.getTransferableFundTransactionList()
-                .subscribe(pendingTransactions -> {
-                    mFromLabel.setText(getResources().getQuantityString(R.plurals.transfer_label_plural, pendingTransactions.size()));
-                    // TODO: 20/09/2016 Dropdown for receive to
-                }, throwable -> {
-                    throwable.printStackTrace();
-                    dismiss();
-                });
+        mLoadingLayout = (RelativeLayout) view.findViewById(R.id.loading_layout);
 
-        PrefsUtil prefsUtil = new PrefsUtil(getActivity());
-        MonetaryUtil monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
-        String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double exchangeRate = ExchangeRateFactory.getInstance().getLastPrice(fiatUnit);
+        AddressAdapter receiveToAdapter = new AddressAdapter(
+                getActivity(), R.layout.spinner_item, mViewModel.getReceiveToList(), true);
+        receiveToAdapter.setDropDownViewResource(R.layout.spinner_dropdown);
+        mToSpinner.setAdapter(receiveToAdapter);
+        mToSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+                mToSpinner.setSelection(mToSpinner.getSelectedItemPosition());
+                mViewModel.accountSelected(mToSpinner.getSelectedItemPosition());
+            }
 
-        long totalToSend = mFundsHelper.getTotalToSend();
-        long totalFee = mFundsHelper.getTotalFee();
-        String fiatAmount = monetaryUtil.getFiatFormat(fiatUnit).format(exchangeRate * ((double) totalToSend / 1e8));
-        String fiatFee = monetaryUtil.getFiatFormat(fiatUnit).format(exchangeRate * ((double) totalFee / 1e8));
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+                // No-op
+            }
+        });
 
-        int defaultIndex = PayloadManager.getInstance().getPayload().getHdWallet().getDefaultIndex();
-        Account defaultAccount = PayloadManager.getInstance().getPayload().getHdWallet().getAccounts().get(defaultIndex);
-        mFromLabel.setText(defaultAccount.getLabel() + " (" + getResources().getString(R.string.default_label) + ")");
-        mTransferAmountBtc.setText(monetaryUtil.getDisplayAmountWithFormatting(totalToSend));
-        mTransferAmountFiat.setText(fiatAmount);
+        mToSpinner.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    mToSpinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                } else {
+                    mToSpinner.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                }
 
-        mFeeAmountBtc.setText(monetaryUtil.getDisplayAmountWithFormatting(totalFee));
-        mFeeAmountFiat.setText(fiatFee);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    mToSpinner.setDropDownWidth(mToSpinner.getWidth());
+                }
+            }
+        });
+
+        mTransferButton.setOnClickListener(v ->
+                new SecondPasswordHandler(getActivity()).validate(new SecondPasswordHandler.ResultListener() {
+                    @Override
+                    public void onNoSecondPassword() {
+                        mViewModel.sendPayment(null);
+                    }
+
+                    @Override
+                    public void onSecondPasswordValidated(String validateSecondPassword) {
+                        mViewModel.sendPayment(new CharSequenceX(validateSecondPassword));
+                    }
+                }));
+
+        mToSpinner.setSelection(mViewModel.getDefaultAccount());
+
+        mViewModel.onViewReady();
+    }
+
+    @Override
+    public void showProgressDialog() {
+        hideProgressDialog();
+        mProgressDialog = new MaterialProgressDialog(getContext());
+        mProgressDialog.setMessage(getString(R.string.please_wait));
+        mProgressDialog.setCancelable(false);
+        if (getActivity() != null && !getActivity().isFinishing()) {
+            mProgressDialog.show();
+        }
+    }
+
+    @Override
+    public void hideProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
+        }
+    }
+
+    @Override
+    public void onUiUpdated() {
+        mLoadingLayout.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void updateFromLabel(String label) {
+        mFromLabel.setText(label);
+    }
+
+    @Override
+    public void updateTransferAmountBtc(String amount) {
+        mTransferAmountBtc.setText(amount);
+    }
+
+    @Override
+    public void updateTransferAmountFiat(String amount) {
+        mTransferAmountFiat.setText(amount);
+    }
+
+    @Override
+    public void updateFeeAmountBtc(String amount) {
+        mFeeAmountBtc.setText(amount);
+    }
+
+    @Override
+    public void updateFeeAmountFiat(String amount) {
+        mFeeAmountFiat.setText(amount);
+    }
+
+    @Override
+    public void setPaymentButtonEnabled(boolean enabled) {
+        mTransferButton.setEnabled(enabled);
+    }
+
+    @Override
+    public boolean getIfArchiveChecked() {
+        return mArchiveCheckbox.isChecked();
+    }
+
+    @Override
+    public void dismissDialog() {
+        Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+        dismiss();
+    }
+
+    @Override
+    public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
+        ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mViewModel.destroy();
     }
 }
