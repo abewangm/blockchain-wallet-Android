@@ -1,6 +1,7 @@
 package info.blockchain.wallet.util;
 
 import android.content.Context;
+import android.support.annotation.PluralsRes;
 import android.support.annotation.StringRes;
 
 public class StringUtils {
@@ -13,5 +14,9 @@ public class StringUtils {
 
     public String getString(@StringRes int stringId) {
         return mContext.getString(stringId);
+    }
+
+    public String getQuantityString(@PluralsRes int pluralId, int size) {
+        return mContext.getResources().getQuantityString(pluralId, size);
     }
 }
