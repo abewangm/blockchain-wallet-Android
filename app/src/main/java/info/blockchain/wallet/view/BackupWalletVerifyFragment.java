@@ -65,7 +65,7 @@ public class BackupWalletVerifyFragment extends Fragment {
                         hideProgressDialog();
                         new PrefsUtil(getActivity()).setValue(BackupWalletActivity.BACKUP_DATE_KEY, (int) (System.currentTimeMillis() / 1000));
                         ToastCustom.makeText(getActivity(), getString(R.string.backup_confirmed), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
-                        popAllAndStartFragment(BackupWalletCompleteFragment.newInstance(true), BackupWalletCompleteFragment.TAG);
+                        popAllAndStartFragment(BackupWalletCompletedFragment.newInstance(true), BackupWalletCompletedFragment.TAG);
                     }
 
                     @Override
