@@ -6,11 +6,9 @@ import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.ViewUtils;
@@ -39,9 +37,6 @@ public class BackupWalletStartingFragment extends Fragment {
 
             // Wallet is double encrypted
             if (mPayloadManager.getPayload().isDoubleEncrypted()) {
-                final EditText double_encrypt_password = new EditText(getActivity());
-                double_encrypt_password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-
                 new SecondPasswordHandler(getActivity()).validate(new SecondPasswordHandler.ResultListener() {
                     @Override
                     public void onNoSecondPassword() {

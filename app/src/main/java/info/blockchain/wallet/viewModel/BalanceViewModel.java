@@ -33,7 +33,9 @@ import javax.inject.Inject;
 import piuk.blockchain.android.BR;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.di.Injector;
+import piuk.blockchain.android.di.scopes.ViewModelScope;
 import rx.Observable;
+import rx.subscriptions.CompositeSubscription;
 
 @SuppressWarnings("WeakerAccess")
 public class BalanceViewModel extends BaseObservable implements ViewModel {
@@ -53,6 +55,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected PayloadManager payloadManager;
     @Inject protected TransactionListDataManager transactionListDataManager;
+    @ViewModelScope CompositeSubscription compositeSubscription;
 
     @Bindable
     public String getBalance(){
@@ -82,6 +85,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         this.activeAccountAndAddressBiMap = HashBiMap.create();
         this.transactionList = new ArrayList<>();
         this.osUtil = new OSUtil(context);
+        compositeSubscription = new CompositeSubscription();
     }
 
     public void onViewReady() {
@@ -100,18 +104,19 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
                     storeTimeOfLastSecurityPrompt();
                 }
             } else if ((isBackedUp() || hasTransactions()) && !getIfNeverPrompt2Fa()) {
-                getSettingsApi()
-                        .compose(RxUtil.applySchedulers())
-                        .subscribe(settings -> {
-                            if (!settings.isSmsVerified()) {
-                                // Show dialog for 2FA, store date of dialog launch
-                                if (getTimeOfLastSecurityPrompt() == 0L
-                                        || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-                                    dataListener.show2FaDialog();
-                                    storeTimeOfLastSecurityPrompt();
-                                }
-                            }
-                        }, Throwable::printStackTrace);
+                compositeSubscription.add(
+                        getSettingsApi()
+                                .compose(RxUtil.applySchedulers())
+                                .subscribe(settings -> {
+                                    if (!settings.isSmsVerified()) {
+                                        // Show dialog for 2FA, store date of dialog launch
+                                        if (getTimeOfLastSecurityPrompt() == 0L
+                                                || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
+                                            dataListener.show2FaDialog();
+                                            storeTimeOfLastSecurityPrompt();
+                                        }
+                                    }
+                                }, Throwable::printStackTrace));
             }
         }
     }
@@ -168,6 +173,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     public void destroy() {
         context = null;
         dataListener = null;
+        compositeSubscription.clear();
     }
 
     public ArrayList<String> getActiveAccountAndAddressList(){

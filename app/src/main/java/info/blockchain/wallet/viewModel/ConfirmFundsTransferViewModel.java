@@ -17,7 +17,7 @@ import info.blockchain.wallet.util.MonetaryUtil;
 import info.blockchain.wallet.util.PrefsUtil;
 import info.blockchain.wallet.util.StringUtils;
 import info.blockchain.wallet.view.helpers.ToastCustom;
-import info.blockchain.wallet.view.helpers.TransferFundsDataManager;
+import info.blockchain.wallet.datamanagers.TransferFundsDataManager;
 import info.blockchain.wallet.view.helpers.WalletAccountHelper;
 
 import java.util.ArrayList;

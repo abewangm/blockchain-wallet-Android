@@ -7,7 +7,7 @@ import info.blockchain.wallet.datamanagers.TransactionListDataManager;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.view.helpers.TransactionHelper;
-import info.blockchain.wallet.view.helpers.TransferFundsDataManager;
+import info.blockchain.wallet.datamanagers.TransferFundsDataManager;
 import info.blockchain.wallet.view.helpers.WalletAccountHelper;
 
 import javax.inject.Singleton;
