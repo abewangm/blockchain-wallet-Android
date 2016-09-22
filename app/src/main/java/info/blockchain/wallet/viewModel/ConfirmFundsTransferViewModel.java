@@ -10,6 +10,7 @@ import info.blockchain.wallet.model.PendingTransaction;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.ExchangeRateFactory;
 import info.blockchain.wallet.util.MonetaryUtil;
@@ -35,13 +36,14 @@ import rx.subscriptions.CompositeSubscription;
 @SuppressWarnings("WeakerAccess")
 public class ConfirmFundsTransferViewModel implements ViewModel {
 
-    @Thunk List<PendingTransaction> mPendingTransactions;
     @Thunk DataListener mDataListener;
-    @Thunk WalletAccountHelper mWalletAccountHelper;
+    @Inject WalletAccountHelper mWalletAccountHelper;
     @Inject TransferFundsDataManager mFundsDataManager;
     @Inject PayloadManager mPayloadManager;
     @Inject PrefsUtil mPrefsUtil;
     @Inject StringUtils mStringUtils;
+    @Inject ExchangeRateFactory mExchangeRateFactory;
+    @VisibleForTesting List<PendingTransaction> mPendingTransactions;
     @VisibleForTesting CompositeSubscription mCompositeSubscription;
 
     public interface DataListener {
@@ -75,8 +77,6 @@ public class ConfirmFundsTransferViewModel implements ViewModel {
         Injector.getInstance().getAppComponent().inject(this);
         mDataListener = listener;
         mCompositeSubscription = new CompositeSubscription();
-        mFundsDataManager = new TransferFundsDataManager(PayloadManager.getInstance());
-        mWalletAccountHelper = new WalletAccountHelper();
     }
 
     public void onViewReady() {
@@ -103,16 +103,16 @@ public class ConfirmFundsTransferViewModel implements ViewModel {
                         }));
     }
 
-    private void updateUi(long totalToSend, long totalFee) {
-        mDataListener.updateFromLabel(
-                mStringUtils.getQuantityString(
-                        R.plurals.transfer_label_plural,
-                        mPendingTransactions.size()));
+    @VisibleForTesting
+    void updateUi(long totalToSend, long totalFee) {
+        mDataListener.updateFromLabel(mStringUtils.getQuantityString(
+                R.plurals.transfer_label_plural,
+                mPendingTransactions.size()));
 
         MonetaryUtil monetaryUtil = new MonetaryUtil(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
         String fiatUnit = mPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         String btcUnit = monetaryUtil.getBTCUnit(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
-        double exchangeRate = ExchangeRateFactory.getInstance().getLastPrice(fiatUnit);
+        double exchangeRate = mExchangeRateFactory.getLastPrice(fiatUnit);
 
         String fiatAmount = monetaryUtil.getFiatFormat(fiatUnit).format(exchangeRate * ((double) totalToSend / 1e8));
         String fiatFee = monetaryUtil.getFiatFormat(fiatUnit).format(exchangeRate * ((double) totalFee / 1e8));
@@ -122,7 +122,7 @@ public class ConfirmFundsTransferViewModel implements ViewModel {
                         + " "
                         + btcUnit);
         mDataListener.updateTransferAmountFiat(
-                ExchangeRateFactory.getInstance().getSymbol(fiatUnit)
+                mExchangeRateFactory.getSymbol(fiatUnit)
                         + fiatAmount);
 
         mDataListener.updateFeeAmountBtc(
@@ -130,7 +130,7 @@ public class ConfirmFundsTransferViewModel implements ViewModel {
                         + " "
                         + btcUnit);
         mDataListener.updateFeeAmountFiat(
-                ExchangeRateFactory.getInstance().getSymbol(fiatUnit)
+                mExchangeRateFactory.getSymbol(fiatUnit)
                         + fiatFee);
 
         mDataListener.setPaymentButtonEnabled(true);
@@ -148,7 +148,7 @@ public class ConfirmFundsTransferViewModel implements ViewModel {
         mDataListener.setPaymentButtonEnabled(false);
         mDataListener.showProgressDialog();
         mCompositeSubscription.add(
-                mFundsDataManager.sendPayment(mPendingTransactions, secondPassword)
+                mFundsDataManager.sendPayment(new Payment(), mPendingTransactions, secondPassword)
                         .subscribe(new Subscriber<String>() {
                             @Override
                             public void onCompleted() {
