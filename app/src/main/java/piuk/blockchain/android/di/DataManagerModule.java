@@ -1,9 +1,11 @@
 package piuk.blockchain.android.di;
 
+import info.blockchain.api.Unspent;
 import info.blockchain.wallet.datamanagers.AuthDataManager;
 import info.blockchain.wallet.datamanagers.ReceiveDataManager;
 import info.blockchain.wallet.datamanagers.TransactionListDataManager;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.view.helpers.TransactionHelper;
 import info.blockchain.wallet.view.helpers.TransferFundsDataManager;
 import info.blockchain.wallet.view.helpers.WalletAccountHelper;
@@ -47,7 +49,7 @@ public class DataManagerModule {
     @Provides
     @Singleton
     protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager) {
-        return new TransferFundsDataManager(payloadManager);
+        return new TransferFundsDataManager(payloadManager, new Unspent(), new Payment());
     }
 
     @Provides

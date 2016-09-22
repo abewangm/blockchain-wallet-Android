@@ -14,8 +14,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import info.blockchain.api.Unspent;
 import info.blockchain.wallet.model.PendingTransaction;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.util.PrefsUtil;
 import info.blockchain.wallet.util.ViewUtils;
 import info.blockchain.wallet.view.helpers.TransferFundsDataManager;
@@ -77,7 +79,8 @@ public class BackupWalletCompletedFragment extends Fragment {
         });
 
         if (getArguments() != null && getArguments().getBoolean(KEY_CHECK_TRANSFER)) {
-            TransferFundsDataManager fundsHelper = new TransferFundsDataManager(PayloadManager.getInstance());
+            TransferFundsDataManager fundsHelper =
+                    new TransferFundsDataManager(PayloadManager.getInstance(), new Unspent(), new Payment());
             mCompositeSubscription.add(
                     fundsHelper.getTransferableFundTransactionListForDefaultAccount()
                             .subscribe(map -> {
