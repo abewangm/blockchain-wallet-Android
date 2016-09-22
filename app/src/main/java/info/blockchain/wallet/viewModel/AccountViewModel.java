@@ -28,7 +28,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.annotations.Thunk;
 
 @SuppressWarnings("WeakerAccess")
-public class AccountViewModel implements ViewModel{
+public class AccountViewModel extends BaseViewModel {
 
     private final String TAG = getClass().getSimpleName();
 
@@ -57,7 +57,13 @@ public class AccountViewModel implements ViewModel{
     }
 
     @Override
+    public void onViewReady() {
+        // No-op
+    }
+
+    @Override
     public void destroy() {
+        super.destroy();
         context = null;
         dataListener = null;
     }

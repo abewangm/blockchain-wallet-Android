@@ -1,6 +1,5 @@
 package info.blockchain.wallet.view;
 
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
@@ -14,7 +13,6 @@ public class SettingsActivity extends BaseAuthActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_settings);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new SettingsFragment()).commit();
     }

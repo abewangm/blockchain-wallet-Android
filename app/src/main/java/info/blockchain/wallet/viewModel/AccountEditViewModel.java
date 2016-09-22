@@ -64,7 +64,7 @@ import piuk.blockchain.android.di.Injector;
 
 import static piuk.blockchain.android.R.string.address;
 
-public class AccountEditViewModel implements ViewModel{
+public class AccountEditViewModel extends BaseViewModel {
 
     private Context context;
     private DataListener dataListener;
@@ -115,7 +115,13 @@ public class AccountEditViewModel implements ViewModel{
     }
 
     @Override
+    public void onViewReady() {
+        // No-op
+    }
+
+    @Override
     public void destroy() {
+        super.destroy();
         context = null;
         dataListener = null;
     }

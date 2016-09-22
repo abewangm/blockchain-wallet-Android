@@ -91,7 +91,6 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         viewModel = new SendViewModel(this,this);
         binding.setViewModel(viewModel);
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         setupToolbar();

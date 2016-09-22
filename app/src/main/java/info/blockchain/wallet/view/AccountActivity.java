@@ -131,7 +131,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_accounts);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         viewModel = new AccountViewModel(this, this);
 

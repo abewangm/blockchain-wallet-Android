@@ -2,7 +2,6 @@ package info.blockchain.wallet.view;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -29,8 +28,6 @@ public class ManualPairingActivity extends BaseAuthActivity implements ManualPai
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_manual_pairing);
         mViewModel = new ManualPairingViewModel(this);
 

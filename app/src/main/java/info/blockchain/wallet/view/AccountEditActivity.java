@@ -56,7 +56,6 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         binding = DataBindingUtil.setContentView(this, R.layout.activity_account_edit);
         viewModel = new AccountEditViewModel(new AccountEditModel(), this, this);
         binding.setViewModel(viewModel);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         setupToolbar();
         viewModel.setDataFromIntent(getIntent());

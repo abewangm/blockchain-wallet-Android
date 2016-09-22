@@ -2,7 +2,6 @@ package info.blockchain.wallet.viewModel;
 
 import android.content.Intent;
 import android.support.annotation.StringRes;
-import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.datamanagers.AuthDataManager;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -13,18 +12,16 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.di.Injector;
-import rx.subscriptions.CompositeSubscription;
 
 import static info.blockchain.wallet.view.CreateWalletFragment.KEY_INTENT_EMAIL;
 import static info.blockchain.wallet.view.CreateWalletFragment.KEY_INTENT_PASSWORD;
 
-public class RecoverFundsViewModel implements ViewModel {
+public class RecoverFundsViewModel extends BaseViewModel {
 
     private DataListener mDataListener;
     @Inject protected AuthDataManager mAuthDataManager;
     @Inject protected PayloadManager mPayloadManager;
     @Inject protected AppUtil mAppUtil;
-    @VisibleForTesting CompositeSubscription mCompositeSubscription;
 
     public interface DataListener {
 
@@ -45,9 +42,9 @@ public class RecoverFundsViewModel implements ViewModel {
     public RecoverFundsViewModel(DataListener listener) {
         Injector.getInstance().getAppComponent().inject(this);
         mDataListener = listener;
-        mCompositeSubscription = new CompositeSubscription();
     }
 
+    @Override
     public void onViewReady() {
         // No-op
     }
@@ -97,12 +94,4 @@ public class RecoverFundsViewModel implements ViewModel {
         return mAppUtil;
     }
 
-    @Override
-    public void destroy() {
-        // Clear all subscriptions so that:
-        // 1) all processes are cancelled
-        // 2) processes don't try to update a null View
-        // 3) background processes don't leak memory
-        mCompositeSubscription.clear();
-    }
 }

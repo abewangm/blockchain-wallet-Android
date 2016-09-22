@@ -1,7 +1,6 @@
 package info.blockchain.wallet.view;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -33,7 +32,6 @@ public class PasswordRequiredActivity extends BaseAuthActivity implements Passwo
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_password_required);
         mViewModel = new PasswordRequiredViewModel(this);

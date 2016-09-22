@@ -3,7 +3,6 @@ package info.blockchain.wallet.view;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -54,7 +53,6 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
         super.onCreate(savedInstanceState);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_upgrade_wallet);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         payloadManager = PayloadManager.getInstance();
         prefs = new PrefsUtil(this);

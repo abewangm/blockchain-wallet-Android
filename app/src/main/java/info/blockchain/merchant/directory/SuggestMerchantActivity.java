@@ -80,7 +80,6 @@ public class SuggestMerchantActivity extends BaseAuthActivity {
         super.onCreate(savedInstanceState);
 
         this.setContentView(R.layout.activity_suggest_merchant);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
         setSupportActionBar(toolbar);

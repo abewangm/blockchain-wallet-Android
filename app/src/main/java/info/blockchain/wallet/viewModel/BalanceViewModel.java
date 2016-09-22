@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
+import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.api.Settings;
 import info.blockchain.wallet.datamanagers.TransactionListDataManager;
@@ -33,7 +34,6 @@ import javax.inject.Inject;
 import piuk.blockchain.android.BR;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.di.Injector;
-import piuk.blockchain.android.di.scopes.ViewModelScope;
 import rx.Observable;
 import rx.subscriptions.CompositeSubscription;
 
@@ -55,7 +55,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected PayloadManager payloadManager;
     @Inject protected TransactionListDataManager transactionListDataManager;
-    @ViewModelScope CompositeSubscription compositeSubscription;
+    @VisibleForTesting CompositeSubscription compositeSubscription;
 
     @Bindable
     public String getBalance(){
@@ -85,7 +85,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         this.activeAccountAndAddressBiMap = HashBiMap.create();
         this.transactionList = new ArrayList<>();
         this.osUtil = new OSUtil(context);
-        compositeSubscription = new CompositeSubscription();
+        this.compositeSubscription = new CompositeSubscription();
     }
 
     public void onViewReady() {

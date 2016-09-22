@@ -35,12 +35,11 @@ import javax.inject.Inject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.di.Injector;
 import rx.Observable;
-import rx.subscriptions.CompositeSubscription;
 
 import static info.blockchain.wallet.view.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
 @SuppressWarnings("WeakerAccess")
-public class TransactionDetailViewModel implements ViewModel {
+public class TransactionDetailViewModel extends BaseViewModel {
 
     private static final int REQUIRED_CONFIRMATIONS = 3;
 
@@ -57,7 +56,6 @@ public class TransactionDetailViewModel implements ViewModel {
     private String mFiatType;
 
     @VisibleForTesting Tx mTransaction;
-    @VisibleForTesting CompositeSubscription mCompositeSubscription;
 
     public interface DataListener {
 
@@ -94,13 +92,13 @@ public class TransactionDetailViewModel implements ViewModel {
     public TransactionDetailViewModel(DataListener listener) {
         Injector.getInstance().getAppComponent().inject(this);
         mDataListener = listener;
-        mCompositeSubscription = new CompositeSubscription();
         mMonetaryUtil = new MonetaryUtil(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
 
         mFiatType = mPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         mBtcExchangeRate = mExchangeRateFactory.getLastPrice(mFiatType);
     }
 
+    @Override
     public void onViewReady() {
         if (mDataListener.getPageIntent() != null
                 && mDataListener.getPageIntent().hasExtra(KEY_TRANSACTION_LIST_POSITION)) {
@@ -279,12 +277,4 @@ public class TransactionDetailViewModel implements ViewModel {
         return (String) mMonetaryUtil.getBTCUnits()[mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
     }
 
-    @Override
-    public void destroy() {
-        // Clear all subscriptions so that:
-        // 1) all processes are cancelled
-        // 2) processes don't try to update a null View
-        // 3) background processes don't leak memory
-        mCompositeSubscription.clear();
-    }
 }

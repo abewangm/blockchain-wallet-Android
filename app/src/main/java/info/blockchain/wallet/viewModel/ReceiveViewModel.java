@@ -48,9 +48,8 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.di.Injector;
-import rx.subscriptions.CompositeSubscription;
 
-public class ReceiveViewModel implements ViewModel {
+public class ReceiveViewModel extends BaseViewModel {
 
     public static final String TAG = ReceiveViewModel.class.getSimpleName();
     private static final int DIMENSION_QR_CODE = 600;
@@ -63,7 +62,6 @@ public class ReceiveViewModel implements ViewModel {
     @Inject ReceiveDataManager mDataManager;
     @Inject WalletAccountHelper mWalletAccountHelper;
     @Inject SSLVerifyUtil mSSLVerifyUtil;
-    @VisibleForTesting CompositeSubscription mCompositeSubscription;
     @VisibleForTesting HashBiMap<Integer, Object> mAccountMap;
     @VisibleForTesting SparseIntArray mSpinnerIndexMap;
     private ReceiveCurrencyHelper mCurrencyHelper;
@@ -89,7 +87,6 @@ public class ReceiveViewModel implements ViewModel {
     public ReceiveViewModel(DataListener listener, Locale locale) {
         Injector.getInstance().getAppComponent().inject(this);
         mDataListener = listener;
-        mCompositeSubscription = new CompositeSubscription();
 
         int btcUnitType = mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         MonetaryUtil monetaryUtil = new MonetaryUtil(btcUnitType);
@@ -99,6 +96,7 @@ public class ReceiveViewModel implements ViewModel {
         mSpinnerIndexMap = new SparseIntArray();
     }
 
+    @Override
     public void onViewReady() {
         mSSLVerifyUtil.validateSSL();
         updateSpinnerList();
@@ -370,15 +368,6 @@ public class ReceiveViewModel implements ViewModel {
     @NonNull
     public AppUtil getAppUtil() {
         return mAppUtil;
-    }
-
-    @Override
-    public void destroy() {
-        // Clear all subscriptions so that:
-        // 1) all processes are cancelled
-        // 2) processes don't try to update a null View
-        // 3) background processes don't leak memory
-        mCompositeSubscription.clear();
     }
 
     public class SendPaymentCodeData {
