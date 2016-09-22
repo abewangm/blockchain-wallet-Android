@@ -1,4 +1,4 @@
-package info.blockchain.wallet.view.helpers;
+package info.blockchain.wallet.datamanagers;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

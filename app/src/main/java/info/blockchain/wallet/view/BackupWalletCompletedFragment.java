@@ -20,7 +20,7 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.util.PrefsUtil;
 import info.blockchain.wallet.util.ViewUtils;
-import info.blockchain.wallet.view.helpers.TransferFundsDataManager;
+import info.blockchain.wallet.datamanagers.TransferFundsDataManager;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

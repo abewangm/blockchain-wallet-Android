@@ -1,4 +1,4 @@
-package info.blockchain.wallet.view.helpers;
+package info.blockchain.wallet.datamanagers;
 
 import android.support.v4.util.Pair;
 
