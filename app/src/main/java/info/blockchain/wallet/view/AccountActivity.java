@@ -101,8 +101,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         @Override
         public void onReceive(Context context, final Intent intent) {
             if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
-                AccountActivity.this.runOnUiThread(() -> onUpdateAccountsList());
-                onUpdateAccountsList();
+                runOnUiThread(() -> onUpdateAccountsList());
             }
         }
     };
@@ -118,7 +117,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     @Thunk AppUtil appUtil;
     @Thunk PayloadManager payloadManager;
     @Thunk AccountViewModel viewModel;
-    private AlertDialog transactionSuccessDialog;
+    @Thunk AlertDialog transactionSuccessDialog;
     @Thunk ActivityAccountsBinding binding;
     @Thunk String secondPassword;
 
@@ -301,6 +300,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         }
     }
 
+    @Thunk
     void importAddress() {
         if (ContextCompat.checkSelfPermission(AccountActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             PermissionUtil.requestCameraPermissionFromActivity(binding.mainLayout, AccountActivity.this);
@@ -764,7 +764,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                         .setPositiveButton(R.string.save_name, (dialog, whichButton) -> {
 
                             String label = address_label.getText().toString();
-                            if (label != null && label.trim().length() > 0) {
+                            if (label.trim().length() > 0) {
                                 legacyAddress.setLabel(label);
                             } else {
                                 legacyAddress.setLabel(legacyAddress.getAddress());
@@ -874,7 +874,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                                     .setPositiveButton(R.string.save_name, (dialog1, whichButton1) -> {
 
                                         String label = address_label.getText().toString();
-                                        if (label != null && label.trim().length() > 0) {
+                                        if (label.trim().length() > 0) {
                                             legacyAddress.setLabel(label);
                                         } else {
                                             legacyAddress.setLabel(legacyAddress.getAddress());
@@ -902,7 +902,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             Looper.prepare();
             JSONObject info = new AddressInfo().getAddressInfo(legacyAddress.getAddress(), "&limit=0");//limit 0 tx, since we only want final balance
 
-            long balance = 0l;
+            long balance = 0L;
             if (info != null)
                 try {
                     balance = info.getLong("final_balance");
