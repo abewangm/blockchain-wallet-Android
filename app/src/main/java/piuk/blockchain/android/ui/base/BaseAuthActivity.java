@@ -32,7 +32,7 @@ public class BaseAuthActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         if (!BuildConfig.DOGFOOD) {
-            disallowScreenshots();
+//            disallowScreenshots();
         }
 
         mCompositeSubscription = new CompositeSubscription();

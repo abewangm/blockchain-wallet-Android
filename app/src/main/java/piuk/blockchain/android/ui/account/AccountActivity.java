@@ -1,8 +1,8 @@
 package piuk.blockchain.android.ui.account;
 
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.client.android.CaptureActivity;
-import com.google.zxing.client.android.Intents;
+import piuk.blockchain.android.ui.zxing.CaptureActivity;
+import piuk.blockchain.android.ui.zxing.Intents;
 
 import android.Manifest;
 import android.app.Activity;

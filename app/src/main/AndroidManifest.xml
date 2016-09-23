@@ -100,7 +100,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-            android:name="com.google.zxing.client.android.CaptureActivity"
+            android:name=".ui.zxing.CaptureActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity

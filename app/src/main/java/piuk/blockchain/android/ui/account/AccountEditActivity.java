@@ -1,6 +1,6 @@
 package piuk.blockchain.android.ui.account;
 
-import com.google.zxing.client.android.CaptureActivity;
+import piuk.blockchain.android.ui.zxing.CaptureActivity;
 
 import android.Manifest;
 import android.app.Activity;

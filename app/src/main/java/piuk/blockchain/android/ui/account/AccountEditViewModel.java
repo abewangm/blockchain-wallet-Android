@@ -2,9 +2,9 @@ package piuk.blockchain.android.ui.account;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
-import com.google.zxing.client.android.CaptureActivity;
-import com.google.zxing.client.android.Contents;
-import com.google.zxing.client.android.encode.QRCodeEncoder;
+import piuk.blockchain.android.ui.zxing.CaptureActivity;
+import piuk.blockchain.android.ui.zxing.Contents;
+import piuk.blockchain.android.ui.zxing.encode.QRCodeEncoder;
 
 import android.app.Activity;
 import android.content.Context;

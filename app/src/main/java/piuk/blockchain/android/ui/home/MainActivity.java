@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.home;
 
-import com.google.zxing.client.android.CaptureActivity;
-
 import android.Manifest;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -39,6 +37,7 @@ import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.send.SendActivity;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
+import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
