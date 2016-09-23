@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">Spersonalizuj sposób organizacji bitcoinów swoim Portfelu Blockchain</string>
     <string name="CONFIRM">ULEPSZ TERAZ</string>
     <string name="confirm_upgrade">Potwierdź ulepszenie</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Hej, dodaliśmy te nowe opcje do Twojego portfela Blockchain:</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">Hej, dodaliśmy te nowe opcje do Twojego portfela Blockchain:</string>
     <string name="upgrading">Ulepszanie...</string>
     <string name="upgrading_started_info">Twój portfel jest właśnie ulepszany, prosimy o cierpliwość, gdyż może to chwilę potrwać, w zależności od rozmiaru i wieku Twojego portfela.</string>
     <string name="upgrade_success_heading">Twój portfel został ulepszony!</string>
@@ -526,21 +527,25 @@
     <string name="learn_more">Dowiedz się więcej</string>
     <string name="new_address_info">Dla zwiększonej prywatności, generujemy unikalny adres dla każdej płatności. Wszystkie adresy wygenerowane w Twoim portfelu nadal mogą otrzymywać płatności, nawet jeśli nie znajdują się w dziale "Otrzymuj".</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Żądanie płatności bitcoin</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">Żądanie płatności bitcoin</string>
     <string name="email_request_body">Proszę wysłać %1$s BTC na adres bitcoin %2$s</string>
     <string name="email_request_body_fallback">załączono</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">Uwaga</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">Uwaga</string>
     <string name="common_pin_dialog_message">Wybrany przez Ciebie PIN jest bardzo powszechny i osoba z dostępem do Twojego telefonu może z łatwością odgadnąć go w 3 próbach. Czy chcesz użyć tego PINu mimo to?</string>
     <string name="common_pin_dialog_try_again">Spróbuj ponownie</string>
     <string name="common_pin_dialog_continue">Kontynuuj</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Wylogowałeś się, lub wystąpił błąd w rozszyfrowywaniu Twojego portfela. Poniżej wpisz swoje hasło, by rozpocząć.</string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">Wylogowałeś się, lub wystąpił błąd w rozszyfrowywaniu Twojego portfela. Poniżej wpisz swoje hasło, by rozpocząć.</string>
     <string name="logged_out_forget_wallet">Jeśli chcesz zapomnieć tego portfela i zacząć od nowa, wciśnij "Zapomnij portfel".</string>
 
     <string name="api_fail">Nie udało się połączyć z serwerem. Spróbuj ponownie później.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Ta transakcja bitcoin jest za duża. Twój portfel musi skonsolidować wiele mniejszych płatności, otrzymanych przez Ciebie w przeszłości. Wymaga to stosunkowo wysokiej opłaty w celu szybkiego potwierdzenia. Jeśli transakcja może poczekać dłużej na potwierdzenie, możesz ręcznie obniżyć opłatę, klikając "spersonalizuj" </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">Ta transakcja bitcoin jest za duża. Twój portfel musi skonsolidować wiele mniejszych płatności, otrzymanych przez Ciebie w przeszłości. Wymaga to stosunkowo wysokiej opłaty w celu szybkiego potwierdzenia. Jeśli transakcja może poczekać dłużej na potwierdzenie, możesz ręcznie obniżyć opłatę, klikając "spersonalizuj" </string>
     <string name="go_back">Wróć</string>
     <string name="accept_higher_fee">Zaakceptuj wyższą opłatę</string>
     <string name="large_tx_high_fee_warning">"Ta transakcja wymaga wyższej opłaty dla konsumpcji "kurzu" z powodu małej kwoty reszty."</string>

@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">Tùy chỉnh cách bạn tổ chức Bitcoin trong Ví Blockchain của mình.</string>
     <string name="CONFIRM">NÂNG CẤP NGAY</string>
     <string name="confirm_upgrade">Xác nhận nâng cấp</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Chúng tôi đã thêm một vài tính năng mới cho ví Blockchain:</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">Chúng tôi đã thêm một vài tính năng mới cho ví Blockchain:</string>
     <string name="upgrading">Đang nâng cấp...</string>
     <string name="upgrading_started_info">Ví của bạn đang nâng cấp, thời gian phụ thuộc vào kích cỡ và thời gian sử dụng ví của bạn.</string>
     <string name="upgrade_success_heading">Ví của bạn đã được nâng cấp!</string>
@@ -526,21 +527,25 @@
     <string name="learn_more">Tìm hiểu thêm</string>
     <string name="new_address_info">Để tăng cường bảo mật, chúng tôi tạo một địa chỉ độc nhất cho mỗi thanh toán. Tất cả các địa chỉ được tạo trong ví của bạn đều có thể nhận tiền, thậm chí khi không còn xuất hiện trong mục Nhận.</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Yêu cầu thanh toán Bitcoin</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">Yêu cầu thanh toán Bitcoin</string>
     <string name="email_request_body">Vui lòng gửi %1$s BTC đến địa chỉ Bitcoin %2$s.</string>
     <string name="email_request_body_fallback">đã đính kèm</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">Cảnh báo</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">Cảnh báo</string>
     <string name="common_pin_dialog_message">Mã PIN bạn đã chọn rất thông dụng và có thể đoán được dễ dàng với 3 lần thử trên điện thoại. Bạn có muốn vẫn sử dụng mã PIN này?</string>
     <string name="common_pin_dialog_try_again">Thử lại</string>
     <string name="common_pin_dialog_continue">Tiếp tục</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Bạn đã đăng xuất hoặc có lỗi khi mã hóa ví của bạn. Nhập mật khẩu của bạn vào bên dưới để đăng nhập.</string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">Bạn đã đăng xuất hoặc có lỗi khi mã hóa ví của bạn. Nhập mật khẩu của bạn vào bên dưới để đăng nhập.</string>
     <string name="logged_out_forget_wallet">Nếu bạn muốn quên ví này và bắt đầu lại, nhấn \'Quên ví\'.</string>
 
     <string name="api_fail">Không thể kết nối đến máy chủ. Vui lòng thử lại sau.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Đây là một giao dịch bitcoin vượt kích cỡ. Ví của bạn cần tổng hợp nhiều thanh toán nhỏ hơn mà bạn đã nhận trong quá khứ. Điều này cần một khoản phí tương đối cao để được xác nhận nhanh chóng. Xác nhận giao dịch lâu hơn vẫn không sao, bạn có thể tự giảm phí bằng cách nhấn "tùy chỉnh". </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">Đây là một giao dịch bitcoin vượt kích cỡ. Ví của bạn cần tổng hợp nhiều thanh toán nhỏ hơn mà bạn đã nhận trong quá khứ. Điều này cần một khoản phí tương đối cao để được xác nhận nhanh chóng. Xác nhận giao dịch lâu hơn vẫn không sao, bạn có thể tự giảm phí bằng cách nhấn "tùy chỉnh". </string>
     <string name="go_back">Trở lại</string>
     <string name="accept_higher_fee">Chấp nhận phí cao hơn</string>
     <string name="large_tx_high_fee_warning">"Giao dịch này yêu cầu phí cao hơn vì thực hiện giao dịch với số tiền quá nhỏ."</string>

@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">Maak de manier waarop u uw Bitcoins organiseert in uw Blockchain Portemonnee op maat.</string>
     <string name="CONFIRM">NU UPGRADEN</string>
     <string name="confirm_upgrade">Upgrade bevestigen</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Hé, we hebben deze nieuwe functies toegevoegd aan uw Blockchain portemonnee:</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">Hé, we hebben deze nieuwe functies toegevoegd aan uw Blockchain portemonnee:</string>
     <string name="upgrading">Aan het opgraden...</string>
     <string name="upgrading_started_info">Uw portemonnee is aan het upgraden. Even geduld a.u.b. dit kan enige tijd duren, afhankelijk van de grootte en de leeftijd van uw portemonnee.</string>
     <string name="upgrade_success_heading">Uw portemonnee is geüpgraded!</string>
@@ -526,21 +527,25 @@
     <string name="learn_more">Kom meer te weten</string>
     <string name="new_address_info">Voor meer privacy genereren we een uniek adres voor elke betaling. Alle adressen die zijn gegenereerd in uw portemonnee kunnen nog steeds geld ontvangen, zelfs als ze niet langer verschijnen onder Ontvangen.</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Bitcoin-betalingsverzoek</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">Bitcoin-betalingsverzoek</string>
     <string name="email_request_body">Verzend %1$s BTC naar Bitcoin-adres %2$s.</string>
     <string name="email_request_body_fallback">bijgevoegd</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">Waarschuwing</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">Waarschuwing</string>
     <string name="common_pin_dialog_message">De door u geselecteerde pincode komt zeer vaak voor en kan gemakkelijk binnen 3 pogingen worden geraden door iemand met toegang tot uw telefoon. Wilt u deze pincode toch gebruiken?</string>
     <string name="common_pin_dialog_try_again">Probeer opnieuw</string>
     <string name="common_pin_dialog_continue">Doorgaan</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">U bent uitgelogd of er is een fout opgetreden bij het decoderen van uw portemonnee. Voer hieronder uw wachtwoord in om in te loggen.</string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">U bent uitgelogd of er is een fout opgetreden bij het decoderen van uw portemonnee. Voer hieronder uw wachtwoord in om in te loggen.</string>
     <string name="logged_out_forget_wallet">Als u deze portemonnee wilt vergeten en opnieuw wilt beginnen, druk dan op \'Portemonnee vergeten\'.</string>
 
     <string name="api_fail">Kan geen verbinding maken met server. Probeer het later opnieuw.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Dit is een extra grote bitcoin-transactie. Uw portemonnee moet vele kleinere betalingen die u in het verleden heeft ontvangen combineren. Dit vereist een relatief hoog tarief om snel te worden bevestigd. Als het prima is dat het langer duurt om de transactie te bevestigen, kunt u het tarief handmatig verlagen door te klikken op "op maat maken". </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">Dit is een extra grote bitcoin-transactie. Uw portemonnee moet vele kleinere betalingen die u in het verleden heeft ontvangen combineren. Dit vereist een relatief hoog tarief om snel te worden bevestigd. Als het prima is dat het langer duurt om de transactie te bevestigen, kunt u het tarief handmatig verlagen door te klikken op "op maat maken". </string>
     <string name="go_back">Ga terug</string>
     <string name="accept_higher_fee">Hoger tarief accepteren</string>
     <string name="large_tx_high_fee_warning">"Deze transactie vereist een hoger tarief voor dustconsumptie ten gevolg van de kleine hoeveelheid wisselgeld die kan worden teruggegeven."</string>

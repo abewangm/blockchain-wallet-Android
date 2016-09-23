@@ -2,7 +2,7 @@ package info.blockchain.credentials;
 
 import android.content.Context;
 
-import info.blockchain.wallet.util.PrefsUtil;
+import piuk.blockchain.android.util.PrefsUtil;
 
 public class WalletUtil {
 

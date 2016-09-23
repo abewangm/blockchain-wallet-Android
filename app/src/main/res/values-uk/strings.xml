@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">Персоналізуйте спосіб групування своїх bitcoin у своєму гаманці Blockchain.</string>
     <string name="CONFIRM">ОНОВИТИ ЗАРАЗ</string>
     <string name="confirm_upgrade">Підтвердити оновлення</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Ми додали ось такі нові опції до вашого гаманця Blockchain:</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">Ми додали ось такі нові опції до вашого гаманця Blockchain:</string>
     <string name="upgrading">Оновлення...</string>
     <string name="upgrading_started_info">Ваш гаманець оновлюється, будь ласка, трохи зачекайте, це може зайняти деякий час, в залежності від розміру та віку вашого гаманця.</string>
     <string name="upgrade_success_heading">Ваш гаманець оновлено!</string>
@@ -526,21 +527,25 @@
     <string name="learn_more">Дізнатись більше</string>
     <string name="new_address_info">Для підвищення конфіденційності ми генеруємо унікальну адресу для кожного платежу. Усі адреси, згенеровані у вашому гаманці, все ще можуть отримувати кошти, навіть якщо вони більше не з\'являються під пунктом Отримати.</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Запит Bitcoin-платежу</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">Запит Bitcoin-платежу</string>
     <string name="email_request_body">Будь ласка, відправте%1$s BTC на Bitcoin-адресу %2$s.</string>
     <string name="email_request_body_fallback">прикріплено</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">Попередження</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">Попередження</string>
     <string name="common_pin_dialog_message">Обраний вами PIN-код надзвичайно поширений, його може легко вгадати і ввести за 3 спроби у ваш телефон будь-хто. Хочете використовувати цей PIN-код в будь-якому випадку?</string>
     <string name="common_pin_dialog_try_again">Спробувати ще раз</string>
     <string name="common_pin_dialog_continue">Продовжити</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Ви вийшли або стався збій дешифрування вашого гаманця. Знизу введіть свій пароль, щоб увійти.</string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">Ви вийшли або стався збій дешифрування вашого гаманця. Знизу введіть свій пароль, щоб увійти.</string>
     <string name="logged_out_forget_wallet">Якщо ви бажаєте забути цей гаманець або створити новий, натисніть \'Забути гаманець\'.</string>
 
     <string name="api_fail">Неможливо з\'єднатись із сервером. Будь ласка, спробуйте пізніше.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Завищений розмір bitcoin-транзакції. Вашому гаманцю необхідно консолідувати багато менших платежів, які ви колись отримували. Для швидкого підтвердження, це вимагає відносно високої комісії. Якщо більше часу для підтвердження транзакції є цілком нормальним явищем, ви могли б зменшити комісію вручну, натиснувши кнопку "налаштування". </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">Завищений розмір bitcoin-транзакції. Вашому гаманцю необхідно консолідувати багато менших платежів, які ви колись отримували. Для швидкого підтвердження, це вимагає відносно високої комісії. Якщо більше часу для підтвердження транзакції є цілком нормальним явищем, ви могли б зменшити комісію вручну, натиснувши кнопку "налаштування". </string>
     <string name="go_back">Повернутись</string>
     <string name="accept_higher_fee">Прийняти вищу комісію</string>
     <string name="large_tx_high_fee_warning">"Ця транзакція вимагає більш високу комісію через невелику кількість змін, яку буде повернуто."</string>

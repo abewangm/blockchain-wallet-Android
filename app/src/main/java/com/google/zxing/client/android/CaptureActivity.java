@@ -34,7 +34,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -48,13 +47,11 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-import info.blockchain.wallet.access.AccessState;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
-import piuk.blockchain.android.BaseAuthActivity;
+import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.R;
 
 /**

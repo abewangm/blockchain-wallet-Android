@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">Personalizza il modo in cui organizzi i tuoi Bitcoin nel tuo Portafoglio Blockchain.</string>
     <string name="CONFIRM">AGGIORNA ORA</string>
     <string name="confirm_upgrade">Conferma l\'aggiornamento</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Ehi, abbiamo aggiunto queste nuove funzioni al tuo portafoglio Blockchain:</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">Ehi, abbiamo aggiunto queste nuove funzioni al tuo portafoglio Blockchain:</string>
     <string name="upgrading">In fase di aggiornamento...</string>
     <string name="upgrading_started_info">Il tuo portafoglio è in fase di aggiornamento, per favore sii paziente perchè questo potrebbe richiedere del tempo, a seconda della dimensione e dell\'età del tuo portafoglio.</string>
     <string name="upgrade_success_heading">Il tuo portafoglio è stato aggiornato!</string>
@@ -528,21 +529,25 @@
     <string name="learn_more">Maggiori dettagli</string>
     <string name="new_address_info">Per una migliore privacy, noi generiamo un indirizzo unico per ogni pagamento. Tutti gli indirizzi generati nel tuo portafoglio possono ugualmente ricevere soldi, anche se non appaiono più sotto la voce Ricevi</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Richiesta di pagamento in Bitcoin</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">Richiesta di pagamento in Bitcoin</string>
     <string name="email_request_body">Invia %1$s BTC all\'indirizzo Bitcoin %2$s.</string>
     <string name="email_request_body_fallback">allegato</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">Avvertenza</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">Avvertenza</string>
     <string name="common_pin_dialog_message">Il PIN che hai selezionato è molto comune e può essere facilmente indovinato da qualcuno con accesso al tuo telefono entro 3 tentativi. Vuoi usare questo PIN comunque?</string>
     <string name="common_pin_dialog_try_again">Prova di nuovo</string>
     <string name="common_pin_dialog_continue">Continua</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Sei uscito o è avvenuto un errore nella decifrazione del tuo portafoglio. Inserisci la tua password sotto per effettuare l\'accesso.</string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">Sei uscito o è avvenuto un errore nella decifrazione del tuo portafoglio. Inserisci la tua password sotto per effettuare l\'accesso.</string>
     <string name="logged_out_forget_wallet">Se vuoi abbandonare questo portafoglio ed iniziare da capo, premi su \'Abbandona Portafoglio\'.</string>
 
     <string name="api_fail">Impossibile connettersi al server. Riprova più tardi.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Questa è una transazione in bitcoin troppo grande. Il tuo portafoglio deve consolidare tanti piccoli pagamenti che hai ricevuto in passato. Ciò richiede un costo relativamente elevato, per avere una conferma rapida. Se ti sta bene che la transazione richieda più tempo per la conferma, puoi ridurre la commissione manualmente cliccando su "personalizza”. </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">Questa è una transazione in bitcoin troppo grande. Il tuo portafoglio deve consolidare tanti piccoli pagamenti che hai ricevuto in passato. Ciò richiede un costo relativamente elevato, per avere una conferma rapida. Se ti sta bene che la transazione richieda più tempo per la conferma, puoi ridurre la commissione manualmente cliccando su "personalizza”. </string>
     <string name="go_back">Torna indietro</string>
     <string name="accept_higher_fee">Accetta commissioni più alte</string>
     <string name="large_tx_high_fee_warning">"Questa operazione richiede una commissione più elevata per il consumo di dust a causa della piccola quantità di resto da restituire."</string>

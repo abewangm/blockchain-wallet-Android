@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">Personnalisez la façon dont vous organisez vos Bitcoin dans votre portefeuille Blockchain.</string>
     <string name="CONFIRM">METTRE À JOUR MAINTENANT</string>
     <string name="confirm_upgrade">Confirmez la mise à jour</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Nous avons ajouté ces nouvelles caractéristiques à votre portefeuille Blockchain :</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">Nous avons ajouté ces nouvelles caractéristiques à votre portefeuille Blockchain :</string>
     <string name="upgrading">Mise à jour en cours…</string>
     <string name="upgrading_started_info">Mise à jour de votre portefeuille en cours. Veuillez patienter, cela peut prendre un certain temps selon la taille et l\'ancienneté de votre portefeuille.</string>
     <string name="upgrade_success_heading">Votre portefeuille a été mis à jour !</string>
@@ -526,21 +527,25 @@
     <string name="learn_more">En savoir plus</string>
     <string name="new_address_info">Pour une meilleure confidentialité, nous générons une adresse unique pour chaque paiement. Toutes les adresses générées dans votre portefeuille peuvent toujours recevoir des fonds, même si elles n\'apparaissent plus dans la section « Recevoir ».</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Demande de paiement en Bitcoin</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">Demande de paiement en Bitcoin</string>
     <string name="email_request_body">Veuillez envoyer %1$s BTC à l\'adresse Bitcoin %2$s.</string>
     <string name="email_request_body_fallback">en pièce jointe</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">Avertissement</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">Avertissement</string>
     <string name="common_pin_dialog_message">Le code PIN que vous avez sélectionné est extrêmement courant et pourrait être facilement deviné au bout de 3 tentatives par une personne qui a accès à votre téléphone. Voulez-vous quand même utiliser ce code PIN ?</string>
     <string name="common_pin_dialog_try_again">Réessayez</string>
     <string name="common_pin_dialog_continue">Continuer</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Vous vous êtes déconnecté ou bien il s\'est produit une erreur lors du décodage de votre portefeuille. Pour vous connecter, saisissez votre mot de passe ci-dessous. </string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">Vous vous êtes déconnecté ou bien il s\'est produit une erreur lors du décodage de votre portefeuille. Pour vous connecter, saisissez votre mot de passe ci-dessous. </string>
     <string name="logged_out_forget_wallet">Si vous souhaitez oublier ce portefeuille et recommencer, appuyez sur \'Oublier le portefeuille\'.</string>
 
     <string name="api_fail">Impossible de se connecter au serveur. Veuillez réessayer plus tard.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Cette transaction de bitcoin est trop grande. Votre portefeuille doit consolider tous les petits paiements que vous avez reçus dans le passé. Pour pouvoir être confirmés rapidement, ils nécessitent des frais de transaction relativement élevés. Si cette transaction n\'a plus besoin d\'être confirmée, vous devriez réduire les frais manuellement en cliquant sur « personnaliser ».   </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">Cette transaction de bitcoin est trop grande. Votre portefeuille doit consolider tous les petits paiements que vous avez reçus dans le passé. Pour pouvoir être confirmés rapidement, ils nécessitent des frais de transaction relativement élevés. Si cette transaction n\'a plus besoin d\'être confirmée, vous devriez réduire les frais manuellement en cliquant sur « personnaliser ».   </string>
     <string name="go_back">Retour</string>
     <string name="accept_higher_fee">Accepter des frais plus élevés</string>
     <string name="large_tx_high_fee_warning">« Le montant des modifications à rembourser étant faible, cette transaction requière des frais plus élevés pour la consommation de montants inférieurs au montant minimal accepté par le réseau bitcoin. »</string>

@@ -3,9 +3,9 @@ package info.blockchain.wallet;
 import android.content.Context;
 
 import info.blockchain.credentials.WalletUtil;
-import info.blockchain.wallet.access.AccessState;
+import piuk.blockchain.android.data.access.AccessState;
 import info.blockchain.wallet.util.CharSequenceX;
-import info.blockchain.wallet.util.PrefsUtil;
+import piuk.blockchain.android.util.PrefsUtil;
 
 public class BlockchainWalletTest extends BlockchainTest {
 

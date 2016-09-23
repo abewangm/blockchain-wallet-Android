@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">귀하 블록체인 지갑 안 비트코인을 정리를 방법 사용자 설정</string>
     <string name="CONFIRM">지금 업그레이드</string>
     <string name="confirm_upgrade">업그레이드 확인</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">귀하 블록체인 지갑에 새로운 기능을 추가했습니다:</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">귀하 블록체인 지갑에 새로운 기능을 추가했습니다:</string>
     <string name="upgrading">업그레이드 중...</string>
     <string name="upgrading_started_info">지갑 업그레이드 중입니다. 지갑 크기나 이력에 따라 시간이 좀 걸리니 기다려 주세요.</string>
     <string name="upgrade_success_heading">지갑 업그레이드가 끝났습니다!</string>
@@ -526,21 +527,25 @@
     <string name="learn_more">더 배우기</string>
     <string name="new_address_info">For increased privacy, we generate a unique address for every payment. All addresses generated in your wallet can still receive funds, even if they no longer appear under Receive.</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">비트코인 payment request</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">비트코인 payment request</string>
     <string name="email_request_body">Please send%1$s BTC to the 비트코인 address %2$s.</string>
     <string name="email_request_body_fallback">attached</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">경고</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">경고</string>
     <string name="common_pin_dialog_message">The PIN you have selected is extremely common and may be easily guessed by someone with access to your phone within 3 tries. Would you like to use this PIN anyway?</string>
     <string name="common_pin_dialog_try_again">Try again</string>
     <string name="common_pin_dialog_continue">계속</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">You have logged out or there was an error decrypting your wallet. Enter your password below to login.</string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">You have logged out or there was an error decrypting your wallet. Enter your password below to login.</string>
     <string name="logged_out_forget_wallet">If you would like to forget this wallet and start over, press \'Forget Wallet\'.</string>
 
     <string name="api_fail">Unable connect to server. Please try again later.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">This is an oversized 비트코인 transaction. Your wallet needs to consolidate many smaller payments you\'ve received in the past. This requires a relatively high fee in order to be confirmed quickly. If it’s fine for the transaction to take longer to confirm, you could reduce the fee manually by clicking “customize”. </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">This is an oversized 비트코인 transaction. Your wallet needs to consolidate many smaller payments you\'ve received in the past. This requires a relatively high fee in order to be confirmed quickly. If it’s fine for the transaction to take longer to confirm, you could reduce the fee manually by clicking “customize”. </string>
     <string name="go_back">Go back</string>
     <string name="accept_higher_fee">Accept higher fee</string>
     <string name="large_tx_high_fee_warning">"This transaction requires a higher fee for dust consumption due to the small amount of change to be returned."</string>

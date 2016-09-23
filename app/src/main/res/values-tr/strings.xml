@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">Blockchain Cüzdanınızdaki Bitcoinlerinizi düzenleme biçiminizi özelleştirin.</string>
     <string name="CONFIRM">ŞİMDİ YÜKSELT</string>
     <string name="confirm_upgrade">Yükseltmeyi Onayla</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Selam, Blockchain cüzdanınıza bu yeni özellikleri ekledik:</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">Selam, Blockchain cüzdanınıza bu yeni özellikleri ekledik:</string>
     <string name="upgrading">Yükseltiliyor...</string>
     <string name="upgrading_started_info">Cüzdanınız yükseltiliyor, bu işlem cüzdanınızın büyüklüğüne ve yaşına göre biraz zaman alabilir lütfen sabırlı olun.</string>
     <string name="upgrade_success_heading">Cüzdanınız yükseltildi!</string>
@@ -526,21 +527,25 @@
     <string name="learn_more">Daha Fazla Öğren</string>
     <string name="new_address_info">Artırılmış güvenlik için her bir ödeme için eşsiz bir adres oluşturmaktayız. Cüzdanınızda oluşturulan tüm adresler, Al seçeneğinde artık görünmeseler bile halen para alabilirler.</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Bitcoin ödeme talebi</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">Bitcoin ödeme talebi</string>
     <string name="email_request_body">Lütfen %2$s Bitcoin adresine %1$s BTC gönder.</string>
     <string name="email_request_body_fallback">ekli</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">Uyarı</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">Uyarı</string>
     <string name="common_pin_dialog_message">Seçtiğiniz PIN kodu oldukça fazla kullanılmakta ve telefonunuza erişebilen birisi tarafından 3 denemeyle kolay şekilde tahmin edilebilir. Bu PIN kodunu yine de kullanmak ister misiniz?</string>
     <string name="common_pin_dialog_try_again">Tekrar dene</string>
     <string name="common_pin_dialog_continue">Devam</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Oturum kapattınız veya cüzdanınızın şifresini çözmede bir sorun yaşandı. Oturum açmak için aşağıya şifrenizi girin.</string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">Oturum kapattınız veya cüzdanınızın şifresini çözmede bir sorun yaşandı. Oturum açmak için aşağıya şifrenizi girin.</string>
     <string name="logged_out_forget_wallet">Bu cüzdanı unutmak ve baştan başlamak için, lütfen \'Cüzdanı Unut\' seçeneğini tıklayın.</string>
 
     <string name="api_fail">Sunucuya bağlanamadı. Lütfen daha sonra tekrar deneyin.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Büyük boyuta bir bitcoin işlemi. Cüzdanınız geçmişte almış olduğunuz birçok daha küçük ödemeyi birleştirmek zorundadır. Bu da hızlıca onaylanması için nispeten daha yüksek bir ücret gerektirir. Eğer işlemin onaylanmasının daha uzun sürmesi sorun değilse, ücreti manüel olarak “kişiselleştir” seçeneğine tıklayarak azaltabilirsiniz. </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">Büyük boyuta bir bitcoin işlemi. Cüzdanınız geçmişte almış olduğunuz birçok daha küçük ödemeyi birleştirmek zorundadır. Bu da hızlıca onaylanması için nispeten daha yüksek bir ücret gerektirir. Eğer işlemin onaylanmasının daha uzun sürmesi sorun değilse, ücreti manüel olarak “kişiselleştir” seçeneğine tıklayarak azaltabilirsiniz. </string>
     <string name="go_back">Geri git</string>
     <string name="accept_higher_fee">Daha yüksek ücreti kabul et</string>
     <string name="large_tx_high_fee_warning">"Bu işlem, küçük miktarda para üstü iadesi sebebiyle toz tüketimi için daha yüksek bir ücret gerektirir."</string>

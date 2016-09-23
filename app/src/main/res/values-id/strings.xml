@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">Sesuaikan cara Anda mengatur Bitcoin Anda dalam dompet Blockchain Anda.</string>
     <string name="CONFIRM">PERBARUI SEKARANG</string>
     <string name="confirm_upgrade">Konfirmasi Pembaruan</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Hey kami telah menambahkan fitur baru ke dompet Blockchain Anda:</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">Hey kami telah menambahkan fitur baru ke dompet Blockchain Anda:</string>
     <string name="upgrading">Memutakhirkan...</string>
     <string name="upgrading_started_info">Dompet Anda sedang dimutakhirkan, harap bersabar, hal ini akan memakan waktu cukup lama tergantung dari ukuran dan umur dari dompet Anda.</string>
     <string name="upgrade_success_heading">Dompet Anda sudah ditingkatkan versinya!</string>
@@ -526,21 +527,25 @@
     <string name="learn_more">Pelajari Lebih Lanjut</string>
     <string name="new_address_info">Untuk meningkatkan privasi, kami menghasilkan alamat unik untuk setiap pembayaran. Semua alamat yang dihasilkan dalam dompet Anda masih dapat menerima dana, bahkan jika mereka tidak lagi muncul di bawah Menerima.</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Permintaan pembayaran Bitcoin</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">Permintaan pembayaran Bitcoin</string>
     <string name="email_request_body">Mohon kirim%1$s BTC ke alamat Bitcoin %2$s.</string>
     <string name="email_request_body_fallback">terlampir</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">Peringatan</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">Peringatan</string>
     <string name="common_pin_dialog_message">PIN yang Anda pilih sangat umum dan dapat mudah ditebak oleh seseorang dengan akses ke ponsel Anda dalam 3 kali mencoba. Anda tetap ingin menggunakan PIN ini?</string>
     <string name="common_pin_dialog_try_again">Coba lagi</string>
     <string name="common_pin_dialog_continue">Lanjutkan</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Anda telah keluar atau ada kesalahan mendekripsi dompet Anda. Masukkan kata sandi Anda di bawah ini untuk masuk.</string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">Anda telah keluar atau ada kesalahan mendekripsi dompet Anda. Masukkan kata sandi Anda di bawah ini untuk masuk.</string>
     <string name="logged_out_forget_wallet">Jika Anda ingin melupakan dompet ini dan mulai dari awal, tekan \'Lupakan Dompet\'.</string>
 
     <string name="api_fail">Tidak dapat terhubung ke server. Mohon coba lagi nanti.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Ini merupakan transaksi bitcoin yang terlalu besar. Dompet Anda perlu mengonsolidasi pembayaran yang lebih kecil yang Anda terima di masa lalu. Ini membutuhkan biaya yang relatif tinggi agar dapat dikonfirmasi dengan cepat. Jika itu baik untuk transaksi yang membutuhkan waktu lebih lama untuk dikonfirmasi, Anda bisa mengurangi biaya secara manual dengan mengklik "menyesuaikan". </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">Ini merupakan transaksi bitcoin yang terlalu besar. Dompet Anda perlu mengonsolidasi pembayaran yang lebih kecil yang Anda terima di masa lalu. Ini membutuhkan biaya yang relatif tinggi agar dapat dikonfirmasi dengan cepat. Jika itu baik untuk transaksi yang membutuhkan waktu lebih lama untuk dikonfirmasi, Anda bisa mengurangi biaya secara manual dengan mengklik "menyesuaikan". </string>
     <string name="go_back">Kembali</string>
     <string name="accept_higher_fee">Terima biaya yang lebih tinggi</string>
     <string name="large_tx_high_fee_warning">"Transaksi ini membutuhkan biaya yang lebih tinggi untuk recehan karena jumlah kecil dari kembalian untuk dikembalikan."</string>

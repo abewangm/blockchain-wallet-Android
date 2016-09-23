@@ -2,7 +2,7 @@ package info.blockchain.wallet;
 
 import android.content.Context;
 
-import info.blockchain.wallet.util.SSLVerifyUtil;
+import piuk.blockchain.android.util.SSLVerifyUtil;
 
 public class SSLVerifierTest extends BlockchainTest {
 

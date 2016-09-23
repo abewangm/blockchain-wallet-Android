@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">Personalize a organização dos bitcoins em sua Carteira Blockchain.</string>
     <string name="CONFIRM">ATUALIZAR AGORA</string>
     <string name="confirm_upgrade">Confirmar atualização</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Olha só, adicionamos estes novos recursos à sua Carteira Blockchain:</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">Olha só, adicionamos estes novos recursos à sua Carteira Blockchain:</string>
     <string name="upgrading">Atualizando...</string>
     <string name="upgrading_started_info">Sua carteira está sendo atualizada, aguarde um momento. Isto pode levar alguns minutos, dependendo do tamanho e tempo de existência de sua carteira.</string>
     <string name="upgrade_success_heading">Sua carteira foi atualizada!</string>
@@ -526,21 +527,25 @@
     <string name="learn_more">Saiba Mais</string>
     <string name="new_address_info">Para maior privacidade, nós geramos um endereço único para cada pagamento. Todos os endereços gerados em sua carteira ainda podem receber fundos, mesmo se não aparecerem mais embaixo de Receber.</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Solicitar pagamento em bitcoin</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">Solicitar pagamento em bitcoin</string>
     <string name="email_request_body">Por favor, envie %1$s BTC ao endereço Bitcoin %2$s.</string>
     <string name="email_request_body_fallback">anexado</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">Aviso</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">Aviso</string>
     <string name="common_pin_dialog_message">O PIN que você escolheu é extremamente comum e pode ser descoberto em 3 tentativas por alguém com acesso ao seu telefone. Gostaria de usar este PIN mesmo assim?</string>
     <string name="common_pin_dialog_try_again">Tentar novamente</string>
     <string name="common_pin_dialog_continue">Continuar</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Você saiu ou houve um erro ao decodificar sua carteira. Digite sua senha abaixo para entrar.</string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">Você saiu ou houve um erro ao decodificar sua carteira. Digite sua senha abaixo para entrar.</string>
     <string name="logged_out_forget_wallet">Se deseja descartar esta carteira e começar de novo, pressione \'Descartar Carteira\'.</string>
 
     <string name="api_fail">Não é possível conectar-se ao servidor. Por favor, tente novamente mais tarde.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Esta transação bitcoin é grande demais. Sua carteira precisa consolidar muitos pagamentos menores já recebidos. Isto requer uma taxa relativamente alta para ser confirmado relativamente rápido. Se não tem problema que a transação demore um pouco mais para ser confirmada, você pode reduzir a taxa manualmente, clicando em “personalizar”. </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">Esta transação bitcoin é grande demais. Sua carteira precisa consolidar muitos pagamentos menores já recebidos. Isto requer uma taxa relativamente alta para ser confirmado relativamente rápido. Se não tem problema que a transação demore um pouco mais para ser confirmada, você pode reduzir a taxa manualmente, clicando em “personalizar”. </string>
     <string name="go_back">Voltar</string>
     <string name="accept_higher_fee">Aceitar taxa mais alta</string>
     <string name="large_tx_high_fee_warning">"Esta transação requer uma taxa mais alta para gasto residual devido ao baixo valor de troco a ser devolvido."</string>

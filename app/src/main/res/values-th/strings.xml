@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">ตั้งค่าวิธีการที่คุณจัดการ Bitcoin ของคุณในกระเป๋าเงิน Blockchain ของคุณ</string>
     <string name="CONFIRM">อัปเกรดตอนนี้</string>
     <string name="confirm_upgrade">ยืนยันการอัปเกรด</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">หวัดดี เราได้เพิ่มฟีเจอร์ใหม่เหล่านี้ไปยังกระเป๋าเงิน Blockchain ของคุณ</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">หวัดดี เราได้เพิ่มฟีเจอร์ใหม่เหล่านี้ไปยังกระเป๋าเงิน Blockchain ของคุณ</string>
     <string name="upgrading">กำลังอัปเกรด...</string>
     <string name="upgrading_started_info">กระเป๋าเงินของคุณกำลังอัปเกรด โปรดอดทนรอ มันจะใช้เวลาสักครู่โดยขึ้นอยู่กับขนาดและอายุของกระเป๋าเงินของคุณ</string>
     <string name="upgrade_success_heading">กระเป๋าเงินของคุณได้รับการอัปเกรดแล้ว!</string>
@@ -526,21 +527,25 @@
     <string name="learn_more">เรียนรู้เพิ่มเติม</string>
     <string name="new_address_info">เราสร้างที่อยู่ที่เป็นเอกลักษณ์สำหรับการชำระเงินทุกครั้งเพื่อความเป็นส่วนตัวที่มากยิ่งขึ้น ที่อยู่ทั้งหมดซึ่งได้รับการสร้างในกระเป๋าเงินของคุณยังสามารถรับเงินได้ แม้กระทั่งเมื่อมันไม่ได้แสดงภายใต้ส่วนการรับแล้วก็ตาม</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">คำร้องขอการชำระเงิน Bitcoin</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">คำร้องขอการชำระเงิน Bitcoin</string>
     <string name="email_request_body">โปรดส่ง %1$s BTC ไปยังที่อยู่ Bitcoin %2$s</string>
     <string name="email_request_body_fallback">แนบแล้ว</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">คำเตือน</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">คำเตือน</string>
     <string name="common_pin_dialog_message">PIN ที่คุณเลือกนั้นเป็น PIN ที่ธรรมดาเป็นอย่างยิ่งและใครก็ตามซึ่งสามารถเข้าถึงโทรศัพท์ของคุณอาจจะสามารถคาดเดาได้ง่ายโดยลองเพียงแค่ 3 ครั้ง คุณต้องการใช้ PIN นี้จริง ๆ หรือ?</string>
     <string name="common_pin_dialog_try_again">ลองอีกครั้ง</string>
     <string name="common_pin_dialog_continue">ดำเนินการต่อ</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">คุณได้ออกจากระบบหรือมีข้อผิดพลาดในการถอดรหัสกระเป๋าเงินของคุณ กรอกรหัสผ่านของคุณด้านล่างเพื่อล็อกอิน</string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">คุณได้ออกจากระบบหรือมีข้อผิดพลาดในการถอดรหัสกระเป๋าเงินของคุณ กรอกรหัสผ่านของคุณด้านล่างเพื่อล็อกอิน</string>
     <string name="logged_out_forget_wallet">หากคุณต้องการลืมกระเป๋าเงินนี้และเริ่มใหม่ กด \'ลืมกระเป๋าเงิน\'</string>
 
     <string name="api_fail">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ โปรดลองอีกครั้งในภายหลัง</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">ธุรกรรมนี้เป็นธุรกรรม bitcoin ที่ขนาดใหญ่เกินไป กระเป๋าเงินของคุณจำเป็นต้องรวบรวมการชำระเงินเล็ก ๆ ซึ่งคุณเคยได้รับในอดีต การดำเนินการเช่นนี้ต้องการค่าธรรมเนียมที่สูงเพื่อให้ได้รับการยืนยันอย่างรวดเร็ว หากคุณไม่มีปัญหาในการรอการยืนยันธุรกรรมเป็นเวลานาน คุณสามารถลดค่าธรรมเนียมได้ด้วยตนเองโดยการคลิก “ปรับแต่งค่า” </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">ธุรกรรมนี้เป็นธุรกรรม bitcoin ที่ขนาดใหญ่เกินไป กระเป๋าเงินของคุณจำเป็นต้องรวบรวมการชำระเงินเล็ก ๆ ซึ่งคุณเคยได้รับในอดีต การดำเนินการเช่นนี้ต้องการค่าธรรมเนียมที่สูงเพื่อให้ได้รับการยืนยันอย่างรวดเร็ว หากคุณไม่มีปัญหาในการรอการยืนยันธุรกรรมเป็นเวลานาน คุณสามารถลดค่าธรรมเนียมได้ด้วยตนเองโดยการคลิก “ปรับแต่งค่า” </string>
     <string name="go_back">กลับ</string>
     <string name="accept_higher_fee">รับค่าธรรมเนียมที่สูงขึ้น</string>
     <string name="large_tx_high_fee_warning">"ธุรกรรมนี้ต้องการค่าธรรมเนียมที่สูงขึ้นสำหรับการใช้ดัส เนื่องจากจะมีการคืนเงินทอนเล็กน้อย"</string>

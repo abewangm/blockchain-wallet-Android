@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">Individualisieren Sie die Art und Weise, wie Sie die Bitcoins in Ihrer Blockchain-Wallet organisieren.</string>
     <string name="CONFIRM">JETZT AKTUALISIEREN</string>
     <string name="confirm_upgrade">Upgrade bestätigen</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Hallo, wir haben Ihre Blockchain-Wallet um diese neuen Funktionen erweitert:</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">Hallo, wir haben Ihre Blockchain-Wallet um diese neuen Funktionen erweitert:</string>
     <string name="upgrading">Aufrüstung erfolgt ...</string>
     <string name="upgrading_started_info">Ihre Wallet wird derzeit aufgerüstet. Bitte haben Sie Geduld. Dies kann je nach Größe und Alter Ihrer Wallet etwas dauern.</string>
     <string name="upgrade_success_heading">Ihre Wallet wurde aufgerüstet!</string>
@@ -526,21 +527,25 @@
     <string name="learn_more">Mehr dazu</string>
     <string name="new_address_info">Für eine größere Privatsphäre erzeugen wir für jede Zahlung eine einmalige Adresse. Alle in Ihrer Wallet generierten Adressen können selbst dann noch Guthaben empfangen, wenn sie nicht mehr unter \'Empfangen\' erscheinen.</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Bitcoin-Zahlungsaufforderung</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">Bitcoin-Zahlungsaufforderung</string>
     <string name="email_request_body">Bitte senden Sie%1$s BTC an die Bitcoin-Adresse %2$s.</string>
     <string name="email_request_body_fallback">im Anhang</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">Warnhinweis</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">Warnhinweis</string>
     <string name="common_pin_dialog_message">Die von Ihnen gewählte PIN ist sehr geläufig. Eine Person, die Zugriff auf Ihr Telefon hat, kann diese durch 3-maliges Versuchen eventuell leicht erraten. Möchten Sie diese PIN dennoch verwenden?</string>
     <string name="common_pin_dialog_try_again">Erneut versuchen</string>
     <string name="common_pin_dialog_continue">Weiter</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Sie haben sich abgemeldet oder es ist beim Entschlüsseln Ihrer Wallet ein Fehler aufgetreten. Geben Sie zur Anmeldung das folgende Passwort ein.</string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">Sie haben sich abgemeldet oder es ist beim Entschlüsseln Ihrer Wallet ein Fehler aufgetreten. Geben Sie zur Anmeldung das folgende Passwort ein.</string>
     <string name="logged_out_forget_wallet">Wenn Sie diese Wallet vergessen und nochmals von vorne anfangen möchten, drücken Sie auf \'Wallet Wallet\'.</string>
 
     <string name="api_fail">Keine Serververbindung möglich. Bitte versuchen Sie es später erneut.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Diese Bitcoin-Transaktion ist zu groß. In Ihrer Wallet befinden sich viele kleine in der Vergangenheit eingegangene Zahlungen. Für eine schnelle Bestätigung ist eine relativ hohe Gebühr erforderlich. Falls Ihnen eine längere Wartezeit bei der Transaktionsbestätigung recht ist, können Sie die Gebühr eigenständig reduzieren. Klicken Sie dazu auf „Individuell anpassen“. </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">Diese Bitcoin-Transaktion ist zu groß. In Ihrer Wallet befinden sich viele kleine in der Vergangenheit eingegangene Zahlungen. Für eine schnelle Bestätigung ist eine relativ hohe Gebühr erforderlich. Falls Ihnen eine längere Wartezeit bei der Transaktionsbestätigung recht ist, können Sie die Gebühr eigenständig reduzieren. Klicken Sie dazu auf „Individuell anpassen“. </string>
     <string name="go_back">Zurück</string>
     <string name="accept_higher_fee">Höhere Gebühr akzeptieren</string>
     <string name="large_tx_high_fee_warning">„Da der zurückzugebene Wechselbetrag klein ist, erfordert diese Transaktion eine höhere Gebühr für Kleinstsummenkonsum.“</string>

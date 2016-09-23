@@ -326,7 +326,8 @@
     <string name="upgrade_page_3">ブロックチェーンウォレットでビットコインを管理する方法をカスタマイズ。</string>
     <string name="CONFIRM">今すぐアップグレード</string>
     <string name="confirm_upgrade">アップグレードを確認</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">こんにちは、ブロックチェーンウォレットに次の新規機能が追加されました：</string>
+    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
+    <string name="confirm_upgrade_header">こんにちは、ブロックチェーンウォレットに次の新規機能が追加されました：</string>
     <string name="upgrading">アップグレード中...</string>
     <string name="upgrading_started_info">財布をアップグレードしています。財布のサイズや年数によって時間がかかることがあります。お待ちください。</string>
     <string name="upgrade_success_heading">財布がアップグレードしました！</string>
@@ -526,21 +527,25 @@
     <string name="learn_more">さらに詳しく</string>
     <string name="new_address_info">プライバシー強化のため、毎回の支払いに一意のアドレスが生成されます。「受信」に表示されていない場合でも、財布で生成されたアドレスは全て資金を受信できます。</string>
 
-    <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">ビットコイン決済リクエスト</string>
+    <!-- SHARE RECEIVE ADDRESS -->
+    <string name="email_request_subject">ビットコイン決済リクエスト</string>
     <string name="email_request_body">%1$s BTCをビットコインアドレス%2$sに送信してください。</string>
     <string name="email_request_body_fallback">添付済み</string>
 
-    <!-- COMMON PIN CODES --><string name="common_pin_dialog_title">警告</string>
+    <!-- COMMON PIN CODES -->
+    <string name="common_pin_dialog_title">警告</string>
     <string name="common_pin_dialog_message">選択したPINは非常に一般的なものであり、あなたの携帯電話にアクセスがある人物に3回の試行で推測されてしまう可能性があります。それでもこのPINを使用しますか？</string>
     <string name="common_pin_dialog_try_again">再試行してください</string>
     <string name="common_pin_dialog_continue">続行</string>
 
-    <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">財布の復号化にエラーが発生し、ログアウトされました。以下にパスワードを入力してログインしてください。</string>
+    <!-- PASSWORD REENTRY ACTIVITY -->
+    <string name="logged_out_enter_password">財布の復号化にエラーが発生し、ログアウトされました。以下にパスワードを入力してログインしてください。</string>
     <string name="logged_out_forget_wallet">この財布を忘れて最初から始めたい場合は\'財布を忘れる\'をクリックしてください。</string>
 
     <string name="api_fail">サーバーに接続できません。後で再試行してください。</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">このビットコイン取引は大きすぎます。あなたの財布は過去に受信した多くの少額支払いを統合する必要があります。迅速に確認されるためには比較的高額な手数料が必要です。確認されるまでに時間がかかっても問題がない場合は、「カスタマイズ」をクリックして手数料を手動で減らすことができます。 </string>
+    <!-- FEE WARNING -->
+    <string name="large_tx_warning">このビットコイン取引は大きすぎます。あなたの財布は過去に受信した多くの少額支払いを統合する必要があります。迅速に確認されるためには比較的高額な手数料が必要です。確認されるまでに時間がかかっても問題がない場合は、「カスタマイズ」をクリックして手数料を手動で減らすことができます。 </string>
     <string name="go_back">戻る</string>
     <string name="accept_higher_fee">より高額な費用に同意する</string>
     <string name="large_tx_high_fee_warning">"この取引では少額の釣り銭金額が払い戻されるため、ダスト消費により高額な手数料が必要です。"</string>
