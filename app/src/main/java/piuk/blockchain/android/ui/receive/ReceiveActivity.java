@@ -272,6 +272,7 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
         }
     };
 
+    @Thunk
     void setKeyListener(Editable s, EditText editText) {
         if (s.toString().contains(getDefaultDecimalSeparator())) {
             editText.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
@@ -280,6 +281,7 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
         }
     }
 
+    @Thunk
     Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
         try {
             if (input.contains(getDefaultDecimalSeparator())) {
@@ -317,6 +319,7 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
         }
     }
 
+    @Thunk
     void displayQRCode(int spinnerIndex) {
         mBinding.content.accounts.spinner.setSelection(spinnerIndex);
 
