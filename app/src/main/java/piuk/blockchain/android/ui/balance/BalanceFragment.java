@@ -58,7 +58,8 @@ import piuk.blockchain.android.util.ViewUtils;
 public class BalanceFragment extends Fragment implements BalanceViewModel.DataListener {
 
     public static final String ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH";
-    public static final String KEY_TRANSACTION_LIST_POSITION = "key_transaction_list_position";
+    public static final String KEY_SELECTED_ACCOUNT_POSITION = "selected_account_position";
+    public static final String KEY_TRANSACTION_LIST_POSITION = "transaction_list_position";
     private final static int SHOW_BTC = 1;
     private final static int SHOW_FIAT = 2;
     private final static int SHOW_HIDE = 3;
@@ -94,6 +95,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 binding.swipeContainer.setRefreshing(true);
                 viewModel.updateAccountList();
                 viewModel.updateBalanceAndTransactionList(intent, accountSpinner.getSelectedItemPosition(), isBTC);
+                transactionAdapter.onTransactionsUpdated(viewModel.getTransactionList());
                 binding.swipeContainer.setRefreshing(false);
                 // Check backup status on receiving funds
                 viewModel.onViewReady();
@@ -155,7 +157,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void onResume() {
         super.onResume();
-
         comm.resetNavigationDrawer();
 
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
@@ -169,7 +170,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void onPause() {
         super.onPause();
-
         LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver);
     }
 
@@ -376,13 +376,32 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     }
 
     private void sendClicked() {
-        startActivity(new Intent(getActivity(), SendActivity.class));
+        Intent intent = new Intent(getActivity(), SendActivity.class);
+        intent.putExtra(KEY_SELECTED_ACCOUNT_POSITION, getSelectedAccountPosition());
+        startActivity(intent);
         binding.fab.collapse();
     }
 
     private void receiveClicked() {
-        startActivity(new Intent(getActivity(), ReceiveActivity.class));
+        Intent intent = new Intent(getActivity(), ReceiveActivity.class);
+        intent.putExtra(KEY_SELECTED_ACCOUNT_POSITION, getSelectedAccountPosition());
+        startActivity(intent);
         binding.fab.collapse();
+    }
+
+    /**
+     * Position is offset to account for first item being "All Wallets". If returned result is
+     * -1, {@link SendActivity} and {@link ReceiveActivity} can safely ignore and choose the
+     * defaults instead.
+     */
+    private int getSelectedAccountPosition() {
+        int position = accountSpinner.getSelectedItemPosition();
+        if (position >= accountSpinner.getCount() - 1) {
+            // End of list is imported addresses, ignore
+            position = 0;
+        }
+
+        return position - 1;
     }
 
     @Override
@@ -419,6 +438,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 isBTC = true;
                 viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
             }
+
+            transactionAdapter.onViewFormatUpdated(isBTC);
             prefsUtil.setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, BALANCE_DISPLAY_STATE);
 
             return false;

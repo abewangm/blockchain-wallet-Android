@@ -141,6 +141,7 @@
 
     <string name="support">Support</string>
     <string name="rate_us">Rate us</string>
+    <string name="licenses">Licenses</string>
     <string name="email_chooser">Send e-mail…</string>
     <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Free Merchant app</string>

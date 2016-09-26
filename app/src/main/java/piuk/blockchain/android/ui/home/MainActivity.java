@@ -172,7 +172,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     }
 
     private void doScanInput(String strResult) {
-
         Intent intent = new Intent(this, SendActivity.class);
         intent.putExtra("scan_data", strResult);
         startActivity(intent);

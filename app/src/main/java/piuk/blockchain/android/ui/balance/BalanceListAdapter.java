@@ -143,6 +143,11 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
         mListClickListener = listClickListener;
     }
 
+    void onViewFormatUpdated(boolean isBTC) {
+        mIsBtc = isBTC;
+        notifyDataSetChanged();
+    }
+
     interface TxListClickListener {
 
         void onRowClicked(int position);

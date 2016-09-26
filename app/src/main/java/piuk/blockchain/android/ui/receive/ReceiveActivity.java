@@ -48,13 +48,15 @@ import java.util.Locale;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityReceiveBinding;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.send.AddressAdapter;
 import piuk.blockchain.android.util.annotations.Thunk;
+
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_SELECTED_ACCOUNT_POSITION;
 
 public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewModel.DataListener, CustomKeypadCallback {
 
@@ -100,7 +102,13 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
         mViewModel.onViewReady();
 
         setupLayout();
-        selectDefaultAccount();
+
+        if (getIntent().hasExtra(KEY_SELECTED_ACCOUNT_POSITION)
+                && getIntent().getIntExtra(KEY_SELECTED_ACCOUNT_POSITION, -1) != -1) {
+            selectAccount(getIntent().getIntExtra(KEY_SELECTED_ACCOUNT_POSITION, -1));
+        } else {
+            selectAccount(mViewModel.getDefaultSpinnerPosition());
+        }
     }
 
     private void setupLayout() {
@@ -313,9 +321,9 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
         mBinding.content.amountContainer.amountBtc.requestFocus();
     }
 
-    private void selectDefaultAccount() {
+    private void selectAccount(int position) {
         if (mBinding.content.accounts.spinner != null) {
-            displayQRCode(mViewModel.getDefaultSpinnerPosition());
+            displayQRCode(position);
         }
     }
 
