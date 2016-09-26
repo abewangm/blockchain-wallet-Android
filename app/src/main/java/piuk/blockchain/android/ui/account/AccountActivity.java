@@ -1,8 +1,6 @@
 package piuk.blockchain.android.ui.account;
 
 import com.google.zxing.BarcodeFormat;
-import piuk.blockchain.android.ui.zxing.CaptureActivity;
-import piuk.blockchain.android.ui.zxing.Intents;
 
 import android.Manifest;
 import android.app.Activity;
@@ -73,8 +71,10 @@ import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.home.BalanceFragment;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.send.PendingTransaction;
+import piuk.blockchain.android.ui.zxing.CaptureActivity;
+import piuk.blockchain.android.ui.zxing.Intents;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -462,7 +462,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
         headerPositions = new ArrayList<>();
 
-        //accountsAndImportedList is linked to AccountAdapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
+        //accountsAndImportedList is linked to BalanceHeaderAdapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
         accountsAndImportedList.clear();
 
         int i = 0;

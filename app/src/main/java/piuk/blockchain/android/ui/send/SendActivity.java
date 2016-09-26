@@ -43,7 +43,7 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.home.BalanceFragment;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;

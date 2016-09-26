@@ -28,7 +28,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.home.BalanceFragment;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.send.AddressAdapter;
 import piuk.blockchain.android.util.annotations.Thunk;
 
