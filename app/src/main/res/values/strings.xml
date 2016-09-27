@@ -4,8 +4,6 @@
     <string name="backup_wallet">Backup funds</string>
     <string name="upgrade_wallet">Upgrade</string>
 
-    <string name="change_pin">Change PIN</string>
-
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Settings</string>
 
@@ -15,9 +13,7 @@
 
     <string name="send_bitcoin">Send</string>
     <string name="receive_bitcoin">Receive</string>
-    <string name="blockchain">Blockchain</string>
 
-    <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -25,8 +21,6 @@
     <string name="done">Done</string>
 
     <string name="YESTERDAY">Yesterday</string>
-    <string name="TODAY">Today</string>
-    <string name="AGO">ago</string>
 
     <string name="SENT">Sent</string>
     <string name="RECEIVED">Received</string>
@@ -35,24 +29,16 @@
     <string name="copied_to_clipboard">Copied to clipboard</string>
 
     <string name="options_id">Wallet ID</string>
-    <string name="options_id2">Wallet ID</string>
     <string name="preferences_about_title">About Us</string>
-    <string name="about_us">About us</string>
 
     <string name="ask_you_sure_unpair">Are you sure you want to unpair your device?</string>
 
     <string name="select_currency">Select Currency</string>
     <string name="options_currency">Local Currency</string>
-    <string name="options_currency2">Your preferred fiat currency</string>
 
-    <string name="options_mnemonic">Show Mnemonic</string>
-    <string name="options_mnemonic2">Show mnemonic for this wallet</string>
     <string name="options_units">Bitcoin Unit</string>
-    <string name="options_units2">BTC, mBTC or bits</string>
     <string name="options_tos">Terms of Service</string>
-    <string name="options_tos2">Blockchain Android Bitcoin Wallet terms of service</string>
     <string name="options_privacy">Privacy Policy</string>
-    <string name="options_privacy2">Blockchain privacy policy</string>
 
     <string name="invalid_email">Invalid email address</string>
     <string name="invalid_mobile">Invalid mobile phone number</string>
@@ -69,8 +55,6 @@
 
     <string name="pin_entry">Enter PIN</string>
     <string name="password_entry">Please enter password</string>
-    <string name="options_CLEAR">CLEAR</string>
-    <string name="options_FORGOT_PIN">FORGOT PIN</string>
     <string name="zero_pin">0000 is an invalid PIN. Please try again.</string>
     <string name="invalid_pin">Invalid PIN. Please try again.</string>
     <string name="pin_mismatch_error">PINs do not match</string>
@@ -78,11 +62,9 @@
     <string name="confirm_pin">Confirm PIN</string>
     <string name="create_pin_failed">PIN creation failed. Please pair device again.</string>
     <string name="pairing_failed">Pairing failed. Please try again.</string>
-    <string name="pairing_failed_decrypt_error">Pairing failed. Decryption error.</string>
 
     <string name="check_connectivity_exit">Blockchain Wallet cannot obtain an Internet connection. Please check the connectivity on your device and try again.</string>
     <string name="dialog_continue">Continue</string>
-    <string name="cannot_edit_imported_label">Imported addresses label cannot be edited</string>
 
     <string name="double_encryption_password_error">Double encrypt password error. Please try again.</string>
 
@@ -91,7 +73,6 @@
     <string name="CREATE">CREATE NEW WALLET</string>
     <string name="LOGIN">Log in to my Wallet</string>
     <string name="pair_your_wallet">Pair Your Wallet</string>
-    <string name="scan_pairing_code">Scan pairing code</string>
     <string name="manual_pairing">Manual Pairing</string>
     <string name="pair_wallet_step_1">Log in to your Blockchain Wallet via your PC or Mac at https://blockchain.info/wallet.</string>
     <string name="pair_wallet_step_2">Go to Settings / Wallet Information.</string>
@@ -122,13 +103,9 @@
 
     <string name="CONTINUE">Continue</string>
     <string name="SEND">SEND</string>
-    <string name="CONFIRM_PAYMENT">CONFIRM PAYMENT</string>
-    <string name="GO_BACK">GO BACK</string>
 
     <string name="total">Total</string>
 
-    <string name="no_funds_available">No funds available for this account</string>
-    <string name="no_funds_available2">No funds available for this address</string>
     <string name="max_available">Use total available minus fee:</string>
 
     <string name="invalid_bitcoin_address">Invalid Bitcoin address</string>
@@ -136,14 +113,11 @@
     <string name="insufficient_funds">Insufficient funds</string>
 
     <string name="enter_double_encryption_pw">Please enter double encryption password</string>
-    <string name="edit_label">Edit label</string>
 
     <string name="support">Support</string>
     <string name="rate_us">Rate us</string>
-    <string name="email_chooser">Send e-mail…</string>
     <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Free Merchant app</string>
-    <string name="feedback">Send Feedback</string>
     <string name="password_or_wipe">Enter using your password or forget this wallet</string>
     <string name="use_password">Use password</string>
     <string name="wipe_wallet">Forget wallet</string>
@@ -156,9 +130,7 @@
 
     <string name="confirm_details">Confirm Payment</string>
     <string name="fee">Fee</string>
-    <string name="dialog_send">SEND</string>
     <string name="dialog_cancel">CANCEL</string>
-    <string name="dialog_priority_fee">SEND W/ PRIORITY FEE</string>
     <string name="exit_confirm">Press back button again to exit</string>
 
     <string name="label_address">Your address has been imported successfully. Optionally assign a friendly display name to this address.</string>
@@ -170,19 +142,9 @@
     <string name="scan_not_recognized">Scan cannot be decoded</string>
 
     <string name="imported_addresses">Imported Addresses</string>
-    <string name="account_colon">Account:</string>
-    <string name="created_account_colon">Created account:</string>
 
-    <string name="tx_length_error">Blockchain wallet cannot handle transactions over 100KB in size. Please try splitting your transaction.</string>
-    <string name="invalid_tx">Invalid transaction attempt</string>
-
-    <string name="remote_save_ok">Remote save OK</string>
-    <string name="remote_save_ko">Remote save failed</string>
-    <string name="payload_corrupted">Remote payload corrupted, not saved to server.</string>
-
-    <string name="my_bitcoin_wallet">Blockchain Wallet</string>
-    <string name="drawer_open">Drawer open</string>
-    <string name="drawer_close">Drawer close</string>
+    <string name="remote_save_ok">Successfully saved</string>
+    <string name="remote_save_ko">Save unsuccessful</string>
 
     <string name="unpair_wallet">Unpair Wallet</string>
     <string name="unpair">UNPAIR</string>
@@ -192,8 +154,6 @@
     <string name="enter_current_pin">Please enter current PIN.</string>
 
     <string name="suggest_merchant">Suggest merchant</string>
-    <string name="business_name">Business name</string>
-    <string name="select_category">Category</string>
     <string name="business_category">Category</string>
     <string name="street_address">Street address</string>
     <string name="description">Description</string>
@@ -201,36 +161,19 @@
     <string name="postal">Postal code</string>
     <string name="telephone">Telephone</string>
     <string name="web">Web</string>
-    <string name="latitude">Latitude:</string>
-    <string name="longitude">Longitude:</string>
-    <string name="get_location">I am here. Use my location.</string>
     <string name="merchant_cat_hint">Choose a category…</string>
     <string name="merchant_cat1">Café</string>
     <string name="merchant_cat2">Bars/Drinking</string>
     <string name="merchant_cat3">Food and Dining</string>
     <string name="merchant_cat4">Shopping/Spending</string>
     <string name="merchant_cat5">ATM</string>
-    <string name="missing_merchant_category">Please provide a category for this merchant</string>
-    <string name="missing_merchant_name">Please provide the merchant name</string>
-    <string name="missing_merchant_street_address">Please provide the merchant street address</string>
-    <string name="missing_merchant_city">Please provide a city</string>
-    <string name="missing_merchant_postal">Please provide a postal code</string>
     <string name="ok_writing_merchant">Thank you for your suggestion.</string>
     <string name="error_writing_merchant">Error writing to database. Please try again.</string>
-    <string name="no_merchants_in_range">There are no Bitcoin businesses within range for listing.</string>
-    <string name="merchant_info">Merchant Info</string>
-    <string name="directions">Directions</string>
     <string name="call">Call</string>
     <string name="navigate">Navigate</string>
     <string name="enable_geo">Enable either GPS or any other location service to find current location. Click OK to go to location services settings to let you do so.</string>
 
-    <string-array name="menus_merchantDirectory">
-        <item>Suggest a merchant</item>
-    </string-array>
-
-    <string name="my_accounts">Addresses</string>
     <string name="my_addresses">Addresses</string>
-    <string name="accounts">Addresses</string>
     <string name="addresses">Addresses</string>
     <string name="create_new">Create New</string>
     <string name="import_address">Import Address</string>
@@ -240,19 +183,9 @@
     <string name="receive_address_to_share">Share this receive address for sending? If so, be advised that other applications may be able to look at this information.</string>
     <string name="guid_to_clipboard">Copy your Wallet ID to the clipboard? If so, be advised that other applications may be able to look at this information.</string>
 
-    <string name="ssl_hostname_invalid">We are unable to validate the hostname of the SSL certificate. This might indicate malicious activity. Please verify your network connection and device before continuing.</string>
-    <string name="ssl_pinning_invalid">SSL certificate pinning has failed. This might indicate malicious activity. Please verify your network connection and device before continuing.</string>
-
-    <string name="address_already_used">This receive address has already been used.</string>
-
-    <string name="my_wallet_id">My Wallet ID</string>
-    <string name="EMAIL">EMAIL</string>
-    <string name="new_support_request">New Support Request</string>
-    <string name="contact_support">Contact Support</string>
-    <string name="email_subject">Android Support Request</string>
+    <string name="ssl_pinning_invalid">Secure connection to the host has failed. This might indicate malicious activity. Please verify your network connection and device before continuing.</string>
 
     <string name="merchant_map">Merchant Map</string>
-    <string name="merchant_list">Merchant List</string>
     <string name="merchant_suggest">Suggest Merchant</string>
     <string name="name">Name</string>
     <string name="location">Location</string>
@@ -263,7 +196,6 @@
     <string name="address_lookup_fail">Could not retrieve address. Please enter address manually.</string>
 
     <string name="received_bitcoin">Received Bitcoin</string>
-    <string name="refresh_balance">Refresh balance</string>
 
     <string-array name="mnemonic_word_requests">
         <item>first word</item>
@@ -280,20 +212,14 @@
         <item>twelfth word</item>
     </string-array>
 
-    <string name="confirmation_code">Confirmation Code</string>
     <string name="verification_failed">Verification Failed</string>
-    <string name="resend_email_confirmation">Resend Email</string>
-    <string name="please_confirm_email">Please Confirm Your Email Address</string>
-    <string name="confirmation_instructions">We have sent you an email at %1$s. Please open the email and follow the instructions to complete your wallet setup.</string>
 
     <string name="send_payment">Send Payment</string>
     <string name="share">Share Receive Address</string>
     <string name="scan_qr">Scan QR Code</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="check_email_to_auth_login">Please check your email to approve this login attempt.</string>
-    <string name="confirmations">Confirmations</string>
     <string name="transaction_fee">Transaction Fee</string>
-    <string name="transaction_hash">Transaction Hash</string>
     <string name="your_transactions">Your Transactions</string>
     <string name="transaction_occur_when">Transactions occur when you receive and send bitcoin.</string>
     <string name="click">Click</string>
@@ -303,23 +229,17 @@
     <string name="address_book_label">(address book)</string>
     <string name="archived_label">(archived)</string>
 
-    <string name="dust_change">Transaction returns dust amount as change.</string>
-    <string name="dust_amount">Transaction spends dust amount.</string>
-    <string name="logging_out_automatically">Logging out automatically</string>
     <string name="transaction_submitted">Transaction complete</string>
     <string name="transaction_failed">Transaction failed</string>
     <string name="UPGRADE_YOUR_WALLET">Ok, let\'s go!</string>
     <string name="upgrade_page_1">Simplified backup and recovery.</string>
     <string name="upgrade_page_2">Enhanced privacy through hierarchical deterministic addresses.</string>
     <string name="upgrade_page_3">Customize the way you organize your Bitcoin in your Blockchain Wallet.</string>
-    <string name="CONFIRM">UPGRADE NOW</string>
-    <string name="confirm_upgrade">Confirm Upgrade</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
     <string name="confirm_upgrade_header">Hey we\'ve added these new features to your Blockchain wallet:</string>
     <string name="upgrading">Upgrading…</string>
     <string name="upgrading_started_info">Your wallet is upgrading, please be patient this may take some time depending on the size and age of your wallet.</string>
     <string name="upgrade_success_heading">Your wallet has been upgraded!</string>
-    <string name="upgrade_interrupted">Wallet upgrade has been interrupted. Please re-pair your wallet and try again.</string>
     <string name="upgrade_success_info">You are now running the most secure and private Blockchain Wallet. You may continue to your wallet now.</string>
     <string name="CLOSE">CLOSE</string>
     <string name="total_funds">All</string>
@@ -328,63 +248,38 @@
     <string name="upgrade_fail_info">There was an error upgrading your wallet. Please try again later.</string>
     <string name="not_sane_error">Your Blockchain Wallet installation is incomplete. Please re-pair your wallet or create a new one.</string>
 
-    <string name="archived_address">This address is archived. You can manage it via the Blockchain web wallet.</string>
-    <string name="watchonly_address">This address is a watch-only. You can manage it via the Blockchain web wallet.</string>
-    <string name="watchonly_address_spend_warning">This address is a watch-only. You can spend from it via the Blockchain web wallet.</string>
     <string name="watchonly_address_receive_warning">You are about to receive bitcoin to a watch-only address. You can only spend these funds if you have access to the private key. Continue?</string>
 
-    <string name="PENDING">PENDING</string>
-    <string name="COMPLETE">COMPLETE</string>
-
     <string name="camera_unavailable">The camera is currently opened by another application. Please close other application and try again.</string>
-    <string name="transaction_failed_will_retry">Transaction failed, will try again in a few seconds.</string>
 
-    <string name="limit_21m_exceeded">This amount cannot be transmitted on the Bitcoin network.</string>
     <string name="validating_password">Validating Password…</string>
     <string name="validating_pin">Validating PIN…</string>
     <string name="creating_pin">Creating PIN…</string>
     <string name="decrypting_wallet">Decrypting Wallet…</string>
-    <string name="verifying_email">Verifying Email…</string>
-    <string name="pairing_wallet">Pairing Wallet…</string>
-    <string name="transaction_queued">Transaction queued</string>
-    <string name="WAITING">QUEUED</string>
     <string name="password_unchanged">Password unchanged</string>
     <string name="password_changed">Password changed</string>
-    <string name="sending">Sending...</string>
-    <string name="ask_me_later">Ask me later</string>
-    <string name="verify_email">Verify Email</string>
-    <string name="email_verified">Email Verified</string>
     <string name="verify_email2">Your verified email address is used to send login codes when suspicious or unusual activity is detected, to remind you of your wallet login ID, and to send bitcoin payment alerts when you receive funds. We will not use your email address for marketing purposes.</string>
     <string name="disable_root_warning">Disable rooted device warning</string>
 
     <string name="show_balance">Show Balance</string>
-    <string name="my_address">My Address</string>
     <string name="create_new_address">Create new address</string>
-    <string name="confirmation_code_error">The code you entered is incorrect. Please try again.</string>
     <string name="auth_failed">Authorization failed. Please try again.</string>
     <string name="send_failed">Send failed. Please try again.</string>
-    <string name="invalid_qr">Invalid QR</string>
 
     <string name="wallet_updated">Wallet update received</string>
-    <string name="lame_mode_hd_pair_fail">Can\'t pair V3 wallet.</string>
-    <string name="please_repair">An error has occurred. Wallet can\'t be decoded in it\'s current state. Please re-pair your wallet.</string>
 
     <string name="device_rooted">Your device appears to be rooted. Be advised that storing funds on a rooted device is unsafe and, in addition, can cause stability issues. If you continue to use our Bitcoin wallet on this device we recommend that you use double encryption on your Blockchain account.</string>
     <string name="address_already_in_wallet">Your wallet already contains this address.</string>
     <string name="cannot_create_address">A new address cannot be created at this time. Please try again.</string>
     <string name="saving_address">Saving address…</string>
-    <string name="cannot_create_wallet">Wallet cannot be created/restored at this time. Please try again.</string>
 
     <string name="cannot_launch_app">Blockchain Wallet cannot be run on this device.</string>
-    <string name="support_guide">Please describe in detail the issue you are experiencing, along with any steps we can take to reproduce it.</string>
     <string name="label">Label</string>
-    <string name="rename_address">Rename Address</string>
     <string name="edit">Edit</string>
     <string name="label_cant_be_empty">Label can\'t be blank.</string>
-    <string name="saving_changes">Saving changes…</string>
     <string name="warning">Warning</string>
 
-    <string name="ssl_no_connection">We are unable to connect to the host to verify the SSL certificate. Please verify your network connection and device before continuing.</string>
+    <string name="ssl_no_connection">We are unable to connect to the host to establish a secure connection. Please verify your network connection and device before continuing.</string>
     <string name="retry">Retry</string>
     <string name="exit">Exit</string>
     <string name="screen_overlay_warning">Screen overlay detected!</string>
@@ -444,7 +339,6 @@
     <string name="transfer_funds">Transfer Imported Addresses?</string>
     <string name="transfer_recommend">Looks like you have some bitcoins in imported addresses. Imported addresses are not backed up by your Recovery Phrase. To secure these funds, we recommend transferring these balances to include in your backup.</string>
     <string name="spendable_addresses">spendable addresses</string>
-    <string name="total_fees">Total fees</string>
     <string name="transfer_confirmed">Transfer Confirmed</string>
     <string name="transfer_confirm">Confirm Transfer</string>
     <string name="transfer_all">Transfer all</string>
@@ -460,14 +354,10 @@
     <string name="insufficient_fee">Transaction fee is too low.</string>
     <string name="customize">customize</string>
     <string name="amount">Amount</string>
-    <string name="recommended">(Recommended)</string>
     <string name="recommended_fee">Transaction fees impact how quickly the Bitcoin mining network will confirm your transactions, and depend on the current network conditions. We recommend the fee below for this transaction at this time.</string>
-    <string name="default_label_brackets">(default)</string>
     <string name="not_now">Not now</string>
-    <string name="high_fee_not_necessary">High fee not necessary.</string>
     <string name="high_fee_not_necessary_info">You specified an unusually high transaction fee of %1$s.\n\nEven if you lower the fee to %2$s, you can expect the transaction to confirm within the next ~10 minutes (1 block).</string>
 
-    <string name="low_fee_not_recommended">Low Custom Fee Not Recommended</string>
     <string name="low_fee_suggestion">You specified an exceptionally small transaction fee of %1$s.\n\nYour transaction may become stuck and possibly never confirm. To increase the likelihood for your transaction to confirm within approximately one hour (6 blocks) we strongly recommend a fee of no less than %2$s.</string>
     <string name="raise_fee">Raise fee</string>
     <string name="lower_fee">Lower fee</string>
@@ -486,7 +376,6 @@
     <string name="update">Update</string>
     <string name="mobile">Mobile</string>
     <string name="profile">Profile</string>
-    <string name="wallet">Wallet</string>
     <string name="app">App</string>
     <string name="verify">Verify</string>
     <string name="resend">Resend</string>
@@ -496,7 +385,6 @@
     <string name="allow">Allow</string>
     <string name="block">Block</string>
     <string name="security">Security</string>
-    <string name="stored">Stored</string>
     <string name="enable">Enable</string>
     <string name="disable">Disable</string>
 
@@ -516,7 +404,6 @@
     <string name="password_hint_summary">Your Blockchain Wallet never communicates your password to our servers. This means we have no idea what your password is and we cannot reset it if you forget it. Create a memorable password hint that we can send to your verified email address in case you forget your password.</string>
     <string name="change_password">Change Password</string>
     <string name="change_password_summary">Your password is never shared with our servers, which means we cannot help reset your password if you forget it. Make sure you write down your recovery phrase which can restore access to your wallet in the event of a lost password.</string>
-    <string name="wallet_recovery_phrase">Wallet Recovery Phrase</string>
     <string name="verify_email_notice">We have sent your email address a verification link. Click the verification link to verify your email address.</string>
     <string name="email_notifications">Email Notifications</string>
     <string name="email_notifications_summary">Enable notifications to receive an email whenever you receive bitcoins. Only labeled addresses and imported addresses are eligible to trigger notifications.</string>
@@ -606,11 +493,9 @@
     <string name="backup_verify_heading">Enter the following words from your Recovery Phrase to complete the backup process.</string>
     <string name="backup_next_word">NEXT WORD</string>
     <string name="backup_previous_word">PREVIOUS WORD</string>
-    <string name="backup_verify_button">VERIFY BACKUP</string>
     <string name="backup_word">Word</string>
     <string name="backup_of">of</string>
     <string name="backup_word_mismatch">Word Mismatch</string>
     <string name="backup_done">DONE</string>
-    <string name="backup_funds_title">Backup Funds</string>
     <string name="backup_lost_mnemonic">Lost your 12 word recovery phrase?</string>
 </resources>

@@ -1,8 +1,6 @@
 package piuk.blockchain.android.ui.account;
 
 import com.google.zxing.BarcodeFormat;
-import piuk.blockchain.android.ui.zxing.CaptureActivity;
-import piuk.blockchain.android.ui.zxing.Intents;
 
 import android.Manifest;
 import android.app.Activity;
@@ -75,6 +73,8 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.BalanceFragment;
 import piuk.blockchain.android.ui.send.PendingTransaction;
+import piuk.blockchain.android.ui.zxing.CaptureActivity;
+import piuk.blockchain.android.ui.zxing.Intents;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;

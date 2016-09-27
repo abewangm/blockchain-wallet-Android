@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.account;
 
-import piuk.blockchain.android.ui.zxing.CaptureActivity;
-
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
@@ -30,6 +28,7 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
+import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
