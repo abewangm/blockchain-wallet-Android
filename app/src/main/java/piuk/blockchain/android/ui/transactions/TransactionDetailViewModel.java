@@ -6,6 +6,7 @@ import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pair;
 
+import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.Transaction;
 import info.blockchain.wallet.payload.Tx;
@@ -258,9 +259,23 @@ public class TransactionDetailViewModel extends BaseViewModel {
     Observable<String> getTransactionValueString(String currency, Tx transaction) {
         if (currency.equals("USD")) {
             return ExchangeRateFactory.getInstance().getHistoricPrice((long) Math.abs(transaction.getAmount()), mFiatType, transaction.getTS() * 1000)
-                    .map(aDouble -> mStringUtils.getString(R.string.transaction_detail_value_at_time)
-                            + ExchangeRateFactory.getInstance().getSymbol(mFiatType)
-                            + mMonetaryUtil.getFiatFormat(mFiatType).format(aDouble));
+                    .map(aDouble -> {
+                        int stringId = -1;
+                        switch (transaction.getDirection()) {
+                            case MultiAddrFactory.MOVED:
+                                stringId = R.string.transaction_detail_value_at_time_transferred;
+                                break;
+                            case MultiAddrFactory.SENT:
+                                stringId = R.string.transaction_detail_value_at_time_sent;
+                                break;
+                            case MultiAddrFactory.RECEIVED:
+                                stringId = R.string.transaction_detail_value_at_time_received;
+                                break;
+                        }
+                        return mStringUtils.getString(stringId)
+                                + ExchangeRateFactory.getInstance().getSymbol(mFiatType)
+                                + mMonetaryUtil.getFiatFormat(mFiatType).format(aDouble);
+                    });
         } else {
             return Observable.just(getTransactionValueFiat(transaction));
         }
