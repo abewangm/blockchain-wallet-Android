@@ -51,6 +51,8 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
     private AppCompatButton mTransferButton;
     // Layouts
     private RelativeLayout mLoadingLayout;
+    // Dismiss Listener
+    private OnDismissListener mDismissListener;
 
     public static ConfirmFundsTransferDialogFragment newInstance() {
         ConfirmFundsTransferDialogFragment fragment = new ConfirmFundsTransferDialogFragment();
@@ -212,6 +214,7 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
     public void dismissDialog() {
         Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+        if (mDismissListener != null) mDismissListener.onDismiss();
         dismiss();
     }
 
@@ -224,5 +227,15 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
     public void onDestroy() {
         super.onDestroy();
         mViewModel.destroy();
+    }
+
+    public void setOnDismissListener(OnDismissListener listener) {
+        mDismissListener = listener;
+    }
+
+    public interface OnDismissListener {
+
+        void onDismiss();
+
     }
 }
