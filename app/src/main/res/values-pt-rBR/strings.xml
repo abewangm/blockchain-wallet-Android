@@ -260,13 +260,13 @@
     <string name="backup_step_2">Digite sua Frase de Recuperação de 12 palavras</string>
     <string name="START">INICIAR</string>
     <string name="backup_write_down_words">É importante anotar as palavras exatamente como aparecem aqui e nesta mesma ordem.</string>
-    <string name="NEXT_WORD">PRÓXIMA PALAVRA</string>
+    <string name="backup_next_word">PRÓXIMA PALAVRA</string>
     <string name="press_to_reveal">mantenha pressionado para revelar a palavra</string>
     <string name="VERIFY">VERIFICAR</string>
     <string name="backup_verify_heading">Insira as seguintes palavras de sua Frase de Recuperação para concluir o processo de backup.</string>
-    <string name="VERIFY_BACKUP">VERIFICAR BACKUP</string>
-    <string name="Word">Palavra</string>
-    <string name="of">de</string>
+    <string name="backup_verify_button">VERIFICAR BACKUP</string>
+    <string name="backup_word">Palavra</string>
+    <string name="backup_of">de</string>
     <string name="backup_confirmed">Backup Confirmado</string>
     <string name="backup_word_mismatch">A palavra não corresponde</string>
     <string name="backup_days_ago">Você fez backup de sua carteira há %1$s %2$s</string>
@@ -510,11 +510,11 @@
     <string name="preferences">Preferências</string>
     <string name="two_fa_summary">Proteja sua carteira contra acesso não autorizado ativando a Verificação em 2 Passos. Você pode usar o seu número de celular para proteger sua carteira. Este código será solicitado quando você tentar acessar sua carteira pelo navegador.\n\nPara utilizar outras formas de autenticação em vez dessa, acesse nossa carteira web.</string>
 
-    <string name="PREVIOUS_WORD">PALAVRA ANTERIOR</string>
-    <string name="DONE">PRONTO</string>
-    <string name="backup_funds">Fazer backup dos fundos</string>
+    <string name="backup_previous_word">PALAVRA ANTERIOR</string>
+    <string name="backup_done">PRONTO</string>
+    <string name="backup_funds_title">Fazer backup dos fundos</string>
     <string name="backup_funds_again">Fazer backup dos seus fundos novamente</string>
-    <string name="lost_mnemonic">Perdeu sua Frase de Recuperação de 12 palavras?</string>
+    <string name="backup_lost_mnemonic">Perdeu sua Frase de Recuperação de 12 palavras?</string>
     <string name="backup_write_down_12_words">Anote as 12 palavras seguintes num pedaço de papel. Se alguém tiver acesso à sua Frase de Recuperação, também terá acesso aos seu bitcoins. Não se esqueça de mantê-la off-line e guardada em segurança.</string>
     <string name="rate_title">Avaliar a Carteira Blockchain</string>
     <string name="rate_message">Gostando da Carteira Blockchain? Por favor, reserve um momento para deixar uma avaliação no Google Play e contar às pessoas sobre a carteira.</string>

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 
+import info.blockchain.api.Settings;
 import info.blockchain.wallet.datamanagers.TransactionListDataManager;
 import info.blockchain.wallet.model.BalanceModel;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -16,13 +17,13 @@ import info.blockchain.wallet.payload.ImportedAccount;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.Tx;
+import info.blockchain.wallet.rxjava.RxUtil;
 import info.blockchain.wallet.util.ExchangeRateFactory;
 import info.blockchain.wallet.util.MonetaryUtil;
 import info.blockchain.wallet.util.OSUtil;
 import info.blockchain.wallet.util.PrefsUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -32,8 +33,14 @@ import javax.inject.Inject;
 import piuk.blockchain.android.BR;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.di.Injector;
+import piuk.blockchain.android.di.scopes.ViewModelScope;
+import rx.Observable;
+import rx.subscriptions.CompositeSubscription;
 
+@SuppressWarnings("WeakerAccess")
 public class BalanceViewModel extends BaseObservable implements ViewModel {
+
+    private static final long ONE_MONTH = 28 * 24 * 60 * 60 * 1000L;
 
     private Context context;
     private DataListener dataListener;
@@ -48,6 +55,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected PayloadManager payloadManager;
     @Inject protected TransactionListDataManager transactionListDataManager;
+    @ViewModelScope CompositeSubscription compositeSubscription;
 
     @Bindable
     public String getBalance(){
@@ -63,6 +71,8 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         void onRefreshAccounts();
         void onAccountSizeChange();
         void onRefreshBalanceAndTransactions();
+        void showBackupPromptDialog(boolean showNeverAgain);
+        void show2FaDialog();
     }
 
     public BalanceViewModel(Context context, DataListener dataListener) {
@@ -75,6 +85,84 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         this.activeAccountAndAddressBiMap = HashBiMap.create();
         this.transactionList = new ArrayList<>();
         this.osUtil = new OSUtil(context);
+        compositeSubscription = new CompositeSubscription();
+    }
+
+    public void onViewReady() {
+        if (prefsUtil.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
+            // 1st run of the app
+            prefsUtil.setValue(PrefsUtil.KEY_FIRST_RUN, false);
+        } else {
+            // Check from this point forwards
+            if (!isBackedUp() && hasTransactions() && !getIfNeverPromptBackup()) {
+                // Show dialog and store date of dialog launch
+                if (getTimeOfLastSecurityPrompt() == 0) {
+                    dataListener.showBackupPromptDialog(false);
+                    storeTimeOfLastSecurityPrompt();
+                } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
+                    dataListener.showBackupPromptDialog(true);
+                    storeTimeOfLastSecurityPrompt();
+                }
+            } else if ((isBackedUp() || hasTransactions()) && !getIfNeverPrompt2Fa()) {
+                compositeSubscription.add(
+                        getSettingsApi()
+                                .compose(RxUtil.applySchedulers())
+                                .subscribe(settings -> {
+                                    if (!settings.isSmsVerified()) {
+                                        // Show dialog for 2FA, store date of dialog launch
+                                        if (getTimeOfLastSecurityPrompt() == 0L
+                                                || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
+                                            dataListener.show2FaDialog();
+                                            storeTimeOfLastSecurityPrompt();
+                                        }
+                                    }
+                                }, Throwable::printStackTrace));
+            }
+        }
+    }
+
+    /**
+     * Saves value of true to prevent users from seeing the backup prompt again
+     */
+    public void neverPromptBackup() {
+        prefsUtil.setValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER, true);
+    }
+
+    /**
+     * Saves value of true to prevent users from seeing the 2FA prompt again
+     */
+    public void neverPrompt2Fa() {
+        prefsUtil.setValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER, true);
+    }
+
+    private boolean isBackedUp() {
+        return payloadManager.getPayload() != null
+                && payloadManager.getPayload().getHdWallet() != null
+                && payloadManager.getPayload().getHdWallet().isMnemonicVerified();
+    }
+
+    private boolean hasTransactions() {
+        return !transactionListDataManager.getTransactionList().isEmpty();
+    }
+
+    private long getTimeOfLastSecurityPrompt() {
+        return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_TIME_ELAPSED, 0L);
+    }
+
+    private void storeTimeOfLastSecurityPrompt() {
+        prefsUtil.setValue(PrefsUtil.KEY_SECURITY_TIME_ELAPSED, System.currentTimeMillis());
+    }
+
+    private boolean getIfNeverPromptBackup() {
+        return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER, false);
+    }
+
+    private boolean getIfNeverPrompt2Fa() {
+        return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER, false);
+    }
+
+    private Observable<Settings> getSettingsApi() {
+        return Observable.fromCallable(() -> new Settings(payloadManager.getPayload().getGuid(), payloadManager.getPayload().getSharedKey()));
     }
 
     public MonetaryUtil getMonetaryUtil() {
@@ -85,13 +173,14 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     public void destroy() {
         context = null;
         dataListener = null;
+        compositeSubscription.clear();
     }
 
     public ArrayList<String> getActiveAccountAndAddressList(){
         return activeAccountAndAddressList;
     }
 
-    public void updateAccountList(){
+    public void updateAccountList() {
 
         //activeAccountAndAddressList is linked to Adapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
         activeAccountAndAddressList.clear();
@@ -130,7 +219,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
                 //Only V3 will display "All"
                 Account all = new Account();
                 all.setLabel(context.getResources().getString(R.string.all_accounts));
-                all.setTags(Arrays.asList(TAG_ALL));
+                all.setTags(Collections.singletonList(TAG_ALL));
                 activeAccountAndAddressList.add(all.getLabel());
                 activeAccountAndAddressBiMap.put(all, spinnerIndex);
                 spinnerIndex++;

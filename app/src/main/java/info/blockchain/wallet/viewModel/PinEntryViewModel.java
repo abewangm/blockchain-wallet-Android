@@ -33,6 +33,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.annotations.Thunk;
 import piuk.blockchain.android.di.Injector;
 import rx.exceptions.Exceptions;
 import rx.subscriptions.CompositeSubscription;
@@ -41,6 +42,7 @@ import static info.blockchain.wallet.view.CreateWalletFragment.KEY_INTENT_EMAIL;
 import static info.blockchain.wallet.view.CreateWalletFragment.KEY_INTENT_PASSWORD;
 import static info.blockchain.wallet.view.LandingActivity.KEY_INTENT_RECOVERING_FUNDS;
 
+@SuppressWarnings("WeakerAccess")
 public class PinEntryViewModel implements ViewModel {
 
     private static final int PIN_LENGTH = 4;
@@ -185,7 +187,8 @@ public class PinEntryViewModel implements ViewModel {
         }
     }
 
-    private void validateAndConfirmPin() {
+    @Thunk
+    void validateAndConfirmPin() {
         // Validate
         if (!mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "").isEmpty()) {
             mDataListener.setTitleVisibility(View.INVISIBLE);
@@ -207,7 +210,8 @@ public class PinEntryViewModel implements ViewModel {
         }
     }
 
-    private void clearPinViewAndReset() {
+    @Thunk
+    void clearPinViewAndReset() {
         clearPinBoxes();
         mUserEnteredConfirmationPin = null;
     }
@@ -217,7 +221,6 @@ public class PinEntryViewModel implements ViewModel {
         mDataListener.clearPinBoxes();
     }
 
-    @SuppressWarnings("WeakerAccess")
     @VisibleForTesting
     void updatePayload(CharSequenceX password) {
         mDataListener.showProgressDialog(R.string.decrypting_wallet, null);
@@ -246,6 +249,7 @@ public class PinEntryViewModel implements ViewModel {
 
                             } else if (throwable instanceof ServerConnectionException) {
                                 mDataListener.showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+                                mAppUtil.restartApp();
 
                             } else if (throwable instanceof UnsupportedVersionException) {
                                 mDataListener.showWalletVersionNotSupportedDialog(throwable.getMessage());

@@ -46,27 +46,10 @@ public class WalletAccountHelper {
     @NonNull
     public List<ItemAccount> getAccountItems(boolean isBtc) {
 
-        ArrayList<ItemAccount> accountArrayList = new ArrayList<>();
+        List<ItemAccount> accountList = new ArrayList<>();
 
         // V3
-        if (mPayloadManager.getPayload().isUpgraded()) {
-
-            List<Account> accounts = mPayloadManager.getPayload().getHdWallet().getAccounts();
-            for (Account account : accounts) {
-
-                if (account.isArchived())
-                    // Skip archived account
-                    continue;
-
-                if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(account.getXpub())) {
-                    accountArrayList.add(new ItemAccount(
-                            account.getLabel(),
-                            mAddressBalanceHelper.getAccountBalance(account, isBtc, mBtcExchangeRate, mFiatUnit, mBtcUnit),
-                            null,
-                            account));
-                }
-            }
-        }
+        accountList.addAll(getHdAccounts(isBtc));
 
         // V2
         List<LegacyAddress> legacyAddresses = mPayloadManager.getPayload().getLegacyAddresses();
@@ -88,7 +71,7 @@ public class WalletAccountHelper {
                 tag = mStringUtils.getString(R.string.watch_only);
             }
 
-            accountArrayList.add(new ItemAccount(
+            accountList.add(new ItemAccount(
                     labelOrAddress,
                     mAddressBalanceHelper.getAddressBalance(legacyAddress, isBtc, mBtcExchangeRate, mFiatUnit, mBtcUnit),
                     tag,
@@ -96,12 +79,37 @@ public class WalletAccountHelper {
 
         }
 
+        return accountList;
+    }
+
+    @NonNull
+    public List<ItemAccount> getHdAccounts(boolean isBtc) {
+        List<ItemAccount> accountArrayList = new ArrayList<>();
+        if (mPayloadManager.getPayload().isUpgraded()) {
+
+            List<Account> accounts = mPayloadManager.getPayload().getHdWallet().getAccounts();
+            for (Account account : accounts) {
+
+                if (account.isArchived())
+                    // Skip archived account
+                    continue;
+
+                if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(account.getXpub())) {
+                    accountArrayList.add(new ItemAccount(
+                            account.getLabel(),
+                            mAddressBalanceHelper.getAccountBalance(account, isBtc, mBtcExchangeRate, mFiatUnit, mBtcUnit),
+                            null,
+                            account));
+                }
+            }
+        }
+
         return accountArrayList;
     }
 
     @NonNull
     public List<ItemAccount> getAddressBookEntries() {
-        ArrayList<ItemAccount> accountArrayList = new ArrayList<>();
+        List<ItemAccount> itemAccountList = new ArrayList<>();
 
         List<AddressBookEntry> addressBookEntries = mPayloadManager.getPayload().getAddressBookEntries();
         for (AddressBookEntry addressBookEntry : addressBookEntries) {
@@ -109,9 +117,9 @@ public class WalletAccountHelper {
             // If address has no label, we'll display address
             String labelOrAddress = addressBookEntry.getLabel() == null || addressBookEntry.getLabel().length() == 0 ? addressBookEntry.getAddress() : addressBookEntry.getLabel();
 
-            accountArrayList.add(new ItemAccount(labelOrAddress, "", mStringUtils.getString(R.string.address_book_label), addressBookEntry));
+            itemAccountList.add(new ItemAccount(labelOrAddress, "", mStringUtils.getString(R.string.address_book_label), addressBookEntry));
         }
 
-        return accountArrayList;
+        return itemAccountList;
     }
 }

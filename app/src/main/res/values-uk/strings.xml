@@ -260,13 +260,13 @@
     <string name="backup_step_2">Введіть свою Фразу для відновлення доступу із 12-слів</string>
     <string name="START">СТАРТ</string>
     <string name="backup_write_down_words">Зверніть увагу: ви повинні вписувати слова точно так, і в тому ж порядку, як вони з\'являтимуться на екрані.</string>
-    <string name="NEXT_WORD">НАСТУПНЕ СЛОВО</string>
+    <string name="backup_next_word">НАСТУПНЕ СЛОВО</string>
     <string name="press_to_reveal">натисніть і утримуйте, щоб відкрити слово</string>
     <string name="VERIFY">ПІДТВЕРДИТИ</string>
     <string name="backup_verify_heading">Введіть наступні слова з вашої Фрази відновлення, щоб завершити процес повернення.</string>
-    <string name="VERIFY_BACKUP">ПІДТВЕРДИТИ РЕЗЕРВНЕ КОПІЮВАННЯ</string>
-    <string name="Word">Слово</string>
-    <string name="of">з</string>
+    <string name="backup_verify_button">ПІДТВЕРДИТИ РЕЗЕРВНЕ КОПІЮВАННЯ</string>
+    <string name="backup_word">Слово</string>
+    <string name="backup_of">з</string>
     <string name="backup_confirmed">Резервне копіювання підтверджено</string>
     <string name="backup_word_mismatch">Слова не співпадають</string>
     <string name="backup_days_ago">Ви створили резервну копію свого гаманця %1$s %2$s тому</string>
@@ -510,11 +510,11 @@
     <string name="preferences">Налаштування</string>
     <string name="two_fa_summary">Захистіть свій гаманець від несанкціонованого доступу, активувавши 2-крокове підтвердження. Щоб захистити свій гаманець, можете обрати свій номер моб. телефону. У вас запитають цей код, якщо ви спробуєте зайти у свій гаманець через веб-браузер.\n\nЩоб використовувати інші методи аутентифікації замість цього, будь ласка, увійдіть в свій веб-гаманець.</string>
 
-    <string name="PREVIOUS_WORD">ПОПЕРЕДНЄ СЛОВО</string>
-    <string name="DONE">ВИКОНАНО</string>
-    <string name="backup_funds">Відновлення коштів</string>
+    <string name="backup_previous_word">ПОПЕРЕДНЄ СЛОВО</string>
+    <string name="backup_done">ВИКОНАНО</string>
+    <string name="backup_funds_title">Відновлення коштів</string>
     <string name="backup_funds_again">Знову відновити кошти</string>
-    <string name="lost_mnemonic">Загубили фразу для відновлення пароля із 12-слів?</string>
+    <string name="backup_lost_mnemonic">Загубили фразу для відновлення пароля із 12-слів?</string>
     <string name="backup_write_down_12_words">Запишіть ці 12 слів на аркуші паперу. Зберігайте фразу для відновлення доступу в режимі оффлайн і в надійному та безпечному місці. Пам\'ятайте, будь-яка людина, що має доступ до Фрази відновлення доступу, матиме доступ і до ваших bitcoin.</string>
     <string name="rate_title">Оцінити гаманець Blockchain</string>
     <string name="rate_message">Подобається користуватись гаманцем Blockchain? Будь ласка, знайдіть хвилинку і залишіть відгук про наш гаманець в Google Play, нехай інші також про нього дізнаються.</string>

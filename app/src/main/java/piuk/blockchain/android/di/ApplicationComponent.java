@@ -2,13 +2,13 @@ package piuk.blockchain.android.di;
 
 import info.blockchain.wallet.access.AccessState;
 import info.blockchain.wallet.datamanagers.AuthDataManager;
-import info.blockchain.wallet.datamanagers.TransactionListDataManager;
 import info.blockchain.wallet.util.AppUtil;
 import info.blockchain.wallet.util.ExchangeRateFactory;
 import info.blockchain.wallet.view.helpers.ReceiveCurrencyHelper;
 import info.blockchain.wallet.view.helpers.WalletAccountHelper;
 import info.blockchain.wallet.viewModel.AccountEditViewModel;
 import info.blockchain.wallet.viewModel.BalanceViewModel;
+import info.blockchain.wallet.viewModel.ConfirmFundsTransferViewModel;
 import info.blockchain.wallet.viewModel.MainViewModel;
 import info.blockchain.wallet.viewModel.ManualPairingViewModel;
 import info.blockchain.wallet.viewModel.PairingViewModel;
@@ -69,7 +69,7 @@ public interface ApplicationComponent {
 
     void inject(WalletAccountHelper walletAccountHelper);
 
-    void inject(TransactionListDataManager transactionDataManager);
-
     void inject(TransactionDetailViewModel transactionDetailViewModel);
+
+    void inject(ConfirmFundsTransferViewModel confirmFundsTransferViewModel);
 }

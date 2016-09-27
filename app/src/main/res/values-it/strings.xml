@@ -260,13 +260,13 @@
     <string name="backup_step_2">Inserisci la tua frase di recupero da 12 parole</string>
     <string name="START">INIZIA</string>
     <string name="backup_write_down_words">È importante assicurarti che tu scriva le tue parole esattamente come appaiono qui e nello stesso ordine.</string>
-    <string name="NEXT_WORD">PROSSIMA PAROLA</string>
+    <string name="backup_next_word">PROSSIMA PAROLA</string>
     <string name="press_to_reveal">premi e tieni premuto per rivelare la parola</string>
     <string name="VERIFY">VERIFICA</string>
     <string name="backup_verify_heading">Inserisci le seguenti parole dalla tua Frase di Backup per completare il processo di backup.</string>
-    <string name="VERIFY_BACKUP">VERIFICA IL BACKUP</string>
-    <string name="Word">Parola</string>
-    <string name="of">di</string>
+    <string name="backup_verify_button">VERIFICA IL BACKUP</string>
+    <string name="backup_word">Parola</string>
+    <string name="backup_of">di</string>
     <string name="backup_confirmed">Backup Confermata</string>
     <string name="backup_word_mismatch">Mancata corrispondenza della parola</string>
     <string name="backup_days_ago">Hai fatto il backup del tuo portafoglio il %1$s %2$s fa</string>
@@ -512,11 +512,11 @@
     <string name="preferences">Preferenze</string>
     <string name="two_fa_summary">Proteggi il tuo portafogli da accessi non autorizzati abilitando la Verifica in 2-Fasi. Puoi scegliere di usare il tuo numero di telefono cellulare per mettere al sicuro il tuo portafoglio. Questo codice ti verrà richiesto quando tenti di accedere al tuo portafoglio tramite il browser web.\n\nPer usare altri metodi di autenticazione, accedi al nostro portafoglio web.</string>
 
-    <string name="PREVIOUS_WORD">PAROLA PRECEDENTE</string>
-    <string name="DONE">FATTO</string>
-    <string name="backup_funds">Effettua il backup dei fondi</string>
+    <string name="backup_previous_word">PAROLA PRECEDENTE</string>
+    <string name="backup_done">FATTO</string>
+    <string name="backup_funds_title">Effettua il backup dei fondi</string>
     <string name="backup_funds_again">Effettua di nuovo il backup dei fondi</string>
-    <string name="lost_mnemonic">Hai perso la tua frase di backup di 12 parole?</string>
+    <string name="backup_lost_mnemonic">Hai perso la tua frase di backup di 12 parole?</string>
     <string name="backup_write_down_12_words">Scrivi le seguenti 12 parole su un pezzo di carta. Chiunque con l\'accesso alla tua Frase di Backup ha accesso ai tuoi bitcoin, quindi assicurati di tenerli offline in qualche posto molto fidato e sicuro.</string>
     <string name="rate_title">Vota il Portafoglio Blockchain</string>
     <string name="rate_message">Ti piace il Portafoglio Blockchain? Per favore, spendi un momento per lasciare una recensione su Google Play e farlo sapere agli altri.</string>
