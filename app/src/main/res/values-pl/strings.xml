@@ -260,13 +260,13 @@
     <string name="backup_step_2">Podaj swój składający się z 12 słów zwrot do odzyskiwania hasła</string>
     <string name="START">START</string>
     <string name="backup_write_down_words">To ważne, aby zapisać sobie te słowa dokładnie tak jak się tutaj pojawiają i w tej samej kolejności.</string>
-    <string name="NEXT_WORD">NASTĘPNE SŁOWO</string>
+    <string name="backup_next_word">NASTĘPNE SŁOWO</string>
     <string name="press_to_reveal">wciśnij i przytrzymaj, by odkryć słowo</string>
     <string name="VERIFY">POTWIERDŹ</string>
     <string name="backup_verify_heading">Wpisz następujące słowa ze swojego zwrotu do odzyskiwania hasła, aby zakończyć proces tworzenia kopii zapasowej.</string>
-    <string name="VERIFY_BACKUP">POTWIERDŹ KOPIĘ ZAPASOWĄ</string>
-    <string name="Word">Słowo</string>
-    <string name="of">z</string>
+    <string name="backup_verify_button">POTWIERDŹ KOPIĘ ZAPASOWĄ</string>
+    <string name="backup_word">Słowo</string>
+    <string name="backup_of">z</string>
     <string name="backup_confirmed">Kopia zapasowa potwierdzona</string>
     <string name="backup_word_mismatch">Słowa się nie zgadzają</string>
     <string name="backup_days_ago">Stworzyłeś kopię zapasową swojego portfela %1$s %2$s temu</string>
@@ -510,11 +510,11 @@
     <string name="preferences">Preferencje</string>
     <string name="two_fa_summary">Chroń swój portfel przed nieautoryzowanym dostępem poprzez włączenie Uwierzytelniania Dwustopniowego.  Możesz korzystać z darmowej aplikacji lub numeru telefonu komórkowego, by chronić swój portfel. Ten kod będzie Ci potrzebny, gdy będziesz próbować otrzymać dostęp do portfela przez przeglądarkę sieciową.\n\nAby skorzystać z innych metod autoryzacyjnych, zaloguj się do naszego portfela sieciowego.</string>
 
-    <string name="PREVIOUS_WORD">POPRZEDNIE SŁOWO</string>
-    <string name="DONE">GOTOWE</string>
-    <string name="backup_funds">Wykonaj kopię zapasową środków</string>
+    <string name="backup_previous_word">POPRZEDNIE SŁOWO</string>
+    <string name="backup_done">GOTOWE</string>
+    <string name="backup_funds_title">Wykonaj kopię zapasową środków</string>
     <string name="backup_funds_again">Wykonaj kopię zapasową środków ponownie</string>
-    <string name="lost_mnemonic">Zgubiłeś swój zwrot do odzyskiwania hasła?</string>
+    <string name="backup_lost_mnemonic">Zgubiłeś swój zwrot do odzyskiwania hasła?</string>
     <string name="backup_write_down_12_words">Zapisz następujące 12 słów na kartce papieru. Każda osoba z dostępem do Twojego zwrotu do odzyskiwania hasła ma dostęp do Twoich bitcoinów, więc upewnij się, że trzymasz go offline w bardzo bezpiecznym miejscu.</string>
     <string name="rate_title">Oceń Portfel Blockchain</string>
     <string name="rate_message">Podoba Ci się Portfel Blockchain? Poświęć chwilę na wystawienie nam recenzji w Google Play i daj znać innym.</string>

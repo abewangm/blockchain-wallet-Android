@@ -7,6 +7,7 @@ import android.os.Looper;
 import info.blockchain.api.DynamicFee;
 import info.blockchain.api.ExchangeTicker;
 import info.blockchain.api.PersistentUrls;
+import info.blockchain.api.Settings;
 import info.blockchain.api.Unspent;
 import info.blockchain.wallet.access.AccessState;
 import info.blockchain.wallet.cache.DefaultAccountUnspentCache;
@@ -15,6 +16,7 @@ import info.blockchain.wallet.connectivity.ConnectivityStatus;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.rxjava.RxUtil;
 import info.blockchain.wallet.util.AppUtil;
 import info.blockchain.wallet.util.ExchangeRateFactory;
 import info.blockchain.wallet.util.OSUtil;
@@ -29,12 +31,16 @@ import java.util.List;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.di.Injector;
+import rx.Observable;
+import rx.subscriptions.CompositeSubscription;
 
+@SuppressWarnings("WeakerAccess")
 public class MainViewModel implements ViewModel {
 
     private Context context;
     private DataListener dataListener;
     private OSUtil osUtil;
+    private CompositeSubscription compositeSubscription;
     @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
     @Inject protected PayloadManager payloadManager;
@@ -51,6 +57,7 @@ public class MainViewModel implements ViewModel {
         void onStartBalanceFragment();
         void onExitConfirmToast();
         void kickToLauncherPage();
+        void showEmailVerificationDialog(String email);
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -59,10 +66,33 @@ public class MainViewModel implements ViewModel {
         this.dataListener = dataListener;
         this.osUtil = new OSUtil(context);
         this.appUtil.applyPRNGFixes();
+        this.compositeSubscription = new CompositeSubscription();
+    }
 
+    public void onViewReady() {
         checkBackendEnvironment();
         checkRooted();
         checkConnectivity();
+        checkIfShouldShowEmailVerification();
+    }
+
+    private void checkIfShouldShowEmailVerification() {
+        if (appUtil.isNewlyCreated()) {
+            compositeSubscription.add(
+                    getSettingsApi()
+                            .compose(RxUtil.applySchedulers())
+                            .subscribe(settings -> {
+                                if (!settings.isEmailVerified()) {
+                                    appUtil.setNewlyCreated(false);
+                                    String email = settings.getEmail();
+                                    dataListener.showEmailVerificationDialog(email);
+                                }
+                            }, Throwable::printStackTrace));
+        }
+    }
+
+    private Observable<Settings> getSettingsApi() {
+        return Observable.fromCallable(() -> new Settings(payloadManager.getPayload().getGuid(), payloadManager.getPayload().getSharedKey()));
     }
 
     public PayloadManager getPayloadManager() {
@@ -156,6 +186,7 @@ public class MainViewModel implements ViewModel {
         dataListener = null;
         stopWebSocketService();
         DynamicFeeCache.getInstance().destroy();
+        compositeSubscription.clear();
     }
 
     private void exchangeRateThread() {

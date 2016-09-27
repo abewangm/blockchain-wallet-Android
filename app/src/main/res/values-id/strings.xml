@@ -260,13 +260,13 @@
     <string name="backup_step_2">Masukkan frasa pemulihan 12 kata milik Anda</string>
     <string name="START">MULAI</string>
     <string name="backup_write_down_words">Penting untuk memastikan bahwa Anda menuliskan kata-kata Anda persis sebagaimana kata-kata tersebut muncul di sini dan dalam urutan ini.</string>
-    <string name="NEXT_WORD">KATA BERIKUTNYA</string>
+    <string name="backup_next_word">KATA BERIKUTNYA</string>
     <string name="press_to_reveal">tekan dan tahan untuk menampilkan kata</string>
     <string name="VERIFY">VERIFIKASIKAN</string>
     <string name="backup_verify_heading">Masukkan kata-kata berikut dari Frasa Pemulihan Anda untuk menyelesaikan proses pencadangan.</string>
-    <string name="VERIFY_BACKUP">VERIFIKASI CADANGAN</string>
-    <string name="Word">Kata</string>
-    <string name="of">dari</string>
+    <string name="backup_verify_button">VERIFIKASI CADANGAN</string>
+    <string name="backup_word">Kata</string>
+    <string name="backup_of">dari</string>
     <string name="backup_confirmed">Pencadangan Dikonfirmasikan</string>
     <string name="backup_word_mismatch">Kata Tidak Sesuai</string>
     <string name="backup_days_ago">Anda mencadangkan dompet Anda %1$s %2$s yang lalu</string>
@@ -510,11 +510,11 @@
     <string name="preferences">Preferensi</string>
     <string name="two_fa_summary">Lindungi dompet Anda dari akses yang tidak diizinkan dengan mengaktifkan Verifikasi 2 Langkah. Anda dapat memilih untuk menggunakan nomor ponsel Anda untuk mengamankan dompet Anda. Kode ini akan diminta ketika Anda mencoba untuk mengakses dompet Anda melalui peramban web.\n\nUntuk menggunakan metode otentikasi lain sebagai gantinya, silahkan masuk ke dompet web kami.</string>
 
-    <string name="PREVIOUS_WORD">KATA SEBELUMNYA</string>
-    <string name="DONE">SELESAI</string>
-    <string name="backup_funds">Cadangkan Dana</string>
+    <string name="backup_previous_word">KATA SEBELUMNYA</string>
+    <string name="backup_done">SELESAI</string>
+    <string name="backup_funds_title">Cadangkan Dana</string>
     <string name="backup_funds_again">Cadangkan Dana Lagi</string>
-    <string name="lost_mnemonic">Anda kehilangan frasa 12 kata Anda?</string>
+    <string name="backup_lost_mnemonic">Anda kehilangan frasa 12 kata Anda?</string>
     <string name="backup_write_down_12_words">Tulis 12 kata berikut di selembar kertas. Siapa pun yang memiliki akses ke Frase Pemulihan Anda memiliki akses untuk bitcoin Anda, jadi pastikan untuk menjaganya tetap offline di suatu tempat sangat aman dan terjaga.</string>
     <string name="rate_title">Beri Nilai Dompet Blockchain</string>
     <string name="rate_message">Menikmati Dompet Blockchain? Harap luangkan waktu untuk meninggalkan ulasan di Google Play dan biarkan orang lain tahu tentang hal itu.</string>

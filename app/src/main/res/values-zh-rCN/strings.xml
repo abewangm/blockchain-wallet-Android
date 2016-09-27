@@ -260,13 +260,13 @@
     <string name="backup_step_2">输入您的12 个词组成的恢复密语</string>
     <string name="START">开始</string>
     <string name="backup_write_down_words">务必以该顺序准确地写下这里显示的单词。</string>
-    <string name="NEXT_WORD">下一个词</string>
+    <string name="backup_next_word">下一个词</string>
     <string name="press_to_reveal">长按可显示该词</string>
     <string name="VERIFY">验证</string>
     <string name="backup_verify_heading">输入您的“恢复密语”中的下列词以完成备份过程。</string>
-    <string name="VERIFY_BACKUP">验证备份</string>
-    <string name="Word">词</string>
-    <string name="of">/</string>
+    <string name="backup_verify_button">验证备份</string>
+    <string name="backup_word">词</string>
+    <string name="backup_of">/</string>
     <string name="backup_confirmed">备份已确认</string>
     <string name="backup_word_mismatch">词不匹配</string>
     <string name="backup_days_ago">您在 %1$s %2$s 之前已备份了您的钱包</string>
@@ -510,11 +510,11 @@
     <string name="preferences">首选项</string>
     <string name="two_fa_summary">通过启用 2 步验证，保护您的钱包免遭未经授权的访问。您可以选择使用手机号码保护您的钱包。在您尝试通过网页浏览器访问您的钱包时会要求该代码。\n\n若要使用其它验证方式，请登录我们的网络钱包。</string>
 
-    <string name="PREVIOUS_WORD">上一个词</string>
-    <string name="DONE">完成</string>
-    <string name="backup_funds">备份资金</string>
+    <string name="backup_previous_word">上一个词</string>
+    <string name="backup_done">完成</string>
+    <string name="backup_funds_title">备份资金</string>
     <string name="backup_funds_again">再次备份资金</string>
-    <string name="lost_mnemonic">丢失了 12 个词组成的恢复密语?</string>
+    <string name="backup_lost_mnemonic">丢失了 12 个词组成的恢复密语?</string>
     <string name="backup_write_down_12_words">将以下 12 个词记录在案。任何能够访问您的“恢复密语”的用户都可以访问您的比特币，因此，请务必将其离线保存在安全隐秘的地方。</string>
     <string name="rate_title">给 Blockchain 钱包打分</string>
     <string name="rate_message">喜欢 Blockchain 钱包？请花一些时间在 Google Play 上留下评论，让其他人知道。</string>

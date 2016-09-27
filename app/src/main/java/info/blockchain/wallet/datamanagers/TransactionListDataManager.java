@@ -19,9 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.inject.Inject;
-
-import piuk.blockchain.android.di.Injector;
 import rx.Observable;
 
 public class TransactionListDataManager {
@@ -29,12 +26,10 @@ public class TransactionListDataManager {
     private final String TAG_ALL = "TAG_ALL";
     private final String TAG_IMPORTED_ADDRESSES = "TAG_IMPORTED_ADDRESSES";
     @VisibleForTesting List<Tx> mTransactionList = new ArrayList<>();
+    private PayloadManager mPayloadManager;
 
-    @SuppressWarnings("WeakerAccess")
-    @Inject PayloadManager mPayloadManager;
-
-    public TransactionListDataManager() {
-        Injector.getInstance().getAppComponent().inject(this);
+    public TransactionListDataManager(PayloadManager payloadManager) {
+        mPayloadManager = payloadManager;
     }
 
     /**

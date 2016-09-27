@@ -260,13 +260,13 @@
     <string name="backup_step_2">12 sözcüklü kurtarma ifadesi girin</string>
     <string name="START">BAŞLA</string>
     <string name="backup_write_down_words">Lütfen sözcükleri tam olarak burada yazıldıkları şekil ve sırada yazdığınızdan emin olun.</string>
-    <string name="NEXT_WORD">SONRAKİ SÖZCÜK</string>
+    <string name="backup_next_word">SONRAKİ SÖZCÜK</string>
     <string name="press_to_reveal">sözcüğü göstermek için basılı tutun</string>
     <string name="VERIFY">DOĞRULA</string>
     <string name="backup_verify_heading">Kurtarma İfadenizi aşağıdaki sözcükleri girerek yedekleme işlemini tamamlayın.</string>
-    <string name="VERIFY_BACKUP">YEDEKLEMEYİ DOĞRULA</string>
-    <string name="Word">Sözcük</string>
-    <string name="of">girişi</string>
+    <string name="backup_verify_button">YEDEKLEMEYİ DOĞRULA</string>
+    <string name="backup_word">Sözcük</string>
+    <string name="backup_of">girişi</string>
     <string name="backup_confirmed">Yedekleme Onaylandı</string>
     <string name="backup_word_mismatch">Sözcük Uyumsuzluğu</string>
     <string name="backup_days_ago">%1$s %2$s önce cüzdanınızı yedeklediniz</string>
@@ -510,11 +510,11 @@
     <string name="preferences">Tercihler</string>
     <string name="two_fa_summary">2-Aşamalı Doğrulamayı etkinleştirerek cüzdanınızı yetkisiz erişime karşı koruyun.  Cüzdanınızı güvende tutmak için cep telefonu numaranızı kullanabilirsiniz. Bu kod, cüzdanınıza web tarayıcısıyla erişmeyi denediğinizde istenilecektir.\n\nBunun yerine başka kimlik doğrulama yöntemi kullanmak için, lütfen web cüzdanımıza giriş yapın.</string>
 
-    <string name="PREVIOUS_WORD">ÖNCEKİ SÖZCÜK</string>
-    <string name="DONE">TAMAMLANDI</string>
-    <string name="backup_funds">Parayı Yedekle</string>
+    <string name="backup_previous_word">ÖNCEKİ SÖZCÜK</string>
+    <string name="backup_done">TAMAMLANDI</string>
+    <string name="backup_funds_title">Parayı Yedekle</string>
     <string name="backup_funds_again">Parayı Tekrar Yedekle</string>
-    <string name="lost_mnemonic">12 sözcüklü kurtarma ifadenizi mi kaybettiniz?</string>
+    <string name="backup_lost_mnemonic">12 sözcüklü kurtarma ifadenizi mi kaybettiniz?</string>
     <string name="backup_write_down_12_words">Aşağıdaki 12 sözcüğü bir kağıda yazın. Kurtarma İfadenize erişebilen herkes paralarınıza da erişebilir, bu yüzden Kurtarma İfadenizi çevrimdışı güvenli ve özel bir yerde tutmanız çok önemlidir.</string>
     <string name="rate_title">Blockchain Cüzdanına Puan Verin</string>
     <string name="rate_message">Blockchain Cüzdanını Beğeniyor Musunuz? Lütfen Google Play\'de bir inceleme yazmak için biraz zamanınızı ayırın ve diğerlerinin de bundan haberdar olmasını sağlayın.</string>
