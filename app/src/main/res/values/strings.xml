@@ -558,6 +558,7 @@
     <string name="email_request_subject">Bitcoin payment request</string>
     <string name="email_request_body">Please send%1$s BTC to the Bitcoin address %2$s.</string>
     <string name="email_request_body_fallback">attached</string>
+    <string name="share_instructions">Tap to copy this address. Share it with the sender via email or text.</string>
 
     <!-- COMMON PIN CODES -->
     <string name="common_pin_dialog_title">Warning</string>
