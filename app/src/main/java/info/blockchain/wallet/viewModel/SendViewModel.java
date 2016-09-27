@@ -63,7 +63,7 @@ import javax.inject.Inject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.di.Injector;
 
-public class SendViewModel implements ViewModel {
+public class SendViewModel extends BaseViewModel {
 
     private final String TAG = getClass().getSimpleName();
 
@@ -127,7 +127,13 @@ public class SendViewModel implements ViewModel {
     }
 
     @Override
+    public void onViewReady() {
+        // No-op
+    }
+
+    @Override
     public void destroy() {
+        super.destroy();
         context = null;
         dataListener = null;
     }

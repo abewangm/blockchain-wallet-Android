@@ -36,14 +36,13 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.annotations.Thunk;
 import piuk.blockchain.android.di.Injector;
 import rx.exceptions.Exceptions;
-import rx.subscriptions.CompositeSubscription;
 
 import static info.blockchain.wallet.view.CreateWalletFragment.KEY_INTENT_EMAIL;
 import static info.blockchain.wallet.view.CreateWalletFragment.KEY_INTENT_PASSWORD;
 import static info.blockchain.wallet.view.LandingActivity.KEY_INTENT_RECOVERING_FUNDS;
 
 @SuppressWarnings("WeakerAccess")
-public class PinEntryViewModel implements ViewModel {
+public class PinEntryViewModel extends BaseViewModel {
 
     private static final int PIN_LENGTH = 4;
     private static final int MAX_ATTEMPTS = 4;
@@ -55,7 +54,6 @@ public class PinEntryViewModel implements ViewModel {
     @Inject protected PayloadManager mPayloadManager;
     @Inject protected StringUtils mStringUtils;
     @Inject protected SSLVerifyUtil mSSLVerifyUtil;
-    @VisibleForTesting CompositeSubscription mCompositeSubscription;
 
     private String email;
     private CharSequenceX password;
@@ -100,9 +98,9 @@ public class PinEntryViewModel implements ViewModel {
     public PinEntryViewModel(DataListener listener) {
         Injector.getInstance().getAppComponent().inject(this);
         mDataListener = listener;
-        mCompositeSubscription = new CompositeSubscription();
     }
 
+    @Override
     public void onViewReady() {
         mSSLVerifyUtil.validateSSL();
 
@@ -420,14 +418,5 @@ public class PinEntryViewModel implements ViewModel {
     @NonNull
     public AppUtil getAppUtil() {
         return mAppUtil;
-    }
-
-    @Override
-    public void destroy() {
-        // Clear all subscriptions so that:
-        // 1) all processes are cancelled
-        // 2) processes don't try to update a null View
-        // 3) background processes don't leak memory
-        mCompositeSubscription.clear();
     }
 }

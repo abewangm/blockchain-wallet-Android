@@ -1,5 +1,6 @@
 package piuk.blockchain.android;
 
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
@@ -27,6 +28,8 @@ public class BaseAuthActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         if (!BuildConfig.DOGFOOD) {
             disallowScreenshots();
         }

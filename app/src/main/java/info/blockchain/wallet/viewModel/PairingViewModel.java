@@ -21,7 +21,7 @@ import javax.inject.Inject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.di.Injector;
 
-public class PairingViewModel implements ViewModel{
+public class PairingViewModel extends BaseViewModel {
 
     private Context context;
     @Inject protected AppUtil appUtil;
@@ -33,7 +33,13 @@ public class PairingViewModel implements ViewModel{
     }
 
     @Override
+    public void onViewReady() {
+        // No-op
+    }
+
+    @Override
     public void destroy() {
+        super.destroy();
         context = null;
     }
 

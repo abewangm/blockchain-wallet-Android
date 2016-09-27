@@ -113,8 +113,6 @@ public class MapActivity extends BaseAuthActivity implements LocationListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
         toolbar.setTitle(R.string.merchant_map);
         setSupportActionBar(toolbar);

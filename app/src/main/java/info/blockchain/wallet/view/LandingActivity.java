@@ -1,7 +1,6 @@
 package info.blockchain.wallet.view;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.IntDef;
@@ -40,7 +39,6 @@ public class LandingActivity extends BaseAuthActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_landing);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setTitle(R.string.app_name);
 
         //TODO - Temporarily hide this option - WIP

@@ -19,16 +19,14 @@ import javax.inject.Inject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.di.Injector;
 import rx.Subscriber;
-import rx.subscriptions.CompositeSubscription;
 
-public class PasswordRequiredViewModel implements ViewModel {
+public class PasswordRequiredViewModel extends BaseViewModel {
 
     @Inject protected AppUtil mAppUtil;
     @Inject protected PrefsUtil mPrefsUtil;
     @Inject protected AuthDataManager mAuthDataManager;
     private DataListener mDataListener;
     @VisibleForTesting boolean mWaitingForAuth = false;
-    @VisibleForTesting CompositeSubscription mCompositeSubscription;
 
     public interface DataListener {
 
@@ -55,9 +53,9 @@ public class PasswordRequiredViewModel implements ViewModel {
     public PasswordRequiredViewModel(DataListener listener) {
         Injector.getInstance().getAppComponent().inject(this);
         mDataListener = listener;
-        mCompositeSubscription = new CompositeSubscription();
     }
 
+    @Override
     public void onViewReady() {
         // No-op
     }
@@ -198,14 +196,5 @@ public class PasswordRequiredViewModel implements ViewModel {
     @NonNull
     public AppUtil getAppUtil() {
         return mAppUtil;
-    }
-
-    @Override
-    public void destroy() {
-        // Clear all subscriptions so that:
-        // 1) all processes are cancelled
-        // 2) processes don't try to update a null View
-        // 3) background processes don't leak memory
-        mCompositeSubscription.clear();
     }
 }

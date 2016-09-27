@@ -18,16 +18,14 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.annotations.Thunk;
 import piuk.blockchain.android.di.Injector;
 import rx.Subscriber;
-import rx.subscriptions.CompositeSubscription;
 
 @SuppressWarnings("WeakerAccess")
-public class ManualPairingViewModel implements ViewModel {
+public class ManualPairingViewModel extends BaseViewModel {
 
     @Inject protected AppUtil mAppUtil;
     @Inject protected AuthDataManager mAuthDataManager;
     @Thunk DataListener mDataListener;
     @VisibleForTesting boolean mWaitingForAuth = false;
-    @VisibleForTesting CompositeSubscription mCompositeSubscription;
 
     public interface DataListener {
 
@@ -52,9 +50,9 @@ public class ManualPairingViewModel implements ViewModel {
     public ManualPairingViewModel(DataListener listener) {
         Injector.getInstance().getAppComponent().inject(this);
         mDataListener = listener;
-        mCompositeSubscription = new CompositeSubscription();
     }
 
+    @Override
     public void onViewReady() {
         // No-op
     }
@@ -186,14 +184,5 @@ public class ManualPairingViewModel implements ViewModel {
     @NonNull
     public AppUtil getAppUtil() {
         return mAppUtil;
-    }
-
-    @Override
-    public void destroy() {
-        // Clear all subscriptions so that:
-        // 1) all processes are cancelled
-        // 2) processes don't try to update a null View
-        // 3) background processes don't leak memory
-        mCompositeSubscription.clear();
     }
 }

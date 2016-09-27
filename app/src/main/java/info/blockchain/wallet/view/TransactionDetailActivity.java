@@ -2,7 +2,6 @@ package info.blockchain.wallet.view;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
@@ -30,7 +29,6 @@ import piuk.blockchain.android.databinding.ActivityTransactionDetailsBinding;
 
 public class TransactionDetailActivity extends BaseAuthActivity implements TransactionDetailViewModel.DataListener {
 
-    // TODO: 12/09/2016 Use new API for getting Fiat value at time of transaction
     public static final String KEY_TRANSACTION_URL = "key_transaction_url";
     @Thunk ActivityTransactionDetailsBinding mBinding;
     private TransactionDetailViewModel mViewModel;
@@ -38,7 +36,6 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_transaction_details);
         mViewModel = new TransactionDetailViewModel(this);

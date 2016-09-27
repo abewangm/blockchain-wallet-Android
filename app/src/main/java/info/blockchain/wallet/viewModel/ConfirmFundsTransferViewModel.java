@@ -5,6 +5,7 @@ import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pair;
 
+import info.blockchain.wallet.datamanagers.TransferFundsDataManager;
 import info.blockchain.wallet.model.ItemAccount;
 import info.blockchain.wallet.model.PendingTransaction;
 import info.blockchain.wallet.payload.Account;
@@ -17,7 +18,6 @@ import info.blockchain.wallet.util.MonetaryUtil;
 import info.blockchain.wallet.util.PrefsUtil;
 import info.blockchain.wallet.util.StringUtils;
 import info.blockchain.wallet.view.helpers.ToastCustom;
-import info.blockchain.wallet.datamanagers.TransferFundsDataManager;
 import info.blockchain.wallet.view.helpers.WalletAccountHelper;
 
 import java.util.ArrayList;
@@ -31,10 +31,9 @@ import piuk.blockchain.android.annotations.Thunk;
 import piuk.blockchain.android.di.Injector;
 import rx.Subscriber;
 import rx.exceptions.Exceptions;
-import rx.subscriptions.CompositeSubscription;
 
 @SuppressWarnings("WeakerAccess")
-public class ConfirmFundsTransferViewModel implements ViewModel {
+public class ConfirmFundsTransferViewModel extends BaseViewModel {
 
     @Thunk DataListener mDataListener;
     @Inject WalletAccountHelper mWalletAccountHelper;
@@ -44,7 +43,6 @@ public class ConfirmFundsTransferViewModel implements ViewModel {
     @Inject StringUtils mStringUtils;
     @Inject ExchangeRateFactory mExchangeRateFactory;
     @VisibleForTesting List<PendingTransaction> mPendingTransactions;
-    @VisibleForTesting CompositeSubscription mCompositeSubscription;
 
     public interface DataListener {
 
@@ -76,9 +74,9 @@ public class ConfirmFundsTransferViewModel implements ViewModel {
     public ConfirmFundsTransferViewModel(DataListener listener) {
         Injector.getInstance().getAppComponent().inject(this);
         mDataListener = listener;
-        mCompositeSubscription = new CompositeSubscription();
     }
 
+    @Override
     public void onViewReady() {
         updateToAddress(mPayloadManager.getPayload().getHdWallet().getDefaultIndex());
     }
@@ -250,14 +248,5 @@ public class ConfirmFundsTransferViewModel implements ViewModel {
 
         // Find corrected position
         return activeAccounts.indexOf(mPayloadManager.getPayload().getHdWallet().getAccounts().get(accountIndex));
-    }
-
-    @Override
-    public void destroy() {
-        // Clear all subscriptions so that:
-        // 1) all processes are cancelled
-        // 2) processes don't try to update a null View
-        // 3) background processes don't leak memory
-        mCompositeSubscription.clear();
     }
 }

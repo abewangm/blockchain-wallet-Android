@@ -32,15 +32,13 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.di.Injector;
 import rx.Observable;
-import rx.subscriptions.CompositeSubscription;
 
 @SuppressWarnings("WeakerAccess")
-public class MainViewModel implements ViewModel {
+public class MainViewModel extends BaseViewModel {
 
     private Context context;
     private DataListener dataListener;
     private OSUtil osUtil;
-    private CompositeSubscription compositeSubscription;
     @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
     @Inject protected PayloadManager payloadManager;
@@ -66,9 +64,9 @@ public class MainViewModel implements ViewModel {
         this.dataListener = dataListener;
         this.osUtil = new OSUtil(context);
         this.appUtil.applyPRNGFixes();
-        this.compositeSubscription = new CompositeSubscription();
     }
 
+    @Override
     public void onViewReady() {
         checkBackendEnvironment();
         checkRooted();
@@ -78,7 +76,7 @@ public class MainViewModel implements ViewModel {
 
     private void checkIfShouldShowEmailVerification() {
         if (appUtil.isNewlyCreated()) {
-            compositeSubscription.add(
+            mCompositeSubscription.add(
                     getSettingsApi()
                             .compose(RxUtil.applySchedulers())
                             .subscribe(settings -> {
@@ -181,12 +179,12 @@ public class MainViewModel implements ViewModel {
 
     @Override
     public void destroy() {
+        super.destroy();
         appUtil.deleteQR();
         context = null;
         dataListener = null;
         stopWebSocketService();
         DynamicFeeCache.getInstance().destroy();
-        compositeSubscription.clear();
     }
 
     private void exchangeRateThread() {

@@ -27,7 +27,6 @@ public class SupportActivity extends BaseAuthActivity {
         super.onCreate(savedInstanceState);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_support);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         //TODO - don't use NoActionBar in styles.xml (affects BalanceFragment, so don't just edit styles.xml)
         binding.toolbarContainer.toolbarGeneral.setTitle(getResources().getString(R.string.contact_support));

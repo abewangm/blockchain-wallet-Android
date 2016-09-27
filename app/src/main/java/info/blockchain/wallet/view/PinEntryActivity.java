@@ -1,7 +1,6 @@
 package info.blockchain.wallet.view;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
@@ -46,7 +45,6 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
         super.onCreate(savedInstanceState);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_pin_entry);
         mViewModel = new PinEntryViewModel(this);
