@@ -260,13 +260,13 @@
     <string name="backup_step_2">Ingresa tu frase de recuperación de 12 palabras</string>
     <string name="START">EMPEZAR</string>
     <string name="backup_write_down_words">Es importante asegurarte de que escribas las palabras exactamente como aparecen aquí y en el mismo orden.</string>
-    <string name="NEXT_WORD">PALABRA SIGUIENTE </string>
+    <string name="backup_next_word">PALABRA SIGUIENTE </string>
     <string name="press_to_reveal">Presiona y mantén presionado para mostrar la palabra</string>
     <string name="VERIFY">VERIFICAR</string>
     <string name="backup_verify_heading">Escribe las siguientes palabras de tu frase de recuperación para completar el proceso de respaldo.</string>
-    <string name="VERIFY_BACKUP">VERIFICAR COPIA DE SEGURIDAD</string>
-    <string name="Word">Palabra</string>
-    <string name="of">de</string>
+    <string name="backup_verify_button">VERIFICAR COPIA DE SEGURIDAD</string>
+    <string name="backup_word">Palabra</string>
+    <string name="backup_of">de</string>
     <string name="backup_confirmed">Respaldo confirmado</string>
     <string name="backup_word_mismatch">La palabra no coincide</string>
     <string name="backup_days_ago">Hiciste una copia de seguridad hace %1$s %2$s</string>
@@ -510,11 +510,11 @@
     <string name="preferences">Preferencias</string>
     <string name="two_fa_summary">Protege tu monedero de accesos no autorizados habilitando la verificación de 2 pasos. Puedes elegir utilizar tu número de celular para asegurar tu monedero. Se te pedirá este código cuando intentes acceder a tu monedero con el navegador web.\n\nPara poder usar otros métodos de autentificación en lugar de éste, inicia sesión en nuestro monedero web.</string>
 
-    <string name="PREVIOUS_WORD">PALABRA ANTERIOR</string>
-    <string name="DONE">Completado</string>
-    <string name="backup_funds">Respaldar fondos</string>
+    <string name="backup_previous_word">PALABRA ANTERIOR</string>
+    <string name="backup_done">Completado</string>
+    <string name="backup_funds_title">Respaldar fondos</string>
     <string name="backup_funds_again">Crear nueva copia de seguridad de los fondos</string>
-    <string name="lost_mnemonic">¿Perdiste tu frase de recuperación de 12 palabras?</string>
+    <string name="backup_lost_mnemonic">¿Perdiste tu frase de recuperación de 12 palabras?</string>
     <string name="backup_write_down_12_words">Escribe las siguientes 12 palabras en una hoja de papel. Cualquier persona que tenga acceso a tu Frase de Recuperación puede acceder a tus Bitcoin, por eso asegúrate de guardarlo offline en un lugar muy seguro.</string>
     <string name="rate_title">Califica al monedero Blockchain</string>
     <string name="rate_message">¿Estás disfrutando de tu monedero Blockchain? Por favor tómate un momento para dejar una reseña en Google Play para que así otros la conozcan.</string>

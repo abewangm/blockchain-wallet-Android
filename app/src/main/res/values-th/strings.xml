@@ -260,13 +260,13 @@
     <string name="backup_step_2">กรอกวลีเพื่อการกู้คืน 12 คำของคุณ</string>
     <string name="START">เริ่ม</string>
     <string name="backup_write_down_words">เป็นสิ่งสำคัญที่ต้องตรวจสอบให้แน่ใจว่าคุณได้เขียนคำของคุณลงไปอย่างแม่นยำตามที่แสดงอยู่ที่นี่และในลำดับเดียวกันนี้</string>
-    <string name="NEXT_WORD">คำถัดไป</string>
+    <string name="backup_next_word">คำถัดไป</string>
     <string name="press_to_reveal">กดค้างเพื่อเปิดชมคำ</string>
     <string name="VERIFY">ยืนยัน</string>
     <string name="backup_verify_heading">กรอกคำต่อไปนี้จากวลีเพื่อการกู้คืนของคุณเพื่อดำเนินกระบวนการสำรองข้อมูลให้เสร็จสิ้น</string>
-    <string name="VERIFY_BACKUP">ยืนยันการสำรองข้อมูล</string>
-    <string name="Word">คำ</string>
-    <string name="of">จาก</string>
+    <string name="backup_verify_button">ยืนยันการสำรองข้อมูล</string>
+    <string name="backup_word">คำ</string>
+    <string name="backup_of">จาก</string>
     <string name="backup_confirmed">ยืนยันการสำรองข้อมูลแล้ว</string>
     <string name="backup_word_mismatch">คำไม่ตรงกัน</string>
     <string name="backup_days_ago">คุณได้สำรองกระเป๋าเงินของคุณ %1$s %2$s ก่อนหน้านี้</string>
@@ -510,11 +510,11 @@
     <string name="preferences">การตั้งค่า</string>
     <string name="two_fa_summary">ปกป้องกระเป๋าเงินของคุณจากการเข้าถึงที่ไม่ได้รับอนุญาตโดยการเปิดใช้งานการยืนยัน 2 ขั้นตอน คุณสามารถเลือกใช้หมายเลขโทรศัพท์มือถือของคุณเพื่อทำให้กระเป๋าเงินของคุณปลอดภัย รหัสผ่านนี้จะได้รับการร้องขอเมื่อคุณพยายามที่จะเข้าถึงกระเป๋าเงินของคุณผ่านทางเว็บเบราว์เซอร์\n\nเพื่อใช้วิธีการพิสูจน์ตัวตนอื่น โปรดล็อกอินไปยังกระเป๋าเงินเว็บของเรา</string>
 
-    <string name="PREVIOUS_WORD">คำก่อนหน้า</string>
-    <string name="DONE">เสร็จแล้ว</string>
-    <string name="backup_funds">สำรองเงิน</string>
+    <string name="backup_previous_word">คำก่อนหน้า</string>
+    <string name="backup_done">เสร็จแล้ว</string>
+    <string name="backup_funds_title">สำรองเงิน</string>
     <string name="backup_funds_again">สำรองเงินอีกครั้ง</string>
-    <string name="lost_mnemonic">ทำวลีเพื่อการกู้คืน 12 คำสูญหาย?</string>
+    <string name="backup_lost_mnemonic">ทำวลีเพื่อการกู้คืน 12 คำสูญหาย?</string>
     <string name="backup_write_down_12_words">เขียน 12 คำต่อไปนี้ลงบนกระดาษ ผู้ใดก็ตามซึ่งมีการเข้าถึงวลีเพื่อการกู้คืนของคุณจะสามารถเข้าถึง bitcoin ของคุณได้ ดังนั้นโปรดทำให้มั่นใจว่าคุณเก็บมันไว้นอกคอมพิวเตอร์ในที่ที่ปลอดภัย</string>
     <string name="rate_title">ให้คะแนนกระเป๋าเงิน Blockchain </string>
     <string name="rate_message">สนุกกับการใช้งานกระเป๋าเงิน Blockchain? โปรดใช้เวลาสักเล็กน้อยในการรีวิวเราใน Google Play และบอกให้ผู้อื่นรู้จักเรา</string>

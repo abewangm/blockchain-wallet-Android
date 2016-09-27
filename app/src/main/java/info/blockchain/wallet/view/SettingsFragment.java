@@ -60,8 +60,11 @@ import java.util.TimerTask;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.annotations.Thunk;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceClickListener {
+
+    public static final String EXTRA_SHOW_TWO_FA_DIALOG = "show_two_fa_dialog";
     public static final String URL_TOS_POLICY = "https://blockchain.com/terms";
     public static final String URL_PRIVACY_POLICY = "https://blockchain.com/privacy";
 
@@ -89,18 +92,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     private Preference privacyPref;
     private Preference disableRootWarningPref;
 
-    private Settings settingsApi;
+    @Thunk Settings settingsApi;
     private int pwStrength = 0;
     private PrefsUtil prefsUtil;
     private MonetaryUtil monetaryUtil;
-    private PayloadManager payloadManager;
+    @Thunk PayloadManager payloadManager;
     // Flag for setting 2FA after phone confirmation
-    private boolean show2FaAfterPhoneVerified = false;
+    @Thunk boolean show2FaAfterPhoneVerified = false;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-
             if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
                 fetchUpdatedSettings();
             }
@@ -118,7 +120,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         fetchUpdatedSettings();
     }
 
-    private void fetchUpdatedSettings(){
+    @Thunk void fetchUpdatedSettings(){
         new AsyncTask<Void, Void, Void>() {
 
             MaterialProgressDialog progress;
@@ -172,7 +174,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     @UiThread
-    private void refreshList() {
+    @Thunk void refreshList() {
         if (isAdded() && getActivity() != null) {
             PreferenceScreen prefScreen = getPreferenceScreen();
             if (prefScreen != null) prefScreen.removeAll();
@@ -291,6 +293,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                     !new RootUtil().isDeviceRooted()) {
                 PreferenceCategory appCategory = (PreferenceCategory) findPreference("app");
                 appCategory.removePreference(disableRootWarningPref);
+            }
+
+            // Check if referred from Security Centre dialog
+            if (getActivity().getIntent() != null && getActivity().getIntent().hasExtra(EXTRA_SHOW_TWO_FA_DIALOG)) {
+                showDialogTwoFA();
             }
         }
     }
@@ -492,7 +499,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     @UiThread
-    private void updateNotification(final boolean enabled, int notificationType){
+    @Thunk void updateNotification(final boolean enabled, int notificationType){
 
         if(enabled){
 
@@ -817,7 +824,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 .show();
     }
 
-    private void showDialogVerifySms() {
+    @Thunk void showDialogVerifySms() {
 
         final AppCompatEditText etSms = new AppCompatEditText(getActivity());
         etSms.setSingleLine(true);
@@ -1048,7 +1055,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         alertDialog.show();
     }
 
-    private void showDialogTwoFA() {
+    @Thunk void showDialogTwoFA() {
         if (!settingsApi.isSmsVerified()) {
             twoStepVerificationPref.setChecked(false);
             show2FaAfterPhoneVerified = true;

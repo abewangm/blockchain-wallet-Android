@@ -260,13 +260,13 @@
     <string name="backup_step_2">Geben Sie Ihr 12 Worte umfassendes Wiederherstellungspasswort ein</string>
     <string name="START">STARTEN</string>
     <string name="backup_write_down_words">Es ist wichtig, dass Sie sich Ihre Worte auf jeden Fall exakt nach Wortlaut und in dieser Reihenfolge notieren.</string>
-    <string name="NEXT_WORD">NÄCHSTES WORT</string>
+    <string name="backup_next_word">NÄCHSTES WORT</string>
     <string name="press_to_reveal">Zur Anzeige des Wortes drücken und festhalten</string>
     <string name="VERIFY">ÜBERPRÜFEN</string>
     <string name="backup_verify_heading">Zur Beendigung des Backup-Verfahrens geben Sie die folgenden Worte Ihres Wiederherstellungspassworts ein.</string>
-    <string name="VERIFY_BACKUP">BACKUP ÜBERPRÜFEN</string>
-    <string name="Word">Wort</string>
-    <string name="of">von</string>
+    <string name="backup_verify_button">BACKUP ÜBERPRÜFEN</string>
+    <string name="backup_word">Wort</string>
+    <string name="backup_of">von</string>
     <string name="backup_confirmed">Backup wurde bestätigt</string>
     <string name="backup_word_mismatch">Wort passt nicht</string>
     <string name="backup_days_ago">Sie haben Ihre Wallet vor %1$s %2$s Tagen gesichert</string>
@@ -510,11 +510,11 @@
     <string name="preferences">Voreinstellungen</string>
     <string name="two_fa_summary">Schützen Sie durch die Aktivierung der 2-Schritt-Verifizierung Ihre Wallet vor unberechtigten Zugriffen. Sie können zur Sicherung Ihrer Wallet wahlweise eine kostenlose App oder Ihre Handynummer verwenden. Wenn Sie über den Webbrowser auf Ihre Wallet zugreifen möchten, wird nach diesem Code gefragt.\n\nZur Verwendung einer anderen Authentifizierungsmethode, melden Sie sich bitte bei unserer Web-Wallet an.</string>
 
-    <string name="PREVIOUS_WORD">VORHERIGES WORT</string>
-    <string name="DONE">FERTIG</string>
-    <string name="backup_funds">Guthaben sichern</string>
+    <string name="backup_previous_word">VORHERIGES WORT</string>
+    <string name="backup_done">FERTIG</string>
+    <string name="backup_funds_title">Guthaben sichern</string>
     <string name="backup_funds_again">Guthaben erneut sichern</string>
-    <string name="lost_mnemonic">Haben Sie Ihr 12 Worte umfassendes Wiederherstellungspasswort verloren?</string>
+    <string name="backup_lost_mnemonic">Haben Sie Ihr 12 Worte umfassendes Wiederherstellungspasswort verloren?</string>
     <string name="backup_write_down_12_words">Notieren Sie die folgenden 12 Worte auf einem Stück Papier. Jeder mit Zugang zu Ihrem Wiederherstellungspasswort kann auf Ihr Bitcoin zugreifen. Deshalb ist es äußerst wichtig, es offline an einem sicheren und privaten Ort aufzubewahren.</string>
     <string name="rate_title">Blockchain Wallet bewerten</string>
     <string name="rate_message">Gefällt Ihnen die Blockchain Wallet? Bitte nehmen Sie sich einen Moment Zeit, um bei Google Play eine Bewertung zu hinterlassen und andere darüber zu informieren.</string>

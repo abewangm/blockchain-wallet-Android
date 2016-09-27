@@ -68,6 +68,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         binding.setViewModel(mainViewModel);
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        mainViewModel.onViewReady();
     }
 
     @Override
@@ -331,6 +333,18 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     private Context getActivity() {
         return this;
+    }
+
+    @Override
+    public void showEmailVerificationDialog(String email) {
+        String message = String.format(getString(R.string.security_centre_email_message), email);
+        SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
+                R.string.security_centre_email_title,
+                message,
+                R.drawable.vector_email,
+                android.R.string.ok);
+        securityPromptDialog.showDialog(getSupportFragmentManager());
+        securityPromptDialog.setPositiveButtonListener(v -> securityPromptDialog.dismiss());
     }
 
     @Override

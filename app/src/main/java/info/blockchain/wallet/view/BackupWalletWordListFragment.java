@@ -4,8 +4,9 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,54 +17,37 @@ import android.view.inputmethod.InputMethodManager;
 import info.blockchain.wallet.util.BackupWalletUtil;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.databinding.FragmentBackupWallet2Binding;
+import piuk.blockchain.android.annotations.Thunk;
+import piuk.blockchain.android.databinding.FragmentBackupWordListBinding;
 
-public class BackupWalletFragment2 extends Fragment {
+public class BackupWalletWordListFragment extends Fragment {
 
-    private int currentWordIndex = 0;
-    private String[] mnemonic = null;
+    @Thunk FragmentBackupWordListBinding binding;
+    @Thunk Animation animEnterFromRight;
+    @Thunk Animation animEnterFromLeft;
+    private Animation animExitToLeft;
+    private Animation animExitToRight;
 
-    private String word = null;
-    private String of = null;
-
-    private Animation animExitToLeft = null;
-    private Animation animEnterFromRight = null;
-
-    private Animation animExitToRight = null;
-    private Animation animEnterFromLeft = null;
-
-    private FragmentBackupWallet2Binding binding;
-    private String secondPassword = null;
+    int currentWordIndex = 0;
+    @Thunk String[] mnemonic;
+    @Thunk String word;
+    private String of;
+    private String secondPassword;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_backup_word_list, container, false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setElevation(0F);
+        }
 
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_backup_wallet_2, container, false);
-
-        Bundle bundle = this.getArguments();
+        Bundle bundle = getArguments();
         if (bundle != null) {
             secondPassword = bundle.getString("second_password");
         }
 
-        binding.startAction.setVisibility(View.VISIBLE);
-        binding.previousWordAction.setVisibility(View.INVISIBLE);
-        binding.nextWordAction.setVisibility(View.INVISIBLE);
-        binding.cardLayout.setVisibility(View.INVISIBLE);
-        binding.tvPressReveal.setVisibility(View.INVISIBLE);
-        binding.tvCurrentWord.setVisibility(View.INVISIBLE);
-
-        binding.startAction.setOnClickListener(v -> {
-            binding.startAction.setVisibility(View.INVISIBLE);
-            binding.tvInstructions.setText(getString(R.string.backup_write_down_words));
-            binding.previousWordAction.setVisibility(View.GONE);
-            binding.nextWordAction.setVisibility(View.VISIBLE);
-            binding.cardLayout.setVisibility(View.VISIBLE);
-            binding.tvPressReveal.setVisibility(View.VISIBLE);
-            binding.tvCurrentWord.setVisibility(View.VISIBLE);
-        });
-
-        word = getResources().getString(R.string.Word);
-        of = getResources().getString(R.string.of);
+        word = getResources().getString(R.string.backup_word);
+        of = getResources().getString(R.string.backup_of);
 
         animExitToLeft = AnimationUtils.loadAnimation(getActivity(), R.anim.exit_to_left);
         animEnterFromRight = AnimationUtils.loadAnimation(getActivity(), R.anim.enter_from_right);
@@ -80,7 +64,7 @@ public class BackupWalletFragment2 extends Fragment {
 
         binding.nextWordAction.setOnClickListener(v -> {
 
-            if(currentWordIndex >= 0){
+            if (currentWordIndex >= 0) {
                 binding.previousWordAction.setVisibility(View.VISIBLE);
             }
 
@@ -95,6 +79,7 @@ public class BackupWalletFragment2 extends Fragment {
 
                     @Override
                     public void onAnimationRepeat(Animation animation) {
+                        // No-op
                     }
 
                     @Override
@@ -113,8 +98,8 @@ public class BackupWalletFragment2 extends Fragment {
 
                 currentWordIndex = 0;
 
-                Fragment fragment = new BackupWalletFragment3();
-                if(secondPassword!=null) {
+                Fragment fragment = new BackupWalletVerifyFragment();
+                if (secondPassword != null) {
                     Bundle args = new Bundle();
                     args.putString("second_password", secondPassword);
                     fragment.setArguments(args);
@@ -127,16 +112,17 @@ public class BackupWalletFragment2 extends Fragment {
                         .commit();
             } else {
 
-                if (currentWordIndex == mnemonic.length - 1)
-                    binding.nextWordAction.setText(getResources().getString(R.string.DONE));
-                else
-                    binding.nextWordAction.setText(getResources().getString(R.string.NEXT_WORD));
+                if (currentWordIndex == mnemonic.length - 1) {
+                    binding.nextWordAction.setText(getResources().getString(R.string.backup_done));
+                } else {
+                    binding.nextWordAction.setText(getResources().getString(R.string.backup_next_word));
+                }
             }
         });
 
         binding.previousWordAction.setOnClickListener(v1 -> {
 
-            binding.nextWordAction.setText(getResources().getString(R.string.NEXT_WORD));
+            binding.nextWordAction.setText(getResources().getString(R.string.backup_next_word));
 
             if (currentWordIndex == 1) {
                 binding.previousWordAction.setVisibility(View.GONE);
@@ -151,6 +137,7 @@ public class BackupWalletFragment2 extends Fragment {
 
                 @Override
                 public void onAnimationRepeat(Animation animation) {
+                    // No-op
                 }
 
                 @Override
@@ -171,11 +158,7 @@ public class BackupWalletFragment2 extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
         currentWordIndex = 0;
-
-        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar_general);
-        toolbar.setNavigationOnClickListener(v -> getActivity().onBackPressed());
     }
 
     @Override
@@ -187,5 +170,4 @@ public class BackupWalletFragment2 extends Fragment {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
-
 }
