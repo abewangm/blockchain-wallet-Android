@@ -33,7 +33,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         if (viewType == TYPE_IMPORTED_HEADER) {
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row_header, parent, false);
             TextView header = (TextView) v.findViewById(R.id.my_account_row_header);
-            header.setText(AccountActivity.IMPORTED_HEADER);
+            header.setText(context.getResources().getString(R.string.imported_addresses));
         }
 
         return new ViewHolder(v);
@@ -95,7 +95,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
     public int getItemViewType(int position) {
 
         String title = items.get(position).getLabel();
-        if (title.equals(AccountActivity.IMPORTED_HEADER))
+        if (title.equals(context.getResources().getString(R.string.imported_addresses)))
             return TYPE_IMPORTED_HEADER;
 
         else

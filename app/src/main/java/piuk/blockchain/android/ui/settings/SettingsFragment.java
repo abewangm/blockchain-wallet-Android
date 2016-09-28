@@ -53,7 +53,7 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.home.BalanceFragment;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
