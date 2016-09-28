@@ -142,7 +142,9 @@ public class CreateWalletFragment extends Fragment {
 
                 if (!FormatsUtil.getInstance().isValidEmailAddress(em)) {
                     ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                } else if (pw1.length() < 4 || pw1.length() > 255) {
+                } else if (pw1.length() < 4) {
+                    ToastCustom.makeText(getActivity(), getString(R.string.invalid_password_too_short), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                } else if (pw1.length() > 255) {
                     ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                 } else if (!pw1.equals(pw2)) {
                     ToastCustom.makeText(getActivity(), getString(R.string.password_mismatch_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
