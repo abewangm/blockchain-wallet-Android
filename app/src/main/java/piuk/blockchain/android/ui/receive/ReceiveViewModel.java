@@ -155,7 +155,7 @@ public class ReceiveViewModel extends BaseViewModel {
 
     public void generateQrCode(String uri) {
         mDataListener.showQrLoading();
-
+        mCompositeSubscription.clear();
         mCompositeSubscription.add(
                 mDataManager.generateQrCode(uri, DIMENSION_QR_CODE)
                         .subscribe(qrCode -> {
