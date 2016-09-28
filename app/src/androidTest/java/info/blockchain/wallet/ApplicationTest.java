@@ -5,7 +5,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.robotium.solo.Solo;
 
-import info.blockchain.wallet.view.MainActivity;
+import piuk.blockchain.android.ui.home.MainActivity;
 
 import org.junit.After;
 import org.junit.Before;

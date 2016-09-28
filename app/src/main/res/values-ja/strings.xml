@@ -105,7 +105,6 @@
 
     <string name="support">サポート</string>
     <string name="rate_us">評価する</string>
-    <string name="email_chooser">メールを送信...</string>
     <string name="about">ブロックチェーンウォレット %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">無料商人アプリ</string>
     <string name="password_or_wipe">パスワードを使ってログインするかこの財布を忘れる</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">財布IDをクリップボードにコピーしますか？その場合、その他のアプリケーションがこの情報を閲覧できる可能性があることに注意してください。</string>
 
     <string name="ssl_pinning_invalid">SSL証明書のピニングに失敗しました。悪意のあるアクティビティが行われている可能性があります。続行する前にネットワーク接続とデバイスを確認してください。</string>
-
-    <string name="my_wallet_id">私の財布ID</string>
-    <string name="EMAIL">メール</string>
-    <string name="new_support_request">新規サポートリクエスト</string>
-    <string name="contact_support">サポートへお問い合わせ</string>
-    <string name="email_subject">Androidサポートリクエスト</string>
 
     <string name="merchant_map">商人マップ</string>
     <string name="merchant_suggest">商人を提案</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">アドレスを保存中...</string>
 
     <string name="cannot_launch_app">ブロックチェーンウォレットはこのデバイスで起動できません。</string>
-    <string name="support_guide">発生している問題の詳細と、その問題が発生するまでの手順を説明してください。</string>
     <string name="label">ラベル</string>
     <string name="edit">編集</string>
     <string name="label_cant_be_empty">ラベル名は必須です。</string>

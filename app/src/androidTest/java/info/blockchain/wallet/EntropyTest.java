@@ -3,16 +3,13 @@ package info.blockchain.wallet;
 import android.content.Context;
 
 import info.blockchain.api.ExternalEntropy;
-import info.blockchain.wallet.util.AppUtil;
+import piuk.blockchain.android.util.AppUtil;
 import info.blockchain.wallet.util.Util;
-import info.blockchain.wallet.util.WebUtil;
 
 import org.bitcoinj.core.ECKey;
 import org.spongycastle.util.encoders.Hex;
 
 import java.security.SecureRandom;
-
-import static piuk.blockchain.android.R.id.result;
 
 public class EntropyTest extends BlockchainTest {
 

@@ -116,7 +116,6 @@
 
     <string name="support">Support</string>
     <string name="rate_us">Rate us</string>
-    <string name="email_chooser">Send e-mail…</string>
     <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Free Merchant app</string>
     <string name="password_or_wipe">Enter using your password or forget this wallet</string>
@@ -185,12 +184,6 @@
     <string name="guid_to_clipboard">Copy your Wallet ID to the clipboard? If so, be advised that other applications may be able to look at this information.</string>
 
     <string name="ssl_pinning_invalid">Secure connection to the host has failed. This might indicate malicious activity. Please verify your network connection and device before continuing.</string>
-
-    <string name="my_wallet_id">My Wallet ID</string>
-    <string name="EMAIL">EMAIL</string>
-    <string name="new_support_request">New Support Request</string>
-    <string name="contact_support">Contact Support</string>
-    <string name="email_subject">Android Support Request</string>
 
     <string name="merchant_map">Merchant Map</string>
     <string name="merchant_suggest">Suggest Merchant</string>
@@ -281,7 +274,6 @@
     <string name="saving_address">Saving address…</string>
 
     <string name="cannot_launch_app">Blockchain Wallet cannot be run on this device.</string>
-    <string name="support_guide">Please describe in detail the issue you are experiencing, along with any steps we can take to reproduce it.</string>
     <string name="label">Label</string>
     <string name="edit">Edit</string>
     <string name="label_cant_be_empty">Label can\'t be blank.</string>

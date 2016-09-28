@@ -105,7 +105,6 @@
 
     <string name="support">Ayuda</string>
     <string name="rate_us">Califícanos</string>
-    <string name="email_chooser">Enviar un correo electrónico...</string>
     <string name="about">Monedero Blockchain %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Aplicación gratuita para comerciante</string>
     <string name="password_or_wipe">Entrar introduciendo tu contraseña u olvidar este monedero</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">¿Quieres copiar tu ID de monedero al portapapeles? Si es así, ten en cuenta que es posible que otras aplicaciones vean esta información.</string>
 
     <string name="ssl_pinning_invalid">Se ha producido un error en la fijación del certificado SSL. Esto podría ser señal de actividad maliciosa. Por favor verifica tu conexión de red y el dispositivo antes de continuar.</string>
-
-    <string name="my_wallet_id">Mi identificador del monedero</string>
-    <string name="EMAIL">CORREO ELECTRÓNICO</string>
-    <string name="new_support_request">Nueva solicitud de asistencia</string>
-    <string name="contact_support">Contactar al centro de ayuda</string>
-    <string name="email_subject">Solicitud de asistencia para Android</string>
 
     <string name="merchant_map">Mapa del comerciante</string>
     <string name="merchant_suggest">Sugerir comerciante</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">Guardando dirección...</string>
 
     <string name="cannot_launch_app">El monedero Blockchain no se puede ejecutar en este dispositivo.</string>
-    <string name="support_guide">Por favor describe en detalle el problema que experimentas, junto con los pasos que podemos tomar para reproducirlo.</string>
     <string name="label">Etiqueta</string>
     <string name="edit">Editar</string>
     <string name="label_cant_be_empty">La etiqueta no puede quedar en blanco.</string>

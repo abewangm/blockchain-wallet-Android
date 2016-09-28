@@ -2,87 +2,71 @@
 <android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-            android:title="@string/profile"
-            android:key="profile">
+        android:title="@string/profile"
+        android:key="profile">
         <Preference
-                android:title="@string/options_id"
-                android:key="guid"
-        />
+            android:title="@string/options_id"
+            android:key="guid" />
         <Preference
-                android:title="@string/email"
-                android:key="email"
-        />
+            android:title="@string/email"
+            android:key="email" />
         <Preference
-                android:title="@string/mobile"
-                android:key="mobile"
-        />
+            android:title="@string/mobile"
+            android:key="mobile" />
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/preferences"
-            android:key="preferences">
+        android:title="@string/preferences"
+        android:key="preferences">
         <Preference
-                android:title="@string/options_units"
-                android:key="units"
-        />
+            android:title="@string/options_units"
+            android:key="units" />
         <Preference
-                android:title="@string/options_currency"
-                android:key="fiat"
-        />
+            android:title="@string/options_currency"
+            android:key="fiat" />
         <SwitchPreferenceCompat
-                android:title="@string/email_notifications"
-                android:key="email_notifications"
-        />
+            android:title="@string/email_notifications"
+            android:key="email_notifications" />
         <SwitchPreferenceCompat
-                android:title="@string/sms_notifications"
-                android:key="sms_notifications"
-        />
+            android:title="@string/sms_notifications"
+            android:key="sms_notifications" />
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/security"
-            android:key="security">
+        android:title="@string/security"
+        android:key="security">
         <Preference
-                android:title="@string/change_pin_code"
-                android:key="pin"
-        />
+            android:title="@string/change_pin_code"
+            android:key="pin" />
         <SwitchPreferenceCompat
-                android:title="@string/two_fa"
-                android:key="2fa"
-        />
+            android:title="@string/two_fa"
+            android:key="2fa" />
         <Preference
-                android:title="@string/change_password"
-                android:key="change_pw"
-        />
+            android:title="@string/change_password"
+            android:key="change_pw" />
         <Preference
-                android:title="@string/password_hint"
-                android:key="pw_hint1"
-        />
+            android:title="@string/password_hint"
+            android:key="pw_hint1" />
         <SwitchPreferenceCompat
-                android:title="@string/tor_requests"
-                android:key="tor"
-        />
+            android:title="@string/tor_requests"
+            android:key="tor" />
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/app"
-            android:key="app">
+        android:title="@string/app"
+        android:key="app">
         <Preference
-                android:title="@string/preferences_about_title"
-                android:key="about"
-        />
+            android:title="@string/preferences_about_title"
+            android:key="about" />
         <Preference
-                android:title="@string/options_tos"
-                android:key="tos"
-        />
+            android:title="@string/options_tos"
+            android:key="tos" />
         <Preference
-                android:title="@string/options_privacy"
-                android:key="privacy"
-        />
+            android:title="@string/options_privacy"
+            android:key="privacy" />
         <CheckBoxPreference
-                android:title="@string/disable_root_warning"
-                android:key="disable_root_warning"
-        />
+            android:title="@string/disable_root_warning"
+            android:key="disable_root_warning" />
     </PreferenceCategory>
 
 </android.support.v7.preference.PreferenceScreen>

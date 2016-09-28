@@ -11,11 +11,10 @@ import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
-import info.blockchain.wallet.access.AccessState;
-
-import piuk.blockchain.android.annotations.Thunk;
-import piuk.blockchain.android.di.Injector;
-import piuk.blockchain.android.exceptions.LoggingExceptionHandler;
+import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.util.annotations.Thunk;
+import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
 import rx.plugins.RxJavaHooks;
 
 /**
@@ -35,7 +34,7 @@ public class BlockchainApplication extends Application {
             MultiDex.install(base);
         }
     }
-    
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -60,10 +59,11 @@ public class BlockchainApplication extends Application {
      * vulnerabilities. This provider is normally updated in Google Play Services anyway, but this
      * will catch any immediate issues that haven't been fixed in a slow rollout.
      *
-     * In the future, we may want to show some kind of warning to users or even
-     * stop the app, but this will harm users with versions of Android without GMS approval.
+     * In the future, we may want to show some kind of warning to users or even stop the app, but
+     * this will harm users with versions of Android without GMS approval.
      *
-     * @see <a href="https://developer.android.com/training/articles/security-gms-provider.html">Updating Your Security Provider</a>
+     * @see <a href="https://developer.android.com/training/articles/security-gms-provider.html">Updating
+     * Your Security Provider</a>
      */
     private void checkSecurityProviderAndPatchIfNeeded() {
         ProviderInstaller.installIfNeededAsync(this, new ProviderInstaller.ProviderInstallListener() {
@@ -85,23 +85,23 @@ public class BlockchainApplication extends Application {
     }
 
     /**
-     * Show a dialog prompting the user to
-     * install/update/enable Google Play services.
+     * Show a dialog prompting the user to install/update/enable Google Play services.
      *
      * @param errorCode Recoverable error code
      */
-    @Thunk void showError(int errorCode) {
+    @Thunk
+    void showError(int errorCode) {
         // TODO: 05/08/2016 Decide if we should alert users here or not
         Log.e(TAG, "Security Provider install failed with recoverable error: " +
                 GoogleApiAvailability.getInstance().getErrorString(errorCode));
     }
 
     /**
-     * This is reached if the provider cannot be updated for some reason.
-     * App should consider all HTTP communication to be vulnerable, and take
-     * appropriate action.
+     * This is reached if the provider cannot be updated for some reason. App should consider all
+     * HTTP communication to be vulnerable, and take appropriate action.
      */
-    @Thunk void onProviderInstallerNotAvailable() {
+    @Thunk
+    void onProviderInstallerNotAvailable() {
         // TODO: 05/08/2016 Decide if we should take action here or not
         Log.wtf(TAG, "Security Provider Installer not available");
     }

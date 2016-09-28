@@ -105,7 +105,6 @@
 
     <string name="support">支持</string>
     <string name="rate_us">给我们打分</string>
-    <string name="email_chooser">发送电子邮件...</string>
     <string name="about">Blockchain 钱包 %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">免费商家应用程序</string>
     <string name="password_or_wipe">使用密码进入或忘记此钱包</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">复制您的钱包 ID 到剪贴板？若这样操作，要注意其他应用程序可能会看到这些信息。</string>
 
     <string name="ssl_pinning_invalid">SSL 证书锁定已失败。这可能属于恶意行为。请在继续之前检查您的网络连接和设备。</string>
-
-    <string name="my_wallet_id">「我的钱包」 ID</string>
-    <string name="EMAIL">电子邮件</string>
-    <string name="new_support_request">新客户支持要求</string>
-    <string name="contact_support">联系客户支持</string>
-    <string name="email_subject">安卓支持请求</string>
 
     <string name="merchant_map">商家地图</string>
     <string name="merchant_suggest">推荐商家</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">正在保存地址...</string>
 
     <string name="cannot_launch_app">Blockchain 钱包无法在此设备上运行。</string>
-    <string name="support_guide">请详细描述遇到的问题，以及我们重现该问题所采取的步骤。</string>
     <string name="label">标签</string>
     <string name="edit">编辑</string>
     <string name="label_cant_be_empty">标签不能为空。</string>

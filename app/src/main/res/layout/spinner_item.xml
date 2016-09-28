@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView
-            android:id="@+id/text"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textSize="16sp"
-            android:gravity="left|center_vertical"
-            android:textColor="#FF000000"
-            android:paddingRight="16dip"
-            android:paddingTop="5dip"
-            android:paddingBottom="5dip"
-            android:maxLines="1"
-            android:marqueeRepeatLimit="marquee_forever"
-            android:background="@drawable/selector_pearl_white"
-            android:drawablePadding="8dp"
-            android:drawableRight="@drawable/ic_arrow_drop_down_grey600_24dp"
-    />
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="16sp"
+        android:gravity="left|center_vertical"
+        android:textColor="#FF000000"
+        android:paddingRight="16dip"
+        android:paddingTop="5dip"
+        android:paddingBottom="5dip"
+        android:maxLines="1"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:background="@drawable/selector_pearl_white"
+        android:drawablePadding="8dp"
+        android:drawableRight="@drawable/ic_arrow_drop_down_grey600_24dp" />
 </layout>

@@ -105,7 +105,6 @@
 
     <string name="support">Dukungan</string>
     <string name="rate_us">Beri kami nilai</string>
-    <string name="email_chooser">Kirim surel...</string>
     <string name="about">Dompet Rangkaian Blok %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Aplikasi Gratis untuk Pedagang</string>
     <string name="password_or_wipe">Isikan menggunakan kata sandi Anda atau lupakan dompet ini</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">Salin ID Dompet Anda ke papan klip? Jika ya, harap ketahui bahwa aplikasi lain mungkin juga dapat melihat informasi ini.</string>
 
     <string name="ssl_pinning_invalid">Penyematan sertifikat SSL gagal. Hal ini mungkin mengindikasikan aktivitas mencurigakan. Mohon verifikasi sambungan internet dan perangkat Anda sebelum melanjutkan.</string>
-
-    <string name="my_wallet_id">ID Dompet Saya</string>
-    <string name="EMAIL">SUREL:</string>
-    <string name="new_support_request">Permintaan Dukungan Baru</string>
-    <string name="contact_support">Hubungi Dukungan</string>
-    <string name="email_subject">Permintaan Dukungan Android</string>
 
     <string name="merchant_map">Peta Pedagang</string>
     <string name="merchant_suggest">Sarankan Penjual</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">Menyimpan alamat...</string>
 
     <string name="cannot_launch_app">Dompet Blockchain tidak dapat dijalankan pada perangkat ini.</string>
-    <string name="support_guide">Jelaskan secara rinci masalah yang Anda alami, bersama dengan setiap langkah yang dapat kita lakukan untuk mereproduksi itu.</string>
     <string name="label">Label</string>
     <string name="edit">Edit</string>
     <string name="label_cant_be_empty">Label tidak boleh kosong.</string>

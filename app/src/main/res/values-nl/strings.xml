@@ -105,7 +105,6 @@
 
     <string name="support">Ondersteuning</string>
     <string name="rate_us">Beoordeel ons</string>
-    <string name="email_chooser">E-mail verzenden...</string>
     <string name="about">Blockchain Portemonnee %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Gratis handelaren-app</string>
     <string name="password_or_wipe">Ga van start met behulp van uw wachtwoord of vergeet deze portemonnee</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">Uw Portemonnee-ID naar het klembord kopiëren? Zo ja, weet dan dat andere applicaties deze informatie kunnen bekijken.</string>
 
     <string name="ssl_pinning_invalid">SSL-certificaatpinning is mislukt. Dit kan op schadelijke activiteiten duiden. Controleer uw netwerkverbinding en het apparaat voordat u verder gaat.</string>
-
-    <string name="my_wallet_id">Mijn Portemonnee-ID</string>
-    <string name="EMAIL">E-MAILADRES</string>
-    <string name="new_support_request">Nieuw ondersteuningsverzoek</string>
-    <string name="contact_support">Neem contact op met de ondersteuningsdienst</string>
-    <string name="email_subject">Android-ondersteuningsverzoek</string>
 
     <string name="merchant_map">Kaart met handelaren</string>
     <string name="merchant_suggest">Handelaar voorstellen</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">Adres aan het opslaan...</string>
 
     <string name="cannot_launch_app">Blockchain Portemonnee kan niet worden uitgevoerd op dit apparaat.</string>
-    <string name="support_guide">Beschrijf in detail het probleem dat u ondervindt, samen met eventuele stappen die we kunnen nemen om het te reproduceren.</string>
     <string name="label">Label</string>
     <string name="edit">Bewerken</string>
     <string name="label_cant_be_empty">Label kan niet worden leeg gelaten.</string>

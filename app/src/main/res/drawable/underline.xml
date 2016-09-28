@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-     <item>
+    <item>
         <shape>
             <padding android:bottom="1dp" />
             <solid android:color="@color/blockchain_light_grey" />
@@ -10,8 +10,8 @@
 
     <!-- Background -->
     <item>
-	<shape>
+        <shape>
             <solid android:color="@color/blockchain_pearl_white" />
-	</shape>
+        </shape>
     </item>
 </layer-list>

@@ -105,7 +105,6 @@
 
     <string name="support">Destek</string>
     <string name="rate_us">Bize puan verin</string>
-    <string name="email_chooser">E-posta gönder</string>
     <string name="about">Blockchain Cüzdanı %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Ücretsiz Tacir yatırımı</string>
     <string name="password_or_wipe">Şifrenizi kullanarak giriş yapın veya bu cüzdanı unutun</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">Cüzden Kimliğinizi panoya kopyalayın? Öyleyse, lütfen diğer uygulamaların bu bilgiye bakabileceğini dikkate alın.</string>
 
     <string name="ssl_pinning_invalid">SSL sertifikası sabitleme başarısız oldu. Bu, kötü amaçlı aktiviteye işaret edebilir. Lütfen devam etmeden önce ağ bağlantınızı ve cihazınızı doğrulayın.</string>
-
-    <string name="my_wallet_id">Cüzdan Kimliğim</string>
-    <string name="EMAIL">EPOSTA </string>
-    <string name="new_support_request">Yeni Destek Talebi</string>
-    <string name="contact_support">Destek İle İletişim Kur</string>
-    <string name="email_subject">Android Destek Talebi</string>
 
     <string name="merchant_map">Tacir Haritası</string>
     <string name="merchant_suggest">Tacir Öner</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">Adres kaydediliyor...</string>
 
     <string name="cannot_launch_app">Blockchain Cüzdanı bu cihazda çalışmıyor.</string>
-    <string name="support_guide">Lütfen karşılaştığınız sorunu ayrıntılı şekilde ve bunu yeniden üretmek için atabileceğimiz adımlarla birlikte açıklayın.</string>
     <string name="label">Etiket</string>
     <string name="edit">Düzenle</string>
     <string name="label_cant_be_empty">Etiket boş olamaz.</string>

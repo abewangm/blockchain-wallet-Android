@@ -105,7 +105,6 @@
 
     <string name="support">Podpora</string>
     <string name="rate_us">Ohodnoťte nás</string>
-    <string name="email_chooser">Odeslat e-mail...</string>
     <string name="about">Peněženka Blockchain %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Bezplatná aplikace pro prodejce</string>
     <string name="password_or_wipe">Zadat pomocí hesla nebo zapomenout tuto peněženku</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">Chcete zkopírovat ID své peněženky do schránky? Pokud ano, mějte prosím na paměti, že tuto informaci budou moc zobrazit také ostatní aplikace.</string>
 
     <string name="ssl_pinning_invalid">Připnutí certifikátu SSL se nezdařilo. Může to znamenat škodlivou aktivitu. Dříve než budete pokračovat, ověřte síťové připojení a zařízení.</string>
-
-    <string name="my_wallet_id">ID mojí peněženky</string>
-    <string name="EMAIL">E-MAIL</string>
-    <string name="new_support_request">Nový požadavek podpory</string>
-    <string name="contact_support">Kontaktovat podporu</string>
-    <string name="email_subject">Požadavek podpory Android</string>
 
     <string name="merchant_map">Mapa prodejců</string>
     <string name="merchant_suggest">Doporučte prodejce</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">Ukládání adresy...</string>
 
     <string name="cannot_launch_app">Peněženku Blockchain nelze na tomto zařízení spustit.</string>
-    <string name="support_guide">Popište prosím podrobně problém, který jste zaznamenali, včetně kroků, na základě kterých ho můžeme reprodukovat.</string>
     <string name="label">Označení</string>
     <string name="edit">Upravit</string>
     <string name="label_cant_be_empty">Označení nemůže být prázdné.</string>

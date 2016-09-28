@@ -105,7 +105,6 @@
 
     <string name="support">Assistenza</string>
     <string name="rate_us">Votaci</string>
-    <string name="email_chooser">Invia e-mail...</string>
     <string name="about">Portafoglio Blockchain %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">App Merchant gratuita </string>
     <string name="password_or_wipe">Inserisci usando la tua password o abbandona questo portafoglio</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">Vuoi copiare negli appunti l\'ID del tuo portafoglio? Se è così, sappi che altre applicazioni potrebbero essere in grado di vedere queste informazioni.</string>
 
     <string name="ssl_pinning_invalid">La selezione del certificato SSL non è riuscita. Ciò potrebbe indicare un\'attività pericolosa. Verifica tua connessione di rete ed il dispositivo prima di continuare.</string>
-
-    <string name="my_wallet_id">L\'ID del mio portafoglio</string>
-    <string name="EMAIL">EMAIL</string>
-    <string name="new_support_request">Richiesta di nuova assistenza</string>
-    <string name="contact_support">Contatta l\'Assistenza</string>
-    <string name="email_subject">Richiesta di assistenza per Android </string>
 
     <string name="merchant_map">Mappa dei venditori</string>
     <string name="merchant_suggest">Suggerisci un venditore</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">In fase di salvataggio dell\'indirizzo...</string>
 
     <string name="cannot_launch_app">Il portafoglio Blockchain non può girare su questo dispositivo.</string>
-    <string name="support_guide">Descrivi in dettaglio il problema che si sta verificando, assieme con i passi che possiamo intraprendere per riprodurlo.</string>
     <string name="label">Etichetta</string>
     <string name="edit">Modifica</string>
     <string name="label_cant_be_empty">L\'etichetta non può essere bianca.</string>

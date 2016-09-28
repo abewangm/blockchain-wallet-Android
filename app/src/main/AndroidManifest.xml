@@ -1,149 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="piuk.blockchain.android"
-          android:installLocation="auto">
+    package="piuk.blockchain.android"
+    android:installLocation="auto">
 
-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <uses-feature android:name="android.hardware.location.gps" />
     
     <application
-            android:icon="@drawable/ic_launcher"
-            android:label="@string/app_name"
-            android:name=".BlockchainApplication"
-            android:allowBackup="false"
-            android:theme="@style/AppTheme">
+        android:name=".BlockchainApplication"
+        android:allowBackup="false"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
 
         <activity
-                android:name=".LauncherActivity"
-                android:launchMode="singleTask"
-                android:configChanges="keyboardHidden|orientation|screenSize">
+            android:name=".ui.launcher.LauncherActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTask">
 
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <data android:scheme="bitcoin"/>
+                <action android:name="android.intent.action.VIEW" />
+                <data android:scheme="bitcoin" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
 
         </activity>
 
         <activity
-                android:name="info.blockchain.wallet.view.MainActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"
-                android:windowSoftInputMode="adjustPan"
-                android:theme="@style/AppTheme.MainActivity"/>
+            android:name=".ui.home.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:theme="@style/AppTheme.MainActivity"
+            android:windowSoftInputMode="adjustPan" />
 
         <activity
-                android:name="info.blockchain.wallet.view.SettingsActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
+            android:name=".ui.settings.SettingsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-                android:name="info.blockchain.wallet.view.PinEntryActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
+            android:name=".ui.auth.PinEntryActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-                android:name="info.blockchain.wallet.view.LandingActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
+            android:name=".ui.auth.LandingActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-                android:name="info.blockchain.wallet.view.PairOrCreateWalletActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"
-                android:windowSoftInputMode="adjustResize"/>
+            android:name=".ui.pairing.PairOrCreateWalletActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name=".ui.directory.MapActivity" />
+
+        <activity android:name=".ui.directory.SuggestMerchantActivity" />
 
         <activity
-                android:name="info.blockchain.merchant.directory.MapActivity"/>
+            android:name=".ui.account.AccountActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-                android:name="info.blockchain.merchant.directory.SuggestMerchantActivity"/>
+            android:name=".ui.account.AccountEditActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-                android:name="info.blockchain.wallet.view.AccountActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
+            android:name=".ui.backup.BackupWalletActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-                android:name="info.blockchain.wallet.view.AccountEditActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
+            android:name=".ui.upgrade.UpgradeWalletActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-                android:name="info.blockchain.wallet.view.SupportActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
+            android:name=".ui.pairing.ManualPairingActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-                android:name="info.blockchain.wallet.view.BackupWalletActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
+            android:name=".ui.auth.LogoutActivity"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay" />
 
         <activity
-                android:name="info.blockchain.wallet.view.UpgradeWalletActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
+            android:name=".ui.auth.PasswordRequiredActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-                android:name="info.blockchain.wallet.view.ManualPairingActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
+            android:name=".ui.recover.RecoverFundsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-                android:name=".LogoutActivity"
-                android:theme="@android:style/Theme.NoDisplay"
-                android:noHistory="true"
-                android:excludeFromRecents="true"/>
+            android:name=".ui.zxing.CaptureActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-                android:name="info.blockchain.wallet.view.PasswordRequiredActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
+            android:name=".ui.send.SendActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-                android:name="info.blockchain.wallet.view.RecoverFundsActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
+            android:name=".ui.receive.ReceiveActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateAlwaysHidden" />
 
         <activity
-                android:name="com.google.zxing.client.android.CaptureActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
-
-        <activity
-                android:name="info.blockchain.wallet.view.SendActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"/>
-
-        <activity android:name="info.blockchain.wallet.view.ReceiveActivity"
-                  android:windowSoftInputMode="stateAlwaysHidden"
-                  android:configChanges="keyboardHidden|orientation|screenSize"/>
-
-        <activity
-            android:name="info.blockchain.wallet.view.TransactionDetailActivity"
+            android:name=".ui.transactions.TransactionDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="stateHidden" />
 
         <activity
-            android:name="info.blockchain.wallet.view.TransactionDetailWebViewActivity"
+            android:name=".ui.transactions.TransactionDetailWebViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
-        <service android:name="info.blockchain.wallet.websocket.WebSocketService"/>
+        <service android:name=".data.websocket.WebSocketService" />
 
         <meta-data
-                android:name="com.google.android.maps.v2.API_KEY"
-                android:value="@string/google_maps_key"/>
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="@string/google_maps_key" />
         <!--
         debug: AIzaSyASTnx7wjsCTkMr_RtLQYTzMAf7A9SWIMw
         release: AIzaSyB_5WN2exwvF4pqQ6rW6JdkHcYWjZOim4w
         -->
         <meta-data
-                android:name="com.google.android.gms.version"
-                android:value="@integer/google_play_services_version"/>
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
-        <receiver android:name="info.blockchain.wallet.connectivity.NetworkStateReceiver">
+        <receiver android:name=".data.connectivity.NetworkStateReceiver">
             <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
 

@@ -105,7 +105,6 @@
 
     <string name="support">Aide</string>
     <string name="rate_us">Notez nous</string>
-    <string name="email_chooser">Envoyer un e-mail...</string>
     <string name="about">Portefeuille Blockchain %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Application Marchand gratuite</string>
     <string name="password_or_wipe">Vous connecter en utilisant votre mot de passe ou oublier ce portefeuille</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">Copier votre identifiant du portefeuille dans le presse-papiers ? Si c\'est le cas, sachez que d\'autres applications pourraient être en mesure d\'avoir accès à cette information.</string>
 
     <string name="ssl_pinning_invalid">L\’épinglage du certificat SSL a échoué. Ceci pourrait indiquer une activité malveillante. Veuillez vérifier votre connexion réseau et le périphérique avant de continuer.</string>
-
-    <string name="my_wallet_id">Mon identifiant du portefeuille</string>
-    <string name="EMAIL">E-MAIL</string>
-    <string name="new_support_request">Nouvelle demande d\'assistance</string>
-    <string name="contact_support">Contacter le centre d\'assistance</string>
-    <string name="email_subject">Demande d\'assistance Android</string>
 
     <string name="merchant_map">Carte des marchands</string>
     <string name="merchant_suggest">Suggérer un marchand</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">Enregistrement de l\’adresse en cours...</string>
 
     <string name="cannot_launch_app">Impossible de charger le portefeuille Blockchain sur cet appareil.</string>
-    <string name="support_guide">Veuillez décrire en détail le problème que vous rencontrez, ainsi que toutes les étapes nécessaires pour que nous puissions le reproduire.</string>
     <string name="label">Libellé</string>
     <string name="edit">Modifier</string>
     <string name="label_cant_be_empty">Le libellé ne peut pas être vierge.</string>

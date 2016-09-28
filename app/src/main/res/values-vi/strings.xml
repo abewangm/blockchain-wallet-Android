@@ -105,7 +105,6 @@
 
     <string name="support">Hỗ trợ</string>
     <string name="rate_us">Đánh giá</string>
-    <string name="email_chooser">Gửi e-mail...</string>
     <string name="about">Ví Blockchain %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Ứng dụng cổng thanh toán miễn phí</string>
     <string name="password_or_wipe">Nhập mật khẩu đang sử dụng hoặc quên ví này</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">Sao chép ID Ví của bạn vào clipboard? Nếu như vậy, xin lưu ý các ứng dụng khác có thể xem thông tin này.</string>
 
     <string name="ssl_pinning_invalid">Xác nhận chứng chỉ SSL thất bại Điều này có thể gây ra tác động độc hại. Vui lòng kiểm tra kết nối mạng của thiết bị trước khi tiếp tục.</string>
-
-    <string name="my_wallet_id">ID Ví của tôi</string>
-    <string name="EMAIL">EMAIL</string>
-    <string name="new_support_request">Yêu cầu hỗ trợ mới</string>
-    <string name="contact_support">Liên hệ hỗ trợ</string>
-    <string name="email_subject">Yêu cầu hỗ trợ Android</string>
 
     <string name="merchant_map">Sơ đồ cổng thanh toán</string>
     <string name="merchant_suggest">Đề xuất cổng thanh toán</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">Đang lưu địa chỉ...</string>
 
     <string name="cannot_launch_app">Ví Blockchain không thể sử dụng trên thiết bị này.</string>
-    <string name="support_guide">Vui lòng mô tả chi tiết lỗi mà bạn gặp phải, cùng bất kỳ biện pháp nào chúng tôi có thể làm để khắc phục.</string>
     <string name="label">Nhãn</string>
     <string name="edit">Chỉnh sửa</string>
     <string name="label_cant_be_empty">Nhãn không được để trống.</string>

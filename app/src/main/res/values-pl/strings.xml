@@ -105,7 +105,6 @@
 
     <string name="support">Wsparcie</string>
     <string name="rate_us">Oceń nas</string>
-    <string name="email_chooser">Wyślij e-mail</string>
     <string name="about">Portfel Blockchain %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Darmowa aplikacja Merchant</string>
     <string name="password_or_wipe">Wejdź korzystając z hasła lub zapomnij ten portfel</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">Skopiować Twój identyfikator portfela do schowka? Jeśli tak, pamiętaj, że inne aplikacje mogą mieć dostęp do tej informacji.</string>
 
     <string name="ssl_pinning_invalid">Przypinanie certyfikatu SSL nieudane. Może to oznaczać działanie złośliwe. Proszę potwierdzić, że Twoje połączenie sieciowe i urządzenie działają poprawnie, zanim będziesz kontynuować</string>
-
-    <string name="my_wallet_id">Mój identyfikator portfela</string>
-    <string name="EMAIL">E-MAIL</string>
-    <string name="new_support_request">Nowe zapytanie do działu obsługi klienta</string>
-    <string name="contact_support">Skontaktuj się z działem obsługi klienta</string>
-    <string name="email_subject">Zapytanie dot. Androida do działu obsługi klienta</string>
 
     <string name="merchant_map">Mapa kupców</string>
     <string name="merchant_suggest">Zasugeruj kupca</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">Zapisywanie adresu...</string>
 
     <string name="cannot_launch_app">Portfel Blockchain nie może zostać uruchomiony na tym urządzeniu.</string>
-    <string name="support_guide">Proszę szczegółowo opisać napotkany problem, a także podać konkretne kroki, dzięki którym możemy go zreprodukować.</string>
     <string name="label">Etykieta</string>
     <string name="edit">Edytuj</string>
     <string name="label_cant_be_empty">Etykieta nie może być pusta.</string>

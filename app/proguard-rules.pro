@@ -85,7 +85,7 @@
 
 # Specific to Blockchain
 -keep class android.support.design.widget.NavigationView { *; }
--keep class info.blockchain.wallet.view.customviews.AnimatedPasswordInputLayout { *; }
+-keep class piuk.blockchain.android.ui.customviews.AnimatedPasswordInputLayout { *; }
 
 # Retrolambda
 -dontwarn java.lang.invoke.*

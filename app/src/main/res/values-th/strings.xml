@@ -105,7 +105,6 @@
 
     <string name="support">สนับสนุน</string>
     <string name="rate_us">ให้คะแนนเรา</string>
-    <string name="email_chooser">ส่งอีเมล...</string>
     <string name="about">กระเป๋าเงิน Blockchain %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">แอปร้านค้าฟรี</string>
     <string name="password_or_wipe">กรอกโดยใช้รหัสผ่านของคุณ หรือลืมกระเป๋าเงินนี้</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">คัดลอก ID กระเป๋าเงินของคุณไปยังคลิปบอร์ด? หากทำเช่นนั้น โปรดทราบว่าแอปพลิเคชันอื่นอาจสามารถมองเห็นข้อมูลนี้ได้</string>
 
     <string name="ssl_pinning_invalid">การปักหมุดใบอนุญาต SSL ล้มเหลว นี่อาจแสดงให้เห็นว่ามีกิจกรรมที่เป็นอันตรายเกิดขึ้น โปรดยืนยันการเชื่อมต่อเครือข่ายและอุปกรณ์ของคุณก่อนดำเนินการต่อ</string>
-
-    <string name="my_wallet_id">ID กระเป๋าเงินของฉัน</string>
-    <string name="EMAIL">อีเมล</string>
-    <string name="new_support_request">คำร้องขอการให้การสนับสนุนใหม่</string>
-    <string name="contact_support">ติดต่อแผนกสนับสนุน</string>
-    <string name="email_subject">คำร้องขอการให้การสนับสนุน Android</string>
 
     <string name="merchant_map">แผนที่ผู้ค้า</string>
     <string name="merchant_suggest">แนะนำผู้ค้า</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">กำลังบันทึกที่อยู่...</string>
 
     <string name="cannot_launch_app">ไม่สามารถใช้งานกระเป๋าเงิน Blockchain ได้บนอุปกรณ์นี้</string>
-    <string name="support_guide">โปรดอธิบายในรายละเอียดถึงปัญหาที่คุณพบ พร้อมทั้งขั้นตอนใด ๆ ที่เราสามารถทำเพื่อทำให้เกิดปัญหาขึ้นอีกครั้ง</string>
     <string name="label">ทำเครื่องหมาย</string>
     <string name="edit">แก้ไข</string>
     <string name="label_cant_be_empty">ห้ามป้ายชื่อว่างเปล่า</string>

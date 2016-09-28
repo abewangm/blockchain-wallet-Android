@@ -105,7 +105,6 @@
 
     <string name="support">Служба підтримки</string>
     <string name="rate_us">Оцінити нас</string>
-    <string name="email_chooser">Відправити ел. лист...</string>
     <string name="about">Гаманець Blockchain %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Безкоштовна програма Підприємця</string>
     <string name="password_or_wipe">Увійти під своїм паролем або забути цей гаманець</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">Скопіювати ID вашого гаманця в буфер обміну? Якщо так, тоді майте на увазі: інші програми зможуть бачити цю інформацію.</string>
 
     <string name="ssl_pinning_invalid">Закріпити сертифікат SSL не вдалося. Це може свідчити про небезпечну активність. Перш ніж продовжити, будь ласка, перевірте підключення до мережі та пристрій.</string>
-
-    <string name="my_wallet_id">ID мого гаманця</string>
-    <string name="EMAIL">ЕЛ.ПОШТА</string>
-    <string name="new_support_request">Новий запит підтримки</string>
-    <string name="contact_support">Зв\'язок зі Службою підтримки користувачів</string>
-    <string name="email_subject">Запит підтримки Android</string>
 
     <string name="merchant_map">Мапа підприємця</string>
     <string name="merchant_suggest">Рекомендувати підприємця</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">Збереження адреси...</string>
 
     <string name="cannot_launch_app">Гаманець Blockchain не може працювати на цьому пристрої.</string>
-    <string name="support_guide">Будь ласка, щоб ми краще зрозуміли, опишіть докладно проблему, з якою ви зіткнулися, а також опишіть покроково свої дії.</string>
     <string name="label">Мітка</string>
     <string name="edit">Редагувати</string>
     <string name="label_cant_be_empty">Мітка не може залишатись порожньою.</string>

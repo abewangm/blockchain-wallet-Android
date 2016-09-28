@@ -105,7 +105,6 @@
 
     <string name="support">Support</string>
     <string name="rate_us">Bewerten Sie uns</string>
-    <string name="email_chooser">E-Mail senden ...</string>
     <string name="about">Blockchain-Wallet %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Kostenlose Merchant-App</string>
     <string name="password_or_wipe">Anmeldung mithilfe des persönlichen Passworts oder diese Wallet vergessen</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">Ihre Wallet-ID in die Zwischenablage kopieren? Falls ja, beachten Sie bitte, dass diese Angaben eventuell für andere Anwendungen einsehbar sind.</string>
 
     <string name="ssl_pinning_invalid">Die SSL-Zertifikatsbestätigung ist fehlgeschlagen. Dies weist eventuell auf ein Gefahrenrisiko hin. Bevor Sie fortfahren, überprüfen Sie bitte Gerät und Netzwerkverbindung.</string>
-
-    <string name="my_wallet_id">Meine Wallet-ID</string>
-    <string name="EMAIL">E-MAIL</string>
-    <string name="new_support_request">Neue Supportanfrage</string>
-    <string name="contact_support">Support kontaktieren</string>
-    <string name="email_subject">Android-Supportanfrage</string>
 
     <string name="merchant_map">Händlerkarte</string>
     <string name="merchant_suggest">Händler vorschlagen</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">Adresse wird gespeichert ...</string>
 
     <string name="cannot_launch_app">Blockchain Wallet funktioniert nicht auf diesem Gerät.</string>
-    <string name="support_guide">Bitte beschreiben Sie detailliert Ihr derzeitiges Problem sowie jegliche Schritte, die uns helfen, dieses nachzuvollziehen.</string>
     <string name="label">Beschreibung</string>
     <string name="edit">Bearbeiten</string>
     <string name="label_cant_be_empty">Beschreibung muss ausgefüllt werden.</string>

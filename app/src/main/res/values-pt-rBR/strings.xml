@@ -105,7 +105,6 @@
 
     <string name="support">Suporte</string>
     <string name="rate_us">Avalie-nos</string>
-    <string name="email_chooser">Enviar e-mail...</string>
     <string name="about">Carteira Blockchain %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Merchant App gratuito</string>
     <string name="password_or_wipe">Entre utilizando sua senha ou descarte esta carteira.</string>
@@ -174,12 +173,6 @@
     <string name="guid_to_clipboard">Deseja copiar o ID da Carteira para a área de transferência? Se fizer isso, saiba que outras aplicações poderão acessar estas informações.</string>
 
     <string name="ssl_pinning_invalid">Erro na fixação do certificado SSL. Isto pode indicar atividade maliciosa. Verifique sua conexão de rede e dispositivo antes de continuar.</string>
-
-    <string name="my_wallet_id">Meu ID da Carteira</string>
-    <string name="EMAIL">E-MAIL</string>
-    <string name="new_support_request">Nova solicitação de suporte</string>
-    <string name="contact_support">Contatar suporte</string>
-    <string name="email_subject">Solicitação de suporte ao Android</string>
 
     <string name="merchant_map">Mapa de Estabelecimentos</string>
     <string name="merchant_suggest">Sugerir Estabelecimento</string>
@@ -277,7 +270,6 @@
     <string name="saving_address">Salvando endereço...</string>
 
     <string name="cannot_launch_app">Não é possível executar a Carteira Blockchain neste dispositivo.</string>
-    <string name="support_guide">Descreva detalhadamente o problema que está ocorrendo e as etapas que podemos realizar para reproduzi-lo.</string>
     <string name="label">Etiqueta</string>
     <string name="edit">Editar</string>
     <string name="label_cant_be_empty">A etiqueta não pode ficar em branco.</string>
