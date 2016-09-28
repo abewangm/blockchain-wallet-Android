@@ -73,8 +73,7 @@ public class TransferFundsDataManager {
                                     pendingSpend.sendingObject = new ItemAccount(legacyAddress.getLabel(), "", "", legacyAddress);
                                     pendingSpend.bigIntFee = pendingSpend.unspentOutputBundle.getAbsoluteFee();
                                     pendingSpend.bigIntAmount = sweepBundle.getSweepAmount();
-                                    // assign new receive address for each transfer
-                                    pendingSpend.receivingAddress = mPayloadManager.getReceiveAddress(addressToReceiveIndex);
+                                    pendingSpend.addressToReceiveIndex = addressToReceiveIndex;
                                     totalToSend += pendingSpend.bigIntAmount.longValue();
                                     totalFee += pendingSpend.bigIntFee.longValue();
                                     pendingTransactionList.add(pendingSpend);
@@ -127,6 +126,8 @@ public class TransferFundsDataManager {
 
                 LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
                 String changeAddress = legacyAddress.getAddress();
+                String receivingAddress = mPayloadManager.getReceiveAddress(pendingTransaction.addressToReceiveIndex);
+
                 isWatchOnly = legacyAddress.isWatchOnly();
 
                 final int finalI = i;
@@ -135,7 +136,7 @@ public class TransferFundsDataManager {
                             pendingTransaction.unspentOutputBundle,
                             null,
                             legacyAddress,
-                            pendingTransaction.receivingAddress,
+                            receivingAddress,
                             changeAddress,
                             pendingTransaction.note,
                             pendingTransaction.bigIntFee,
