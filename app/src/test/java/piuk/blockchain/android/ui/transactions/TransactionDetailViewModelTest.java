@@ -5,7 +5,6 @@ import android.app.Application;
 import android.content.Intent;
 import android.support.v4.util.Pair;
 
-import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.Transaction;
@@ -24,6 +23,7 @@ import java.util.Locale;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -261,6 +261,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         verify(mTransactionListDataManager).updateTransactionNotes("hash", "note");
         //noinspection WrongConstant
         verify(mActivity).showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
+        verify(mActivity).setDescription("note");
     }
 
     @Test
