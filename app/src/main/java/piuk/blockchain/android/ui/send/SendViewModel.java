@@ -538,7 +538,7 @@ public class SendViewModel extends BaseViewModel {
 
                 sendModel.absoluteSuggestedFee = getSuggestedAbsoluteFee(coins, amountToSend);
 
-                if (!customFeeText.isEmpty() || customFee.compareTo(BigInteger.ZERO) == 1) {
+                if (customFeeText != null && !customFeeText.isEmpty() || customFee.compareTo(BigInteger.ZERO) == 1) {
                     customFeePayment(coins, amountToSend, customFee, spendAll);
                 } else {
                     suggestedFeePayment(coins, amountToSend, spendAll);
