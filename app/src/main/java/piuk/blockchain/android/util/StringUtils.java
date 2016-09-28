@@ -17,6 +17,6 @@ public class StringUtils {
     }
 
     public String getQuantityString(@PluralsRes int pluralId, int size) {
-        return mContext.getResources().getQuantityString(pluralId, size);
+        return mContext.getResources().getQuantityString(pluralId, size, size);
     }
 }

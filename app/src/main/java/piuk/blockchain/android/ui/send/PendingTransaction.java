@@ -16,6 +16,7 @@ public class PendingTransaction {
     public String receivingAddress;
     public BigInteger bigIntFee;
     public BigInteger bigIntAmount;
+    public int addressToReceiveIndex;
 
     public boolean isHD() {
         return (sendingObject.accountObject instanceof Account);
@@ -31,6 +32,7 @@ public class PendingTransaction {
                 ", receivingAddress='" + receivingAddress + '\'' +
                 ", bigIntFee=" + bigIntFee +
                 ", bigIntAmount=" + bigIntAmount +
+                ", addressToReceiveIndex=" + addressToReceiveIndex +
                 '}';
     }
 }
