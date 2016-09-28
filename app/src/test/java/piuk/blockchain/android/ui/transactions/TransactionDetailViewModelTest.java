@@ -207,7 +207,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Arrange
         TestSubscriber<String> subscriber = new TestSubscriber<>();
         // Act
-        mSubject.getTransactionValueString("USD", new Tx("", "", "", 0D, 0L, new HashMap<>())).toBlocking().subscribe(subscriber);
+        mSubject.getTransactionValueString("USD", mTxSent).toBlocking().subscribe(subscriber);
         // Assert
         assertNotNull(subscriber.getOnNextEvents().get(0));
         subscriber.onCompleted();
@@ -219,7 +219,31 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Arrange
         TestSubscriber<String> subscriber = new TestSubscriber<>();
         // Act
-        mSubject.getTransactionValueString("GBP", new Tx("", "", "", 0D, 0L, new HashMap<>())).toBlocking().subscribe(subscriber);
+        mSubject.getTransactionValueString("GBP", mTxReceived).toBlocking().subscribe(subscriber);
+        // Assert
+        assertNotNull(subscriber.getOnNextEvents().get(0));
+        subscriber.onCompleted();
+        subscriber.assertNoErrors();
+    }
+
+    @Test
+    public void getTransactionValueStringReceived() {
+        // Arrange
+        TestSubscriber<String> subscriber = new TestSubscriber<>();
+        // Act
+        mSubject.getTransactionValueString("USD", mTxReceived).toBlocking().subscribe(subscriber);
+        // Assert
+        assertNotNull(subscriber.getOnNextEvents().get(0));
+        subscriber.onCompleted();
+        subscriber.assertNoErrors();
+    }
+
+    @Test
+    public void getTransactionValueStringTransferred() {
+        // Arrange
+        TestSubscriber<String> subscriber = new TestSubscriber<>();
+        // Act
+        mSubject.getTransactionValueString("USD", mTxSent).toBlocking().subscribe(subscriber);
         // Assert
         assertNotNull(subscriber.getOnNextEvents().get(0));
         subscriber.onCompleted();

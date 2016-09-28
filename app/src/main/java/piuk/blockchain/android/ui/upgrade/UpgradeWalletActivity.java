@@ -345,4 +345,10 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
         }
 
     }
+
+    @Override
+    public void onBackPressed() {
+        new AccessState().logout(this);
+        super.onBackPressed();
+    }
 }

@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.pairing;
 
-import piuk.blockchain.android.ui.zxing.CaptureActivity;
-
 import android.Manifest;
 import android.app.Fragment;
 import android.content.Intent;
@@ -18,6 +16,7 @@ import android.view.ViewGroup;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentPairWalletBinding;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 

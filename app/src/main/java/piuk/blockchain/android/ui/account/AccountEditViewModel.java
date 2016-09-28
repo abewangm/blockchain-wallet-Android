@@ -2,9 +2,6 @@ package piuk.blockchain.android.ui.account;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
-import piuk.blockchain.android.ui.zxing.CaptureActivity;
-import piuk.blockchain.android.ui.zxing.Contents;
-import piuk.blockchain.android.ui.zxing.encode.QRCodeEncoder;
 
 import android.app.Activity;
 import android.content.Context;
@@ -55,11 +52,12 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.ui.send.SendModel;
+import piuk.blockchain.android.ui.zxing.CaptureActivity;
+import piuk.blockchain.android.ui.zxing.Contents;
+import piuk.blockchain.android.ui.zxing.encode.QRCodeEncoder;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-
-import static piuk.blockchain.android.R.string.address;
 
 public class AccountEditViewModel extends BaseViewModel {
 
@@ -183,7 +181,7 @@ public class AccountEditViewModel extends BaseViewModel {
                 accountModel.setLabel(legacyAddress.getLabel());
                 accountModel.setLabelHeader(context.getString(R.string.name));
                 accountModel.setXpubDescriptionVisibility(View.GONE);
-                accountModel.setXpubText(context.getString(address));
+                accountModel.setXpubText(context.getString(R.string.address));
                 accountModel.setDefaultAccountVisibility(View.GONE);//No default for V2
                 setArchive(legacyAddress.getTag() == PayloadManager.ARCHIVED_ADDRESS);
 
@@ -833,7 +831,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
         } else if (legacyAddress != null) {
 
-            heading = context.getString(address);
+            heading = context.getString(R.string.address);
             note = legacyAddress.getAddress();
             copy = context.getString(R.string.copy_address);
             qrString = legacyAddress.getAddress();

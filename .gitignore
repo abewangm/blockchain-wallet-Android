@@ -40,3 +40,6 @@ projectFilesBackup/
 
 # Captures
 captures
+
+# Firebase config
+google-services.json
