@@ -4,17 +4,11 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.graphics.Bitmap;
 
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
-import piuk.blockchain.android.ui.account.ItemAccount;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.HDWallet;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
-import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.ExchangeRateFactory;
-import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.StringUtils;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,11 +28,17 @@ import java.util.Locale;
 
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
+import piuk.blockchain.android.ui.account.ItemAccount;
+import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.StringUtils;
 import rx.Observable;
 
 import static junit.framework.Assert.assertNotNull;
@@ -53,6 +53,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static piuk.blockchain.android.ui.receive.ReceiveViewModel.KEY_WARN_WATCH_ONLY_SPEND;
 
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
@@ -262,7 +263,7 @@ public class ReceiveViewModelTest {
         // Act
         mSubject.setWarnWatchOnlySpend(true);
         // Assert
-        assertTrue(true);
+        verify(mPrefsUtil).setValue(KEY_WARN_WATCH_ONLY_SPEND, true);
     }
 
     @Test
