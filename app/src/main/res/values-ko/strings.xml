@@ -93,7 +93,7 @@
     <string name="manual_pairing">수동 페어링</string>
     <string name="pair_wallet_step_1">%1$s에서 PC 또는 Mac으로 블록체인 지갑에 로그인 하세요</string>
     <string name="pair_wallet_step_2">옛 지갑을 쓰고 있으면 계정 설정 단추를 클릭한 후 장치 탭을 선택하세요 새 베타 지갑을 쓰고 있으면, 설정 / 지갑 정보로 가세요</string>
-    <string name="pair_wallet_step_3">흑백 네모인 QR 코드가 보이게 하려면 '페어링 코드 보이기'를 클릭하세요 코드를 카메라로 스캔 하세요</string>
+    <string name="pair_wallet_step_3">흑백 네모인 QR 코드가 보이게 하려면 \'페어링 코드 보이기\'를 클릭하세요 코드를 카메라로 스캔 하세요</string>
     <string name="disable_two_factor">귀하 지갑을 수동 페어링 하려면 2 단계 인증을 먼저 해제해야 합니다.</string>
     <string name="wallet_id">지갑 아이디</string>
     <string name="default_wallet_name">내 비트코인 지갑</string>
@@ -212,7 +212,7 @@
     <string name="directions">가는 길</string>
     <string name="call">전화하기</string>
     <string name="navigate">길 찾기</string>
-    <string name="enable_geo">현 위치를 찾기 위해 GPS 또는 다른 위치 서비스를 사용하세요 그렇게 하기 위해 위치 서비스 설정으로 가려면 '좋아요'를 클릭</string>
+    <string name="enable_geo">현 위치를 찾기 위해 GPS 또는 다른 위치 서비스를 사용하세요 그렇게 하기 위해 위치 서비스 설정으로 가려면 \'좋아요\'를 클릭</string>
 
     <string-array name="menus_merchantDirectory">
         <item>상인 추천</item>
@@ -399,7 +399,7 @@
     <string name="retry">다시 해 보기</string>
     <string name="exit">나가기</string>
     <string name="screen_overlay_warning">화면 오버레이 탐지 됨!</string>
-    <string name="screen_overlay_note">화면 오버레이를 쓰는 앱은 보이지 않는 대상에 탭을 하도록 귀하를 속여 남이 귀하 자금을 훔쳐가게 할 수 있습니다. 이 경고는 '화면 흐리게 하기 앱'이 원인일 수도 있습니다. 아무 위협도 없는 것이 확실하면 계속해도 좋습니다. </string>
+    <string name="screen_overlay_note">화면 오버레이를 쓰는 앱은 보이지 않는 대상에 탭을 하도록 귀하를 속여 남이 귀하 자금을 훔쳐가게 할 수 있습니다. 이 경고는 \'화면 흐리게 하기 앱\'이 원인일 수도 있습니다. 아무 위협도 없는 것이 확실하면 계속해도 좋습니다. </string>
     <string name="archived_description">이 항목은 보관되었으며 모바일 앱에서는 접근할 수 없습니다. 이 항목에서 자금은 못 보내지만 모든 자금은 안전합니다. 다시 쓰려면 이 항목 보관을 해제하세요.</string>
     <string name="not_archived_description">이 항목은 보관되지 않았습니다. 이것을 더 쓰지 않으려면 보관하세요. 귀하 자금은 안전하며 언제든지 보관 해제할 수 있습니다.</string>
     <string name="transfer_success_archive_prompt_title">스윕 (sweep) 된 주소를 보관하겠습니까?</string>
@@ -524,7 +524,7 @@
     <string name="hint_reveals_password_error">사용자 주 지갑 암호는 암호 힌트로 설정할 수 없습니다.</string>
     <string name="why_has_my_address_changed">내 주소가 왜 바뀌었나요?</string>
     <string name="learn_more">더 배우기</string>
-    <string name="new_address_info">개인 정보 추가 보안을 위해 모든 지불에 대한 고유 주소를 우리가 만들었습니다. 귀하 지갑에서 생성된 모든 주소는 '받기' 아래 안 나타나도 계속 자금을 받을 수 있습니다.</string>
+    <string name="new_address_info">개인 정보 추가 보안을 위해 모든 지불에 대한 고유 주소를 우리가 만들었습니다. 귀하 지갑에서 생성된 모든 주소는 \'받기\' 아래 안 나타나도 계속 자금을 받을 수 있습니다.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">비트코인 지불 요청</string>
     <string name="email_request_body">%1$s BTC을 비트코인 주소 %2$s로 보내십시오.</string>
@@ -536,11 +536,11 @@
     <string name="common_pin_dialog_continue">계속</string>
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">귀하는 로그아웃 되었거나 지갑 암호 해독에 오류가 있었습니다. 로그인 하려면 아래 암호를 입력하세요.</string>
-    <string name="logged_out_forget_wallet">이 지갑은 잊어버리고 새로 시작하려면 \'지갑 잊기'\를 누르세요.</string>
+    <string name="logged_out_forget_wallet">이 지갑은 잊어버리고 새로 시작하려면 \'지갑 잊기\'\를 누르세요.</string>
 
     <string name="api_fail">서버 연결 불가 나중에 다시 해 보세요.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">너무 큰 비트코인 거래가 있습니다. 귀하 지갑은 이제까지 받아 온 수많은 작은 지불들을 합쳐야 합니다. 이에 대해 확인을 빨리 받으려면 비교적 높은 수수료를 내야 합니다. 거래 확인에 시간이 오래 걸려도 상관 없으면, '사용자 설정'을 클릭해서 수수료를 직접 낮추세요 </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">너무 큰 비트코인 거래가 있습니다. 귀하 지갑은 이제까지 받아 온 수많은 작은 지불들을 합쳐야 합니다. 이에 대해 확인을 빨리 받으려면 비교적 높은 수수료를 내야 합니다. 거래 확인에 시간이 오래 걸려도 상관 없으면, \'사용자 설정\'을 클릭해서 수수료를 직접 낮추세요 </string>
     <string name="go_back">뒤로 가기</string>
     <string name="accept_higher_fee">높은 수수료 승인</string>
     <string name="large_tx_high_fee_warning">"이 거래는 작은 거스름 돈 반환으로 인한 아주 작은 금액 (dust amount) 소비를 위해 높은 수수료가 필요합니다."</string>
