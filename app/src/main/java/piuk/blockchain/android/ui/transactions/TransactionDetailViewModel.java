@@ -124,6 +124,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
                                 mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
                             } else {
                                 mDataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
+                                mDataListener.setDescription(description);
                             }
                         }, throwable -> {
                             mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
@@ -213,6 +214,10 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private void setTransactionNote(Tx transaction) {
         String notes = mPayloadManager.getPayload().getNotes().get(transaction.getHash());
         mDataListener.setDescription(notes);
+    }
+
+    public String getTransactionNote() {
+        return mPayloadManager.getPayload().getNotes().get(mTransaction.getHash());
     }
 
     @VisibleForTesting
