@@ -50,7 +50,7 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
             editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE | InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE);
             editText.setHint(R.string.transaction_detail_description_hint);
 
-            int maxLength = 140;
+            int maxLength = 256;
             InputFilter[] fArray = new InputFilter[1];
             fArray[0] = new InputFilter.LengthFilter(maxLength);
             editText.setFilters(fArray);
