@@ -51,6 +51,7 @@ import piuk.blockchain.android.util.StringUtils;
 public class ReceiveViewModel extends BaseViewModel {
 
     public static final String TAG = ReceiveViewModel.class.getSimpleName();
+    static final String KEY_WARN_WATCH_ONLY_SPEND = "warn_watch_only_spend";
     private static final int DIMENSION_QR_CODE = 600;
 
     private DataListener mDataListener;
@@ -188,11 +189,11 @@ public class ReceiveViewModel extends BaseViewModel {
     }
 
     public boolean warnWatchOnlySpend() {
-        return mPrefsUtil.getValue("WARN_WATCH_ONLY_SPEND", true);
+        return mPrefsUtil.getValue(KEY_WARN_WATCH_ONLY_SPEND, true);
     }
 
     public void setWarnWatchOnlySpend(boolean warn) {
-        mPrefsUtil.getValue("WARN_WATCH_ONLY_SPEND", warn);
+        mPrefsUtil.setValue(KEY_WARN_WATCH_ONLY_SPEND, warn);
     }
 
     public void updateFiatTextField(String bitcoin) {
