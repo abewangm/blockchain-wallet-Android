@@ -393,6 +393,8 @@
     <string name="google_authenticator">Google Authenticator</string>
     <string name="yubikey">Yubikey</string>
 
+    <string name="disable_2fa_first">Please disable 2-step Verification via SMS in the security settings first.</string>
+
     <string name="request_camera_permission">Camera access is required.</string>
     <string name="request_location_permission">Location access is required.</string>
     <string name="not_specified">not specified</string>

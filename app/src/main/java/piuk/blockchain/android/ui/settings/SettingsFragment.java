@@ -742,64 +742,75 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogMobile() {
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View smsPickerView = inflater.inflate(R.layout.include_sms_update, null);
-        final AppCompatEditText etMobile = (AppCompatEditText) smsPickerView.findViewById(R.id.etSms);
-        final TextView tvCountry = (TextView) smsPickerView.findViewById(R.id.tvCountry);
-        final TextView tvSms = (TextView) smsPickerView.findViewById(R.id.tvSms);
 
-        final CountryPicker picker = CountryPicker.newInstance(getString(R.string.select_country));
-        final Country country = picker.getUserCountryInfo(getActivity());
-        if (country.getDialCode().equals("93")) {
-            setCountryFlag(tvCountry, "+1", R.drawable.flag_us);
+        if (settingsApi.getAuthType() != Settings.AUTH_TYPE_OFF) {
+            new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                    .setTitle(R.string.warning)
+                    .setMessage(R.string.disable_2fa_first)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .create().show();
+
         } else {
-            setCountryFlag(tvCountry, country.getDialCode(), country.getFlag());
-        }
-        tvCountry.setOnClickListener(v -> {
 
-            picker.show(getFragmentManager(), "COUNTRY_PICKER");
-            picker.setListener((name, code, dialCode, flagDrawableResID) -> {
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            View smsPickerView = inflater.inflate(R.layout.include_sms_update, null);
+            final AppCompatEditText etMobile = (AppCompatEditText) smsPickerView.findViewById(R.id.etSms);
+            final TextView tvCountry = (TextView) smsPickerView.findViewById(R.id.tvCountry);
+            final TextView tvSms = (TextView) smsPickerView.findViewById(R.id.tvSms);
 
-                setCountryFlag(tvCountry, dialCode, flagDrawableResID);
-                picker.dismiss();
+            final CountryPicker picker = CountryPicker.newInstance(getString(R.string.select_country));
+            final Country country = picker.getUserCountryInfo(getActivity());
+            if (country.getDialCode().equals("93")) {
+                setCountryFlag(tvCountry, "+1", R.drawable.flag_us);
+            } else {
+                setCountryFlag(tvCountry, country.getDialCode(), country.getFlag());
+            }
+            tvCountry.setOnClickListener(v -> {
+
+                picker.show(getFragmentManager(), "COUNTRY_PICKER");
+                picker.setListener((name, code, dialCode, flagDrawableResID) -> {
+
+                    setCountryFlag(tvCountry, dialCode, flagDrawableResID);
+                    picker.dismiss();
+                });
             });
-        });
 
-        if (!settingsApi.isSmsVerified() && settingsApi.getSms() != null && !settingsApi.getSms().isEmpty()) {
-            tvSms.setText(settingsApi.getSms());
-            tvSms.setVisibility(View.VISIBLE);
-        } else {
-            tvSms.setVisibility(View.GONE);
-        }
+            if (!settingsApi.isSmsVerified() && settingsApi.getSms() != null && !settingsApi.getSms().isEmpty()) {
+                tvSms.setText(settingsApi.getSms());
+                tvSms.setVisibility(View.VISIBLE);
+            } else {
+                tvSms.setVisibility(View.GONE);
+            }
 
-        final AlertDialog.Builder alertDialogSmsBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.mobile)
-                .setMessage(getString(R.string.mobile_description))
-                .setView(smsPickerView)
-                .setCancelable(false)
-                .setPositiveButton(R.string.update, null)
-                .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> show2FaAfterPhoneVerified = false);
+            final AlertDialog.Builder alertDialogSmsBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                    .setTitle(R.string.mobile)
+                    .setMessage(getString(R.string.mobile_description))
+                    .setView(smsPickerView)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.update, null)
+                    .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> show2FaAfterPhoneVerified = false);
 
-        if (!settingsApi.isSmsVerified() && settingsApi.getSms() != null && !settingsApi.getSms().isEmpty()) {
-            alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) -> showDialogVerifySms());
-        }
+            if (!settingsApi.isSmsVerified() && settingsApi.getSms() != null && !settingsApi.getSms().isEmpty()) {
+                alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) -> showDialogVerifySms());
+            }
 
-        AlertDialog dialog = alertDialogSmsBuilder.create();
-        dialog.setOnShowListener(dialogInterface -> {
-            Button positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-            positive.setOnClickListener(view -> {
-                final String sms = tvCountry.getText().toString() + etMobile.getText().toString();
+            AlertDialog dialog = alertDialogSmsBuilder.create();
+            dialog.setOnShowListener(dialogInterface -> {
+                Button positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                positive.setOnClickListener(view -> {
+                    final String sms = tvCountry.getText().toString() + etMobile.getText().toString();
 
-                if (!FormatsUtil.getInstance().isValidMobileNumber(sms)) {
-                    ToastCustom.makeText(getActivity(), getString(R.string.invalid_mobile), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                } else {
-                    updateSms(sms);
-                    dialog.dismiss();
-                }
+                    if (!FormatsUtil.getInstance().isValidMobileNumber(sms)) {
+                        ToastCustom.makeText(getActivity(), getString(R.string.invalid_mobile), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                    } else {
+                        updateSms(sms);
+                        dialog.dismiss();
+                    }
+                });
             });
-        });
 
-        dialog.show();
+            dialog.show();
+        }
     }
 
     private void showDialogGUI() {
