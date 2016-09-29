@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.account;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -8,21 +7,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import piuk.blockchain.android.R;
 
-public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHolder> {
+class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHolder> {
 
     private static final int TYPE_IMPORTED_HEADER = -1;
+    private static final int TYPE_CREATE_NEW_WALLET_BUTTON = -2;
+    private static final int TYPE_IMPORT_ADDRESS_BUTTON = -3;
     private ArrayList<AccountItem> items;
-    private Context context;
+    private boolean isUpgraded;
+    private AccountHeadersListener listener;
 
-    public AccountAdapter(ArrayList<AccountItem> myAccountItems, Context context) {
+    AccountAdapter(ArrayList<AccountItem> myAccountItems, boolean isUpgraded) {
         this.items = myAccountItems;
-        this.context = context;
+        this.isUpgraded = isUpgraded;
     }
 
     @Override
@@ -34,6 +37,9 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row_header, parent, false);
             TextView header = (TextView) v.findViewById(R.id.my_account_row_header);
             header.setText(AccountActivity.IMPORTED_HEADER);
+
+        } else if (viewType == TYPE_CREATE_NEW_WALLET_BUTTON || viewType == TYPE_IMPORT_ADDRESS_BUTTON) {
+            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row_buttons, parent, false);
         }
 
         return new ViewHolder(v);
@@ -44,6 +50,36 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
 
         if (holder.getItemViewType() == TYPE_IMPORTED_HEADER)
             return;
+
+        LinearLayout cardView = (LinearLayout) holder.itemView.findViewById(R.id.card_layout);
+
+        if (holder.getItemViewType() == TYPE_CREATE_NEW_WALLET_BUTTON) {
+            TextView description = (TextView) holder.itemView.findViewById(R.id.description);
+            if (isUpgraded) {
+                description.setText(R.string.create_new);
+            } else {
+                description.setText(R.string.create_new_address);
+            }
+
+            cardView.setOnClickListener(v -> {
+                if (listener != null) listener.onCreateNewClicked();
+            });
+            return;
+        }
+
+        if (holder.getItemViewType() == TYPE_IMPORT_ADDRESS_BUTTON) {
+            TextView description = (TextView) holder.itemView.findViewById(R.id.description);
+            description.setText(R.string.import_address);
+
+            cardView.setOnClickListener(v -> {
+                if (listener != null) listener.onImportAddressClicked();
+            });
+            return;
+        }
+
+        cardView.setOnClickListener(v -> {
+            if (listener != null) listener.onCardClicked(items.get(position).getCorrectPosition());
+        });
 
         TextView title = (TextView) holder.itemView.findViewById(R.id.my_account_row_label);
         TextView address = (TextView) holder.itemView.findViewById(R.id.my_account_row_address);
@@ -61,20 +97,20 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
 
         if (items.get(position).isArchived()) {
             amount.setText(R.string.archived_label);
-            amount.setTextColor(ContextCompat.getColor(context, R.color.blockchain_transfer_blue));
+            amount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.blockchain_transfer_blue));
         } else {
             amount.setText(items.get(position).getAmount());
-            amount.setTextColor(ContextCompat.getColor(context, R.color.blockchain_receive_green));
+            amount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.blockchain_receive_green));
         }
 
         if (items.get(position).isWatchOnly()) {
-            tag.setText(context.getString(R.string.watch_only));
-            tag.setTextColor(ContextCompat.getColor(context, R.color.blockchain_send_red));
+            tag.setText(holder.itemView.getContext().getString(R.string.watch_only));
+            tag.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.blockchain_send_red));
         }
 
         if (items.get(position).isDefault()) {
-            tag.setText(context.getString(R.string.default_label));
-            tag.setTextColor(ContextCompat.getColor(context, R.color.blockchain_grey));
+            tag.setText(holder.itemView.getContext().getString(R.string.default_label));
+            tag.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.blockchain_grey));
         }
 
         if (!items.get(position).isWatchOnly() && !items.get(position).isDefault()) {
@@ -88,24 +124,40 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return !items.isEmpty() ? items.size() : 0;
     }
 
     @Override
     public int getItemViewType(int position) {
-
         String title = items.get(position).getLabel();
-        if (title.equals(AccountActivity.IMPORTED_HEADER))
+        if (title.equals(AccountActivity.IMPORTED_HEADER)) {
             return TYPE_IMPORTED_HEADER;
+        } else if (title.equals(AccountActivity.IMPORT_ADDRESS)) {
+            return TYPE_IMPORT_ADDRESS_BUTTON;
+        } else if (title.equals(AccountActivity.CREATE_NEW)) {
+            return TYPE_CREATE_NEW_WALLET_BUTTON;
+        }
 
-        else
-            return position;
+        return position;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    void setAccountHeaderListener(AccountHeadersListener accountHeadersListener) {
+        listener = accountHeadersListener;
+    }
 
-        public ViewHolder(View view) {
+    class ViewHolder extends RecyclerView.ViewHolder {
+
+        ViewHolder(View view) {
             super(view);
         }
+    }
+
+    interface AccountHeadersListener {
+
+        void onCreateNewClicked();
+
+        void onImportAddressClicked();
+
+        void onCardClicked(int correctedPosition);
     }
 }

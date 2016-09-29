@@ -31,7 +31,7 @@ public class BaseAuthActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        if (!BuildConfig.DOGFOOD) {
+        if (!BuildConfig.DOGFOOD && !BuildConfig.DEBUG) {
             disallowScreenshots();
         }
 
