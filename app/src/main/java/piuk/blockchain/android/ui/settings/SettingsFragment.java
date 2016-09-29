@@ -263,7 +263,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
             twoStepVerificationPref = (SwitchPreferenceCompat) findPreference("2fa");
             twoStepVerificationPref.setOnPreferenceClickListener(this);
-            twoStepVerificationPref.setChecked(settingsApi.getAuthType() == Settings.AUTH_TYPE_SMS);
+            twoStepVerificationPref.setChecked(settingsApi.getAuthType() != Settings.AUTH_TYPE_OFF);
+
+            set2FASummary(settingsApi.getAuthType());
 
             passwordHint1Pref = findPreference("pw_hint1");
             if (settingsApi.getPasswordHint1() != null && !settingsApi.getPasswordHint1().isEmpty()) {
@@ -302,6 +304,23 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             if (getActivity().getIntent() != null && getActivity().getIntent().hasExtra(EXTRA_SHOW_TWO_FA_DIALOG)) {
                 showDialogTwoFA();
             }
+        }
+    }
+
+    private void set2FASummary(int type){
+        switch (type) {
+            case Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR:
+                twoStepVerificationPref.setSummary(getString(R.string.google_authenticator));
+                break;
+            case Settings.AUTH_TYPE_SMS:
+                twoStepVerificationPref.setSummary(getString(R.string.sms));
+                break;
+            case Settings.AUTH_TYPE_YUBI_KEY:
+                twoStepVerificationPref.setSummary(getString(R.string.yubikey));
+                break;
+            default:
+                twoStepVerificationPref.setSummary("");
+                break;
         }
     }
 
@@ -564,13 +583,19 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 () -> settingsApi.setAuthType(type, new Settings.ResultListener() {
                     @Override
                     public void onSuccess() {
-                        handler.post(() -> twoStepVerificationPref.setChecked(type == Settings.AUTH_TYPE_SMS));
+                        handler.post(() -> {
+                            twoStepVerificationPref.setChecked(type != Settings.AUTH_TYPE_OFF);
+                            set2FASummary(type);
+                        });
                     }
 
                     @Override
                     public void onFail() {
                         ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-                        handler.post(() -> twoStepVerificationPref.setChecked(type == Settings.AUTH_TYPE_SMS));
+                        handler.post(() -> {
+                            twoStepVerificationPref.setChecked(type != Settings.AUTH_TYPE_OFF);
+                            set2FASummary(type);
+                        });
                     }
 
                     @Override
@@ -1073,16 +1098,14 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                     .setTitle(R.string.two_fa)
                     .setMessage(R.string.two_fa_summary)
                     .setNeutralButton(android.R.string.cancel, (dialogInterface, i) -> {
-                        if (settingsApi.getAuthType() == Settings.AUTH_TYPE_SMS) {
-                            twoStepVerificationPref.setChecked(true);
-                        } else {
-                            twoStepVerificationPref.setChecked(false);
-                        }
+                        twoStepVerificationPref.setChecked(settingsApi.getAuthType() != Settings.AUTH_TYPE_OFF);
+                        set2FASummary(settingsApi.getAuthType());
                     });
 
-            if (settingsApi.getAuthType() == Settings.AUTH_TYPE_SMS) {
+            if (settingsApi.getAuthType() != Settings.AUTH_TYPE_OFF) {
                 alertDialogBuilder.setNegativeButton(R.string.disable, (dialogInterface, i) -> update2FA(Settings.AUTH_TYPE_OFF));
             } else {
+                //TODO - Currently only SMS 2FA on android
                 alertDialogBuilder.setPositiveButton(R.string.enable, (dialogInterface, i) -> update2FA(Settings.AUTH_TYPE_SMS));
             }
             alertDialogBuilder.create()

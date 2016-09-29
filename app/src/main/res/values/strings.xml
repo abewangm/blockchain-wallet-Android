@@ -373,6 +373,7 @@
     <string name="to_field_helper">Enter Bitcoin address or select</string>
     <string name="to_field_helper_no_dropdown">Enter Bitcoin address</string>
 
+    <!-- SETTINGS -->
     <string name="update">Update</string>
     <string name="mobile">Mobile</string>
     <string name="profile">Profile</string>
@@ -387,6 +388,10 @@
     <string name="security">Security</string>
     <string name="enable">Enable</string>
     <string name="disable">Disable</string>
+
+    <string name="sms">SMS</string>
+    <string name="google_authenticator">Google Authenticator</string>
+    <string name="yubikey">Yubikey</string>
 
     <string name="request_camera_permission">Camera access is required.</string>
     <string name="request_location_permission">Location access is required.</string>
