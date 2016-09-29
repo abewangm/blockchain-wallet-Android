@@ -241,7 +241,7 @@ public class SendViewModel extends BaseViewModel {
      *
      * @return decimal separator
      */
-    private String getDefaultDecimalSeparator() {
+    String getDefaultDecimalSeparator() {
         DecimalFormat format = (DecimalFormat) DecimalFormat.getInstance(Locale.getDefault());
         DecimalFormatSymbols symbols = format.getDecimalFormatSymbols();
         return Character.toString(symbols.getDecimalSeparator());
@@ -429,9 +429,7 @@ public class SendViewModel extends BaseViewModel {
                 NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
                 Number btcNumber = numberFormat.parse(btcAmount);
                 btc_amount = monetaryUtil.getUndenominatedAmount(btcNumber.doubleValue());
-            } catch (NumberFormatException e) {
-                btc_amount = 0.0;
-            } catch (ParseException e) {
+            } catch (NumberFormatException | ParseException e) {
                 btc_amount = 0.0;
             }
 

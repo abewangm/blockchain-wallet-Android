@@ -21,6 +21,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.text.method.DigitsKeyListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -544,6 +545,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         btcTextWatcher = new TextWatcher() {
             public void afterTextChanged(Editable editable) {
                 viewModel.afterBtcTextChanged(editable.toString());
+                setKeyListener(editable, binding.amountRow.amountBtc);
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -562,6 +564,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         fiatTextWatcher = new TextWatcher() {
             public void afterTextChanged(Editable editable) {
                 viewModel.afterFiatTextChanged(editable.toString());
+                setKeyListener(editable, binding.amountRow.amountFiat);
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -573,6 +576,14 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             }
         };
 
+    }
+
+    void setKeyListener(Editable s, EditText editText) {
+        if (s.toString().contains(viewModel.getDefaultDecimalSeparator())) {
+            editText.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
+        } else {
+            editText.setKeyListener(DigitsKeyListener.getInstance("0123456789" + viewModel.getDefaultDecimalSeparator()));
+        }
     }
 
     @Override
