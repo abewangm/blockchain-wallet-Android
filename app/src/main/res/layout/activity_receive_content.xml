@@ -50,8 +50,9 @@
                         android:id="@+id/accounts"
                         layout="@layout/include_spinner_compat"
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1" />
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginTop="8dp" />
 
                 </LinearLayout>
 
@@ -85,22 +86,20 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:paddingBottom="8dp"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:paddingTop="8dp"
-                        android:paddingBottom="8dp"
-                        android:gravity="center"
                         android:text="@string/share_instructions"
-                        android:textColor="@color/blockchain_grey"/>
+                        android:textColor="@color/blockchain_grey" />
 
                     <ImageView
                         android:id="@+id/qr"
                         android:layout_width="220dp"
                         android:layout_height="220dp"
                         android:layout_gravity="center_vertical|center_horizontal"
-                        android:gravity="center_vertical|center_horizontal"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp" />
+                        android:gravity="center_vertical|center_horizontal" />
 
                     <EditText
                         android:id="@+id/receiving_address"
