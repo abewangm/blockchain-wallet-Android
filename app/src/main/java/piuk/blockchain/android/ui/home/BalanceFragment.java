@@ -687,30 +687,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
                 tvResult.setText(span1);
 
-                tvResult.setOnTouchListener((v, event) -> {
-
-                    View parent = (View) v.getParent();
-                    event.setLocation(v.getX() + (v.getWidth() / 2), v.getY() + (v.getHeight() / 2));
-                    parent.onTouchEvent(event);
-
-                    if (event.getAction() == MotionEvent.ACTION_UP) {
-                        isBTC = !isBTC;
-                        viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
-                    }
-                    return true;
+                tvResult.setOnClickListener(v -> {
+                    isBTC = !isBTC;
+                    viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
                 });
 
-                txTouchView.setOnTouchListener((v, event) -> {
-
-                    View parent = (View) v.getParent();
-                    event.setLocation(event.getX(), v.getY() + (v.getHeight() / 2));
-                    parent.onTouchEvent(event);
-
-                    if (event.getAction() == MotionEvent.ACTION_UP) {
-                        onRowClick(position);
-                    }
-                    return true;
-                });
+                txTouchView.setOnClickListener(v -> onRowClick(position));
             }
         }
 

@@ -3,10 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <RelativeLayout
-        style="?android:attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/expandable_layout_base_height"
-        android:background="@drawable/selector_pearl_white_tx"
         android:gravity="start">
 
         <FrameLayout
@@ -27,6 +25,8 @@
                 android:id="@+id/tx_touch_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:theme="@style/PlainTheme"
+                android:foreground="?attr/selectableItemBackground"
                 android:background="@android:color/transparent" />
 
             <!-- DATE -->
@@ -40,7 +40,7 @@
                 android:maxLines="1"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
-                android:textColor="@color/primary_text_default_material_light"
+                android:textColor="@color/black"
                 android:textSize="14sp"
                 tools:text="April 2015" />
 
