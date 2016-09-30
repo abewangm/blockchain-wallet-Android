@@ -7,10 +7,11 @@
     android:layout_width="fill_parent"
     android:layout_height="72dp"
     android:layout_gravity="center"
-    android:layout_margin="4dp">
+    android:layout_margin="4dp"
+    android:foreground="?attr/selectableItemBackground"
+    android:theme="@style/PlainTheme">
 
     <LinearLayout
-        android:id="@+id/card_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
