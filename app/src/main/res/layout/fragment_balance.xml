@@ -56,7 +56,6 @@
                         android:layout_centerInParent="true"
                         android:paddingLeft="72dp"
                         android:text="@{viewModel.balance}"
-                        android:textAlignment="center"
                         android:textColor="@color/white"
                         android:textSize="30sp"
                         tools:text="10.0000002 BTC" />

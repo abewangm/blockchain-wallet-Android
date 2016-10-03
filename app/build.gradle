@@ -5,7 +5,7 @@ apply from: '../jacoco.gradle'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '24.0.2'
+    buildToolsVersion '24.0.3'
 
     // Introduced to prevent crash during DEXing step since SDK 23, but also speeds up DEXing in general
     dexOptions {
