@@ -31,9 +31,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import com.getbase.floatingactionbutton.FloatingActionButton;
-import com.getbase.floatingactionbutton.FloatingActionsMenu;
-
 import info.blockchain.api.AddressInfo;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
@@ -87,6 +84,11 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     private static final int EDIT_ACTIVITY_REQUEST_CODE = 2007;
     private static final int ADDRESS_LABEL_MAX_LENGTH = 17;
 
+    private static String[] HEADERS;
+    public static String IMPORTED_HEADER;
+    public static final String IMPORT_ADDRESS = "import_account";
+    public static final String CREATE_NEW = "create_wallet";
+
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
@@ -95,10 +97,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             }
         }
     };
-    private String[] headersArray;
     private ArrayList<AccountItem> accountsAndImportedList;
     private AccountAdapter accountsAdapter;
-    @Thunk ArrayList<Integer> headerPositions;
     private int hdAccountsIdx;
     private List<LegacyAddress> legacy;
     @Thunk MaterialProgressDialog progress;
@@ -127,8 +127,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         initToolbar();
 
         setupViews();
-
-        setFab();
     }
 
     private void initToolbar() {
@@ -143,105 +141,49 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     private void setupViews() {
 
-        if (!payloadManager.isNotUpgraded())
-            headersArray = new String[]{getResources().getString(R.string.imported_addresses)};
-        else
-            headersArray = new String[0];
+        IMPORTED_HEADER = getResources().getString(R.string.imported_addresses);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        binding.accountsList.setLayoutManager(layoutManager);
+        if (!payloadManager.isNotUpgraded()) {
+            HEADERS = new String[]{getResources().getString(R.string.imported_addresses)};
+        } else {
+            HEADERS = new String[0];
+        }
+
+        binding.accountsList.setLayoutManager(new LinearLayoutManager(this));
 
         accountsAndImportedList = new ArrayList<>();
         onUpdateAccountsList();
-        accountsAdapter = new AccountAdapter(accountsAndImportedList, this);
+        accountsAdapter = new AccountAdapter(accountsAndImportedList, !payloadManager.isNotUpgraded());
+        accountsAdapter.setAccountHeaderListener(new AccountAdapter.AccountHeadersListener() {
+            @Override
+            public void onCreateNewClicked() {
+                if (payloadManager.isNotUpgraded()) {
+                    createNewAddress();
+                } else {
+                    createNewAccount();
+                }
+            }
+
+            @Override
+            public void onImportAddressClicked() {
+                importAddress();
+            }
+
+            @Override
+            public void onCardClicked(int correctedPosition) {
+                onRowClick(correctedPosition);
+            }
+        });
+
         binding.accountsList.setAdapter(accountsAdapter);
-
-        binding.accountsList.addOnItemTouchListener(
-                new RecyclerItemClickListener(this, (view, position) -> {
-                    if (!payloadManager.isNotUpgraded())
-                        if (headerPositions.contains(position)) return;//headers unclickable
-                    onRowClick(position);
-                })
-        );
-
-        binding.balanceMainContentShadow.setOnClickListener(view -> binding.multipleActions.collapse());
-    }
-
-    private void setFab() {
-
-        //First icon when fab expands
-        FloatingActionButton actionA = new FloatingActionButton(getBaseContext());
-        actionA.setColorNormal(getResources().getColor(R.color.blockchain_transfer_blue));
-        actionA.setSize(FloatingActionButton.SIZE_MINI);
-        actionA.setIconDrawable(getResources().getDrawable(R.drawable.icon_accounthd));
-        actionA.setColorPressed(getResources().getColor(R.color.blockchain_dark_blue));
-
-        if (!payloadManager.isNotUpgraded()) {
-            //V3
-            actionA.setTitle(getResources().getString(R.string.create_new));
-            actionA.setOnClickListener(v -> {
-                createNewAccount();
-                if (binding.multipleActions.isExpanded())
-                    binding.multipleActions.collapse();
-            });
-        } else {
-            //V2
-            actionA.setTitle(getResources().getString(R.string.create_new_address));
-            actionA.setOnClickListener(v -> {
-                if (binding.multipleActions.isExpanded())
-                    binding.multipleActions.collapse();
-                createNewAddress();
-            });
-        }
-
-        //Second icon when fab expands
-        FloatingActionButton actionB = new FloatingActionButton(getBaseContext());
-        actionB.setColorNormal(getResources().getColor(R.color.blockchain_transfer_blue));
-        actionB.setSize(FloatingActionButton.SIZE_MINI);
-        actionB.setIconDrawable(getResources().getDrawable(R.drawable.icon_imported));
-        actionB.setColorPressed(getResources().getColor(R.color.blockchain_dark_blue));
-        actionB.setTitle(getResources().getString(R.string.import_address));
-        actionB.setOnClickListener(v -> {
-            if (binding.multipleActions.isExpanded()) {
-                binding.multipleActions.collapse();
-            }
-            importAddress();
-        });
-
-        binding.multipleActions.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
-            @Override
-            public void onMenuExpanded() {
-                binding.balanceMainContentShadow.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onMenuCollapsed() {
-                binding.balanceMainContentShadow.setVisibility(View.INVISIBLE);
-            }
-        });
-
-        //Add buttons to expanding fab
-        binding.multipleActions.addButton(actionA);
-        binding.multipleActions.addButton(actionB);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (!isFinishing() && binding.multipleActions != null) {
-            if (binding.multipleActions.isExpanded()) {
-                binding.multipleActions.collapse();
-            } else {
-                super.onBackPressed();
-            }
-        }
     }
 
     @Thunk
     void onRowClick(int position) {
 
         Intent intent = new Intent(this, AccountEditActivity.class);
-        if (position - headersArray.length >= hdAccountsIdx) {//2 headers before imported
-            intent.putExtra("address_index", position - headersArray.length - hdAccountsIdx);
+        if (position - HEADERS.length >= hdAccountsIdx) {//2 headers before imported
+            intent.putExtra("address_index", position - HEADERS.length - hdAccountsIdx);
         } else {
             intent.putExtra("account_index", position);
         }
@@ -452,13 +394,9 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     @Override
     public void onUpdateAccountsList() {
-
-        headerPositions = new ArrayList<>();
-
-        //accountsAndImportedList is linked to BalanceHeaderAdapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
+        //accountsAndImportedList is linked to AccountAdapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
         accountsAndImportedList.clear();
-
-        int i = 0;
+        int correctedPosition = 0;
         if (payloadManager.getPayload().isUpgraded()) {
 
             List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
@@ -473,7 +411,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             Account defaultAccount = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultIndex);
 
             int archivedCount = 0;
-            for (; i < accountClone.size(); i++) {
+            for (int i = 0; i < accountClone.size(); i++) {
 
                 String label = accountClone.get(i).getLabel();
                 String balance = getAccountBalance(i);
@@ -482,9 +420,13 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                     label = label.substring(0, ADDRESS_LABEL_MAX_LENGTH) + "...";
                 if (label == null || label.length() == 0) label = "";
 
-                accountsAndImportedList.add(new AccountItem(label, null, balance, getResources().getDrawable(R.drawable.icon_accounthd), accountClone.get(i).isArchived(), false, defaultAccount.getXpub().equals(accountClone.get(i).getXpub())));
+                accountsAndImportedList.add(new AccountItem(correctedPosition, label, null, balance, getResources().getDrawable(R.drawable.icon_accounthd), accountClone.get(i).isArchived(), false, defaultAccount.getXpub().equals(accountClone.get(i).getXpub())));
+                correctedPosition++;
             }
             hdAccountsIdx = accountClone.size() - archivedCount;
+
+            // Create New button position
+            accountsAndImportedList.add(new AccountItem(null, CREATE_NEW, null, "", getResources().getDrawable(R.drawable.icon_accounthd), false, false, false));
         }
 
         ImportedAccount iAccount = null;
@@ -495,8 +437,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
             if (!payloadManager.isNotUpgraded()) {
                 //Imported Header Position
-                headerPositions.add(accountsAndImportedList.size());
-                accountsAndImportedList.add(new AccountItem(headersArray[0], null, "", getResources().getDrawable(R.drawable.icon_accounthd), false, false, false));
+                accountsAndImportedList.add(new AccountItem(correctedPosition, HEADERS[0], null, "", getResources().getDrawable(R.drawable.icon_accounthd), false, false, false));
+                correctedPosition++;
             }
 
             legacy = iAccount.getLegacyAddresses();
@@ -511,9 +453,13 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 if (label == null || label.length() == 0) label = "";
                 if (address == null || address.length() == 0) address = "";
 
-                accountsAndImportedList.add(new AccountItem(label, address, balance, getResources().getDrawable(R.drawable.icon_imported), legacy.get(j).getTag() == PayloadManager.ARCHIVED_ADDRESS, legacy.get(j).isWatchOnly(), false));
+                accountsAndImportedList.add(new AccountItem(correctedPosition, label, address, balance, getResources().getDrawable(R.drawable.icon_imported), legacy.get(j).getTag() == PayloadManager.ARCHIVED_ADDRESS, legacy.get(j).isWatchOnly(), false));
+                correctedPosition++;
             }
         }
+
+        // Import Address button at last position
+        accountsAndImportedList.add(new AccountItem(null, IMPORT_ADDRESS, null, "", getResources().getDrawable(R.drawable.icon_accounthd), false, false, false));
 
         runOnUiThread(() -> {
             if (accountsAdapter != null) {

@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.transactions;
 
-import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -8,10 +7,12 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 
@@ -23,6 +24,7 @@ import piuk.blockchain.android.databinding.ActivityTransactionDetailsBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.receive.RecipientAdapter;
+import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 public class TransactionDetailActivity extends BaseAuthActivity implements TransactionDetailViewModel.DataListener {
@@ -42,14 +44,28 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
         toolbar.setTitle(getResources().getString(R.string.transaction_detail_title));
         setSupportActionBar(toolbar);
 
-        mBinding.editIcon.setOnClickListener(v -> mBinding.descriptionField.requestFocus());
-        mBinding.descriptionField.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                mViewModel.updateTransactionNote(mBinding.descriptionField.getText().toString());
-                hideKeyboard();
-                mBinding.descriptionField.clearFocus();
-            }
-            return true;
+        mBinding.editIcon.setOnClickListener(v -> mBinding.descriptionField.performClick());
+        mBinding.descriptionField.setOnClickListener(v -> {
+            AppCompatEditText editText = new AppCompatEditText(this);
+            editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE | InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE);
+            editText.setHint(R.string.transaction_detail_description_hint);
+
+            int maxLength = 256;
+            InputFilter[] fArray = new InputFilter[1];
+            fArray[0] = new InputFilter.LengthFilter(maxLength);
+            editText.setFilters(fArray);
+            editText.setText(mViewModel.getTransactionNote());
+            editText.setSelection(editText.getText().length());
+
+            new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.app_name)
+                    .setView(ViewUtils.getAlertDialogEditTextLayout(this, editText))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        mViewModel.updateTransactionNote(editText.getText().toString());
+                        setDescription(editText.getText().toString());
+                    })
+                    .show();
         });
 
         mViewModel.onViewReady();
@@ -162,13 +178,5 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
     protected void onDestroy() {
         super.onDestroy();
         mViewModel.destroy();
-    }
-
-    private void hideKeyboard() {
-        View view = getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
     }
 }

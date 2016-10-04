@@ -204,7 +204,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(this.getString(R.string.password_entry))
-                .setView(ViewUtils.getAlertDialogTextViewLayout(this, password))
+                .setView(ViewUtils.getAlertDialogEditTextLayout(this, password))
                 .setCancelable(false)
                 .setNegativeButton(android.R.string.cancel, (dialog, whichButton) -> mViewModel.getAppUtil().restartApp())
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {

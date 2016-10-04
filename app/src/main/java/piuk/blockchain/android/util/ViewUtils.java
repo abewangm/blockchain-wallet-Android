@@ -56,7 +56,7 @@ public class ViewUtils {
      *                 for design compatibility - there's no reason to be using plain EditTexts)
      * @return A correctly padded FrameLayout containing the AppCompatEditText
      */
-    public static FrameLayout getAlertDialogTextViewLayout(Context context, AppCompatEditText editText) {
+    public static FrameLayout getAlertDialogEditTextLayout(Context context, AppCompatEditText editText) {
         FrameLayout frameLayout = new FrameLayout(context);
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
