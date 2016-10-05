@@ -46,23 +46,32 @@ public class AccountDataManager {
         Payload payload = payloadManager.getPayload();
         int index = payload.getLegacyAddressStrings().indexOf(key.toAddress(MainNetParams.get()).toString());
         LegacyAddress legacyAddress = payload.getLegacyAddresses().get(index);
-        if (!payload.isDoubleEncrypted()) {
-            legacyAddress.setEncryptedKey(key.getPrivKeyBytes());
-        } else {
-            String encryptedKey = Base58.encode(key.getPrivKeyBytes());
-            String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
-                    payload.getSharedKey(),
-                    secondPassword != null ? secondPassword.toString() : null,
-                    payload.getOptions().getIterations());
-            legacyAddress.setEncryptedKey(encrypted2);
-        }
+        setKeyForLegacyAddress(legacyAddress, key, secondPassword);
         legacyAddress.setWatchOnly(false);
         payloadManager.setPayload(payload);
         return savePayloadToServer();
     }
 
-    // TODO: 04/10/2016 This needs testing
-    public Observable<Boolean> updateLegacyAddress(LegacyAddress address) {
+    public void setKeyForLegacyAddress(LegacyAddress legacyAddress, ECKey key, @Nullable CharSequenceX secondPassword) {
+        // If double encrypted, save encrypted in payload
+        if (!payloadManager.getPayload().isDoubleEncrypted()) {
+            legacyAddress.setEncryptedKey(key.getPrivKeyBytes());
+        } else {
+            String encryptedKey = Base58.encode(key.getPrivKeyBytes());
+            String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
+                    payloadManager.getPayload().getSharedKey(),
+                    secondPassword != null ? secondPassword.toString() : null,
+                    payloadManager.getPayload().getOptions().getIterations());
+            legacyAddress.setEncryptedKey(encrypted2);
+        }
+    }
+
+    public Observable<Boolean> updateLegacyAddress(LegacyAddress legacyAddress) {
+        return createUpdateLegacyAddressObservable(legacyAddress)
+                .compose(RxUtil.applySchedulers());
+    }
+
+    private Observable<Boolean> createUpdateLegacyAddressObservable(LegacyAddress address) {
         return Observable.fromCallable(() -> payloadManager.addLegacyAddress(address))
                 .flatMap(success -> {
                     if (success) {
@@ -73,12 +82,11 @@ public class AccountDataManager {
                             throw Exceptions.propagate(e);
                         }
 
-                        addAddressAndUpdate(address)
-                                .flatMap(aLong -> refreshLegacyAddressData())
-                                .doOnNext(aVoid -> Observable.just(true));
+                        return addAddressAndUpdate(address)
+                                .flatMap(total -> Observable.just(true));
+                    } else {
+                        return Observable.just(false);
                     }
-
-                    return Observable.just(false);
                 });
     }
 
@@ -87,23 +95,13 @@ public class AccountDataManager {
                 .compose(RxUtil.applySchedulers());
     }
 
-    private Observable<Void> refreshLegacyAddressData() {
-        return Observable.create(subscriber -> {
-            try {
-                List<String> legacyAddressList = payloadManager.getPayload().getLegacyAddressStrings();
-                multiAddrFactory.refreshLegacyAddressData(legacyAddressList.toArray(new String[legacyAddressList.size()]), false);
-                if (subscriber.isUnsubscribed()) return;
-                subscriber.onNext(null);
-                subscriber.onCompleted();
-            } catch (Exception e) {
-                if (!subscriber.isUnsubscribed()) {
-                    subscriber.onError(e);
-                }
-            }
-        });
-    }
-
     private Observable<Long> addAddressAndUpdate(LegacyAddress address) {
+        try {
+            List<String> legacyAddressList = payloadManager.getPayload().getLegacyAddressStrings();
+            multiAddrFactory.refreshLegacyAddressData(legacyAddressList.toArray(new String[legacyAddressList.size()]), false);
+        } catch (Exception e) {
+            throw Exceptions.propagate(e);
+        }
         return addressInfoService.getAddressBalance(address, PARAMETER_FINAL_BALANCE)
                 .doOnNext(balance -> {
                     multiAddrFactory.setLegacyBalance(address.getAddress(), balance);

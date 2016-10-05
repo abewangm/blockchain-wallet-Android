@@ -11,8 +11,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -26,9 +26,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
@@ -36,21 +34,12 @@ import info.blockchain.wallet.payload.ImportedAccount;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
-import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
-
-import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.crypto.BIP38PrivateKey;
-import org.bitcoinj.params.MainNetParams;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityAccountsBinding;
@@ -62,7 +51,6 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.ui.zxing.Intents;
-import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PermissionUtil;
@@ -98,7 +86,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     private MonetaryUtil monetaryUtil;
     private int hdAccountsIdx;
     @Thunk MaterialProgressDialog progress;
-    @Thunk AppUtil appUtil;
     @Thunk PayloadManager payloadManager;
     @Thunk AccountViewModel viewModel;
     @Thunk ActivityAccountsBinding binding;
@@ -109,7 +96,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         super.onCreate(savedInstanceState);
 
         prefsUtil = new PrefsUtil(this);
-        appUtil = new AppUtil(this);
         payloadManager = PayloadManager.getInstance();
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
 
@@ -189,16 +175,12 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         }
     }
 
-    @Thunk
-    void startScanActivity() {
-        if (!appUtil.isCameraOpen()) {
-            Intent intent = new Intent(AccountActivity.this, CaptureActivity.class);
-            intent.putExtra(Intents.Scan.FORMATS, EnumSet.allOf(BarcodeFormat.class));
-            intent.putExtra(Intents.Scan.MODE, Intents.Scan.QR_CODE_MODE);
-            startActivityForResult(intent, IMPORT_PRIVATE_REQUEST_CODE);
-        } else {
-            ToastCustom.makeText(AccountActivity.this, getString(R.string.camera_unavailable), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-        }
+    @Override
+    public void startScanForResult() {
+        Intent intent = new Intent(AccountActivity.this, CaptureActivity.class);
+        intent.putExtra(Intents.Scan.FORMATS, EnumSet.allOf(BarcodeFormat.class));
+        intent.putExtra(Intents.Scan.MODE, Intents.Scan.QR_CODE_MODE);
+        startActivityForResult(intent, IMPORT_PRIVATE_REQUEST_CODE);
     }
 
     @Thunk
@@ -209,67 +191,59 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             new SecondPasswordHandler(this).validate(new SecondPasswordHandler.ResultListener() {
                 @Override
                 public void onNoSecondPassword() {
-                    startScanActivity();
+                    viewModel.onScanButtonClicked();
                 }
 
                 @Override
                 public void onSecondPasswordValidated(String validateSecondPassword) {
                     secondPassword = validateSecondPassword;
-                    startScanActivity();
+                    viewModel.onScanButtonClicked();
                 }
             });
         }
     }
 
-    private void createNewAccount() {
+    @Thunk
+    void createNewAccount() {
         new SecondPasswordHandler(this).validate(new SecondPasswordHandler.ResultListener() {
             @Override
             public void onNoSecondPassword() {
-                promptForAccountLabel(null);
+                promptForAccountLabel();
             }
 
             @Override
             public void onSecondPasswordValidated(String validateSecondPassword) {
                 secondPassword = validateSecondPassword;
-                promptForAccountLabel(validateSecondPassword);
+                promptForAccountLabel();
             }
         });
     }
 
     @Thunk
-    void promptForAccountLabel(@Nullable final String validatedSecondPassword) {
-        final AppCompatEditText etLabel = new AppCompatEditText(this);
-        etLabel.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-        etLabel.setFilters(new InputFilter[]{new InputFilter.LengthFilter(ADDRESS_LABEL_MAX_LENGTH)});
-
-        FrameLayout frameLayout = new FrameLayout(this);
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        int marginInPixels = (int) ViewUtils.convertDpToPixel(20, this);
-        params.setMargins(marginInPixels, 0, marginInPixels, 0);
-        frameLayout.addView(etLabel, params);
+    void promptForAccountLabel() {
+        AppCompatEditText editText = getAddressLabelEditText();
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.label)
                 .setMessage(R.string.assign_display_name)
-                .setView(frameLayout)
+                .setView(ViewUtils.getAlertDialogEditTextLayout(this, editText))
                 .setCancelable(false)
                 .setPositiveButton(R.string.save_name, (dialog, whichButton) -> {
-
-                    if (etLabel.getText().toString().trim().length() > 0) {
-                        addAccount(etLabel.getText().toString().trim(), validatedSecondPassword);
+                    if (editText.getText().toString().trim().length() > 0) {
+                        addAccount(editText.getText().toString().trim());
                     } else {
                         ToastCustom.makeText(AccountActivity.this, getResources().getString(R.string.label_cant_be_empty), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                     }
                 })
-                .setNegativeButton(android.R.string.cancel, null).show();
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
-    private void addAccount(final String accountLabel, @Nullable final String secondPassword) {
+    private void addAccount(final String accountLabel) {
         if (!ConnectivityStatus.hasConnectivity(AccountActivity.this)) {
             ToastCustom.makeText(AccountActivity.this, getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
         } else {
-            viewModel.createNewAccount(accountLabel, secondPassword != null ? new CharSequenceX(secondPassword) : null);
+            viewModel.createNewAccount(accountLabel, getSecondPassword());
         }
     }
 
@@ -343,7 +317,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     }
 
     private String getAccountBalance(int index) {
-
         String address = payloadManager.getXpubFromAccountIndex(index);
         Long amount = MultiAddrFactory.getInstance().getXpubAmounts().get(address);
         if (amount == null) amount = 0L;
@@ -354,7 +327,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     }
 
     private String getAddressBalance(int index) {
-
         String address = legacy.get(index).getAddress();
         Long amount = MultiAddrFactory.getInstance().getLegacyBalance(address);
         String unit = (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
@@ -393,7 +365,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                     }
                 } else {
                     // Watch-only address scanned
-                    importWatchOnly(strResult);
+                    viewModel.importWatchOnlyAddress(strResult);
                 }
             } catch (Exception e) {
                 ToastCustom.makeText(AccountActivity.this, getString(R.string.privkey_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
@@ -404,8 +376,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     }
 
     private void importBIP38Address(final String data) {
-
-        final AppCompatEditText password = new AppCompatEditText(this);
+        AppCompatEditText password = new AppCompatEditText(this);
         password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
@@ -413,145 +384,14 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 .setMessage(R.string.bip38_password_entry)
                 .setView(ViewUtils.getAlertDialogEditTextLayout(this, password))
                 .setCancelable(false)
-                .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
-
-                    final String pw = password.getText().toString();
-
-                    if (progress != null && progress.isShowing()) {
-                        progress.dismiss();
-                        progress = null;
-                    }
-                    progress = new MaterialProgressDialog(AccountActivity.this);
-                    progress.setMessage(AccountActivity.this.getResources().getString(R.string.please_wait));
-                    progress.show();
-
-                    new Thread(() -> {
-
-                        Looper.prepare();
-
-                        try {
-                            BIP38PrivateKey bip38 = new BIP38PrivateKey(MainNetParams.get(), data);
-                            final ECKey key = bip38.decrypt(pw);
-
-                            if (key != null && key.hasPrivKey() && payloadManager.getPayload().getLegacyAddressStrings().contains(key.toAddress(MainNetParams.get()).toString())) {
-
-                                //A private key to an existing address has been scanned
-                                setPrivateKey(key);
-
-                            } else if (key != null && key.hasPrivKey() && !payloadManager.getPayload().getLegacyAddressStrings().contains(key.toAddress(MainNetParams.get()).toString())) {
-                                final LegacyAddress legacyAddress = new LegacyAddress(null, System.currentTimeMillis() / 1000L, key.toAddress(MainNetParams.get()).toString(), "", 0L, "android", BuildConfig.VERSION_NAME);
-                                            /*
-                                             * if double encrypted, save encrypted in payload
-                                             */
-                                if (!payloadManager.getPayload().isDoubleEncrypted()) {
-                                    legacyAddress.setEncryptedKey(key.getPrivKeyBytes());
-                                } else {
-                                    String encryptedKey = Base58.encode(key.getPrivKeyBytes());
-                                    String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
-                                            payloadManager.getPayload().getSharedKey(),
-                                            secondPassword,
-                                            payloadManager.getPayload().getOptions().getIterations());
-                                    legacyAddress.setEncryptedKey(encrypted2);
-                                }
-
-                                final AppCompatEditText address_label = new AppCompatEditText(AccountActivity.this);
-                                address_label.setFilters(new InputFilter[]{new InputFilter.LengthFilter(ADDRESS_LABEL_MAX_LENGTH)});
-                                address_label.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-
-                                FrameLayout frameLayout1 = new FrameLayout(AccountActivity.this);
-                                FrameLayout.LayoutParams params1 = new FrameLayout.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                                int marginInPixels1 = (int) ViewUtils.convertDpToPixel(20, AccountActivity.this);
-                                params1.setMargins(marginInPixels1, 0, marginInPixels1, 0);
-                                frameLayout1.addView(address_label, params1);
-
-                                new AlertDialog.Builder(AccountActivity.this, R.style.AlertDialogStyle)
-                                        .setTitle(R.string.app_name)
-                                        .setMessage(R.string.label_address)
-                                        .setView(frameLayout1)
-                                        .setCancelable(false)
-                                        .setPositiveButton(R.string.save_name, (dialog1, whichButton1) -> {
-                                            String label = address_label.getText().toString();
-                                            if (label.trim().length() > 0) {
-                                                legacyAddress.setLabel(label);
-                                            } else {
-                                                legacyAddress.setLabel(legacyAddress.getAddress());
-                                            }
-
-                                            remoteSaveNewAddress(legacyAddress);
-
-                                        }).setNegativeButton(R.string.polite_no, (dialog1, whichButton1) -> {
-                                    legacyAddress.setLabel(legacyAddress.getAddress());
-                                    remoteSaveNewAddress(legacyAddress);
-
-                                }).show();
-
-                            } else {
-                                ToastCustom.makeText(getApplicationContext(), getString(R.string.bip38_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                            }
-                        } catch (Exception e) {
-                            ToastCustom.makeText(AccountActivity.this, getString(R.string.bip38_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                        } finally {
-                            if (progress != null && progress.isShowing()) {
-                                progress.dismiss();
-                                progress = null;
-                            }
-                        }
-
-                        Looper.loop();
-
-                    }).start();
-
-                }).setNegativeButton(android.R.string.cancel, null).show();
+                .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
+                        viewModel.importBip38Address(data, password.getText().toString(), getSecondPassword()))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
-    private void importNonBIP38Address(final String format, final String data) {
-
-        ECKey key;
-
-        try {
-            key = PrivateKeyFactory.getInstance().getKey(format, data);
-        } catch (Exception e) {
-            ToastCustom.makeText(AccountActivity.this, getString(R.string.no_private_key), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-            e.printStackTrace();
-            return;
-        }
-
-        if (key != null && key.hasPrivKey() && payloadManager.getPayload().getLegacyAddressStrings().contains(key.toAddress(MainNetParams.get()).toString())) {
-
-            // A private key to an existing address has been scanned
-            setPrivateKey(key);
-
-        } else if (key != null && key.hasPrivKey() && !payloadManager.getPayload().getLegacyAddressStrings().contains(key.toAddress(MainNetParams.get()).toString())) {
-
-            final LegacyAddress legacyAddress = new LegacyAddress(null, System.currentTimeMillis() / 1000L, key.toAddress(MainNetParams.get()).toString(), "", 0L, "android", BuildConfig.VERSION_NAME);
-
-            // If double encrypted, save encrypted in payload
-            if (!payloadManager.getPayload().isDoubleEncrypted()) {
-                legacyAddress.setEncryptedKey(key.getPrivKeyBytes());
-            } else {
-                String encryptedKey = Base58.encode(key.getPrivKeyBytes());
-                String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
-                        payloadManager.getPayload().getSharedKey(),
-                        secondPassword,
-                        payloadManager.getPayload().getOptions().getIterations());
-                legacyAddress.setEncryptedKey(encrypted2);
-            }
-
-            showRenameImportedAddressDialog(legacyAddress);
-
-        } else {
-            ToastCustom.makeText(AccountActivity.this, getString(R.string.no_private_key), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-        }
-    }
-
-    @Thunk
-    void setPrivateKey(ECKey key) {
-        viewModel.setPrivateECKey(key, secondPassword != null ? new CharSequenceX(secondPassword) : null);
-    }
-
-    private void importWatchOnly(String address) {
-        viewModel.importWatchOnlyAddress(address);
+    private void importNonBIP38Address(String format, String data) {
+        viewModel.importNonBip38Address(format, data, getSecondPassword());
     }
 
     @Override
@@ -567,9 +407,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     @Override
     public void showRenameImportedAddressDialog(LegacyAddress address) {
-        final AppCompatEditText editText = new AppCompatEditText(AccountActivity.this);
-        editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(ADDRESS_LABEL_MAX_LENGTH)});
-        editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        AppCompatEditText editText = getAddressLabelEditText();
 
         new AlertDialog.Builder(AccountActivity.this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
@@ -585,7 +423,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                     }
 
                     remoteSaveNewAddress(address);
-
                 })
                 .setNegativeButton(R.string.polite_no, (dialog, whichButton) -> {
                     address.setLabel(address.getAddress());
@@ -614,7 +451,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     @Override
     public void onShowTransferableLegacyFundsWarning(boolean isAutoPopup) {
-
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.AlertDialogStyle);
         AlertPromptTransferFundsBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
                 R.layout.alert_prompt_transfer_funds, null, false);
@@ -658,14 +494,14 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     @Override
     public void onSetTransferLegacyFundsMenuItemVisible(boolean visible) {
-        runOnUiThread(() -> transferFundsMenuItem.setVisible(visible));
+        transferFundsMenuItem.setVisible(visible);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startScanActivity();
+                viewModel.onScanButtonClicked();
             } else {
                 // Permission request was denied.
             }
@@ -674,6 +510,18 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         }
     }
 
+    @NonNull
+    private AppCompatEditText getAddressLabelEditText() {
+        AppCompatEditText editText = new AppCompatEditText(this);
+        editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(ADDRESS_LABEL_MAX_LENGTH)});
+        return editText;
+    }
+
+    @Nullable
+    private CharSequenceX getSecondPassword() {
+        return secondPassword != null ? new CharSequenceX(secondPassword) : null;
+    }
 
     @Override
     public void showProgressDialog(@StringRes int message) {
