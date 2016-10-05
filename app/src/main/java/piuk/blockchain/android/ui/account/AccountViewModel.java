@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.account;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pair;
 
 import info.blockchain.wallet.exceptions.DecryptionException;
@@ -50,7 +51,7 @@ public class AccountViewModel extends BaseViewModel {
     @Inject TransferFundsDataManager fundsDataManager;
     @Inject PrefsUtil prefsUtil;
     @Inject AppUtil appUtil;
-    private CharSequenceX doubleEncryptionPassword;
+    @VisibleForTesting CharSequenceX doubleEncryptionPassword;
 
     AccountViewModel(DataListener dataListener) {
         Injector.getInstance().getAppComponent().inject(this);
