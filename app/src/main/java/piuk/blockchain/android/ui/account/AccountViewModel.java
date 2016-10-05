@@ -37,6 +37,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import rx.exceptions.Exceptions;
 
+@SuppressWarnings("WeakerAccess")
 public class AccountViewModel extends BaseViewModel {
 
     public static final String KEY_WARN_TRANSFER_ALL = "WARN_TRANSFER_ALL";
@@ -49,8 +50,9 @@ public class AccountViewModel extends BaseViewModel {
     @Inject TransferFundsDataManager fundsDataManager;
     @Inject PrefsUtil prefsUtil;
     @Inject AppUtil appUtil;
+    private CharSequenceX doubleEncryptionPassword;
 
-    public AccountViewModel(DataListener dataListener) {
+    AccountViewModel(DataListener dataListener) {
         Injector.getInstance().getAppComponent().inject(this);
         this.dataListener = dataListener;
     }
@@ -70,11 +72,13 @@ public class AccountViewModel extends BaseViewModel {
 
         void broadcastIntent(Intent intent);
 
-        void showWatchOnlyWarning(DialogButtonCallback dialogButtonCallback);
+        void showWatchOnlyWarningDialog(DialogButtonCallback dialogButtonCallback);
 
         void showRenameImportedAddressDialog(LegacyAddress address);
 
         void startScanForResult();
+
+        void showBip38PasswordDialog(String data);
     }
 
     @Override
@@ -82,10 +86,8 @@ public class AccountViewModel extends BaseViewModel {
         // No-op
     }
 
-    @Override
-    public void destroy() {
-        super.destroy();
-        dataListener = null;
+    void setDoubleEncryptionPassword(CharSequenceX secondPassword) {
+        doubleEncryptionPassword = secondPassword;
     }
 
     /**
@@ -112,16 +114,22 @@ public class AccountViewModel extends BaseViewModel {
                         }));
     }
 
-    void createNewAccount(String accountLabel, @Nullable CharSequenceX secondPassword) {
+    /**
+     * Derive new Account from seed
+     *
+     * @param accountLabel   A label for the account to be created
+     */
+    void createNewAccount(String accountLabel) {
         dataListener.showProgressDialog(R.string.please_wait);
         mCompositeSubscription.add(
-                accountDataManager.createNewAccount(accountLabel, secondPassword)
+                accountDataManager.createNewAccount(accountLabel, doubleEncryptionPassword)
                         .subscribe(account -> {
                             dataListener.dismissProgressDialog();
                             dataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
                             Intent intent = new Intent(WebSocketService.ACTION_INTENT);
                             intent.putExtra(KEY_XPUB, account.getXpub());
                             dataListener.broadcastIntent(intent);
+                            dataListener.onUpdateAccountsList();
 
                         }, throwable -> {
                             dataListener.dismissProgressDialog();
@@ -135,6 +143,12 @@ public class AccountViewModel extends BaseViewModel {
                         }));
     }
 
+    /**
+     * Sync {@link LegacyAddress} with server after either creating a new address or updating the
+     * address in some way, for instance updating its name.
+     *
+     * @param address The {@link LegacyAddress} to be sync'd with the server
+     */
     void updateLegacyAddress(LegacyAddress address) {
         dataListener.showProgressDialog(R.string.saving_address);
         mCompositeSubscription.add(
@@ -156,28 +170,71 @@ public class AccountViewModel extends BaseViewModel {
                         }));
     }
 
-    void importWatchOnlyAddress(String address) {
-        // Check for poorly formed BIP21 URIs
-        if (address.startsWith("bitcoin://") && address.length() > 10) {
-            address = "bitcoin:" + address.substring(10);
+    /**
+     * Checks status of camera and updates UI appropriately
+     */
+    void onScanButtonClicked() {
+        if (!appUtil.isCameraOpen()) {
+            dataListener.startScanForResult();
+        } else {
+            dataListener.showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
         }
+    }
 
-        if (FormatsUtil.getInstance().isBitcoinUri(address)) {
-            address = FormatsUtil.getInstance().getBitcoinAddress(address);
+    /**
+     * Imports BIP38 address and prompts user to rename address if successful
+     * @param data              The address to be imported
+     * @param password          The BIP38 encryption passphrase
+     */
+    void importBip38Address(String data, String password) {
+        dataListener.showProgressDialog(R.string.please_wait);
+        try {
+            BIP38PrivateKey bip38 = new BIP38PrivateKey(MainNetParams.get(), data);
+            ECKey key = bip38.decrypt(password);
+
+            handlePrivateKey(key, doubleEncryptionPassword);
+        } catch (Exception e) {
+            dataListener.showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR);
+        } finally {
+            dataListener.dismissProgressDialog();
         }
+    }
 
-        if (!FormatsUtil.getInstance().isValidBitcoinAddress(address)) {
+    /**
+     * Handles result of address scanning operation appropriately for each possible type of address
+     * @param data              The address to be imported
+     */
+    void onAddressScanned(String data) {
+        try {
+            String format = PrivateKeyFactory.getInstance().getFormat(data);
+            if (format != null) {
+                // Private key scanned
+                if (!format.equals(PrivateKeyFactory.BIP38)) {
+                    importNonBip38Address(format, data, doubleEncryptionPassword);
+                } else {
+                    dataListener.showBip38PasswordDialog(data);
+                }
+            } else {
+                // Watch-only address scanned
+                importWatchOnlyAddress(data);
+            }
+        } catch (Exception e) {
+            dataListener.showToast(R.string.privkey_error, ToastCustom.TYPE_ERROR);
+        }
+    }
+
+    private void importWatchOnlyAddress(String address) {
+        if (!FormatsUtil.getInstance().isValidBitcoinAddress(correctAddressFormatting(address))) {
             dataListener.showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
         } else if (payloadManager.getPayload().getLegacyAddressStrings().contains(address)) {
             dataListener.showToast(R.string.address_already_in_wallet, ToastCustom.TYPE_ERROR);
         } else {
             // Do some things
-            String finalAddress = address;
-            dataListener.showWatchOnlyWarning(new DialogButtonCallback() {
+            dataListener.showWatchOnlyWarningDialog(new DialogButtonCallback() {
                 @Override
                 public void onPositiveClicked() {
                     LegacyAddress legacyAddress = new LegacyAddress();
-                    legacyAddress.setAddress(finalAddress);
+                    legacyAddress.setAddress(address);
                     legacyAddress.setCreatedDeviceName("android");
                     legacyAddress.setCreated(System.currentTimeMillis());
                     legacyAddress.setCreatedDeviceVersion(BuildConfig.VERSION_NAME);
@@ -193,20 +250,25 @@ public class AccountViewModel extends BaseViewModel {
         }
     }
 
-    void onScanButtonClicked() {
-        if (!appUtil.isCameraOpen()) {
-            dataListener.startScanForResult();
-        } else {
-            dataListener.showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
+    private String correctAddressFormatting(String address) {
+        // Check for poorly formed BIP21 URIs
+        if (address.startsWith("bitcoin://") && address.length() > 10) {
+            address = "bitcoin:" + address.substring(10);
         }
+
+        if (FormatsUtil.getInstance().isBitcoinUri(address)) {
+            address = FormatsUtil.getInstance().getBitcoinAddress(address);
+        }
+
+        return address;
     }
 
-    void importNonBip38Address(String format, String data, @Nullable CharSequenceX secondPassword) {
+    private void importNonBip38Address(String format, String data, @Nullable CharSequenceX secondPassword) {
         dataListener.showProgressDialog(R.string.please_wait);
         try {
             ECKey key = PrivateKeyFactory.getInstance().getKey(format, data);
 
-            handlePrivateKey(secondPassword, key);
+            handlePrivateKey(key, secondPassword);
         } catch (Exception e) {
             dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
         } finally {
@@ -214,21 +276,7 @@ public class AccountViewModel extends BaseViewModel {
         }
     }
 
-    void importBip38Address(String data, String password, @Nullable CharSequenceX secondPassword) {
-        dataListener.showProgressDialog(R.string.please_wait);
-        try {
-            BIP38PrivateKey bip38 = new BIP38PrivateKey(MainNetParams.get(), data);
-            ECKey key = bip38.decrypt(password);
-
-            handlePrivateKey(secondPassword, key);
-        } catch (Exception e) {
-            dataListener.showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR);
-        } finally {
-            dataListener.dismissProgressDialog();
-        }
-    }
-
-    private void handlePrivateKey(@Nullable CharSequenceX secondPassword, ECKey key) {
+    private void handlePrivateKey(ECKey key, @Nullable CharSequenceX secondPassword) {
         if (key != null && key.hasPrivKey()
                 && payloadManager.getPayload().getLegacyAddressStrings().contains(key.toAddress(MainNetParams.get()).toString())) {
 
@@ -249,7 +297,6 @@ public class AccountViewModel extends BaseViewModel {
 
             accountDataManager.setKeyForLegacyAddress(legacyAddress, key, secondPassword);
             dataListener.showRenameImportedAddressDialog(legacyAddress);
-
         } else {
             dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
         }

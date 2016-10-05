@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -34,7 +33,6 @@ import info.blockchain.wallet.payload.ImportedAccount;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
-import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -74,7 +72,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         @Override
         public void onReceive(Context context, final Intent intent) {
             if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
-                runOnUiThread(() -> onUpdateAccountsList());
+                onUpdateAccountsList();
             }
         }
     };
@@ -89,7 +87,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     @Thunk PayloadManager payloadManager;
     @Thunk AccountViewModel viewModel;
     @Thunk ActivityAccountsBinding binding;
-    @Thunk String secondPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,37 +101,14 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         viewModel = new AccountViewModel(this);
 
         setSupportActionBar(binding.toolbarContainer.toolbarGeneral);
-
-        setupViews();
-    }
-
-    private void setupViews() {
+        binding.toolbarContainer.toolbarGeneral.setTitle("");
 
         IMPORTED_HEADER = getResources().getString(R.string.imported_addresses);
-
         binding.accountsList.setLayoutManager(new LinearLayoutManager(this));
-
+        binding.accountsList.setHasFixedSize(true);
         accountsAndImportedList = new ArrayList<>();
+
         onUpdateAccountsList();
-        accountsAdapter = new AccountAdapter(accountsAndImportedList, !payloadManager.isNotUpgraded());
-        accountsAdapter.setAccountHeaderListener(new AccountAdapter.AccountHeadersListener() {
-            @Override
-            public void onCreateNewClicked() {
-                createNewAccount();
-            }
-
-            @Override
-            public void onImportAddressClicked() {
-                importAddress();
-            }
-
-            @Override
-            public void onCardClicked(int correctedPosition) {
-                onRowClick(correctedPosition);
-            }
-        });
-
-        binding.accountsList.setAdapter(accountsAdapter);
     }
 
     @Thunk
@@ -152,9 +126,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.account_activity_actions, menu);
-
         transferFundsMenuItem = menu.findItem(R.id.action_transfer_funds);
-
         viewModel.checkTransferableLegacyFunds(true);//Auto popup
 
         return super.onCreateOptionsMenu(menu);
@@ -196,7 +168,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
                 @Override
                 public void onSecondPasswordValidated(String validateSecondPassword) {
-                    secondPassword = validateSecondPassword;
+                    viewModel.setDoubleEncryptionPassword(new CharSequenceX(validateSecondPassword));
                     viewModel.onScanButtonClicked();
                 }
             });
@@ -213,7 +185,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
             @Override
             public void onSecondPasswordValidated(String validateSecondPassword) {
-                secondPassword = validateSecondPassword;
+                viewModel.setDoubleEncryptionPassword(new CharSequenceX(validateSecondPassword));
                 promptForAccountLabel();
             }
         });
@@ -243,7 +215,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         if (!ConnectivityStatus.hasConnectivity(AccountActivity.this)) {
             ToastCustom.makeText(AccountActivity.this, getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
         } else {
-            viewModel.createNewAccount(accountLabel, getSecondPassword());
+            viewModel.createNewAccount(accountLabel);
         }
     }
 
@@ -310,9 +282,29 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         // Import Address button at last position
         accountsAndImportedList.add(new AccountItem(null, IMPORT_ADDRESS, null, "", getResources().getDrawable(R.drawable.icon_accounthd), false, false, false));
 
-        if (accountsAdapter != null) {
-            accountsAdapter.notifyDataSetChanged();
+        if (accountsAdapter == null) {
+            accountsAdapter = new AccountAdapter(accountsAndImportedList);
+            accountsAdapter.setAccountHeaderListener(new AccountAdapter.AccountHeadersListener() {
+                @Override
+                public void onCreateNewClicked() {
+                    createNewAccount();
+                }
+
+                @Override
+                public void onImportAddressClicked() {
+                    importAddress();
+                }
+
+                @Override
+                public void onCardClicked(int correctedPosition) {
+                    onRowClick(correctedPosition);
+                }
+            });
+
             binding.accountsList.setAdapter(accountsAdapter);
+        } else {
+            // Notify adapter of items changes
+            accountsAdapter.notifyDataSetChanged();
         }
     }
 
@@ -353,29 +345,15 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         if (resultCode == Activity.RESULT_OK && requestCode == IMPORT_PRIVATE_REQUEST_CODE
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
 
-            try {
-                final String strResult = data.getStringExtra(CaptureActivity.SCAN_RESULT);
-                String format = PrivateKeyFactory.getInstance().getFormat(strResult);
-                if (format != null) {
-                    // Private key scanned
-                    if (!format.equals(PrivateKeyFactory.BIP38)) {
-                        importNonBIP38Address(format, strResult);
-                    } else {
-                        importBIP38Address(strResult);
-                    }
-                } else {
-                    // Watch-only address scanned
-                    viewModel.importWatchOnlyAddress(strResult);
-                }
-            } catch (Exception e) {
-                ToastCustom.makeText(AccountActivity.this, getString(R.string.privkey_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-            }
+            String strResult = data.getStringExtra(CaptureActivity.SCAN_RESULT);
+            viewModel.onAddressScanned(strResult);
         } else if (resultCode == Activity.RESULT_OK && requestCode == EDIT_ACTIVITY_REQUEST_CODE) {
             onUpdateAccountsList();
         }
     }
 
-    private void importBIP38Address(final String data) {
+    @Override
+    public void showBip38PasswordDialog(String data) {
         AppCompatEditText password = new AppCompatEditText(this);
         password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
@@ -385,17 +363,13 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 .setView(ViewUtils.getAlertDialogEditTextLayout(this, password))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
-                        viewModel.importBip38Address(data, password.getText().toString(), getSecondPassword()))
+                        viewModel.importBip38Address(data, password.getText().toString()))
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
 
-    private void importNonBIP38Address(String format, String data) {
-        viewModel.importNonBip38Address(format, data, getSecondPassword());
-    }
-
     @Override
-    public void showWatchOnlyWarning(DialogButtonCallback dialogButtonCallback) {
+    public void showWatchOnlyWarningDialog(DialogButtonCallback dialogButtonCallback) {
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.warning)
                 .setCancelable(false)
@@ -516,11 +490,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(ADDRESS_LABEL_MAX_LENGTH)});
         return editText;
-    }
-
-    @Nullable
-    private CharSequenceX getSecondPassword() {
-        return secondPassword != null ? new CharSequenceX(secondPassword) : null;
     }
 
     @Override
