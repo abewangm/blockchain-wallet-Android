@@ -415,11 +415,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         binding.noTransactionMessage.noTxMessage.setVisibility(View.GONE);
 
-        //Elevation compat
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            binding.balance1.setBackgroundResource(R.drawable.container_blue_shadow);
-        }
-
         binding.balance1.setOnTouchListener((v, event) -> {
 
             //TODO this BALANCE_DISPLAY_STATE could be improved
@@ -485,9 +480,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             public void onMoved(int distance) {
                 binding.balanceLayout.setTranslationY(-distance);
                 if (distance > 1) {
-                    toolbar.setElevation(ViewUtils.convertDpToPixel(5, getActivity()));
+                    ViewUtils.setElevation(toolbar, ViewUtils.convertDpToPixel(5F, getActivity()));
                 } else {
-                    toolbar.setElevation(0);
+                    ViewUtils.setElevation(toolbar, 0F);
                 }
             }
         });

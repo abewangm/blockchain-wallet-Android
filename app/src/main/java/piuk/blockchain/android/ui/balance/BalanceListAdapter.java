@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -94,28 +93,13 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
 
             holder.result.setText(span1);
 
-            holder.result.setOnTouchListener((v, event) -> {
-                View parent = (View) v.getParent();
-                event.setLocation(v.getX() + (v.getWidth() / 2), v.getY() + (v.getHeight() / 2));
-                parent.onTouchEvent(event);
-
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    mIsBtc = !mIsBtc;
-                    if (mListClickListener != null) mListClickListener.onValueClicked(mIsBtc);
-                }
-                return true;
+            holder.result.setOnClickListener(v -> {
+                mIsBtc = !mIsBtc;
+                if (mListClickListener != null) mListClickListener.onValueClicked(mIsBtc);
             });
 
-            holder.touchView.setOnTouchListener((v, event) -> {
-
-                View parent = (View) v.getParent();
-                event.setLocation(event.getX(), v.getY() + (v.getHeight() / 2));
-                parent.onTouchEvent(event);
-
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    if (mListClickListener != null) mListClickListener.onRowClicked(position);
-                }
-                return true;
+            holder.touchView.setOnClickListener(v -> {
+                if (mListClickListener != null) mListClickListener.onRowClicked(position);
             });
         }
     }
