@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
-apply plugin: 'com.neenbedankt.android-apt'
 apply from: '../jacoco.gradle'
 
 android {
@@ -130,8 +129,8 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.2.1'
     // Dagger2
     compile 'com.google.dagger:dagger:2.7'
-    apt 'com.google.guava:guava:19.0'
-    apt 'com.google.dagger:dagger-compiler:2.7'
+    annotationProcessor 'com.google.guava:guava:19.0'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.7'
 
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
