@@ -13,7 +13,9 @@ import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
 
-import org.junit.After;
+import org.bitcoinj.core.Address;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.NetworkParameters;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +52,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -80,12 +83,6 @@ public class AccountViewModelTest {
                 new MockDataManagerModule());
 
         subject = new AccountViewModel(activity);
-    }
-
-    // STOPSHIP: 05/10/2016 This should be temporary
-    @After
-    public void tearDown() throws Exception {
-        Mockito.validateMockitoUsage();
     }
 
     @Test
@@ -270,23 +267,185 @@ public class AccountViewModelTest {
     }
 
     @Test
-    public void importBip38Address() throws Exception {
+    public void importBip38AddressWithValidPassword() throws Exception {
         // Arrange
 
         // Act
-
+        subject.importBip38Address("6PRJmkckxBct8jUwn6UcJbickdrnXBiPP9JkNW83g4VyFNsfEuxas39pSS", new CharSequenceX("password"));
         // Assert
-
+        verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
     }
 
     @Test
-    public void onAddressScanned() throws Exception {
+    public void importBip38AddressWithIncorrectPassword() throws Exception {
         // Arrange
 
         // Act
-
+        subject.importBip38Address("6PRJmkckxBct8jUwn6UcJbickdrnXBiPP9JkNW83g4VyFNsfEuxas39pSS", new CharSequenceX("notthepassword"));
         // Assert
+        verify(activity).showProgressDialog(anyInt());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verify(activity).dismissProgressDialog();
+        verifyNoMoreInteractions(activity);
+    }
 
+    @Test
+    public void onAddressScannedBip38() throws Exception {
+        // Arrange
+
+        // Act
+        subject.onAddressScanned("6PRJmkckxBct8jUwn6UcJbickdrnXBiPP9JkNW83g4VyFNsfEuxas39pSS");
+        // Assert
+        verify(activity).showBip38PasswordDialog("6PRJmkckxBct8jUwn6UcJbickdrnXBiPP9JkNW83g4VyFNsfEuxas39pSS");
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void onAddressScannedNonBip38() throws Exception {
+        // Arrange
+
+        // Act
+        subject.onAddressScanned("L1FQxC7wmmRNNe2YFPNXscPq3kaheiA4T7SnTr7vYSBW7Jw1A7PD");
+        // Assert
+        verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
+    }
+
+    @Test
+    public void onAddressScannedWatchOnlyInvalidAddress() throws Exception {
+        // Arrange
+
+        // Act
+        subject.onAddressScanned("test");
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void onAddressScannedWatchOnlyNullAddress() throws Exception {
+        // Arrange
+
+        // Act
+        subject.onAddressScanned(null);
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void onAddressScannedWatchAddressAlreadyInWallet() throws Exception {
+        // Arrange
+        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
+        //noinspection SuspiciousMethodCalls
+        when(mockPayload.getLegacyAddressStrings().contains(any())).thenReturn(true);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        subject.onAddressScanned("17UovdU9ZvepPe75igTQwxqNME1HbnvMB7");
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void onAddressScannedWatchAddressNotInWallet() throws Exception {
+        // Arrange
+        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
+        //noinspection SuspiciousMethodCalls
+        when(mockPayload.getLegacyAddressStrings().contains(any())).thenReturn(false);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        subject.onAddressScanned("17UovdU9ZvepPe75igTQwxqNME1HbnvMB7");
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).showWatchOnlyWarningDialog("17UovdU9ZvepPe75igTQwxqNME1HbnvMB7");
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void confirmImportWatchOnly() throws Exception {
+        // Arrange
+
+        // Act
+        subject.confirmImportWatchOnly("17UovdU9ZvepPe75igTQwxqNME1HbnvMB7");
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).showRenameImportedAddressDialog(any(LegacyAddress.class));
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void handlePrivateKeyWhenKeyIsNull() throws Exception {
+        // Arrange
+
+        // Act
+        subject.handlePrivateKey(null, null);
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void handlePrivateKeyExistingAddressSuccess() throws Exception {
+        // Arrange
+        ECKey mockECKey = mock(ECKey.class);
+        when(mockECKey.hasPrivKey()).thenReturn(true);
+        when(mockECKey.toAddress(any(NetworkParameters.class))).thenReturn(mock(Address.class));
+        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
+        //noinspection SuspiciousMethodCalls
+        when(mockPayload.getLegacyAddressStrings().contains(any())).thenReturn(true);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(accountDataManager.setPrivateKey(mockECKey, null)).thenReturn(Observable.just(true));
+        // Act
+        subject.handlePrivateKey(mockECKey, null);
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_OK));
+        verify(activity).onUpdateAccountsList();
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void handlePrivateKeyExistingAddressFailure() throws Exception {
+        // Arrange
+        ECKey mockECKey = mock(ECKey.class);
+        when(mockECKey.hasPrivKey()).thenReturn(true);
+        when(mockECKey.toAddress(any(NetworkParameters.class))).thenReturn(mock(Address.class));
+        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
+        //noinspection SuspiciousMethodCalls
+        when(mockPayload.getLegacyAddressStrings().contains(any())).thenReturn(true);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(accountDataManager.setPrivateKey(mockECKey, null)).thenReturn(Observable.just(false));
+        // Act
+        subject.handlePrivateKey(mockECKey, null);
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void handlePrivateKeyNewAddress() throws Exception {
+        // Arrange
+        ECKey mockECKey = mock(ECKey.class);
+        when(mockECKey.hasPrivKey()).thenReturn(true);
+        when(mockECKey.toAddress(any(NetworkParameters.class))).thenReturn(mock(Address.class));
+        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
+        //noinspection SuspiciousMethodCalls
+        when(mockPayload.getLegacyAddressStrings().contains(any())).thenReturn(false);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        subject.handlePrivateKey(mockECKey, null);
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).showRenameImportedAddressDialog(any(LegacyAddress.class));
+        verifyNoMoreInteractions(activity);
     }
 
     private class MockApplicationModule extends ApplicationModule {

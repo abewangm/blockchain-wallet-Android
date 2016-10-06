@@ -49,7 +49,6 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.ui.zxing.Intents;
-import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -363,19 +362,19 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 .setView(ViewUtils.getAlertDialogEditTextLayout(this, password))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
-                        viewModel.importBip38Address(data, password.getText().toString()))
+                        viewModel.importBip38Address(data, new CharSequenceX(password.getText().toString())))
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
 
     @Override
-    public void showWatchOnlyWarningDialog(DialogButtonCallback dialogButtonCallback) {
+    public void showWatchOnlyWarningDialog(String address) {
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.warning)
                 .setCancelable(false)
                 .setMessage(getString(R.string.watch_only_import_warning))
-                .setPositiveButton(R.string.dialog_continue, (dialog, whichButton) -> dialogButtonCallback.onPositiveClicked())
-                .setNegativeButton(android.R.string.cancel, (dialog, which) -> dialogButtonCallback.onNegativeClicked())
+                .setPositiveButton(R.string.dialog_continue, (dialog, whichButton) -> viewModel.confirmImportWatchOnly(address))
+                .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
 

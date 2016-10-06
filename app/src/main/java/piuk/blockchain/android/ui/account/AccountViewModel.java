@@ -33,7 +33,6 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import rx.exceptions.Exceptions;
@@ -73,7 +72,7 @@ public class AccountViewModel extends BaseViewModel {
 
         void broadcastIntent(Intent intent);
 
-        void showWatchOnlyWarningDialog(DialogButtonCallback dialogButtonCallback);
+        void showWatchOnlyWarningDialog(String address);
 
         void showRenameImportedAddressDialog(LegacyAddress address);
 
@@ -118,7 +117,7 @@ public class AccountViewModel extends BaseViewModel {
     /**
      * Derive new Account from seed
      *
-     * @param accountLabel   A label for the account to be created
+     * @param accountLabel A label for the account to be created
      */
     void createNewAccount(String accountLabel) {
         dataListener.showProgressDialog(R.string.please_wait);
@@ -184,14 +183,15 @@ public class AccountViewModel extends BaseViewModel {
 
     /**
      * Imports BIP38 address and prompts user to rename address if successful
-     * @param data              The address to be imported
-     * @param password          The BIP38 encryption passphrase
+     *
+     * @param data     The address to be imported
+     * @param password The BIP38 encryption passphrase
      */
-    void importBip38Address(String data, String password) {
+    void importBip38Address(String data, CharSequenceX password) {
         dataListener.showProgressDialog(R.string.please_wait);
         try {
             BIP38PrivateKey bip38 = new BIP38PrivateKey(MainNetParams.get(), data);
-            ECKey key = bip38.decrypt(password);
+            ECKey key = bip38.decrypt(password.toString());
 
             handlePrivateKey(key, doubleEncryptionPassword);
         } catch (Exception e) {
@@ -203,7 +203,8 @@ public class AccountViewModel extends BaseViewModel {
 
     /**
      * Handles result of address scanning operation appropriately for each possible type of address
-     * @param data              The address to be imported
+     *
+     * @param data The address to be imported
      */
     void onAddressScanned(String data) {
         try {
@@ -224,6 +225,22 @@ public class AccountViewModel extends BaseViewModel {
         }
     }
 
+    /**
+     * Create {@link LegacyAddress} from correctly formatted address string, show rename dialog
+     * after finishing
+     *
+     * @param address The address to be saved
+     */
+    void confirmImportWatchOnly(String address) {
+        LegacyAddress legacyAddress = new LegacyAddress();
+        legacyAddress.setAddress(address);
+        legacyAddress.setCreatedDeviceName("android");
+        legacyAddress.setCreated(System.currentTimeMillis());
+        legacyAddress.setCreatedDeviceVersion(BuildConfig.VERSION_NAME);
+        legacyAddress.setWatchOnly(true);
+        dataListener.showRenameImportedAddressDialog(legacyAddress);
+    }
+
     private void importWatchOnlyAddress(String address) {
         if (!FormatsUtil.getInstance().isValidBitcoinAddress(correctAddressFormatting(address))) {
             dataListener.showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
@@ -231,23 +248,7 @@ public class AccountViewModel extends BaseViewModel {
             dataListener.showToast(R.string.address_already_in_wallet, ToastCustom.TYPE_ERROR);
         } else {
             // Do some things
-            dataListener.showWatchOnlyWarningDialog(new DialogButtonCallback() {
-                @Override
-                public void onPositiveClicked() {
-                    LegacyAddress legacyAddress = new LegacyAddress();
-                    legacyAddress.setAddress(address);
-                    legacyAddress.setCreatedDeviceName("android");
-                    legacyAddress.setCreated(System.currentTimeMillis());
-                    legacyAddress.setCreatedDeviceVersion(BuildConfig.VERSION_NAME);
-                    legacyAddress.setWatchOnly(true);
-                    dataListener.showRenameImportedAddressDialog(legacyAddress);
-                }
-
-                @Override
-                public void onNegativeClicked() {
-                    // No-op
-                }
-            });
+            dataListener.showWatchOnlyWarningDialog(address);
         }
     }
 
@@ -277,7 +278,8 @@ public class AccountViewModel extends BaseViewModel {
         }
     }
 
-    private void handlePrivateKey(ECKey key, @Nullable CharSequenceX secondPassword) {
+    @VisibleForTesting
+    void handlePrivateKey(ECKey key, @Nullable CharSequenceX secondPassword) {
         if (key != null && key.hasPrivKey()
                 && payloadManager.getPayload().getLegacyAddressStrings().contains(key.toAddress(MainNetParams.get()).toString())) {
 
