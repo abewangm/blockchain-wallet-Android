@@ -3,9 +3,6 @@ package piuk.blockchain.android.data.services;
 import info.blockchain.api.AddressInfo;
 import info.blockchain.wallet.payload.LegacyAddress;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import rx.Observable;
 
@@ -20,21 +17,17 @@ public class AddressInfoService {
         addressInfo = info;
     }
 
+    /**
+     * Returns the current balance for a given {@link LegacyAddress}
+     *
+     * @param address   The {@link LegacyAddress} which you want to know the balance of
+     * @param parameter A URL parameter - this can allow you to get the balance at a specific point
+     *                  in time, or now using {@value PARAMETER_FINAL_BALANCE}
+     * @return          An {@link Observable<Long>} wrapping the balance of the address
+     */
     public Observable<Long> getAddressBalance(LegacyAddress address, String parameter) {
-        return createGetAddressBalanceObservable(address, parameter)
+        return Observable.fromCallable(() -> addressInfo.getAddressInfo(address.getAddress(), parameter))
+                .flatMap(response -> Observable.fromCallable(() -> response.getLong(KEY_FINAL_BALANCE)))
                 .compose(RxUtil.applySchedulers());
-    }
-
-    private Observable<Long> createGetAddressBalanceObservable(LegacyAddress address, String parameter) {
-        return Observable.create(subscriber -> {
-            JSONObject response = addressInfo.getAddressInfo(address.getAddress(), parameter);
-            try {
-                if (subscriber.isUnsubscribed()) return;
-                subscriber.onNext(response.getLong(KEY_FINAL_BALANCE));
-                subscriber.onCompleted();
-            } catch (JSONException e) {
-                subscriber.onError(e);
-            }
-        });
     }
 }

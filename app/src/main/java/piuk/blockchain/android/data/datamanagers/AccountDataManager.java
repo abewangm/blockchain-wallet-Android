@@ -37,11 +37,26 @@ public class AccountDataManager {
         addressInfoService = addressService;
     }
 
+    /**
+     * Derives new {@link Account} from the master seed
+     *
+     * @param accountLabel   A label for the account
+     * @param secondPassword An optional double encryption password
+     * @return An {@link Observable<Account>} wrapping the newly created Account
+     */
     public Observable<Account> createNewAccount(String accountLabel, @Nullable CharSequenceX secondPassword) {
         return createNewAccountObservable(accountLabel, secondPassword)
                 .compose(RxUtil.applySchedulers());
     }
 
+    /**
+     * Sets a private key for an associated {@link LegacyAddress} which is already in the {@link
+     * Payload} as a watch only address
+     *
+     * @param key            An {@link ECKey}
+     * @param secondPassword An optional double encryption password
+     * @return An {@link Observable<Boolean>} representing a successful save
+     */
     public Observable<Boolean> setPrivateKey(ECKey key, @Nullable CharSequenceX secondPassword) {
         Payload payload = payloadManager.getPayload();
         int index = payload.getLegacyAddressStrings().indexOf(key.toAddress(MainNetParams.get()).toString());
@@ -52,6 +67,13 @@ public class AccountDataManager {
         return savePayloadToServer();
     }
 
+    /**
+     * Sets a private key for a {@link LegacyAddress}
+     *
+     * @param legacyAddress  The {@link LegacyAddress} to which you wish to add the key
+     * @param key            The {@link ECKey} for the address
+     * @param secondPassword An optional double encryption password
+     */
     public void setKeyForLegacyAddress(LegacyAddress legacyAddress, ECKey key, @Nullable CharSequenceX secondPassword) {
         // If double encrypted, save encrypted in payload
         if (!payloadManager.getPayload().isDoubleEncrypted()) {
@@ -66,6 +88,13 @@ public class AccountDataManager {
         }
     }
 
+    /**
+     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link Payload} and
+     * the {@link MultiAddrFactory}
+     *
+     * @param legacyAddress The updated address
+     * @return {@link Observable<Boolean>} representing a successful save
+     */
     public Observable<Boolean> updateLegacyAddress(LegacyAddress legacyAddress) {
         return createUpdateLegacyAddressObservable(legacyAddress)
                 .compose(RxUtil.applySchedulers());
@@ -73,21 +102,10 @@ public class AccountDataManager {
 
     private Observable<Boolean> createUpdateLegacyAddressObservable(LegacyAddress address) {
         return Observable.fromCallable(() -> payloadManager.addLegacyAddress(address))
-                .flatMap(success -> {
-                    if (success) {
-                        List<String> legacyAddressList = payloadManager.getPayload().getLegacyAddressStrings();
-                        try {
-                            multiAddrFactory.refreshLegacyAddressData(legacyAddressList.toArray(new String[legacyAddressList.size()]), false);
-                        } catch (Exception e) {
-                            throw Exceptions.propagate(e);
-                        }
-
-                        return addAddressAndUpdate(address)
-                                .flatMap(total -> Observable.just(true));
-                    } else {
-                        return Observable.just(false);
-                    }
-                });
+                .flatMap(RxUtil.ternary(
+                        Boolean::booleanValue,
+                        aBoolean -> addAddressAndUpdate(address).flatMap(total -> Observable.just(true)),
+                        aBoolean -> Observable.just(false)));
     }
 
     private Observable<Boolean> savePayloadToServer() {
