@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -34,8 +33,13 @@ import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
+import info.blockchain.wallet.payload.Tx;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
@@ -52,8 +56,10 @@ import piuk.blockchain.android.ui.settings.SettingsFragment;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.util.DateUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.ListUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
+import piuk.blockchain.android.util.annotations.Thunk;
 
 public class BalanceFragment extends Fragment implements BalanceViewModel.DataListener {
 
@@ -62,30 +68,22 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public static final String KEY_TRANSACTION_LIST_POSITION = "transaction_list_position";
     private final static int SHOW_BTC = 1;
     private final static int SHOW_FIAT = 2;
-    private final static int SHOW_HIDE = 3;
     private static int BALANCE_DISPLAY_STATE = SHOW_BTC;
     public int balanceBarHeight;
     private BalanceHeaderAdapter accountsAdapter;
-    private Communicator comm;
-    //
-    // main balance display
-    //
+    @Thunk Communicator comm;
     private double btc_fx = 319.13;//TODO remove hard coded when refactoring
-    private boolean isBTC = true;
-    //
-    // accounts list
-    //
-    private AppCompatSpinner accountSpinner;
-    //
-    // tx list
-    //
-    private BalanceListAdapter transactionAdapter;
+    @Thunk boolean isBTC = true;
+    // Accounts list
+    @Thunk AppCompatSpinner accountSpinner;
+    // Tx list
+    @Thunk BalanceListAdapter transactionAdapter;
     private Activity context;
     private PrefsUtil prefsUtil;
     private DateUtil dateUtil;
 
-    private FragmentBalanceBinding binding;
-    private BalanceViewModel viewModel;
+    @Thunk FragmentBalanceBinding binding;
+    @Thunk BalanceViewModel viewModel;
     private Toolbar toolbar;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -404,11 +402,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         return position - 1;
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-    }
-
     private void setupViews() {
         initFab();
         initDebugFab();
@@ -417,17 +410,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         binding.balance1.setOnTouchListener((v, event) -> {
 
-            //TODO this BALANCE_DISPLAY_STATE could be improved
             if (BALANCE_DISPLAY_STATE == SHOW_BTC) {
                 BALANCE_DISPLAY_STATE = SHOW_FIAT;
                 isBTC = false;
                 viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
-
-            } else if (BALANCE_DISPLAY_STATE == SHOW_FIAT) {
-                BALANCE_DISPLAY_STATE = SHOW_HIDE;
-                isBTC = true;
-                viewModel.setBalance(context.getString(R.string.show_balance));
-
             } else {
                 BALANCE_DISPLAY_STATE = SHOW_BTC;
                 isBTC = true;
@@ -475,7 +461,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.rvTransactions.setHasFixedSize(true);
         binding.rvTransactions.setLayoutManager(layoutManager);
         binding.rvTransactions.setAdapter(transactionAdapter);
-
         binding.rvTransactions.setOnScrollListener(new CollapseActionbarScrollListener() {
             @Override
             public void onMoved(int distance) {
@@ -581,9 +566,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         String strFiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         btc_fx = ExchangeRateFactory.getInstance().getLastPrice(strFiat);
 
-        //Notify adapters of change
-        accountsAdapter.notifyDataSetChanged();
-        transactionAdapter.onTransactionsUpdated(viewModel.getTransactionList());
+        // Notify adapter of change, let DiffUtil work out what needs changing
+        List<Tx> newTransactions = new ArrayList<>();
+        ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
+        transactionAdapter.onTransactionsUpdated(newTransactions);
+        binding.rvTransactions.scrollToPosition(0);
 
         //Display help text to user if no transactionList on selected account/address
         if (viewModel.getTransactionList().size() > 0) {
