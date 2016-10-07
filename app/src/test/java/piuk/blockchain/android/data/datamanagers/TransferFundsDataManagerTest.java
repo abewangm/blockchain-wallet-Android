@@ -3,11 +3,7 @@ package piuk.blockchain.android.data.datamanagers;
 import android.support.v4.util.Pair;
 
 import info.blockchain.api.Unspent;
-import piuk.blockchain.android.data.cache.DynamicFeeCache;
-import piuk.blockchain.android.ui.account.ItemAccount;
-import piuk.blockchain.android.ui.send.PendingTransaction;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.HDWallet;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.Payload;
@@ -33,11 +29,13 @@ import java.util.List;
 import java.util.Map;
 
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.ui.account.ItemAccount;
+import piuk.blockchain.android.ui.send.PendingTransaction;
 import rx.observers.TestSubscriber;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
@@ -111,15 +109,11 @@ public class TransferFundsDataManagerTest extends RxTest {
             return null;
         }).when(mockPayment).submitPayment(
                 any(SpendableUnspentOutputs.class),
-                any(Account.class),
-                any(LegacyAddress.class),
-                anyString(),
+                any(ArrayList.class),
                 anyString(),
                 anyString(),
                 any(BigInteger.class),
                 any(BigInteger.class),
-                anyBoolean(),
-                anyString(),
                 any(Payment.SubmitPaymentListener.class));
 
         PendingTransaction transaction1 = new PendingTransaction();
@@ -153,15 +147,11 @@ public class TransferFundsDataManagerTest extends RxTest {
             return null;
         }).when(mockPayment).submitPayment(
                 any(SpendableUnspentOutputs.class),
-                any(Account.class),
-                any(LegacyAddress.class),
-                anyString(),
+                any(ArrayList.class),
                 anyString(),
                 anyString(),
                 any(BigInteger.class),
                 any(BigInteger.class),
-                anyBoolean(),
-                anyString(),
                 any(Payment.SubmitPaymentListener.class));
 
         PendingTransaction transaction1 = new PendingTransaction();
@@ -192,15 +182,11 @@ public class TransferFundsDataManagerTest extends RxTest {
                 .when(mockPayment)
                 .submitPayment(
                         any(SpendableUnspentOutputs.class),
-                        any(Account.class),
-                        any(LegacyAddress.class),
-                        anyString(),
+                        any(ArrayList.class),
                         anyString(),
                         anyString(),
                         any(BigInteger.class),
                         any(BigInteger.class),
-                        anyBoolean(),
-                        anyString(),
                         any(Payment.SubmitPaymentListener.class));
 
         PendingTransaction transaction1 = new PendingTransaction();
