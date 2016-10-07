@@ -146,6 +146,7 @@ public class TransferFundsDataManager {
                             new Payment.SubmitPaymentListener() {
                                 @Override
                                 public void onSuccess(String s) {
+                                    if (subscriber.isUnsubscribed()) return;
                                     subscriber.onNext(s);
                                     MultiAddrFactory.getInstance().setLegacyBalance(MultiAddrFactory.getInstance().getLegacyBalance() - (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue()));
 
@@ -163,11 +164,15 @@ public class TransferFundsDataManager {
 
                                 @Override
                                 public void onFail(String error) {
-                                    subscriber.onError(new Throwable(error));
+                                    if (!subscriber.isUnsubscribed()) {
+                                        subscriber.onError(new Throwable(error));
+                                    }
                                 }
                             });
                 } catch (Exception e) {
-                    subscriber.onError(e);
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onError(e);
+                    }
                 }
             }
         });
