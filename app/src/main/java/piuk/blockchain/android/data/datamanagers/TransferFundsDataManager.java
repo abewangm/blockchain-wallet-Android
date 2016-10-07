@@ -128,11 +128,11 @@ public class TransferFundsDataManager {
 
                     LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
                     String changeAddress = legacyAddress.getAddress();
-                    String receivingAddress = receivingAddress = mPayloadManager.getNextReceiveAddress(pendingTransaction.addressToReceiveIndex);
+                    String receivingAddress = mPayloadManager.getNextReceiveAddress(pendingTransaction.addressToReceiveIndex);
 
-                    List<ECKey> keys = new ArrayList<ECKey>();
+                    List<ECKey> keys = new ArrayList<>();
                     if (mPayloadManager.getPayload().isDoubleEncrypted()) {
-                        ECKey walletKey = legacyAddress.getECKey(new CharSequenceX(secondPassword));
+                        ECKey walletKey = legacyAddress.getECKey(secondPassword);
                         keys.add(walletKey);
                     } else {
                         ECKey walletKey = legacyAddress.getECKey();

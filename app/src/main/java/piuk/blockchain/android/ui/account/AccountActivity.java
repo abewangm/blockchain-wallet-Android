@@ -100,7 +100,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         viewModel = new AccountViewModel(this);
 
         setSupportActionBar(binding.toolbarContainer.toolbarGeneral);
-        binding.toolbarContainer.toolbarGeneral.setTitle("");
+        getSupportActionBar().setTitle("");
 
         IMPORTED_HEADER = getResources().getString(R.string.imported_addresses);
         binding.accountsList.setLayoutManager(new LinearLayoutManager(this));
