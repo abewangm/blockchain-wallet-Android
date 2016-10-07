@@ -212,7 +212,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         }
         List<LegacyAddress> activeLegacyAddresses = new ArrayList<>();
         for (LegacyAddress item : allLegacyAddresses) {
-            if (item.getTag() != PayloadManager.ARCHIVED_ADDRESS) {
+            if (item.getTag() != LegacyAddress.ARCHIVED_ADDRESS) {
                 activeLegacyAddresses.add(item);
             }
         }

@@ -184,12 +184,14 @@ public class AccountEditViewModel extends BaseViewModel {
                 accountModel.setXpubDescriptionVisibility(View.GONE);
                 accountModel.setXpubText(context.getString(R.string.address));
                 accountModel.setDefaultAccountVisibility(View.GONE);//No default for V2
-                setArchive(legacyAddress.getTag() == PayloadManager.ARCHIVED_ADDRESS);
+                setArchive(legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS);
 
                 if (legacyAddress.isWatchOnly()) {
                     accountModel.setScanPrivateKeyVisibility(View.VISIBLE);
+                    accountModel.setArchiveVisibility(View.GONE);
                 } else {
                     accountModel.setScanPrivateKeyVisibility(View.GONE);
+                    accountModel.setArchiveVisibility(View.VISIBLE);
                 }
 
                 if (payloadManager.getPayload().isUpgraded()) {
@@ -495,7 +497,7 @@ public class AccountEditViewModel extends BaseViewModel {
                                 @Override
                                 public void onSuccess(String s) {
 
-                                    legacyAddress.setTag(PayloadManager.ARCHIVED_ADDRESS);
+                                    legacyAddress.setTag(LegacyAddress.ARCHIVED_ADDRESS);
                                     setArchive(true);
 
                                     if (alertDialog != null && alertDialog.isShowing())
@@ -650,7 +652,7 @@ public class AccountEditViewModel extends BaseViewModel {
         String title = context.getResources().getString(R.string.archive);
         String subTitle = context.getResources().getString(R.string.archive_are_you_sure);
 
-        if ((account != null && account.isArchived()) || (legacyAddress != null && legacyAddress.getTag() == PayloadManager.ARCHIVED_ADDRESS)) {
+        if ((account != null && account.isArchived()) || (legacyAddress != null && legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS)) {
             title = context.getResources().getString(R.string.unarchive);
             subTitle = context.getResources().getString(R.string.unarchive_are_you_sure);
         }
@@ -666,11 +668,11 @@ public class AccountEditViewModel extends BaseViewModel {
             return account.isArchived();
 
         } else {
-            if (legacyAddress.getTag() == PayloadManager.ARCHIVED_ADDRESS) {
-                legacyAddress.setTag(PayloadManager.NORMAL_ADDRESS);
+            if (legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS) {
+                legacyAddress.setTag(LegacyAddress.NORMAL_ADDRESS);
                 return false;
             } else {
-                legacyAddress.setTag(PayloadManager.ARCHIVED_ADDRESS);
+                legacyAddress.setTag(LegacyAddress.ARCHIVED_ADDRESS);
                 return true;
             }
         }

@@ -273,7 +273,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 if (label == null || label.length() == 0) label = "";
                 if (address == null || address.length() == 0) address = "";
 
-                accountsAndImportedList.add(new AccountItem(correctedPosition, label, address, balance, getResources().getDrawable(R.drawable.icon_imported), legacy.get(j).getTag() == PayloadManager.ARCHIVED_ADDRESS, legacy.get(j).isWatchOnly(), false));
+                accountsAndImportedList.add(new AccountItem(correctedPosition, label, address, balance, getResources().getDrawable(R.drawable.icon_imported), legacy.get(j).getTag() == LegacyAddress.ARCHIVED_ADDRESS, legacy.get(j).isWatchOnly(), false));
                 correctedPosition++;
             }
         }
