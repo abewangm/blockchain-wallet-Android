@@ -147,7 +147,7 @@ public class AccountEditViewModel extends BaseViewModel {
             List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
 
             //Remove "All"
-            List<Account> accountClone = new ArrayList<Account>(accounts.size());
+            List<Account> accountClone = new ArrayList<>(accounts.size());
             accountClone.addAll(accounts);
 
             if (accountClone.get(accountClone.size() - 1) instanceof ImportedAccount) {
