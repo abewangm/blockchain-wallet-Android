@@ -520,6 +520,8 @@
     <string name="fingerprint_use_pin">Use PIN</string>
     <string name="fingerprint_disable_message">Are you sure you want to disable fingerprint login?</string>
     <string name="fingerprint_no_fingerprints_added">No fingerprints have been registered to this device yet. Do you want to register a fingerprint now?</string>
-    <string name="fingerprint_newly_enrolled_description">A new fingerprint was added to this device, so your password is required.</string>
-    <string name="fingerprint_fatal_error">There was a problem setting up fingerprint login. Please try again later</string>
+    <string name="fingerprint_key_invalidated_description">Either the fingerprints stored on this device have changed or the keyguard has been disabled</string>
+    <string name="fingerprint_key_invalidated_brief">Keys invalidated, PIN code required</string>
+    <string name="fingerprint_fatal_error_description">There was a problem setting up fingerprint login. Please try again later</string>
+    <string name="fingerprint_fatal_error_brief">Unexpected error</string>
 </resources>

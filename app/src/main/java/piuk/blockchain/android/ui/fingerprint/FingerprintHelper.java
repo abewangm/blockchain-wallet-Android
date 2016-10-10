@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Base64;
-import android.util.Log;
 
 import com.mtramin.rxfingerprint.RxFingerprint;
 
@@ -12,9 +11,12 @@ import info.blockchain.wallet.util.CharSequenceX;
 
 import java.io.UnsupportedEncodingException;
 
+import piuk.blockchain.android.data.fingerprint.FingerprintAuth;
 import piuk.blockchain.android.util.PrefsUtil;
 import rx.subscriptions.CompositeSubscription;
 
+// This will likely be used in different packages soon
+@SuppressWarnings("WeakerAccess")
 public class FingerprintHelper {
 
     public static final String KEY_PIN_CODE = "pin_code";
@@ -22,11 +24,13 @@ public class FingerprintHelper {
 
     private Context applicationContext;
     private PrefsUtil prefsUtil;
+    private FingerprintAuth fingerprintAuth;
     private CompositeSubscription compositeSubscription;
 
-    public FingerprintHelper(Context applicationContext, PrefsUtil prefsUtil) {
+    public FingerprintHelper(Context applicationContext, PrefsUtil prefsUtil, FingerprintAuth fingerprintAuth) {
         this.applicationContext = applicationContext;
         this.prefsUtil = prefsUtil;
+        this.fingerprintAuth = fingerprintAuth;
         compositeSubscription = new CompositeSubscription();
     }
 
@@ -35,21 +39,21 @@ public class FingerprintHelper {
      * fingerprints
      */
     public boolean isFingerprintAvailable() {
-        return RxFingerprint.isAvailable(applicationContext);
+        return fingerprintAuth.isFingerprintAvailable(applicationContext);
     }
 
     /**
      * Returns true if the device has the appropriate hardware for fingerprint authentication
      */
     public boolean isHardwareDetected() {
-        return RxFingerprint.isHardwareDetected(applicationContext);
+        return fingerprintAuth.isHardwareDetected(applicationContext);
     }
 
     /**
      * Returns if any fingerprints are registered
      */
     public boolean areFingerprintsEnrolled() {
-        return RxFingerprint.hasEnrolledFingerprints(applicationContext);
+        return fingerprintAuth.areFingerprintsEnrolled(applicationContext);
     }
 
     /**
@@ -71,9 +75,9 @@ public class FingerprintHelper {
      * into a Base64 string and written to shared prefs with a key. Please note that this doesn't
      * encrypt the data in any way, just obfuscates it.
      *
-     * @param key   The key to write/retrieve the data to/from
-     * @param data  The data to be stored, in the form of a {@link CharSequenceX}
-     * @return      Returns true if data stored successfully
+     * @param key  The key to write/retrieve the data to/from
+     * @param data The data to be stored, in the form of a {@link CharSequenceX}
+     * @return Returns true if data stored successfully
      */
     public boolean storeEncryptedData(@NonNull String key, @NonNull CharSequenceX data) {
         try {
@@ -87,8 +91,9 @@ public class FingerprintHelper {
 
     /**
      * Retrieve previously saved encrypted data from shared preferences
-     * @param key   The key of the item to be retrieved
-     * @return      A {@link CharSequenceX} wrapping the saved String, or null if not found
+     *
+     * @param key The key of the item to be retrieved
+     * @return A {@link CharSequenceX} wrapping the saved String, or null if not found
      */
     @Nullable
     public CharSequenceX getEncryptedData(@NonNull String key) {
@@ -107,15 +112,21 @@ public class FingerprintHelper {
 
     /**
      * Deletes the data stored under the passed in key
-     * @param key   The key of the data to be stored
+     *
+     * @param key The key of the data to be stored
      */
     public void clearEncryptedData(@NonNull String key) {
         prefsUtil.removeValue(key);
     }
 
+    /**
+     * Authenticates a user's fingerprint
+     *
+     * @param callback {@link AuthCallback}
+     */
     public void authenticateFingerprint(AuthCallback callback) {
         compositeSubscription.add(
-                RxFingerprint.authenticate(applicationContext)
+                fingerprintAuth.authenticate(applicationContext)
                         .subscribe(fingerprintAuthenticationResult -> {
                             switch (fingerprintAuthenticationResult.getResult()) {
                                 case FAILED:
@@ -125,17 +136,24 @@ public class FingerprintHelper {
                                     callback.onHelp(fingerprintAuthenticationResult.getMessage());
                                     break;
                                 case AUTHENTICATED:
-                                    callback.onAuthenticated(new CharSequenceX(fingerprintAuthenticationResult.getMessage()));
+                                    callback.onAuthenticated(null);
                                     break;
                             }
                         }, throwable -> {
-                            callback.onFailure();
+                            callback.onFatalError();
                         }));
     }
 
+    /**
+     * Encrypts a String and stores its private key Android Keystore using a specific keyword
+     *
+     * @param key             The key to save/retrieve the object
+     * @param stringToEncrypt The String to be encrypted
+     * @param callback        {@link AuthCallback}
+     */
     public void encryptString(String key, String stringToEncrypt, AuthCallback callback) {
         compositeSubscription.add(
-                RxFingerprint.encrypt(applicationContext, key, stringToEncrypt)
+                fingerprintAuth.encrypt(applicationContext, key, stringToEncrypt)
                         .subscribe(encryptionResult -> {
                             switch (encryptionResult.getResult()) {
                                 case FAILED:
@@ -150,14 +168,20 @@ public class FingerprintHelper {
                                     break;
                             }
                         }, throwable -> {
-                            callback.onFailure();
-                            Log.e("ERROR", "encrypt", throwable);
+                            callback.onFatalError();
                         }));
     }
 
+    /**
+     * Decrypts a supplied String after authentication
+     *
+     * @param key             The key of the object to be retrieved
+     * @param encryptedString The String to be decrypted
+     * @param callback        {@link AuthCallback}
+     */
     public void decryptString(String key, String encryptedString, AuthCallback callback) {
         compositeSubscription.add(
-                RxFingerprint.decrypt(applicationContext, key, encryptedString)
+                fingerprintAuth.decrypt(applicationContext, key, encryptedString)
                         .subscribe(decryptionResult -> {
                             switch (decryptionResult.getResult()) {
                                 case FAILED:
@@ -180,16 +204,14 @@ public class FingerprintHelper {
                             } else {
                                 callback.onFatalError();
                             }
-                            Log.e("ERROR", "decrypt", throwable);
                         }));
     }
 
     /**
-     * This should be called when authentication completed or no longer required, otherwise
-     * the fingerprint sensor will keep listening in the background for touch events and leak
-     * memory.
+     * This should be called when authentication completed or no longer required, otherwise the
+     * fingerprint sensor will keep listening in the background for touch events and leak memory.
      */
-    public void releaseFingerprintReader() {
+    void releaseFingerprintReader() {
         compositeSubscription.clear();
     }
 
@@ -199,7 +221,7 @@ public class FingerprintHelper {
 
         void onHelp(String message);
 
-        void onAuthenticated(@NonNull CharSequenceX data);
+        void onAuthenticated(@Nullable CharSequenceX data);
 
         void onKeyInvalidated();
 

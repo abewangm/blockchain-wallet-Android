@@ -17,6 +17,7 @@ import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
+import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
 import piuk.blockchain.android.data.services.AddressInfoService;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
@@ -73,6 +74,6 @@ public class DataManagerModule {
 
     @Provides
     protected FingerprintHelper provideFingerprintHelper(Context applicationContext, PrefsUtil prefsUtil) {
-        return new FingerprintHelper(applicationContext, prefsUtil);
+        return new FingerprintHelper(applicationContext, prefsUtil, new FingerprintAuthImpl());
     }
 }

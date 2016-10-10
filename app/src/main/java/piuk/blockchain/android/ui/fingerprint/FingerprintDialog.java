@@ -21,19 +21,22 @@ import info.blockchain.wallet.util.CharSequenceX;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-public class FingerprintDialog extends AppCompatDialogFragment {
+public class FingerprintDialog extends AppCompatDialogFragment implements FingerprintHelper.AuthCallback {
 
     public static final String TAG = "FingerprintDialog";
     public static final String KEY_PIN_CODE = "pin_code";
     public static final String KEY_STAGE = "stage";
     private static final long ERROR_TIMEOUT_MILLIS = 1500;
     private static final long SUCCESS_DELAY_MILLIS = 1000;
+    private static final long FATAL_ERROR_TIMEOUT_MILLIS = 3000;
 
-    @Thunk Button cancelButton;
+    private Button cancelButton;
     @Thunk ImageView fingerprintIcon;
     @Thunk TextView statusTextView;
-    @Thunk FingerprintHelper fingerprintHelper;
+    private TextView descriptionTextView;
+    private FingerprintHelper fingerprintHelper;
     private FingerprintAuthCallback authCallback;
+    private String currentStage;
 
     public static FingerprintDialog newInstance(CharSequenceX pin, String stage) {
         Bundle args = new Bundle();
@@ -47,7 +50,6 @@ public class FingerprintDialog extends AppCompatDialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // TODO: 10/10/2016 Refactor this out
         if (fingerprintHelper == null) {
             throw new RuntimeException("Fingerprint helper is null, have you passed in into the dialog via setFingerprintHelper?");
         }
@@ -68,20 +70,20 @@ public class FingerprintDialog extends AppCompatDialogFragment {
 
         View view = inflater.inflate(R.layout.dialog_fingerprint, container, false);
 
-        TextView descriptionTextView = (TextView) view.findViewById(R.id.fingerprint_description);
+        descriptionTextView = (TextView) view.findViewById(R.id.fingerprint_description);
         statusTextView = (TextView) view.findViewById(R.id.fingerprint_status);
         cancelButton = (Button) view.findViewById(R.id.action_cancel);
         cancelButton.setOnClickListener(v -> authCallback.onCanceled());
 
         fingerprintIcon = (ImageView) view.findViewById(R.id.icon_fingerprint);
 
-        if (getArguments() == null
-                || getArguments().getString(KEY_PIN_CODE) == null
+        if (getArguments() == null || getArguments().getString(KEY_PIN_CODE) == null
                 || getArguments().getString(KEY_STAGE) == null) {
             authCallback.onCanceled();
         } else {
-            String currentStage = getArguments().getString(KEY_STAGE);
+            currentStage = getArguments().getString(KEY_STAGE);
 
+            assert currentStage != null;
             if (currentStage.equals(Stage.REGISTER_FINGERPRINT)) {
                 // Enable Fingerprint
                 cancelButton.setText(android.R.string.cancel);
@@ -93,35 +95,7 @@ public class FingerprintDialog extends AppCompatDialogFragment {
                 fingerprintHelper.encryptString(
                         FingerprintHelper.KEY_PIN_CODE,
                         getArguments().getString(KEY_PIN_CODE),
-                        new FingerprintHelper.AuthCallback() {
-                            @Override
-                            public void onFailure() {
-                                onAuthenticationFailed();
-                            }
-
-                            @Override
-                            public void onHelp(String message) {
-                                onAuthenticationHelp(message);
-                            }
-
-                            @Override
-                            public void onAuthenticated(@Nullable CharSequenceX data) {
-                                if (data != null) {
-                                    fingerprintHelper.storeEncryptedData(KEY_PIN_CODE, data);
-                                }
-                                onAuthenticationSucceeded(data);
-                            }
-
-                            @Override
-                            public void onKeyInvalidated() {
-                                // This can't be called at this stage
-                            }
-
-                            @Override
-                            public void onFatalError() {
-                                showFatalErrorAndDismiss();
-                            }
-                        });
+                        this);
 
             } else if (currentStage.equals(Stage.AUTHENTICATE)) {
                 // Authenticate fingerprint
@@ -130,59 +104,60 @@ public class FingerprintDialog extends AppCompatDialogFragment {
                 fingerprintHelper.decryptString(
                         FingerprintHelper.KEY_PIN_CODE,
                         getArguments().getString(KEY_PIN_CODE),
-                        new FingerprintHelper.AuthCallback() {
-                            @Override
-                            public void onFailure() {
-                                onAuthenticationFailed();
-                            }
-
-                            @Override
-                            public void onHelp(String message) {
-                                onAuthenticationHelp(message);
-                            }
-
-                            @Override
-                            public void onAuthenticated(@Nullable CharSequenceX data) {
-                                onAuthenticationSucceeded(data);
-                            }
-
-                            @Override
-                            public void onKeyInvalidated() {
-                                // User will have to re-register
-                                showKeyInvalidated();
-                            }
-
-                            @Override
-                            public void onFatalError() {
-                                showFatalErrorAndDismiss();
-                            }
-                        });
+                        this);
             }
         }
 
         return view;
     }
 
-    @Thunk
-    void onAuthenticationHelp(String helpString) {
-        showError(helpString);
+    @Override
+    public void onFailure() {
+        showError(getString(R.string.fingerprint_not_recognized), ERROR_TIMEOUT_MILLIS);
     }
 
-    @Thunk
-    void onAuthenticationFailed() {
-        showError(getString(R.string.fingerprint_not_recognized));
+    @Override
+    public void onHelp(String message) {
+        showError(message, ERROR_TIMEOUT_MILLIS);
     }
 
-    public void onAuthenticationSucceeded(CharSequenceX data) {
+    @Override
+    public void onAuthenticated(@Nullable CharSequenceX data) {
         statusTextView.removeCallbacks(mResetErrorTextRunnable);
         fingerprintIcon.setImageResource(R.drawable.ic_fingerprint_success);
         statusTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.blockchain_blue));
         statusTextView.setText(getString(R.string.fingerprint_success));
         fingerprintIcon.postDelayed(() -> authCallback.onAuthenticated(data), SUCCESS_DELAY_MILLIS);
+
+        if (currentStage.equals(Stage.REGISTER_FINGERPRINT) && data != null) {
+            fingerprintHelper.storeEncryptedData(KEY_PIN_CODE, data);
+        }
     }
 
-    @Thunk
-    void showError(CharSequence error) {
+    // Recently changed PIN on device or added another fingerprint, must re-register
+    @Override
+    public void onKeyInvalidated() {
+        showError(getString(R.string.fingerprint_key_invalidated_brief), FATAL_ERROR_TIMEOUT_MILLIS);
+        descriptionTextView.setText(R.string.fingerprint_key_invalidated_description);
+        cancelButton.setText(R.string.fingerprint_use_pin);
+        fingerprintHelper.clearEncryptedData(KEY_PIN_CODE);
+        fingerprintHelper.setFingerprintUnlockEnabled(false);
+        Handler handler = new Handler();
+        handler.postDelayed(() -> authCallback.onCanceled(), FATAL_ERROR_TIMEOUT_MILLIS);
+    }
+
+    // Most likely too many attempts, temporarily locked out
+    @Override
+    public void onFatalError() {
+        descriptionTextView.setText(R.string.fingerprint_fatal_error_description);
+        showError(getString(R.string.fingerprint_fatal_error_brief), FATAL_ERROR_TIMEOUT_MILLIS);
+        fingerprintHelper.clearEncryptedData(KEY_PIN_CODE);
+        fingerprintHelper.setFingerprintUnlockEnabled(false);
+        Handler handler = new Handler();
+        handler.postDelayed(() -> authCallback.onCanceled(), FATAL_ERROR_TIMEOUT_MILLIS);
+    }
+
+    private void showError(CharSequence error, long timeout) {
         fingerprintIcon.setImageResource(R.drawable.ic_fingerprint_error);
         Animation shake = AnimationUtils.loadAnimation(getContext(), R.anim.fingerprint_failed_shake);
         fingerprintIcon.setAnimation(shake);
@@ -190,26 +165,7 @@ public class FingerprintDialog extends AppCompatDialogFragment {
         statusTextView.setText(error);
         statusTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.warning_color));
         statusTextView.removeCallbacks(mResetErrorTextRunnable);
-        statusTextView.postDelayed(mResetErrorTextRunnable, ERROR_TIMEOUT_MILLIS);
-    }
-
-    // Recently changed PIN on device or added another fingerprint, must re-register
-    @Thunk
-    void showKeyInvalidated() {
-        showError(getString(R.string.fingerprint_newly_enrolled_description));
-        cancelButton.setText(R.string.fingerprint_use_pin);
-        fingerprintHelper.clearEncryptedData(KEY_PIN_CODE);
-        fingerprintHelper.setFingerprintUnlockEnabled(false);
-    }
-
-    // Most likely too many attempts, temporarily locked out
-    @Thunk
-    void showFatalErrorAndDismiss() {
-        showError(getString(R.string.fingerprint_fatal_error));
-        fingerprintHelper.clearEncryptedData(KEY_PIN_CODE);
-        fingerprintHelper.setFingerprintUnlockEnabled(false);
-        Handler handler = new Handler();
-        handler.postDelayed(() -> authCallback.onCanceled(), ERROR_TIMEOUT_MILLIS);
+        statusTextView.postDelayed(mResetErrorTextRunnable, timeout);
     }
 
     private Runnable mResetErrorTextRunnable = new Runnable() {
@@ -243,11 +199,11 @@ public class FingerprintDialog extends AppCompatDialogFragment {
     }
 
     /**
-     * Indicate which authentication method the user is trying to authenticate with.
+     * Indicate which stage of the auth process the user is currently at
      */
     public static class Stage {
         public static final String REGISTER_FINGERPRINT = "new_fingerprint";
-        public static final String AUTHENTICATE = "AUTHENTICATE";
+        public static final String AUTHENTICATE = "authenticate";
     }
 
     public interface FingerprintAuthCallback {
