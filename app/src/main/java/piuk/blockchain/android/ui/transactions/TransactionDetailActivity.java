@@ -47,7 +47,9 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
         mBinding.editIcon.setOnClickListener(v -> mBinding.descriptionField.performClick());
         mBinding.descriptionField.setOnClickListener(v -> {
             AppCompatEditText editText = new AppCompatEditText(this);
-            editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE | InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE);
+            editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+                    | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
+                    | InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE);
             editText.setHint(R.string.transaction_detail_description_hint);
 
             int maxLength = 256;

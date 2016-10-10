@@ -122,7 +122,8 @@ public class CreateWalletFragment extends Fragment {
                             @Override
                             public void run() {
                                 binding.entropyContainer.passStrengthBar.setProgress(scorePerc);
-                                binding.entropyContainer.passStrengthBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), strengthColors[pwStrengthLevel]));
+                                binding.entropyContainer.passStrengthBar.setProgressDrawable(
+                                        ContextCompat.getDrawable(getActivity(), strengthColors[pwStrengthLevel]));
                                 binding.entropyContainer.passStrengthVerdict.setText(getResources().getString(strengthVerdicts[pwStrengthLevel]));
                             }
                         });

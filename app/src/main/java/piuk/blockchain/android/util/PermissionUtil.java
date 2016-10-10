@@ -62,7 +62,8 @@ public class PermissionUtil {
 
     public static void requestLocationPermissionFromActivity(View parentView, final Activity activity) {
         // Permission has not been granted and must be requested.
-        if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_COARSE_LOCATION) && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+                && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
 
             Snackbar.make(parentView, activity.getString(R.string.request_location_permission),
                     Snackbar.LENGTH_INDEFINITE).setAction(activity.getString(R.string.ok_cap), new View.OnClickListener() {

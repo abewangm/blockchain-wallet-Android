@@ -170,7 +170,10 @@ public class AccountEditViewModel extends BaseViewModel {
             //V2
             ImportedAccount iAccount = null;
             if (payloadManager.getPayload().getLegacyAddresses().size() > 0) {
-                iAccount = new ImportedAccount(context.getString(R.string.imported_addresses), payloadManager.getPayload().getLegacyAddresses(), new ArrayList<String>(), MultiAddrFactory.getInstance().getLegacyBalance());
+                iAccount = new ImportedAccount(context.getString(R.string.imported_addresses),
+                        payloadManager.getPayload().getLegacyAddresses(),
+                        new ArrayList<String>(),
+                        MultiAddrFactory.getInstance().getLegacyBalance());
             }
 
             if (iAccount != null) {
@@ -505,7 +508,9 @@ public class AccountEditViewModel extends BaseViewModel {
                                     dataListener.onShowTransactionSuccess();
 
                                     //Update v2 balance immediately after spend - until refresh from server
-                                    MultiAddrFactory.getInstance().setLegacyBalance(MultiAddrFactory.getInstance().getLegacyBalance() - (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue()));
+                                    long currentBalance = MultiAddrFactory.getInstance().getLegacyBalance();
+                                    long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
+                                    MultiAddrFactory.getInstance().setLegacyBalance(currentBalance - spentAmount);
                                     PayloadBridge.getInstance().remoteSaveThread(null);
 
                                     accountModel.setTransferFundsVisibility(View.GONE);

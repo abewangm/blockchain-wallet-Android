@@ -117,7 +117,9 @@ public class MapActivity extends BaseAuthActivity implements LocationListener {
         merchantList = new ArrayList<>();
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ? LocationManager.GPS_PROVIDER : LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, this);
+        locationManager.requestLocationUpdates(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ?
+                LocationManager.GPS_PROVIDER :
+                LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, this);
 
         infoLayout = ((LinearLayout) findViewById(R.id.info));
         infoLayout.setOnTouchListener(new OnSwipeTouchListener(this) {
@@ -445,42 +447,54 @@ public class MapActivity extends BaseAuthActivity implements LocationListener {
                                         switch (category) {
                                             case MerchantDirectory.Merchant.HEADING_CAFE:
                                                 if (cafeSelected) {
-                                                    bmd = merchant.featured_merchant ? BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe_featured) : BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe);
+                                                    bmd = merchant.featured_merchant ?
+                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe_featured) :
+                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe);
                                                 } else {
                                                     bmd = null;
                                                 }
                                                 break;
                                             case MerchantDirectory.Merchant.HEADING_BAR:
                                                 if (drinkSelected) {
-                                                    bmd = merchant.featured_merchant ? BitmapDescriptorFactory.fromResource(R.drawable.marker_drink_featured) : BitmapDescriptorFactory.fromResource(R.drawable.marker_drink);
+                                                    bmd = merchant.featured_merchant ?
+                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_drink_featured) :
+                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_drink);
                                                 } else {
                                                     bmd = null;
                                                 }
                                                 break;
                                             case MerchantDirectory.Merchant.HEADING_RESTAURANT:
                                                 if (eatSelected) {
-                                                    bmd = merchant.featured_merchant ? BitmapDescriptorFactory.fromResource(R.drawable.marker_eat_featured) : BitmapDescriptorFactory.fromResource(R.drawable.marker_eat);
+                                                    bmd = merchant.featured_merchant ?
+                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_eat_featured) :
+                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_eat);
                                                 } else {
                                                     bmd = null;
                                                 }
                                                 break;
                                             case MerchantDirectory.Merchant.HEADING_SPEND:
                                                 if (spendSelected) {
-                                                    bmd = merchant.featured_merchant ? BitmapDescriptorFactory.fromResource(R.drawable.marker_spend_featured) : BitmapDescriptorFactory.fromResource(R.drawable.marker_spend);
+                                                    bmd = merchant.featured_merchant ?
+                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_spend_featured) :
+                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_spend);
                                                 } else {
                                                     bmd = null;
                                                 }
                                                 break;
                                             case MerchantDirectory.Merchant.HEADING_ATM:
                                                 if (atmSelected) {
-                                                    bmd = merchant.featured_merchant ? BitmapDescriptorFactory.fromResource(R.drawable.marker_atm_featured) : BitmapDescriptorFactory.fromResource(R.drawable.marker_atm);
+                                                    bmd = merchant.featured_merchant ?
+                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_atm_featured) :
+                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_atm);
                                                 } else {
                                                     bmd = null;
                                                 }
                                                 break;
                                             default:
                                                 if (cafeSelected) {
-                                                    bmd = merchant.featured_merchant ? BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe_featured) : BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe);
+                                                    bmd = merchant.featured_merchant ?
+                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe_featured) :
+                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe);
                                                 } else {
                                                     bmd = null;
                                                 }

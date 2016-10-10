@@ -29,6 +29,8 @@ import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import rx.Observable;
 
+import static piuk.blockchain.android.R.id.balance1;
+
 public class TransferFundsDataManager {
 
     private PayloadManager mPayloadManager;
@@ -151,7 +153,11 @@ public class TransferFundsDataManager {
                                 public void onSuccess(String s) {
                                     if (subscriber.isUnsubscribed()) return;
                                     subscriber.onNext(s);
-                                    MultiAddrFactory.getInstance().setLegacyBalance(MultiAddrFactory.getInstance().getLegacyBalance() - (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue()));
+
+                                    long currentBalance = MultiAddrFactory.getInstance().getLegacyBalance();
+                                    long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
+
+                                    MultiAddrFactory.getInstance().setLegacyBalance(currentBalance - spentAmount);
 
                                     if (finalI == pendingTransactions.size() - 1) {
                                         savePayloadToServer()
