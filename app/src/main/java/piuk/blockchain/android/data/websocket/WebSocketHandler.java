@@ -303,7 +303,13 @@ public class WebSocketHandler {
                                                 text += " from " + in_addr;
                                             }
 
-                                            new NotificationsUtil(context).setNotification(title, marquee, text, R.drawable.ic_notification_transparent, R.drawable.ic_launcher, MainActivity.class, 1000);
+                                            new NotificationsUtil(context).setNotification(title,
+                                                    marquee,
+                                                    text,
+                                                    R.drawable.ic_notification_transparent,
+                                                    R.drawable.ic_launcher,
+                                                    MainActivity.class,
+                                                    1000);
                                         }
 
                                         updateBalancesAndTransactions();

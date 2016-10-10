@@ -188,7 +188,8 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                                 new PayloadManager.UpgradePayloadListener() {
                                     @Override
                                     public void onDoubleEncryptionPasswordError() {
-                                        ToastCustom.makeText(UpgradeWalletActivity.this, UpgradeWalletActivity.this.getString(R.string.double_encryption_password_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                                        ToastCustom.makeText(UpgradeWalletActivity.this, UpgradeWalletActivity.this.getString(R.string.double_encryption_password_error),
+                                                ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                                         upgradeClicked(null);
                                     }
 

@@ -315,7 +315,8 @@ public class SuggestMerchantActivity extends BaseAuthActivity {
 
         } catch (Exception e) {
             Log.e("", "", e);
-            ToastCustom.makeText(SuggestMerchantActivity.this, getString(R.string.address_lookup_fail), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            ToastCustom.makeText(SuggestMerchantActivity.this,
+                    getString(R.string.address_lookup_fail), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
         }
     }
 

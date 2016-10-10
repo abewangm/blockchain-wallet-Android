@@ -170,7 +170,10 @@ public class AccountEditViewModel extends BaseViewModel {
             //V2
             ImportedAccount iAccount = null;
             if (payloadManager.getPayload().getLegacyAddresses().size() > 0) {
-                iAccount = new ImportedAccount(context.getString(R.string.imported_addresses), payloadManager.getPayload().getLegacyAddresses(), new ArrayList<String>(), MultiAddrFactory.getInstance().getLegacyBalance());
+                iAccount = new ImportedAccount(context.getString(R.string.imported_addresses),
+                        payloadManager.getPayload().getLegacyAddresses(),
+                        new ArrayList<String>(),
+                        MultiAddrFactory.getInstance().getLegacyBalance());
             }
 
             if (iAccount != null) {
@@ -184,12 +187,14 @@ public class AccountEditViewModel extends BaseViewModel {
                 accountModel.setXpubDescriptionVisibility(View.GONE);
                 accountModel.setXpubText(context.getString(R.string.address));
                 accountModel.setDefaultAccountVisibility(View.GONE);//No default for V2
-                setArchive(legacyAddress.getTag() == PayloadManager.ARCHIVED_ADDRESS);
+                setArchive(legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS);
 
                 if (legacyAddress.isWatchOnly()) {
                     accountModel.setScanPrivateKeyVisibility(View.VISIBLE);
+                    accountModel.setArchiveVisibility(View.GONE);
                 } else {
                     accountModel.setScanPrivateKeyVisibility(View.GONE);
+                    accountModel.setArchiveVisibility(View.VISIBLE);
                 }
 
                 if (payloadManager.getPayload().isUpgraded()) {
@@ -495,7 +500,7 @@ public class AccountEditViewModel extends BaseViewModel {
                                 @Override
                                 public void onSuccess(String s) {
 
-                                    legacyAddress.setTag(PayloadManager.ARCHIVED_ADDRESS);
+                                    legacyAddress.setTag(LegacyAddress.ARCHIVED_ADDRESS);
                                     setArchive(true);
 
                                     if (alertDialog != null && alertDialog.isShowing())
@@ -503,7 +508,9 @@ public class AccountEditViewModel extends BaseViewModel {
                                     dataListener.onShowTransactionSuccess();
 
                                     //Update v2 balance immediately after spend - until refresh from server
-                                    MultiAddrFactory.getInstance().setLegacyBalance(MultiAddrFactory.getInstance().getLegacyBalance() - (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue()));
+                                    long currentBalance = MultiAddrFactory.getInstance().getLegacyBalance();
+                                    long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
+                                    MultiAddrFactory.getInstance().setLegacyBalance(currentBalance - spentAmount);
                                     PayloadBridge.getInstance().remoteSaveThread(null);
 
                                     accountModel.setTransferFundsVisibility(View.GONE);
@@ -650,7 +657,7 @@ public class AccountEditViewModel extends BaseViewModel {
         String title = context.getResources().getString(R.string.archive);
         String subTitle = context.getResources().getString(R.string.archive_are_you_sure);
 
-        if ((account != null && account.isArchived()) || (legacyAddress != null && legacyAddress.getTag() == PayloadManager.ARCHIVED_ADDRESS)) {
+        if ((account != null && account.isArchived()) || (legacyAddress != null && legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS)) {
             title = context.getResources().getString(R.string.unarchive);
             subTitle = context.getResources().getString(R.string.unarchive_are_you_sure);
         }
@@ -666,11 +673,11 @@ public class AccountEditViewModel extends BaseViewModel {
             return account.isArchived();
 
         } else {
-            if (legacyAddress.getTag() == PayloadManager.ARCHIVED_ADDRESS) {
-                legacyAddress.setTag(PayloadManager.NORMAL_ADDRESS);
+            if (legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS) {
+                legacyAddress.setTag(LegacyAddress.NORMAL_ADDRESS);
                 return false;
             } else {
-                legacyAddress.setTag(PayloadManager.ARCHIVED_ADDRESS);
+                legacyAddress.setTag(LegacyAddress.ARCHIVED_ADDRESS);
                 return true;
             }
         }

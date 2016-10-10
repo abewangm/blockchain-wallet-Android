@@ -212,7 +212,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         }
         List<LegacyAddress> activeLegacyAddresses = new ArrayList<>();
         for (LegacyAddress item : allLegacyAddresses) {
-            if (item.getTag() != PayloadManager.ARCHIVED_ADDRESS) {
+            if (item.getTag() != LegacyAddress.ARCHIVED_ADDRESS) {
                 activeLegacyAddresses.add(item);
             }
         }
@@ -234,7 +234,10 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
             } else if (activeLegacyAddresses.size() > 1) {
 
                 //V2 "All" at top of accounts spinner if wallet contains multiple legacy addresses
-                ImportedAccount iAccount = new ImportedAccount(context.getString(R.string.total_funds), payloadManager.getPayload().getLegacyAddresses(), new ArrayList<>(), MultiAddrFactory.getInstance().getLegacyBalance());
+                ImportedAccount iAccount = new ImportedAccount(context.getString(R.string.total_funds),
+                        payloadManager.getPayload().getLegacyAddresses(),
+                        new ArrayList<>(),
+                        MultiAddrFactory.getInstance().getLegacyBalance());
                 iAccount.setTags(Collections.singletonList(TAG_ALL));
                 String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
                 activeAccountAndAddressList.add(new ItemAccount(iAccount.getLabel(), balance, null, null));
@@ -260,7 +263,10 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         if (payloadManager.getPayload().isUpgraded() && activeLegacyAddresses.size() > 0) {
 
             //Only V3 - Consolidate and add Legacy addresses to "Imported Addresses" at bottom of accounts spinner
-            ImportedAccount iAccount = new ImportedAccount(context.getString(R.string.imported_addresses), payloadManager.getPayload().getLegacyAddresses(), new ArrayList<String>(), MultiAddrFactory.getInstance().getLegacyBalance());
+            ImportedAccount iAccount = new ImportedAccount(context.getString(R.string.imported_addresses),
+                    payloadManager.getPayload().getLegacyAddresses(),
+                    new ArrayList<String>(),
+                    MultiAddrFactory.getInstance().getLegacyBalance());
             iAccount.setTags(Collections.singletonList(TAG_IMPORTED_ADDRESSES));
             String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
             activeAccountAndAddressList.add(new ItemAccount(iAccount.getLabel(), balance, null, null));
@@ -271,7 +277,9 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
             for (LegacyAddress legacyAddress : activeLegacyAddresses) {
 
                 //If address has no label, we'll display address
-                String labelOrAddress = legacyAddress.getLabel() == null || legacyAddress.getLabel().trim().length() == 0 ? legacyAddress.getAddress() : legacyAddress.getLabel();
+                String labelOrAddress = legacyAddress.getLabel() == null ||
+                        legacyAddress.getLabel().trim().length() == 0 ?
+                        legacyAddress.getAddress() : legacyAddress.getLabel();
 
                 //Prefix "watch-only"
                 if (legacyAddress.isWatchOnly()) {
