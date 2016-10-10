@@ -1206,8 +1206,6 @@ public class SendViewModel extends BaseViewModel {
     private void setTempLegacyAddressPrivateKey(LegacyAddress legacyAddress, ECKey key) {
         if (key != null && key.hasPrivKey() && legacyAddress.getAddress().equals(key.toAddress(MainNetParams.get()).toString())) {
 
-            Log.d(TAG, "setTempLegacyAddressPrivateKey: "+key.getPrivKeyBytes());
-
             //Create copy, otherwise pass by ref will override private key in wallet payload
             LegacyAddress tempLegacyAddress = new LegacyAddress();
             tempLegacyAddress.setEncryptedKey(key.getPrivKeyBytes());
