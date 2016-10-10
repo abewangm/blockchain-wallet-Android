@@ -69,8 +69,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public static final String ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH";
     public static final String KEY_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     public static final String KEY_TRANSACTION_LIST_POSITION = "transaction_list_position";
-    private final static int SHOW_BTC = 1;
-    private final static int SHOW_FIAT = 2;
+    private static final int SHOW_BTC = 1;
+    private static final int SHOW_FIAT = 2;
     private static int BALANCE_DISPLAY_STATE = SHOW_BTC;
     public int balanceBarHeight;
     private BalanceHeaderAdapter accountsAdapter;

@@ -39,8 +39,8 @@ public class CreateWalletFragment extends Fragment {
     public static final String KEY_INTENT_PASSWORD = "intent_password";
 
     private int pwStrength;
-    private int[] strengthVerdicts = {R.string.strength_weak, R.string.strength_medium, R.string.strength_normal, R.string.strength_strong};
-    private int[] strengthColors = {R.drawable.progress_red, R.drawable.progress_orange, R.drawable.progress_blue, R.drawable.progress_green};
+    private final int[] strengthVerdicts = {R.string.strength_weak, R.string.strength_medium, R.string.strength_normal, R.string.strength_strong};
+    private final int[] strengthColors = {R.drawable.progress_red, R.drawable.progress_orange, R.drawable.progress_blue, R.drawable.progress_green};
 
     private FragmentCreateWalletBinding binding;
     private boolean mRecoveringFunds = false;
