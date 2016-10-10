@@ -799,13 +799,17 @@ public class SendViewModel extends BaseViewModel {
 
             if (isValidSpend(sendModel.pendingTransaction)) {
 
-                //Currently only v2 has watch-only
-                if (!sendModel.pendingTransaction.isHD() &&
-                        ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject).isWatchOnly()) {
+                LegacyAddress legacyAddress = null;
+
+                if (!sendModel.pendingTransaction.isHD()) {
+                    legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
+                }
+
+                if (legacyAddress != null && legacyAddress.isWatchOnly() && legacyAddress.getEncryptedKey() != null && legacyAddress.getEncryptedKey().isEmpty()) {
 
                     dataListener.onShowSpendFromWatchOnly(((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject).getAddress());
 
-                } else if (sendModel.verifiedSecondPassword != null) {
+                } else if ((legacyAddress != null && legacyAddress.isWatchOnly()) || sendModel.verifiedSecondPassword != null) {
                     confirmPayment();
 
                 } else {
