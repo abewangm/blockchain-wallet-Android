@@ -1,6 +1,8 @@
 package piuk.blockchain.android.ui.balance;
 
 import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.style.RelativeSizeSpan;
@@ -29,7 +31,13 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
     private boolean mIsBtc;
     private TxListClickListener mListClickListener;
 
-    BalanceListAdapter(List<Tx> transactions, PrefsUtil prefsUtil, MonetaryUtil monetaryUtil, DateUtil dateUtil, double btcExchangeRate, boolean isBtc) {
+    BalanceListAdapter(List<Tx> transactions,
+                       PrefsUtil prefsUtil,
+                       MonetaryUtil monetaryUtil,
+                       DateUtil dateUtil,
+                       double btcExchangeRate,
+                       boolean isBtc) {
+
         mTransactions = transactions;
         mPrefsUtil = prefsUtil;
         mMonetaryUtil = monetaryUtil;
@@ -42,6 +50,11 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
     public BalanceListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.txs_layout_expandable, parent, false);
         return new ViewHolder(v);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
+        onBindViewHolder(holder, position);
     }
 
     @Override
@@ -66,22 +79,44 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
 
             Spannable span1;
             if (mIsBtc) {
-                span1 = Spannable.Factory.getInstance().newSpannable(mMonetaryUtil.getDisplayAmountWithFormatting(Math.abs(tx.getAmount())) + " " + getDisplayUnits());
-                span1.setSpan(new RelativeSizeSpan(0.67f), span1.length() - getDisplayUnits().length(), span1.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                span1 = Spannable.Factory.getInstance().newSpannable(
+                        mMonetaryUtil.getDisplayAmountWithFormatting(Math.abs(tx.getAmount())) + " " + getDisplayUnits());
+                span1.setSpan(
+                        new RelativeSizeSpan(0.67f), span1.length() - getDisplayUnits().length(), span1.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
-                span1 = Spannable.Factory.getInstance().newSpannable(mMonetaryUtil.getFiatFormat(strFiat).format(Math.abs(fiatBalance)) + " " + strFiat);
-                span1.setSpan(new RelativeSizeSpan(0.67f), span1.length() - 3, span1.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                span1 = Spannable.Factory.getInstance().newSpannable(
+                        mMonetaryUtil.getFiatFormat(strFiat).format(Math.abs(fiatBalance)) + " " + strFiat);
+                span1.setSpan(
+                        new RelativeSizeSpan(0.67f), span1.length() - 3, span1.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
+
             int nbConfirmations = 3;
             if (tx.isMove()) {
-                holder.result.setBackgroundResource(tx.getConfirmations() < nbConfirmations ? R.drawable.rounded_view_lighter_blue_50 : R.drawable.rounded_view_lighter_blue);
-                holder.direction.setTextColor(holder.direction.getContext().getResources().getColor(tx.getConfirmations() < nbConfirmations ? R.color.blockchain_transfer_blue_50 : R.color.blockchain_transfer_blue));
+                holder.result.setBackgroundResource(
+                        tx.getConfirmations() < nbConfirmations
+                                ? R.drawable.rounded_view_lighter_blue_50 : R.drawable.rounded_view_lighter_blue);
+
+                holder.direction.setTextColor(ContextCompat.getColor(holder.direction.getContext(),
+                        tx.getConfirmations() < nbConfirmations
+                                ? R.color.blockchain_transfer_blue_50 : R.color.blockchain_transfer_blue));
+
             } else if (btcBalance < 0.0) {
-                holder.result.setBackgroundResource(tx.getConfirmations() < nbConfirmations ? R.drawable.rounded_view_red_50 : R.drawable.rounded_view_red);
-                holder.direction.setTextColor(holder.direction.getContext().getResources().getColor(tx.getConfirmations() < nbConfirmations ? R.color.blockchain_red_50 : R.color.blockchain_send_red));
+                holder.result.setBackgroundResource(
+                        tx.getConfirmations() < nbConfirmations
+                                ? R.drawable.rounded_view_red_50 : R.drawable.rounded_view_red);
+
+                holder.direction.setTextColor(ContextCompat.getColor(holder.direction.getContext(),
+                        tx.getConfirmations() < nbConfirmations
+                                ? R.color.blockchain_red_50 : R.color.blockchain_send_red));
+
             } else {
-                holder.result.setBackgroundResource(tx.getConfirmations() < nbConfirmations ? R.drawable.rounded_view_green_50 : R.drawable.rounded_view_green);
-                holder.direction.setTextColor(holder.direction.getContext().getResources().getColor(tx.getConfirmations() < nbConfirmations ? R.color.blockchain_green_50 : R.color.blockchain_receive_green));
+                holder.result.setBackgroundResource(
+                        tx.getConfirmations() < nbConfirmations
+                                ? R.drawable.rounded_view_green_50 : R.drawable.rounded_view_green);
+
+                holder.direction.setTextColor(ContextCompat.getColor(holder.direction.getContext(),
+                        tx.getConfirmations() < nbConfirmations
+                                ? R.color.blockchain_green_50 : R.color.blockchain_receive_green));
             }
 
             TextView tvWatchOnly = (TextView) holder.itemView.findViewById(R.id.watch_only);
@@ -94,7 +129,7 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
             holder.result.setText(span1);
 
             holder.result.setOnClickListener(v -> {
-                mIsBtc = !mIsBtc;
+                onViewFormatUpdated(!mIsBtc);
                 if (mListClickListener != null) mListClickListener.onValueClicked(mIsBtc);
             });
 
@@ -119,8 +154,9 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
     }
 
     void onTransactionsUpdated(List<Tx> transactions) {
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new BalanceDiffUtil(mTransactions, transactions));
         mTransactions = transactions;
-        notifyDataSetChanged();
+        diffResult.dispatchUpdatesTo(this);
     }
 
     void setTxListClickListener(TxListClickListener listClickListener) {
@@ -140,7 +176,7 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
 
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
 
         View touchView;
         TextView result;
