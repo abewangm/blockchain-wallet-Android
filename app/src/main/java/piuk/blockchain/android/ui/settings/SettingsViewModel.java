@@ -9,6 +9,8 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.util.PrefsUtil;
 
+import static piuk.blockchain.android.ui.fingerprint.FingerprintHelper.KEY_PIN_CODE;
+
 public class SettingsViewModel extends BaseViewModel {
 
     @Inject FingerprintHelper fingerprintHelper;
@@ -52,6 +54,9 @@ public class SettingsViewModel extends BaseViewModel {
 
     void setFingerprintUnlockEnabled(boolean enabled) {
         fingerprintHelper.setFingerprintUnlockEnabled(enabled);
+        if (!enabled) {
+            fingerprintHelper.clearEncryptedData(KEY_PIN_CODE);
+        }
     }
 
     void onFingerprintClicked() {
@@ -65,7 +70,6 @@ public class SettingsViewModel extends BaseViewModel {
             // Verify PIN before continuing
             dataListener.verifyPinCode();
         }
-
     }
 
     void pinCodeValidated(CharSequenceX pinCode) {

@@ -72,7 +72,6 @@ public class DataManagerModule {
     }
 
     @Provides
-    @Singleton
     protected FingerprintHelper provideFingerprintHelper(Context applicationContext, PrefsUtil prefsUtil) {
         return new FingerprintHelper(applicationContext, prefsUtil);
     }

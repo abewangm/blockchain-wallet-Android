@@ -511,6 +511,7 @@
     <string name="backup_lost_mnemonic">Lost your 12 word recovery phrase?</string>
 
     <!-- FINGERPRINT -->
+    <string name="fingerprint_prompt">Use your fingerprint for faster, easier access to your wallet.</string>
     <string name="fingerprint_description">Confirm fingerprint to continue</string>
     <string name="fingerprint_hint">Touch sensor</string>
     <string name="fingerprint_login_title">Fingerprint login</string>
@@ -519,4 +520,6 @@
     <string name="fingerprint_use_pin">Use PIN</string>
     <string name="fingerprint_disable_message">Are you sure you want to disable fingerprint login?</string>
     <string name="fingerprint_no_fingerprints_added">No fingerprints have been registered to this device yet. Do you want to register a fingerprint now?</string>
+    <string name="fingerprint_newly_enrolled_description">A new fingerprint was added to this device, so your password is required.</string>
+    <string name="fingerprint_fatal_error">There was a problem setting up fingerprint login. Please try again later</string>
 </resources>

@@ -273,7 +273,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 fingerprintPref.setVisible(false);
             } else {
                 fingerprintPref.setOnPreferenceClickListener(this);
-                fingerprintPref.setChecked(viewModel.getIfFingerprintUnlockEnabled());
+                updateFingerprintPreferenceStatus();
             }
 
             pinPref = findPreference("pin");
@@ -353,12 +353,13 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 .setMessage(R.string.fingerprint_disable_message)
                 .setCancelable(true)
                 .setPositiveButton(R.string.yes, (dialog, which) -> viewModel.setFingerprintUnlockEnabled(false))
-                .setNegativeButton(android.R.string.cancel, null)
+                .setNegativeButton(android.R.string.cancel, (dialog, which) -> updateFingerprintPreferenceStatus())
                 .show();
     }
 
     @Override
     public void showNoFingerprintsAddedDialog() {
+        updateFingerprintPreferenceStatus();
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.fingerprint_no_fingerprints_added)
@@ -387,7 +388,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         dialog.setFingerprintHelper(fingerprintHelper);
         dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
             @Override
-            public void onAuthenticated() {
+            public void onAuthenticated(CharSequenceX data) {
                 dialog.dismiss();
                 viewModel.setFingerprintUnlockEnabled(true);
             }
