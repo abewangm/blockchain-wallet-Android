@@ -92,18 +92,15 @@ public class FingerprintDialogViewModel extends BaseViewModel implements Fingerp
     // Fingerprint not recognised
     @Override
     public void onFailure() {
-        dataListener.setIcon(R.drawable.ic_fingerprint_error);
-        dataListener.setStatusText(R.string.fingerprint_not_recognized);
-        dataListener.setStatusTextColor(R.color.warning_color);
+        setFailureState(R.string.fingerprint_not_recognized, null);
         dataListener.onRecoverableError();
     }
 
     // Some error occurred
     @Override
     public void onHelp(String message) {
-        dataListener.setIcon(R.drawable.ic_fingerprint_error);
+        setFailureState(null, null);
         dataListener.setStatusText(message);
-        dataListener.setStatusTextColor(R.color.warning_color);
         dataListener.onRecoverableError();
     }
 
@@ -126,11 +123,8 @@ public class FingerprintDialogViewModel extends BaseViewModel implements Fingerp
      */
     @Override
     public void onKeyInvalidated() {
-        dataListener.setIcon(R.drawable.ic_fingerprint_error);
+        setFailureState(R.string.fingerprint_key_invalidated_brief, R.string.fingerprint_key_invalidated_description);
         dataListener.setCancelButtonText(R.string.fingerprint_use_pin);
-        dataListener.setStatusText(R.string.fingerprint_key_invalidated_brief);
-        dataListener.setStatusTextColor(R.color.warning_color);
-        dataListener.setDescriptionText(R.string.fingerprint_key_invalidated_description);
         dataListener.onFatalError();
 
         fingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
@@ -140,14 +134,18 @@ public class FingerprintDialogViewModel extends BaseViewModel implements Fingerp
     // Most likely too many attempts, temporarily locked out
     @Override
     public void onFatalError() {
-        dataListener.setIcon(R.drawable.ic_fingerprint_error);
-        dataListener.setStatusText(R.string.fingerprint_fatal_error_brief);
-        dataListener.setStatusTextColor(R.color.warning_color);
-        dataListener.setDescriptionText(R.string.fingerprint_fatal_error_description);
+        setFailureState(R.string.fingerprint_fatal_error_brief, R.string.fingerprint_fatal_error_description);
         dataListener.onFatalError();
 
         fingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
         fingerprintHelper.setFingerprintUnlockEnabled(false);
+    }
+
+    private void setFailureState(@StringRes Integer status, @StringRes Integer description) {
+        dataListener.setIcon(R.drawable.ic_fingerprint_error);
+        dataListener.setStatusTextColor(R.color.warning_color);
+        if (status != null) dataListener.setStatusText(status);
+        if (description != null) dataListener.setDescriptionText(description);
     }
 
     @Override
