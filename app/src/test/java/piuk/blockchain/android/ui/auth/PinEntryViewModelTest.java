@@ -224,7 +224,7 @@ public class PinEntryViewModelTest {
         // Act
         mSubject.checkFingerprintStatus();
         // Assert
-        verify(mActivity).showFingerprintDialog(any(CharSequenceX.class), eq(mFingerprintHelper));
+        verify(mActivity).showFingerprintDialog(any(CharSequenceX.class));
     }
 
     @Test

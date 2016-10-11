@@ -146,7 +146,7 @@ public class FingerprintHelper {
     }
 
     /**
-     * Encrypts a String and stores its private key Android Keystore using a specific keyword
+     * Encrypts a String and stores its private key in the Android Keystore using a specific keyword
      *
      * @param key             The key to save/retrieve the object
      * @param stringToEncrypt The String to be encrypted

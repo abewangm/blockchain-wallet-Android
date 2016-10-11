@@ -137,7 +137,7 @@ public class SettingsViewModelTest {
         // Act
         subject.pinCodeValidated(pincode);
         // Assert
-        verify(activity).showFingerprintDialog(pincode, fingerprintHelper);
+        verify(activity).showFingerprintDialog(pincode);
     }
 
     private class MockDataManagerModule extends DataManagerModule {

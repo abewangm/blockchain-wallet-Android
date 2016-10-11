@@ -511,7 +511,7 @@
     <string name="backup_lost_mnemonic">Lost your 12 word recovery phrase?</string>
 
     <!-- FINGERPRINT -->
-    <string name="fingerprint_prompt">Use your fingerprint for faster, easier access to your wallet.</string>
+    <string name="fingerprint_prompt">Use your fingerprint for faster, easier access to your wallet.\n\nConfirm fingerprint to continue</string>
     <string name="fingerprint_description">Confirm fingerprint to continue</string>
     <string name="fingerprint_hint">Touch sensor</string>
     <string name="fingerprint_login_title">Fingerprint login</string>

@@ -18,7 +18,7 @@ public class SettingsViewModel extends BaseViewModel {
 
         void verifyPinCode();
 
-        void showFingerprintDialog(CharSequenceX pincode, FingerprintHelper fingerprintHelper);
+        void showFingerprintDialog(CharSequenceX pincode);
 
         void showDisableFingerprintDialog();
 
@@ -70,6 +70,6 @@ public class SettingsViewModel extends BaseViewModel {
     }
 
     void pinCodeValidated(CharSequenceX pinCode) {
-        dataListener.showFingerprintDialog(pinCode, fingerprintHelper);
+        dataListener.showFingerprintDialog(pinCode);
     }
 }

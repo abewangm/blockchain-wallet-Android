@@ -102,7 +102,7 @@ public class PinEntryViewModel extends BaseViewModel {
 
         void finishWithResultOk(String pin);
 
-        void showFingerprintDialog(CharSequenceX pincode, FingerprintHelper fingerprintHelper);
+        void showFingerprintDialog(CharSequenceX pincode);
 
         void showKeyboard();
 
@@ -158,7 +158,7 @@ public class PinEntryViewModel extends BaseViewModel {
     public void checkFingerprintStatus() {
         if (getIfShouldShowFingerprintLogin()) {
             mDataListener.showFingerprintDialog(
-                    mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE), mFingerprintHelper);
+                    mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE));
         } else {
             mDataListener.showKeyboard();
         }

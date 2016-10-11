@@ -11,6 +11,7 @@ import piuk.blockchain.android.ui.auth.PasswordRequiredViewModel;
 import piuk.blockchain.android.ui.auth.PinEntryViewModel;
 import piuk.blockchain.android.ui.backup.ConfirmFundsTransferViewModel;
 import piuk.blockchain.android.ui.balance.BalanceViewModel;
+import piuk.blockchain.android.ui.fingerprint.FingerprintDialogViewModel;
 import piuk.blockchain.android.ui.home.MainViewModel;
 import piuk.blockchain.android.ui.launcher.LauncherViewModel;
 import piuk.blockchain.android.ui.pairing.ManualPairingViewModel;
@@ -77,4 +78,6 @@ public interface ApplicationComponent {
     void inject(AccountViewModel accountViewModel);
 
     void inject(SettingsViewModel settingsViewModel);
+
+    void inject(FingerprintDialogViewModel fingerprintDialogViewModel);
 }

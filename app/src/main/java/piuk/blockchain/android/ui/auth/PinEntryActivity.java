@@ -81,14 +81,13 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
     }
 
     @Override
-    public void showFingerprintDialog(CharSequenceX pincode, FingerprintHelper fingerprintHelper) {
+    public void showFingerprintDialog(CharSequenceX pincode) {
         // Show icon for relaunching dialog
         mBinding.fingerprintLogo.setVisibility(View.VISIBLE);
         mBinding.fingerprintLogo.setOnClickListener(v -> mViewModel.checkFingerprintStatus());
         // Show dialog itself if not already showing
         if (mFingerprintDialog == null && mViewModel.canShowFingerprintDialog()) {
             mFingerprintDialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.AUTHENTICATE);
-            mFingerprintDialog.setFingerprintHelper(fingerprintHelper);
             mFingerprintDialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
                 @Override
                 public void onAuthenticated(CharSequenceX data) {

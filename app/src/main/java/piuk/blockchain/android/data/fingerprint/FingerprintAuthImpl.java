@@ -45,7 +45,7 @@ public class FingerprintAuthImpl implements FingerprintAuth {
     }
 
     /**
-     * Encrypts a String and stores its private key Android Keystore using a specific keyword
+     * Encrypts a String and stores its private key in the Android Keystore using a specific keyword
      */
     @Override
     public Observable<FingerprintEncryptionResult> encrypt(Context applicationContext, String key, String stringToEncrypt) {
