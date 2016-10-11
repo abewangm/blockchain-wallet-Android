@@ -19,29 +19,30 @@ import android.widget.TextView;
 import info.blockchain.wallet.util.CharSequenceX;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 public class FingerprintDialog extends AppCompatDialogFragment implements FingerprintHelper.AuthCallback {
 
     public static final String TAG = "FingerprintDialog";
-    public static final String KEY_PIN_CODE = "pin_code";
-    public static final String KEY_STAGE = "stage";
+    public static final String KEY_BUNDLE_PIN_CODE = "pin_code";
+    public static final String KEY_BUNDLE_STAGE = "stage";
     private static final long ERROR_TIMEOUT_MILLIS = 1500;
     private static final long SUCCESS_DELAY_MILLIS = 1000;
     private static final long FATAL_ERROR_TIMEOUT_MILLIS = 3000;
 
-    private Button cancelButton;
     @Thunk ImageView fingerprintIcon;
     @Thunk TextView statusTextView;
     private TextView descriptionTextView;
+    private Button cancelButton;
     private FingerprintHelper fingerprintHelper;
     private FingerprintAuthCallback authCallback;
     private String currentStage;
 
     public static FingerprintDialog newInstance(CharSequenceX pin, String stage) {
         Bundle args = new Bundle();
-        args.putString(KEY_PIN_CODE, pin.toString());
-        args.putString(KEY_STAGE, stage);
+        args.putString(KEY_BUNDLE_PIN_CODE, pin.toString());
+        args.putString(KEY_BUNDLE_STAGE, stage);
         FingerprintDialog fragment = new FingerprintDialog();
         fragment.setArguments(args);
         return fragment;
@@ -77,38 +78,40 @@ public class FingerprintDialog extends AppCompatDialogFragment implements Finger
 
         fingerprintIcon = (ImageView) view.findViewById(R.id.icon_fingerprint);
 
-        if (getArguments() == null || getArguments().getString(KEY_PIN_CODE) == null
-                || getArguments().getString(KEY_STAGE) == null) {
+        if (getArguments() == null || getArguments().getString(KEY_BUNDLE_PIN_CODE) == null
+                || getArguments().getString(KEY_BUNDLE_STAGE) == null) {
             authCallback.onCanceled();
         } else {
-            currentStage = getArguments().getString(KEY_STAGE);
-
-            assert currentStage != null;
-            if (currentStage.equals(Stage.REGISTER_FINGERPRINT)) {
-                // Enable Fingerprint
-                cancelButton.setText(android.R.string.cancel);
-                descriptionTextView.setText(
-                        getString(R.string.fingerprint_prompt)
-                                + "\n\n"
-                                + getString(R.string.fingerprint_description));
-
-                fingerprintHelper.encryptString(
-                        FingerprintHelper.KEY_PIN_CODE,
-                        getArguments().getString(KEY_PIN_CODE),
-                        this);
-
-            } else if (currentStage.equals(Stage.AUTHENTICATE)) {
-                // Authenticate fingerprint
-                cancelButton.setText(R.string.fingerprint_use_pin);
-
-                fingerprintHelper.decryptString(
-                        FingerprintHelper.KEY_PIN_CODE,
-                        getArguments().getString(KEY_PIN_CODE),
-                        this);
-            }
+            currentStage = getArguments().getString(KEY_BUNDLE_STAGE);
+            startListeningForFingerprints();
         }
 
         return view;
+    }
+
+    private void startListeningForFingerprints() {
+        if (currentStage.equals(Stage.REGISTER_FINGERPRINT)) {
+            // Enable fingerprint login
+            cancelButton.setText(android.R.string.cancel);
+            descriptionTextView.setText(
+                    getString(R.string.fingerprint_prompt)
+                            + "\n\n"
+                            + getString(R.string.fingerprint_description));
+
+            fingerprintHelper.encryptString(
+                    PrefsUtil.KEY_ENCRYPTED_PIN_CODE,
+                    getArguments().getString(KEY_BUNDLE_PIN_CODE),
+                    this);
+
+        } else if (currentStage.equals(Stage.AUTHENTICATE)) {
+            // Authenticate previously enabled fingerprint
+            cancelButton.setText(R.string.fingerprint_use_pin);
+
+            fingerprintHelper.decryptString(
+                    PrefsUtil.KEY_ENCRYPTED_PIN_CODE,
+                    getArguments().getString(KEY_BUNDLE_PIN_CODE),
+                    this);
+        }
     }
 
     @Override
@@ -123,14 +126,14 @@ public class FingerprintDialog extends AppCompatDialogFragment implements Finger
 
     @Override
     public void onAuthenticated(@Nullable CharSequenceX data) {
-        statusTextView.removeCallbacks(mResetErrorTextRunnable);
+        statusTextView.removeCallbacks(resetErrorTextRunnable);
         fingerprintIcon.setImageResource(R.drawable.ic_fingerprint_success);
         statusTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.blockchain_blue));
         statusTextView.setText(getString(R.string.fingerprint_success));
         fingerprintIcon.postDelayed(() -> authCallback.onAuthenticated(data), SUCCESS_DELAY_MILLIS);
 
         if (currentStage.equals(Stage.REGISTER_FINGERPRINT) && data != null) {
-            fingerprintHelper.storeEncryptedData(KEY_PIN_CODE, data);
+            fingerprintHelper.storeEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE, data);
         }
     }
 
@@ -140,7 +143,7 @@ public class FingerprintDialog extends AppCompatDialogFragment implements Finger
         showError(getString(R.string.fingerprint_key_invalidated_brief), FATAL_ERROR_TIMEOUT_MILLIS);
         descriptionTextView.setText(R.string.fingerprint_key_invalidated_description);
         cancelButton.setText(R.string.fingerprint_use_pin);
-        fingerprintHelper.clearEncryptedData(KEY_PIN_CODE);
+        fingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
         fingerprintHelper.setFingerprintUnlockEnabled(false);
         Handler handler = new Handler();
         handler.postDelayed(() -> authCallback.onCanceled(), FATAL_ERROR_TIMEOUT_MILLIS);
@@ -149,9 +152,9 @@ public class FingerprintDialog extends AppCompatDialogFragment implements Finger
     // Most likely too many attempts, temporarily locked out
     @Override
     public void onFatalError() {
-        descriptionTextView.setText(R.string.fingerprint_fatal_error_description);
         showError(getString(R.string.fingerprint_fatal_error_brief), FATAL_ERROR_TIMEOUT_MILLIS);
-        fingerprintHelper.clearEncryptedData(KEY_PIN_CODE);
+        descriptionTextView.setText(R.string.fingerprint_fatal_error_description);
+        fingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
         fingerprintHelper.setFingerprintUnlockEnabled(false);
         Handler handler = new Handler();
         handler.postDelayed(() -> authCallback.onCanceled(), FATAL_ERROR_TIMEOUT_MILLIS);
@@ -164,11 +167,11 @@ public class FingerprintDialog extends AppCompatDialogFragment implements Finger
         fingerprintIcon.animate();
         statusTextView.setText(error);
         statusTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.warning_color));
-        statusTextView.removeCallbacks(mResetErrorTextRunnable);
-        statusTextView.postDelayed(mResetErrorTextRunnable, timeout);
+        statusTextView.removeCallbacks(resetErrorTextRunnable);
+        statusTextView.postDelayed(resetErrorTextRunnable, timeout);
     }
 
-    private Runnable mResetErrorTextRunnable = new Runnable() {
+    private Runnable resetErrorTextRunnable = new Runnable() {
         @Override
         public void run() {
             if (getContext() != null) {
@@ -202,7 +205,7 @@ public class FingerprintDialog extends AppCompatDialogFragment implements Finger
      * Indicate which stage of the auth process the user is currently at
      */
     public static class Stage {
-        public static final String REGISTER_FINGERPRINT = "new_fingerprint";
+        public static final String REGISTER_FINGERPRINT = "register_fingerprint";
         public static final String AUTHENTICATE = "authenticate";
     }
 

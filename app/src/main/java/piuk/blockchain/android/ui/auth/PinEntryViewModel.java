@@ -43,7 +43,6 @@ import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_EM
 import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_PASSWORD;
 import static piuk.blockchain.android.ui.auth.LandingActivity.KEY_INTENT_RECOVERING_FUNDS;
 import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATING_PIN_FOR_RESULT;
-import static piuk.blockchain.android.ui.fingerprint.FingerprintHelper.KEY_PIN_CODE;
 
 @SuppressWarnings("WeakerAccess")
 public class PinEntryViewModel extends BaseViewModel {
@@ -62,8 +61,8 @@ public class PinEntryViewModel extends BaseViewModel {
 
     private String mEmail;
     private CharSequenceX mPassword;
-    private boolean mRecoveringFunds = false;
-    private boolean mCanShowFingerprintDialog = true;
+    @VisibleForTesting boolean mRecoveringFunds = false;
+    @VisibleForTesting boolean mCanShowFingerprintDialog = true;
     @VisibleForTesting boolean mValidatingPinForResult = false;
     @VisibleForTesting String mUserEnteredPin = "";
     @VisibleForTesting String mUserEnteredConfirmationPin;
@@ -158,7 +157,8 @@ public class PinEntryViewModel extends BaseViewModel {
 
     public void checkFingerprintStatus() {
         if (getIfShouldShowFingerprintLogin()) {
-            mDataListener.showFingerprintDialog(mFingerprintHelper.getEncryptedData(KEY_PIN_CODE), mFingerprintHelper);
+            mDataListener.showFingerprintDialog(
+                    mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE), mFingerprintHelper);
         } else {
             mDataListener.showKeyboard();
         }
@@ -171,7 +171,7 @@ public class PinEntryViewModel extends BaseViewModel {
     private boolean getIfShouldShowFingerprintLogin() {
         return !(mValidatingPinForResult || mRecoveringFunds || isCreatingNewPin())
                 && mFingerprintHelper.getIfFingerprintUnlockEnabled()
-                && mFingerprintHelper.getEncryptedData(KEY_PIN_CODE) != null;
+                && mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE) != null;
     }
 
     public void loginWithDecryptedPin(CharSequenceX pincode) {
@@ -359,7 +359,7 @@ public class PinEntryViewModel extends BaseViewModel {
                         .subscribe(createSuccessful -> {
                             mDataListener.dismissProgressDialog();
                             if (createSuccessful) {
-                                mFingerprintHelper.clearEncryptedData(KEY_PIN_CODE);
+                                mFingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
                                 mFingerprintHelper.setFingerprintUnlockEnabled(false);
                                 mPrefsUtil.setValue(PrefsUtil.KEY_PIN_FAILS, 0);
                                 updatePayload(mPayloadManager.getTempPassword());

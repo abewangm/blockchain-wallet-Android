@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.fingerprint;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.util.Base64;
 
 import com.mtramin.rxfingerprint.RxFingerprint;
@@ -19,15 +20,15 @@ import rx.subscriptions.CompositeSubscription;
 @SuppressWarnings("WeakerAccess")
 public class FingerprintHelper {
 
-    public static final String KEY_PIN_CODE = "pin_code";
-    public static final String KEY_FINGERPRINT_ENABLED = "fingerprint_enabled";
-
     private Context applicationContext;
     private PrefsUtil prefsUtil;
     private FingerprintAuth fingerprintAuth;
-    private CompositeSubscription compositeSubscription;
+    @VisibleForTesting CompositeSubscription compositeSubscription;
 
-    public FingerprintHelper(Context applicationContext, PrefsUtil prefsUtil, FingerprintAuth fingerprintAuth) {
+    public FingerprintHelper(Context applicationContext,
+                             PrefsUtil prefsUtil,
+                             FingerprintAuth fingerprintAuth) {
+
         this.applicationContext = applicationContext;
         this.prefsUtil = prefsUtil;
         this.fingerprintAuth = fingerprintAuth;
@@ -60,14 +61,14 @@ public class FingerprintHelper {
      * Returns true if the user has previously enabled fingerprint login
      */
     public boolean getIfFingerprintUnlockEnabled() {
-        return isFingerprintAvailable() && prefsUtil.getValue(KEY_FINGERPRINT_ENABLED, false);
+        return isFingerprintAvailable() && prefsUtil.getValue(PrefsUtil.KEY_FINGERPRINT_ENABLED, false);
     }
 
     /**
      * Store whether or not fingerprint login has been successfully set up
      */
     public void setFingerprintUnlockEnabled(boolean enabled) {
-        prefsUtil.setValue(KEY_FINGERPRINT_ENABLED, enabled);
+        prefsUtil.setValue(PrefsUtil.KEY_FINGERPRINT_ENABLED, enabled);
     }
 
     /**

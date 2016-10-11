@@ -94,7 +94,6 @@ public class LauncherActivity extends AppCompatActivity implements LauncherViewM
         private LauncherActivity activity;
 
         DelayStartRunnable(LauncherActivity activity) {
-            super();
             this.activity = activity;
         }
 
