@@ -1159,8 +1159,15 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     @UiThread
     private void setCountryFlag(TextView tvCountry, String dialCode, int flagResourceId) {
         tvCountry.setText(dialCode);
-        Drawable drawable = getResources().getDrawable(flagResourceId);
+        Drawable drawable = ContextCompat.getDrawable(getActivity(), flagResourceId);
         drawable.setAlpha(30);
-        tvCountry.setBackgroundDrawable(drawable);
+
+        int sdk = android.os.Build.VERSION.SDK_INT;
+        if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            //noinspection deprecation
+            tvCountry.setBackgroundDrawable(drawable);
+        } else {
+            tvCountry.setBackground(drawable);
+        }
     }
 }

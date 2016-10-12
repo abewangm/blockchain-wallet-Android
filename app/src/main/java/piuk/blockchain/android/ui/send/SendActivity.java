@@ -294,6 +294,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     binding.accounts.spinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
+                    //noinspection deprecation
                     binding.accounts.spinner.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
 
@@ -337,6 +338,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     binding.spDestination.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
+                    //noinspection deprecation
                     binding.spDestination.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
 

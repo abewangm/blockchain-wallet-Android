@@ -124,6 +124,8 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     mToSpinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
+                    //Deprecated, but necessary to prevent issues on < 16
+                    //noinspection deprecation
                     mToSpinner.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
 

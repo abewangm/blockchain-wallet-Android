@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -74,7 +75,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
 
         mCustomPagerAdapter = new CustomPagerAdapter(this);
         binding.pager.setAdapter(mCustomPagerAdapter);
-        binding.pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        binding.pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
@@ -283,23 +284,33 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
 
     private void setSelectedPage(int position) {
 
-        binding.pageBox0.setBackgroundDrawable(getResources().getDrawable(R.drawable.rounded_view_dark_blue));
-        binding.pageBox1.setBackgroundDrawable(getResources().getDrawable(R.drawable.rounded_view_dark_blue));
-        binding.pageBox2.setBackgroundDrawable(getResources().getDrawable(R.drawable.rounded_view_dark_blue));
+        setBackGround(binding.pageBox0, R.drawable.rounded_view_dark_blue);
+        setBackGround(binding.pageBox1, R.drawable.rounded_view_dark_blue);
+        setBackGround(binding.pageBox2, R.drawable.rounded_view_dark_blue);
 
         switch (position) {
             case 0:
                 binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_1));
-                binding.pageBox0.setBackgroundDrawable(getResources().getDrawable(R.drawable.rounded_view_upgrade_wallet_blue));
+                setBackGround(binding.pageBox0, R.drawable.rounded_view_upgrade_wallet_blue);
                 break;
             case 1:
                 binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_2));
-                binding.pageBox1.setBackgroundDrawable(getResources().getDrawable(R.drawable.rounded_view_upgrade_wallet_blue));
+                setBackGround(binding.pageBox1, R.drawable.rounded_view_upgrade_wallet_blue);
                 break;
             case 2:
                 binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_3));
-                binding.pageBox2.setBackgroundDrawable(getResources().getDrawable(R.drawable.rounded_view_upgrade_wallet_blue));
+                setBackGround(binding.pageBox2, R.drawable.rounded_view_upgrade_wallet_blue);
                 break;
+        }
+    }
+
+    private void setBackGround(View view, int res){
+        int sdk = android.os.Build.VERSION.SDK_INT;
+        if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            //noinspection deprecation
+            view.setBackgroundDrawable(ContextCompat.getDrawable(this, res));
+        } else {
+            view.setBackground(ContextCompat.getDrawable(this, res));
         }
     }
 

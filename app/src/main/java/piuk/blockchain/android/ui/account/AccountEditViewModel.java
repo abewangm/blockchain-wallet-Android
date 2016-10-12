@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Looper;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -225,7 +226,7 @@ public class AccountEditViewModel extends BaseViewModel {
         } else {
             accountModel.setDefaultAccountVisibility(View.VISIBLE);
             accountModel.setDefaultText(context.getString(R.string.make_default));
-            accountModel.setDefaultTextColor(context.getResources().getColor(R.color.blockchain_blue));
+            accountModel.setDefaultTextColor(ContextCompat.getColor(context, R.color.blockchain_blue));
         }
     }
 

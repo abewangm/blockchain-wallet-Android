@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.directory;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -40,7 +41,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
-public class SuggestMerchantActivity extends BaseAuthActivity {
+public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapReadyCallback {
 
     private static final String SUGGEST_MERCHANT_URL = "https://merchant-directory.blockchain.info/api/suggest_merchant.php";
     TextView commandSave;
@@ -103,7 +104,12 @@ public class SuggestMerchantActivity extends BaseAuthActivity {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new MyLocationListener();
 
-        map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
+        ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+
         map.getUiSettings().setZoomControlsEnabled(true);
 
         try {

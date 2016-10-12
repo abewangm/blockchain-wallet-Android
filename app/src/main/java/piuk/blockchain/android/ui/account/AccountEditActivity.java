@@ -315,7 +315,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         dialogBinding.tvWarningHeading.setText(heading);
         dialogBinding.tvXpubNote.setText(note);
         dialogBinding.tvExtendedXpub.setText(copy);
-        dialogBinding.tvExtendedXpub.setTextColor(getResources().getColor(R.color.blockchain_blue));
+        dialogBinding.tvExtendedXpub.setTextColor(ContextCompat.getColor(this, R.color.blockchain_blue));
         dialogBinding.ivQr.setImageBitmap(bitmap);
 
         dialogBinding.tvExtendedXpub.setOnClickListener(v -> {

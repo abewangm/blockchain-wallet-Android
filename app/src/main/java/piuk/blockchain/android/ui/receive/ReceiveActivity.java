@@ -187,6 +187,7 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     mBinding.content.accounts.spinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
+                    //noinspection deprecation
                     mBinding.content.accounts.spinner.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
 

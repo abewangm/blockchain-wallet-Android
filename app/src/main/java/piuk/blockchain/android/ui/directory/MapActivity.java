@@ -5,6 +5,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -46,7 +47,7 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 
 //import android.util.Log;
 
-public class MapActivity extends BaseAuthActivity implements LocationListener {
+public class MapActivity extends BaseAuthActivity implements LocationListener, OnMapReadyCallback {
 
     private final String TAG = getClass().getSimpleName();
 
@@ -138,7 +139,12 @@ public class MapActivity extends BaseAuthActivity implements LocationListener {
         tvWeb = (TextView) findViewById(R.id.tv_web);
         tvDesc = (TextView) findViewById(R.id.tv_desc);
 
-        map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+        ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+
         map.setMyLocationEnabled(true);
         map.setOnMarkerClickListener(new OnMarkerClickListener() {
             @Override
