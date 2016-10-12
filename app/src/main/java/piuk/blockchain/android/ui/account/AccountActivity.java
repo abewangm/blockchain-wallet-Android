@@ -485,10 +485,12 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
         // This corrects the layout size after view drawn
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(alertDialog.getWindow().getAttributes());
-        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        alertDialog.getWindow().setAttributes(lp);
+        if (alertDialog.getWindow() != null) {
+            lp.copyFrom(alertDialog.getWindow().getAttributes());
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            alertDialog.getWindow().setAttributes(lp);
+        }
     }
 
     private void transferSpendableFunds() {

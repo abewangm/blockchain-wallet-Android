@@ -57,7 +57,7 @@ public class CustomKeypad implements View.OnClickListener {
                 if (hasFocus) {
                     View view = ((Activity) context).getCurrentFocus();
                     if (view != null) {
-                        InputMethodManager inputManager = (InputMethodManager) ((Activity) context).getSystemService(Context.INPUT_METHOD_SERVICE);
+                        InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
                         inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
                     }
                     numpad.setVisibility(View.VISIBLE);

@@ -157,16 +157,16 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
 
                     final StringBuilder args = new StringBuilder();
                     args.append("{");
-                    args.append("\"NAME\":\"" + edName.getText().toString());
-                    args.append("\",\"DESCRIPTION\":\"" + edDescription.getText().toString());
-                    args.append("\",\"STREET_ADDRESS\":\"" + edStreetAddress.getText().toString());
-                    args.append("\",\"CITY\":\"" + edCity.getText().toString());
-                    args.append("\",\"ZIP\":\"" + edPostal.getText().toString());
-                    args.append("\",\"TELEPHONE\":\"" + edTelephone.getText().toString());
-                    args.append("\",\"WEB\":\"" + edWeb.getText().toString());
-                    args.append("\",\"LATITUDE\":" + df.format(selectedY));
-                    args.append(",\"LONGITUDE\":" + df.format(selectedX));
-                    args.append(",\"CATEGORY\":" + Integer.toString(spCategory.getSelectedItemPosition()));
+                    args.append("\"NAME\":\"").append(edName.getText().toString());
+                    args.append("\",\"DESCRIPTION\":\"").append(edDescription.getText().toString());
+                    args.append("\",\"STREET_ADDRESS\":\"").append(edStreetAddress.getText().toString());
+                    args.append("\",\"CITY\":\"").append(edCity.getText().toString());
+                    args.append("\",\"ZIP\":\"").append(edPostal.getText().toString());
+                    args.append("\",\"TELEPHONE\":\"").append(edTelephone.getText().toString());
+                    args.append("\",\"WEB\":\"").append(edWeb.getText().toString());
+                    args.append("\",\"LATITUDE\":").append(df.format(selectedY));
+                    args.append(",\"LONGITUDE\":").append(df.format(selectedX));
+                    args.append(",\"CATEGORY\":").append(Integer.toString(spCategory.getSelectedItemPosition()));
                     args.append(",\"SOURCE\":\"Android\"");
                     args.append("}");
 
@@ -220,7 +220,7 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
             currLocation.setLongitude(0.0);
         } else if (lastKnownByGps != null && lastKnownByNetwork == null) {
             currLocation = lastKnownByGps;
-        } else if (lastKnownByGps == null && lastKnownByNetwork != null) {
+        } else if (lastKnownByGps == null) {
             currLocation = lastKnownByNetwork;
         } else {
             currLocation = (lastKnownByGps.getAccuracy() <= lastKnownByNetwork.getAccuracy()) ? lastKnownByGps : lastKnownByNetwork;

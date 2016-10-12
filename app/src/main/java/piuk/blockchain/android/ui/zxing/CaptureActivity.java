@@ -170,8 +170,6 @@ public final class CaptureActivity extends BaseAuthActivity implements SurfaceHo
 
         Intent intent = getIntent();
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
         source = IntentSource.NONE;
         decodeFormats = null;
         characterSet = null;

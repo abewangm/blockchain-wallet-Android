@@ -158,8 +158,8 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
                     return true;
                 }
 
-                ((LinearLayout) findViewById(R.id.row_call)).setVisibility(View.VISIBLE);
-                ((LinearLayout) findViewById(R.id.row_web)).setVisibility(View.VISIBLE);
+                findViewById(R.id.row_call).setVisibility(View.VISIBLE);
+                findViewById(R.id.row_web).setVisibility(View.VISIBLE);
 
                 LatLng latLng = marker.getPosition();
 
@@ -175,14 +175,14 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
                     tvTel.setText(b.phone);
                     Linkify.addLinks(tvTel, Linkify.PHONE_NUMBERS);
                 } else {
-                    ((LinearLayout) findViewById(R.id.row_call)).setVisibility(View.GONE);
+                    findViewById(R.id.row_call).setVisibility(View.GONE);
                 }
 
                 if (b.website != null && b.website.trim().length() > 0) {
                     tvWeb.setText(b.website);
                     Linkify.addLinks(tvWeb, Linkify.WEB_URLS);
                 } else {
-                    ((LinearLayout) findViewById(R.id.row_web)).setVisibility(View.GONE);
+                    findViewById(R.id.row_web).setVisibility(View.GONE);
                 }
 
                 tvDesc.setText(b.description);
@@ -332,7 +332,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             currLocation.setLongitude(0.0);
         } else if (lastKnownByGps != null && lastKnownByNetwork == null) {
             currLocation = lastKnownByGps;
-        } else if (lastKnownByGps == null && lastKnownByNetwork != null) {
+        } else if (lastKnownByGps == null) {
             currLocation = lastKnownByNetwork;
         } else {
             currLocation = (lastKnownByGps.getAccuracy() <= lastKnownByNetwork.getAccuracy()) ? lastKnownByGps : lastKnownByNetwork;

@@ -108,8 +108,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                             String password1 = ((EditText) pwLayout.findViewById(R.id.pw1)).getText().toString();
                             String password2 = ((EditText) pwLayout.findViewById(R.id.pw2)).getText().toString();
 
-                            if (password1 == null || password1.length() < 9 || password1.length() > 255 ||
-                                    password2 == null || password2.length() < 9 || password2.length() > 255) {
+                            if (password1.length() < 9 || password1.length() > 255 || password2 == null || password2.length() < 9 || password2.length() > 255) {
                                 ToastCustom.makeText(UpgradeWalletActivity.this, getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                             } else {
 
@@ -336,7 +335,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
 
         @Override
         public boolean isViewFromObject(View view, Object object) {
-            return view == ((LinearLayout) object);
+            return view == object;
         }
 
         @Override

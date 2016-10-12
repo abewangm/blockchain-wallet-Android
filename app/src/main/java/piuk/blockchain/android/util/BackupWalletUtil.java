@@ -33,9 +33,6 @@ public class BackupWalletUtil {
         int sel = 0;
         int i = 0;
         while (i < 3) {
-            if (i == 3) {
-                break;
-            }
             sel = random.nextInt(s.length);
             if (seen.contains(sel)) {
                 continue;

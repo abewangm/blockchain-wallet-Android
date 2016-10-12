@@ -361,6 +361,7 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
         }
 
         if (!amountBigInt.equals(BigInteger.ZERO)) {
+            assert receiveAddress != null;
             mUri = BitcoinURI.convertToBitcoinURI(receiveAddress, Coin.valueOf(amountBigInt.longValue()), "", "");
         } else {
             mUri = "bitcoin:" + receiveAddress;

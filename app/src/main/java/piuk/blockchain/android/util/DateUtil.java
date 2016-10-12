@@ -19,7 +19,7 @@ public class DateUtil {
     }
 
     public String formatted(long ts) {
-        String ret = null;
+        String ret;
 
         Date localTime = new Date(ts);
         long date = localTime.getTime();

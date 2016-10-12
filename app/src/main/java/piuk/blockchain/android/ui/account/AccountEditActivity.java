@@ -200,7 +200,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         dialogBinding.tvCustomizeFee.setVisibility(View.GONE);
 
         dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialog != null && alertDialog.isShowing()) {
+            if (alertDialog.isShowing()) {
                 alertDialog.cancel();
             }
         });
@@ -327,7 +327,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         });
 
         dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialog != null && alertDialog.isShowing()) {
+            if (alertDialog.isShowing()) {
                 alertDialog.cancel();
             }
         });

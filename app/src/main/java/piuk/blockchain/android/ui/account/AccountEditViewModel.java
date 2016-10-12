@@ -545,7 +545,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
             newLabel = newLabel.trim();
 
-            if (newLabel != null && newLabel.length() > 0) {
+            if (newLabel.length() > 0) {
 
                 final String finalNewLabel = newLabel;
                 new AsyncTask<String, Void, Void>() {
@@ -564,7 +564,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
                     @Override
                     protected Void doInBackground(final String... params) {
-                        String revertLabel = null;
+                        String revertLabel;
                         if (account != null) {
                             revertLabel = account.getLabel();
                             account.setLabel(params[0]);
