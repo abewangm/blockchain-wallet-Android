@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.account;
 
 import android.app.Application;
 import android.content.Intent;
-import android.support.v4.util.Pair;
 
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
@@ -13,6 +12,7 @@ import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
@@ -27,9 +27,6 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
@@ -108,11 +105,10 @@ public class AccountViewModelTest {
     @Test
     public void checkTransferableLegacyFundsWarnTransferAllTrue() throws Exception {
         // Arrange
-        Map<List<PendingTransaction>, Pair<Long, Long>> map = new HashMap<>();
-        map.put(new ArrayList<PendingTransaction>() {{
+        Triple triple = Triple.of(new ArrayList<PendingTransaction>() {{
             add(new PendingTransaction());
-        }}, new Pair<>(1L, 2L));
-        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.just(map));
+        }}, 1L, 2L);
+        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.just(triple));
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isUpgraded()).thenReturn(true);
         when(payloadManager.getPayload()).thenReturn(mockPayload);
@@ -129,9 +125,8 @@ public class AccountViewModelTest {
     @Test
     public void checkTransferableLegacyFundsNoFundsAvailable() throws Exception {
         // Arrange
-        Map<List<PendingTransaction>, Pair<Long, Long>> map = new HashMap<>();
-        map.put(new ArrayList<>(), new Pair<>(1L, 2L));
-        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.just(map));
+        Triple triple = Triple.of(new ArrayList<PendingTransaction>(), 1L, 2L);
+        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.just(triple));
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isUpgraded()).thenReturn(true);
         when(payloadManager.getPayload()).thenReturn(mockPayload);

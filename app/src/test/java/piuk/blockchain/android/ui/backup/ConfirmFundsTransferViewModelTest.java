@@ -1,24 +1,15 @@
 package piuk.blockchain.android.ui.backup;
 
 import android.app.Application;
-import android.support.v4.util.Pair;
 
-import piuk.blockchain.android.ui.account.ItemAccount;
-import piuk.blockchain.android.ui.send.PendingTransaction;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.util.CharSequenceX;
-import piuk.blockchain.android.util.ExchangeRateFactory;
-import piuk.blockchain.android.util.MonetaryUtil;
-import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.StringUtils;
-import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
-import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,17 +21,24 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
+import piuk.blockchain.android.ui.account.ItemAccount;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.receive.WalletAccountHelper;
+import piuk.blockchain.android.ui.send.PendingTransaction;
+import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.MonetaryUtil;
+import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.StringUtils;
 import rx.Observable;
 
 import static org.junit.Assert.assertEquals;
@@ -97,10 +95,8 @@ public class ConfirmFundsTransferViewModelTest {
            add(transaction);
            add(transaction);
         }};
-        Pair<Long, Long> values = new Pair<>(100000000L, 10000L);
-        Map<List<PendingTransaction>, Pair<Long, Long>> map = new HashMap<>();
-        map.put(transactions, values);
-        when(mFundsDataManager.getTransferableFundTransactionList(0)).thenReturn(Observable.just(map));
+        Triple triple = Triple.of(transactions, 100000000L, 10000L);
+        when(mFundsDataManager.getTransferableFundTransactionList(0)).thenReturn(Observable.just(triple));
         // Act
         mSubject.onViewReady();
         // Assert

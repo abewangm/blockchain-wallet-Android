@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.backup;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
-import android.support.v4.util.Pair;
 
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
@@ -13,7 +12,6 @@ import info.blockchain.wallet.util.CharSequenceX;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -90,11 +88,9 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
         mDataListener.setPaymentButtonEnabled(false);
         mCompositeSubscription.add(
                 mFundsDataManager.getTransferableFundTransactionList(indexOfReceiveAccount)
-                        .subscribe(map -> {
-                            Map.Entry<List<PendingTransaction>, Pair<Long, Long>> entry = map.entrySet().iterator().next();
-                            mPendingTransactions = entry.getKey();
-                            Pair<Long, Long> value = entry.getValue();
-                            updateUi(value.first, value.second);
+                        .subscribe(triple -> {
+                            mPendingTransactions = triple.getLeft();
+                            updateUi(triple.getMiddle(), triple.getRight());
 
                         }, throwable -> {
                             mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
