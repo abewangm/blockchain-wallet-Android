@@ -1,6 +1,7 @@
 package piuk.blockchain.android.injection;
 
 import info.blockchain.api.AddressInfo;
+import info.blockchain.api.TransactionDetails;
 import info.blockchain.api.Unspent;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -16,6 +17,7 @@ import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.services.AddressInfoService;
+import piuk.blockchain.android.data.services.TransactionDetailsService;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.transactions.TransactionHelper;
 
@@ -47,7 +49,7 @@ public class DataManagerModule {
     @Provides
     @Singleton
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager) {
-        return new TransactionListDataManager(payloadManager);
+        return new TransactionListDataManager(payloadManager, new TransactionDetailsService(new TransactionDetails()));
     }
 
     @Provides
