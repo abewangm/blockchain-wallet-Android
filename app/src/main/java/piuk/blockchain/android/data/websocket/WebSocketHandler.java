@@ -265,9 +265,7 @@ public class WebSocketHandler {
                                                             total_value -= value;
                                                         } else if (in_addr == null) {
                                                             in_addr = (String) prevOutObj.get("addr");
-                                                        } else {
                                                         }
-                                                    } else {
                                                     }
                                                 }
                                             }
@@ -287,7 +285,6 @@ public class WebSocketHandler {
                                                     if (payloadManager.getPayload().containsLegacyAddress((String) outObj.get("addr"))) {
                                                         total_value += value;
                                                     }
-                                                } else {
                                                 }
                                             }
                                         }
@@ -337,7 +334,6 @@ public class WebSocketHandler {
                                             onChangeHashSet.add(message);
                                         }
 
-                                    } else {
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
