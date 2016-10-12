@@ -173,7 +173,7 @@ public class AccountEditViewModel extends BaseViewModel {
             if (payloadManager.getPayload().getLegacyAddresses().size() > 0) {
                 iAccount = new ImportedAccount(context.getString(R.string.imported_addresses),
                         payloadManager.getPayload().getLegacyAddresses(),
-                        new ArrayList<String>(),
+                        new ArrayList<>(),
                         MultiAddrFactory.getInstance().getLegacyBalance());
             }
 
@@ -482,7 +482,7 @@ public class AccountEditViewModel extends BaseViewModel {
                     LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
                     String changeAddress = legacyAddress.getAddress();
 
-                    List<ECKey> keys = new ArrayList<ECKey>();
+                    List<ECKey> keys = new ArrayList<>();
                     if (payloadManager.getPayload().isDoubleEncrypted()) {
                         ECKey walletKey = legacyAddress.getECKey(new CharSequenceX(secondPassword));
                         keys.add(walletKey);

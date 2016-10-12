@@ -68,7 +68,6 @@ public class DateUtil {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time).getTime();
         } catch (Exception e) {
         }
-        ;
         return 0;
     }
 

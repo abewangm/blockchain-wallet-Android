@@ -20,19 +20,15 @@ public class OnSwipeTouchListener implements OnTouchListener {
     }
 
     public void onSwipeRight() {
-        ;
     }
 
     public void onSwipeLeft() {
-        ;
     }
 
     public void onSwipeTop() {
-        ;
     }
 
     public void onSwipeBottom() {
-        ;
     }
 
     private final class GestureListener extends SimpleOnGestureListener {

@@ -35,47 +35,44 @@ public class ToastCustom {
 
     public static void makeText(final Context context, final CharSequence text, final int duration, final @ToastType String type) {
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Looper.prepare();
+        new Thread(() -> {
+            Looper.prepare();
 
-                toast = Toast.makeText(context, text, duration);
+            toast = Toast.makeText(context, text, duration);
 
-                LayoutInflater inflate = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View v = inflate.inflate(R.layout.transient_notification, null);
-                TextView tv = (TextView) v.findViewById(R.id.message);
-                tv.setText(text);
+            LayoutInflater inflate = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View v = inflate.inflate(R.layout.transient_notification, null);
+            TextView tv = (TextView) v.findViewById(R.id.message);
+            tv.setText(text);
 
-                if (type.equals(TYPE_ERROR)) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                        tv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_error));
-                    else
-                        //noinspection deprecation
-                        tv.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_error));
-                    tv.setTextColor(ContextCompat.getColor(context, R.color.toast_error_text));
+            if (type.equals(TYPE_ERROR)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                    tv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_error));
+                else
+                    //noinspection deprecation
+                    tv.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_error));
+                tv.setTextColor(ContextCompat.getColor(context, R.color.toast_error_text));
 
-                } else if (type.equals(TYPE_GENERAL)) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                        tv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_warning));
-                    else
-                        //noinspection deprecation
-                        tv.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_warning));
-                    tv.setTextColor(ContextCompat.getColor(context, R.color.toast_warning_text));
+            } else if (type.equals(TYPE_GENERAL)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                    tv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_warning));
+                else
+                    //noinspection deprecation
+                    tv.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_warning));
+                tv.setTextColor(ContextCompat.getColor(context, R.color.toast_warning_text));
 
-                } else if (type.equals(TYPE_OK)) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                        tv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_info));
-                    else
-                        //noinspection deprecation
-                        tv.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_info));
-                    tv.setTextColor(ContextCompat.getColor(context, R.color.toast_info_text));
-                }
-                toast.setView(v);
-                toast.show();
-
-                Looper.loop();
+            } else if (type.equals(TYPE_OK)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                    tv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_info));
+                else
+                    //noinspection deprecation
+                    tv.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_info));
+                tv.setTextColor(ContextCompat.getColor(context, R.color.toast_info_text));
             }
+            toast.setView(v);
+            toast.show();
+
+            Looper.loop();
         }).start();
     }
 }

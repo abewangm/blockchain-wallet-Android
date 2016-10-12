@@ -51,25 +51,19 @@ public class CustomKeypad implements View.OnClickListener {
         if (!viewList.contains(view)) viewList.add(view);
 
         view.setTextIsSelectable(true);
-        view.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    View view = ((Activity) context).getCurrentFocus();
-                    if (view != null) {
-                        InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-                        inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                    }
-                    numpad.setVisibility(View.VISIBLE);
+        view.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                View view1 = ((Activity) context).getCurrentFocus();
+                if (view1 != null) {
+                    InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputManager.hideSoftInputFromWindow(view1.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
                 }
-            }
-        });
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((TextView) numpad.findViewById(R.id.decimal_point)).setText(decimalSeparator);
                 numpad.setVisibility(View.VISIBLE);
             }
+        });
+        view.setOnClickListener(v -> {
+            ((TextView) numpad.findViewById(R.id.decimal_point)).setText(decimalSeparator);
+            numpad.setVisibility(View.VISIBLE);
         });
     }
 

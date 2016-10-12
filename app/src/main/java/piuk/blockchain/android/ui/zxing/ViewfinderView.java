@@ -72,7 +72,7 @@ public final class ViewfinderView extends View {
     laserColor = ContextCompat.getColor(context, R.color.barcode_viewfinder_laser);
     resultPointColor = ContextCompat.getColor(context, R.color.barcode_possible_result_points);
     scannerAlpha = 0;
-    possibleResultPoints = new ArrayList<ResultPoint>(5);
+    possibleResultPoints = new ArrayList<>(5);
     lastPossibleResultPoints = null;
   }
 
@@ -125,7 +125,7 @@ public final class ViewfinderView extends View {
       if (currentPossible.isEmpty()) {
         lastPossibleResultPoints = null;
       } else {
-        possibleResultPoints = new ArrayList<ResultPoint>(5);
+        possibleResultPoints = new ArrayList<>(5);
         lastPossibleResultPoints = currentPossible;
         paint.setAlpha(CURRENT_POINT_OPACITY);
         paint.setColor(resultPointColor);

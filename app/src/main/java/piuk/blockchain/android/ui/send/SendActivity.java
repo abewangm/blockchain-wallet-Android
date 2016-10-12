@@ -555,11 +555,9 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                ;
             }
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                ;
             }
         };
 
@@ -574,11 +572,9 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                ;
             }
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                ;
             }
         };
 
