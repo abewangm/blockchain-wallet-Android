@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.fingerprint;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
@@ -139,8 +138,7 @@ public class FingerprintDialog extends AppCompatDialogFragment
     @Override
     public void onFatalError() {
         showErrorAnimation(FATAL_ERROR_TIMEOUT_MILLIS);
-        Handler handler = new Handler();
-        handler.postDelayed(() -> authCallback.onCanceled(), FATAL_ERROR_TIMEOUT_MILLIS);
+        fingerprintIcon.postDelayed(() -> authCallback.onCanceled(), FATAL_ERROR_TIMEOUT_MILLIS);
     }
 
     @Override

@@ -444,6 +444,8 @@ public class PinEntryViewModelTest {
         // Assert
         verify(mActivity, times(2)).showProgressDialog(anyInt(), anyString());
         verify(mAuthDataManager).createPin(any(CharSequenceX.class), anyString());
+        verify(mFingerprintHelper).clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
+        verify(mFingerprintHelper).setFingerprintUnlockEnabled(false);
     }
 
     @Test
@@ -679,6 +681,8 @@ public class PinEntryViewModelTest {
         verify(mAppUtil).setSharedKey(anyString());
         verify(mPayloadManager, times(5)).getPayload();
         verify(mStringUtils).getString(anyInt());
+        verify(mActivity).dismissProgressDialog();
+        assertEquals(true, mSubject.mCanShowFingerprintDialog);
     }
 
     @Test
@@ -697,6 +701,8 @@ public class PinEntryViewModelTest {
         verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
         verify(mAppUtil).setSharedKey(anyString());
         verify(mActivity).goToUpgradeWalletActivity();
+        verify(mActivity).dismissProgressDialog();
+        assertEquals(true, mSubject.mCanShowFingerprintDialog);
     }
 
     @Test
@@ -715,6 +721,8 @@ public class PinEntryViewModelTest {
         verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
         verify(mAppUtil).setSharedKey(anyString());
         verify(mAppUtil).restartAppWithVerifiedPin();
+        verify(mActivity).dismissProgressDialog();
+        assertEquals(true, mSubject.mCanShowFingerprintDialog);
     }
 
     @Test
