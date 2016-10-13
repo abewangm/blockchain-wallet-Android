@@ -25,17 +25,14 @@ public class BackupWalletUtil {
      */
     public List<Pair<Integer, String>> getConfirmSequence(String secondPassword) {
 
-        List<Pair<Integer, String>> toBeConfirmed = new ArrayList<Pair<Integer, String>>();
+        List<Pair<Integer, String>> toBeConfirmed = new ArrayList<>();
         String[] s = getMnemonic(secondPassword);
         SecureRandom random = new SecureRandom();
-        List<Integer> seen = new ArrayList<Integer>();
+        List<Integer> seen = new ArrayList<>();
 
         int sel = 0;
         int i = 0;
         while (i < 3) {
-            if (i == 3) {
-                break;
-            }
             sel = random.nextInt(s.length);
             if (seen.contains(sel)) {
                 continue;
@@ -48,7 +45,7 @@ public class BackupWalletUtil {
         Collections.sort(seen);
 
         for (int ii = 0; ii < 3; ii++) {
-            toBeConfirmed.add(new Pair<Integer, String>(seen.get(ii), s[seen.get(ii)]));
+            toBeConfirmed.add(new Pair<>(seen.get(ii), s[seen.get(ii)]));
         }
 
         return toBeConfirmed;

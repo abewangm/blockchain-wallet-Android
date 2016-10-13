@@ -118,14 +118,11 @@ public class CreateWalletFragment extends Fragment {
 
                     private void setProgress(final int pwStrengthLevel, final int scorePerc) {
 
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                binding.entropyContainer.passStrengthBar.setProgress(scorePerc);
-                                binding.entropyContainer.passStrengthBar.setProgressDrawable(
-                                        ContextCompat.getDrawable(getActivity(), strengthColors[pwStrengthLevel]));
-                                binding.entropyContainer.passStrengthVerdict.setText(getResources().getString(strengthVerdicts[pwStrengthLevel]));
-                            }
+                        getActivity().runOnUiThread(() -> {
+                            binding.entropyContainer.passStrengthBar.setProgress(scorePerc);
+                            binding.entropyContainer.passStrengthBar.setProgressDrawable(
+                                    ContextCompat.getDrawable(getActivity(), strengthColors[pwStrengthLevel]));
+                            binding.entropyContainer.passStrengthVerdict.setText(getResources().getString(strengthVerdicts[pwStrengthLevel]));
                         });
                     }
 
@@ -133,44 +130,37 @@ public class CreateWalletFragment extends Fragment {
             }
         });
 
-        binding.commandNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        binding.commandNext.setOnClickListener(v -> {
 
-                final String em = binding.emailAddress.getText().toString().trim();
-                final String pw1 = binding.walletPass.getText().toString();
-                final String pw2 = binding.walletPassConfrirm.getText().toString();
+            final String em = binding.emailAddress.getText().toString().trim();
+            final String pw1 = binding.walletPass.getText().toString();
+            final String pw2 = binding.walletPassConfrirm.getText().toString();
 
-                if (!FormatsUtil.getInstance().isValidEmailAddress(em)) {
-                    ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                } else if (pw1.length() < 4) {
-                    ToastCustom.makeText(getActivity(), getString(R.string.invalid_password_too_short), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                } else if (pw1.length() > 255) {
-                    ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                } else if (!pw1.equals(pw2)) {
-                    ToastCustom.makeText(getActivity(), getString(R.string.password_mismatch_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                } else if (pwStrength < 50) {
+            if (!FormatsUtil.getInstance().isValidEmailAddress(em)) {
+                ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            } else if (pw1.length() < 4) {
+                ToastCustom.makeText(getActivity(), getString(R.string.invalid_password_too_short), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            } else if (pw1.length() > 255) {
+                ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            } else if (!pw1.equals(pw2)) {
+                ToastCustom.makeText(getActivity(), getString(R.string.password_mismatch_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            } else if (pwStrength < 50) {
 
-                    new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                            .setTitle(R.string.app_name)
-                            .setMessage(R.string.weak_password)
-                            .setCancelable(false)
-                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    binding.walletPass.setText("");
-                                    binding.walletPassConfrirm.setText("");
-                                    binding.walletPass.requestFocus();
-                                }
-                            }).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
+                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                        .setTitle(R.string.app_name)
+                        .setMessage(R.string.weak_password)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.yes, (dialog, whichButton) -> {
+                            binding.walletPass.setText("");
+                            binding.walletPassConfrirm.setText("");
+                            binding.walletPass.requestFocus();
+                        }).setNegativeButton(R.string.no, (dialog, whichButton) -> {
                             hideKeyboard();
                             getActivity().startActivity(getNextActivityIntent(em, pw1));
-                        }
-                    }).show();
-                } else {
-                    hideKeyboard();
-                    getActivity().startActivity(getNextActivityIntent(em, pw1));
-                }
+                        }).show();
+            } else {
+                hideKeyboard();
+                getActivity().startActivity(getNextActivityIntent(em, pw1));
             }
         });
 
@@ -178,7 +168,7 @@ public class CreateWalletFragment extends Fragment {
         String text2 = getString(R.string.blockchain_tos);
 
         Spannable spannable = new SpannableString(text + text2);
-        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.blockchain_blue)),
+        spannable.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getActivity(), R.color.blockchain_blue)),
                 text.length(), text.length() + text2.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         binding.tos.setText(spannable, TextView.BufferType.SPANNABLE);
 

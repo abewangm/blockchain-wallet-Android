@@ -247,7 +247,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                     label,
                     null,
                     balance,
-                    getResources().getDrawable(R.drawable.icon_accounthd),
+                    ContextCompat.getDrawable(this, R.drawable.icon_accounthd),
                     accountClone.get(i).isArchived(),
                     false,
                     defaultAccount.getXpub().equals(accountClone.get(i).getXpub())));
@@ -259,7 +259,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 CREATE_NEW,
                 null,
                 "",
-                getResources().getDrawable(R.drawable.icon_accounthd),
+                ContextCompat.getDrawable(this, R.drawable.icon_accounthd),
                 false, false, false));
         hdAccountsIdx = correctedPosition;
 
@@ -278,7 +278,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                     getString(R.string.imported_addresses),
                     null,
                     "",
-                    getResources().getDrawable(R.drawable.icon_accounthd),
+                    ContextCompat.getDrawable(this, R.drawable.icon_accounthd),
                     false, false, false));
 
             legacy = iAccount.getLegacyAddresses();
@@ -297,7 +297,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                         label,
                         address,
                         balance,
-                        getResources().getDrawable(R.drawable.icon_imported),
+                        ContextCompat.getDrawable(this, R.drawable.icon_imported),
                         legacy.get(j).getTag() == LegacyAddress.ARCHIVED_ADDRESS,
                         legacy.get(j).isWatchOnly(),
                         false));
@@ -310,7 +310,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 IMPORT_ADDRESS,
                 null,
                 "",
-                getResources().getDrawable(R.drawable.icon_accounthd),
+                ContextCompat.getDrawable(this, R.drawable.icon_accounthd),
                 false, false, false));
 
         if (accountsAdapter == null) {
@@ -485,10 +485,12 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
         // This corrects the layout size after view drawn
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(alertDialog.getWindow().getAttributes());
-        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        alertDialog.getWindow().setAttributes(lp);
+        if (alertDialog.getWindow() != null) {
+            lp.copyFrom(alertDialog.getWindow().getAttributes());
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            alertDialog.getWindow().setAttributes(lp);
+        }
     }
 
     private void transferSpendableFunds() {

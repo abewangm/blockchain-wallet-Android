@@ -228,7 +228,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     public void resetNavigationDrawer() {
 
         toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_menu_white_24dp));
+        toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.ic_menu_white_24dp));
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
         ViewUtils.setElevation(toolbar, 0F);
@@ -254,10 +254,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 mainViewModel.getPayloadManager().getPayload().getHdWallet() != null &&
                 !mainViewModel.getPayloadManager().getPayload().getHdWallet().isMnemonicVerified()) {
             //Not backed up
-            drawable.setColorFilter(getResources().getColor(R.color.blockchain_send_red), PorterDuff.Mode.SRC_ATOP);
+            drawable.setColorFilter(ContextCompat.getColor(this, R.color.blockchain_send_red), PorterDuff.Mode.SRC_ATOP);
         } else {
             //Backed up
-            drawable.setColorFilter(getResources().getColor(R.color.alert_green), PorterDuff.Mode.SRC_ATOP);
+            drawable.setColorFilter(ContextCompat.getColor(this, R.color.alert_green), PorterDuff.Mode.SRC_ATOP);
         }
 
         binding.nvView.setNavigationItemSelectedListener(

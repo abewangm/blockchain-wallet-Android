@@ -177,6 +177,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     /**
      * Deprecated, but necessary to prevent casting issues on <API21
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -464,7 +465,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.rvTransactions.setHasFixedSize(true);
         binding.rvTransactions.setLayoutManager(layoutManager);
         binding.rvTransactions.setAdapter(transactionAdapter);
-        binding.rvTransactions.setOnScrollListener(new CollapseActionbarScrollListener() {
+        binding.rvTransactions.addOnScrollListener(new CollapseActionbarScrollListener() {
             @Override
             public void onMoved(int distance) {
                 binding.balanceLayout.setTranslationY(-distance);

@@ -91,63 +91,60 @@ public class TxQueue {
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
+                    handler.post(() -> {
 
-                            if (ConnectivityStatus.hasConnectivity(context)) {
+                        if (ConnectivityStatus.hasConnectivity(context)) {
 
-                                Spendable sp = poll();
+                            Spendable sp = poll();
 
-                                Log.i("TxQueue", sp == null ? "sp is null" : "sp is not null");
+                            Log.i("TxQueue", sp == null ? "sp is null" : "sp is not null");
 
-                                if (sp != null) {
-                                    try {
-                                        String hexString = new String(Hex.encode(sp.getTx().bitcoinSerialize()));
-                                        String response = pushTxApi.submitTransaction(hexString);
+                            if (sp != null) {
+                                try {
+                                    String hexString = new String(Hex.encode(sp.getTx().bitcoinSerialize()));
+                                    String response = pushTxApi.submitTransaction(hexString);
 //					Log.i("Send response", response);
-                                        if (response.contains("Transaction Submitted")) {
+                                    if (response.contains("Transaction Submitted")) {
 
-                                            sp.getOpCallback().onSuccess(sp.getTx().getHashAsString());
+                                        sp.getOpCallback().onSuccess(sp.getTx().getHashAsString());
 
-                                            if (sp.getNote() != null && sp.getNote().length() > 0) {
-                                                Map<String, String> notes = payloadManager.getPayload().getNotes();
-                                                notes.put(sp.getTx().getHashAsString(), sp.getNote());
-                                                payloadManager.getPayload().setNotes(notes);
-                                            }
-
-                                            if (sp.isHD() && sp.sentChange()) {
-                                                // increment change address counter
-                                                payloadManager.getPayload().getHdWallet().getAccounts().get(sp.getAccountIdx()).incChange();
-                                            }
-
-                                            if (queue.size() == 0) {
-                                                if (timer != null) {
-                                                    timer.cancel();
-                                                    timer = null;
-                                                }
-                                            }
-
-                                        } else {
-                                            add(context, sp);
-
-                                            ToastCustom.makeText(context, response, ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-//                                            sp.getOpCallback().onFail();
+                                        if (sp.getNote() != null && sp.getNote().length() > 0) {
+                                            Map<String, String> notes = payloadManager.getPayload().getNotes();
+                                            notes.put(sp.getTx().getHashAsString(), sp.getNote());
+                                            payloadManager.getPayload().setNotes(notes);
                                         }
 
-                                    } catch (Exception e) {
+                                        if (sp.isHD() && sp.sentChange()) {
+                                            // increment change address counter
+                                            payloadManager.getPayload().getHdWallet().getAccounts().get(sp.getAccountIdx()).incChange();
+                                        }
+
+                                        if (queue.size() == 0) {
+                                            if (timer != null) {
+                                                timer.cancel();
+                                                timer = null;
+                                            }
+                                        }
+
+                                    } else {
                                         add(context, sp);
 
-                                        e.printStackTrace();
-//                                        sp.getOpCallback().onFail();
+                                        ToastCustom.makeText(context, response, ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+//                                            sp.getOpCallback().onFail();
                                     }
-                                }
 
-                            } else {
-                                ToastCustom.makeText(context, context.getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                                } catch (Exception e) {
+                                    add(context, sp);
+
+                                    e.printStackTrace();
+//                                        sp.getOpCallback().onFail();
+                                }
                             }
 
+                        } else {
+                            ToastCustom.makeText(context, context.getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                         }
+
                     });
 
                 }

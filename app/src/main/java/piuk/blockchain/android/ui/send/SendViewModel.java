@@ -301,7 +301,7 @@ public class SendViewModel extends BaseViewModel {
         btcFormat.setMinimumFractionDigits(0);
 
         try {
-            if (btcAmountText.indexOf(sendModel.defaultSeparator) != -1) {
+            if (btcAmountText.contains(sendModel.defaultSeparator)) {
                 String dec = btcAmountText.substring(btcAmountText.indexOf(sendModel.defaultSeparator));
                 if (dec.length() > 0) {
                     dec = dec.substring(1);
@@ -311,7 +311,6 @@ public class SendViewModel extends BaseViewModel {
                 }
             }
         } catch (NumberFormatException nfe) {
-            ;
         }
 
         dataListener.onAddBtcTextChangeListener();
@@ -323,9 +322,7 @@ public class SendViewModel extends BaseViewModel {
             double btc_amount;
             try {
                 btc_amount = monetaryUtil.getUndenominatedAmount(NumberFormat.getInstance(Locale.getDefault()).parse(btcAmountText).doubleValue());
-            } catch (NumberFormatException nfe) {
-                btc_amount = 0.0;
-            } catch (ParseException pe) {
+            } catch (NumberFormatException | ParseException nfe) {
                 btc_amount = 0.0;
             }
 
@@ -351,7 +348,7 @@ public class SendViewModel extends BaseViewModel {
         fiatFormat.setMinimumFractionDigits(0);
 
         try {
-            if (fiatAmountText.indexOf(sendModel.defaultSeparator) != -1) {
+            if (fiatAmountText.contains(sendModel.defaultSeparator)) {
                 String dec = fiatAmountText.substring(fiatAmountText.indexOf(sendModel.defaultSeparator));
                 if (dec.length() > 0) {
                     dec = dec.substring(1);
@@ -361,7 +358,6 @@ public class SendViewModel extends BaseViewModel {
                 }
             }
         } catch (NumberFormatException nfe) {
-            ;
         }
 
         dataListener.onAddFiatTextChangeListener();
@@ -1082,7 +1078,7 @@ public class SendViewModel extends BaseViewModel {
                 String changeAddress;
                 Account account = null;
                 LegacyAddress legacyAddress = null;
-                List<ECKey> keys = new ArrayList<ECKey>();
+                List<ECKey> keys = new ArrayList<>();
 
                 if (sendModel.pendingTransaction.isHD()) {
                     account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);

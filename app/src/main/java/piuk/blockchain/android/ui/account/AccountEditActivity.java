@@ -200,7 +200,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         dialogBinding.tvCustomizeFee.setVisibility(View.GONE);
 
         dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialog != null && alertDialog.isShowing()) {
+            if (alertDialog.isShowing()) {
                 alertDialog.cancel();
             }
         });
@@ -315,7 +315,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         dialogBinding.tvWarningHeading.setText(heading);
         dialogBinding.tvXpubNote.setText(note);
         dialogBinding.tvExtendedXpub.setText(copy);
-        dialogBinding.tvExtendedXpub.setTextColor(getResources().getColor(R.color.blockchain_blue));
+        dialogBinding.tvExtendedXpub.setTextColor(ContextCompat.getColor(this, R.color.blockchain_blue));
         dialogBinding.ivQr.setImageBitmap(bitmap);
 
         dialogBinding.tvExtendedXpub.setOnClickListener(v -> {
@@ -327,7 +327,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         });
 
         dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialog != null && alertDialog.isShowing()) {
+            if (alertDialog.isShowing()) {
                 alertDialog.cancel();
             }
         });

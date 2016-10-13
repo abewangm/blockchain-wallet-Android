@@ -2,7 +2,6 @@ package piuk.blockchain.android.util;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
@@ -152,16 +151,12 @@ public class AppUtil {
                     .setTitle(R.string.screen_overlay_warning)
                     .setMessage(R.string.screen_overlay_note)
                     .setCancelable(false)
-                    .setPositiveButton(R.string.dialog_continue, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            prefs.setValue("OVERLAY_TRUSTED", true);
-                            dialog.dismiss();
-                        }
-                    }).setNegativeButton(R.string.exit, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            dialog.dismiss();
-                            ((Activity) context).finish();
-                        }
+                    .setPositiveButton(R.string.dialog_continue, (dialog, whichButton) -> {
+                        prefs.setValue("OVERLAY_TRUSTED", true);
+                        dialog.dismiss();
+                    }).setNegativeButton(R.string.exit, (dialog, whichButton) -> {
+                        dialog.dismiss();
+                        ((Activity) context).finish();
                     }).show();
             return true;//consume event
         } else {

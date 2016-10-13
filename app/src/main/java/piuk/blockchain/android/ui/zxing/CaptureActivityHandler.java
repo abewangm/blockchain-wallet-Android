@@ -106,7 +106,7 @@ public final class CaptureActivityHandler extends Handler {
         String url = (String) message.obj;
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
         intent.setData(Uri.parse(url));
 
         ResolveInfo resolveInfo =
