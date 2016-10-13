@@ -1,7 +1,5 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import android.support.v4.util.Pair;
-
 import info.blockchain.api.Unspent;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.HDWallet;
@@ -15,6 +13,7 @@ import info.blockchain.wallet.payment.data.SweepBundle;
 import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.util.CharSequenceX;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -26,7 +25,6 @@ import org.mockito.MockitoAnnotations;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
@@ -65,7 +63,7 @@ public class TransferFundsDataManagerTest extends RxTest {
     @Test
     public void getTransferableFundTransactionListForDefaultAccount() throws Exception {
         // Arrange
-        TestSubscriber<Map<List<PendingTransaction>, Pair<Long, Long>>> subscriber = new TestSubscriber<>();
+        TestSubscriber<Triple> subscriber = new TestSubscriber<>();
         Payload mockPayload = mock(Payload.class);
         LegacyAddress legacyAddress1 = new LegacyAddress();
         legacyAddress1.setAddress("address");

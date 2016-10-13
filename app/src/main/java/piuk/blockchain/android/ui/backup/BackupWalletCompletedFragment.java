@@ -7,7 +7,6 @@ import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -21,14 +20,11 @@ import info.blockchain.wallet.payment.Payment;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.databinding.AlertPromptTransferFundsBinding;
 import piuk.blockchain.android.databinding.FragmentBackupCompleteBinding;
-import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import rx.subscriptions.CompositeSubscription;
@@ -83,9 +79,8 @@ public class BackupWalletCompletedFragment extends Fragment {
                     new TransferFundsDataManager(PayloadManager.getInstance(), new Unspent(), new Payment());
             mCompositeSubscription.add(
                     fundsHelper.getTransferableFundTransactionListForDefaultAccount()
-                            .subscribe(map -> {
-                                Map.Entry<List<PendingTransaction>, Pair<Long, Long>> entry = map.entrySet().iterator().next();
-                                if (!entry.getKey().isEmpty()) {
+                            .subscribe(triple -> {
+                                if (!triple.getLeft().isEmpty()) {
                                     showTransferFundsPrompt();
                                 }
                             }, Throwable::printStackTrace));
