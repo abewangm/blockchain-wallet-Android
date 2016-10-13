@@ -1,5 +1,7 @@
 package piuk.blockchain.android.injection;
 
+import android.content.Context;
+
 import info.blockchain.api.AddressInfo;
 import info.blockchain.api.TransactionDetails;
 import info.blockchain.api.Unspent;
@@ -16,10 +18,13 @@ import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
+import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
 import piuk.blockchain.android.data.services.AddressInfoService;
+import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.data.services.TransactionDetailsService;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.transactions.TransactionHelper;
+import piuk.blockchain.android.util.PrefsUtil;
 
 /**
  * Created by adambennett on 12/08/2016.
@@ -67,5 +72,10 @@ public class DataManagerModule {
     @Singleton
     protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
         return new AccountDataManager(payloadManager, multiAddrFactory, new AddressInfoService(new AddressInfo()));
+    }
+
+    @Provides
+    protected FingerprintHelper provideFingerprintHelper(Context applicationContext, PrefsUtil prefsUtil) {
+        return new FingerprintHelper(applicationContext, prefsUtil, new FingerprintAuthImpl());
     }
 }

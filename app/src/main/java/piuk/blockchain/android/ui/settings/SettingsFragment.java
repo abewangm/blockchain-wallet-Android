@@ -51,9 +51,10 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.ui.auth.PinEntryActivity;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.balance.BalanceFragment;
+import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -66,14 +67,15 @@ import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATED_PIN
 import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATING_PIN_FOR_RESULT;
 import static piuk.blockchain.android.ui.auth.PinEntryActivity.REQUEST_CODE_VALIDATE_PIN;
 
-public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceClickListener {
+public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceClickListener, SettingsViewModel.DataListener {
 
     public static final String EXTRA_SHOW_TWO_FA_DIALOG = "show_two_fa_dialog";
     public static final String URL_TOS_POLICY = "https://blockchain.com/terms";
     public static final String URL_PRIVACY_POLICY = "https://blockchain.com/privacy";
+    public static final int REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT = 1984;
 
     //Profile
-    private Preference guidPref;
+    @Thunk Preference guidPref;
     private Preference emailPref;
     private Preference smsPref;
 
@@ -84,19 +86,21 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     private SwitchPreferenceCompat smsNotificationPref;
 
     //Security
-    private Preference pinPref;
+    @Thunk SwitchPreferenceCompat fingerprintPref;
+    @Thunk Preference pinPref;
     private SwitchPreferenceCompat twoStepVerificationPref;
     private Preference passwordHint1Pref;
-    private Preference changePasswordPref;
+    @Thunk Preference changePasswordPref;
     private SwitchPreferenceCompat torPref;
 
     //App
-    private Preference aboutPref;
-    private Preference tosPref;
-    private Preference privacyPref;
-    private Preference disableRootWarningPref;
+    @Thunk Preference aboutPref;
+    @Thunk Preference tosPref;
+    @Thunk Preference privacyPref;
+    @Thunk Preference disableRootWarningPref;
 
     @Thunk Settings settingsApi;
+    @Thunk SettingsViewModel viewModel;
     private int pwStrength = 0;
     private PrefsUtil prefsUtil;
     private MonetaryUtil monetaryUtil;
@@ -120,6 +124,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         payloadManager = PayloadManager.getInstance();
         prefsUtil = new PrefsUtil(getActivity());
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
+        viewModel = new SettingsViewModel(this);
 
         fetchUpdatedSettings();
     }
@@ -261,6 +266,15 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
             //Security
             PreferenceCategory securityCategory = (PreferenceCategory) findPreference("security");
+
+            fingerprintPref = (SwitchPreferenceCompat) findPreference("fingerprint");
+            if (!viewModel.getIfFingerprintHardwareAvailable()) {
+                fingerprintPref.setVisible(false);
+            } else {
+                fingerprintPref.setOnPreferenceClickListener(this);
+                updateFingerprintPreferenceStatus();
+            }
+
             pinPref = findPreference("pin");
             pinPref.setOnPreferenceClickListener(this);
 
@@ -325,6 +339,66 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 twoStepVerificationPref.setSummary("");
                 break;
         }
+    }
+
+    private void onFingerprintClicked() {
+        viewModel.onFingerprintClicked();
+    }
+
+    @Override
+    public void showDisableFingerprintDialog() {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.fingerprint_disable_message)
+                .setCancelable(true)
+                .setPositiveButton(R.string.yes, (dialog, which) -> viewModel.setFingerprintUnlockEnabled(false))
+                .setNegativeButton(android.R.string.cancel, (dialog, which) -> updateFingerprintPreferenceStatus())
+                .show();
+    }
+
+    @Override
+    public void showNoFingerprintsAddedDialog() {
+        updateFingerprintPreferenceStatus();
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.fingerprint_no_fingerprints_added)
+                .setCancelable(true)
+                .setPositiveButton(R.string.yes, (dialog, which) ->
+                        startActivityForResult(new Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS), 0))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    @Override
+    public void updateFingerprintPreferenceStatus() {
+        fingerprintPref.setChecked(viewModel.getIfFingerprintUnlockEnabled());
+    }
+
+    @Override
+    public void verifyPinCode() {
+        Intent intent = new Intent(getActivity(), PinEntryActivity.class);
+        intent.putExtra(KEY_VALIDATING_PIN_FOR_RESULT, true);
+        startActivityForResult(intent, REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT);
+    }
+
+    @Override
+    public void showFingerprintDialog(CharSequenceX pincode) {
+        FingerprintDialog dialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
+        dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
+            @Override
+            public void onAuthenticated(CharSequenceX data) {
+                dialog.dismiss();
+                viewModel.setFingerprintUnlockEnabled(true);
+            }
+
+            @Override
+            public void onCanceled() {
+                dialog.dismiss();
+                viewModel.setFingerprintUnlockEnabled(false);
+                fingerprintPref.setChecked(viewModel.getIfFingerprintUnlockEnabled());
+            }
+        });
+        dialog.show(getFragmentManager(), FingerprintDialog.TAG);
     }
 
     private String getDisplayUnits() {
@@ -645,6 +719,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 showDialogFiatUnits();
                 break;
 
+            case "fingerprint":
+                onFingerprintClicked();
+                break;
+
             case "2fa":
                 showDialogTwoFA();
                 break;
@@ -945,8 +1023,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_VALIDATE_PIN && resultCode == RESULT_OK) {
-            String pin = data.getStringExtra(KEY_VALIDATED_PIN);
-            updatePin(pin);
+            updatePin(data.getStringExtra(KEY_VALIDATED_PIN));
+        } else if (requestCode == REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT && resultCode == RESULT_OK) {
+            viewModel.pinCodeValidated(new CharSequenceX(data.getStringExtra(KEY_VALIDATED_PIN)));
         }
     }
 
