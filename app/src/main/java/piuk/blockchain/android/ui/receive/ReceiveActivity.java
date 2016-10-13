@@ -187,6 +187,7 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     mBinding.content.accounts.spinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
+                    //noinspection deprecation
                     mBinding.content.accounts.spinner.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
 
@@ -360,6 +361,7 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
         }
 
         if (!amountBigInt.equals(BigInteger.ZERO)) {
+            assert receiveAddress != null;
             mUri = BitcoinURI.convertToBitcoinURI(receiveAddress, Coin.valueOf(amountBigInt.longValue()), "", "");
         } else {
             mUri = "bitcoin:" + receiveAddress;

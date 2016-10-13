@@ -43,7 +43,7 @@ public class AboutDialog extends AppCompatDialogFragment {
             try {
                 String appPackageName = getActivity().getPackageName();
                 Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName));
-                marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_NEW_DOCUMENT | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
                 startActivity(marketIntent);
             } catch (ActivityNotFoundException e) {
                 Log.e(AboutDialog.class.getSimpleName(), "Google Play Store not found", e);

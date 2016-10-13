@@ -15,7 +15,8 @@ class AccountItem {
     private boolean isDefault;
     private Integer correctedPosition;
 
-    AccountItem(@Nullable Integer correctedPosition, String title, String address, String amount, Drawable icon, boolean isArchived, boolean isWatchOnly, boolean isDefault) {
+    AccountItem(@Nullable Integer correctedPosition, String title, String address, String amount,
+                Drawable icon, boolean isArchived, boolean isWatchOnly, boolean isDefault) {
         this.correctedPosition = correctedPosition;
         this.label = title;
         this.address = address;

@@ -100,7 +100,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         viewModel = new AccountViewModel(this);
 
         setSupportActionBar(binding.toolbarContainer.toolbarGeneral);
-        binding.toolbarContainer.toolbarGeneral.setTitle("");
+        getSupportActionBar().setTitle("");
 
         IMPORTED_HEADER = getResources().getString(R.string.imported_addresses);
         binding.accountsList.setLayoutManager(new LinearLayoutManager(this));
@@ -243,23 +243,43 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 label = label.substring(0, ADDRESS_LABEL_MAX_LENGTH) + "...";
             if (label == null || label.length() == 0) label = "";
 
-            accountsAndImportedList.add(new AccountItem(correctedPosition, label, null, balance, getResources().getDrawable(R.drawable.icon_accounthd), accountClone.get(i).isArchived(), false, defaultAccount.getXpub().equals(accountClone.get(i).getXpub())));
+            accountsAndImportedList.add(new AccountItem(correctedPosition,
+                    label,
+                    null,
+                    balance,
+                    ContextCompat.getDrawable(this, R.drawable.icon_accounthd),
+                    accountClone.get(i).isArchived(),
+                    false,
+                    defaultAccount.getXpub().equals(accountClone.get(i).getXpub())));
             correctedPosition++;
         }
 
         // Create New button position
-        accountsAndImportedList.add(new AccountItem(null, CREATE_NEW, null, "", getResources().getDrawable(R.drawable.icon_accounthd), false, false, false));
+        accountsAndImportedList.add(new AccountItem(null,
+                CREATE_NEW,
+                null,
+                "",
+                ContextCompat.getDrawable(this, R.drawable.icon_accounthd),
+                false, false, false));
         hdAccountsIdx = correctedPosition;
 
         ImportedAccount iAccount = null;
         if (payloadManager.getPayload().getLegacyAddresses().size() > 0) {
-            iAccount = new ImportedAccount(getString(R.string.imported_addresses), payloadManager.getPayload().getLegacyAddresses(), new ArrayList<>(), MultiAddrFactory.getInstance().getLegacyBalance());
+            iAccount = new ImportedAccount(getString(R.string.imported_addresses),
+                    payloadManager.getPayload().getLegacyAddresses(),
+                    new ArrayList<>(),
+                    MultiAddrFactory.getInstance().getLegacyBalance());
         }
 
         if (iAccount != null) {
 
             // Imported Header Position
-            accountsAndImportedList.add(new AccountItem(null, getString(R.string.imported_addresses), null, "", getResources().getDrawable(R.drawable.icon_accounthd), false, false, false));
+            accountsAndImportedList.add(new AccountItem(null,
+                    getString(R.string.imported_addresses),
+                    null,
+                    "",
+                    ContextCompat.getDrawable(this, R.drawable.icon_accounthd),
+                    false, false, false));
 
             legacy = iAccount.getLegacyAddresses();
             for (int j = 0; j < legacy.size(); j++) {
@@ -273,13 +293,25 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 if (label == null || label.length() == 0) label = "";
                 if (address == null || address.length() == 0) address = "";
 
-                accountsAndImportedList.add(new AccountItem(correctedPosition, label, address, balance, getResources().getDrawable(R.drawable.icon_imported), legacy.get(j).getTag() == PayloadManager.ARCHIVED_ADDRESS, legacy.get(j).isWatchOnly(), false));
+                accountsAndImportedList.add(new AccountItem(correctedPosition,
+                        label,
+                        address,
+                        balance,
+                        ContextCompat.getDrawable(this, R.drawable.icon_imported),
+                        legacy.get(j).getTag() == LegacyAddress.ARCHIVED_ADDRESS,
+                        legacy.get(j).isWatchOnly(),
+                        false));
                 correctedPosition++;
             }
         }
 
         // Import Address button at last position
-        accountsAndImportedList.add(new AccountItem(null, IMPORT_ADDRESS, null, "", getResources().getDrawable(R.drawable.icon_accounthd), false, false, false));
+        accountsAndImportedList.add(new AccountItem(null,
+                IMPORT_ADDRESS,
+                null,
+                "",
+                ContextCompat.getDrawable(this, R.drawable.icon_accounthd),
+                false, false, false));
 
         if (accountsAdapter == null) {
             accountsAdapter = new AccountAdapter(accountsAndImportedList);
@@ -453,10 +485,12 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
         // This corrects the layout size after view drawn
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(alertDialog.getWindow().getAttributes());
-        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        alertDialog.getWindow().setAttributes(lp);
+        if (alertDialog.getWindow() != null) {
+            lp.copyFrom(alertDialog.getWindow().getAttributes());
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            alertDialog.getWindow().setAttributes(lp);
+        }
     }
 
     private void transferSpendableFunds() {

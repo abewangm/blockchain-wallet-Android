@@ -98,7 +98,7 @@ public class ReceiveViewModelTest {
 
         List<LegacyAddress> legacyAddresses = new ArrayList<>();
         LegacyAddress legacy0 = new LegacyAddress();
-        legacy0.setTag(PayloadManager.ARCHIVED_ADDRESS);
+        legacy0.setTag(LegacyAddress.ARCHIVED_ADDRESS);
         LegacyAddress legacy1 = new LegacyAddress();
         legacy1.setWatchOnly(true);
         LegacyAddress legacy2 = new LegacyAddress();

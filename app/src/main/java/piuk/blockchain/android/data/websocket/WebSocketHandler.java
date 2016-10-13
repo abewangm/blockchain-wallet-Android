@@ -33,9 +33,9 @@ import piuk.blockchain.android.util.PrefsUtil;
 
 public class WebSocketHandler {
 
-    private static String guid;
-    private static String[] xpubs;
-    private static String[] addrs;
+    private String guid;
+    private String[] xpubs;
+    private String[] addrs;
     private final long pingInterval = 20000L;//ping pong every 20 seconds
     private final long pongTimeout = 5000L;//pong timeout after 5 seconds
     private WebSocket mConnection;
@@ -83,15 +83,15 @@ public class WebSocketHandler {
         // send("{\"op\":\"blocks_sub\"}");
         send("{\"op\":\"wallet_sub\",\"guid\":\"" + guid + "\"}");
 
-        for (int i = 0; i < xpubs.length; i++) {
-            if (xpubs[i] != null && xpubs[i].length() > 0) {
-                send("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpubs[i] + "\"}");
+        for (String xpub : xpubs) {
+            if (xpub != null && xpub.length() > 0) {
+                send("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpub + "\"}");
             }
         }
 
-        for (int i = 0; i < addrs.length; i++) {
-            if (addrs[i] != null && addrs[i].length() > 0) {
-                send("{\"op\":\"addr_sub\", \"addr\":\"" + addrs[i] + "\"}");
+        for (String addr : addrs) {
+            if (addr != null && addr.length() > 0) {
+                send("{\"op\":\"addr_sub\", \"addr\":\"" + addr + "\"}");
             }
         }
     }
@@ -265,11 +265,7 @@ public class WebSocketHandler {
                                                             total_value -= value;
                                                         } else if (in_addr == null) {
                                                             in_addr = (String) prevOutObj.get("addr");
-                                                        } else {
-                                                            ;
                                                         }
-                                                    } else {
-                                                        ;
                                                     }
                                                 }
                                             }
@@ -289,8 +285,6 @@ public class WebSocketHandler {
                                                     if (payloadManager.getPayload().containsLegacyAddress((String) outObj.get("addr"))) {
                                                         total_value += value;
                                                     }
-                                                } else {
-                                                    ;
                                                 }
                                             }
                                         }
@@ -303,7 +297,13 @@ public class WebSocketHandler {
                                                 text += " from " + in_addr;
                                             }
 
-                                            new NotificationsUtil(context).setNotification(title, marquee, text, R.drawable.ic_notification_transparent, R.drawable.ic_launcher, MainActivity.class, 1000);
+                                            new NotificationsUtil(context).setNotification(title,
+                                                    marquee,
+                                                    text,
+                                                    R.drawable.ic_notification_transparent,
+                                                    R.drawable.ic_launcher,
+                                                    MainActivity.class,
+                                                    1000);
                                         }
 
                                         updateBalancesAndTransactions();
@@ -334,8 +334,6 @@ public class WebSocketHandler {
                                             onChangeHashSet.add(message);
                                         }
 
-                                    } else {
-                                        ;
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();

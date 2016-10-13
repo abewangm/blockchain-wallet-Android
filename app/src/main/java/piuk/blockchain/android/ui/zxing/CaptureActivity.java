@@ -22,6 +22,7 @@ import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import piuk.blockchain.android.ui.zxing.camera.CameraManager;
 
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -163,14 +164,11 @@ public final class CaptureActivity extends BaseAuthActivity implements SurfaceHo
         } else {
             // Install the callback and wait for surfaceCreated() to init the camera.
             surfaceHolder.addCallback(this);
-            surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         }
 
         inactivityTimer.onResume();
 
         Intent intent = getIntent();
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         source = IntentSource.NONE;
         decodeFormats = null;
@@ -300,7 +298,7 @@ public final class CaptureActivity extends BaseAuthActivity implements SurfaceHo
         if (points != null && points.length > 0) {
             Canvas canvas = new Canvas(barcode);
             Paint paint = new Paint();
-            paint.setColor(getResources().getColor(R.color.blockchain_blue));
+            paint.setColor(ContextCompat.getColor(this, R.color.blockchain_blue));
             if (points.length == 2) {
                 paint.setStrokeWidth(4.0f);
                 drawLine(canvas, paint, points[0], points[1]);

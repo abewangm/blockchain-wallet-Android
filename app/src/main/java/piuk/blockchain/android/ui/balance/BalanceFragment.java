@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -14,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -22,6 +22,7 @@ import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -34,8 +35,13 @@ import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
+import info.blockchain.wallet.payload.Tx;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
@@ -52,41 +58,36 @@ import piuk.blockchain.android.ui.settings.SettingsFragment;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.util.DateUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.ListUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
+import piuk.blockchain.android.util.annotations.Thunk;
 
 public class BalanceFragment extends Fragment implements BalanceViewModel.DataListener {
 
+    private static final String TAG = "BalanceFragment";
     public static final String ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH";
     public static final String KEY_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     public static final String KEY_TRANSACTION_LIST_POSITION = "transaction_list_position";
-    private final static int SHOW_BTC = 1;
-    private final static int SHOW_FIAT = 2;
-    private final static int SHOW_HIDE = 3;
+    private static final int SHOW_BTC = 1;
+    private static final int SHOW_FIAT = 2;
     private static int BALANCE_DISPLAY_STATE = SHOW_BTC;
     public int balanceBarHeight;
     private BalanceHeaderAdapter accountsAdapter;
-    private Communicator comm;
-    //
-    // main balance display
-    //
+    @Thunk Communicator comm;
     private double btc_fx = 319.13;//TODO remove hard coded when refactoring
-    private boolean isBTC = true;
-    //
-    // accounts list
-    //
-    private AppCompatSpinner accountSpinner;
-    //
-    // tx list
-    //
-    private BalanceListAdapter transactionAdapter;
+    @Thunk boolean isBTC = true;
+    // Accounts list
+    @Thunk AppCompatSpinner accountSpinner;
+    // Tx list
+    @Thunk BalanceListAdapter transactionAdapter;
     private Activity context;
     private PrefsUtil prefsUtil;
     private DateUtil dateUtil;
 
-    private FragmentBalanceBinding binding;
-    private BalanceViewModel viewModel;
-    private Toolbar toolbar;
+    @Thunk FragmentBalanceBinding binding;
+    @Thunk BalanceViewModel viewModel;
+    @Thunk Toolbar toolbar;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -176,6 +177,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     /**
      * Deprecated, but necessary to prevent casting issues on <API21
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -251,23 +253,23 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         //First icon when fab expands
         com.getbase.floatingactionbutton.FloatingActionButton actionA = new com.getbase.floatingactionbutton.FloatingActionButton(context);
-        actionA.setColorNormal(getResources().getColor(R.color.blockchain_send_red));
+        actionA.setColorNormal(ContextCompat.getColor(getActivity(), R.color.blockchain_send_red));
         actionA.setSize(com.getbase.floatingactionbutton.FloatingActionButton.SIZE_MINI);
-        Drawable sendIcon = context.getResources().getDrawable(R.drawable.icon_send);
+        Drawable sendIcon = ContextCompat.getDrawable(getActivity(), R.drawable.icon_send);
         sendIcon.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
         actionA.setIconDrawable(sendIcon);
-        actionA.setColorPressed(getResources().getColor(R.color.blockchain_red_50));
+        actionA.setColorPressed(ContextCompat.getColor(getActivity(), R.color.blockchain_red_50));
         actionA.setTitle(getResources().getString(R.string.send_bitcoin));
         actionA.setOnClickListener(v -> sendClicked());
 
         //Second icon when fab expands
         com.getbase.floatingactionbutton.FloatingActionButton actionB = new com.getbase.floatingactionbutton.FloatingActionButton(context);
-        actionB.setColorNormal(getResources().getColor(R.color.blockchain_receive_green));
+        actionB.setColorNormal(ContextCompat.getColor(getActivity(), R.color.blockchain_receive_green));
         actionB.setSize(com.getbase.floatingactionbutton.FloatingActionButton.SIZE_MINI);
-        Drawable receiveIcon = context.getResources().getDrawable(R.drawable.icon_receive);
+        Drawable receiveIcon = ContextCompat.getDrawable(getActivity(), R.drawable.icon_receive);
         receiveIcon.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
         actionB.setIconDrawable(receiveIcon);
-        actionB.setColorPressed(getResources().getColor(R.color.blockchain_green_50));
+        actionB.setColorPressed(ContextCompat.getColor(getActivity(), R.color.blockchain_green_50));
         actionB.setTitle(getResources().getString(R.string.receive_bitcoin));
         actionB.setOnClickListener(v -> receiveClicked());
 
@@ -300,12 +302,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             binding.fabDebug.setVisibility(View.VISIBLE);
 
             com.getbase.floatingactionbutton.FloatingActionButton actionA = new com.getbase.floatingactionbutton.FloatingActionButton(context);
-            actionA.setColorNormal(getResources().getColor(R.color.blockchain_receive_green));
+            actionA.setColorNormal(ContextCompat.getColor(getActivity(), R.color.blockchain_receive_green));
             actionA.setSize(com.getbase.floatingactionbutton.FloatingActionButton.SIZE_MINI);
-            Drawable debugIcon = context.getResources().getDrawable(R.drawable.icon_news);
+            Drawable debugIcon = ContextCompat.getDrawable(getActivity(), R.drawable.icon_news);
             debugIcon.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
             actionA.setIconDrawable(debugIcon);
-            actionA.setColorPressed(getResources().getColor(R.color.blockchain_green_50));
+            actionA.setColorPressed(ContextCompat.getColor(getActivity(), R.color.blockchain_green_50));
             actionA.setTitle("Show Payload");
             actionA.setOnClickListener(v -> {
                 AlertDialog dialog = null;
@@ -315,18 +317,18 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                             .setMessage(new JSONObject(viewModel.getPayloadManager().getBciWallet().getPayload().getDecryptedPayload()).toString(4))
                             .show();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "initDebugFab: ", e);
                 }
                 TextView textView = (TextView) dialog.findViewById(android.R.id.message);
                 textView.setTextSize(9);
             });
 
             com.getbase.floatingactionbutton.FloatingActionButton actionB = new com.getbase.floatingactionbutton.FloatingActionButton(context);
-            actionB.setColorNormal(getResources().getColor(R.color.blockchain_receive_green));
+            actionB.setColorNormal(ContextCompat.getColor(getActivity(), R.color.blockchain_receive_green));
             actionB.setSize(com.getbase.floatingactionbutton.FloatingActionButton.SIZE_MINI);
             debugIcon.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
             actionB.setIconDrawable(debugIcon);
-            actionB.setColorPressed(getResources().getColor(R.color.blockchain_green_50));
+            actionB.setColorPressed(ContextCompat.getColor(getActivity(), R.color.blockchain_green_50));
             actionB.setTitle("Show unparsed wallet data");
             actionB.setOnClickListener(v -> {
                 AlertDialog dialog = null;
@@ -336,18 +338,18 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                             .setMessage(new JSONObject(viewModel.getPayloadManager().getBciWallet().getUnparsedWalletData()).toString(4))
                             .show();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "initDebugFab: ", e);
                 }
                 TextView textView = (TextView) dialog.findViewById(android.R.id.message);
                 textView.setTextSize(9);
             });
 
             com.getbase.floatingactionbutton.FloatingActionButton actionC = new com.getbase.floatingactionbutton.FloatingActionButton(context);
-            actionC.setColorNormal(getResources().getColor(R.color.blockchain_receive_green));
+            actionC.setColorNormal(ContextCompat.getColor(getActivity(), R.color.blockchain_receive_green));
             actionC.setSize(com.getbase.floatingactionbutton.FloatingActionButton.SIZE_MINI);
             debugIcon.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
             actionC.setIconDrawable(debugIcon);
-            actionC.setColorPressed(getResources().getColor(R.color.blockchain_green_50));
+            actionC.setColorPressed(ContextCompat.getColor(getActivity(), R.color.blockchain_green_50));
             actionC.setTitle("Show parsed wallet data");
             actionC.setOnClickListener(v -> {
                 AlertDialog dialog = null;
@@ -404,11 +406,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         return position - 1;
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-    }
-
     private void setupViews() {
         initFab();
         initDebugFab();
@@ -417,17 +414,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         binding.balance1.setOnTouchListener((v, event) -> {
 
-            //TODO this BALANCE_DISPLAY_STATE could be improved
             if (BALANCE_DISPLAY_STATE == SHOW_BTC) {
                 BALANCE_DISPLAY_STATE = SHOW_FIAT;
                 isBTC = false;
                 viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
-
-            } else if (BALANCE_DISPLAY_STATE == SHOW_FIAT) {
-                BALANCE_DISPLAY_STATE = SHOW_HIDE;
-                isBTC = true;
-                viewModel.setBalance(context.getString(R.string.show_balance));
-
             } else {
                 BALANCE_DISPLAY_STATE = SHOW_BTC;
                 isBTC = true;
@@ -475,8 +465,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.rvTransactions.setHasFixedSize(true);
         binding.rvTransactions.setLayoutManager(layoutManager);
         binding.rvTransactions.setAdapter(transactionAdapter);
-
-        binding.rvTransactions.setOnScrollListener(new CollapseActionbarScrollListener() {
+        binding.rvTransactions.addOnScrollListener(new CollapseActionbarScrollListener() {
             @Override
             public void onMoved(int distance) {
                 binding.balanceLayout.setTranslationY(-distance);
@@ -531,7 +520,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                         try {
                             viewModel.getPayloadManager().updateBalancesAndTransactions();
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Log.e(TAG, "doInBackground: ", e);
                         }
                         return null;
                     }
@@ -552,7 +541,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 R.color.blockchain_send_red);
     }
 
-    private void goToTransactionDetail(int position) {
+    @Thunk
+    void goToTransactionDetail(int position) {
         Intent intent = new Intent(getActivity(), TransactionDetailActivity.class);
         intent.putExtra(KEY_TRANSACTION_LIST_POSITION, position);
         startActivity(intent);
@@ -581,9 +571,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         String strFiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         btc_fx = ExchangeRateFactory.getInstance().getLastPrice(strFiat);
 
-        //Notify adapters of change
-        accountsAdapter.notifyDataSetChanged();
-        transactionAdapter.onTransactionsUpdated(viewModel.getTransactionList());
+        // Notify adapter of change, let DiffUtil work out what needs changing
+        List<Tx> newTransactions = new ArrayList<>();
+        ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
+        transactionAdapter.onTransactionsUpdated(newTransactions);
+        binding.rvTransactions.scrollToPosition(0);
 
         //Display help text to user if no transactionList on selected account/address
         if (viewModel.getTransactionList().size() > 0) {

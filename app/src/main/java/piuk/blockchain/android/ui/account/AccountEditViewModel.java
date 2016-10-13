@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Looper;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -170,7 +171,10 @@ public class AccountEditViewModel extends BaseViewModel {
             //V2
             ImportedAccount iAccount = null;
             if (payloadManager.getPayload().getLegacyAddresses().size() > 0) {
-                iAccount = new ImportedAccount(context.getString(R.string.imported_addresses), payloadManager.getPayload().getLegacyAddresses(), new ArrayList<String>(), MultiAddrFactory.getInstance().getLegacyBalance());
+                iAccount = new ImportedAccount(context.getString(R.string.imported_addresses),
+                        payloadManager.getPayload().getLegacyAddresses(),
+                        new ArrayList<>(),
+                        MultiAddrFactory.getInstance().getLegacyBalance());
             }
 
             if (iAccount != null) {
@@ -184,12 +188,14 @@ public class AccountEditViewModel extends BaseViewModel {
                 accountModel.setXpubDescriptionVisibility(View.GONE);
                 accountModel.setXpubText(context.getString(R.string.address));
                 accountModel.setDefaultAccountVisibility(View.GONE);//No default for V2
-                setArchive(legacyAddress.getTag() == PayloadManager.ARCHIVED_ADDRESS);
+                setArchive(legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS);
 
                 if (legacyAddress.isWatchOnly()) {
                     accountModel.setScanPrivateKeyVisibility(View.VISIBLE);
+                    accountModel.setArchiveVisibility(View.GONE);
                 } else {
                     accountModel.setScanPrivateKeyVisibility(View.GONE);
+                    accountModel.setArchiveVisibility(View.VISIBLE);
                 }
 
                 if (payloadManager.getPayload().isUpgraded()) {
@@ -220,7 +226,7 @@ public class AccountEditViewModel extends BaseViewModel {
         } else {
             accountModel.setDefaultAccountVisibility(View.VISIBLE);
             accountModel.setDefaultText(context.getString(R.string.make_default));
-            accountModel.setDefaultTextColor(context.getResources().getColor(R.color.blockchain_blue));
+            accountModel.setDefaultTextColor(ContextCompat.getColor(context, R.color.blockchain_blue));
         }
     }
 
@@ -476,7 +482,7 @@ public class AccountEditViewModel extends BaseViewModel {
                     LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
                     String changeAddress = legacyAddress.getAddress();
 
-                    List<ECKey> keys = new ArrayList<ECKey>();
+                    List<ECKey> keys = new ArrayList<>();
                     if (payloadManager.getPayload().isDoubleEncrypted()) {
                         ECKey walletKey = legacyAddress.getECKey(new CharSequenceX(secondPassword));
                         keys.add(walletKey);
@@ -495,7 +501,7 @@ public class AccountEditViewModel extends BaseViewModel {
                                 @Override
                                 public void onSuccess(String s) {
 
-                                    legacyAddress.setTag(PayloadManager.ARCHIVED_ADDRESS);
+                                    legacyAddress.setTag(LegacyAddress.ARCHIVED_ADDRESS);
                                     setArchive(true);
 
                                     if (alertDialog != null && alertDialog.isShowing())
@@ -503,7 +509,9 @@ public class AccountEditViewModel extends BaseViewModel {
                                     dataListener.onShowTransactionSuccess();
 
                                     //Update v2 balance immediately after spend - until refresh from server
-                                    MultiAddrFactory.getInstance().setLegacyBalance(MultiAddrFactory.getInstance().getLegacyBalance() - (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue()));
+                                    long currentBalance = MultiAddrFactory.getInstance().getLegacyBalance();
+                                    long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
+                                    MultiAddrFactory.getInstance().setLegacyBalance(currentBalance - spentAmount);
                                     PayloadBridge.getInstance().remoteSaveThread(null);
 
                                     accountModel.setTransferFundsVisibility(View.GONE);
@@ -537,7 +545,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
             newLabel = newLabel.trim();
 
-            if (newLabel != null && newLabel.length() > 0) {
+            if (newLabel.length() > 0) {
 
                 final String finalNewLabel = newLabel;
                 new AsyncTask<String, Void, Void>() {
@@ -556,7 +564,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
                     @Override
                     protected Void doInBackground(final String... params) {
-                        String revertLabel = null;
+                        String revertLabel;
                         if (account != null) {
                             revertLabel = account.getLabel();
                             account.setLabel(params[0]);
@@ -650,7 +658,7 @@ public class AccountEditViewModel extends BaseViewModel {
         String title = context.getResources().getString(R.string.archive);
         String subTitle = context.getResources().getString(R.string.archive_are_you_sure);
 
-        if ((account != null && account.isArchived()) || (legacyAddress != null && legacyAddress.getTag() == PayloadManager.ARCHIVED_ADDRESS)) {
+        if ((account != null && account.isArchived()) || (legacyAddress != null && legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS)) {
             title = context.getResources().getString(R.string.unarchive);
             subTitle = context.getResources().getString(R.string.unarchive_are_you_sure);
         }
@@ -666,11 +674,11 @@ public class AccountEditViewModel extends BaseViewModel {
             return account.isArchived();
 
         } else {
-            if (legacyAddress.getTag() == PayloadManager.ARCHIVED_ADDRESS) {
-                legacyAddress.setTag(PayloadManager.NORMAL_ADDRESS);
+            if (legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS) {
+                legacyAddress.setTag(LegacyAddress.NORMAL_ADDRESS);
                 return false;
             } else {
-                legacyAddress.setTag(PayloadManager.ARCHIVED_ADDRESS);
+                legacyAddress.setTag(LegacyAddress.ARCHIVED_ADDRESS);
                 return true;
             }
         }

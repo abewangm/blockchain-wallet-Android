@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 
 import info.blockchain.api.Unspent;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -14,14 +13,13 @@ import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.send.SendCoins;
 import info.blockchain.wallet.util.CharSequenceX;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.ECKey;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -50,7 +48,7 @@ public class TransferFundsDataManager {
      * @return Returns a Map which bundles together the List of {@link PendingTransaction} objects,
      * as well as a Pair which contains the total to send and the total fees, in that order.
      */
-    public Observable<Map<List<PendingTransaction>, Pair<Long, Long>>> getTransferableFundTransactionList(int addressToReceiveIndex) {
+    public Observable<Triple<List<PendingTransaction>, Long, Long>> getTransferableFundTransactionList(int addressToReceiveIndex) {
         return Observable.fromCallable(() -> {
                     BigInteger suggestedFeePerKb = DynamicFeeCache.getInstance().getSuggestedFee().defaultFeePerKb;
                     List<PendingTransaction> pendingTransactionList = new ArrayList<>();
@@ -83,9 +81,7 @@ public class TransferFundsDataManager {
                         }
                     }
 
-                    Map<List<PendingTransaction>, Pair<Long, Long>> map = new HashMap<>();
-                    map.put(pendingTransactionList, new Pair<>(totalToSend, totalFee));
-                    return map;
+                    return Triple.of(pendingTransactionList, totalToSend, totalFee);
                 }
         ).compose(RxUtil.applySchedulers());
     }
@@ -97,7 +93,7 @@ public class TransferFundsDataManager {
      * @return Returns a Map which bundles together the List of {@link PendingTransaction} objects,
      * as well as a Pair which contains the total to send and the total fees, in that order.
      */
-    public Observable<Map<List<PendingTransaction>, Pair<Long, Long>>> getTransferableFundTransactionListForDefaultAccount() {
+    public Observable<Triple<List<PendingTransaction>, Long, Long>> getTransferableFundTransactionListForDefaultAccount() {
         return getTransferableFundTransactionList(mPayloadManager.getPayload().getHdWallet().getDefaultIndex());
     }
 
@@ -128,11 +124,11 @@ public class TransferFundsDataManager {
 
                     LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
                     String changeAddress = legacyAddress.getAddress();
-                    String receivingAddress = receivingAddress = mPayloadManager.getNextReceiveAddress(pendingTransaction.addressToReceiveIndex);
+                    String receivingAddress = mPayloadManager.getNextReceiveAddress(pendingTransaction.addressToReceiveIndex);
 
-                    List<ECKey> keys = new ArrayList<ECKey>();
+                    List<ECKey> keys = new ArrayList<>();
                     if (mPayloadManager.getPayload().isDoubleEncrypted()) {
-                        ECKey walletKey = legacyAddress.getECKey(new CharSequenceX(secondPassword));
+                        ECKey walletKey = legacyAddress.getECKey(secondPassword);
                         keys.add(walletKey);
                     } else {
                         ECKey walletKey = legacyAddress.getECKey();
@@ -151,7 +147,11 @@ public class TransferFundsDataManager {
                                 public void onSuccess(String s) {
                                     if (subscriber.isUnsubscribed()) return;
                                     subscriber.onNext(s);
-                                    MultiAddrFactory.getInstance().setLegacyBalance(MultiAddrFactory.getInstance().getLegacyBalance() - (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue()));
+
+                                    long currentBalance = MultiAddrFactory.getInstance().getLegacyBalance();
+                                    long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
+
+                                    MultiAddrFactory.getInstance().setLegacyBalance(currentBalance - spentAmount);
 
                                     if (finalI == pendingTransactions.size() - 1) {
                                         savePayloadToServer()

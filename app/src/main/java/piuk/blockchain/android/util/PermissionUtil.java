@@ -21,15 +21,12 @@ public class PermissionUtil {
         if (FragmentCompat.shouldShowRequestPermissionRationale(fragment, Manifest.permission.CAMERA)) {
 
             Snackbar.make(parentView, context.getString(R.string.request_camera_permission),
-                    Snackbar.LENGTH_INDEFINITE).setAction(context.getString(R.string.ok_cap), new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    // Request the permission
-                    FragmentCompat.requestPermissions(fragment,
-                            new String[]{Manifest.permission.CAMERA},
-                            PERMISSION_REQUEST_CAMERA);
-                }
-            }).show();
+                    Snackbar.LENGTH_INDEFINITE).setAction(context.getString(R.string.ok_cap), view -> {
+                        // Request the permission
+                        FragmentCompat.requestPermissions(fragment,
+                                new String[]{Manifest.permission.CAMERA},
+                                PERMISSION_REQUEST_CAMERA);
+                    }).show();
 
         } else {
             FragmentCompat.requestPermissions(fragment,
@@ -43,15 +40,12 @@ public class PermissionUtil {
         if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)) {
 
             Snackbar.make(parentView, activity.getString(R.string.request_camera_permission),
-                    Snackbar.LENGTH_INDEFINITE).setAction(activity.getString(R.string.ok_cap), new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    // Request the permission
-                    ActivityCompat.requestPermissions(activity,
-                            new String[]{Manifest.permission.CAMERA},
-                            PERMISSION_REQUEST_CAMERA);
-                }
-            }).show();
+                    Snackbar.LENGTH_INDEFINITE).setAction(activity.getString(R.string.ok_cap), view -> {
+                        // Request the permission
+                        ActivityCompat.requestPermissions(activity,
+                                new String[]{Manifest.permission.CAMERA},
+                                PERMISSION_REQUEST_CAMERA);
+                    }).show();
 
         } else {
             ActivityCompat.requestPermissions(activity,
@@ -62,18 +56,16 @@ public class PermissionUtil {
 
     public static void requestLocationPermissionFromActivity(View parentView, final Activity activity) {
         // Permission has not been granted and must be requested.
-        if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_COARSE_LOCATION) && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+                && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
 
             Snackbar.make(parentView, activity.getString(R.string.request_location_permission),
-                    Snackbar.LENGTH_INDEFINITE).setAction(activity.getString(R.string.ok_cap), new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    // Request the permission
-                    ActivityCompat.requestPermissions(activity,
-                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
-                            PERMISSION_REQUEST_LOCATION);
-                }
-            }).show();
+                    Snackbar.LENGTH_INDEFINITE).setAction(activity.getString(R.string.ok_cap), view -> {
+                        // Request the permission
+                        ActivityCompat.requestPermissions(activity,
+                                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                                PERMISSION_REQUEST_LOCATION);
+                    }).show();
 
         } else {
             ActivityCompat.requestPermissions(activity,

@@ -132,7 +132,7 @@ dependencies {
     annotationProcessor 'com.google.guava:guava:19.0'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.7'
     // Fingerprint authentication
-    compile 'com.mtramin:rxfingerprint:1.1.1'
+    compile 'com.mtramin:rxfingerprint:1.2.0'
 
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
