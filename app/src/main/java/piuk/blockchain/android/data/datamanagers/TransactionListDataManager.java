@@ -3,7 +3,6 @@ package piuk.blockchain.android.data.datamanagers;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
-import info.blockchain.api.TransactionDetails;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
@@ -18,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.services.TransactionDetailsService;
 import piuk.blockchain.android.util.ListUtil;
 import rx.Observable;
 
@@ -27,9 +27,11 @@ public class TransactionListDataManager {
     private final String TAG_IMPORTED_ADDRESSES = "TAG_IMPORTED_ADDRESSES";
     @VisibleForTesting List<Tx> mTransactionList = new ArrayList<>();
     private PayloadManager mPayloadManager;
+    private TransactionDetailsService mTransactionDetails;
 
-    public TransactionListDataManager(PayloadManager payloadManager) {
+    public TransactionListDataManager(PayloadManager payloadManager, TransactionDetailsService transactionDetails) {
         mPayloadManager = payloadManager;
+        mTransactionDetails = transactionDetails;
     }
 
     /**
@@ -134,8 +136,7 @@ public class TransactionListDataManager {
      * @return A Transaction object
      */
     public Observable<Transaction> getTransactionFromHash(String transactionHash) {
-        return Observable.fromCallable(() -> new TransactionDetails().getTransactionDetails(transactionHash))
-                .compose(RxUtil.applySchedulers());
+        return mTransactionDetails.getTransactionDetailsFromHash(transactionHash);
     }
 
     /**
