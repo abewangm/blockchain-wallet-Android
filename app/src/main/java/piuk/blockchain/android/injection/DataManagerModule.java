@@ -22,6 +22,7 @@ import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
 import piuk.blockchain.android.data.services.AddressInfoService;
 import piuk.blockchain.android.data.services.TransactionDetailsService;
 import piuk.blockchain.android.data.services.WalletPayloadService;
+import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.transactions.TransactionHelper;
@@ -68,8 +69,11 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager) {
-        return new TransactionListDataManager(payloadManager, new TransactionDetailsService(new TransactionDetails()));
+    protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
+                                                                           TransactionListStore transactionListStore) {
+        return new TransactionListDataManager(payloadManager,
+                new TransactionDetailsService(new TransactionDetails()),
+                transactionListStore);
     }
 
     @Provides

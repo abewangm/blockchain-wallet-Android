@@ -42,6 +42,13 @@ public enum Injector {
     }
 
     public DataManagerComponent getDataManagerComponent() {
+        if (dataManagerComponent == null) {
+            dataManagerComponent = applicationComponent.plus(new DataManagerModule());
+        }
         return dataManagerComponent;
+    }
+
+    public void releaseViewModelScope() {
+        dataManagerComponent = null;
     }
 }

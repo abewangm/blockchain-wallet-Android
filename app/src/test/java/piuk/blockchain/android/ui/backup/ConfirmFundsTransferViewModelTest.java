@@ -26,6 +26,7 @@ import java.util.List;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
+import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
@@ -345,7 +346,7 @@ public class ConfirmFundsTransferViewModelTest {
         }
     }
 
-    private class MockApiModule {
+    private class MockApiModule extends ApiModule {
         @Override
         protected PayloadManager providePayloadManager() {
             return mPayloadManager;

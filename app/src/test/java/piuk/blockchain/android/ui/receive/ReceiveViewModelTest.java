@@ -29,6 +29,7 @@ import java.util.Locale;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
+import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
@@ -400,7 +401,7 @@ public class ReceiveViewModelTest {
         }
     }
 
-    private class MockApiModule {
+    private class MockApiModule extends ApiModule {
 
         @Override
         protected PayloadManager providePayloadManager() {

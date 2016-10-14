@@ -25,6 +25,7 @@ import java.util.Locale;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
+import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
@@ -432,7 +433,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         }
     }
 
-    private class MockApiModule {
+    private class MockApiModule extends ApiModule {
         @Override
         protected PayloadManager providePayloadManager() {
             return mPayloadManager;
