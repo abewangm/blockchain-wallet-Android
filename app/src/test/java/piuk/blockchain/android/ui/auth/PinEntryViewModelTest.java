@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
@@ -39,6 +40,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
+import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -832,7 +834,12 @@ public class PinEntryViewModelTest {
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected AuthDataManager provideAuthDataManager() {
+        protected AuthDataManager provideAuthDataManager(PayloadManager payloadManager,
+                                                         PrefsUtil prefsUtil,
+                                                         AppUtil appUtil,
+                                                         AESUtilWrapper aesUtilWrapper,
+                                                         AccessState accessState,
+                                                         StringUtils stringUtils) {
             return mAuthDataManager;
         }
 

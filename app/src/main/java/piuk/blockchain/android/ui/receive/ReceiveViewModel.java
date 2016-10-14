@@ -48,6 +48,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
 
+@SuppressWarnings("WeakerAccess")
 public class ReceiveViewModel extends BaseViewModel {
 
     public static final String TAG = ReceiveViewModel.class.getSimpleName();

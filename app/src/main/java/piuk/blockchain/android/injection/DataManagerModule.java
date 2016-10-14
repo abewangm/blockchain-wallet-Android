@@ -5,6 +5,7 @@ import android.content.Context;
 import info.blockchain.api.AddressInfo;
 import info.blockchain.api.TransactionDetails;
 import info.blockchain.api.Unspent;
+import info.blockchain.api.WalletPayload;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
@@ -13,6 +14,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
@@ -20,35 +22,51 @@ import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
 import piuk.blockchain.android.data.services.AddressInfoService;
-import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.data.services.TransactionDetailsService;
+import piuk.blockchain.android.data.services.WalletPayloadService;
+import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.transactions.TransactionHelper;
+import piuk.blockchain.android.util.AESUtilWrapper;
+import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.StringUtils;
 
 /**
- * Created by adambennett on 12/08/2016.
+ * Created by adambennett on 12/08/2016.x
  */
 
 @Module
 public class DataManagerModule {
 
     @Provides
-    @Singleton
-    protected AuthDataManager provideAuthDataManager() {
-        return new AuthDataManager();
+    protected AuthDataManager provideAuthDataManager(PayloadManager payloadManager,
+                                                     PrefsUtil prefsUtil,
+                                                     AppUtil appUtil,
+                                                     AESUtilWrapper aesUtilWrapper,
+                                                     AccessState accessState,
+                                                     StringUtils stringUtils) {
+        return new AuthDataManager(payloadManager,
+                prefsUtil,
+                new WalletPayloadService(new WalletPayload()),
+                appUtil,
+                aesUtilWrapper,
+                accessState,
+                stringUtils);
     }
 
     @Provides
-    @Singleton
     protected ReceiveDataManager provideReceiveDataManager() {
         return new ReceiveDataManager();
     }
 
-    // TODO: 01/09/2016 This needs to move to a more appropriate place once we've restructured the app
     @Provides
-    protected WalletAccountHelper provideWalletAccountHelper() {
-        return new WalletAccountHelper();
+    protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager,
+                                                             PrefsUtil prefsUtil,
+                                                             StringUtils stringUtils,
+                                                             ExchangeRateFactory exchangeRateFactory) {
+        return new WalletAccountHelper(payloadManager, prefsUtil, stringUtils, exchangeRateFactory);
     }
 
     @Provides
@@ -58,24 +76,25 @@ public class DataManagerModule {
     }
 
     @Provides
-    @Singleton
     protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager) {
         return new TransferFundsDataManager(payloadManager, new Unspent(), new Payment());
     }
 
     @Provides
-    protected TransactionHelper provideTransactionHelper(PayloadManager payloadManager) {
-        return new TransactionHelper(payloadManager);
+    protected TransactionHelper provideTransactionHelper(PayloadManager payloadManager,
+                                                         MultiAddrFactory multiAddrFactory) {
+        return new TransactionHelper(payloadManager, multiAddrFactory);
     }
 
     @Provides
-    @Singleton
-    protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
+    protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
+                                                           MultiAddrFactory multiAddrFactory) {
         return new AccountDataManager(payloadManager, multiAddrFactory, new AddressInfoService(new AddressInfo()));
     }
 
     @Provides
-    protected FingerprintHelper provideFingerprintHelper(Context applicationContext, PrefsUtil prefsUtil) {
+    protected FingerprintHelper provideFingerprintHelper(Context applicationContext,
+                                                         PrefsUtil prefsUtil) {
         return new FingerprintHelper(applicationContext, prefsUtil, new FingerprintAuthImpl());
     }
 }

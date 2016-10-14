@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Intent;
 import android.support.v4.util.Pair;
 
+import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.Transaction;
@@ -446,7 +447,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         }
 
         @Override
-        protected TransactionHelper provideTransactionHelper(PayloadManager payloadManager) {
+        protected TransactionHelper provideTransactionHelper(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
             return mTransactionHelper;
         }
     }

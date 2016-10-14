@@ -417,7 +417,7 @@ public class ReceiveViewModelTest {
         }
 
         @Override
-        protected WalletAccountHelper provideWalletAccountHelper() {
+        protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager, PrefsUtil prefsUtil, StringUtils stringUtils, ExchangeRateFactory exchangeRateFactory) {
             return mWalletAccountHelper;
         }
     }

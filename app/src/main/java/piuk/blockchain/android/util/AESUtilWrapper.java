@@ -9,4 +9,8 @@ public class AESUtilWrapper {
         return AESUtil.decrypt(ciphertext, password, iterations);
     }
 
+    public String encrypt(String plaintext, CharSequenceX password, int iterations) {
+        return AESUtil.encrypt(plaintext, password, iterations);
+    }
+
 }

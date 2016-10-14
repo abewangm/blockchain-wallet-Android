@@ -3,8 +3,6 @@ package piuk.blockchain.android.injection;
 import javax.inject.Singleton;
 
 import dagger.Component;
-import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.ui.account.AccountEditViewModel;
 import piuk.blockchain.android.ui.account.AccountViewModel;
 import piuk.blockchain.android.ui.auth.PasswordRequiredViewModel;
@@ -18,7 +16,6 @@ import piuk.blockchain.android.ui.pairing.ManualPairingViewModel;
 import piuk.blockchain.android.ui.pairing.PairingViewModel;
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper;
 import piuk.blockchain.android.ui.receive.ReceiveViewModel;
-import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.recover.RecoverFundsViewModel;
 import piuk.blockchain.android.ui.send.SendViewModel;
 import piuk.blockchain.android.ui.settings.SettingsViewModel;
@@ -31,11 +28,10 @@ import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
  * Created by adambennett on 08/08/2016.
  */
 
+@SuppressWarnings("WeakerAccess")
 @Singleton
 @Component(modules = {ApplicationModule.class, ApiModule.class, DataManagerModule.class})
 public interface ApplicationComponent {
-
-    void inject(AccessState accessState);
 
     void inject(LauncherViewModel launcherViewModel);
 
@@ -46,8 +42,6 @@ public interface ApplicationComponent {
     void inject(LoggingExceptionHandler loggingExceptionHandler);
 
     void inject(ManualPairingViewModel manualPairingViewModel);
-
-    void inject(AuthDataManager authDataManager);
 
     void inject(SendViewModel sendViewModel);
 
@@ -68,8 +62,6 @@ public interface ApplicationComponent {
     void inject(ExchangeRateFactory exchangeRateFactory);
 
     void inject(ReceiveCurrencyHelper receiveCurrencyHelper);
-
-    void inject(WalletAccountHelper walletAccountHelper);
 
     void inject(TransactionDetailViewModel transactionDetailViewModel);
 

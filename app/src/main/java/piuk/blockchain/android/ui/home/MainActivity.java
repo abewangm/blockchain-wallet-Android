@@ -43,6 +43,7 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
+import piuk.blockchain.android.util.annotations.Thunk;
 
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.Communicator, MainViewModel.DataListener {
 
@@ -51,7 +52,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     private static final int MERCHANT_ACTIVITY = 1;
     public static final int SCAN_URI = 2007;
 
-    private boolean drawerIsOpen = false;
+    @Thunk boolean drawerIsOpen = false;
 
     private Toolbar toolbar;
     private MainViewModel mainViewModel;
@@ -72,6 +73,28 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         binding.setViewModel(mainViewModel);
 
         mainViewModel.onViewReady();
+
+        binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                // No-op
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                drawerIsOpen = true;
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                drawerIsOpen = false;
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                // No-op
+            }
+        });
     }
 
     @Override
