@@ -30,7 +30,7 @@ public class PairingViewModel extends BaseViewModel {
     @Inject protected Lazy<PayloadManager> payloadManager;
 
     public PairingViewModel(Context context) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         this.context = context;
     }
 

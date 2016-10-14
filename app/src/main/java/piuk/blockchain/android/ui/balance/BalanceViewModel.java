@@ -82,7 +82,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     }
 
     public BalanceViewModel(Context context, DataListener dataListener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         this.context = context;
         this.dataListener = dataListener;
         this.model = new BalanceModel();

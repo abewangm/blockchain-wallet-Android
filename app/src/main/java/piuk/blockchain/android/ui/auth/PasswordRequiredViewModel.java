@@ -52,7 +52,7 @@ public class PasswordRequiredViewModel extends BaseViewModel {
     }
 
     public PasswordRequiredViewModel(DataListener listener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         mDataListener = listener;
     }
 

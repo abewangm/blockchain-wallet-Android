@@ -112,7 +112,7 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     public AccountEditViewModel(AccountEditModel accountModel, Context context, DataListener dataListener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         this.context = context;
         this.dataListener = dataListener;
 

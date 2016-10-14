@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.base;
 
 import android.support.annotation.CallSuper;
 
+import piuk.blockchain.android.injection.Injector;
 import rx.subscriptions.CompositeSubscription;
 
 public abstract class BaseViewModel {
@@ -21,6 +22,8 @@ public abstract class BaseViewModel {
         // 2) processes don't try to update a null View
         // 3) background processes don't leak memory
         mCompositeSubscription.clear();
+
+        Injector.getInstance().releaseViewModelScope();
     }
 
 }

@@ -10,8 +10,6 @@ import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
 import piuk.blockchain.android.data.access.AccessState;
@@ -33,14 +31,11 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
-/**
- * Created by adambennett on 12/08/2016.x
- */
-
 @Module
 public class DataManagerModule {
 
     @Provides
+    @ViewModelScope
     protected AuthDataManager provideAuthDataManager(PayloadManager payloadManager,
                                                      PrefsUtil prefsUtil,
                                                      AppUtil appUtil,
@@ -57,11 +52,13 @@ public class DataManagerModule {
     }
 
     @Provides
+    @ViewModelScope
     protected ReceiveDataManager provideReceiveDataManager() {
         return new ReceiveDataManager();
     }
 
     @Provides
+    @ViewModelScope
     protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager,
                                                              PrefsUtil prefsUtil,
                                                              StringUtils stringUtils,
@@ -70,29 +67,33 @@ public class DataManagerModule {
     }
 
     @Provides
-    @Singleton
+    @ViewModelScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager) {
         return new TransactionListDataManager(payloadManager, new TransactionDetailsService(new TransactionDetails()));
     }
 
     @Provides
+    @ViewModelScope
     protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager) {
         return new TransferFundsDataManager(payloadManager, new Unspent(), new Payment());
     }
 
     @Provides
+    @ViewModelScope
     protected TransactionHelper provideTransactionHelper(PayloadManager payloadManager,
                                                          MultiAddrFactory multiAddrFactory) {
         return new TransactionHelper(payloadManager, multiAddrFactory);
     }
 
     @Provides
+    @ViewModelScope
     protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
                                                            MultiAddrFactory multiAddrFactory) {
         return new AccountDataManager(payloadManager, multiAddrFactory, new AddressInfoService(new AddressInfo()));
     }
 
     @Provides
+    @ViewModelScope
     protected FingerprintHelper provideFingerprintHelper(Context applicationContext,
                                                          PrefsUtil prefsUtil) {
         return new FingerprintHelper(applicationContext, prefsUtil, new FingerprintAuthImpl());

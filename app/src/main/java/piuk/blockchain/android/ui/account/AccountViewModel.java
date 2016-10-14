@@ -48,7 +48,7 @@ public class AccountViewModel extends BaseViewModel {
     @VisibleForTesting CharSequenceX doubleEncryptionPassword;
 
     AccountViewModel(DataListener dataListener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
     }
 

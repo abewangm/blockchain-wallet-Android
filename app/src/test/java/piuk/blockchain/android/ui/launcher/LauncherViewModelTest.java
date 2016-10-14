@@ -21,7 +21,6 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import piuk.blockchain.android.BlockchainTestApplication;
-import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
@@ -296,7 +295,7 @@ public class LauncherViewModelTest {
         }
     }
 
-    private class MockApiModule extends ApiModule {
+    private class MockApiModule {
         @Override
         protected PayloadManager providePayloadManager() {
             return mPayloadManager;

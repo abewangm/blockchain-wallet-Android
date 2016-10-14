@@ -1,4 +1,11 @@
 package piuk.blockchain.android.injection;
 
-public class ViewModelScope {
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import javax.inject.Scope;
+
+@Scope
+@Retention(RetentionPolicy.RUNTIME)
+@interface ViewModelScope {
 }
