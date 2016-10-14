@@ -298,7 +298,12 @@ public class AccountViewModel extends BaseViewModel {
                             "android",
                             BuildConfig.VERSION_NAME);
 
-            accountDataManager.setKeyForLegacyAddress(legacyAddress, key, secondPassword);
+            try {
+                accountDataManager.setKeyForLegacyAddress(legacyAddress, key, secondPassword);
+            } catch (Exception e) {
+                e.printStackTrace();
+                dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
+            }
             dataListener.showRenameImportedAddressDialog(legacyAddress);
         } else {
             dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);

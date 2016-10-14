@@ -154,7 +154,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             @Override
             protected Void doInBackground(Void... params) {
                 Payload payload = payloadManager.getPayload();
-                settingsApi = new Settings(payload.getGuid(), payload.getSharedKey());
+                try {
+                    settingsApi = new Settings(payload.getGuid(), payload.getSharedKey());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return null;
             }
 
@@ -455,26 +459,37 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 })).execute();
     }
 
+    private boolean isBadString(String hint) {
+        return hint == null || hint.isEmpty() || hint.length() > 255;
+    }
+
     @UiThread
     private void updatePasswordHint(final String hint) {
-        Handler handler = new Handler(Looper.getMainLooper());
-        new BackgroundExecutor(getActivity(),
-                () -> settingsApi.setPasswordHint1(hint, new Settings.ResultListener() {
-                    @Override
-                    public void onSuccess() {
-                        handler.post(() -> passwordHint1Pref.setSummary(hint));
-                    }
 
-                    @Override
-                    public void onFail() {
-                        ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-                    }
+        if (isBadString(hint)) {
 
-                    @Override
-                    public void onBadRequest() {
+            ToastCustom.makeText(getActivity(), getString(R.string.settings_field_cant_be_empty), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
+        } else {
 
-                    }
-                })).execute();
+            Handler handler = new Handler(Looper.getMainLooper());
+            new BackgroundExecutor(getActivity(),
+                    () -> settingsApi.setPasswordHint1(hint, new Settings.ResultListener() {
+                        @Override
+                        public void onSuccess() {
+                            handler.post(() -> passwordHint1Pref.setSummary(hint));
+                        }
+
+                        @Override
+                        public void onFail() {
+                            ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
+                        }
+
+                        @Override
+                        public void onBadRequest() {
+
+                        }
+                    })).execute();
+        }
     }
 
     @UiThread
@@ -1112,30 +1127,37 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void updatePassword(AlertDialog alertDialog, final CharSequenceX updatedPassword, final CharSequenceX fallbackPassword) {
-        MaterialProgressDialog progress = new MaterialProgressDialog(getActivity());
-        progress.setMessage(getActivity().getResources().getString(R.string.please_wait));
-        progress.setCancelable(false);
-        progress.show();
 
-        new Thread(() -> {
-            Looper.prepare();
+        if (isBadString(updatedPassword.toString())) {
 
-            payloadManager.setTempPassword(updatedPassword);
+            ToastCustom.makeText(getActivity(), getString(R.string.settings_field_cant_be_empty), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
+        } else {
 
-            if (AccessState.getInstance().createPIN(updatedPassword, AccessState.getInstance().getPIN())
-                    && payloadManager.savePayloadToServer()) {
+            MaterialProgressDialog progress = new MaterialProgressDialog(getActivity());
+            progress.setMessage(getActivity().getResources().getString(R.string.please_wait));
+            progress.setCancelable(false);
+            progress.show();
 
-                ToastCustom.makeText(getActivity(), getString(R.string.password_changed), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
-            } else {
-                //Revert on fail
-                payloadManager.setTempPassword(fallbackPassword);
-                ToastCustom.makeText(getActivity(), getString(R.string.remote_save_ko), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                ToastCustom.makeText(getActivity(), getString(R.string.password_unchanged), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-            }
-            progress.dismiss();
-            alertDialog.dismiss();
-            Looper.loop();
-        }).start();
+            new Thread(() -> {
+                Looper.prepare();
+
+                payloadManager.setTempPassword(updatedPassword);
+
+                if (AccessState.getInstance().createPIN(updatedPassword, AccessState.getInstance().getPIN())
+                        && payloadManager.savePayloadToServer()) {
+
+                    ToastCustom.makeText(getActivity(), getString(R.string.password_changed), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
+                } else {
+                    //Revert on fail
+                    payloadManager.setTempPassword(fallbackPassword);
+                    ToastCustom.makeText(getActivity(), getString(R.string.remote_save_ko), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                    ToastCustom.makeText(getActivity(), getString(R.string.password_unchanged), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                }
+                progress.dismiss();
+                alertDialog.dismiss();
+                Looper.loop();
+            }).start();
+        }
     }
 
     @UiThread
