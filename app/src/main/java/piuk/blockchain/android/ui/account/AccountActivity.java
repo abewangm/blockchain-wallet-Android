@@ -63,9 +63,9 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     private static final int EDIT_ACTIVITY_REQUEST_CODE = 2007;
     private static final int ADDRESS_LABEL_MAX_LENGTH = 17;
 
-    public static String IMPORTED_HEADER;
     public static final String IMPORT_ADDRESS = "import_account";
     public static final String CREATE_NEW = "create_wallet";
+    protected static String IMPORTED_HEADER;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override

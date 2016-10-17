@@ -36,8 +36,8 @@ public class WebSocketHandler {
     private String guid;
     private String[] xpubs;
     private String[] addrs;
-    private final long pingInterval = 20000L;//ping pong every 20 seconds
-    private final long pongTimeout = 5000L;//pong timeout after 5 seconds
+    private final static long pingInterval = 20000L;//ping pong every 20 seconds
+    private final static long pongTimeout = 5000L;//pong timeout after 5 seconds
     private WebSocket mConnection;
     private HashSet<String> subHashSet = new HashSet<>();
     private HashSet<String> onChangeHashSet = new HashSet<>();

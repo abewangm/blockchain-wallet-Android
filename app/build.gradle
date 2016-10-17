@@ -100,6 +100,7 @@ android {
 
 ext {
     supportVersion = '24.2.1'
+    googleServicesVersion = '9.6.1'
 }
 
 dependencies {
@@ -112,12 +113,12 @@ dependencies {
     compile "com.android.support:preference-v7:$supportVersion"
     compile "com.android.support:preference-v14:$supportVersion"
 
+    compile "com.google.android.gms:play-services-maps:$googleServicesVersion"
     compile 'org.slf4j:slf4j-api:1.7.13'
     compile 'org.bitcoinj:bitcoinj-core:0.13.4'
     compile 'commons-io:commons-io:2.4'
     compile 'commons-codec:commons-codec:1.10'
     compile 'org.apache.commons:commons-lang3:3.4'
-    compile 'com.google.android.gms:play-services-maps:8.4.0'
     compile 'com.android.support:multidex:1.0.1'
     compile 'org.thoughtcrime.ssl.pinning:AndroidPinning:1.0.0'
     compile 'com.neovisionaries:nv-websocket-client:1.19'

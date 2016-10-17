@@ -47,7 +47,7 @@ public class BackupWalletVerifyFragment extends Fragment {
             secondPassword = bundle.getString("second_password");
         }
 
-        final List<Pair<Integer, String>> confirmSequence = new BackupWalletUtil(getActivity()).getConfirmSequence(secondPassword);
+        final List<Pair<Integer, String>> confirmSequence = new BackupWalletUtil().getConfirmSequence(secondPassword);
         String[] mnemonicRequestHint = getResources().getStringArray(R.array.mnemonic_word_requests);
 
         binding.etFirstRequest.setHint(mnemonicRequestHint[confirmSequence.get(0).first]);

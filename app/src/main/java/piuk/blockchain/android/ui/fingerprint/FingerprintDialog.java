@@ -30,7 +30,7 @@ public class FingerprintDialog extends AppCompatDialogFragment
     public static final String KEY_BUNDLE_PIN_CODE = "pin_code";
     public static final String KEY_BUNDLE_STAGE = "stage";
     private static final long ERROR_TIMEOUT_MILLIS = 1500;
-    private static final long SUCCESS_DELAY_MILLIS = 1000;
+    private static final long SUCCESS_DELAY_MILLIS = 600;
     private static final long FATAL_ERROR_TIMEOUT_MILLIS = 3000;
 
     @Thunk ImageView fingerprintIcon;

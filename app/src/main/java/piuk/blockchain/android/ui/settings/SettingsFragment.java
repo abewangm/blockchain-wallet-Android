@@ -199,7 +199,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             addPreferencesFromResource(R.xml.settings);
 
             //Profile
-            PreferenceCategory profileCategory = (PreferenceCategory) findPreference("profile");
             guidPref = findPreference("guid");
             guidPref.setSummary(payloadManager.getPayload().getGuid());
             guidPref.setOnPreferenceClickListener(SettingsFragment.this);
@@ -272,8 +271,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             }
 
             //Security
-            PreferenceCategory securityCategory = (PreferenceCategory) findPreference("security");
-
             fingerprintPref = (SwitchPreferenceCompat) findPreference("fingerprint");
             if (!viewModel.getIfFingerprintHardwareAvailable()) {
                 fingerprintPref.setVisible(false);

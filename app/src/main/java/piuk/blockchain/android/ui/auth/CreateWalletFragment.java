@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.auth;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
@@ -77,7 +76,7 @@ public class CreateWalletFragment extends Fragment {
         });
 
         binding.walletPass.addTextChangedListener(new TextWatcher() {
-            private final long DELAY = 200; // small delay before pass entropy calc - increases performance when user types fast.
+            private static final long DELAY = 200; // small delay before pass entropy calc - increases performance when user types fast.
             private Timer timer = new Timer();
 
             @Override
@@ -96,24 +95,25 @@ public class CreateWalletFragment extends Fragment {
                 timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
+                        if (getActivity() != null && !getActivity().isFinishing()) {
+                            setEntropyMeterVisible(View.VISIBLE);
 
-                        setEntropyMeterVisible(View.VISIBLE);
+                            final String pw = editable.toString();
 
-                        final String pw = editable.toString();
+                            if (pw.equals(binding.emailAddress.getText().toString())) {
+                                // Email and password can't be the same
+                                pwStrength = 0;
+                            } else {
+                                pwStrength = (int) Math.round(PasswordUtil.getInstance().getStrength(pw));
+                            }
 
-                        if (pw.equals(binding.emailAddress.getText().toString())) {
-                            // Email and password can't be the same
-                            pwStrength = 0;
-                        } else {
-                            pwStrength = (int) Math.round(PasswordUtil.getInstance().getStrength(pw));
+                            int pwStrengthLevel = 0;//red
+                            if (pwStrength >= 75) pwStrengthLevel = 3;//green
+                            else if (pwStrength >= 50) pwStrengthLevel = 2;//green
+                            else if (pwStrength >= 25) pwStrengthLevel = 1;//orange
+
+                            setProgress(pwStrengthLevel, pwStrength);
                         }
-
-                        int pwStrengthLevel = 0;//red
-                        if (pwStrength >= 75) pwStrengthLevel = 3;//green
-                        else if (pwStrength >= 50) pwStrengthLevel = 2;//green
-                        else if (pwStrength >= 25) pwStrengthLevel = 1;//orange
-
-                        setProgress(pwStrengthLevel, pwStrength);
                     }
 
                     private void setProgress(final int pwStrengthLevel, final int scorePerc) {

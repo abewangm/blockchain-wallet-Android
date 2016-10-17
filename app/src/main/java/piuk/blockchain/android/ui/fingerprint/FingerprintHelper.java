@@ -102,7 +102,7 @@ public class FingerprintHelper {
         if (!encryptedData.isEmpty()) {
             try {
                 byte[] bytes = Base64.decode(encryptedData.getBytes("UTF-8"), Base64.DEFAULT);
-                return new CharSequenceX(new String(bytes));
+                return new CharSequenceX(new String(bytes, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 return null;
             }
