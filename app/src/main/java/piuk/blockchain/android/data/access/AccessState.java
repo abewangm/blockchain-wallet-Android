@@ -10,7 +10,6 @@ import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
 
-import org.json.JSONException;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.UnsupportedEncodingException;
@@ -76,7 +75,7 @@ public class AccessState {
                                     AESUtil.decrypt(encryptedPassword,
                                             new CharSequenceX(decryptionKey),
                                             AESUtil.PIN_PBKDF2_ITERATIONS)));
-                        } catch (JSONException e) {
+                        } catch (Exception e) {
                             throw Exceptions.propagate(new Throwable("Validate access failed"));
                         }
                     } else {
@@ -111,16 +110,23 @@ public class AccessState {
 
                 pinStore.setAccessKey(key, value, passedPin)
                         .subscribe(success -> {
-                            String encryptedPassword = new AESUtilWrapper().encrypt(
-                                    password.toString(), new CharSequenceX(value), AESUtil.PIN_PBKDF2_ITERATIONS);
+                            String encryptedPassword = null;
+                            try {
+                                encryptedPassword = new AESUtilWrapper().encrypt(
+                                        password.toString(), new CharSequenceX(value), AESUtil.PIN_PBKDF2_ITERATIONS);
 
-                            prefs.setValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, encryptedPassword);
-                            prefs.setValue(PrefsUtil.KEY_PIN_IDENTIFIER, key);
+                                prefs.setValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, encryptedPassword);
+                                prefs.setValue(PrefsUtil.KEY_PIN_IDENTIFIER, key);
 
-                            if (!subscriber.isUnsubscribed()) {
-                                subscriber.onNext(true);
-                                subscriber.onCompleted();
+                                if (!subscriber.isUnsubscribed()) {
+                                    subscriber.onNext(true);
+                                    subscriber.onCompleted();
+                                }
+
+                            } catch (Exception e) {
+                                throw Exceptions.propagate(e);
                             }
+
                         }, throwable -> {
                             if (!subscriber.isUnsubscribed()) {
                                 subscriber.onNext(false);

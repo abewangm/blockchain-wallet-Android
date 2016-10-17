@@ -193,12 +193,12 @@ public class AuthDataManager {
             try {
                 BlockchainWallet v1Wallet = new BlockchainWallet(payload, password);
                 attemptUpdatePayload(password, guid, v1Wallet.getPayload().getDecryptedPayload(), listener);
-            } catch (PayloadException | JSONException fatalException) {
-                Log.e(getClass().getSimpleName(), "attemptDecryptPayload: ", fatalException);
-                listener.onFatalError();
             } catch (DecryptionException | NullPointerException authException) {
                 Log.e(getClass().getSimpleName(), "attemptDecryptPayload: ", authException);
                 listener.onAuthFail();
+            } catch (Exception fatalException) {
+                Log.e(getClass().getSimpleName(), "attemptDecryptPayload: ", fatalException);
+                listener.onFatalError();
             }
         }
     }

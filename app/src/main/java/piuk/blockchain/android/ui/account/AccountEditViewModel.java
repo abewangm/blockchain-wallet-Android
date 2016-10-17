@@ -729,7 +729,7 @@ public class AccountEditViewModel extends BaseViewModel {
         }.execute();
     }
 
-    private void importAddressPrivateKey(ECKey key, LegacyAddress address, boolean matchesIntendedAddress) {
+    private void importAddressPrivateKey(ECKey key, LegacyAddress address, boolean matchesIntendedAddress) throws Exception {
         setLegacyAddressKey(key, address, false);
 
         if (payloadManager.savePayloadToServer()) {
@@ -750,7 +750,7 @@ public class AccountEditViewModel extends BaseViewModel {
         }
     }
 
-    private void setLegacyAddressKey(ECKey key, LegacyAddress address, boolean watchOnly) {
+    private void setLegacyAddressKey(ECKey key, LegacyAddress address, boolean watchOnly) throws Exception {
         // If double encrypted, save encrypted in payload
         if (!payloadManager.getPayload().isDoubleEncrypted()) {
             address.setEncryptedKey(key.getPrivKeyBytes());
@@ -767,7 +767,7 @@ public class AccountEditViewModel extends BaseViewModel {
         }
     }
 
-    private void importUnmatchedPrivateKey(ECKey key) {
+    private void importUnmatchedPrivateKey(ECKey key) throws Exception {
         if (payloadManager.getPayload().getLegacyAddressStrings().contains(key.toAddress(MainNetParams.get()).toString())) {
             // Wallet contains address associated with this private key, find & save it with scanned key
             String foundAddressString = key.toAddress(MainNetParams.get()).toString();

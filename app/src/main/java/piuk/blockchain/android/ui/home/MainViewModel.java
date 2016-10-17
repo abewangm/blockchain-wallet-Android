@@ -165,7 +165,11 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void cacheDynamicFee() {
-        DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDynamicFee());
+        try {
+            DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDynamicFee());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void cacheDefaultAccountUnspentData() {

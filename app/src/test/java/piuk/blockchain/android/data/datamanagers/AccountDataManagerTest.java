@@ -1,7 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
@@ -30,7 +29,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -55,11 +53,7 @@ public class AccountDataManagerTest extends RxTest {
         // Arrange
         TestSubscriber<Account> subscriber = new TestSubscriber<>();
         Account mockAccount = mock(Account.class);
-        doAnswer(invocation -> {
-            ((PayloadManager.AccountAddListener) invocation.getArguments()[2]).onAccountAddSuccess(mockAccount);
-            return null;
-        }).when(payloadManager).addAccount(
-                anyString(), anyString(), any(PayloadManager.AccountAddListener.class));
+        when(payloadManager.addAccount(anyString(), anyString())).thenReturn(mockAccount);
         // Act
         subject.createNewAccount("", null).toBlocking().subscribe(subscriber);
         // Assert
@@ -72,11 +66,7 @@ public class AccountDataManagerTest extends RxTest {
     public void createNewAccountDecryptionFailure() throws Exception {
         // Arrange
         TestSubscriber<Account> subscriber = new TestSubscriber<>();
-        doAnswer(invocation -> {
-            ((PayloadManager.AccountAddListener) invocation.getArguments()[2]).onSecondPasswordFail();
-            return null;
-        }).when(payloadManager).addAccount(
-                anyString(), anyString(), any(PayloadManager.AccountAddListener.class));
+        when(payloadManager.addAccount(anyString(), anyString())).thenThrow(new DecryptionException());
         // Act
         subject.createNewAccount("", new CharSequenceX("password")).toBlocking().subscribe(subscriber);
         // Assert
@@ -86,18 +76,14 @@ public class AccountDataManagerTest extends RxTest {
     }
 
     @Test
-    public void createNewAccountPayloadException() throws Exception {
+    public void createNewAccountFatalException() throws Exception {
         // Arrange
         TestSubscriber<Account> subscriber = new TestSubscriber<>();
-        doAnswer(invocation -> {
-            ((PayloadManager.AccountAddListener) invocation.getArguments()[2]).onPayloadSaveFail();
-            return null;
-        }).when(payloadManager).addAccount(
-                anyString(), anyString(), any(PayloadManager.AccountAddListener.class));
+        when(payloadManager.addAccount(anyString(), anyString())).thenThrow(new Exception());
         // Act
         subject.createNewAccount("", new CharSequenceX("password")).toBlocking().subscribe(subscriber);
         // Assert
-        subscriber.assertError(PayloadException.class);
+        subscriber.assertError(Exception.class);
         subscriber.assertNotCompleted();
         subscriber.assertNoValues();
     }
@@ -108,7 +94,7 @@ public class AccountDataManagerTest extends RxTest {
         TestSubscriber<Account> subscriber = new TestSubscriber<>();
         doThrow(new Exception())
                 .when(payloadManager).addAccount(
-                anyString(), anyString(), any(PayloadManager.AccountAddListener.class));
+                anyString(), anyString());
         // Act
         subject.createNewAccount("", new CharSequenceX("password")).toBlocking().subscribe(subscriber);
         // Assert

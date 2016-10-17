@@ -2,8 +2,6 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.Nullable;
 
-import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
@@ -45,7 +43,8 @@ public class AccountDataManager {
      * @return An {@link Observable<Account>} wrapping the newly created Account
      */
     public Observable<Account> createNewAccount(String accountLabel, @Nullable CharSequenceX secondPassword) {
-        return createNewAccountObservable(accountLabel, secondPassword)
+        return Observable.fromCallable(() -> payloadManager.addAccount(accountLabel,
+                secondPassword != null ? secondPassword.toString() : null))
                 .compose(RxUtil.applySchedulers());
     }
 
@@ -61,7 +60,12 @@ public class AccountDataManager {
         Payload payload = payloadManager.getPayload();
         int index = payload.getLegacyAddressStrings().indexOf(key.toAddress(MainNetParams.get()).toString());
         LegacyAddress legacyAddress = payload.getLegacyAddresses().get(index);
-        setKeyForLegacyAddress(legacyAddress, key, secondPassword);
+        try {
+            setKeyForLegacyAddress(legacyAddress, key, secondPassword);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Observable.error(e);
+        }
         legacyAddress.setWatchOnly(false);
         payloadManager.setPayload(payload);
         return savePayloadToServer();
@@ -74,16 +78,17 @@ public class AccountDataManager {
      * @param key            The {@link ECKey} for the address
      * @param secondPassword An optional double encryption password
      */
-    public void setKeyForLegacyAddress(LegacyAddress legacyAddress, ECKey key, @Nullable CharSequenceX secondPassword) {
+    public void setKeyForLegacyAddress(LegacyAddress legacyAddress, ECKey key, @Nullable CharSequenceX secondPassword) throws Exception {
         // If double encrypted, save encrypted in payload
         if (!payloadManager.getPayload().isDoubleEncrypted()) {
             legacyAddress.setEncryptedKey(key.getPrivKeyBytes());
         } else {
             String encryptedKey = Base58.encode(key.getPrivKeyBytes());
             String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
-                    payloadManager.getPayload().getSharedKey(),
-                    secondPassword != null ? secondPassword.toString() : null,
-                    payloadManager.getPayload().getOptions().getIterations());
+                        payloadManager.getPayload().getSharedKey(),
+                        secondPassword != null ? secondPassword.toString() : null,
+                        payloadManager.getPayload().getOptions().getIterations());
+
             legacyAddress.setEncryptedKey(encrypted2);
         }
     }
@@ -125,34 +130,5 @@ public class AccountDataManager {
                     multiAddrFactory.setLegacyBalance(address.getAddress(), balance);
                     multiAddrFactory.setLegacyBalance(MultiAddrFactory.getInstance().getLegacyBalance() + balance);
                 });
-    }
-
-    private Observable<Account> createNewAccountObservable(String accountLabel, @Nullable CharSequenceX secondPassword) {
-        return Observable.create(subscriber -> {
-            try {
-                payloadManager.addAccount(
-                        accountLabel,
-                        secondPassword != null ? secondPassword.toString() : null,
-                        new PayloadManager.AccountAddListener() {
-                            @Override
-                            public void onAccountAddSuccess(Account account) {
-                                subscriber.onNext(account);
-                                subscriber.onCompleted();
-                            }
-
-                            @Override
-                            public void onSecondPasswordFail() {
-                                subscriber.onError(new DecryptionException());
-                            }
-
-                            @Override
-                            public void onPayloadSaveFail() {
-                                subscriber.onError(new PayloadException());
-                            }
-                        });
-            } catch (Exception e) {
-                subscriber.onError(e);
-            }
-        });
     }
 }

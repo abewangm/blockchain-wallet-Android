@@ -458,7 +458,17 @@ public class SendViewModel extends BaseViewModel {
 
         //Refresh cache
         new Thread(() -> {
-            DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDynamicFee());
+
+            SuggestedFee suggestedFee;
+            try {
+                suggestedFee = new DynamicFee().getDynamicFee();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                suggestedFee = new DynamicFee().getDefaultFee();
+            }
+            DynamicFeeCache.getInstance().setSuggestedFee(suggestedFee);
+
             sendModel.suggestedFee = DynamicFeeCache.getInstance().getSuggestedFee();
         }).start();
     }
