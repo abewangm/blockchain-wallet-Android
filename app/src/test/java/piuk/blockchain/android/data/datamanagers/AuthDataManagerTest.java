@@ -1,7 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.api.WalletPayload;
-import piuk.blockchain.android.data.access.AccessState;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
@@ -9,25 +8,24 @@ import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
-import piuk.blockchain.android.util.AESUtilWrapper;
-import piuk.blockchain.android.util.AppUtil;
 import info.blockchain.wallet.util.CharSequenceX;
-import piuk.blockchain.android.util.PrefsUtil;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.concurrent.TimeUnit;
 
-import piuk.blockchain.android.BlockchainTestApplication;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.services.WalletPayloadService;
+import piuk.blockchain.android.util.AESUtilWrapper;
+import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.StringUtils;
+import rx.Observable;
 import rx.observers.TestSubscriber;
 
 import static org.mockito.Matchers.any;
@@ -44,18 +42,17 @@ import static org.mockito.Mockito.when;
 /**
  * Created by adambennett on 15/08/2016.
  */
-@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
-@RunWith(RobolectricTestRunner.class)
 public class AuthDataManagerTest extends RxTest {
 
     private static final String STRING_TO_RETURN = "string_to_return";
 
     @Mock private PayloadManager mPayloadManager;
     @Mock private PrefsUtil mPrefsUtil;
-    @Mock private WalletPayload mAccess;
+    @Mock private WalletPayloadService mWalletPayloadService;
     @Mock private AppUtil mAppUtil;
     @Mock private AESUtilWrapper mAesUtils;
     @Mock private AccessState mAccessState;
+    @Mock private StringUtils mStringUtils;
     @InjectMocks AuthDataManager mSubject;
 
     @Before
@@ -68,11 +65,11 @@ public class AuthDataManagerTest extends RxTest {
     public void getEncryptedPayload() throws Exception {
         // Arrange
         TestSubscriber<String> subscriber = new TestSubscriber<>();
-        when(mAccess.getEncryptedPayload(anyString(), anyString())).thenReturn(STRING_TO_RETURN);
+        when(mWalletPayloadService.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
         // Act
         mSubject.getEncryptedPayload("1234567890", "1234567890").toBlocking().subscribe(subscriber);
         // Assert
-        verify(mAccess).getEncryptedPayload(anyString(), anyString());
+        verify(mWalletPayloadService).getEncryptedPayload(anyString(), anyString());
         subscriber.assertCompleted();
         subscriber.onNext(STRING_TO_RETURN);
         subscriber.assertNoErrors();
@@ -82,11 +79,11 @@ public class AuthDataManagerTest extends RxTest {
     public void getSessionId() throws Exception {
         // Arrange
         TestSubscriber<String> subscriber = new TestSubscriber<>();
-        when(mAccess.getEncryptedPayload(anyString(), anyString())).thenReturn(STRING_TO_RETURN);
+        when(mWalletPayloadService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
         // Act
         mSubject.getSessionId("1234567890").toBlocking().subscribe(subscriber);
         // Assert
-        verify(mAccess).getSessionId(anyString());
+        verify(mWalletPayloadService).getSessionId(anyString());
         subscriber.assertCompleted();
         subscriber.onNext(STRING_TO_RETURN);
         subscriber.assertNoErrors();
@@ -97,11 +94,11 @@ public class AuthDataManagerTest extends RxTest {
         // Arrange
         TestSubscriber<CharSequenceX> subscriber = new TestSubscriber<>();
         CharSequenceX charSequenceX = new CharSequenceX("1234567890");
-        when(mAccessState.validatePIN(anyString())).thenReturn(charSequenceX);
+        when(mAccessState.validatePin(anyString())).thenReturn(Observable.just(charSequenceX));
         // Act
         mSubject.validatePin(anyString()).toBlocking().subscribe(subscriber);
         // Assert
-        verify(mAccessState).validatePIN(anyString());
+        verify(mAccessState).validatePin(anyString());
         subscriber.assertCompleted();
         subscriber.onNext(charSequenceX);
         subscriber.assertNoErrors();
@@ -111,11 +108,11 @@ public class AuthDataManagerTest extends RxTest {
     public void createPin() throws Exception {
         // Arrange
         TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
-        when(mAccessState.createPIN(any(CharSequenceX.class), anyString())).thenReturn(true);
+        when(mAccessState.createPin(any(CharSequenceX.class), anyString())).thenReturn(Observable.just(true));
         // Act
         mSubject.createPin(any(CharSequenceX.class), anyString()).toBlocking().subscribe(subscriber);
         // Assert
-        verify(mAccessState).createPIN(any(CharSequenceX.class), anyString());
+        verify(mAccessState).createPin(any(CharSequenceX.class), anyString());
         subscriber.assertCompleted();
         subscriber.onNext(true);
         subscriber.assertNoErrors();
@@ -181,13 +178,13 @@ public class AuthDataManagerTest extends RxTest {
     public void startPollingAuthStatusSuccess() throws Exception {
         // Arrange
         TestSubscriber<String> subscriber = new TestSubscriber<>();
-        when(mAccess.getSessionId(anyString())).thenReturn(STRING_TO_RETURN);
-        when(mAccess.getEncryptedPayload(anyString(), anyString())).thenReturn(STRING_TO_RETURN);
+        when(mWalletPayloadService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
+        when(mWalletPayloadService.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
         // Act
         mSubject.startPollingAuthStatus("1234567890").toBlocking().subscribe(subscriber);
         // Assert
-        verify(mAccess).getSessionId(anyString());
-        verify(mAccess).getEncryptedPayload(anyString(), anyString());
+        verify(mWalletPayloadService).getSessionId(anyString());
+        verify(mWalletPayloadService).getEncryptedPayload(anyString(), anyString());
         subscriber.assertCompleted();
         subscriber.onNext(STRING_TO_RETURN);
         subscriber.assertNoErrors();
@@ -201,13 +198,13 @@ public class AuthDataManagerTest extends RxTest {
     public void startPollingAuthStatusError() throws Exception {
         // Arrange
         TestSubscriber<String> subscriber = new TestSubscriber<>();
-        when(mAccess.getSessionId(anyString())).thenReturn(STRING_TO_RETURN);
-        when(mAccess.getEncryptedPayload(anyString(), anyString())).thenThrow(mock(RuntimeException.class));
+        when(mWalletPayloadService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
+        when(mWalletPayloadService.getEncryptedPayload(anyString(), anyString())).thenThrow(mock(RuntimeException.class));
         // Act
         mSubject.startPollingAuthStatus("1234567890").toBlocking().subscribe(subscriber);
         // Assert
-        verify(mAccess).getSessionId(anyString());
-        verify(mAccess).getEncryptedPayload(anyString(), anyString());
+        verify(mWalletPayloadService).getSessionId(anyString());
+        verify(mWalletPayloadService).getEncryptedPayload(anyString(), anyString());
         subscriber.assertCompleted();
         subscriber.onNext(WalletPayload.KEY_AUTH_REQUIRED);
         subscriber.assertNoErrors();
@@ -220,8 +217,8 @@ public class AuthDataManagerTest extends RxTest {
     public void startPollingAuthStatusAccessRequired() throws Exception {
         // Arrange
         TestSubscriber<String> subscriber = new TestSubscriber<>();
-        when(mAccess.getSessionId(anyString())).thenReturn(STRING_TO_RETURN);
-        when(mAccess.getEncryptedPayload(anyString(), anyString())).thenReturn(WalletPayload.KEY_AUTH_REQUIRED);
+        when(mWalletPayloadService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
+        when(mWalletPayloadService.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
         // Act
         mSubject.startPollingAuthStatus("1234567890").take(1, TimeUnit.SECONDS).toBlocking().subscribe(subscriber);
         // Assert
@@ -479,9 +476,5 @@ public class AuthDataManagerTest extends RxTest {
     private static final String DECRYPTED_PAYLOAD_NO_SHARED_KEY = "{\n" +
             "\t\"test\": \"1234567890\"\n" +
             "}";
-
-    private static final String V1_PAYLOAD_ENCRYPTED = "4gen70mZdnKx0YRnjpPSHTqz2UOMiEUGev9ZaU0L5daWQpqCBqZUgCIqEEbyNzmBQk6DhaQsReAOkzJz4L8q8VMeKk+/h5JXIQTqxOwz0M470ZiyGnmKe7DFtEQGft3oAQAvc/SA89gdu/50SASEQk6fQPyRigkPunIrjmnxzWuO+Mak040Lea3qoScJXBY3xZG4C4ukJaFFhcZUTi+e45JYAg7AtmyONFFdcVLNpGjwRTkDvpAPobGJqMfOfFLHkdxNos+51khXYuyxEp3grU8jvwZbl2pCVgC1Z50IWFSUvSaZGvKkZaK5Ohw0Tn7RF4T4oUA4IrRYGpHY2F8yLUpcSJ47ctC90UPT7GITpDHA/eQNpzdhtIv7Inkkza/Okd5blx+59he+x/AQFTdyc5YZmsEgN+g/RUN06UNibe78iyqEEN4q88RiLDAwFMoHY4cYtzyd25CSza0NP+yBFFLf+NbKA64Ck2pItMgr4JXkCVU8shQmtKnVKfO8mC3MQSF+kZE0mClr7URa8LIbMhmGgQ3o2vGNbRiutzdO7/L52F7GWTHJzKEo5FdWK2K218Spd0L31TpBn3aKXg6BLgw6WiggztP4hP4pVf6LK21KvgPKf3NegF4Or7wfDz1/mP4uiz+xf18trCuFHoityhXduwrrtA9bhhf2SwLE4+Md9R+m1KOQ6q63ynujM0oeIGVj6NIH4uJS6pz/3iIKZTkr/4/5TdEw8uBlKHHxJHBHBuHPsYN3bpd4A+VMiNn3EPV02aD7xCq6anFPvoYbj8BHW0p6kUHP32fcuETciO7NF0NLGSIoE3iTNHRSpXt58BEHIU/p4Tx4KczwLfUiVvARzjnkF8KQMPrgzhZysiXhH8cwdw3LPU1hi0zDuyW3RR7UQxuCTOa/T8v0ZnGZhFNIFkocwSvcDStef807vg6bu2Fe4BewCLzHLQDEudTUHxiFsWWfzo4E4/3pCTNgAkI4N0swvUR7aBTQHminudxrdSxC2f/6pgBnd4TqBv+W16qcWLf31x/yV1wHFyG2rfTpbpTx07W4r3G4zoDq8XHecpfuDy2H+GKgctSyUSDO9BTb6Q93+JyrMDvuw2o4ennAmll8gQ8C5WjxsQ78oES2//yeCqTgKQiEx121Dwa2/MiposMiRg82pwMXZ7lERx74CQnII54z4YAHGA2EqtQwwNdzdCufJqGV8oHaEPAXRNnGuAK6fbDUlM10GiSQoCpvzmDtv5n3RYlXXgmXAjmDb1CodLEFqCps/lPyAvav";
-
-
 
 }

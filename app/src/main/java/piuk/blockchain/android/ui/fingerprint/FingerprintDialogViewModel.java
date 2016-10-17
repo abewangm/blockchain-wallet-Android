@@ -54,7 +54,7 @@ public class FingerprintDialogViewModel extends BaseViewModel implements Fingerp
     }
 
     FingerprintDialogViewModel(DataListener dataListener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
     }
 

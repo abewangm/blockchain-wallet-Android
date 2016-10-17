@@ -3,11 +3,8 @@ package piuk.blockchain.android.ui.recover;
 import android.app.Application;
 import android.content.Intent;
 
-import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
-
-import piuk.blockchain.android.util.AppUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,15 +17,19 @@ import org.robolectric.annotation.Config;
 
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
+import piuk.blockchain.android.util.AESUtilWrapper;
+import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.StringUtils;
 import rx.Observable;
 
-import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_EMAIL;
-import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_PASSWORD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -39,6 +40,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_EMAIL;
+import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_PASSWORD;
 
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
@@ -238,7 +241,12 @@ public class RecoverFundsViewModelTest {
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected AuthDataManager provideAuthDataManager() {
+        protected AuthDataManager provideAuthDataManager(PayloadManager payloadManager,
+                                                         PrefsUtil prefsUtil,
+                                                         AppUtil appUtil,
+                                                         AESUtilWrapper aesUtilWrapper,
+                                                         AccessState accessState,
+                                                         StringUtils stringUtils) {
             return mAuthDataManager;
         }
     }

@@ -48,6 +48,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
 
+@SuppressWarnings("WeakerAccess")
 public class ReceiveViewModel extends BaseViewModel {
 
     public static final String TAG = ReceiveViewModel.class.getSimpleName();
@@ -85,7 +86,7 @@ public class ReceiveViewModel extends BaseViewModel {
     }
 
     public ReceiveViewModel(DataListener listener, Locale locale) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         mDataListener = listener;
 
         int btcUnitType = mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);

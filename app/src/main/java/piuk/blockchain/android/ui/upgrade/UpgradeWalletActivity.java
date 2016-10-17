@@ -6,7 +6,6 @@ import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -28,6 +27,7 @@ import info.blockchain.wallet.util.PasswordUtil;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
+import piuk.blockchain.android.data.payload.PayloadBridge;
 import piuk.blockchain.android.databinding.ActivityUpgradeWalletBinding;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -35,6 +35,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
+import rx.exceptions.Exceptions;
 
 public class UpgradeWalletActivity extends BaseAuthActivity {
 
@@ -58,7 +59,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
         appUtil = new AppUtil(this);
 
         binding.upgradePageHeader.setFactory(() -> {
-            TextView myText = new TextView(UpgradeWalletActivity.this);
+            TextView myText = new TextView(this);
             myText.setGravity(Gravity.CENTER);
             myText.setTextSize(14);
             myText.setTextColor(Color.WHITE);
@@ -113,28 +114,23 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                                 final CharSequenceX currentPassword = payloadManager.getTempPassword();
                                 payloadManager.setTempPassword(new CharSequenceX(password2));
 
-                                new Thread(() -> {
-
-                                    Looper.prepare();
-
-                                    if (AccessState.getInstance().createPIN(payloadManager.getTempPassword(), AccessState.getInstance().getPIN())) {
-                                        payloadManager.savePayloadToServer();
-                                        ToastCustom.makeText(UpgradeWalletActivity.this, getString(R.string.password_changed), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
-                                    } else {
-                                        payloadManager.setTempPassword(currentPassword);
-                                        ToastCustom.makeText(UpgradeWalletActivity.this, getString(R.string.remote_save_ko), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                                        ToastCustom.makeText(UpgradeWalletActivity.this, getString(R.string.password_unchanged), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                                    }
-
-                                    Looper.loop();
-
-                                }).start();
-
+                                AccessState.getInstance().createPin(payloadManager.getTempPassword(), AccessState.getInstance().getPIN())
+                                        .subscribe(success -> {
+                                            if (success) {
+                                                PayloadBridge.getInstance().remoteSaveThread(null);
+                                                ToastCustom.makeText(this, getString(R.string.password_changed), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
+                                            } else {
+                                                throw Exceptions.propagate(new Throwable("Create PIN failed"));
+                                            }
+                                        }, throwable -> {
+                                            payloadManager.setTempPassword(currentPassword);
+                                            ToastCustom.makeText(this, getString(R.string.remote_save_ko), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                                            ToastCustom.makeText(this, getString(R.string.password_unchanged), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                                        });
                             }
-
                         }
                     })
-                    .setNegativeButton(R.string.no, (dialog, whichButton) -> ToastCustom.makeText(UpgradeWalletActivity.this, getString(R.string.password_unchanged), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL)).show();
+                    .setNegativeButton(R.string.no, (dialog, whichButton) -> ToastCustom.makeText(this, getString(R.string.password_unchanged), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL)).show();
 
         }
     }
@@ -170,11 +166,11 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                         payloadManager.upgradeV2PayloadToV3(
                                 secondPassword,
                                 appUtil.isNewlyCreated(),
-                                UpgradeWalletActivity.this.getResources().getString(R.string.default_wallet_name),
+                                getResources().getString(R.string.default_wallet_name),
                                 new PayloadManager.UpgradePayloadListener() {
                                     @Override
                                     public void onDoubleEncryptionPasswordError() {
-                                        ToastCustom.makeText(UpgradeWalletActivity.this, UpgradeWalletActivity.this.getString(R.string.double_encryption_password_error),
+                                        ToastCustom.makeText(UpgradeWalletActivity.this, getString(R.string.double_encryption_password_error),
                                                 ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                                         upgradeClicked(null);
                                     }
@@ -182,10 +178,10 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                                     @Override
                                     public void onUpgradeSuccess() {
                                         if (new OSUtil(UpgradeWalletActivity.this).isServiceRunning(piuk.blockchain.android.data.websocket.WebSocketService.class)) {
-                                            UpgradeWalletActivity.this.stopService(new Intent(UpgradeWalletActivity.this,
+                                            stopService(new Intent(UpgradeWalletActivity.this,
                                                     piuk.blockchain.android.data.websocket.WebSocketService.class));
                                         }
-                                        UpgradeWalletActivity.this.startService(new Intent(UpgradeWalletActivity.this,
+                                        startService(new Intent(UpgradeWalletActivity.this,
                                                 piuk.blockchain.android.data.websocket.WebSocketService.class));
 
                                         payloadManager.getPayload().getHdWallet().getAccounts().get(0).setLabel(getResources().getString(R.string.default_wallet_name));
@@ -284,7 +280,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
         }
     }
 
-    class CustomPagerAdapter extends PagerAdapter {
+    static class CustomPagerAdapter extends PagerAdapter {
 
         Context mContext;
         LayoutInflater mLayoutInflater;
@@ -294,7 +290,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                 R.drawable.upgrade_tx_list_hilite,
         };
 
-        public CustomPagerAdapter(Context context) {
+        CustomPagerAdapter(Context context) {
             mContext = context;
             mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }

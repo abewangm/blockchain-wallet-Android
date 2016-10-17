@@ -166,6 +166,14 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         viewModel.startWebSocketService();
         viewModel.updateAccountList();
         viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
+
+        binding.rvTransactions.clearOnScrollListeners();
+        binding.rvTransactions.addOnScrollListener(new CollapseActionbarScrollListener() {
+            @Override
+            public void onMoved(int distance) {
+                setToolbarOffset(distance);
+            }
+        });
     }
 
     @Override
@@ -392,9 +400,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     }
 
     /**
-     * Position is offset to account for first item being "All Wallets". If returned result is
-     * -1, {@link SendActivity} and {@link ReceiveActivity} can safely ignore and choose the
-     * defaults instead.
+     * Position is offset to account for first item being "All Wallets". If returned result is -1,
+     * {@link SendActivity} and {@link ReceiveActivity} can safely ignore and choose the defaults
+     * instead.
      */
     private int getSelectedAccountPosition() {
         int position = accountSpinner.getSelectedItemPosition();
@@ -465,17 +473,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.rvTransactions.setHasFixedSize(true);
         binding.rvTransactions.setLayoutManager(layoutManager);
         binding.rvTransactions.setAdapter(transactionAdapter);
-        binding.rvTransactions.addOnScrollListener(new CollapseActionbarScrollListener() {
-            @Override
-            public void onMoved(int distance) {
-                binding.balanceLayout.setTranslationY(-distance);
-                if (distance > 1) {
-                    ViewUtils.setElevation(toolbar, ViewUtils.convertDpToPixel(5F, getActivity()));
-                } else {
-                    ViewUtils.setElevation(toolbar, 0F);
-                }
-            }
-        });
 
         // drawerTitle account now that wallet has been created
         if (prefsUtil.getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, "").length() > 0) {
@@ -542,6 +539,16 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     }
 
     @Thunk
+    void setToolbarOffset(int distance) {
+        binding.balanceLayout.setTranslationY(-distance);
+        if (distance > 1) {
+            ViewUtils.setElevation(toolbar, ViewUtils.convertDpToPixel(5F, getActivity()));
+        } else {
+            ViewUtils.setElevation(toolbar, 0F);
+        }
+    }
+
+    @Thunk
     void goToTransactionDetail(int position) {
         Intent intent = new Intent(getActivity(), TransactionDetailActivity.class);
         intent.putExtra(KEY_TRANSACTION_LIST_POSITION, position);
@@ -576,6 +583,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
         transactionAdapter.onTransactionsUpdated(newTransactions);
         binding.rvTransactions.scrollToPosition(0);
+        binding.balanceLayout.post(() -> setToolbarOffset(0));
 
         //Display help text to user if no transactionList on selected account/address
         if (viewModel.getTransactionList().size() > 0) {

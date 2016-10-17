@@ -71,7 +71,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
     }
 
     public ConfirmFundsTransferViewModel(DataListener listener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         mDataListener = listener;
     }
 

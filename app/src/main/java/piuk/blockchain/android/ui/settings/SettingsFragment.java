@@ -61,8 +61,11 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
+import rx.Observable;
+import rx.exceptions.Exceptions;
 
 import static android.app.Activity.RESULT_OK;
+import static piuk.blockchain.android.R.string.success;
 import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATED_PIN;
 import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATING_PIN_FOR_RESULT;
 import static piuk.blockchain.android.ui.auth.PinEntryActivity.REQUEST_CODE_VALIDATE_PIN;
@@ -485,7 +488,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                         handler.post(() -> {
                             refreshList();
                             new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                                    .setTitle(R.string.success)
+                                    .setTitle(success)
                                     .setMessage(R.string.sms_verified)
                                     .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) -> {
                                         if (show2FaAfterPhoneVerified) showDialogTwoFA();
@@ -553,48 +556,31 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
     @UiThread
     private void updatePin(final String pin) {
-        new AsyncTask<Void, Void, CharSequenceX>() {
 
-            MaterialProgressDialog progress;
+        final MaterialProgressDialog progress = new MaterialProgressDialog(getContext());
+        progress.setMessage(getActivity().getResources().getString(R.string.please_wait));
+        progress.show();
 
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                progress = new MaterialProgressDialog(getActivity());
-                progress.setMessage(getActivity().getResources().getString(R.string.please_wait));
-                progress.show();
-            }
+        AccessState.getInstance().validatePin(pin)
+                .doOnTerminate(() -> {
+                    if (progress.isShowing()) {
+                        progress.dismiss();
+                    }
+                })
+                .subscribe(sequenceX -> {
+                    if (sequenceX != null) {
+                        prefsUtil.removeValue(PrefsUtil.KEY_PIN_FAILS);
+                        prefsUtil.removeValue(PrefsUtil.KEY_PIN_IDENTIFIER);
 
-            @Override
-            protected void onPostExecute(CharSequenceX params) {
-                if (progress != null && progress.isShowing()) {
-                    progress.dismiss();
-                    progress = null;
-                }
-                if (params != null) {
-                    prefsUtil.removeValue(PrefsUtil.KEY_PIN_FAILS);
-                    prefsUtil.removeValue(PrefsUtil.KEY_PIN_IDENTIFIER);
-
-                    Intent intent = new Intent(getActivity(), PinEntryActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                } else {
+                        Intent intent = new Intent(getActivity(), PinEntryActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    } else {
+                        throw Exceptions.propagate(new Throwable("CharsequenceX was null"));
+                    }
+                }, throwable -> {
                     ToastCustom.makeText(getActivity(), getString(R.string.invalid_pin), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                }
-
-                super.onPostExecute(params);
-            }
-
-            @Override
-            protected CharSequenceX doInBackground(Void... params) {
-                try {
-                    return AccessState.getInstance().validatePIN(pin);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        }.execute();
+                });
     }
 
     @UiThread
@@ -1196,25 +1182,32 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         progress.setCancelable(false);
         progress.show();
 
-        new Thread(() -> {
-            Looper.prepare();
+        payloadManager.setTempPassword(updatedPassword);
 
-            payloadManager.setTempPassword(updatedPassword);
-
-            if (AccessState.getInstance().createPIN(updatedPassword, AccessState.getInstance().getPIN())
-                    && payloadManager.savePayloadToServer()) {
-
-                ToastCustom.makeText(getActivity(), getString(R.string.password_changed), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
-            } else {
-                //Revert on fail
-                payloadManager.setTempPassword(fallbackPassword);
-                ToastCustom.makeText(getActivity(), getString(R.string.remote_save_ko), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                ToastCustom.makeText(getActivity(), getString(R.string.password_unchanged), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-            }
-            progress.dismiss();
-            alertDialog.dismiss();
-            Looper.loop();
-        }).start();
+        AccessState.getInstance().createPin(updatedPassword, AccessState.getInstance().getPIN())
+                .flatMap(success -> {
+                    if (success) {
+                        return AccessState.getInstance().syncPayloadToServer();
+                    } else {
+                        return Observable.just(false);
+                    }
+                })
+                .doOnTerminate(() -> {
+                    progress.dismiss();
+                    alertDialog.dismiss();
+                })
+                .subscribe(success -> {
+                    if (success) {
+                        ToastCustom.makeText(getActivity(), getString(R.string.password_changed), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
+                    } else {
+                        throw Exceptions.propagate(new Throwable("Update password failed"));
+                    }
+                }, throwable -> {
+                    // Revert on fail
+                    payloadManager.setTempPassword(fallbackPassword);
+                    ToastCustom.makeText(getActivity(), getString(R.string.remote_save_ko), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                    ToastCustom.makeText(getActivity(), getString(R.string.password_unchanged), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                });
     }
 
     @UiThread

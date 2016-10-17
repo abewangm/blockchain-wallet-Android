@@ -13,7 +13,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -29,6 +28,7 @@ import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.services.TransactionDetailsService;
+import piuk.blockchain.android.data.stores.TransactionListStore;
 import rx.Observable;
 import rx.observers.TestSubscriber;
 
@@ -44,7 +44,8 @@ public class TransactionListDataManagerTest extends RxTest {
 
     @Mock PayloadManager mPayloadManager;
     @Mock TransactionDetailsService mTransactionDetails;
-    @InjectMocks TransactionListDataManager mSubject;
+    private TransactionListStore mTransactionList;
+    private TransactionListDataManager mSubject;
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -53,6 +54,10 @@ public class TransactionListDataManagerTest extends RxTest {
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
+
+        mTransactionList = new TransactionListStore();
+
+        mSubject = new TransactionListDataManager(mPayloadManager, mTransactionDetails, mTransactionList);
     }
 
     @Test
@@ -140,14 +145,14 @@ public class TransactionListDataManagerTest extends RxTest {
         // Act
         List<Tx> value = mSubject.getTransactionList();
         // Assert
-        assertEquals(mSubject.mTransactionList, value);
+        assertEquals(mTransactionList.getList(), value);
         assertEquals(Collections.emptyList(), value);
     }
 
     @Test
     public void clearTransactionList() throws Exception {
         // Arrange
-        mSubject.mTransactionList.add(new Tx("", "", "", 0D, 0L, new HashMap<>()));
+        mTransactionList.getList().add(new Tx("", "", "", 0D, 0L, new HashMap<>()));
         // Act
         mSubject.clearTransactionList();
         // Assert
@@ -161,7 +166,7 @@ public class TransactionListDataManagerTest extends RxTest {
         Tx tx1 = new Tx("", "", "", 0D, 500L, new HashMap<>());
         Tx tx2 = new Tx("", "", "", 0D, 1000L, new HashMap<>());
 
-        mSubject.mTransactionList.addAll(Arrays.asList(tx1, tx0));
+        mTransactionList.insertTransactions(Arrays.asList(tx1, tx0));
         // Act
         List<Tx> value = mSubject.insertTransactionIntoListAndReturnSorted(tx2);
         // Assert

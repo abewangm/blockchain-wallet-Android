@@ -29,7 +29,7 @@ public class SettingsViewModel extends BaseViewModel {
     }
 
     SettingsViewModel(DataListener dataListener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
     }
 
