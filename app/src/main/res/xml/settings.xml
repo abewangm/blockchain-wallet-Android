@@ -35,6 +35,9 @@
     <PreferenceCategory
         android:title="@string/security"
         android:key="security">
+        <SwitchPreferenceCompat
+            android:title="@string/enable_fingerprint"
+            android:key="fingerprint" />
         <Preference
             android:title="@string/change_pin_code"
             android:key="pin" />

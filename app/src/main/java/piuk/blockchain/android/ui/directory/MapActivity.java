@@ -5,6 +5,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -46,7 +47,7 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 
 //import android.util.Log;
 
-public class MapActivity extends BaseAuthActivity implements LocationListener {
+public class MapActivity extends BaseAuthActivity implements LocationListener, OnMapReadyCallback {
 
     private final String TAG = getClass().getSimpleName();
 
@@ -138,88 +139,90 @@ public class MapActivity extends BaseAuthActivity implements LocationListener {
         tvWeb = (TextView) findViewById(R.id.tv_web);
         tvDesc = (TextView) findViewById(R.id.tv_desc);
 
-        map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+        ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+
         map.setMyLocationEnabled(true);
-        map.setOnMarkerClickListener(new OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(final Marker marker) {
+        map.setOnMarkerClickListener(marker -> {
 
-                if (marker == null) {
-                    return true;
-                }
-
-                if (markerValues == null || markerValues.size() < 1) {
-                    return true;
-                }
-
-                ((LinearLayout) findViewById(R.id.row_call)).setVisibility(View.VISIBLE);
-                ((LinearLayout) findViewById(R.id.row_web)).setVisibility(View.VISIBLE);
-
-                LatLng latLng = marker.getPosition();
-
-                MerchantDirectory.Merchant b = markerValues.get(marker.getId());
-
-                String url = "http://maps.google.com/?saddr=" +
-                        currLocation.getLatitude() + "," + currLocation.getLongitude() +
-                        "&daddr=" + markerValues.get(marker.getId()).latitude + "," + markerValues.get(marker.getId()).longitude;
-                tvAddress.setText(Html.fromHtml("<a href=\"" + url + "\">" + b.address + ", " + b.city + " " + b.postal_code + "</a>"));
-                tvAddress.setMovementMethod(LinkMovementMethod.getInstance());
-
-                if (b.phone != null && b.phone.trim().length() > 0) {
-                    tvTel.setText(b.phone);
-                    Linkify.addLinks(tvTel, Linkify.PHONE_NUMBERS);
-                } else {
-                    ((LinearLayout) findViewById(R.id.row_call)).setVisibility(View.GONE);
-                }
-
-                if (b.website != null && b.website.trim().length() > 0) {
-                    tvWeb.setText(b.website);
-                    Linkify.addLinks(tvWeb, Linkify.WEB_URLS);
-                } else {
-                    ((LinearLayout) findViewById(R.id.row_web)).setVisibility(View.GONE);
-                }
-
-                tvDesc.setText(b.description);
-
-                tvName.setText(b.name);
-                int category;
-                try {
-                    category = b.category_id;
-                } catch (Exception e) {
-                    category = 0;
-                }
-                switch (category) {
-                    case MerchantDirectory.Merchant.HEADING_CAFE:
-                        tvName.setTextColor(color_cafe_selected);
-                        break;
-                    case MerchantDirectory.Merchant.HEADING_BAR:
-                        tvName.setTextColor(color_drink_selected);
-                        break;
-                    case MerchantDirectory.Merchant.HEADING_RESTAURANT:
-                        tvName.setTextColor(color_eat_selected);
-                        break;
-                    case MerchantDirectory.Merchant.HEADING_SPEND:
-                        tvName.setTextColor(color_spend_selected);
-                        break;
-                    case MerchantDirectory.Merchant.HEADING_ATM:
-                        tvName.setTextColor(color_atm_selected);
-                        break;
-                    default:
-                        tvName.setTextColor(color_cafe_selected);
-                        break;
-                }
-
-                infoLayout.setVisibility(View.VISIBLE);
-
-                saveZ00mLevel = map.getCameraPosition().zoom;
-                if (map.getCameraPosition().zoom < Z00M_LEVEL_CLOSE) {
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), Z00M_LEVEL_CLOSE));
-                } else {
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), map.getCameraPosition().zoom));
-                }
-
+            if (marker == null) {
                 return true;
             }
+
+            if (markerValues == null || markerValues.size() < 1) {
+                return true;
+            }
+
+            findViewById(R.id.row_call).setVisibility(View.VISIBLE);
+            findViewById(R.id.row_web).setVisibility(View.VISIBLE);
+
+            LatLng latLng = marker.getPosition();
+
+            MerchantDirectory.Merchant b = markerValues.get(marker.getId());
+
+            String url = "http://maps.google.com/?saddr=" +
+                    currLocation.getLatitude() + "," + currLocation.getLongitude() +
+                    "&daddr=" + markerValues.get(marker.getId()).latitude + "," + markerValues.get(marker.getId()).longitude;
+            tvAddress.setText(Html.fromHtml("<a href=\"" + url + "\">" + b.address + ", " + b.city + " " + b.postal_code + "</a>"));
+            tvAddress.setMovementMethod(LinkMovementMethod.getInstance());
+
+            if (b.phone != null && b.phone.trim().length() > 0) {
+                tvTel.setText(b.phone);
+                Linkify.addLinks(tvTel, Linkify.PHONE_NUMBERS);
+            } else {
+                findViewById(R.id.row_call).setVisibility(View.GONE);
+            }
+
+            if (b.website != null && b.website.trim().length() > 0) {
+                tvWeb.setText(b.website);
+                Linkify.addLinks(tvWeb, Linkify.WEB_URLS);
+            } else {
+                findViewById(R.id.row_web).setVisibility(View.GONE);
+            }
+
+            tvDesc.setText(b.description);
+
+            tvName.setText(b.name);
+            int category;
+            try {
+                category = b.category_id;
+            } catch (Exception e) {
+                category = 0;
+            }
+            switch (category) {
+                case MerchantDirectory.Merchant.HEADING_CAFE:
+                    tvName.setTextColor(color_cafe_selected);
+                    break;
+                case MerchantDirectory.Merchant.HEADING_BAR:
+                    tvName.setTextColor(color_drink_selected);
+                    break;
+                case MerchantDirectory.Merchant.HEADING_RESTAURANT:
+                    tvName.setTextColor(color_eat_selected);
+                    break;
+                case MerchantDirectory.Merchant.HEADING_SPEND:
+                    tvName.setTextColor(color_spend_selected);
+                    break;
+                case MerchantDirectory.Merchant.HEADING_ATM:
+                    tvName.setTextColor(color_atm_selected);
+                    break;
+                default:
+                    tvName.setTextColor(color_cafe_selected);
+                    break;
+            }
+
+            infoLayout.setVisibility(View.VISIBLE);
+
+            saveZ00mLevel = map.getCameraPosition().zoom;
+            if (map.getCameraPosition().zoom < Z00M_LEVEL_CLOSE) {
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), Z00M_LEVEL_CLOSE));
+            } else {
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), map.getCameraPosition().zoom));
+            }
+
+            return true;
         });
 
         imgCafe = ((ImageView) findViewById(R.id.cafe));
@@ -253,69 +256,54 @@ public class MapActivity extends BaseAuthActivity implements LocationListener {
         layoutATM.setBackgroundColor(color_category_selected);
         dividerATM.setBackgroundColor(color_atm_selected);
 
-        layoutCafe.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                saveZ00mLevel = map.getCameraPosition().zoom;
-                changeZoom = false;
-                imgCafe.setImageResource(cafeSelected ? R.drawable.marker_cafe_off : R.drawable.marker_cafe);
-                dividerCafe.setBackgroundColor(cafeSelected ? color_category_unselected : color_cafe_selected);
-                cafeSelected = cafeSelected ? false : true;
-                drawData(false, null, null, false);
-                return false;
-            }
+        layoutCafe.setOnTouchListener((v, event) -> {
+            saveZ00mLevel = map.getCameraPosition().zoom;
+            changeZoom = false;
+            imgCafe.setImageResource(cafeSelected ? R.drawable.marker_cafe_off : R.drawable.marker_cafe);
+            dividerCafe.setBackgroundColor(cafeSelected ? color_category_unselected : color_cafe_selected);
+            cafeSelected = cafeSelected ? false : true;
+            drawData(false, null, null, false);
+            return false;
         });
 
-        layoutDrink.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                saveZ00mLevel = map.getCameraPosition().zoom;
-                changeZoom = false;
-                imgDrink.setImageResource(drinkSelected ? R.drawable.marker_drink_off : R.drawable.marker_drink);
-                dividerDrink.setBackgroundColor(drinkSelected ? color_category_unselected : color_drink_selected);
-                drinkSelected = drinkSelected ? false : true;
-                drawData(false, null, null, false);
-                return false;
-            }
+        layoutDrink.setOnTouchListener((v, event) -> {
+            saveZ00mLevel = map.getCameraPosition().zoom;
+            changeZoom = false;
+            imgDrink.setImageResource(drinkSelected ? R.drawable.marker_drink_off : R.drawable.marker_drink);
+            dividerDrink.setBackgroundColor(drinkSelected ? color_category_unselected : color_drink_selected);
+            drinkSelected = drinkSelected ? false : true;
+            drawData(false, null, null, false);
+            return false;
         });
 
-        layoutEat.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                saveZ00mLevel = map.getCameraPosition().zoom;
-                changeZoom = false;
-                imgEat.setImageResource(eatSelected ? R.drawable.marker_eat_off : R.drawable.marker_eat);
-                dividerEat.setBackgroundColor(eatSelected ? color_category_unselected : color_eat_selected);
-                eatSelected = eatSelected ? false : true;
-                drawData(false, null, null, false);
-                return false;
-            }
+        layoutEat.setOnTouchListener((v, event) -> {
+            saveZ00mLevel = map.getCameraPosition().zoom;
+            changeZoom = false;
+            imgEat.setImageResource(eatSelected ? R.drawable.marker_eat_off : R.drawable.marker_eat);
+            dividerEat.setBackgroundColor(eatSelected ? color_category_unselected : color_eat_selected);
+            eatSelected = eatSelected ? false : true;
+            drawData(false, null, null, false);
+            return false;
         });
 
-        layoutSpend.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                saveZ00mLevel = map.getCameraPosition().zoom;
-                changeZoom = false;
-                imgSpend.setImageResource(spendSelected ? R.drawable.marker_spend_off : R.drawable.marker_spend);
-                dividerSpend.setBackgroundColor(spendSelected ? color_category_unselected : color_spend_selected);
-                spendSelected = spendSelected ? false : true;
-                drawData(false, null, null, false);
-                return false;
-            }
+        layoutSpend.setOnTouchListener((v, event) -> {
+            saveZ00mLevel = map.getCameraPosition().zoom;
+            changeZoom = false;
+            imgSpend.setImageResource(spendSelected ? R.drawable.marker_spend_off : R.drawable.marker_spend);
+            dividerSpend.setBackgroundColor(spendSelected ? color_category_unselected : color_spend_selected);
+            spendSelected = spendSelected ? false : true;
+            drawData(false, null, null, false);
+            return false;
         });
 
-        layoutATM.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                saveZ00mLevel = map.getCameraPosition().zoom;
-                changeZoom = false;
-                imgATM.setImageResource(atmSelected ? R.drawable.marker_atm_off : R.drawable.marker_atm);
-                dividerATM.setBackgroundColor(atmSelected ? color_category_unselected : color_atm_selected);
-                atmSelected = atmSelected ? false : true;
-                drawData(false, null, null, false);
-                return false;
-            }
+        layoutATM.setOnTouchListener((v, event) -> {
+            saveZ00mLevel = map.getCameraPosition().zoom;
+            changeZoom = false;
+            imgATM.setImageResource(atmSelected ? R.drawable.marker_atm_off : R.drawable.marker_atm);
+            dividerATM.setBackgroundColor(atmSelected ? color_category_unselected : color_atm_selected);
+            atmSelected = atmSelected ? false : true;
+            drawData(false, null, null, false);
+            return false;
         });
 
         currLocation = new Location(LocationManager.NETWORK_PROVIDER);
@@ -326,7 +314,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener {
             currLocation.setLongitude(0.0);
         } else if (lastKnownByGps != null && lastKnownByNetwork == null) {
             currLocation = lastKnownByGps;
-        } else if (lastKnownByGps == null && lastKnownByNetwork != null) {
+        } else if (lastKnownByGps == null) {
             currLocation = lastKnownByNetwork;
         } else {
             currLocation = (lastKnownByGps.getAccuracy() <= lastKnownByNetwork.getAccuracy()) ? lastKnownByGps : lastKnownByNetwork;
@@ -414,132 +402,125 @@ public class MapActivity extends BaseAuthActivity implements LocationListener {
 
         final Handler handler = new Handler(Looper.getMainLooper());
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        new Thread(() -> {
 
-                Looper.prepare();
+            Looper.prepare();
 
-                try {
-                    if (fetch) {
+            try {
+                if (fetch) {
 
-                        merchantList = new MerchantDirectory().getAllMerchants();
-                    }
+                    merchantList = new MerchantDirectory().getAllMerchants();
+                }
 
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
+                handler.post(() -> {
 
-                            try {
+                    try {
 
-                                if (merchantList != null && merchantList.size() > 0) {
+                        if (merchantList != null && merchantList.size() > 0) {
 
-                                    MerchantDirectory.Merchant merchant = null;
+                            MerchantDirectory.Merchant merchant = null;
 
-                                    for (int i = 0; i < merchantList.size(); i++) {
+                            for (int i = 0; i < merchantList.size(); i++) {
 
-                                        merchant = merchantList.get(i);
+                                merchant = merchantList.get(i);
 
-                                        BitmapDescriptor bmd = null;
+                                BitmapDescriptor bmd = null;
 
-                                        int category = merchant.category_id;
+                                int category = merchant.category_id;
 
-                                        switch (category) {
-                                            case MerchantDirectory.Merchant.HEADING_CAFE:
-                                                if (cafeSelected) {
-                                                    bmd = merchant.featured_merchant ?
-                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe_featured) :
-                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe);
-                                                } else {
-                                                    bmd = null;
-                                                }
-                                                break;
-                                            case MerchantDirectory.Merchant.HEADING_BAR:
-                                                if (drinkSelected) {
-                                                    bmd = merchant.featured_merchant ?
-                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_drink_featured) :
-                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_drink);
-                                                } else {
-                                                    bmd = null;
-                                                }
-                                                break;
-                                            case MerchantDirectory.Merchant.HEADING_RESTAURANT:
-                                                if (eatSelected) {
-                                                    bmd = merchant.featured_merchant ?
-                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_eat_featured) :
-                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_eat);
-                                                } else {
-                                                    bmd = null;
-                                                }
-                                                break;
-                                            case MerchantDirectory.Merchant.HEADING_SPEND:
-                                                if (spendSelected) {
-                                                    bmd = merchant.featured_merchant ?
-                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_spend_featured) :
-                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_spend);
-                                                } else {
-                                                    bmd = null;
-                                                }
-                                                break;
-                                            case MerchantDirectory.Merchant.HEADING_ATM:
-                                                if (atmSelected) {
-                                                    bmd = merchant.featured_merchant ?
-                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_atm_featured) :
-                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_atm);
-                                                } else {
-                                                    bmd = null;
-                                                }
-                                                break;
-                                            default:
-                                                if (cafeSelected) {
-                                                    bmd = merchant.featured_merchant ?
-                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe_featured) :
-                                                            BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe);
-                                                } else {
-                                                    bmd = null;
-                                                }
-                                                break;
+                                switch (category) {
+                                    case MerchantDirectory.Merchant.HEADING_CAFE:
+                                        if (cafeSelected) {
+                                            bmd = merchant.featured_merchant ?
+                                                    BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe_featured) :
+                                                    BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe);
+                                        } else {
+                                            bmd = null;
                                         }
-
-                                        if (bmd != null) {
-                                            Marker marker = map.addMarker(new MarkerOptions()
-                                                    .position(new LatLng(merchant.latitude, merchant.longitude))
-                                                    .icon(bmd));
-
-                                            markerValues.put(marker.getId(), merchant);
+                                        break;
+                                    case MerchantDirectory.Merchant.HEADING_BAR:
+                                        if (drinkSelected) {
+                                            bmd = merchant.featured_merchant ?
+                                                    BitmapDescriptorFactory.fromResource(R.drawable.marker_drink_featured) :
+                                                    BitmapDescriptorFactory.fromResource(R.drawable.marker_drink);
+                                        } else {
+                                            bmd = null;
                                         }
-
-                                    }
-
-                                    if (doListView) {
-                                        Intent intent = new Intent(MapActivity.this, ListActivity.class);
-                                        intent.putExtra("ULAT", Double.toString(lat));
-                                        intent.putExtra("ULON", Double.toString(lng));
-                                        startActivity(intent);
-                                    }
-
+                                        break;
+                                    case MerchantDirectory.Merchant.HEADING_RESTAURANT:
+                                        if (eatSelected) {
+                                            bmd = merchant.featured_merchant ?
+                                                    BitmapDescriptorFactory.fromResource(R.drawable.marker_eat_featured) :
+                                                    BitmapDescriptorFactory.fromResource(R.drawable.marker_eat);
+                                        } else {
+                                            bmd = null;
+                                        }
+                                        break;
+                                    case MerchantDirectory.Merchant.HEADING_SPEND:
+                                        if (spendSelected) {
+                                            bmd = merchant.featured_merchant ?
+                                                    BitmapDescriptorFactory.fromResource(R.drawable.marker_spend_featured) :
+                                                    BitmapDescriptorFactory.fromResource(R.drawable.marker_spend);
+                                        } else {
+                                            bmd = null;
+                                        }
+                                        break;
+                                    case MerchantDirectory.Merchant.HEADING_ATM:
+                                        if (atmSelected) {
+                                            bmd = merchant.featured_merchant ?
+                                                    BitmapDescriptorFactory.fromResource(R.drawable.marker_atm_featured) :
+                                                    BitmapDescriptorFactory.fromResource(R.drawable.marker_atm);
+                                        } else {
+                                            bmd = null;
+                                        }
+                                        break;
+                                    default:
+                                        if (cafeSelected) {
+                                            bmd = merchant.featured_merchant ?
+                                                    BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe_featured) :
+                                                    BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe);
+                                        } else {
+                                            bmd = null;
+                                        }
+                                        break;
                                 }
 
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                                if (bmd != null) {
+                                    Marker marker = map.addMarker(new MarkerOptions()
+                                            .position(new LatLng(merchant.latitude, merchant.longitude))
+                                            .icon(bmd));
+
+                                    markerValues.put(marker.getId(), merchant);
+                                }
+
                             }
 
-                            if (changeZoom) {
-                                setProperZoomLevel(new LatLng(currLocation.getLatitude(), currLocation.getLongitude()), radius, 1);
-                            } else {
-                                changeZoom = true;
+                            if (doListView) {
+                                Intent intent = new Intent(MapActivity.this, ListActivity.class);
+                                intent.putExtra("ULAT", Double.toString(lat));
+                                intent.putExtra("ULON", Double.toString(lng));
+                                startActivity(intent);
                             }
 
                         }
 
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
-                Looper.loop();
+                    if (changeZoom) {
+                        setProperZoomLevel(new LatLng(currLocation.getLatitude(), currLocation.getLongitude()), radius, 1);
+                    } else {
+                        changeZoom = true;
+                    }
 
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+            Looper.loop();
+
         }).start();
     }
 

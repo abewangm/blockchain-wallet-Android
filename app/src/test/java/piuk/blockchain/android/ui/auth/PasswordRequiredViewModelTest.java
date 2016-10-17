@@ -3,8 +3,7 @@ package piuk.blockchain.android.ui.auth;
 import android.app.Application;
 
 import info.blockchain.api.WalletPayload;
-import piuk.blockchain.android.util.DialogButtonCallback;
-import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
 
 import org.junit.Before;
@@ -19,13 +18,18 @@ import org.robolectric.annotation.Config;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
+import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.StringUtils;
 import rx.Observable;
 
 import static org.junit.Assert.assertEquals;
@@ -459,7 +463,12 @@ public class PasswordRequiredViewModelTest extends RxTest {
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected AuthDataManager provideAuthDataManager() {
+        protected AuthDataManager provideAuthDataManager(PayloadManager payloadManager,
+                                                         PrefsUtil prefsUtil,
+                                                         AppUtil appUtil,
+                                                         AESUtilWrapper aesUtilWrapper,
+                                                         AccessState accessState,
+                                                         StringUtils stringUtils) {
             return mAuthDataManager;
         }
     }

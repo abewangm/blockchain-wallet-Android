@@ -405,6 +405,7 @@
     <string name="verify_sms_summary">We have sent your mobile phone an SMS message with a verification code. Enter the code to verify your mobile phone number.</string>
     <string name="mobile_description">Your mobile phone can be used to enable two-factor authentication, helping to secure your wallet from unauthorized access.</string>
 
+    <string name="enable_fingerprint">Fingerprint Unlock</string>
     <string name="two_fa">2-step Verification</string>
     <string name="tor_requests">Block Tor Requests</string>
     <string name="tor_summary">Would you like to block IP addresses that are known to be part of the Tor anonymizing network from accessing your wallet? The Tor network is frequently used by hackers attempting to access Blockchain users wallets.</string>
@@ -506,4 +507,19 @@
     <string name="backup_word_mismatch">Word Mismatch</string>
     <string name="backup_done">DONE</string>
     <string name="backup_lost_mnemonic">Lost your 12 word recovery phrase?</string>
+
+    <!-- FINGERPRINT -->
+    <string name="fingerprint_prompt">Use your fingerprint for faster, easier access to your wallet.\n\nConfirm fingerprint to continue</string>
+    <string name="fingerprint_description">Confirm fingerprint to continue</string>
+    <string name="fingerprint_hint">Touch sensor</string>
+    <string name="fingerprint_login_title">Fingerprint login</string>
+    <string name="fingerprint_not_recognized">Fingerprint not recognized. Try again</string>
+    <string name="fingerprint_success">Fingerprint recognized</string>
+    <string name="fingerprint_use_pin">Use PIN</string>
+    <string name="fingerprint_disable_message">Are you sure you want to disable fingerprint login?</string>
+    <string name="fingerprint_no_fingerprints_added">No fingerprints have been registered to this device yet. Do you want to register a fingerprint now?</string>
+    <string name="fingerprint_key_invalidated_description">Either the fingerprints stored on this device have changed or the keyguard has been disabled</string>
+    <string name="fingerprint_key_invalidated_brief">Keys invalidated, PIN code required</string>
+    <string name="fingerprint_fatal_error_description">There was a problem setting up fingerprint login. Please try again later</string>
+    <string name="fingerprint_fatal_error_brief">Unexpected error</string>
 </resources>

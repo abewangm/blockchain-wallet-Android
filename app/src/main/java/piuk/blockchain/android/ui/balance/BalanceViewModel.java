@@ -82,7 +82,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     }
 
     public BalanceViewModel(Context context, DataListener dataListener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         this.context = context;
         this.dataListener = dataListener;
         this.model = new BalanceModel();
@@ -265,7 +265,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
             //Only V3 - Consolidate and add Legacy addresses to "Imported Addresses" at bottom of accounts spinner
             ImportedAccount iAccount = new ImportedAccount(context.getString(R.string.imported_addresses),
                     payloadManager.getPayload().getLegacyAddresses(),
-                    new ArrayList<String>(),
+                    new ArrayList<>(),
                     MultiAddrFactory.getInstance().getLegacyBalance());
             iAccount.setTags(Collections.singletonList(TAG_IMPORTED_ADDRESSES));
             String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));

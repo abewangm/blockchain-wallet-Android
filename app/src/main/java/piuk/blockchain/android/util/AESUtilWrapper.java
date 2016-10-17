@@ -14,4 +14,8 @@ public class AESUtilWrapper {
         return AESUtil.decrypt(ciphertext, password, iterations);
     }
 
+    public String encrypt(String plaintext, CharSequenceX password, int iterations) throws Exception {
+        return AESUtil.encrypt(plaintext, password, iterations);
+    }
+
 }

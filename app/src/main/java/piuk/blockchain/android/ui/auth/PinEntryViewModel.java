@@ -29,6 +29,7 @@ import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -56,10 +57,12 @@ public class PinEntryViewModel extends BaseViewModel {
     @Inject protected PayloadManager mPayloadManager;
     @Inject protected StringUtils mStringUtils;
     @Inject protected SSLVerifyUtil mSSLVerifyUtil;
+    @Inject protected FingerprintHelper mFingerprintHelper;
 
     private String mEmail;
     private CharSequenceX mPassword;
-    private boolean mRecoveringFunds = false;
+    @VisibleForTesting boolean mRecoveringFunds = false;
+    @VisibleForTesting boolean mCanShowFingerprintDialog = true;
     @VisibleForTesting boolean mValidatingPinForResult = false;
     @VisibleForTesting String mUserEnteredPin = "";
     @VisibleForTesting String mUserEnteredConfirmationPin;
@@ -99,10 +102,14 @@ public class PinEntryViewModel extends BaseViewModel {
 
         void finishWithResultOk(String pin);
 
+        void showFingerprintDialog(CharSequenceX pincode);
+
+        void showKeyboard();
+
     }
 
     public PinEntryViewModel(DataListener listener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         mDataListener = listener;
     }
 
@@ -145,6 +152,34 @@ public class PinEntryViewModel extends BaseViewModel {
         }
 
         checkPinFails();
+        checkFingerprintStatus();
+    }
+
+    public void checkFingerprintStatus() {
+        if (getIfShouldShowFingerprintLogin()) {
+            mDataListener.showFingerprintDialog(
+                    mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE));
+        } else {
+            mDataListener.showKeyboard();
+        }
+    }
+
+    public boolean canShowFingerprintDialog() {
+        return mCanShowFingerprintDialog;
+    }
+
+    private boolean getIfShouldShowFingerprintLogin() {
+        return !(mValidatingPinForResult || mRecoveringFunds || isCreatingNewPin())
+                && mFingerprintHelper.getIfFingerprintUnlockEnabled()
+                && mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE) != null;
+    }
+
+    public void loginWithDecryptedPin(CharSequenceX pincode) {
+        mCanShowFingerprintDialog = false;
+        for (View view : mDataListener.getPinBoxArray()) {
+            view.setBackgroundResource(R.drawable.rounded_view_dark_blue);
+        }
+        validatePIN(pincode.toString());
     }
 
     public void onDeleteClicked() {
@@ -222,6 +257,7 @@ public class PinEntryViewModel extends BaseViewModel {
     void clearPinViewAndReset() {
         clearPinBoxes();
         mUserEnteredConfirmationPin = null;
+        checkFingerprintStatus();
     }
 
     public void clearPinBoxes() {
@@ -238,7 +274,10 @@ public class PinEntryViewModel extends BaseViewModel {
                         mPrefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""),
                         mPrefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
                         password)
-                        .doOnTerminate(() -> mDataListener.dismissProgressDialog())
+                        .doOnTerminate(() -> {
+                            mDataListener.dismissProgressDialog();
+                            mCanShowFingerprintDialog = true;
+                        })
                         .subscribe(aVoid -> {
                             mAppUtil.setSharedKey(mPayloadManager.getPayload().getSharedKey());
 
@@ -320,6 +359,8 @@ public class PinEntryViewModel extends BaseViewModel {
                         .subscribe(createSuccessful -> {
                             mDataListener.dismissProgressDialog();
                             if (createSuccessful) {
+                                mFingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
+                                mFingerprintHelper.setFingerprintUnlockEnabled(false);
                                 mPrefsUtil.setValue(PrefsUtil.KEY_PIN_FAILS, 0);
                                 updatePayload(mPayloadManager.getTempPassword());
                             } else {

@@ -90,7 +90,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
 
     public TransactionDetailViewModel(DataListener listener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         mDataListener = listener;
         mMonetaryUtil = new MonetaryUtil(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
 
@@ -263,7 +263,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     @VisibleForTesting
     Observable<String> getTransactionValueString(String currency, Tx transaction) {
         if (currency.equals("USD")) {
-            return ExchangeRateFactory.getInstance().getHistoricPrice((long) Math.abs(transaction.getAmount()), mFiatType, transaction.getTS() * 1000)
+            return mExchangeRateFactory.getHistoricPrice((long) Math.abs(transaction.getAmount()), mFiatType, transaction.getTS() * 1000)
                     .map(aDouble -> {
                         int stringId = -1;
                         switch (transaction.getDirection()) {
@@ -278,7 +278,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
                                 break;
                         }
                         return mStringUtils.getString(stringId)
-                                + ExchangeRateFactory.getInstance().getSymbol(mFiatType)
+                                + mExchangeRateFactory.getSymbol(mFiatType)
                                 + mMonetaryUtil.getFiatFormat(mFiatType).format(aDouble);
                     });
         } else {
@@ -288,7 +288,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     private String getTransactionValueFiat(Tx transaction) {
         return mStringUtils.getString(R.string.transaction_detail_value)
-                + ExchangeRateFactory.getInstance().getSymbol(mFiatType)
+                + mExchangeRateFactory.getSymbol(mFiatType)
                 + mMonetaryUtil.getFiatFormat(mFiatType).format(mBtcExchangeRate * (Math.abs(transaction.getAmount()) / 1e8));
     }
 

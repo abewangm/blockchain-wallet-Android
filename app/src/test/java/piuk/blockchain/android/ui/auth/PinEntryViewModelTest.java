@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.auth;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 import android.widget.TextView;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
@@ -37,6 +39,8 @@ import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
+import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -62,6 +66,7 @@ import static piuk.blockchain.android.ui.auth.LandingActivity.KEY_INTENT_RECOVER
 import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATING_PIN_FOR_RESULT;
 import static rx.Observable.just;
 
+@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class PinEntryViewModelTest {
@@ -74,6 +79,7 @@ public class PinEntryViewModelTest {
     @Mock private PrefsUtil mPrefsUtil;
     @Mock private PayloadManager mPayloadManager;
     @Mock private StringUtils mStringUtils;
+    @Mock private FingerprintHelper mFingerprintHelper;
 
     @Before
     public void setUp() throws Exception {
@@ -100,6 +106,8 @@ public class PinEntryViewModelTest {
         intent.putExtra(KEY_INTENT_EMAIL, email);
         intent.putExtra(KEY_INTENT_PASSWORD, password);
         when(mActivity.getPageIntent()).thenReturn(intent);
+        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(new CharSequenceX(""));
         when(mAuthDataManager.createHdWallet(anyString(), anyString())).thenReturn(just(new Payload()));
         // Act
         mSubject.onViewReady();
@@ -133,6 +141,8 @@ public class PinEntryViewModelTest {
         intent.putExtra(KEY_INTENT_EMAIL, email);
         intent.putExtra(KEY_INTENT_PASSWORD, password);
         when(mActivity.getPageIntent()).thenReturn(intent);
+        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(new CharSequenceX(""));
         when(mAuthDataManager.createHdWallet(anyString(), anyString())).thenReturn(just(null));
         // Act
         mSubject.onViewReady();
@@ -153,6 +163,8 @@ public class PinEntryViewModelTest {
         intent.putExtra(KEY_INTENT_EMAIL, email);
         intent.putExtra(KEY_INTENT_PASSWORD, password);
         when(mActivity.getPageIntent()).thenReturn(intent);
+        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(new CharSequenceX(""));
         when(mAuthDataManager.createHdWallet(anyString(), anyString())).thenReturn(Observable.error(new Throwable()));
         // Act
         mSubject.onViewReady();
@@ -191,6 +203,8 @@ public class PinEntryViewModelTest {
         when(mActivity.getPageIntent()).thenReturn(new Intent());
         when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_FAILS, 0)).thenReturn(4);
         when(mPayloadManager.getPayload()).thenReturn(mock(Payload.class));
+        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(new CharSequenceX(""));
         // Act
         mSubject.onViewReady();
         // Assert
@@ -198,6 +212,53 @@ public class PinEntryViewModelTest {
         //noinspection WrongConstant
         verify(mActivity).showToast(anyInt(), anyString());
         verify(mActivity).showMaxAttemptsDialog();
+    }
+
+    @Test
+    public void checkFingerprintStatusShouldShowDialog() throws Exception {
+        // Arrange
+        mSubject.mValidatingPinForResult = false;
+        mSubject.mRecoveringFunds = false;
+        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234");
+        when(mFingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(true);
+        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(null);
+        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(new CharSequenceX(""));
+        // Act
+        mSubject.checkFingerprintStatus();
+        // Assert
+        verify(mActivity).showFingerprintDialog(any(CharSequenceX.class));
+    }
+
+    @Test
+    public void checkFingerprintStatusDontShow() throws Exception {
+        // Arrange
+        mSubject.mValidatingPinForResult = true;
+        // Act
+        mSubject.checkFingerprintStatus();
+        // Assert
+        verify(mActivity).showKeyboard();
+    }
+
+    @Test
+    public void canShowFingerprintDialog() throws Exception {
+        // Arrange
+        mSubject.mCanShowFingerprintDialog = true;
+        // Act
+        boolean value = mSubject.canShowFingerprintDialog();
+        // Assert
+        assertEquals(true, value);
+    }
+
+    @Test
+    public void loginWithDecryptedPin() throws Exception {
+        // Arrange
+        CharSequenceX pincode = new CharSequenceX("1234");
+        when(mAuthDataManager.validatePin(pincode.toString())).thenReturn(Observable.just(new CharSequenceX("password")));
+        // Act
+        mSubject.loginWithDecryptedPin(pincode);
+        // Assert
+        verify(mActivity).getPinBoxArray();
+        assertEquals(false, mSubject.canShowFingerprintDialog());
     }
 
     @Test
@@ -230,6 +291,8 @@ public class PinEntryViewModelTest {
         // Act
         View mockView = mock(View.class);
         when(mockView.getTag()).thenReturn("0");
+        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(new CharSequenceX(""));
         mSubject.padClicked(mockView);
         // Assert
         verify(mActivity).clearPinBoxes();
@@ -383,6 +446,8 @@ public class PinEntryViewModelTest {
         // Assert
         verify(mActivity, times(2)).showProgressDialog(anyInt(), anyString());
         verify(mAuthDataManager).createPin(any(CharSequenceX.class), anyString());
+        verify(mFingerprintHelper).clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
+        verify(mFingerprintHelper).setFingerprintUnlockEnabled(false);
     }
 
     @Test
@@ -618,6 +683,8 @@ public class PinEntryViewModelTest {
         verify(mAppUtil).setSharedKey(anyString());
         verify(mPayloadManager, times(5)).getPayload();
         verify(mStringUtils).getString(anyInt());
+        verify(mActivity).dismissProgressDialog();
+        assertEquals(true, mSubject.mCanShowFingerprintDialog);
     }
 
     @Test
@@ -636,6 +703,8 @@ public class PinEntryViewModelTest {
         verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
         verify(mAppUtil).setSharedKey(anyString());
         verify(mActivity).goToUpgradeWalletActivity();
+        verify(mActivity).dismissProgressDialog();
+        assertEquals(true, mSubject.mCanShowFingerprintDialog);
     }
 
     @Test
@@ -654,6 +723,8 @@ public class PinEntryViewModelTest {
         verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
         verify(mAppUtil).setSharedKey(anyString());
         verify(mAppUtil).restartAppWithVerifiedPin();
+        verify(mActivity).dismissProgressDialog();
+        assertEquals(true, mSubject.mCanShowFingerprintDialog);
     }
 
     @Test
@@ -763,8 +834,18 @@ public class PinEntryViewModelTest {
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected AuthDataManager provideAuthDataManager() {
+        protected AuthDataManager provideAuthDataManager(PayloadManager payloadManager,
+                                                         PrefsUtil prefsUtil,
+                                                         AppUtil appUtil,
+                                                         AESUtilWrapper aesUtilWrapper,
+                                                         AccessState accessState,
+                                                         StringUtils stringUtils) {
             return mAuthDataManager;
+        }
+
+        @Override
+        protected FingerprintHelper provideFingerprintHelper(Context applicationContext, PrefsUtil prefsUtil) {
+            return mFingerprintHelper;
         }
     }
 

@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Intent;
 import android.support.v4.util.Pair;
 
+import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.Transaction;
@@ -24,6 +25,7 @@ import java.util.Locale;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
+import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -37,9 +39,12 @@ import piuk.blockchain.android.util.StringUtils;
 import rx.Observable;
 import rx.observers.TestSubscriber;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -145,6 +150,10 @@ public class TransactionDetailViewModelTest extends RxTest {
         when(mTransactionListDataManager.getTransactionList()).thenReturn(mTxList);
         when(mStringUtils.getString(R.string.transaction_detail_pending)).thenReturn("Pending (%1$s/%2$s Confirmations)");
         when(mTransactionListDataManager.getTransactionFromHash(anyString())).thenReturn(Observable.error(new Throwable()));
+        double price = 1000.00D;
+        when(mExchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
+        when(mStringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
+        when(mExchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         // Act
         mSubject.onViewReady();
         // Assert
@@ -180,10 +189,13 @@ public class TransactionDetailViewModelTest extends RxTest {
         inputs.put("addr1", 1000L);
         outputs.put("addr2", 2000L);
         Pair pair = new Pair<>(inputs, outputs);
-
         when(mTransactionHelper.filterNonChangeAddresses(any(Transaction.class), any(Tx.class))).thenReturn(pair);
         when(mTransactionHelper.addressToLabel("addr1")).thenReturn("account1");
         when(mTransactionHelper.addressToLabel("addr2")).thenReturn("account2");
+        double price = 1000.00D;
+        when(mExchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
+        when(mStringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
+        when(mExchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         // Act
         mSubject.onViewReady();
         // Assert
@@ -206,10 +218,14 @@ public class TransactionDetailViewModelTest extends RxTest {
     public void getTransactionValueStringUsd() {
         // Arrange
         TestSubscriber<String> subscriber = new TestSubscriber<>();
+        double price = 1000.00D;
+        when(mExchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
+        when(mStringUtils.getString(anyInt())).thenReturn("Value when sent: ");
+        when(mExchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         // Act
         mSubject.getTransactionValueString("USD", mTxSent).toBlocking().subscribe(subscriber);
         // Assert
-        assertNotNull(subscriber.getOnNextEvents().get(0));
+        assertEquals("Value when sent: $1 000.00", subscriber.getOnNextEvents().get(0));
         subscriber.onCompleted();
         subscriber.assertNoErrors();
     }
@@ -230,10 +246,14 @@ public class TransactionDetailViewModelTest extends RxTest {
     public void getTransactionValueStringReceived() {
         // Arrange
         TestSubscriber<String> subscriber = new TestSubscriber<>();
+        double price = 1000.00D;
+        when(mExchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
+        when(mStringUtils.getString(anyInt())).thenReturn("Value when received: ");
+        when(mExchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         // Act
         mSubject.getTransactionValueString("USD", mTxReceived).toBlocking().subscribe(subscriber);
         // Assert
-        assertNotNull(subscriber.getOnNextEvents().get(0));
+        assertEquals("Value when received: $1 000.00", subscriber.getOnNextEvents().get(0));
         subscriber.onCompleted();
         subscriber.assertNoErrors();
     }
@@ -242,10 +262,14 @@ public class TransactionDetailViewModelTest extends RxTest {
     public void getTransactionValueStringTransferred() {
         // Arrange
         TestSubscriber<String> subscriber = new TestSubscriber<>();
+        double price = 1000.00D;
+        when(mExchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
+        when(mStringUtils.getString(anyInt())).thenReturn("Value when transferred: ");
+        when(mExchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         // Act
         mSubject.getTransactionValueString("USD", mTxSent).toBlocking().subscribe(subscriber);
         // Assert
-        assertNotNull(subscriber.getOnNextEvents().get(0));
+        assertEquals("Value when transferred: $1 000.00", subscriber.getOnNextEvents().get(0));
         subscriber.onCompleted();
         subscriber.assertNoErrors();
     }
@@ -419,12 +443,12 @@ public class TransactionDetailViewModelTest extends RxTest {
 
     private class MockDataManagerModule extends DataManagerModule {
         @Override
-        protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager) {
+        protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager, TransactionListStore transactionListStore) {
             return mTransactionListDataManager;
         }
 
         @Override
-        protected TransactionHelper provideTransactionHelper(PayloadManager payloadManager) {
+        protected TransactionHelper provideTransactionHelper(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
             return mTransactionHelper;
         }
     }

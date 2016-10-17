@@ -3,7 +3,6 @@ package piuk.blockchain.android.data.datamanagers;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
-import info.blockchain.api.TransactionDetails;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
@@ -18,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.services.TransactionDetailsService;
+import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.util.ListUtil;
 import rx.Observable;
 
@@ -25,11 +26,16 @@ public class TransactionListDataManager {
 
     private final String TAG_ALL = "TAG_ALL";
     private final String TAG_IMPORTED_ADDRESSES = "TAG_IMPORTED_ADDRESSES";
-    @VisibleForTesting List<Tx> mTransactionList = new ArrayList<>();
-    private PayloadManager mPayloadManager;
+    private PayloadManager payloadManager;
+    private TransactionDetailsService transactionDetails;
+    private TransactionListStore transactionListStore;
 
-    public TransactionListDataManager(PayloadManager payloadManager) {
-        mPayloadManager = payloadManager;
+    public TransactionListDataManager(PayloadManager payloadManager,
+                                      TransactionDetailsService transactionDetails,
+                                      TransactionListStore transactionListStore) {
+        this.payloadManager = payloadManager;
+        this.transactionDetails = transactionDetails;
+        this.transactionListStore = transactionListStore;
     }
 
     /**
@@ -42,15 +48,15 @@ public class TransactionListDataManager {
     public void generateTransactionList(Object object) {
         if (object instanceof Account) {
             // V3
-            mTransactionList.addAll(getV3Transactions((Account) object));
+            transactionListStore.insertTransactions(getV3Transactions((Account) object));
         } else if (object instanceof LegacyAddress) {
             // V2
-            ListUtil.addAllIfNotNull(mTransactionList, MultiAddrFactory.getInstance().getAddressLegacyTxs(((LegacyAddress) object).getAddress()));
+            transactionListStore.insertTransactions(MultiAddrFactory.getInstance().getAddressLegacyTxs(((LegacyAddress) object).getAddress()));
         } else {
             throw new IllegalArgumentException("Object must be instance of Account.class or LegacyAddress.class");
         }
 
-        Collections.sort(mTransactionList, new TxMostRecentDateComparator());
+        Collections.sort(transactionListStore.getList(), new TxMostRecentDateComparator());
     }
 
     /**
@@ -60,14 +66,14 @@ public class TransactionListDataManager {
      */
     @NonNull
     public List<Tx> getTransactionList() {
-        return mTransactionList;
+        return transactionListStore.getList();
     }
 
     /**
      * Resets the list of Transactions.
      */
     public void clearTransactionList() {
-        mTransactionList.clear();
+        transactionListStore.clearList();
     }
 
     /**
@@ -78,9 +84,8 @@ public class TransactionListDataManager {
      */
     @NonNull
     public List<Tx> insertTransactionIntoListAndReturnSorted(Tx transaction) {
-        mTransactionList.add(transaction);
-        Collections.sort(mTransactionList, new TxMostRecentDateComparator());
-        return mTransactionList;
+        transactionListStore.insertTransactionIntoListAndSort(transaction);
+        return transactionListStore.getList();
     }
 
     /**
@@ -98,7 +103,7 @@ public class TransactionListDataManager {
             Account account = ((Account) object);
             // V3 - All
             if (account.getTags().contains(TAG_ALL)) {
-                if (mPayloadManager.getPayload().isUpgraded()) {
+                if (payloadManager.getPayload().isUpgraded()) {
                     // Balance = all xpubs + all legacy address balances
                     balance = ((double) MultiAddrFactory.getInstance().getXpubBalance())
                             + ((double) MultiAddrFactory.getInstance().getLegacyActiveBalance());
@@ -134,8 +139,7 @@ public class TransactionListDataManager {
      * @return A Transaction object
      */
     public Observable<Transaction> getTransactionFromHash(String transactionHash) {
-        return Observable.fromCallable(() -> new TransactionDetails().getTransactionDetails(transactionHash))
-                .compose(RxUtil.applySchedulers());
+        return transactionDetails.getTransactionDetailsFromHash(transactionHash);
     }
 
     /**
@@ -146,8 +150,8 @@ public class TransactionListDataManager {
      * @return If save was successful
      */
     public Observable<Boolean> updateTransactionNotes(String transactionHash, String notes) {
-        mPayloadManager.getPayload().getNotes().put(transactionHash, notes);
-        return Observable.fromCallable(() -> mPayloadManager.savePayloadToServer())
+        payloadManager.getPayload().getNotes().put(transactionHash, notes);
+        return Observable.fromCallable(() -> payloadManager.savePayloadToServer())
                 .compose(RxUtil.applySchedulers());
     }
 
@@ -155,7 +159,7 @@ public class TransactionListDataManager {
         List<Tx> transactions = new ArrayList<>();
 
         if (account.getTags().contains(TAG_ALL)) {
-            if (mPayloadManager.getPayload().isUpgraded()) {
+            if (payloadManager.getPayload().isUpgraded()) {
                 transactions.addAll(getAllXpubAndLegacyTxs());
             } else {
                 transactions.addAll(MultiAddrFactory.getInstance().getLegacyTxs());

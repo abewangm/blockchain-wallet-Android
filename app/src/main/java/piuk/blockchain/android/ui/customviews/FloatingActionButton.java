@@ -25,6 +25,7 @@ import android.support.annotation.DimenRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -67,8 +68,8 @@ public class FloatingActionButton extends ImageButton {
 
     void init(Context context, AttributeSet attributeSet) {
         TypedArray attr = context.obtainStyledAttributes(attributeSet, R.styleable.FloatingActionButton, 0, 0);
-        mColorNormal = attr.getColor(R.styleable.FloatingActionButton_fab_colorNormal, getColor(android.R.color.holo_blue_dark));
-        mColorPressed = attr.getColor(R.styleable.FloatingActionButton_fab_colorPressed, getColor(android.R.color.holo_blue_light));
+        mColorNormal = attr.getColor(R.styleable.FloatingActionButton_fab_colorNormal, getColor(context, android.R.color.holo_blue_dark));
+        mColorPressed = attr.getColor(R.styleable.FloatingActionButton_fab_colorPressed, getColor(context, android.R.color.holo_blue_light));
         mSize = attr.getInt(R.styleable.FloatingActionButton_fab_size, SIZE_NORMAL);
         mIcon = attr.getResourceId(R.styleable.FloatingActionButton_fab_icon, 0);
         mStrokeVisible = attr.getBoolean(R.styleable.FloatingActionButton_fab_stroke_visible, true);
@@ -79,7 +80,7 @@ public class FloatingActionButton extends ImageButton {
         mShadowOffset = getDimension(R.dimen.fab_shadow_offset);
         updateDrawableSize();
 
-        updateBackground();
+        updateBackground(context);
     }
 
     private void updateDrawableSize() {
@@ -95,7 +96,7 @@ public class FloatingActionButton extends ImageButton {
         return mSize;
     }
 
-    public void setSize(@FAB_SIZE int size) {
+    public void setSize(Context context, @FAB_SIZE int size) {
         if (size != SIZE_MINI && size != SIZE_NORMAL) {
             throw new IllegalArgumentException("Use @FAB_SIZE constants only!");
         }
@@ -104,31 +105,27 @@ public class FloatingActionButton extends ImageButton {
             mSize = size;
             updateCircleSize();
             updateDrawableSize();
-            updateBackground();
+            updateBackground(context);
         }
     }
 
-    public void setIcon(@DrawableRes int icon) {
+    public void setIcon(Context context, @DrawableRes int icon) {
         if (mIcon != icon) {
             mIcon = icon;
             mIconDrawable = null;
-            updateBackground();
+            updateBackground(context);
         }
     }
 
-    public void setColorNormalResId(@ColorRes int colorNormal) {
-        setColorNormal(getColor(colorNormal));
-    }
-
-    public void setColorNormal(int color) {
+    public void setColorNormal(Context context, int color) {
         if (mColorNormal != color) {
             mColorNormal = color;
-            updateBackground();
+            updateBackground(context);
         }
     }
 
-    int getColor(@ColorRes int id) {
-        return getResources().getColor(id);
+    int getColor(Context context, @ColorRes int id) {
+        return ContextCompat.getColor(context, id);
     }
 
     float getDimension(@DimenRes int id) {
@@ -145,16 +142,16 @@ public class FloatingActionButton extends ImageButton {
         setMeasuredDimension(mDrawableSize, mDrawableSize);
     }
 
-    void updateBackground() {
+    void updateBackground(Context context) {
         final float strokeWidth = getDimension(R.dimen.fab_stroke_width);
         final float halfStrokeWidth = strokeWidth / 2f;
 
         LayerDrawable layerDrawable = new LayerDrawable(
                 new Drawable[]{
-                        getResources().getDrawable(mSize == SIZE_NORMAL ? R.drawable.fab_bg_normal : R.drawable.fab_bg_mini),
+                        ContextCompat.getDrawable(context, mSize == SIZE_NORMAL ? R.drawable.fab_bg_normal : R.drawable.fab_bg_mini),
                         createFillDrawable(strokeWidth),
                         createOuterStrokeDrawable(strokeWidth),
-                        getIconDrawable()
+                        getIconDrawable(context)
                 });
 
         int iconOffset = (int) (mCircleSize - getDimension(R.dimen.fab_icon_size)) / 2;
@@ -184,21 +181,21 @@ public class FloatingActionButton extends ImageButton {
         setBackgroundCompat(layerDrawable);
     }
 
-    Drawable getIconDrawable() {
+    Drawable getIconDrawable(Context context) {
         if (mIconDrawable != null) {
             return mIconDrawable;
         } else if (mIcon != 0) {
-            return getResources().getDrawable(mIcon);
+            return ContextCompat.getDrawable(context, mIcon);
         } else {
             return new ColorDrawable(Color.TRANSPARENT);
         }
     }
 
-    public void setIconDrawable(@NonNull Drawable iconDrawable) {
+    public void setIconDrawable(Context context, @NonNull Drawable iconDrawable) {
         if (mIconDrawable != iconDrawable) {
             mIcon = 0;
             mIconDrawable = iconDrawable;
-            updateBackground();
+            updateBackground(context);
         }
     }
 
