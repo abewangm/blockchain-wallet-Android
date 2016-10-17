@@ -24,8 +24,8 @@ import rx.Observable;
 
 public class TransactionListDataManager {
 
-    private final String TAG_ALL = "TAG_ALL";
-    private final String TAG_IMPORTED_ADDRESSES = "TAG_IMPORTED_ADDRESSES";
+    private final static String TAG_ALL = "TAG_ALL";
+    private final static String TAG_IMPORTED_ADDRESSES = "TAG_IMPORTED_ADDRESSES";
     private PayloadManager payloadManager;
     private TransactionDetailsService transactionDetails;
     private TransactionListStore transactionListStore;

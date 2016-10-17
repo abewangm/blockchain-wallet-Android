@@ -253,80 +253,76 @@ public class ReceiveViewModel extends BaseViewModel {
     public List<SendPaymentCodeData> getIntentDataList(String uri) {
         File file = getQrFile();
         FileOutputStream outputStream;
-        if (file != null) {
-            outputStream = getFileOutputStream(file);
+        outputStream = getFileOutputStream(file);
 
-            if (outputStream != null) {
-                Bitmap bitmap = mDataListener.getQrBitmap();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
+        if (outputStream != null) {
+            Bitmap bitmap = mDataListener.getQrBitmap();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
 
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "getIntentDataList: ", e);
-                    mDataListener.showToast(e.getMessage(), ToastCustom.TYPE_ERROR);
-                    return null;
-                }
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                Log.e(TAG, "getIntentDataList: ", e);
+                mDataListener.showToast(e.getMessage(), ToastCustom.TYPE_ERROR);
+                return null;
+            }
 
-                List<SendPaymentCodeData> dataList = new ArrayList<>();
+            List<SendPaymentCodeData> dataList = new ArrayList<>();
 
-                PackageManager packageManager = mAppUtil.getPackageManager();
+            PackageManager packageManager = mAppUtil.getPackageManager();
 
-                Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-                emailIntent.setType("application/image");
-                emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+            Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+            emailIntent.setType("application/image");
+            emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
 
-                Intent imageIntent = new Intent();
-                imageIntent.setAction(Intent.ACTION_SEND);
-                imageIntent.setType("image/png");
-                imageIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+            Intent imageIntent = new Intent();
+            imageIntent.setAction(Intent.ACTION_SEND);
+            imageIntent.setType("image/png");
+            imageIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
 
-                if (getFormattedEmailLink(uri) != null) {
-                    emailIntent.setData(getFormattedEmailLink(uri));
-                } else {
-                    mDataListener.showToast(mStringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
-                    return null;
-                }
-
-                HashMap<String, Pair<ResolveInfo, Intent>> intentHashMap = new HashMap<>();
-
-                List<ResolveInfo> emailInfos = packageManager.queryIntentActivities(emailIntent, 0);
-                addResolveInfoToMap(emailIntent, intentHashMap, emailInfos);
-
-                List<ResolveInfo> imageInfos = packageManager.queryIntentActivities(imageIntent, 0);
-                addResolveInfoToMap(imageIntent, intentHashMap, imageInfos);
-
-                SendPaymentCodeData d;
-
-                Iterator it = intentHashMap.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry mapItem = (Map.Entry) it.next();
-                    Pair<ResolveInfo, Intent> pair = (Pair<ResolveInfo, Intent>) mapItem.getValue();
-                    ResolveInfo resolveInfo = pair.first;
-                    String context = resolveInfo.activityInfo.packageName;
-                    String packageClassName = resolveInfo.activityInfo.name;
-                    CharSequence label = resolveInfo.loadLabel(packageManager);
-                    Drawable icon = resolveInfo.loadIcon(packageManager);
-
-                    Intent intent = pair.second;
-                    intent.setClassName(context, packageClassName);
-
-                    d = new SendPaymentCodeData(label.toString(), icon, intent);
-                    dataList.add(d);
-
-                    it.remove();
-                }
-
-                return dataList;
-
+            if (getFormattedEmailLink(uri) != null) {
+                emailIntent.setData(getFormattedEmailLink(uri));
             } else {
                 mDataListener.showToast(mStringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
                 return null;
             }
+
+            HashMap<String, Pair<ResolveInfo, Intent>> intentHashMap = new HashMap<>();
+
+            List<ResolveInfo> emailInfos = packageManager.queryIntentActivities(emailIntent, 0);
+            addResolveInfoToMap(emailIntent, intentHashMap, emailInfos);
+
+            List<ResolveInfo> imageInfos = packageManager.queryIntentActivities(imageIntent, 0);
+            addResolveInfoToMap(imageIntent, intentHashMap, imageInfos);
+
+            SendPaymentCodeData d;
+
+            Iterator it = intentHashMap.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry mapItem = (Map.Entry) it.next();
+                Pair<ResolveInfo, Intent> pair = (Pair<ResolveInfo, Intent>) mapItem.getValue();
+                ResolveInfo resolveInfo = pair.first;
+                String context = resolveInfo.activityInfo.packageName;
+                String packageClassName = resolveInfo.activityInfo.name;
+                CharSequence label = resolveInfo.loadLabel(packageManager);
+                Drawable icon = resolveInfo.loadIcon(packageManager);
+
+                Intent intent = pair.second;
+                intent.setClassName(context, packageClassName);
+
+                d = new SendPaymentCodeData(label.toString(), icon, intent);
+                dataList.add(d);
+
+                it.remove();
+            }
+
+            return dataList;
+
         } else {
             mDataListener.showToast(mStringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
             return null;
         }
+
     }
 
     @Nullable
@@ -371,7 +367,7 @@ public class ReceiveViewModel extends BaseViewModel {
         return mAppUtil;
     }
 
-    public class SendPaymentCodeData {
+    public static class SendPaymentCodeData {
         private Drawable mLogo;
         private String mTitle;
         private Intent mIntent;

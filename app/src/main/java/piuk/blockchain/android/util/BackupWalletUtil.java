@@ -1,6 +1,6 @@
 package piuk.blockchain.android.util;
 
-import android.content.Context;
+import android.util.Log;
 import android.util.Pair;
 
 import info.blockchain.wallet.payload.PayloadManager;
@@ -12,10 +12,8 @@ import java.util.List;
 
 public class BackupWalletUtil {
 
-    private Context context = null;
-
-    public BackupWalletUtil(Context context) {
-        this.context = context;
+    public BackupWalletUtil() {
+        // Empty Constructor
     }
 
     /**
@@ -34,9 +32,7 @@ public class BackupWalletUtil {
         int i = 0;
         while (i < 3) {
             sel = random.nextInt(s.length);
-            if (seen.contains(sel)) {
-                continue;
-            } else {
+            if (!seen.contains(sel)) {
                 seen.add(sel);
                 i++;
             }
@@ -65,7 +61,7 @@ public class BackupWalletUtil {
                 return PayloadManager.getInstance().getMnemonic();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(BackupWalletUtil.class.getSimpleName(), "getMnemonic: ", e);
             return null;
         }
     }

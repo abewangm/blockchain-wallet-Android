@@ -42,6 +42,8 @@ import rx.subscriptions.CompositeSubscription;
 @SuppressWarnings("WeakerAccess")
 public class BalanceViewModel extends BaseObservable implements ViewModel {
 
+    private static final String TAG_IMPORTED_ADDRESSES = "TAG_IMPORTED_ADDRESSES";
+    private static final String TAG_ALL = "TAG_ALL";
     private static final long ONE_MONTH = 28 * 24 * 60 * 60 * 1000L;
 
     private Context context;
@@ -50,8 +52,6 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
 
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
-    private final String TAG_ALL = "TAG_ALL";
-    private final String TAG_IMPORTED_ADDRESSES = "TAG_IMPORTED_ADDRESSES";
     private List<Tx> transactionList;
     private OSUtil osUtil;
     @Inject protected PrefsUtil prefsUtil;
@@ -85,13 +85,13 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.context = context;
         this.dataListener = dataListener;
-        this.model = new BalanceModel();
+        model = new BalanceModel();
 
-        this.activeAccountAndAddressList = new ArrayList<>();
-        this.activeAccountAndAddressBiMap = HashBiMap.create();
-        this.transactionList = new ArrayList<>();
-        this.osUtil = new OSUtil(context);
-        this.compositeSubscription = new CompositeSubscription();
+        activeAccountAndAddressList = new ArrayList<>();
+        activeAccountAndAddressBiMap = HashBiMap.create();
+        transactionList = new ArrayList<>();
+        osUtil = new OSUtil(context);
+        compositeSubscription = new CompositeSubscription();
     }
 
     public void onViewReady() {

@@ -25,7 +25,7 @@ import piuk.blockchain.android.util.PermissionUtil;
 public class PairWalletFragment extends Fragment implements FragmentCompat.OnRequestPermissionsResultCallback {
 
     private FragmentPairWalletBinding binding;
-    private final String walletUrl = BaseApi.PROTOCOL+BaseApi.SERVER_ADDRESS+"wallet";
+    private static final String walletUrl = BaseApi.PROTOCOL + BaseApi.SERVER_ADDRESS + "wallet";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

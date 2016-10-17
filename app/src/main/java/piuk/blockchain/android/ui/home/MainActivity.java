@@ -256,7 +256,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         setSupportActionBar(toolbar);
         ViewUtils.setElevation(toolbar, 0F);
 
-        View headerLayout = binding.nvView.getHeaderView(0);//TODO - future use for account selection
         MenuItem backUpMenuItem = binding.nvView.getMenu().findItem(R.id.nav_backup);
         MenuItem upgradeMenuItem = binding.nvView.getMenu().findItem(R.id.nav_upgrade);
 
