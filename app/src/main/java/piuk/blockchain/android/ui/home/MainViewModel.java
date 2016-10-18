@@ -12,6 +12,7 @@ import info.blockchain.api.Unspent;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.util.WebUtil;
 
 import org.json.JSONObject;
 
@@ -28,6 +29,7 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -130,6 +132,7 @@ public class MainViewModel extends BaseViewModel {
 
             new Thread(() -> {
                 Looper.prepare();
+                logEvents();
                 cacheDynamicFee();
                 cacheDefaultAccountUnspentData();
                 Looper.loop();
@@ -275,5 +278,13 @@ public class MainViewModel extends BaseViewModel {
 //        }else{
         urls.setProductionEnvironment();
 //        }
+    }
+
+    private void logEvents() {
+
+        EventLogHandler handler = new EventLogHandler(prefs, WebUtil.getInstance());
+        handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncrypted());
+        handler.logLegacyEvent(MultiAddrFactory.getInstance().getLegacyBalance() > 0);
+        handler.logBackupEvent(payloadManager.getPayload().getHdWallet().isMnemonicVerified());
     }
 }
