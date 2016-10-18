@@ -7,10 +7,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.StringRes;
 import android.support.annotation.UiThread;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
@@ -38,7 +38,6 @@ import com.mukesh.countrypicker.fragments.CountryPicker;
 import com.mukesh.countrypicker.models.Country;
 
 import info.blockchain.api.Settings;
-import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
@@ -56,7 +55,6 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.util.ExchangeRateFactory;
-import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
 import piuk.blockchain.android.util.ViewUtils;
@@ -65,6 +63,9 @@ import rx.Observable;
 import rx.exceptions.Exceptions;
 
 import static android.app.Activity.RESULT_OK;
+import static com.subgraph.orchid.directory.router.RouterMicrodescriptorKeyword.A;
+import static piuk.blockchain.android.R.id.tvSms;
+import static piuk.blockchain.android.R.string.email;
 import static piuk.blockchain.android.R.string.success;
 import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATED_PIN;
 import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATING_PIN_FOR_RESULT;
@@ -77,18 +78,18 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     public static final String URL_PRIVACY_POLICY = "https://blockchain.com/privacy";
     public static final int REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT = 1984;
 
-    //Profile
+    // Profile
     @Thunk Preference guidPref;
     private Preference emailPref;
     private Preference smsPref;
 
-    //Preferences
+    // Preferences
     private Preference unitsPref;
     private Preference fiatPref;
     private SwitchPreferenceCompat emailNotificationPref;
     private SwitchPreferenceCompat smsNotificationPref;
 
-    //Security
+    // Security
     @Thunk SwitchPreferenceCompat fingerprintPref;
     @Thunk Preference pinPref;
     private SwitchPreferenceCompat twoStepVerificationPref;
@@ -96,26 +97,26 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     @Thunk Preference changePasswordPref;
     private SwitchPreferenceCompat torPref;
 
-    //App
+    // App
     @Thunk Preference aboutPref;
     @Thunk Preference tosPref;
     @Thunk Preference privacyPref;
     @Thunk Preference disableRootWarningPref;
 
-    @Thunk Settings settingsApi;
+//    @Thunk Settings settingsApi;
     @Thunk SettingsViewModel viewModel;
     private int pwStrength = 0;
     private PrefsUtil prefsUtil;
-    private MonetaryUtil monetaryUtil;
     @Thunk PayloadManager payloadManager;
     // Flag for setting 2FA after phone confirmation
     @Thunk boolean show2FaAfterPhoneVerified = false;
+    private MaterialProgressDialog progressDialog;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
-                fetchUpdatedSettings();
+                viewModel.onViewReady();
             }
         }
     };
@@ -123,54 +124,33 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         payloadManager = PayloadManager.getInstance();
         prefsUtil = new PrefsUtil(getActivity());
-        monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
         viewModel = new SettingsViewModel(this);
 
-        fetchUpdatedSettings();
+        refreshPreferences();
+        viewModel.onViewReady();
     }
 
-    @Thunk
-    void fetchUpdatedSettings() {
-        new AsyncTask<Void, Void, Void>() {
+    @Override
+    public void showProgressDialog(@StringRes int message) {
+        progressDialog = new MaterialProgressDialog(getActivity());
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(message);
+        progressDialog.show();
+    }
 
-            MaterialProgressDialog progress;
+    @Override
+    public void hideProgressDialog() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+    }
 
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                progress = new MaterialProgressDialog(getActivity());
-                progress.setMessage(getActivity().getResources().getString(R.string.please_wait));
-                progress.show();
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                if (progress != null && progress.isShowing()) {
-                    progress.dismiss();
-                    progress = null;
-                }
-                if (settingsApi != null) {
-                    refreshList();
-                }
-
-                super.onPostExecute(aVoid);
-            }
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                Payload payload = payloadManager.getPayload();
-                try {
-                    settingsApi = new Settings(payload.getGuid(), payload.getSharedKey());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-        }.execute();
+    @Override
+    public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
+        ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
 
     @Override
@@ -188,122 +168,128 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
     @Override
     public void onCreatePreferences(Bundle bundle, String s) {
+        // No-op
     }
 
-    @UiThread
-    @Thunk
-    void refreshList() {
+    @Override
+    public void setGuidSummary(String summary) {
+        guidPref.setSummary(summary);
+    }
+
+    @Override
+    public void setEmailSummary(String summary) {
+        emailPref.setSummary(summary);
+    }
+
+    @Override
+    public void setSmsSummary(String summary) {
+        smsPref.setSummary(summary);
+    }
+
+    @Override
+    public void setUnitsSummary(String summary) {
+        unitsPref.setSummary(summary);
+    }
+
+    @Override
+    public void setFiatSummary(String summary) {
+        fiatPref.setSummary(summary);
+    }
+
+    @Override
+    public void setEmailNotificationsVisibility(boolean visible) {
+        emailNotificationPref.setVisible(visible);
+    }
+
+    @Override
+    public void setSmsNotificationsVisibility(boolean visible) {
+        smsNotificationPref.setVisible(visible);
+    }
+
+    @Override
+    public void setEmailNotificationPref(boolean enabled) {
+        emailNotificationPref.setChecked(enabled);
+    }
+
+    @Override
+    public void setSmsNotificationPref(boolean enabled) {
+        smsNotificationPref.setChecked(enabled);
+    }
+
+    @Override
+    public void setFingerprintVisibility(boolean visible) {
+        fingerprintPref.setVisible(visible);
+    }
+
+    @Override
+    public void setTwoFaPreference(boolean enabled) {
+        twoStepVerificationPref.setChecked(enabled);
+    }
+
+    @Override
+    public void setTwoFaSummary(String summary) {
+        twoStepVerificationPref.setSummary(summary);
+    }
+
+    @Override
+    public void setPasswordHintSummary(String summary) {
+        passwordHint1Pref.setSummary(summary);
+    }
+
+    @Override
+    public void setTorBlocked(boolean blocked) {
+        torPref.setChecked(blocked);
+    }
+
+    public void refreshPreferences() {
         if (isAdded() && getActivity() != null) {
             PreferenceScreen prefScreen = getPreferenceScreen();
             if (prefScreen != null) prefScreen.removeAll();
             addPreferencesFromResource(R.xml.settings);
 
-            //Profile
+            // Profile
             guidPref = findPreference("guid");
-            guidPref.setSummary(payloadManager.getPayload().getGuid());
-            guidPref.setOnPreferenceClickListener(SettingsFragment.this);
+            guidPref.setOnPreferenceClickListener(this);
 
             emailPref = findPreference("email");
-
-            String emailAndStatus = settingsApi.getEmail();
-            if (emailAndStatus == null || emailAndStatus.isEmpty()) {
-                emailAndStatus = getString(R.string.not_specified);
-            } else if (settingsApi.isEmailVerified()) {
-                emailAndStatus += "  (" + getString(R.string.verified) + ")";
-            } else {
-                emailAndStatus += "  (" + getString(R.string.unverified) + ")";
-            }
-            emailPref.setSummary(emailAndStatus);
-            emailPref.setOnPreferenceClickListener(SettingsFragment.this);
+            emailPref.setOnPreferenceClickListener(this);
 
             smsPref = findPreference("mobile");
-            String smsAndStatus = settingsApi.getSms();
-            if (smsAndStatus == null || smsAndStatus.isEmpty()) {
-                smsAndStatus = getString(R.string.not_specified);
-            } else if (settingsApi.isSmsVerified()) {
-                smsAndStatus += "  (" + getString(R.string.verified) + ")";
-            } else {
-                smsAndStatus += "  (" + getString(R.string.unverified) + ")";
-            }
-            smsPref.setSummary(smsAndStatus);
-            smsPref.setOnPreferenceClickListener(SettingsFragment.this);
+            smsPref.setOnPreferenceClickListener(this);
 
-            //Preferences
-            PreferenceCategory preferencesCategory = (PreferenceCategory) findPreference("preferences");
+            // Preferences
             unitsPref = findPreference("units");
-            unitsPref.setSummary(getDisplayUnits());
-            unitsPref.setOnPreferenceClickListener(SettingsFragment.this);
+            unitsPref.setOnPreferenceClickListener(this);
 
             fiatPref = findPreference("fiat");
-            fiatPref.setSummary(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY));
-            fiatPref.setOnPreferenceClickListener(SettingsFragment.this);
+            fiatPref.setOnPreferenceClickListener(this);
 
             emailNotificationPref = (SwitchPreferenceCompat) findPreference("email_notifications");
-            if (settingsApi.isEmailVerified()) {
-                emailNotificationPref.setOnPreferenceClickListener(this);
-            } else {
-                preferencesCategory.removePreference(emailNotificationPref);
-            }
+            emailNotificationPref.setOnPreferenceClickListener(this);
 
             smsNotificationPref = (SwitchPreferenceCompat) findPreference("sms_notifications");
-            if (settingsApi.isSmsVerified()) {
-                smsNotificationPref.setOnPreferenceClickListener(this);
-            } else {
-                preferencesCategory.removePreference(smsNotificationPref);
-            }
+            smsNotificationPref.setOnPreferenceClickListener(this);
 
-            emailNotificationPref.setChecked(false);
-            smsNotificationPref.setChecked(false);
-
-            if (settingsApi.isNotificationsOn() && settingsApi.getNotificationTypes().size() > 0) {
-                for (int type : settingsApi.getNotificationTypes()) {
-                    if (type == Settings.NOTIFICATION_TYPE_EMAIL) {
-                        emailNotificationPref.setChecked(true);
-                    }
-
-                    if (type == Settings.NOTIFICATION_TYPE_SMS) {
-                        smsNotificationPref.setChecked(true);
-                    }
-                }
-            } else {
-                emailNotificationPref.setChecked(false);
-                smsNotificationPref.setChecked(false);
-            }
-
-            //Security
+            // Security
             fingerprintPref = (SwitchPreferenceCompat) findPreference("fingerprint");
-            if (!viewModel.getIfFingerprintHardwareAvailable()) {
-                fingerprintPref.setVisible(false);
-            } else {
-                fingerprintPref.setOnPreferenceClickListener(this);
-                updateFingerprintPreferenceStatus();
-            }
+            fingerprintPref.setOnPreferenceClickListener(this);
 
             pinPref = findPreference("pin");
             pinPref.setOnPreferenceClickListener(this);
 
             twoStepVerificationPref = (SwitchPreferenceCompat) findPreference("2fa");
             twoStepVerificationPref.setOnPreferenceClickListener(this);
-            twoStepVerificationPref.setChecked(settingsApi.getAuthType() != Settings.AUTH_TYPE_OFF);
-
-            set2FASummary(settingsApi.getAuthType());
 
             passwordHint1Pref = findPreference("pw_hint1");
-            if (settingsApi.getPasswordHint1() != null && !settingsApi.getPasswordHint1().isEmpty()) {
-                passwordHint1Pref.setSummary(settingsApi.getPasswordHint1());
-            } else {
-                passwordHint1Pref.setSummary("");
-            }
             passwordHint1Pref.setOnPreferenceClickListener(this);
 
             changePasswordPref = findPreference("change_pw");
             changePasswordPref.setOnPreferenceClickListener(this);
 
             torPref = (SwitchPreferenceCompat) findPreference("tor");
-            torPref.setChecked(settingsApi.isTorBlocked());
             torPref.setOnPreferenceClickListener(this);
 
-            //App
+            // App
             aboutPref = findPreference("about");
             aboutPref.setSummary("v" + BuildConfig.VERSION_NAME);
             aboutPref.setOnPreferenceClickListener(this);
@@ -315,8 +301,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             privacyPref.setOnPreferenceClickListener(this);
 
             disableRootWarningPref = findPreference("disable_root_warning");
-            if (disableRootWarningPref != null &&
-                    !new RootUtil().isDeviceRooted()) {
+            if (disableRootWarningPref != null && !new RootUtil().isDeviceRooted()) {
                 PreferenceCategory appCategory = (PreferenceCategory) findPreference("app");
                 appCategory.removePreference(disableRootWarningPref);
             }
@@ -328,7 +313,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         }
     }
 
-    private void set2FASummary(int type){
+    private void set2FASummary(int type) {
         switch (type) {
             case Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR:
                 twoStepVerificationPref.setSummary(getString(R.string.google_authenticator));
@@ -405,46 +390,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         dialog.show(getFragmentManager(), FingerprintDialog.TAG);
     }
 
-    private String getDisplayUnits() {
-        return (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
-    }
-
-    interface ExecutorListener {
-        void onSuccess();
-    }
-
-    @UiThread
-    private void updateEmail(String email, ExecutorListener listener) {
-        if (email == null || email.isEmpty()) {
-            email = getString(R.string.not_specified);
-            emailPref.setSummary(email);
-        } else {
-            final String finalEmail = email;
-            Handler handler = new Handler(Looper.getMainLooper());
-            new BackgroundExecutor(getActivity(),
-                    () -> settingsApi.setEmail(finalEmail, new Settings.ResultListener() {
-                        @Override
-                        public void onSuccess() {
-                            handler.post(() -> {
-                                listener.onSuccess();
-                                updateNotification(false, Settings.NOTIFICATION_TYPE_EMAIL);
-                                refreshList();
-                            });
-                        }
-
-                        @Override
-                        public void onFail() {
-                            ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-                        }
-
-                        @Override
-                        public void onBadRequest() {
-
-                        }
-                    })).execute();
-        }
-    }
-
+    // STOPSHIP: 17/10/2016 Done
     @UiThread
     private void updateSms(String sms) {
         if (sms == null || sms.isEmpty()) {
@@ -453,90 +399,93 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         } else {
             final String finalSms = sms;
             Handler handler = new Handler(Looper.getMainLooper());
-            new BackgroundExecutor(getActivity(),
-                    () -> settingsApi.setSms(finalSms, new Settings.ResultListener() {
-                        @Override
-                        public void onSuccess() {
-                            handler.post(() -> {
-                                updateNotification(false, Settings.NOTIFICATION_TYPE_SMS);
-                                refreshList();
-                                showDialogVerifySms();
-                            });
-                        }
-
-                        @Override
-                        public void onFail() {
-                            show2FaAfterPhoneVerified = false;
-                            ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-                        }
-
-                        @Override
-                        public void onBadRequest() {
-
-                        }
-                    })).execute();
+//            new BackgroundExecutor(getActivity(),
+//                    () -> settingsApi.setSms(finalSms, new Settings.ResultListener() {
+//                        @Override
+//                        public void onSuccess() {
+//                            handler.post(() -> {
+//                                updateNotification(false, Settings.NOTIFICATION_TYPE_SMS);
+//                                refreshPreferences();
+//                                showDialogVerifySms();
+//                            });
+//                        }
+//
+//                        @Override
+//                        public void onFail() {
+//                            show2FaAfterPhoneVerified = false;
+//                            ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
+//                        }
+//
+//                        @Override
+//                        public void onBadRequest() {
+//
+//                        }
+//                    })).execute();
 
         }
     }
 
+    // STOPSHIP: 17/10/2016 Done
     @UiThread
     private void verifySms(final String code) {
         Handler handler = new Handler(Looper.getMainLooper());
-        new BackgroundExecutor(getActivity(),
-                () -> settingsApi.verifySms(code, new Settings.ResultListener() {
-                    @Override
-                    public void onSuccess() {
-                        handler.post(() -> {
-                            refreshList();
-                            new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                                    .setTitle(success)
-                                    .setMessage(R.string.sms_verified)
-                                    .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) -> {
-                                        if (show2FaAfterPhoneVerified) showDialogTwoFA();
-                                    })
-                                    .show();
-                        });
-                    }
-
-                    @Override
-                    public void onFail() {
-                        show2FaAfterPhoneVerified = false;
-                        ToastCustom.makeText(getActivity(), getString(R.string.verification_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-                    }
-
-                    @Override
-                    public void onBadRequest() {
-
-                    }
-                })).execute();
+//        new BackgroundExecutor(getActivity(),
+//                () -> settingsApi.verifySms(code, new Settings.ResultListener() {
+//                    @Override
+//                    public void onSuccess() {
+//                        handler.post(() -> {
+//                            refreshPreferences();
+//                            new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+//                                    .setTitle(success)
+//                                    .setMessage(R.string.sms_verified)
+//                                    .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) -> {
+//                                        if (show2FaAfterPhoneVerified) showDialogTwoFA();
+//                                    })
+//                                    .show();
+//                        });
+//                    }
+//
+//                    @Override
+//                    public void onFail() {
+//                        show2FaAfterPhoneVerified = false;
+//                        ToastCustom.makeText(getActivity(), getString(R.string.verification_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
+//                    }
+//
+//                    @Override
+//                    public void onBadRequest() {
+//
+//                    }
+//                })).execute();
     }
 
+    // STOPSHIP: 17/10/2016 Done
     @UiThread
     private void updateTor(final boolean enabled) {
         Handler handler = new Handler(Looper.getMainLooper());
-        new BackgroundExecutor(getActivity(),
-                () -> settingsApi.setTorBlocked(enabled, new Settings.ResultListener() {
-                    @Override
-                    public void onSuccess() {
-                        handler.post(() -> torPref.setChecked(enabled));
-                    }
-
-                    @Override
-                    public void onFail() {
-                        ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-                    }
-
-                    @Override
-                    public void onBadRequest() {
-
-                    }
-                })).execute();
+//        new BackgroundExecutor(getActivity(),
+//                () -> settingsApi.setTorBlocked(enabled, new Settings.ResultListener() {
+//                    @Override
+//                    public void onSuccess() {
+//                        handler.post(() -> torPref.setChecked(enabled));
+//                    }
+//
+//                    @Override
+//                    public void onFail() {
+//                        ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
+//                    }
+//
+//                    @Override
+//                    public void onBadRequest() {
+//
+//                    }
+//                })).execute();
     }
 
     private boolean isBadString(String hint) {
         return hint == null || hint.isEmpty() || hint.length() > 255;
     }
 
+    // STOPSHIP: 17/10/2016 Done
     @UiThread
     private void updatePasswordHint(final String hint) {
 
@@ -545,27 +494,28 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             ToastCustom.makeText(getActivity(), getString(R.string.settings_field_cant_be_empty), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
         } else {
 
-            Handler handler = new Handler(Looper.getMainLooper());
-            new BackgroundExecutor(getActivity(),
-                    () -> settingsApi.setPasswordHint1(hint, new Settings.ResultListener() {
-                        @Override
-                        public void onSuccess() {
-                            handler.post(() -> passwordHint1Pref.setSummary(hint));
-                        }
-
-                        @Override
-                        public void onFail() {
-                            ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-                        }
-
-                        @Override
-                        public void onBadRequest() {
-
-                        }
-                    })).execute();
+//            Handler handler = new Handler(Looper.getMainLooper());
+//            new BackgroundExecutor(getActivity(),
+//                    () -> settingsApi.setPasswordHint1(hint, new Settings.ResultListener() {
+//                        @Override
+//                        public void onSuccess() {
+//                            handler.post(() -> passwordHint1Pref.setSummary(hint));
+//                        }
+//
+//                        @Override
+//                        public void onFail() {
+//                            ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
+//                        }
+//
+//                        @Override
+//                        public void onBadRequest() {
+//
+//                        }
+//                    })).execute();
         }
     }
 
+    // TODO: 17/10/2016 Move elsewhere
     @UiThread
     private void updatePin(final String pin) {
 
@@ -595,6 +545,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 });
     }
 
+    // STOPSHIP: 17/10/2016 Done
     @UiThread
     @Thunk
     void updateNotification(final boolean enabled, int notificationType) {
@@ -602,82 +553,83 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         if (enabled) {
 
             Handler handler = new Handler(Looper.getMainLooper());
-            new BackgroundExecutor(getActivity(),
-                    () -> settingsApi.enableNotification(notificationType, new Settings.ResultListener() {
-                        @Override
-                        public void onSuccess() {
-                            if (notificationType == Settings.NOTIFICATION_TYPE_EMAIL) {
-                                handler.post(() -> emailNotificationPref.setChecked(enabled));
-                            } else if (notificationType == Settings.NOTIFICATION_TYPE_SMS) {
-                                handler.post(() -> smsNotificationPref.setChecked(enabled));
-                            }
-                        }
-
-                        @Override
-                        public void onFail() {
-                            ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-                        }
-
-                        @Override
-                        public void onBadRequest() {
-
-                        }
-                    })).execute();
+//            new BackgroundExecutor(getActivity(),
+//                    () -> settingsApi.enableNotification(notificationType, new Settings.ResultListener() {
+//                        @Override
+//                        public void onSuccess() {
+//                            if (notificationType == Settings.NOTIFICATION_TYPE_EMAIL) {
+//                                handler.post(() -> emailNotificationPref.setChecked(enabled));
+//                            } else if (notificationType == Settings.NOTIFICATION_TYPE_SMS) {
+//                                handler.post(() -> smsNotificationPref.setChecked(enabled));
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onFail() {
+//                            ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
+//                        }
+//
+//                        @Override
+//                        public void onBadRequest() {
+//
+//                        }
+//                    })).execute();
 
         } else {
 
             Handler handler = new Handler(Looper.getMainLooper());
-            new BackgroundExecutor(getActivity(),
-                    () -> settingsApi.disableNotification(notificationType, new Settings.ResultListener() {
-                        @Override
-                        public void onSuccess() {
-                            if (notificationType == Settings.NOTIFICATION_TYPE_EMAIL) {
-                                handler.post(() -> emailNotificationPref.setChecked(enabled));
-                            } else if (notificationType == Settings.NOTIFICATION_TYPE_SMS) {
-                                handler.post(() -> smsNotificationPref.setChecked(enabled));
-                            }
-                        }
-
-                        @Override
-                        public void onFail() {
-                            ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-                        }
-
-                        @Override
-                        public void onBadRequest() {
-
-                        }
-                    })).execute();
+//            new BackgroundExecutor(getActivity(),
+//                    () -> settingsApi.disableNotification(notificationType, new Settings.ResultListener() {
+//                        @Override
+//                        public void onSuccess() {
+//                            if (notificationType == Settings.NOTIFICATION_TYPE_EMAIL) {
+//                                handler.post(() -> emailNotificationPref.setChecked(enabled));
+//                            } else if (notificationType == Settings.NOTIFICATION_TYPE_SMS) {
+//                                handler.post(() -> smsNotificationPref.setChecked(enabled));
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onFail() {
+//                            ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
+//                        }
+//
+//                        @Override
+//                        public void onBadRequest() {
+//
+//                        }
+//                    })).execute();
         }
     }
 
+    // STOPSHIP: 17/10/2016 Done
     @UiThread
     private void update2FA(final int type) {
         Handler handler = new Handler(Looper.getMainLooper());
-        new BackgroundExecutor(getActivity(),
-                () -> settingsApi.setAuthType(type, new Settings.ResultListener() {
-                    @Override
-                    public void onSuccess() {
-                        handler.post(() -> {
-                            twoStepVerificationPref.setChecked(type != Settings.AUTH_TYPE_OFF);
-                            set2FASummary(type);
-                        });
-                    }
-
-                    @Override
-                    public void onFail() {
-                        ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-                        handler.post(() -> {
-                            twoStepVerificationPref.setChecked(type != Settings.AUTH_TYPE_OFF);
-                            set2FASummary(type);
-                        });
-                    }
-
-                    @Override
-                    public void onBadRequest() {
-
-                    }
-                })).execute();
+//        new BackgroundExecutor(getActivity(),
+//                () -> settingsApi.setAuthType(type, new Settings.ResultListener() {
+//                    @Override
+//                    public void onSuccess() {
+//                        handler.post(() -> {
+//                            twoStepVerificationPref.setChecked(type != Settings.AUTH_TYPE_OFF);
+//                            set2FASummary(type);
+//                        });
+//                    }
+//
+//                    @Override
+//                    public void onFail() {
+//                        ToastCustom.makeText(getActivity(), getString(R.string.update_failed), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
+//                        handler.post(() -> {
+//                            twoStepVerificationPref.setChecked(type != Settings.AUTH_TYPE_OFF);
+//                            set2FASummary(type);
+//                        });
+//                    }
+//
+//                    @Override
+//                    public void onBadRequest() {
+//
+//                    }
+//                })).execute();
     }
 
     @Override
@@ -776,7 +728,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
         final AppCompatEditText etEmail = new AppCompatEditText(getActivity());
         etEmail.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        etEmail.setText(settingsApi.getEmail());
+        etEmail.setText(viewModel.getEmail());
         etEmail.setSelection(etEmail.getText().length());
 
         FrameLayout frameLayout = new FrameLayout(getActivity());
@@ -787,7 +739,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         frameLayout.addView(etEmail, params);
 
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.email)
+                .setTitle(email)
                 .setMessage(R.string.verify_email2)
                 .setView(frameLayout)
                 .setCancelable(false)
@@ -797,19 +749,20 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                     if (!FormatsUtil.getInstance().isValidEmailAddress(email)) {
                         ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                     } else {
-                        updateEmail(email, this::showDialogEmailVerification);
+                        viewModel.updateEmail(email);
                     }
                 })
                 .setNeutralButton(R.string.resend, (dialogInterface, i) -> {
-                    //Resend verification code
-                    updateEmail(settingsApi.getEmail(), this::showDialogEmailVerification);
+                    // Resend verification code
+                    viewModel.updateEmail(viewModel.getEmail());
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
     }
 
-    private void showDialogEmailVerification() {
+    @Override
+    public void showDialogEmailVerification() {
         // Slight delay to prevent UI blinking issues
         Handler handler = new Handler();
         handler.postDelayed(() -> new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
@@ -822,7 +775,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
     private void showDialogMobile() {
 
-        if (settingsApi.getAuthType() != Settings.AUTH_TYPE_OFF) {
+        if (viewModel.getAuthType() != Settings.AUTH_TYPE_OFF) {
             new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setTitle(R.string.warning)
                     .setMessage(R.string.disable_2fa_first)
@@ -854,8 +807,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 });
             });
 
-            if (!settingsApi.isSmsVerified() && settingsApi.getSms() != null && !settingsApi.getSms().isEmpty()) {
-                tvSms.setText(settingsApi.getSms());
+            if (!viewModel.isSmsVerified() && !viewModel.getSms().isEmpty()) {
+                tvSms.setText(viewModel.getSms());
                 tvSms.setVisibility(View.VISIBLE);
             } else {
                 tvSms.setVisibility(View.GONE);
@@ -869,7 +822,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                     .setPositiveButton(R.string.update, null)
                     .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> show2FaAfterPhoneVerified = false);
 
-            if (!settingsApi.isSmsVerified() && settingsApi.getSms() != null && !settingsApi.getSms().isEmpty()) {
+            if (!viewModel.isSmsVerified() && !viewModel.getSms().isEmpty()) {
                 alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) -> showDialogVerifySms());
             }
 
@@ -909,14 +862,14 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogBTCUnits() {
-        final CharSequence[] units = monetaryUtil.getBTCUnits();
+        final CharSequence[] units = viewModel.getBtcUnits();
         final int sel = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, 0);
 
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.select_units)
                 .setSingleChoiceItems(units, sel, (dialog, which) -> {
                     prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, which);
-                    unitsPref.setSummary(getDisplayUnits());
+                    unitsPref.setSummary(viewModel.getDisplayUnits());
                     dialog.dismiss();
                 })
                 .show();
@@ -962,7 +915,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 .setCancelable(false)
                 .setPositiveButton(R.string.verify, null)
                 .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> show2FaAfterPhoneVerified = false)
-                .setNeutralButton(R.string.resend, (dialogInterface, i) -> updateSms(settingsApi.getSms()))
+                .setNeutralButton(R.string.resend, (dialogInterface, i) -> updateSms(viewModel.getSms()))
                 .create();
 
         dialog.setOnShowListener(dialogInterface -> {
@@ -981,7 +934,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
     private void showDialogPasswordHint() {
         final AppCompatEditText etPwHint1 = new AppCompatEditText(getActivity());
-        etPwHint1.setText(settingsApi.getPasswordHint1());
+        etPwHint1.setText(viewModel.getPasswordHint());
         etPwHint1.setSelection(etPwHint1.getText().length());
         etPwHint1.setSingleLine(true);
         etPwHint1.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
@@ -1091,8 +1044,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                     @Override
                     public void run() {
                         getActivity().runOnUiThread(() -> {
-                            entropyMeter.setVisibility(View.VISIBLE);
-                            setPasswordStrength(passStrengthVerdict, passStrengthBar, editable.toString());
+                            if (getActivity() != null && !getActivity().isFinishing()) {
+                                entropyMeter.setVisibility(View.VISIBLE);
+                                setPasswordStrength(passStrengthVerdict, passStrengthBar, editable.toString());
+                            }
                         });
                     }
                 }, 200);
@@ -1121,7 +1076,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                         if (newPw.equals(newConfirmedPw)) {
                             if (newConfirmedPw.length() < 4 || newConfirmedPw.length() > 255) {
                                 ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                            } else if (newConfirmedPw.equals(settingsApi.getPasswordHint1())) {
+                            } else if (newConfirmedPw.equals(viewModel.getPasswordHint())) {
                                 ToastCustom.makeText(getActivity(), getString(R.string.hint_reveals_password_error), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
                             } else if (pwStrength < 50) {
                                 new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
@@ -1163,7 +1118,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
     @Thunk
     void showDialogTwoFA() {
-        if (!settingsApi.isSmsVerified()) {
+        if (!viewModel.isSmsVerified()) {
             twoStepVerificationPref.setChecked(false);
             show2FaAfterPhoneVerified = true;
             showDialogMobile();
@@ -1173,14 +1128,14 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                     .setTitle(R.string.two_fa)
                     .setMessage(R.string.two_fa_summary)
                     .setNeutralButton(android.R.string.cancel, (dialogInterface, i) -> {
-                        twoStepVerificationPref.setChecked(settingsApi.getAuthType() != Settings.AUTH_TYPE_OFF);
-                        set2FASummary(settingsApi.getAuthType());
+                        twoStepVerificationPref.setChecked(viewModel.getAuthType() != Settings.AUTH_TYPE_OFF);
+                        set2FASummary(viewModel.getAuthType());
                     });
 
-            if (settingsApi.getAuthType() != Settings.AUTH_TYPE_OFF) {
+            if (viewModel.getAuthType() != Settings.AUTH_TYPE_OFF) {
                 alertDialogBuilder.setNegativeButton(R.string.disable, (dialogInterface, i) -> update2FA(Settings.AUTH_TYPE_OFF));
             } else {
-                //TODO - Currently only SMS 2FA on android
+//                TODO - Currently only SMS 2FA on android
                 alertDialogBuilder.setPositiveButton(R.string.enable, (dialogInterface, i) -> update2FA(Settings.AUTH_TYPE_SMS));
             }
             alertDialogBuilder.create()
@@ -1225,20 +1180,22 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
     @UiThread
     private void setPasswordStrength(TextView passStrengthVerdict, ProgressBar passStrengthBar, String pw) {
-        int[] strengthVerdicts = {R.string.strength_weak, R.string.strength_medium, R.string.strength_normal, R.string.strength_strong};
-        int[] strengthColors = {R.drawable.progress_red, R.drawable.progress_orange, R.drawable.progress_blue, R.drawable.progress_green};
-        pwStrength = (int) Math.round(PasswordUtil.getInstance().getStrength(pw));
+        if (getActivity() != null && !getActivity().isFinishing()) {
+            int[] strengthVerdicts = {R.string.strength_weak, R.string.strength_medium, R.string.strength_normal, R.string.strength_strong};
+            int[] strengthColors = {R.drawable.progress_red, R.drawable.progress_orange, R.drawable.progress_blue, R.drawable.progress_green};
+            pwStrength = (int) Math.round(PasswordUtil.getInstance().getStrength(pw));
 
-        if (pw.equals(prefsUtil.getValue(PrefsUtil.KEY_EMAIL, ""))) pwStrength = 0;
+            if (pw.equals(prefsUtil.getValue(PrefsUtil.KEY_EMAIL, ""))) pwStrength = 0;
 
-        int pwStrengthLevel = 0;//red
-        if (pwStrength >= 75) pwStrengthLevel = 3;//green
-        else if (pwStrength >= 50) pwStrengthLevel = 2;//green
-        else if (pwStrength >= 25) pwStrengthLevel = 1;//orange
+            int pwStrengthLevel = 0;//red
+            if (pwStrength >= 75) pwStrengthLevel = 3;//green
+            else if (pwStrength >= 50) pwStrengthLevel = 2;//green
+            else if (pwStrength >= 25) pwStrengthLevel = 1;//orange
 
-        passStrengthBar.setProgress(pwStrength);
-        passStrengthBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), strengthColors[pwStrengthLevel]));
-        passStrengthVerdict.setText(getResources().getString(strengthVerdicts[pwStrengthLevel]));
+            passStrengthBar.setProgress(pwStrength);
+            passStrengthBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), strengthColors[pwStrengthLevel]));
+            passStrengthVerdict.setText(getResources().getString(strengthVerdicts[pwStrengthLevel]));
+        }
     }
 
     @UiThread
@@ -1248,7 +1205,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         drawable.setAlpha(30);
 
         int sdk = android.os.Build.VERSION.SDK_INT;
-        if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+        if (sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
             //noinspection deprecation
             tvCountry.setBackgroundDrawable(drawable);
         } else {
