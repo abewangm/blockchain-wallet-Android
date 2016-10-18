@@ -418,6 +418,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         runOnUiThread(() -> {
 
             playAudio();
+            LocalBroadcastManager.getInstance(this).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
 
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
             LayoutInflater inflater = getLayoutInflater();
