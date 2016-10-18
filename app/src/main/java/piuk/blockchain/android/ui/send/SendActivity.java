@@ -664,6 +664,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
         dialogBinding.confirmSend.setOnClickListener(v -> {
             if (ConnectivityStatus.hasConnectivity(this)) {
+                dialogBinding.confirmSend.setClickable(false);
                 viewModel.submitPayment(alertDialog);
             } else {
                 ToastCustom.makeText(this, getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);

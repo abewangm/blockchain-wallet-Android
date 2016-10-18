@@ -1099,6 +1099,8 @@ public class SendViewModel extends BaseViewModel {
                             @Override
                             public void onSuccess(String s) {
 
+                                clearUnspentResponseCache();
+
                                 if (alertDialog != null && alertDialog.isShowing())
                                     alertDialog.dismiss();
                                 updateInternalBalances();
@@ -1119,6 +1121,19 @@ public class SendViewModel extends BaseViewModel {
             }
         }).start();
 
+    }
+
+    private void clearUnspentResponseCache() {
+
+        DefaultAccountUnspentCache.getInstance().destroy();
+
+        if (sendModel.pendingTransaction.isHD()) {
+            Account account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);
+            sendModel.unspentApiResponse.remove(account.getXpub());
+        } else {
+            LegacyAddress legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
+            sendModel.unspentApiResponse.remove(legacyAddress.getAddress());
+        }
     }
 
     /**
