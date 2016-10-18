@@ -25,11 +25,13 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
+import piuk.blockchain.android.util.annotations.Thunk;
 import rx.Observable;
 
 public class TransferFundsDataManager {
 
-    private PayloadManager mPayloadManager;
+    @SuppressWarnings("WeakerAccess")
+    @Thunk PayloadManager mPayloadManager;
     private Unspent mUnspentApi;
     private Payment mPayment;
 
@@ -145,8 +147,11 @@ public class TransferFundsDataManager {
                             new Payment.SubmitPaymentListener() {
                                 @Override
                                 public void onSuccess(String s) {
-                                    if (subscriber.isUnsubscribed()) return;
-                                    subscriber.onNext(s);
+                                    if (!subscriber.isUnsubscribed()) {
+                                        subscriber.onNext(s);
+                                    }
+
+                                    mPayloadManager.getPayload().getHdWallet().getAccounts().get(pendingTransaction.addressToReceiveIndex).incReceive();
 
                                     long currentBalance = MultiAddrFactory.getInstance().getLegacyBalance();
                                     long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
@@ -161,7 +166,9 @@ public class TransferFundsDataManager {
                                                 }, throwable -> {
                                                     // No-op
                                                 });
-                                        subscriber.onCompleted();
+                                        if (!subscriber.isUnsubscribed()) {
+                                            subscriber.onCompleted();
+                                        }
                                     }
                                 }
 

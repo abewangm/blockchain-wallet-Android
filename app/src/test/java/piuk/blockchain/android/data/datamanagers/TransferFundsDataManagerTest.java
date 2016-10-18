@@ -2,6 +2,7 @@ package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.api.Unspent;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
+import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.HDWallet;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.Payload;
@@ -34,7 +35,9 @@ import rx.observers.TestSubscriber;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -126,7 +129,8 @@ public class TransferFundsDataManagerTest extends RxTest {
             add(transaction1);
         }};
         when(mPayloadManager.savePayloadToServer()).thenReturn(true);
-        Payload mockPayload = mock(Payload.class);
+        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
+        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
 
@@ -208,7 +212,8 @@ public class TransferFundsDataManagerTest extends RxTest {
             add(transaction1);
         }};
         when(mPayloadManager.savePayloadToServer()).thenReturn(true);
-        Payload mockPayload = mock(Payload.class);
+        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
+        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
 
