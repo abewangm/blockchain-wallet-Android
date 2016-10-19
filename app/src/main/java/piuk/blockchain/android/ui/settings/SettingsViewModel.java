@@ -38,6 +38,8 @@ public class SettingsViewModel extends BaseViewModel {
 
     interface DataListener {
 
+        void setUpUi();
+
         void verifyPinCode();
 
         void showFingerprintDialog(CharSequenceX pincode);
@@ -99,15 +101,19 @@ public class SettingsViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
+        dataListener.showProgressDialog(R.string.please_wait);
         // Fetch updated settings
         mCompositeSubscription.add(
                 settingsDataManager.updateSettings(
                         payloadManager.getPayload().getGuid(),
                         payloadManager.getPayload().getSharedKey())
-                        .doOnTerminate(() -> dataListener.hideProgressDialog())
-                        .subscribe(settings -> {
-                            this.settings = settings;
+                        .doAfterTerminate(() -> {
+                            dataListener.hideProgressDialog();
+                            dataListener.setUpUi();
                             updateUi();
+                        })
+                        .subscribe(updatedSettings -> {
+                            settings = updatedSettings;
                         }, throwable -> {
                             settings = new Settings();
                         }));
@@ -186,41 +192,6 @@ public class SettingsViewModel extends BaseViewModel {
         dataListener.setTorBlocked(settings.isTorBlocked());
     }
 
-    boolean getIfFingerprintHardwareAvailable() {
-        return fingerprintHelper.isHardwareDetected();
-    }
-
-    /**
-     * Returns true if the user has previously enabled fingerprint login
-     */
-    boolean getIfFingerprintUnlockEnabled() {
-        return fingerprintHelper.getIfFingerprintUnlockEnabled();
-    }
-
-    void setFingerprintUnlockEnabled(boolean enabled) {
-        fingerprintHelper.setFingerprintUnlockEnabled(enabled);
-        if (!enabled) {
-            fingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
-        }
-    }
-
-    void onFingerprintClicked() {
-        if (getIfFingerprintUnlockEnabled()) {
-            // Show dialog "are you sure you want to disable fingerprint login?
-            dataListener.showDisableFingerprintDialog();
-        } else if (!fingerprintHelper.areFingerprintsEnrolled()) {
-            // No fingerprints enrolled, prompt user to add some
-            dataListener.showNoFingerprintsAddedDialog();
-        } else {
-            // Verify PIN before continuing
-            dataListener.verifyPinCode();
-        }
-    }
-
-    void pinCodeValidated(CharSequenceX pinCode) {
-        dataListener.showFingerprintDialog(pinCode);
-    }
-
     private String getTwoFaSummary(int type) {
         String summary;
         switch (type) {
@@ -240,75 +211,183 @@ public class SettingsViewModel extends BaseViewModel {
         return summary;
     }
 
-    int getBtcUnitsPosition() {
-        return prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
+    /**
+     * @return true if the device has usable fingerprint hardware
+     */
+    boolean getIfFingerprintHardwareAvailable() {
+        return fingerprintHelper.isHardwareDetected();
     }
 
-    @NonNull
-    String getDisplayUnits() {
-        return (String) monetaryUtil.getBTCUnits()[getBtcUnitsPosition()];
+    /**
+     * @return true if the user has previously enabled fingerprint login
+     */
+    boolean getIfFingerprintUnlockEnabled() {
+        return fingerprintHelper.getIfFingerprintUnlockEnabled();
     }
 
-    @NonNull
-    CharSequence[] getBtcUnits() {
-        return monetaryUtil.getBTCUnits();
+    /**
+     * Sets fingerprint unlock enabled and clears the encrypted PIN if {@param enabled} is false
+     *
+     * @param enabled Whether or not the fingerprint unlock feature is set up
+     */
+    void setFingerprintUnlockEnabled(boolean enabled) {
+        fingerprintHelper.setFingerprintUnlockEnabled(enabled);
+        if (!enabled) {
+            fingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
+        }
     }
 
-    @NonNull
-    String getFiatUnits() {
-        return prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+    /**
+     * Handle fingerprint preference toggle
+     */
+    void onFingerprintClicked() {
+        if (getIfFingerprintUnlockEnabled()) {
+            // Show dialog "are you sure you want to disable fingerprint login?
+            dataListener.showDisableFingerprintDialog();
+        } else if (!fingerprintHelper.areFingerprintsEnrolled()) {
+            // No fingerprints enrolled, prompt user to add some
+            dataListener.showNoFingerprintsAddedDialog();
+        } else {
+            // Verify PIN before continuing
+            dataListener.verifyPinCode();
+        }
     }
 
-    @NonNull
-    CharSequenceX getTempPassword() {
-        return payloadManager.getTempPassword();
+    /**
+     * Displays fingerprint dialog after the PIN has been validated by {@link
+     * piuk.blockchain.android.ui.auth.PinEntryActivity}
+     *
+     * @param pinCode A {@link CharSequenceX} wrapping the validated PIN code
+     */
+    void pinCodeValidated(CharSequenceX pinCode) {
+        dataListener.showFingerprintDialog(pinCode);
     }
 
     private boolean isStringValid(String string) {
         return string != null && !string.isEmpty() && string.length() < 256;
     }
 
+    /**
+     * @return position of user's BTC unit preference
+     */
+    int getBtcUnitsPosition() {
+        return prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
+    }
+
+    /**
+     * @return the user's preferred BTC units
+     */
+    @NonNull
+    String getDisplayUnits() {
+        return (String) monetaryUtil.getBTCUnits()[getBtcUnitsPosition()];
+    }
+
+    /**
+     * @return an array of possible BTC units
+     */
+    @NonNull
+    CharSequence[] getBtcUnits() {
+        return monetaryUtil.getBTCUnits();
+    }
+
+    /**
+     * @return the user's preferred Fiat currency unit
+     */
+    @NonNull
+    String getFiatUnits() {
+        return prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+    }
+
+    /**
+     * @return the temporary password from the Payload Manager
+     */
+    @NonNull
+    CharSequenceX getTempPassword() {
+        return payloadManager.getTempPassword();
+    }
+
+    /**
+     * @return the user's email or an empty string if not set
+     */
     @NonNull
     String getEmail() {
         return settings.getEmail() != null ? settings.getEmail() : "";
     }
 
+    /**
+     * @return the user's phone number or an empty string if not set
+     */
     @NonNull
     String getSms() {
         return settings.getSms() != null ? settings.getSms() : "";
     }
 
+    /**
+     * @return the user's password hint or an empty string if not set
+     */
     @NonNull
     String getPasswordHint() {
         return settings.getPasswordHint1() != null ? settings.getPasswordHint1() : "";
     }
 
+    /**
+     * @return is the user's phone number is verified
+     */
     boolean isSmsVerified() {
         return settings.isSmsVerified();
     }
 
+    /**
+     * @return the current auth type
+     * @see {@link Settings}
+     */
     int getAuthType() {
         return settings.getAuthType();
     }
 
+    /**
+     * @return flag to show the 2FA dialog after verifying number
+     */
     boolean show2FaAfterPhoneVerified() {
         return show2FaAfterPhoneVerified;
     }
 
+    /**
+     * Sets the flag to show the 2FA dialog after verifying number
+     *
+     * @param show whether or not to show the 2FA dialog
+     */
     void setShow2FaAfterPhoneVerified(boolean show) {
         show2FaAfterPhoneVerified = show;
     }
 
+    /**
+     * Write key/value to {@link android.content.SharedPreferences}
+     *
+     * @param key   The key under which to store the data
+     * @param value The value to be stored as a String
+     */
     void updatePreferences(String key, String value) {
         prefsUtil.setValue(key, value);
         updateUi();
     }
 
+    /**
+     * Write key/value to {@link android.content.SharedPreferences}
+     *
+     * @param key   The key under which to store the data
+     * @param value The value to be stored as an int
+     */
     void updatePreferences(String key, int value) {
         prefsUtil.setValue(key, value);
         updateUi();
     }
 
+    /**
+     * Updates the user's email, prompts user to check their email for verification after success
+     *
+     * @param email The email address to be saved
+     */
     void updateEmail(String email) {
         if (!isStringValid(email)) {
             dataListener.setEmailSummary(stringUtils.getString(R.string.not_specified));
@@ -328,6 +407,11 @@ public class SettingsViewModel extends BaseViewModel {
         }
     }
 
+    /**
+     * Updates the user's phone number, prompts user to verify their number after success
+     *
+     * @param sms The phone number to be saved
+     */
     void updateSms(String sms) {
         if (!isStringValid(sms)) {
             dataListener.setSmsSummary(stringUtils.getString(R.string.not_specified));
@@ -348,6 +432,11 @@ public class SettingsViewModel extends BaseViewModel {
         }
     }
 
+    /**
+     * Verifies a user's number, shows verified dialog after success
+     *
+     * @param code The verification code which has been sent to the user
+     */
     void verifySms(@NonNull String code) {
         mCompositeSubscription.add(
                 settingsDataManager.verifySms(code)
@@ -364,6 +453,11 @@ public class SettingsViewModel extends BaseViewModel {
                         }));
     }
 
+    /**
+     * Updates the user's Tor blocking preference
+     *
+     * @param blocked Whether or not to block Tor requests
+     */
     void updateTor(boolean blocked) {
         mCompositeSubscription.add(
                 settingsDataManager.updateTor(blocked)
@@ -378,6 +472,11 @@ public class SettingsViewModel extends BaseViewModel {
                         }));
     }
 
+    /**
+     * Updates the user's password hint
+     *
+     * @param hint The new password hint
+     */
     void updatePasswordHint(String hint) {
         if (!isStringValid(hint)) {
             dataListener.showToast(R.string.settings_field_cant_be_empty, ToastCustom.TYPE_ERROR);
@@ -396,6 +495,12 @@ public class SettingsViewModel extends BaseViewModel {
         }
     }
 
+    /**
+     * Sets the auth type used for 2FA. Pass in {@link Settings#AUTH_TYPE_OFF} to disable 2FA
+     *
+     * @param type The auth type used for 2FA
+     * @see {@link Settings}
+     */
     void updateTwoFa(int type) {
         mCompositeSubscription.add(
                 settingsDataManager.updateTwoFactor(type)
@@ -410,6 +515,13 @@ public class SettingsViewModel extends BaseViewModel {
                         }));
     }
 
+    /**
+     * Updates the user's notification preferences
+     *
+     * @param type    The notification type to be updated
+     * @param enabled Whether or not to enable the notification type
+     * @see {@link Settings}
+     */
     void updateNotification(int type, boolean enabled) {
         mCompositeSubscription.add(
                 settingsDataManager.updateNotifications(type, enabled)
@@ -424,12 +536,18 @@ public class SettingsViewModel extends BaseViewModel {
                         }));
     }
 
+    /**
+     * Validates a passed PIN number. If valid, takes the user to the PIN entry page to create a new
+     * PIN number.
+     *
+     * @param pin A {@link CharSequenceX} wrapping the PIN number
+     */
     void validatePin(@NonNull CharSequenceX pin) {
         dataListener.showProgressDialog(R.string.please_wait);
 
         mCompositeSubscription.add(
                 accessState.validatePin(pin.toString())
-                        .doOnTerminate(() -> dataListener.hideProgressDialog())
+                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(sequenceX -> {
                             if (sequenceX != null) {
                                 prefsUtil.removeValue(PrefsUtil.KEY_PIN_FAILS);
@@ -444,14 +562,19 @@ public class SettingsViewModel extends BaseViewModel {
                         }));
     }
 
+    /**
+     * Updates the user's password
+     *
+     * @param password         The requested new password as a {@link CharSequenceX}
+     * @param fallbackPassword The user's current password as a fallback
+     */
     void updatePassword(@NonNull CharSequenceX password, @NonNull CharSequenceX fallbackPassword) {
         dataListener.showProgressDialog(R.string.please_wait);
-
         payloadManager.setTempPassword(password);
 
         mCompositeSubscription.add(
                 accessState.createPin(password, accessState.getPIN())
-                        .doOnTerminate(() -> dataListener.hideProgressDialog())
+                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .flatMap(success -> {
                             if (success) {
                                 return accessState.syncPayloadToServer();

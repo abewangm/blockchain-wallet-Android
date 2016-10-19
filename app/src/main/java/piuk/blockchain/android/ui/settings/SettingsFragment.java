@@ -1,6 +1,8 @@
 package piuk.blockchain.android.ui.settings;
 
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,7 +19,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceCategory;
 import android.support.v7.preference.PreferenceFragmentCompat;
-import android.support.v7.preference.PreferenceScreen;
 import android.support.v7.preference.SwitchPreferenceCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
@@ -99,9 +100,76 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new SettingsViewModel(this);
-
-        refreshPreferences();
         viewModel.onViewReady();
+    }
+
+    @Override
+    public void setUpUi() {
+        addPreferencesFromResource(R.xml.settings);
+
+        // Profile
+        guidPref = findPreference("guid");
+        guidPref.setOnPreferenceClickListener(this);
+
+        emailPref = findPreference("email");
+        emailPref.setOnPreferenceClickListener(this);
+
+        smsPref = findPreference("mobile");
+        smsPref.setOnPreferenceClickListener(this);
+
+        // Preferences
+        unitsPref = findPreference("units");
+        unitsPref.setOnPreferenceClickListener(this);
+
+        fiatPref = findPreference("fiat");
+        fiatPref.setOnPreferenceClickListener(this);
+
+        emailNotificationPref = (SwitchPreferenceCompat) findPreference("email_notifications");
+        emailNotificationPref.setOnPreferenceClickListener(this);
+
+        smsNotificationPref = (SwitchPreferenceCompat) findPreference("sms_notifications");
+        smsNotificationPref.setOnPreferenceClickListener(this);
+
+        // Security
+        fingerprintPref = (SwitchPreferenceCompat) findPreference("fingerprint");
+        fingerprintPref.setOnPreferenceClickListener(this);
+
+        Preference pinPref = findPreference("pin");
+        pinPref.setOnPreferenceClickListener(this);
+
+        twoStepVerificationPref = (SwitchPreferenceCompat) findPreference("2fa");
+        twoStepVerificationPref.setOnPreferenceClickListener(this);
+
+        passwordHint1Pref = findPreference("pw_hint1");
+        passwordHint1Pref.setOnPreferenceClickListener(this);
+
+        Preference changePasswordPref = findPreference("change_pw");
+        changePasswordPref.setOnPreferenceClickListener(this);
+
+        torPref = (SwitchPreferenceCompat) findPreference("tor");
+        torPref.setOnPreferenceClickListener(this);
+
+        // App
+        Preference aboutPref = findPreference("about");
+        aboutPref.setSummary("v" + BuildConfig.VERSION_NAME);
+        aboutPref.setOnPreferenceClickListener(this);
+
+        Preference tosPref = findPreference("tos");
+        tosPref.setOnPreferenceClickListener(this);
+
+        Preference privacyPref = findPreference("privacy");
+        privacyPref.setOnPreferenceClickListener(this);
+
+        Preference disableRootWarningPref = findPreference("disable_root_warning");
+        if (disableRootWarningPref != null && !new RootUtil().isDeviceRooted()) {
+            PreferenceCategory appCategory = (PreferenceCategory) findPreference("app");
+            appCategory.removePreference(disableRootWarningPref);
+        }
+
+        // Check if referred from Security Centre dialog
+        if (getActivity().getIntent() != null && getActivity().getIntent().hasExtra(EXTRA_SHOW_TWO_FA_DIALOG)) {
+            showDialogTwoFA();
+        }
     }
 
     @Override
@@ -211,76 +279,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     @Override
     public void setTorBlocked(boolean blocked) {
         torPref.setChecked(blocked);
-    }
-
-    public void refreshPreferences() {
-        PreferenceScreen prefScreen = getPreferenceScreen();
-        if (prefScreen != null) prefScreen.removeAll();
-        addPreferencesFromResource(R.xml.settings);
-
-        // Profile
-        guidPref = findPreference("guid");
-        guidPref.setOnPreferenceClickListener(this);
-
-        emailPref = findPreference("email");
-        emailPref.setOnPreferenceClickListener(this);
-
-        smsPref = findPreference("mobile");
-        smsPref.setOnPreferenceClickListener(this);
-
-        // Preferences
-        unitsPref = findPreference("units");
-        unitsPref.setOnPreferenceClickListener(this);
-
-        fiatPref = findPreference("fiat");
-        fiatPref.setOnPreferenceClickListener(this);
-
-        emailNotificationPref = (SwitchPreferenceCompat) findPreference("email_notifications");
-        emailNotificationPref.setOnPreferenceClickListener(this);
-
-        smsNotificationPref = (SwitchPreferenceCompat) findPreference("sms_notifications");
-        smsNotificationPref.setOnPreferenceClickListener(this);
-
-        // Security
-        fingerprintPref = (SwitchPreferenceCompat) findPreference("fingerprint");
-        fingerprintPref.setOnPreferenceClickListener(this);
-
-        Preference pinPref = findPreference("pin");
-        pinPref.setOnPreferenceClickListener(this);
-
-        twoStepVerificationPref = (SwitchPreferenceCompat) findPreference("2fa");
-        twoStepVerificationPref.setOnPreferenceClickListener(this);
-
-        passwordHint1Pref = findPreference("pw_hint1");
-        passwordHint1Pref.setOnPreferenceClickListener(this);
-
-        Preference changePasswordPref = findPreference("change_pw");
-        changePasswordPref.setOnPreferenceClickListener(this);
-
-        torPref = (SwitchPreferenceCompat) findPreference("tor");
-        torPref.setOnPreferenceClickListener(this);
-
-        // App
-        Preference aboutPref = findPreference("about");
-        aboutPref.setSummary("v" + BuildConfig.VERSION_NAME);
-        aboutPref.setOnPreferenceClickListener(this);
-
-        Preference tosPref = findPreference("tos");
-        tosPref.setOnPreferenceClickListener(this);
-
-        Preference privacyPref = findPreference("privacy");
-        privacyPref.setOnPreferenceClickListener(this);
-
-        Preference disableRootWarningPref = findPreference("disable_root_warning");
-        if (disableRootWarningPref != null && !new RootUtil().isDeviceRooted()) {
-            PreferenceCategory appCategory = (PreferenceCategory) findPreference("app");
-            appCategory.removePreference(disableRootWarningPref);
-        }
-
-        // Check if referred from Security Centre dialog
-        if (getActivity().getIntent() != null && getActivity().getIntent().hasExtra(EXTRA_SHOW_TWO_FA_DIALOG)) {
-            showDialogTwoFA();
-        }
     }
 
     private void onFingerprintClicked() {
@@ -435,18 +433,18 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogEmail() {
-        final AppCompatEditText etEmail = new AppCompatEditText(getActivity());
-        etEmail.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        etEmail.setText(viewModel.getEmail());
-        etEmail.setSelection(etEmail.getText().length());
+        AppCompatEditText editText = new AppCompatEditText(getActivity());
+        editText.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        editText.setText(viewModel.getEmail());
+        editText.setSelection(editText.getText().length());
 
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(email)
                 .setMessage(R.string.verify_email2)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), etEmail))
+                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
                 .setCancelable(false)
                 .setPositiveButton(R.string.update, (dialogInterface, i) -> {
-                    String email = etEmail.getText().toString();
+                    String email = editText.getText().toString();
 
                     if (!FormatsUtil.getInstance().isValidEmailAddress(email)) {
                         ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
@@ -486,34 +484,28 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         } else {
             LayoutInflater inflater = getActivity().getLayoutInflater();
             View smsPickerView = inflater.inflate(R.layout.include_sms_update, null);
-            final AppCompatEditText etMobile = (AppCompatEditText) smsPickerView.findViewById(R.id.etSms);
-            final TextView tvCountry = (TextView) smsPickerView.findViewById(R.id.tvCountry);
-            final TextView tvSms = (TextView) smsPickerView.findViewById(R.id.tvSms);
+            AppCompatEditText mobileNumber = (AppCompatEditText) smsPickerView.findViewById(R.id.etSms);
+            TextView countryTextView = (TextView) smsPickerView.findViewById(R.id.tvCountry);
+            TextView mobileNumberTextView = (TextView) smsPickerView.findViewById(R.id.tvSms);
 
-            final CountryPicker picker = CountryPicker.newInstance(getString(R.string.select_country));
-            final Country country = picker.getUserCountryInfo(getActivity());
-            if (country.getDialCode().equals("93")) {
-                setCountryFlag(tvCountry, "+1", R.drawable.flag_us);
-            } else {
-                setCountryFlag(tvCountry, country.getDialCode(), country.getFlag());
-            }
-            tvCountry.setOnClickListener(v -> {
+            CountryPicker picker = CountryPicker.newInstance(getString(R.string.select_country));
+            Country country = picker.getUserCountryInfo(getActivity());
+            setCountryFlag(countryTextView, country.getDialCode(), country.getFlag());
+
+            countryTextView.setOnClickListener(v -> {
                 picker.show(getFragmentManager(), "COUNTRY_PICKER");
                 picker.setListener((name, code, dialCode, flagDrawableResID) -> {
-
-                    setCountryFlag(tvCountry, dialCode, flagDrawableResID);
+                    setCountryFlag(countryTextView, dialCode, flagDrawableResID);
                     picker.dismiss();
                 });
             });
 
             if (!viewModel.getSms().isEmpty()) {
-                tvSms.setText(viewModel.getSms());
-                tvSms.setVisibility(View.VISIBLE);
-            } else {
-                tvSms.setVisibility(View.GONE);
+                mobileNumberTextView.setText(viewModel.getSms());
+                mobileNumberTextView.setVisibility(View.VISIBLE);
             }
 
-            final AlertDialog.Builder alertDialogSmsBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+            AlertDialog.Builder alertDialogSmsBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setTitle(R.string.mobile)
                     .setMessage(getString(R.string.mobile_description))
                     .setView(smsPickerView)
@@ -529,7 +521,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             dialog.setOnShowListener(dialogInterface -> {
                 Button positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
                 positive.setOnClickListener(view -> {
-                    final String sms = tvCountry.getText() + etMobile.getText().toString();
+                    String sms = countryTextView.getText() + mobileNumber.getText().toString();
 
                     if (!FormatsUtil.getInstance().isValidMobileNumber(sms)) {
                         ToastCustom.makeText(getActivity(), getString(R.string.invalid_mobile), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
@@ -550,9 +542,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 .setMessage(R.string.guid_to_clipboard)
                 .setCancelable(false)
                 .setPositiveButton(R.string.yes, (dialog, whichButton) -> {
-                    android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getActivity().getSystemService(android.content.Context.CLIPBOARD_SERVICE);
-                    android.content.ClipData clip = null;
-                    clip = android.content.ClipData.newPlainText("guid", guidPref.getSummary());
+                    ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = null;
+                    clip = ClipData.newPlainText("guid", guidPref.getSummary());
                     clipboard.setPrimaryClip(clip);
                     ToastCustom.makeText(getActivity(), getString(R.string.copied_to_clipboard), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
                 })
@@ -561,8 +553,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogBTCUnits() {
-        final CharSequence[] units = viewModel.getBtcUnits();
-        final int sel = viewModel.getBtcUnitsPosition();
+        CharSequence[] units = viewModel.getBtcUnits();
+        int sel = viewModel.getBtcUnitsPosition();
 
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.select_units)
@@ -574,7 +566,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogFiatUnits() {
-        final String[] currencies = ExchangeRateFactory.getInstance().getCurrencyLabels();
+        String[] currencies = ExchangeRateFactory.getInstance().getCurrencyLabels();
         String strCurrency = viewModel.getFiatUnits();
         int selected = 0;
         for (int i = 0; i < currencies.length; i++) {
@@ -595,13 +587,13 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
     @Override
     public void showDialogVerifySms() {
-        final AppCompatEditText etSms = new AppCompatEditText(getActivity());
-        etSms.setSingleLine(true);
+        AppCompatEditText editText = new AppCompatEditText(getActivity());
+        editText.setSingleLine(true);
 
         AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.verify_mobile)
                 .setMessage(R.string.verify_sms_summary)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), etSms))
+                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
                 .setCancelable(false)
                 .setPositiveButton(R.string.verify, null)
                 .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> viewModel.setShow2FaAfterPhoneVerified(false))
@@ -611,7 +603,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         dialog.setOnShowListener(dialogInterface -> {
             Button positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
             positive.setOnClickListener(view -> {
-                final String codeS = etSms.getText().toString();
+                String codeS = editText.getText().toString();
                 if (codeS.length() > 0) {
                     viewModel.verifySms(codeS);
                     dialog.dismiss();
@@ -623,19 +615,19 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogPasswordHint() {
-        final AppCompatEditText etPwHint1 = new AppCompatEditText(getActivity());
-        etPwHint1.setText(viewModel.getPasswordHint());
-        etPwHint1.setSelection(viewModel.getPasswordHint().length());
-        etPwHint1.setSingleLine(true);
-        etPwHint1.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        AppCompatEditText editText = new AppCompatEditText(getActivity());
+        editText.setText(viewModel.getPasswordHint());
+        editText.setSelection(viewModel.getPasswordHint().length());
+        editText.setSingleLine(true);
+        editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
 
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.password_hint)
                 .setMessage(R.string.password_hint_summary)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), etPwHint1))
+                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
                 .setCancelable(false)
                 .setPositiveButton(R.string.update, (dialogInterface, i) -> {
-                    String hint = etPwHint1.getText().toString();
+                    String hint = editText.getText().toString();
                     if (!hint.equals(viewModel.getTempPassword().toString())) {
                         viewModel.updatePasswordHint(hint);
                     } else {
@@ -668,8 +660,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 .setTitle(R.string.email_notifications)
                 .setMessage(R.string.email_notifications_summary)
                 .setCancelable(false)
-                .setPositiveButton(R.string.enable, (dialogInterface, i) -> viewModel.updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, true))
-                .setNegativeButton(R.string.disable, (dialogInterface, i) -> viewModel.updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, false))
+                .setPositiveButton(R.string.enable, (dialogInterface, i) ->
+                        viewModel.updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, true))
+                .setNegativeButton(R.string.disable, (dialogInterface, i) ->
+                        viewModel.updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, false))
                 .create()
                 .show();
     }
@@ -679,8 +673,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 .setTitle(R.string.sms_notifications)
                 .setMessage(R.string.sms_notifications_summary)
                 .setCancelable(false)
-                .setPositiveButton(R.string.enable, (dialogInterface, i) -> viewModel.updateNotification(Settings.NOTIFICATION_TYPE_SMS, true))
-                .setNegativeButton(R.string.disable, (dialogInterface, i) -> viewModel.updateNotification(Settings.NOTIFICATION_TYPE_SMS, false))
+                .setPositiveButton(R.string.enable, (dialogInterface, i) ->
+                        viewModel.updateNotification(Settings.NOTIFICATION_TYPE_SMS, true))
+                .setNegativeButton(R.string.disable, (dialogInterface, i) ->
+                        viewModel.updateNotification(Settings.NOTIFICATION_TYPE_SMS, false))
                 .create()
                 .show();
     }
@@ -694,19 +690,19 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogChangePassword() {
-        LayoutInflater inflater = (LayoutInflater) getActivity().getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final LinearLayout pwLayout = (LinearLayout) inflater.inflate(R.layout.modal_change_password2, null);
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LinearLayout pwLayout = (LinearLayout) inflater.inflate(R.layout.modal_change_password2, null);
 
-        AppCompatEditText etCurrentPw = (AppCompatEditText) pwLayout.findViewById(R.id.current_password);
-        AppCompatEditText etNewPw = (AppCompatEditText) pwLayout.findViewById(R.id.new_password);
-        AppCompatEditText etNewConfirmedPw = (AppCompatEditText) pwLayout.findViewById(R.id.confirm_password);
+        AppCompatEditText currentPassword = (AppCompatEditText) pwLayout.findViewById(R.id.current_password);
+        AppCompatEditText newPassword = (AppCompatEditText) pwLayout.findViewById(R.id.new_password);
+        AppCompatEditText newPasswordConfirmation = (AppCompatEditText) pwLayout.findViewById(R.id.confirm_password);
 
         LinearLayout entropyMeter = (LinearLayout) pwLayout.findViewById(R.id.entropy_meter);
         ProgressBar passStrengthBar = (ProgressBar) pwLayout.findViewById(R.id.pass_strength_bar);
         passStrengthBar.setMax(100);
         TextView passStrengthVerdict = (TextView) pwLayout.findViewById(R.id.pass_strength_verdict);
 
-        etNewPw.addTextChangedListener(new TextWatcher() {
+        newPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -718,7 +714,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
             @Override
             public void afterTextChanged(final Editable editable) {
-                etNewPw.postDelayed(() -> {
+                newPassword.postDelayed(() -> {
                     if (getActivity() != null && !getActivity().isFinishing()) {
                         entropyMeter.setVisibility(View.VISIBLE);
                         setPasswordStrength(passStrengthVerdict, passStrengthBar, editable.toString());
@@ -739,10 +735,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             Button buttonPositive = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
             buttonPositive.setOnClickListener(view -> {
 
-                String currentPw = etCurrentPw.getText().toString();
-                String newPw = etNewPw.getText().toString();
-                String newConfirmedPw = etNewConfirmedPw.getText().toString();
-                final CharSequenceX walletPassword = viewModel.getTempPassword();
+                String currentPw = currentPassword.getText().toString();
+                String newPw = newPassword.getText().toString();
+                String newConfirmedPw = newPasswordConfirmation.getText().toString();
+                CharSequenceX walletPassword = viewModel.getTempPassword();
 
                 if (!currentPw.equals(newPw)) {
                     if (currentPw.equals(walletPassword.toString())) {
@@ -757,10 +753,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                                         .setMessage(R.string.weak_password)
                                         .setCancelable(false)
                                         .setPositiveButton(R.string.yes, (dialog1, which) -> {
-                                            etNewConfirmedPw.setText("");
-                                            etNewConfirmedPw.requestFocus();
-                                            etNewPw.setText("");
-                                            etNewPw.requestFocus();
+                                            newPasswordConfirmation.setText("");
+                                            newPasswordConfirmation.requestFocus();
+                                            newPassword.setText("");
+                                            newPassword.requestFocus();
                                         })
                                         .setNegativeButton(R.string.polite_no, (dialog1, which) -> {
                                             alertDialog.dismiss();
@@ -772,19 +768,19 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                                 viewModel.updatePassword(new CharSequenceX(newConfirmedPw), walletPassword);
                             }
                         } else {
-                            etNewConfirmedPw.setText("");
-                            etNewConfirmedPw.requestFocus();
+                            newPasswordConfirmation.setText("");
+                            newPasswordConfirmation.requestFocus();
                             ToastCustom.makeText(getActivity(), getString(R.string.password_mismatch_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                         }
                     } else {
-                        etCurrentPw.setText("");
-                        etCurrentPw.requestFocus();
+                        currentPassword.setText("");
+                        currentPassword.requestFocus();
                         ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                     }
                 } else {
-                    etNewPw.setText("");
-                    etNewConfirmedPw.setText("");
-                    etNewPw.requestFocus();
+                    newPassword.setText("");
+                    newPasswordConfirmation.setText("");
+                    newPassword.requestFocus();
                     ToastCustom.makeText(getActivity(), getString(R.string.change_password_new_matches_current), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
                 }
             });
@@ -802,17 +798,18 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setTitle(R.string.two_fa)
                     .setMessage(R.string.two_fa_summary)
-                    .setNeutralButton(android.R.string.cancel, (dialogInterface, i) -> {
-                        twoStepVerificationPref.setChecked(viewModel.getAuthType() != Settings.AUTH_TYPE_OFF);
-                    });
+                    .setNeutralButton(android.R.string.cancel, (dialogInterface, i) ->
+                            twoStepVerificationPref.setChecked(viewModel.getAuthType() != Settings.AUTH_TYPE_OFF));
 
             if (viewModel.getAuthType() != Settings.AUTH_TYPE_OFF) {
-                alertDialogBuilder.setNegativeButton(R.string.disable, (dialogInterface, i) -> viewModel.updateTwoFa(Settings.AUTH_TYPE_OFF));
+                alertDialogBuilder.setNegativeButton(R.string.disable, (dialogInterface, i) ->
+                        viewModel.updateTwoFa(Settings.AUTH_TYPE_OFF));
             } else {
-//                TODO - Currently only SMS 2FA on android
-                alertDialogBuilder.setPositiveButton(R.string.enable, (dialogInterface, i) -> viewModel.updateTwoFa(Settings.AUTH_TYPE_SMS));
+                alertDialogBuilder.setPositiveButton(R.string.enable, (dialogInterface, i) ->
+                        viewModel.updateTwoFa(Settings.AUTH_TYPE_SMS));
             }
-            alertDialogBuilder.create()
+            alertDialogBuilder
+                    .create()
                     .show();
         }
     }
@@ -826,10 +823,19 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
             if (pw.equals(viewModel.getEmail())) pwStrength = 0;
 
-            int pwStrengthLevel = 0;//red
-            if (pwStrength >= 75) pwStrengthLevel = 3;//green
-            else if (pwStrength >= 50) pwStrengthLevel = 2;//green
-            else if (pwStrength >= 25) pwStrengthLevel = 1;//orange
+            // red
+            int pwStrengthLevel = 0;
+
+            if (pwStrength >= 75) {
+                // green
+                pwStrengthLevel = 3;
+            } else if (pwStrength >= 50) {
+                // green
+                pwStrengthLevel = 2;
+            } else if (pwStrength >= 25) {
+                // orange
+                pwStrengthLevel = 1;
+            }
 
             passStrengthBar.setProgress(pwStrength);
             passStrengthBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), strengthColors[pwStrengthLevel]));
