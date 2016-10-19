@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
 
+import info.blockchain.api.Balance;
 import info.blockchain.api.DynamicFee;
 import info.blockchain.api.ExchangeTicker;
 import info.blockchain.api.PersistentUrls;
@@ -288,7 +289,14 @@ public class MainViewModel extends BaseViewModel {
 
         EventLogHandler handler = new EventLogHandler(prefs, WebUtil.getInstance());
         handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncrypted());
-        handler.logLegacyEvent(MultiAddrFactory.getInstance().getLegacyBalance() > 0);
         handler.logBackupEvent(payloadManager.getPayload().getHdWallet().isMnemonicVerified());
+
+        try {
+            List<String> activeLegacyAddressStrings = PayloadManager.getInstance().getPayload().getActiveLegacyAddressStrings();
+            long balance = new Balance().getTotalBalance(activeLegacyAddressStrings);
+            handler.logLegacyEvent(balance > 0L);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

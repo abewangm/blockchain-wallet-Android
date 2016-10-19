@@ -1,7 +1,5 @@
 package piuk.blockchain.android.util;
 
-import android.util.Log;
-
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.WebUtil;
 
@@ -50,7 +48,6 @@ public class EventLogHandler {
                                 JSONObject responseJson = new JSONObject(response);
                                 if(responseJson.has("success") && responseJson.getBoolean("success")) {
                                     prefsUtil.setValue(key, true);
-                                    Log.d("vos", "prefsUtil set: "+key);
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -68,12 +65,6 @@ public class EventLogHandler {
         else
             value = "0";
 
-//        return Observable.fromCallable(() -> webUtil.getURL(url + value));
-        Log.d("vos", "sendEvent: "+url + value);
-        return Observable.fromCallable(() -> fakeSucess());
-    }
-
-    private String fakeSucess(){
-        return "{\"success\":true}";
+        return Observable.fromCallable(() -> webUtil.getURL(url + value));
     }
 }
