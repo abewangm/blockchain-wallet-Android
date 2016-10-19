@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.settings;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.api.Settings;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -31,10 +32,10 @@ public class SettingsViewModel extends BaseViewModel {
     @Inject protected StringUtils stringUtils;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected AccessState accessState;
+    @VisibleForTesting Settings settings;
+    @VisibleForTesting boolean show2FaAfterPhoneVerified = true;
     private DataListener dataListener;
     private MonetaryUtil monetaryUtil;
-    private Settings settings;
-    private boolean show2FaAfterPhoneVerified = true;
 
     interface DataListener {
 

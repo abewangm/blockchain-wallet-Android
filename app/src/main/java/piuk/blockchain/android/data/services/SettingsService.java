@@ -129,6 +129,7 @@ public class SettingsService {
         public void onFail() {
             if (!subscriber.isUnsubscribed()) {
                 subscriber.onNext(false);
+                subscriber.onCompleted();
             }
         }
 
