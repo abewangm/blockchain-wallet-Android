@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.base;
 
 import android.support.annotation.CallSuper;
 
+import piuk.blockchain.android.injection.Injector;
 import rx.subscriptions.CompositeSubscription;
 
 public abstract class BaseViewModel {
@@ -16,11 +17,18 @@ public abstract class BaseViewModel {
 
     @CallSuper
     public void destroy() {
-        // Clear all subscriptions so that:
-        // 1) all processes are cancelled
-        // 2) processes don't try to update a null View
-        // 3) background processes don't leak memory
+        /** Clear all subscriptions so that:
+         * 1) all processes are cancelled
+         * 2) processes don't try to update a null View
+         * 3) background processes don't leak memory
+         */
         mCompositeSubscription.clear();
+
+        /**
+         * Clear DataManagerComponent, thereby releasing all objects with a
+         * {@link piuk.blockchain.android.injection.ViewModelScope} annotation for GC
+         */
+        Injector.getInstance().releaseViewModelScope();
     }
 
 }

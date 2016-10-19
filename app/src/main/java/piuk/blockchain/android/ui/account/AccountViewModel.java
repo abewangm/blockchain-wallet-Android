@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
-import android.support.v4.util.Pair;
 
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
@@ -18,9 +17,6 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
 import org.bitcoinj.params.MainNetParams;
 
-import java.util.List;
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import piuk.blockchain.android.BuildConfig;
@@ -31,7 +27,6 @@ import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -53,7 +48,7 @@ public class AccountViewModel extends BaseViewModel {
     @VisibleForTesting CharSequenceX doubleEncryptionPassword;
 
     AccountViewModel(DataListener dataListener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
     }
 
@@ -97,9 +92,8 @@ public class AccountViewModel extends BaseViewModel {
     void checkTransferableLegacyFunds(boolean isAutoPopup) {
         mCompositeSubscription.add(
                 fundsDataManager.getTransferableFundTransactionListForDefaultAccount()
-                        .subscribe(map -> {
-                            Map.Entry<List<PendingTransaction>, Pair<Long, Long>> entry = map.entrySet().iterator().next();
-                            if (payloadManager.getPayload().isUpgraded() && !entry.getKey().isEmpty()) {
+                        .subscribe(triple -> {
+                            if (payloadManager.getPayload().isUpgraded() && !triple.getLeft().isEmpty()) {
                                 dataListener.onSetTransferLegacyFundsMenuItemVisible(true);
 
                                 if (prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true) || !isAutoPopup) {
@@ -298,8 +292,13 @@ public class AccountViewModel extends BaseViewModel {
                             "android",
                             BuildConfig.VERSION_NAME);
 
-            accountDataManager.setKeyForLegacyAddress(legacyAddress, key, secondPassword);
-            dataListener.showRenameImportedAddressDialog(legacyAddress);
+            try {
+                accountDataManager.setKeyForLegacyAddress(legacyAddress, key, secondPassword);
+                dataListener.showRenameImportedAddressDialog(legacyAddress);
+            } catch (Exception e) {
+                e.printStackTrace();
+                dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
+            }
         } else {
             dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
         }

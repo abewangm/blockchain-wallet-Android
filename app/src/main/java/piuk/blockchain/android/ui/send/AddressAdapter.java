@@ -35,6 +35,7 @@ public class AddressAdapter extends ArrayAdapter<ItemAccount> {
         return getCustomView(position, parent, true);
     }
 
+    @NonNull
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         return getCustomView(position, parent, false);
@@ -70,6 +71,7 @@ public class AddressAdapter extends ArrayAdapter<ItemAccount> {
 
             if (showText) {
                 ItemAccount item = getItem(position);
+                assert item != null;
                 binding.text.setText(item.label);
             }
             return binding.getRoot();

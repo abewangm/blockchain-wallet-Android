@@ -19,7 +19,7 @@ public class DateUtil {
     }
 
     public String formatted(long ts) {
-        String ret = null;
+        String ret;
 
         Date localTime = new Date(ts);
         long date = localTime.getTime();
@@ -68,7 +68,6 @@ public class DateUtil {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time).getTime();
         } catch (Exception e) {
         }
-        ;
         return 0;
     }
 

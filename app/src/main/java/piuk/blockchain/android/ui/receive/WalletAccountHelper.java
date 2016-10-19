@@ -11,10 +11,7 @@ import info.blockchain.wallet.payload.PayloadManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -23,24 +20,23 @@ import piuk.blockchain.android.util.StringUtils;
 
 public class WalletAccountHelper {
 
-    @Inject PayloadManager mPayloadManager;
-    @Inject PrefsUtil mPrefsUtil;
-    @Inject StringUtils mStringUtils;
-    @Inject ExchangeRateFactory mExchangeRateFactory;
-    private AddressBalanceHelper mAddressBalanceHelper;
-    private double mBtcExchangeRate;
-    private String mFiatUnit;
-    private String mBtcUnit;
+    private final PayloadManager payloadManager;
+    private final StringUtils stringUtils;
+    private AddressBalanceHelper addressBalanceHelper;
+    private double btcExchangeRate;
+    private String fiatUnit;
+    private String btcUnit;
 
-    public WalletAccountHelper() {
-        Injector.getInstance().getAppComponent().inject(this);
-        int btcUnit = mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
+    public WalletAccountHelper(PayloadManager payloadManager, PrefsUtil prefsUtil, StringUtils stringUtils, ExchangeRateFactory exchangeRateFactory) {
+        this.payloadManager = payloadManager;
+        this.stringUtils = stringUtils;
+        int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         MonetaryUtil monetaryUtil = new MonetaryUtil(btcUnit);
-        mBtcUnit = monetaryUtil.getBTCUnit(btcUnit);
-        mFiatUnit = mPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        mBtcExchangeRate = mExchangeRateFactory.getLastPrice(mFiatUnit);
+        this.btcUnit = monetaryUtil.getBTCUnit(btcUnit);
+        fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        btcExchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
 
-        mAddressBalanceHelper = new AddressBalanceHelper(monetaryUtil);
+        addressBalanceHelper = new AddressBalanceHelper(monetaryUtil);
     }
 
     @NonNull
@@ -52,7 +48,7 @@ public class WalletAccountHelper {
         accountList.addAll(getHdAccounts(isBtc));
 
         // V2
-        List<LegacyAddress> legacyAddresses = mPayloadManager.getPayload().getLegacyAddresses();
+        List<LegacyAddress> legacyAddresses = payloadManager.getPayload().getLegacyAddresses();
         for (LegacyAddress legacyAddress : legacyAddresses) {
 
             if (legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS)
@@ -68,12 +64,12 @@ public class WalletAccountHelper {
             // Watch-only tag - we'll ask for xpriv scan when spending from
             String tag = null;
             if (legacyAddress.isWatchOnly()) {
-                tag = mStringUtils.getString(R.string.watch_only);
+                tag = stringUtils.getString(R.string.watch_only);
             }
 
             accountList.add(new ItemAccount(
                     labelOrAddress,
-                    mAddressBalanceHelper.getAddressBalance(legacyAddress, isBtc, mBtcExchangeRate, mFiatUnit, mBtcUnit),
+                    addressBalanceHelper.getAddressBalance(legacyAddress, isBtc, btcExchangeRate, fiatUnit, btcUnit),
                     tag,
                     legacyAddress));
 
@@ -85,9 +81,9 @@ public class WalletAccountHelper {
     @NonNull
     public List<ItemAccount> getHdAccounts(boolean isBtc) {
         List<ItemAccount> accountArrayList = new ArrayList<>();
-        if (mPayloadManager.getPayload().isUpgraded()) {
+        if (payloadManager.getPayload().isUpgraded()) {
 
-            List<Account> accounts = mPayloadManager.getPayload().getHdWallet().getAccounts();
+            List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
             for (Account account : accounts) {
 
                 if (account.isArchived())
@@ -97,7 +93,7 @@ public class WalletAccountHelper {
                 if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(account.getXpub())) {
                     accountArrayList.add(new ItemAccount(
                             account.getLabel(),
-                            mAddressBalanceHelper.getAccountBalance(account, isBtc, mBtcExchangeRate, mFiatUnit, mBtcUnit),
+                            addressBalanceHelper.getAccountBalance(account, isBtc, btcExchangeRate, fiatUnit, btcUnit),
                             null,
                             account));
                 }
@@ -111,13 +107,13 @@ public class WalletAccountHelper {
     public List<ItemAccount> getAddressBookEntries() {
         List<ItemAccount> itemAccountList = new ArrayList<>();
 
-        List<AddressBookEntry> addressBookEntries = mPayloadManager.getPayload().getAddressBookEntries();
+        List<AddressBookEntry> addressBookEntries = payloadManager.getPayload().getAddressBookEntries();
         for (AddressBookEntry addressBookEntry : addressBookEntries) {
 
             // If address has no label, we'll display address
             String labelOrAddress = addressBookEntry.getLabel() == null || addressBookEntry.getLabel().length() == 0 ? addressBookEntry.getAddress() : addressBookEntry.getLabel();
 
-            itemAccountList.add(new ItemAccount(labelOrAddress, "", mStringUtils.getString(R.string.address_book_label), addressBookEntry));
+            itemAccountList.add(new ItemAccount(labelOrAddress, "", stringUtils.getString(R.string.address_book_label), addressBookEntry));
         }
 
         return itemAccountList;

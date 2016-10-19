@@ -70,7 +70,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         this.context = context;
         this.dataListener = dataListener;
         this.osUtil = new OSUtil(context);
@@ -168,7 +168,11 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void cacheDynamicFee() {
-        DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDynamicFee());
+        try {
+            DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDynamicFee());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void cacheDefaultAccountUnspentData() {

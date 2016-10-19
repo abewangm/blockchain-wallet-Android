@@ -1,9 +1,8 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import android.support.v4.util.Pair;
-
 import info.blockchain.api.Unspent;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
+import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.HDWallet;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.Payload;
@@ -15,6 +14,7 @@ import info.blockchain.wallet.payment.data.SweepBundle;
 import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.util.CharSequenceX;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -26,7 +26,6 @@ import org.mockito.MockitoAnnotations;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
@@ -36,7 +35,9 @@ import rx.observers.TestSubscriber;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -65,7 +66,7 @@ public class TransferFundsDataManagerTest extends RxTest {
     @Test
     public void getTransferableFundTransactionListForDefaultAccount() throws Exception {
         // Arrange
-        TestSubscriber<Map<List<PendingTransaction>, Pair<Long, Long>>> subscriber = new TestSubscriber<>();
+        TestSubscriber<Triple> subscriber = new TestSubscriber<>();
         Payload mockPayload = mock(Payload.class);
         LegacyAddress legacyAddress1 = new LegacyAddress();
         legacyAddress1.setAddress("address");
@@ -128,7 +129,8 @@ public class TransferFundsDataManagerTest extends RxTest {
             add(transaction1);
         }};
         when(mPayloadManager.savePayloadToServer()).thenReturn(true);
-        Payload mockPayload = mock(Payload.class);
+        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
+        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
 
@@ -210,7 +212,8 @@ public class TransferFundsDataManagerTest extends RxTest {
             add(transaction1);
         }};
         when(mPayloadManager.savePayloadToServer()).thenReturn(true);
-        Payload mockPayload = mock(Payload.class);
+        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
+        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
 

@@ -28,6 +28,8 @@ interface PersistentPrefs {
     String KEY_EVENT_2ND_PW = "event_2nd_pw";
     String KEY_EVENT_LEGACY = "event_legacy";
     String KEY_EVENT_BACKUP = "event_backup";
+    String KEY_ENCRYPTED_PIN_CODE = "encrypted_pin_code";
+    String KEY_FINGERPRINT_ENABLED = "fingerprint_enabled";
 
     String getValue(String name, String value);
 

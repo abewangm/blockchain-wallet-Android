@@ -12,16 +12,16 @@ public class MonetaryUtil {
     public static final int UNIT_BTC = 0;
     public static final int MILLI_BTC = 1;
     public static final int MICRO_BTC = 2;
-    public static final double MILLI_DOUBLE = 1000.0;
-    public static final double MICRO_DOUBLE = 1000000.0;
-    public static final long MILLI_LONG = 1000L;
-    public static final long MICRO_LONG = 1000000L;
-    public static final double BTC_DEC = 1e8;
+    private static final double MILLI_DOUBLE = 1000.0;
+    private static final double MICRO_DOUBLE = 1000000.0;
+    private static final long MILLI_LONG = 1000L;
+    private static final long MICRO_LONG = 1000000L;
+    private static final double BTC_DEC = 1e8;
     private CharSequence[] btcUnits = {"BTC", "mBTC", "bits"};
     private DecimalFormat btcFormat = null;
     private DecimalFormat fiatFormat = null;
 
-    int unit;
+    private int unit;
 
     public MonetaryUtil(int unit) {
         this.unit = unit;
@@ -51,7 +51,7 @@ public class MonetaryUtil {
     }
 
     public CharSequence[] getBTCUnits() {
-        return btcUnits;
+        return btcUnits.clone();
     }
 
     public String getBTCUnit(int unit) {
@@ -60,7 +60,7 @@ public class MonetaryUtil {
 
     public String getDisplayAmount(long value) {
 
-        String strAmount = null;
+        String strAmount;
 
         switch (unit) {
             case MonetaryUtil.MICRO_BTC:
@@ -79,7 +79,7 @@ public class MonetaryUtil {
 
     public BigInteger getUndenominatedAmount(long value) {
 
-        BigInteger amount = BigInteger.ZERO;
+        BigInteger amount;
 
         switch (unit) {
             case MonetaryUtil.MICRO_BTC:
@@ -98,7 +98,7 @@ public class MonetaryUtil {
 
     public double getUndenominatedAmount(double value) {
 
-        double amount = 0.0;
+        double amount;
 
         switch (unit) {
             case MonetaryUtil.MICRO_BTC:
@@ -117,7 +117,7 @@ public class MonetaryUtil {
 
     public double getDenominatedAmount(double value) {
 
-        double amount = 0.0;
+        double amount;
 
         switch (unit) {
             case MonetaryUtil.MICRO_BTC:
@@ -136,7 +136,7 @@ public class MonetaryUtil {
 
     public String getDisplayAmountWithFormatting(long value) {
 
-        String strAmount = null;
+        String strAmount;
         DecimalFormat df = new DecimalFormat("#");
         df.setMinimumIntegerDigits(1);
         df.setMinimumFractionDigits(1);
@@ -159,7 +159,7 @@ public class MonetaryUtil {
 
     public String getDisplayAmountWithFormatting(double value) {
 
-        String strAmount = null;
+        String strAmount;
         DecimalFormat df = new DecimalFormat("#");
         df.setMinimumIntegerDigits(1);
         df.setMinimumFractionDigits(1);

@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.pairing;
 
-import piuk.blockchain.android.ui.zxing.CaptureActivity;
-
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -13,6 +11,7 @@ import android.view.MenuItem;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.auth.CreateWalletFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppUtil;
 
 public class PairOrCreateWalletActivity extends BaseAuthActivity {

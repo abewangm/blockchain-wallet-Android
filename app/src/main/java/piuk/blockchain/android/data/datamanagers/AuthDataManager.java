@@ -18,12 +18,10 @@ import org.json.JSONObject;
 
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.data.services.WalletPayloadService;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -37,27 +35,38 @@ import rx.schedulers.Schedulers;
 @SuppressWarnings("WeakerAccess")
 public class AuthDataManager {
 
-    @Inject protected PayloadManager mPayloadManager;
-    @Inject protected PrefsUtil mPrefsUtil;
-    @Inject protected WalletPayload mAccess;
-    @Inject protected AppUtil mAppUtil;
-    @Inject protected AESUtilWrapper mAESUtil;
-    @Inject protected AccessState mAccessState;
-    @Inject protected StringUtils mStringUtils;
+    private WalletPayloadService walletPayloadService;
+    private PayloadManager payloadManager;
+    private PrefsUtil prefsUtil;
+    private AppUtil appUtil;
+    private AESUtilWrapper aesUtilWrapper;
+    private AccessState accessState;
+    private StringUtils stringUtils;
     @VisibleForTesting protected int timer;
 
-    public AuthDataManager() {
-        Injector.getInstance().getAppComponent().inject(this);
+    public AuthDataManager(PayloadManager payloadManager,
+                           PrefsUtil prefsUtil,
+                           WalletPayloadService walletPayloadService,
+                           AppUtil appUtil,
+                           AESUtilWrapper aesUtilWrapper,
+                           AccessState accessState,
+                           StringUtils stringUtils) {
+
+        this.payloadManager = payloadManager;
+        this.prefsUtil = prefsUtil;
+        this.walletPayloadService = walletPayloadService;
+        this.appUtil = appUtil;
+        this.aesUtilWrapper = aesUtilWrapper;
+        this.accessState = accessState;
+        this.stringUtils = stringUtils;
     }
 
     public Observable<String> getEncryptedPayload(String guid, String sessionId) {
-        return Observable.fromCallable(() -> mAccess.getEncryptedPayload(guid, sessionId))
-                .compose(RxUtil.applySchedulers());
+        return walletPayloadService.getEncryptedPayload(guid, sessionId);
     }
 
     public Observable<String> getSessionId(String guid) {
-        return Observable.fromCallable(() -> mAccess.getSessionId(guid))
-                .compose(RxUtil.applySchedulers());
+        return walletPayloadService.getSessionId(guid);
     }
 
     public Observable<Void> updatePayload(String sharedKey, String guid, CharSequenceX password) {
@@ -66,38 +75,37 @@ public class AuthDataManager {
     }
 
     public Observable<CharSequenceX> validatePin(String pin) {
-        return Observable.fromCallable(() -> mAccessState.validatePIN(pin))
-                .compose(RxUtil.applySchedulers());
+        return accessState.validatePin(pin);
     }
 
     public Observable<Boolean> createPin(CharSequenceX password, String pin) {
-        return Observable.fromCallable(() -> mAccessState.createPIN(password, pin))
+        return accessState.createPin(password, pin)
                 .compose(RxUtil.applySchedulers());
     }
 
     public Observable<Payload> createHdWallet(String password, String walletName) {
-        return Observable.fromCallable(() -> mPayloadManager.createHDWallet(password, walletName))
+        return Observable.fromCallable(() -> payloadManager.createHDWallet(password, walletName))
                 .compose(RxUtil.applySchedulers())
                 .doOnNext(payload -> {
                     if (payload != null) {
                         // Successfully created and saved
-                        mAppUtil.setNewlyCreated(true);
-                        mPrefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
-                        mAppUtil.setSharedKey(payload.getSharedKey());
+                        appUtil.setNewlyCreated(true);
+                        prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
+                        appUtil.setSharedKey(payload.getSharedKey());
                     }
                 });
     }
 
     public Observable<Payload> restoreHdWallet(String email, String password, String passphrase) {
-        mPayloadManager.setEmail(email);
-        return Observable.fromCallable(() -> mPayloadManager.restoreHDWallet(
-                password, passphrase, mStringUtils.getString(R.string.default_wallet_name)))
+        payloadManager.setEmail(email);
+        return Observable.fromCallable(() -> payloadManager.restoreHDWallet(
+                password, passphrase, stringUtils.getString(R.string.default_wallet_name)))
                 .doOnNext(payload -> {
                     if (payload == null) {
                         throw Exceptions.propagate(new Throwable("Save failed"));
                     } else {
-                        mPrefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
-                        mAppUtil.setSharedKey(payload.getSharedKey());
+                        prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
+                        appUtil.setSharedKey(payload.getSharedKey());
                     }
                 })
                 .compose(RxUtil.applySchedulers());
@@ -123,12 +131,12 @@ public class AuthDataManager {
     private Observable<Void> getUpdatePayloadObservable(String sharedKey, String guid, CharSequenceX password) {
         return Observable.defer(() -> Observable.create(subscriber -> {
             try {
-                mPayloadManager.initiatePayload(
+                payloadManager.initiatePayload(
                         sharedKey,
                         guid,
                         password,
                         () -> {
-                            mPayloadManager.setTempPassword(password);
+                            payloadManager.setTempPassword(password);
                             if (!subscriber.isUnsubscribed()) {
                                 subscriber.onNext(null);
                                 subscriber.onCompleted();
@@ -168,7 +176,7 @@ public class AuthDataManager {
 
                 String decryptedPayload = null;
                 try {
-                    decryptedPayload = mAESUtil.decrypt(encryptedPayload, password, iterations);
+                    decryptedPayload = aesUtilWrapper.decrypt(encryptedPayload, password, iterations);
                 } catch (Exception e) {
                     listener.onFatalError();
                 }
@@ -185,12 +193,12 @@ public class AuthDataManager {
             try {
                 BlockchainWallet v1Wallet = new BlockchainWallet(payload, password);
                 attemptUpdatePayload(password, guid, v1Wallet.getPayload().getDecryptedPayload(), listener);
-            } catch (PayloadException | JSONException fatalException) {
-                Log.e(getClass().getSimpleName(), "attemptDecryptPayload: ", fatalException);
-                listener.onFatalError();
             } catch (DecryptionException | NullPointerException authException) {
                 Log.e(getClass().getSimpleName(), "attemptDecryptPayload: ", authException);
                 listener.onAuthFail();
+            } catch (Exception fatalException) {
+                Log.e(getClass().getSimpleName(), "attemptDecryptPayload: ", fatalException);
+                listener.onFatalError();
             }
         }
     }
@@ -199,18 +207,18 @@ public class AuthDataManager {
         JSONObject decryptedJsonObject = new JSONObject(decryptedPayload);
 
         if (decryptedJsonObject.has("sharedKey")) {
-            mPrefsUtil.setValue(PrefsUtil.KEY_GUID, guid);
-            mPayloadManager.setTempPassword(password);
+            prefsUtil.setValue(PrefsUtil.KEY_GUID, guid);
+            payloadManager.setTempPassword(password);
 
             String sharedKey = decryptedJsonObject.getString("sharedKey");
-            mAppUtil.setSharedKey(sharedKey);
+            appUtil.setSharedKey(sharedKey);
 
             updatePayload(sharedKey, guid, password)
                     .compose(RxUtil.applySchedulers())
                     .subscribe(new Subscriber<Void>() {
                         @Override
                         public void onCompleted() {
-                            mPrefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
+                            prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
                             listener.onSuccess();
                         }
 

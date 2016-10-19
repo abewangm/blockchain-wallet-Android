@@ -16,6 +16,8 @@
 
 package piuk.blockchain.android.ui.zxing;
 
+import com.google.zxing.ResultPoint;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -23,16 +25,15 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
-
-import com.google.zxing.ResultPoint;
-import piuk.blockchain.android.ui.zxing.camera.CameraManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.ui.zxing.camera.CameraManager;
 
 /**
  * This view is overlaid on top of the camera preview. It adds the viewfinder rectangle and partial
@@ -66,12 +67,12 @@ public final class ViewfinderView extends View {
     // Initialize these once for performance rather than calling them every time in onDraw().
     paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     Resources resources = getResources();
-    maskColor = resources.getColor(R.color.barcode_viewfinder_mask);
-    resultColor = resources.getColor(R.color.barcode_result_view);
-    laserColor = resources.getColor(R.color.barcode_viewfinder_laser);
-    resultPointColor = resources.getColor(R.color.barcode_possible_result_points);
+    maskColor = ContextCompat.getColor(context, R.color.barcode_viewfinder_mask);
+    resultColor = ContextCompat.getColor(context, R.color.barcode_result_view);
+    laserColor = ContextCompat.getColor(context, R.color.barcode_viewfinder_laser);
+    resultPointColor = ContextCompat.getColor(context, R.color.barcode_possible_result_points);
     scannerAlpha = 0;
-    possibleResultPoints = new ArrayList<ResultPoint>(5);
+    possibleResultPoints = new ArrayList<>(5);
     lastPossibleResultPoints = null;
   }
 
@@ -113,6 +114,7 @@ public final class ViewfinderView extends View {
       canvas.drawRect(frame.left + 2, middle - 1, frame.right - 1, middle + 2, paint);
       
       Rect previewFrame = cameraManager.getFramingRectInPreview();
+      assert previewFrame != null;
       float scaleX = frame.width() / (float) previewFrame.width();
       float scaleY = frame.height() / (float) previewFrame.height();
 
@@ -123,7 +125,7 @@ public final class ViewfinderView extends View {
       if (currentPossible.isEmpty()) {
         lastPossibleResultPoints = null;
       } else {
-        possibleResultPoints = new ArrayList<ResultPoint>(5);
+        possibleResultPoints = new ArrayList<>(5);
         lastPossibleResultPoints = currentPossible;
         paint.setAlpha(CURRENT_POINT_OPACITY);
         paint.setColor(resultPointColor);

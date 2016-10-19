@@ -11,7 +11,7 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.ViewModel;
+import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
@@ -19,7 +19,8 @@ import piuk.blockchain.android.util.PrefsUtil;
  * Created by adambennett on 09/08/2016.
  */
 
-public class LauncherViewModel implements ViewModel {
+@SuppressWarnings("WeakerAccess")
+public class LauncherViewModel extends BaseViewModel {
 
     public static final String INTENT_EXTRA_VERIFIED = "verified";
 
@@ -48,10 +49,11 @@ public class LauncherViewModel implements ViewModel {
     }
 
     public LauncherViewModel(DataListener listener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         mDataListener = listener;
     }
 
+    @Override
     public void onViewReady() {
         // Store incoming URI if needed
         String action = mDataListener.getPageIntent().getAction();
@@ -103,10 +105,5 @@ public class LauncherViewModel implements ViewModel {
     @NonNull
     public AppUtil getAppUtil() {
         return mAppUtil;
-    }
-
-    @Override
-    public void destroy() {
-        // No-op
     }
 }

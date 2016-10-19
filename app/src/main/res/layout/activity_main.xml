@@ -44,6 +44,7 @@
             android:layout_gravity="start"
             android:background="@android:color/white"
             android:paddingTop="16dp"
+            app:insetForeground="@color/blockchain_blue"
             app:headerLayout="@layout/navigation_drawer_header"
             app:menu="@menu/drawer_view" />
     </android.support.v4.widget.DrawerLayout>

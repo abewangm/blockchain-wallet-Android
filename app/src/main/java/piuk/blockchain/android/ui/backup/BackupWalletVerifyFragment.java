@@ -6,6 +6,7 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -34,8 +35,10 @@ public class BackupWalletVerifyFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_backup_wallet_verify, container, false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setElevation(0F);
+
+        ActionBar supportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && supportActionBar != null) {
+            supportActionBar.setElevation(0F);
         }
 
         Bundle bundle = getArguments();
@@ -44,7 +47,7 @@ public class BackupWalletVerifyFragment extends Fragment {
             secondPassword = bundle.getString("second_password");
         }
 
-        final List<Pair<Integer, String>> confirmSequence = new BackupWalletUtil(getActivity()).getConfirmSequence(secondPassword);
+        final List<Pair<Integer, String>> confirmSequence = new BackupWalletUtil().getConfirmSequence(secondPassword);
         String[] mnemonicRequestHint = getResources().getStringArray(R.array.mnemonic_word_requests);
 
         binding.etFirstRequest.setHint(mnemonicRequestHint[confirmSequence.get(0).first]);

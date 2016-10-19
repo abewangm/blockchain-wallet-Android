@@ -119,11 +119,10 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
                                 ? R.color.blockchain_green_50 : R.color.blockchain_receive_green));
             }
 
-            TextView tvWatchOnly = (TextView) holder.itemView.findViewById(R.id.watch_only);
             if (tx.isWatchOnly()) {
-                tvWatchOnly.setVisibility(View.VISIBLE);
+                holder.watchOnly.setVisibility(View.VISIBLE);
             } else {
-                tvWatchOnly.setVisibility(View.GONE);
+                holder.watchOnly.setVisibility(View.GONE);
             }
 
             holder.result.setText(span1);

@@ -20,19 +20,15 @@ public class OnSwipeTouchListener implements OnTouchListener {
     }
 
     public void onSwipeRight() {
-        ;
     }
 
     public void onSwipeLeft() {
-        ;
     }
 
     public void onSwipeTop() {
-        ;
     }
 
     public void onSwipeBottom() {
-        ;
     }
 
     private final class GestureListener extends SimpleOnGestureListener {
@@ -47,7 +43,6 @@ public class OnSwipeTouchListener implements OnTouchListener {
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            boolean result = true;
             try {
                 float diffY = e2.getY() - e1.getY();
                 float diffX = e2.getX() - e1.getX();
@@ -72,7 +67,7 @@ public class OnSwipeTouchListener implements OnTouchListener {
                 exception.printStackTrace();
             }
 
-            return result;
+            return true;
         }
     }
 

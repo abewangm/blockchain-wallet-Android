@@ -294,6 +294,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     binding.accounts.spinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
+                    //noinspection deprecation
                     binding.accounts.spinner.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
 
@@ -337,6 +338,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     binding.spDestination.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
+                    //noinspection deprecation
                     binding.spDestination.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
 
@@ -553,11 +555,9 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                ;
             }
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                ;
             }
         };
 
@@ -572,11 +572,9 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                ;
             }
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                ;
             }
         };
 
@@ -642,7 +640,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         }
 
         dialogBinding.tvCustomizeFee.setOnClickListener(v -> {
-            if (alertDialog != null && alertDialog.isShowing()) {
+            if (alertDialog.isShowing()) {
                 alertDialog.cancel();
             }
 
@@ -661,7 +659,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         });
 
         dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialog != null && alertDialog.isShowing()) {
+            if (alertDialog.isShowing()) {
                 alertDialog.cancel();
             }
         });
@@ -677,7 +675,9 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
         alertDialog.show();
         // To prevent the dialog from appearing too large on Android N
-        alertDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        if (alertDialog.getWindow() != null) {
+            alertDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        }
 
         if (viewModel.isLargeTransaction()) {
             onShowLargeTransactionWarning(alertDialog);

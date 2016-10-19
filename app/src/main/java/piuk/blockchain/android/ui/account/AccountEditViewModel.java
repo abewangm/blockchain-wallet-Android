@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Looper;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -111,7 +112,7 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     public AccountEditViewModel(AccountEditModel accountModel, Context context, DataListener dataListener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         this.context = context;
         this.dataListener = dataListener;
 
@@ -172,7 +173,7 @@ public class AccountEditViewModel extends BaseViewModel {
             if (payloadManager.getPayload().getLegacyAddresses().size() > 0) {
                 iAccount = new ImportedAccount(context.getString(R.string.imported_addresses),
                         payloadManager.getPayload().getLegacyAddresses(),
-                        new ArrayList<String>(),
+                        new ArrayList<>(),
                         MultiAddrFactory.getInstance().getLegacyBalance());
             }
 
@@ -225,7 +226,7 @@ public class AccountEditViewModel extends BaseViewModel {
         } else {
             accountModel.setDefaultAccountVisibility(View.VISIBLE);
             accountModel.setDefaultText(context.getString(R.string.make_default));
-            accountModel.setDefaultTextColor(context.getResources().getColor(R.color.blockchain_blue));
+            accountModel.setDefaultTextColor(ContextCompat.getColor(context, R.color.blockchain_blue));
         }
     }
 
@@ -481,7 +482,7 @@ public class AccountEditViewModel extends BaseViewModel {
                     LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
                     String changeAddress = legacyAddress.getAddress();
 
-                    List<ECKey> keys = new ArrayList<ECKey>();
+                    List<ECKey> keys = new ArrayList<>();
                     if (payloadManager.getPayload().isDoubleEncrypted()) {
                         ECKey walletKey = legacyAddress.getECKey(new CharSequenceX(secondPassword));
                         keys.add(walletKey);
@@ -544,7 +545,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
             newLabel = newLabel.trim();
 
-            if (newLabel != null && newLabel.length() > 0) {
+            if (newLabel.length() > 0) {
 
                 final String finalNewLabel = newLabel;
                 new AsyncTask<String, Void, Void>() {
@@ -563,7 +564,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
                     @Override
                     protected Void doInBackground(final String... params) {
-                        String revertLabel = null;
+                        String revertLabel;
                         if (account != null) {
                             revertLabel = account.getLabel();
                             account.setLabel(params[0]);
@@ -728,7 +729,7 @@ public class AccountEditViewModel extends BaseViewModel {
         }.execute();
     }
 
-    private void importAddressPrivateKey(ECKey key, LegacyAddress address, boolean matchesIntendedAddress) {
+    private void importAddressPrivateKey(ECKey key, LegacyAddress address, boolean matchesIntendedAddress) throws Exception {
         setLegacyAddressKey(key, address, false);
 
         if (payloadManager.savePayloadToServer()) {
@@ -749,7 +750,7 @@ public class AccountEditViewModel extends BaseViewModel {
         }
     }
 
-    private void setLegacyAddressKey(ECKey key, LegacyAddress address, boolean watchOnly) {
+    private void setLegacyAddressKey(ECKey key, LegacyAddress address, boolean watchOnly) throws Exception {
         // If double encrypted, save encrypted in payload
         if (!payloadManager.getPayload().isDoubleEncrypted()) {
             address.setEncryptedKey(key.getPrivKeyBytes());
@@ -766,7 +767,7 @@ public class AccountEditViewModel extends BaseViewModel {
         }
     }
 
-    private void importUnmatchedPrivateKey(ECKey key) {
+    private void importUnmatchedPrivateKey(ECKey key) throws Exception {
         if (payloadManager.getPayload().getLegacyAddressStrings().contains(key.toAddress(MainNetParams.get()).toString())) {
             // Wallet contains address associated with this private key, find & save it with scanned key
             String foundAddressString = key.toAddress(MainNetParams.get()).toString();
