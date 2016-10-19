@@ -147,6 +147,7 @@ public class AuthDataManagerTest extends RxTest {
         // Assert
         verify(mPayloadManager).restoreHDWallet(anyString(), anyString(), anyString());
         verify(mAppUtil).setSharedKey(anyString());
+        verify(mAppUtil).setNewlyCreated(true);
         verify(mPrefsUtil).setValue(eq(PrefsUtil.KEY_GUID), anyString());
         subscriber.assertCompleted();
         subscriber.onNext(payload);

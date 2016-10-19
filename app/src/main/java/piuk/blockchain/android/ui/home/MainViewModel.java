@@ -71,8 +71,8 @@ public class MainViewModel extends BaseViewModel {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.context = context;
         this.dataListener = dataListener;
-        this.osUtil = new OSUtil(context);
-        this.appUtil.applyPRNGFixes();
+        osUtil = new OSUtil(context);
+        appUtil.applyPRNGFixes();
     }
 
     @Override
@@ -84,7 +84,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void checkIfShouldShowEmailVerification() {
-        if (appUtil.isNewlyCreated()) {
+        if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
             mCompositeSubscription.add(
                     getSettingsApi()
                             .compose(RxUtil.applySchedulers())
@@ -109,16 +109,15 @@ public class MainViewModel extends BaseViewModel {
     private void checkRooted() {
         if (new RootUtil().isDeviceRooted() &&
                 !prefs.getValue("disable_root_warning", false)) {
-            this.dataListener.onRooted();
+            dataListener.onRooted();
         }
     }
 
     private void checkConnectivity() {
-
         if (ConnectivityStatus.hasConnectivity(context)) {
             preLaunchChecks();
         } else {
-            this.dataListener.onConnectivityFail();
+            dataListener.onConnectivityFail();
         }
     }
 

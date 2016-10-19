@@ -21,6 +21,8 @@ import piuk.blockchain.android.data.services.TransactionDetailsService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.util.ListUtil;
 import rx.Observable;
+import rx.subjects.PublishSubject;
+import rx.subjects.Subject;
 
 public class TransactionListDataManager {
 
@@ -29,6 +31,7 @@ public class TransactionListDataManager {
     private PayloadManager payloadManager;
     private TransactionDetailsService transactionDetails;
     private TransactionListStore transactionListStore;
+    private Subject<List<Tx>, List<Tx>> listUpdateSubject;
 
     public TransactionListDataManager(PayloadManager payloadManager,
                                       TransactionDetailsService transactionDetails,
@@ -36,6 +39,7 @@ public class TransactionListDataManager {
         this.payloadManager = payloadManager;
         this.transactionDetails = transactionDetails;
         this.transactionListStore = transactionListStore;
+        listUpdateSubject = PublishSubject.create();
     }
 
     /**
@@ -57,6 +61,8 @@ public class TransactionListDataManager {
         }
 
         Collections.sort(transactionListStore.getList(), new TxMostRecentDateComparator());
+        listUpdateSubject.onNext(transactionListStore.getList());
+        listUpdateSubject.onCompleted();
     }
 
     /**
@@ -86,6 +92,16 @@ public class TransactionListDataManager {
     public List<Tx> insertTransactionIntoListAndReturnSorted(Tx transaction) {
         transactionListStore.insertTransactionIntoListAndSort(transaction);
         return transactionListStore.getList();
+    }
+
+    /**
+     * Returns a subject that lets ViewModels subscribe to changes in the transaction list - specifically
+     * this subject will return the transaction list when it's first updated and then call onCompleted()
+     *
+     * @return  The list of transactions after initial sync
+     */
+    public Subject<List<Tx>, List<Tx>> getListUpdateSubject() {
+        return listUpdateSubject;
     }
 
     /**
