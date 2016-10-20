@@ -80,6 +80,7 @@ public class PinEntryViewModelTest {
     @Mock private PayloadManager mPayloadManager;
     @Mock private StringUtils mStringUtils;
     @Mock private FingerprintHelper mFingerprintHelper;
+    @Mock private AccessState mAccessState;
 
     @Before
     public void setUp() throws Exception {
@@ -352,6 +353,23 @@ public class PinEntryViewModelTest {
         verify(mActivity).showCommonPinWarning(any(DialogButtonCallback.class));
         assertEquals("", mSubject.mUserEnteredPin);
         assertEquals("1234", mSubject.mUserEnteredConfirmationPin);
+    }
+
+    @Test
+    public void padClickedShowPinReuseWarning() throws Exception {
+        // Arrange
+        mSubject.mUserEnteredPin = "258";
+        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("");
+        when(mAccessState.getPIN()).thenReturn("2580");
+        // Act
+        View mockView = mock(View.class);
+        when(mockView.getTag()).thenReturn("0");
+        mSubject.padClicked(mockView);
+        // Assert
+        verify(mActivity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(mActivity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verify(mActivity).clearPinBoxes();
     }
 
     @Test
@@ -820,6 +838,11 @@ public class PinEntryViewModelTest {
         @Override
         protected StringUtils provideStringUtils() {
             return mStringUtils;
+        }
+
+        @Override
+        protected AccessState provideAccessState() {
+            return mAccessState;
         }
     }
 
