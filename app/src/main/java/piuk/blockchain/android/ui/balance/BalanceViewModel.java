@@ -100,30 +100,39 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
             prefsUtil.setValue(PrefsUtil.KEY_FIRST_RUN, false);
         } else {
             // Check from this point forwards
-            if (!isBackedUp() && hasTransactions() && !getIfNeverPromptBackup()) {
-                // Show dialog and store date of dialog launch
-                if (getTimeOfLastSecurityPrompt() == 0) {
-                    dataListener.showBackupPromptDialog(false);
-                    storeTimeOfLastSecurityPrompt();
-                } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-                    dataListener.showBackupPromptDialog(true);
-                    storeTimeOfLastSecurityPrompt();
-                }
-            } else if ((isBackedUp() || hasTransactions()) && !getIfNeverPrompt2Fa()) {
-                compositeSubscription.add(
-                        getSettingsApi()
-                                .compose(RxUtil.applySchedulers())
-                                .subscribe(settings -> {
-                                    if (!settings.isSmsVerified()) {
-                                        // Show dialog for 2FA, store date of dialog launch
-                                        if (getTimeOfLastSecurityPrompt() == 0L
-                                                || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-                                            dataListener.show2FaDialog();
-                                            storeTimeOfLastSecurityPrompt();
+            compositeSubscription.add(
+                    transactionListDataManager.getListUpdateSubject()
+                            .compose(RxUtil.applySchedulers())
+                            .subscribe(txs -> {
+                                        if (!txs.isEmpty()) {
+                                            if (!isBackedUp() && !getIfNeverPromptBackup()) {
+                                                // Show dialog and store date of dialog launch
+                                                if (getTimeOfLastSecurityPrompt() == 0) {
+                                                    dataListener.showBackupPromptDialog(false);
+                                                    storeTimeOfLastSecurityPrompt();
+                                                } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
+                                                    dataListener.showBackupPromptDialog(true);
+                                                    storeTimeOfLastSecurityPrompt();
+                                                }
+                                            } else if (isBackedUp() && !getIfNeverPrompt2Fa()) {
+                                                compositeSubscription.add(
+                                                        getSettingsApi()
+                                                                .compose(RxUtil.applySchedulers())
+                                                                .subscribe(settings -> {
+                                                                    if (!settings.isSmsVerified()) {
+                                                                        // Show dialog for 2FA, store date of dialog launch
+                                                                        if (getTimeOfLastSecurityPrompt() == 0L
+                                                                                || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
+                                                                            dataListener.show2FaDialog();
+                                                                            storeTimeOfLastSecurityPrompt();
+                                                                        }
+                                                                    }
+                                                                }, Throwable::printStackTrace));
+                                            }
                                         }
-                                    }
-                                }, Throwable::printStackTrace));
-            }
+
+                                    }, Throwable::printStackTrace
+                            ));
         }
     }
 

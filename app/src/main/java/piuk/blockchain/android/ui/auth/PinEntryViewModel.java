@@ -25,6 +25,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -58,6 +59,7 @@ public class PinEntryViewModel extends BaseViewModel {
     @Inject protected StringUtils mStringUtils;
     @Inject protected SSLVerifyUtil mSSLVerifyUtil;
     @Inject protected FingerprintHelper mFingerprintHelper;
+    @Inject protected AccessState mAccessState;
 
     private String mEmail;
     private CharSequenceX mPassword;
@@ -224,6 +226,13 @@ public class PinEntryViewModel extends BaseViewModel {
                         validateAndConfirmPin();
                     }
                 });
+
+                // If user is changing their PIN and it matches their old one, disallow it
+            } else if (isChangingPin()
+                    && mUserEnteredConfirmationPin == null
+                    && mAccessState.getPIN().equals(mUserEnteredPin)) {
+                showErrorToast(R.string.change_pin_new_matches_current);
+                clearPinViewAndReset();
             } else {
                 validateAndConfirmPin();
             }
@@ -253,6 +262,9 @@ public class PinEntryViewModel extends BaseViewModel {
         }
     }
 
+    /**
+     * Resets the view without restarting the page
+     */
     @Thunk
     void clearPinViewAndReset() {
         clearPinBoxes();
@@ -475,6 +487,12 @@ public class PinEntryViewModel extends BaseViewModel {
 
     public boolean isCreatingNewPin() {
         return mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "").isEmpty();
+    }
+
+    private boolean isChangingPin() {
+        return isCreatingNewPin()
+                && mAccessState.getPIN() != null
+                && !mAccessState.getPIN().isEmpty();
     }
 
     @UiThread

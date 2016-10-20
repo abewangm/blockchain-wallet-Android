@@ -62,6 +62,7 @@
     <string name="create_pin">Create PIN</string>
     <string name="confirm_pin">Confirm PIN</string>
     <string name="create_pin_failed">PIN creation failed. Please pair device again.</string>
+    <string name="change_pin_new_matches_current">You can\'t use your current PIN as your new PIN</string>
     <string name="pairing_failed">Pairing failed. Please try again.</string>
 
     <string name="check_connectivity_exit">Blockchain Wallet cannot obtain an Internet connection. Please check the connectivity on your device and try again.</string>

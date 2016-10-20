@@ -31,6 +31,7 @@ import piuk.blockchain.android.data.services.TransactionDetailsService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import rx.Observable;
 import rx.observers.TestSubscriber;
+import rx.subjects.Subject;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -157,6 +158,16 @@ public class TransactionListDataManagerTest extends RxTest {
         mSubject.clearTransactionList();
         // Assert
         assertEquals(Collections.emptyList(), mSubject.getTransactionList());
+    }
+
+    @Test
+    public void getListUpdateSubject() throws Exception {
+        // Arrange
+
+        // Act
+        Subject value = mSubject.getListUpdateSubject();
+        // Assert
+        assertNotNull(value);
     }
 
     @Test

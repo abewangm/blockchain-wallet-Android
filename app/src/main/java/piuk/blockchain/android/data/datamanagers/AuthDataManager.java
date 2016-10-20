@@ -104,6 +104,7 @@ public class AuthDataManager {
                     if (payload == null) {
                         throw Exceptions.propagate(new Throwable("Save failed"));
                     } else {
+                        appUtil.setNewlyCreated(true);
                         prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
                         appUtil.setSharedKey(payload.getSharedKey());
                     }
