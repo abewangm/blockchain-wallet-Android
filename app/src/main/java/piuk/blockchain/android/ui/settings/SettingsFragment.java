@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.settings;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -7,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -46,6 +48,7 @@ import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
+import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
@@ -82,6 +85,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     private SwitchPreferenceCompat twoStepVerificationPref;
     private Preference passwordHint1Pref;
     private SwitchPreferenceCompat torPref;
+    private SwitchPreferenceCompat launcherShortcutPrefs;
 
     @Thunk SettingsViewModel viewModel;
     private int pwStrength = 0;
@@ -103,6 +107,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         viewModel.onViewReady();
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void setUpUi() {
         addPreferencesFromResource(R.xml.settings);
@@ -148,6 +153,15 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
         torPref = (SwitchPreferenceCompat) findPreference("tor");
         torPref.setOnPreferenceClickListener(this);
+
+        launcherShortcutPrefs = (SwitchPreferenceCompat) findPreference("receive_shortcuts_enabled");
+        launcherShortcutPrefs.setOnPreferenceClickListener(this);
+        launcherShortcutPrefs.setOnPreferenceChangeListener((preference, newValue) -> {
+            if (!((Boolean) newValue) && AndroidUtils.is25OrHigher()) {
+                getActivity().getSystemService(ShortcutManager.class).removeAllDynamicShortcuts();
+            }
+            return true;
+        });
 
         // App
         Preference aboutPref = findPreference("about");
@@ -281,6 +295,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         torPref.setChecked(blocked);
     }
 
+    @Override
+    public void setLauncherShortcutVisibility(boolean visible) {
+        launcherShortcutPrefs.setVisible(visible);
+    }
+
     private void onFingerprintClicked() {
         viewModel.onFingerprintClicked();
     }
@@ -403,6 +422,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 break;
             case "tor":
                 showDialogTorEnable();
+                break;
+            case "receive_shortcuts_enabled":
                 break;
             case "about":
                 DialogFragment aboutDialog = new AboutDialog();

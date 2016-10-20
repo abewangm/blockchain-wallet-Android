@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.home;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -63,10 +64,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     private ActivityMainBinding binding;
     private MaterialProgressDialog fetchTransactionsProgress;
     private AlertDialog mRootedDialog;
-    private LauncherShortcutHelper launcherShortcutHelper;
-
     private AppUtil appUtil;
 
+    @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,13 +78,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         binding.setViewModel(mainViewModel);
 
         mainViewModel.onViewReady();
-
-        if (AndroidUtils.is25OrHigher()) {
-            launcherShortcutHelper = new LauncherShortcutHelper(
-                    this,
-                    PayloadManager.getInstance(),
-                    getSystemService(ShortcutManager.class));
-        }
 
         binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -109,6 +102,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         });
     }
 
+    @SuppressLint("NewApi")
     @Override
     protected void onResume() {
         super.onResume();
@@ -117,8 +111,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         mainViewModel.startWebSocketService();
         resetNavigationDrawer();
 
-        if (launcherShortcutHelper != null && AndroidUtils.is25OrHigher()) {
-            //noinspection NewApi
+        if (AndroidUtils.is25OrHigher() && mainViewModel.areLauncherShortcutsEnabled()) {
+            LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(
+                    this,
+                    PayloadManager.getInstance(),
+                    getSystemService(ShortcutManager.class));
+
             launcherShortcutHelper.generateReceiveShortcuts();
         }
     }
@@ -301,7 +299,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                     return true;
                 });
     }
-    
+
     private void startMerchantActivity() {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
