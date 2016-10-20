@@ -6,6 +6,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -20,9 +21,10 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+
+import info.blockchain.wallet.payload.PayloadManager;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
@@ -37,8 +39,10 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.send.SendActivity;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
+import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
+import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -59,6 +63,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     private ActivityMainBinding binding;
     private MaterialProgressDialog fetchTransactionsProgress;
     private AlertDialog mRootedDialog;
+    private LauncherShortcutHelper launcherShortcutHelper;
 
     private AppUtil appUtil;
 
@@ -73,6 +78,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         binding.setViewModel(mainViewModel);
 
         mainViewModel.onViewReady();
+
+        if (AndroidUtils.is25OrHigher()) {
+            launcherShortcutHelper = new LauncherShortcutHelper(
+                    this,
+                    PayloadManager.getInstance(),
+                    getSystemService(ShortcutManager.class));
+        }
 
         binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -104,6 +116,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
         mainViewModel.startWebSocketService();
         resetNavigationDrawer();
+
+        if (launcherShortcutHelper != null && AndroidUtils.is25OrHigher()) {
+            //noinspection NewApi
+            launcherShortcutHelper.generateReceiveShortcuts();
+        }
     }
 
     @Override
@@ -119,17 +136,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_activity_actions, menu);
+        getMenuInflater().inflate(R.menu.main_activity_actions, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
-
             case android.R.id.home:
                 binding.drawerLayout.openDrawer(GravityCompat.START);
                 return true;
