@@ -101,6 +101,7 @@ android {
 ext {
     supportVersion = '24.2.1'
     googleServicesVersion = '9.6.1'
+    rxJavaVersion = '1.2.1'
 }
 
 dependencies {
@@ -126,8 +127,8 @@ dependencies {
     compile 'com.getbase:floatingactionbutton:1.10.1'
     compile 'com.github.mukeshsolanki:country-picker-android:1.1.6'
     // RxJava
-    compile 'io.reactivex:rxjava:1.1.10'
-    compile 'io.reactivex:rxandroid:1.2.1'
+    compile "io.reactivex:rxjava:$rxJavaVersion"
+    compile "io.reactivex:rxandroid:$rxJavaVersion"
     // Dagger2
     compile 'com.google.dagger:dagger:2.7'
     annotationProcessor 'com.google.guava:guava:19.0'

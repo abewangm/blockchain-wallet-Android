@@ -398,7 +398,9 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
 
     private void drawData(final boolean fetch, final Double lat, final Double lng, final boolean doListView) {
 
-        map.clear();
+        if (map != null) {
+            map.clear();
+        }
 
         final Handler handler = new Handler(Looper.getMainLooper());
 
