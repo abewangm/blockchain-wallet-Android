@@ -9,6 +9,7 @@ import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.ImportedAccount;
 import info.blockchain.wallet.payload.LegacyAddress;
+import info.blockchain.wallet.payload.Options;
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
@@ -16,6 +17,7 @@ import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
 
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.NetworkParameters;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,8 +28,10 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
@@ -590,16 +594,131 @@ public class AccountEditViewModelTest {
     }
 
     @Test
-    public void importBIP38AddressValidAddressWrongKey() throws Exception {
+    public void importAddressPrivateKeySuccessMatchesIntendedAddressNoDoubleEncryption() throws Exception {
         // Arrange
-
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        ECKey mockEcKey = mock(ECKey.class);
+        when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
+        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(true));
         // Act
-        subject.importBIP38Address("6PRJmkckxBct8jUwn6UcJbickdrnXBiPP9JkNW83g4VyFNsfEuxas39pSS", "invalid");
+        subject.importAddressPrivateKey(mockEcKey, new LegacyAddress(), true);
         // Assert
-        verify(activity).showProgressDialog(anyInt());
+        verify(activity).setActivityResult(anyInt());
+        //noinspection WrongConstant
+        verify(accountEditModel).setScanPrivateKeyVisibility(anyInt());
+        verify(activity).privateKeyImportSuccess();
+    }
+
+    @Test
+    public void importAddressPrivateKeySuccessNoAddressMatchDoubleEncryption() throws Exception {
+        // Arrange
+        subject.setSecondPassword("password");
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.isDoubleEncrypted()).thenReturn(true);
+        Options mockOptions = mock(Options.class);
+        when(mockOptions.getIterations()).thenReturn(1);
+        when(mockPayload.getOptions()).thenReturn(mockOptions);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        ECKey mockEcKey = mock(ECKey.class);
+        when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
+        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(true));
+        // Act
+        subject.importAddressPrivateKey(mockEcKey, new LegacyAddress(), false);
+        // Assert
+        verify(activity).setActivityResult(anyInt());
+        //noinspection WrongConstant
+        verify(accountEditModel).setScanPrivateKeyVisibility(anyInt());
+        verify(activity).privateKeyImportMismatch();
+    }
+
+    @Test
+    public void importAddressPrivateKeyFailed() throws Exception {
+        // Arrange
+        subject.setSecondPassword("password");
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.isDoubleEncrypted()).thenReturn(true);
+        Options mockOptions = mock(Options.class);
+        when(mockOptions.getIterations()).thenReturn(1);
+        when(mockPayload.getOptions()).thenReturn(mockOptions);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        ECKey mockEcKey = mock(ECKey.class);
+        when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
+        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(false));
+        // Act
+        subject.importAddressPrivateKey(mockEcKey, new LegacyAddress(), false);
+        // Assert
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
-        verify(activity).dismissProgressDialog();
+    }
+
+    @Test
+    public void importUnmatchedPrivateKeyFoundInPayloadSuccess() throws Exception {
+        // Arrange
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
+        List<String> legacyStrings = Arrays.asList("addr0", "addr1", "addr2");
+        when(mockPayload.getLegacyAddressStrings()).thenReturn(legacyStrings);
+        List<LegacyAddress> legacyAddresses = Collections.singletonList(new LegacyAddress("", 0L, "addr0", "", 0L, "", ""));
+        when(mockPayload.getLegacyAddresses()).thenReturn(legacyAddresses);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        ECKey mockEcKey = mock(ECKey.class);
+        when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
+        org.bitcoinj.core.Address mockAddress = mock(org.bitcoinj.core.Address.class);
+        when(mockAddress.toString()).thenReturn("addr0");
+        when(mockEcKey.toAddress(any(NetworkParameters.class))).thenReturn(mockAddress);
+        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(true));
+        // Act
+        subject.importUnmatchedPrivateKey(mockEcKey);
+        // Assert
+        verify(activity).setActivityResult(anyInt());
+        //noinspection WrongConstant
+        verify(accountEditModel).setScanPrivateKeyVisibility(anyInt());
+        verify(activity).privateKeyImportMismatch();
+    }
+
+    @Test
+    public void importUnmatchedPrivateNotFoundInPayloadSuccess() throws Exception {
+        // Arrange
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
+        when(mockPayload.getLegacyAddressStrings()).thenReturn(new ArrayList<>());
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        ECKey mockEcKey = mock(ECKey.class);
+        when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
+        org.bitcoinj.core.Address mockAddress = mock(org.bitcoinj.core.Address.class);
+        when(mockAddress.toString()).thenReturn("addr0");
+        when(mockEcKey.toAddress(any(NetworkParameters.class))).thenReturn(mockAddress);
+        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(true));
+        // Act
+        subject.importUnmatchedPrivateKey(mockEcKey);
+        // Assert
+        verify(activity).setActivityResult(anyInt());
+        verify(activity).sendBroadcast(anyString(), anyString());
+        //noinspection WrongConstant
+        verify(activity).privateKeyImportMismatch();
+    }
+
+    @SuppressWarnings("WrongConstant")
+    @Test
+    public void importUnmatchedPrivateNotFoundInPayloadFailure() throws Exception {
+        // Arrange
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
+        when(mockPayload.getLegacyAddressStrings()).thenReturn(new ArrayList<>());
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        ECKey mockEcKey = mock(ECKey.class);
+        when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
+        org.bitcoinj.core.Address mockAddress = mock(org.bitcoinj.core.Address.class);
+        when(mockAddress.toString()).thenReturn("addr0");
+        when(mockEcKey.toAddress(any(NetworkParameters.class))).thenReturn(mockAddress);
+        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(false));
+        // Act
+        subject.importUnmatchedPrivateKey(mockEcKey);
+        // Assert
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verify(activity).privateKeyImportMismatch();
     }
 
     private class MockApplicationModule extends ApplicationModule {

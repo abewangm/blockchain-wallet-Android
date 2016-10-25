@@ -566,7 +566,8 @@ public class AccountEditViewModel extends BaseViewModel {
         dataListener.dismissProgressDialog();
     }
 
-    private void importAddressPrivateKey(ECKey key, LegacyAddress address, boolean matchesIntendedAddress) throws Exception {
+    @VisibleForTesting
+    void importAddressPrivateKey(ECKey key, LegacyAddress address, boolean matchesIntendedAddress) throws Exception {
         setLegacyAddressKey(key, address, false);
 
         mCompositeSubscription.add(
@@ -606,7 +607,8 @@ public class AccountEditViewModel extends BaseViewModel {
         }
     }
 
-    private void importUnmatchedPrivateKey(ECKey key) throws Exception {
+    @VisibleForTesting
+    void importUnmatchedPrivateKey(ECKey key) throws Exception {
         if (payloadManager.getPayload().getLegacyAddressStrings().contains(key.toAddress(MainNetParams.get()).toString())) {
             // Wallet contains address associated with this private key, find & save it with scanned key
             String foundAddressString = key.toAddress(MainNetParams.get()).toString();
@@ -641,21 +643,26 @@ public class AccountEditViewModel extends BaseViewModel {
         updatedPayload.setLegacyAddresses(updatedLegacyAddresses);
         payloadManager.setPayload(updatedPayload);
 
-        if (payloadManager.savePayloadToServer()) {
+        mCompositeSubscription.add(
+                accountEditDataManager.syncPayloadWithServer()
+                .subscribe(success -> {
+                    if (success) {
+                        List<String> legacyAddressList = payloadManager.getPayload().getLegacyAddressStrings();
+                        try {
+                            multiAddrFactory.refreshLegacyAddressData(legacyAddressList.toArray(new String[legacyAddressList.size()]), false);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
 
-            List<String> legacyAddressList = payloadManager.getPayload().getLegacyAddressStrings();
-            try {
-                multiAddrFactory.refreshLegacyAddressData(legacyAddressList.toArray(new String[legacyAddressList.size()]), false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            // Subscribe to new address only if successfully created
-            dataListener.sendBroadcast("address", legacyAddress.getAddress());
-            dataListener.setActivityResult(Activity.RESULT_OK);
-        } else {
-            dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-        }
+                        // Subscribe to new address only if successfully created
+                        dataListener.sendBroadcast("address", legacyAddress.getAddress());
+                        dataListener.setActivityResult(Activity.RESULT_OK);
+                    } else {
+                        throw Exceptions.propagate(new Throwable("Remote save failed"));
+                    }
+                }, throwable -> {
+                    dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
+                }));
     }
 
     void showAddressDetails() {
