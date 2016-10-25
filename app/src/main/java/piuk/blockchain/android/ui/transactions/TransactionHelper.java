@@ -34,10 +34,6 @@ public class TransactionHelper {
     @NonNull
     public String addressToLabel(String address) {
 
-        System.out.println("addressToLabel: "+payloadManager);
-        System.out.println("addressToLabel.getPayload(): "+payloadManager.getPayload());
-        System.out.println("payloadManager.getPayload().getHdWallet(): "+payloadManager.getPayload().getHdWallet());
-
         HDWallet hdWallet = payloadManager.getPayload().getHdWallet();
         List<Account> accountList = new ArrayList<>();
         if (hdWallet != null && hdWallet.getAccounts() != null) {
