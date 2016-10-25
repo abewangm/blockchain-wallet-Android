@@ -17,6 +17,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
+import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
@@ -92,6 +93,8 @@ public class SettingsViewModel extends BaseViewModel {
         void showDialogSmsVerified();
 
         void goToPinEntryPage();
+
+        void setLauncherShortcutVisibility(boolean visible);
     }
 
     SettingsViewModel(DataListener dataListener) {
@@ -191,6 +194,9 @@ public class SettingsViewModel extends BaseViewModel {
 
         // Tor
         dataListener.setTorBlocked(settings.isTorBlocked());
+
+        // Launcher shortcuts
+        dataListener.setLauncherShortcutVisibility(AndroidUtils.is25OrHigher());
     }
 
     private String getTwoFaSummary(int type) {

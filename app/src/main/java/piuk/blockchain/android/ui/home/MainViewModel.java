@@ -233,6 +233,10 @@ public class MainViewModel extends BaseViewModel {
         appUtil.restartApp();
     }
 
+    public boolean areLauncherShortcutsEnabled() {
+        return prefs.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true);
+    }
+
     public void onBackPressed() {
         if (mBackPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
             AccessState.getInstance().logout(context);
