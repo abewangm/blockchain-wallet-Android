@@ -422,6 +422,8 @@
     <string name="sms_verified">Mobile number verified</string>
     <string name="preferences">Preferences</string>
     <string name="two_fa_summary">Protect your wallet from unauthorized access by enabling 2-Step Verification. You can choose to use your mobile phone number to secure your wallet. This code will be requested when you try to access your wallet via the web browser.\n\nIn order to use other authentication methods instead, please login to our web wallet.</string>
+    <string name="enable_launcher_shortcuts">Launcher Shortcuts</string>
+    <string name="preferences_shortcuts_summary">Enable this option to reveal a receive address when you long-press on the app icon in the launcher, making receiving bitcoin even faster.</string>
 
     <string name="rate_title">Rate Blockchain Wallet</string>
     <string name="rate_message">Enjoying the Blockchain Wallet? Please take a moment to leave a review in Google Play and let others know about it.</string>
@@ -523,4 +525,11 @@
     <string name="fingerprint_key_invalidated_brief">Keys invalidated, PIN code required</string>
     <string name="fingerprint_fatal_error_description">There was a problem setting up fingerprint login. Please try again later</string>
     <string name="fingerprint_fatal_error_brief">Unexpected error</string>
+
+    <!-- LAUNCHER SHORTCUTS -->
+    <string name="shortcut_receive_copy_short">Copy Address</string>
+    <string name="shortcut_receive_copy_long">Copy receive address to another app</string>
+    <string name="shortcut_receive_qr_short">Show Receive QR</string>
+    <string name="shortcut_receive_qr_long">View QR code for receive address</string>
+    <string name="shortcut_receive_qr_error">Sorry, there was an error generating the QR code</string>
 </resources>

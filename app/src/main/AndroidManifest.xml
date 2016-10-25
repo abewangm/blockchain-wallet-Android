@@ -16,7 +16,7 @@
     <uses-feature android:name="android.hardware.location.gps" />
 
     <uses-sdk tools:overrideLibrary="com.mtramin.rxfingerprint" />
-    
+
     <application
         android:name=".BlockchainApplication"
         android:allowBackup="false"
@@ -41,7 +41,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
-
         </activity>
 
         <activity
@@ -117,6 +116,11 @@
             android:name=".ui.receive.ReceiveActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="stateAlwaysHidden" />
+
+        <activity
+            android:name=".ui.receive.ReceiveQrActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:theme="@style/AppTheme.ReceiveQrWindow" />
 
         <activity
             android:name=".ui.transactions.TransactionDetailActivity"
