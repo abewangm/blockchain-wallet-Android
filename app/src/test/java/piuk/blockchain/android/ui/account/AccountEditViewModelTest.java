@@ -593,6 +593,7 @@ public class AccountEditViewModelTest {
         verify(activity).dismissProgressDialog();
     }
 
+    @SuppressWarnings("WrongConstant")
     @Test
     public void importAddressPrivateKeySuccessMatchesIntendedAddressNoDoubleEncryption() throws Exception {
         // Arrange
@@ -606,11 +607,12 @@ public class AccountEditViewModelTest {
         subject.importAddressPrivateKey(mockEcKey, new LegacyAddress(), true);
         // Assert
         verify(activity).setActivityResult(anyInt());
-        //noinspection WrongConstant
         verify(accountEditModel).setScanPrivateKeyVisibility(anyInt());
+        verify(accountEditModel).setArchiveVisibility(anyInt());
         verify(activity).privateKeyImportSuccess();
     }
 
+    @SuppressWarnings("WrongConstant")
     @Test
     public void importAddressPrivateKeySuccessNoAddressMatchDoubleEncryption() throws Exception {
         // Arrange
@@ -628,8 +630,8 @@ public class AccountEditViewModelTest {
         subject.importAddressPrivateKey(mockEcKey, new LegacyAddress(), false);
         // Assert
         verify(activity).setActivityResult(anyInt());
-        //noinspection WrongConstant
         verify(accountEditModel).setScanPrivateKeyVisibility(anyInt());
+        verify(accountEditModel).setArchiveVisibility(anyInt());
         verify(activity).privateKeyImportMismatch();
     }
 

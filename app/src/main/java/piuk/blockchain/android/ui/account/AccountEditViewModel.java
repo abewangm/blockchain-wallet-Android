@@ -576,6 +576,7 @@ public class AccountEditViewModel extends BaseViewModel {
                             if (success) {
                                 dataListener.setActivityResult(Activity.RESULT_OK);
                                 accountModel.setScanPrivateKeyVisibility(View.GONE);
+                                accountModel.setArchiveVisibility(View.VISIBLE);
 
                                 if (matchesIntendedAddress) {
                                     dataListener.privateKeyImportSuccess();
@@ -651,7 +652,7 @@ public class AccountEditViewModel extends BaseViewModel {
                         try {
                             multiAddrFactory.refreshLegacyAddressData(legacyAddressList.toArray(new String[legacyAddressList.size()]), false);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Log.e(AccountEditViewModel.class.getSimpleName(), "remoteSaveUnmatchedPrivateKey: ", e);
                         }
 
                         // Subscribe to new address only if successfully created
@@ -691,7 +692,7 @@ public class AccountEditViewModel extends BaseViewModel {
         try {
             bitmap = qrCodeEncoder.encodeAsBitmap();
         } catch (WriterException e) {
-            e.printStackTrace();
+            Log.e(AccountEditViewModel.class.getSimpleName(), "showAddressDetails: ", e);
         }
 
         dataListener.showAddressDetails(heading, note, copy, bitmap, qrString);
