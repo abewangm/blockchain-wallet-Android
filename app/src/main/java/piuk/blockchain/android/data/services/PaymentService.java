@@ -73,7 +73,7 @@ public class PaymentService {
 
         @Override
         public void onFail(String s) {
-            if (subscriber != null) {
+            if (!subscriber.isUnsubscribed()) {
                 subscriber.onError(new Throwable(s));
             }
         }

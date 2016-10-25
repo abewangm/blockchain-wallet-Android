@@ -543,29 +543,6 @@ public class AccountEditViewModel extends BaseViewModel {
         }
     }
 
-    private void importNonBIP38Address(final String format, final String data) {
-        dataListener.showProgressDialog(R.string.please_wait);
-
-        try {
-            final ECKey key = PrivateKeyFactory.getInstance().getKey(format, data);
-            if (key != null && key.hasPrivKey()) {
-                final String keyAddress = key.toAddress(MainNetParams.get()).toString();
-                if (!legacyAddress.getAddress().equals(keyAddress)) {
-                    // Private key does not match this address - warn user but import nevertheless
-                    importUnmatchedPrivateKey(key);
-                } else {
-                    importAddressPrivateKey(key, legacyAddress, true);
-                }
-            } else {
-                dataListener.showToast(R.string.invalid_private_key, ToastCustom.TYPE_ERROR);
-            }
-        } catch (Exception e) {
-            dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
-        }
-
-        dataListener.dismissProgressDialog();
-    }
-
     @VisibleForTesting
     void importAddressPrivateKey(ECKey key, LegacyAddress address, boolean matchesIntendedAddress) throws Exception {
         setLegacyAddressKey(key, address, false);
@@ -743,6 +720,29 @@ public class AccountEditViewModel extends BaseViewModel {
                         }, throwable -> {
                             dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
                         }));
+    }
+
+    private void importNonBIP38Address(final String format, final String data) {
+        dataListener.showProgressDialog(R.string.please_wait);
+
+        try {
+            final ECKey key = PrivateKeyFactory.getInstance().getKey(format, data);
+            if (key != null && key.hasPrivKey()) {
+                final String keyAddress = key.toAddress(MainNetParams.get()).toString();
+                if (!legacyAddress.getAddress().equals(keyAddress)) {
+                    // Private key does not match this address - warn user but import nevertheless
+                    importUnmatchedPrivateKey(key);
+                } else {
+                    importAddressPrivateKey(key, legacyAddress, true);
+                }
+            } else {
+                dataListener.showToast(R.string.invalid_private_key, ToastCustom.TYPE_ERROR);
+            }
+        } catch (Exception e) {
+            dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
+        }
+
+        dataListener.dismissProgressDialog();
     }
 
     void importBIP38Address(final String data, final String pw) {
