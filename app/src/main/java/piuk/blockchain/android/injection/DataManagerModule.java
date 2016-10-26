@@ -15,6 +15,7 @@ import dagger.Module;
 import dagger.Provides;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
+import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
@@ -22,8 +23,10 @@ import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
 import piuk.blockchain.android.data.services.AddressInfoService;
+import piuk.blockchain.android.data.services.PaymentService;
 import piuk.blockchain.android.data.services.SettingsService;
 import piuk.blockchain.android.data.services.TransactionDetailsService;
+import piuk.blockchain.android.data.services.UnspentService;
 import piuk.blockchain.android.data.services.WalletPayloadService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
@@ -46,7 +49,8 @@ public class DataManagerModule {
                                                      AESUtilWrapper aesUtilWrapper,
                                                      AccessState accessState,
                                                      StringUtils stringUtils) {
-        return new AuthDataManager(payloadManager,
+        return new AuthDataManager(
+                payloadManager,
                 prefsUtil,
                 new WalletPayloadService(new WalletPayload()),
                 appUtil,
@@ -74,7 +78,8 @@ public class DataManagerModule {
     @ViewModelScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
                                                                            TransactionListStore transactionListStore) {
-        return new TransactionListDataManager(payloadManager,
+        return new TransactionListDataManager(
+                payloadManager,
                 new TransactionDetailsService(new TransactionDetails()),
                 transactionListStore);
     }
@@ -110,5 +115,14 @@ public class DataManagerModule {
     @ViewModelScope
     protected SettingsDataManager provideSettingsDataManager() {
         return new SettingsDataManager(new SettingsService(new Settings()));
+    }
+
+    @Provides
+    @ViewModelScope
+    protected AccountEditDataManager provideAccountEditDataManager(PayloadManager payloadManager) {
+        return new AccountEditDataManager(
+                new UnspentService(new Unspent()),
+                new PaymentService(new Payment()),
+                payloadManager);
     }
 }
