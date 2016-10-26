@@ -157,7 +157,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         launcherShortcutPrefs = (SwitchPreferenceCompat) findPreference("receive_shortcuts_enabled");
         launcherShortcutPrefs.setOnPreferenceClickListener(this);
         launcherShortcutPrefs.setOnPreferenceChangeListener((preference, newValue) -> {
-            if (!((Boolean) newValue) && AndroidUtils.is25OrHigher()) {
+            if (!((Boolean) newValue) && AndroidUtils.is25orHigher()) {
                 getActivity().getSystemService(ShortcutManager.class).removeAllDynamicShortcuts();
             }
             return true;

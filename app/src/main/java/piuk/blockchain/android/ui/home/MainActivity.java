@@ -111,7 +111,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         mainViewModel.startWebSocketService();
         resetNavigationDrawer();
 
-        if (AndroidUtils.is25OrHigher() && mainViewModel.areLauncherShortcutsEnabled()) {
+        if (AndroidUtils.is25orHigher() && mainViewModel.areLauncherShortcutsEnabled()) {
             LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(
                     this,
                     PayloadManager.getInstance(),
