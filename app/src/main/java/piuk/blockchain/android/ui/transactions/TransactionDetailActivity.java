@@ -172,7 +172,7 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
 
     @Override
     public boolean onSupportNavigateUp() {
-        super.onBackPressed();
+        onBackPressed();
         return true;
     }
 
