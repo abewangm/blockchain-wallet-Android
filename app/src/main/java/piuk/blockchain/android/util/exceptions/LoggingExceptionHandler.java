@@ -19,6 +19,7 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import rx.Observable;
 import rx.schedulers.Schedulers;
@@ -27,6 +28,7 @@ import rx.schedulers.Schedulers;
  * Created by adambennett on 10/08/2016.
  */
 
+@SuppressWarnings("WeakerAccess")
 public class LoggingExceptionHandler implements Thread.UncaughtExceptionHandler {
 
     private static final String URL = "https://blockchain.info/exception_log?device=Android&message=";
@@ -34,9 +36,8 @@ public class LoggingExceptionHandler implements Thread.UncaughtExceptionHandler 
     private static final String OPENING_TAG = "<pre>";
     private static final String ENCLOSING_TAG = "</pre>";
     private final Thread.UncaughtExceptionHandler mRootHandler;
-    @SuppressWarnings("WeakerAccess")
-    @Inject
-    protected PrefsUtil mPrefsUtil;
+    @Inject protected PrefsUtil mPrefsUtil;
+    @Inject protected AppUtil mAppUtil;
 
     public LoggingExceptionHandler() {
         Injector.getInstance().getAppComponent().inject(this);
@@ -50,9 +51,12 @@ public class LoggingExceptionHandler implements Thread.UncaughtExceptionHandler 
 
         sendException(throwable)
                 .subscribeOn(Schedulers.io())
+                // Restart the app
+                .doOnTerminate(() -> mAppUtil.restartApp())
                 .subscribe(s -> {
                     Log.d(LoggingExceptionHandler.class.getSimpleName(), "uncaughtException: ");
                 }, Throwable::printStackTrace);
+
 
         // Re-throw the exception so that the system can fail as it normally would
         mRootHandler.uncaughtException(thread, throwable);
