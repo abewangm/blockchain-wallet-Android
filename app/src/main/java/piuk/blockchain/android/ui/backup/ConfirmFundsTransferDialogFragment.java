@@ -230,6 +230,7 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
     @Override
     public void onDestroy() {
         super.onDestroy();
+        dismissDialog();
         mViewModel.destroy();
     }
 

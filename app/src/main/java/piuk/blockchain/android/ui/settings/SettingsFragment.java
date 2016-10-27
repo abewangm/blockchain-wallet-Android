@@ -877,4 +877,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             tvCountry.setBackground(drawable);
         }
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        hideProgressDialog();
+        viewModel.destroy();
+    }
 }

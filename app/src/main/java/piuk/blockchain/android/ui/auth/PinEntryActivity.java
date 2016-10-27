@@ -347,6 +347,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
 
     @Override
     protected void onDestroy() {
+        dismissProgressDialog();
         mViewModel.destroy();
         super.onDestroy();
     }

@@ -96,4 +96,10 @@ public class ReceiveQrActivity extends BaseAuthActivity implements ReceiveQrView
     protected void startLogoutTimer() {
         // No-op
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        viewModel.destroy();
+    }
 }

@@ -545,4 +545,11 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             progress = null;
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dismissProgressDialog();
+        viewModel.destroy();
+    }
 }

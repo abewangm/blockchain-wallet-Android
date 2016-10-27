@@ -793,4 +793,10 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
     public void finishActivity() {
         finish();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        viewModel.destroy();
+    }
 }
