@@ -9,9 +9,7 @@ import info.blockchain.wallet.payload.Transaction;
 import info.blockchain.wallet.payload.Tx;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -48,9 +46,6 @@ public class TransactionListDataManagerTest extends RxTest {
     private TransactionListStore mTransactionList;
     private TransactionListDataManager mSubject;
 
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -59,16 +54,6 @@ public class TransactionListDataManagerTest extends RxTest {
         mTransactionList = new TransactionListStore();
 
         mSubject = new TransactionListDataManager(mPayloadManager, mTransactionDetails, mTransactionList);
-    }
-
-    @Test
-    public void generateTransactionListInvalidObject() throws Exception {
-        // Arrange
-        exception.expect(IllegalArgumentException.class);
-        // Act
-        mSubject.generateTransactionList(new Object());
-        // Assert
-
     }
 
     @Test
@@ -209,7 +194,7 @@ public class TransactionListDataManagerTest extends RxTest {
     @Test()
     public void getBtcBalanceInvalidObject() throws Exception {
         // Arrange
-        exception.expect(IllegalArgumentException.class);
+
         // Act
         double value = mSubject.getBtcBalance(new Object());
         // Assert

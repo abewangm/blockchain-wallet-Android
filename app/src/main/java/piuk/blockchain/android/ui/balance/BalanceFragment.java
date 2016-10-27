@@ -601,6 +601,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        viewModel.destroy();
+    }
+
     public interface Communicator {
 
         void setNavigationDrawerToggleEnabled(boolean enabled);

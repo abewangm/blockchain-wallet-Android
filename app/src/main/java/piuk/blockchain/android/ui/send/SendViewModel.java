@@ -95,23 +95,23 @@ public class SendViewModel extends BaseViewModel {
 
         this.context = context;
         this.dataListener = dataListener;
-        this.payloadManager = PayloadManager.getInstance();
-        this.monetaryUtil = new MonetaryUtil(btcUnit);
-        this.payment = new Payment();
+        payloadManager = PayloadManager.getInstance();
+        monetaryUtil = new MonetaryUtil(btcUnit);
+        payment = new Payment();
 
-        this.sendModel = new SendModel();
-        this.sendModel.pendingTransaction = new PendingTransaction();
-        this.sendModel.btcUnit = monetaryUtil.getBTCUnit(btcUnit);
-        this.sendModel.fiatUnit = fiatUnit;
-        this.sendModel.btcUniti = btcUnit;
-        this.sendModel.isBTC = getBtcDisplayState();
-        this.sendModel.defaultSeparator = getDefaultDecimalSeparator();
-        this.sendModel.exchangeRate = exchangeRate;
-        this.sendModel.unspentApiResponse = new HashMap<>();
-        this.sendModel.btcExchange = ExchangeRateFactory.getInstance().getLastPrice(sendModel.fiatUnit);
+        sendModel = new SendModel();
+        sendModel.pendingTransaction = new PendingTransaction();
+        sendModel.btcUnit = monetaryUtil.getBTCUnit(btcUnit);
+        sendModel.fiatUnit = fiatUnit;
+        sendModel.btcUniti = btcUnit;
+        sendModel.isBTC = getBtcDisplayState();
+        sendModel.defaultSeparator = getDefaultDecimalSeparator();
+        sendModel.exchangeRate = exchangeRate;
+        sendModel.unspentApiResponse = new HashMap<>();
+        sendModel.btcExchange = ExchangeRateFactory.getInstance().getLastPrice(sendModel.fiatUnit);
 
-        dataListener.onUpdateBtcUnit(this.sendModel.btcUnit);
-        dataListener.onUpdateFiatUnit(this.sendModel.fiatUnit);
+        dataListener.onUpdateBtcUnit(sendModel.btcUnit);
+        dataListener.onUpdateFiatUnit(sendModel.fiatUnit);
         getSuggestedFee();
 
         sslVerifyUtil.validateSSL();
@@ -181,6 +181,8 @@ public class SendViewModel extends BaseViewModel {
         void onShowTransactionSuccess();
 
         void onShowBIP38PassphrasePrompt(String scanData);
+
+        void finishActivity();
     }
 
     public int getDefaultAccount() {
@@ -253,7 +255,7 @@ public class SendViewModel extends BaseViewModel {
      * Checks btc amount. Warns user when exceeding maximum and resets entered value field
      */
     private boolean isExceedingMaximumBTCAmount(String btc) {
-        long lamount = 0L;
+        long lamount;
         try {
             //Long is safe to use, but double can lead to ugly rounding issues..
             Double btcDouble = Double.parseDouble(btc);
@@ -311,6 +313,7 @@ public class SendViewModel extends BaseViewModel {
                 }
             }
         } catch (NumberFormatException nfe) {
+            // No-op
         }
 
         dataListener.onAddBtcTextChangeListener();
@@ -358,6 +361,7 @@ public class SendViewModel extends BaseViewModel {
                 }
             }
         } catch (NumberFormatException nfe) {
+            // No-op
         }
 
         dataListener.onAddFiatTextChangeListener();
@@ -464,7 +468,7 @@ public class SendViewModel extends BaseViewModel {
                 suggestedFee = new DynamicFee().getDynamicFee();
 
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "getSuggestedFee: ", e);
                 suggestedFee = new DynamicFee().getDefaultFee();
             }
             DynamicFeeCache.getInstance().setSuggestedFee(suggestedFee);
@@ -566,8 +570,14 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private BigInteger getSuggestedAbsoluteFee(final UnspentOutputs coins, BigInteger amountToSend) {
-        SpendableUnspentOutputs spendableCoins = payment.getSpendableCoins(coins, amountToSend, sendModel.suggestedFee.defaultFeePerKb);
-        return spendableCoins.getAbsoluteFee();
+        if (sendModel.suggestedFee != null) {
+            SpendableUnspentOutputs spendableCoins = payment.getSpendableCoins(coins, amountToSend, sendModel.suggestedFee.defaultFeePerKb);
+            return spendableCoins.getAbsoluteFee();
+        } else {
+            // App is likely in low memory environment, leave page gracefully
+            dataListener.finishActivity();
+            return null;
+        }
     }
 
     /**
@@ -604,28 +614,32 @@ public class SendViewModel extends BaseViewModel {
      * Payment will use suggested dynamic fee
      */
     private void suggestedFeePayment(final UnspentOutputs coins, BigInteger amountToSend, boolean spendAll) {
+        if (sendModel.suggestedFee != null) {
+            SweepBundle sweepBundle = payment.getSweepBundle(coins, sendModel.suggestedFee.defaultFeePerKb);
+            long balanceAfterFee = sweepBundle.getSweepAmount().longValue();
+            updateMaxAvailable(balanceAfterFee);
 
-        SweepBundle sweepBundle = payment.getSweepBundle(coins, sendModel.suggestedFee.defaultFeePerKb);
-        long balanceAfterFee = sweepBundle.getSweepAmount().longValue();
-        updateMaxAvailable(balanceAfterFee);
+            if (spendAll) {
+                amountToSend = BigInteger.valueOf(balanceAfterFee);
+                dataListener.onSetSpendAllAmount(getTextFromSatoshis(balanceAfterFee));
+            }
 
-        if (spendAll) {
-            amountToSend = BigInteger.valueOf(balanceAfterFee);
-            dataListener.onSetSpendAllAmount(getTextFromSatoshis(balanceAfterFee));
-        }
+            BigInteger feePerKb = sendModel.suggestedFee.defaultFeePerKb;
 
-        BigInteger feePerKb = sendModel.suggestedFee.defaultFeePerKb;
+            SpendableUnspentOutputs unspentOutputBundle = payment.getSpendableCoins(coins,
+                    amountToSend,
+                    feePerKb);
 
-        SpendableUnspentOutputs unspentOutputBundle = payment.getSpendableCoins(coins,
-                amountToSend,
-                feePerKb);
+            sendModel.pendingTransaction.bigIntAmount = amountToSend;
+            sendModel.pendingTransaction.unspentOutputBundle = unspentOutputBundle;
+            sendModel.pendingTransaction.bigIntFee = sendModel.pendingTransaction.unspentOutputBundle.getAbsoluteFee();
 
-        sendModel.pendingTransaction.bigIntAmount = amountToSend;
-        sendModel.pendingTransaction.unspentOutputBundle = unspentOutputBundle;
-        sendModel.pendingTransaction.bigIntFee = sendModel.pendingTransaction.unspentOutputBundle.getAbsoluteFee();
-
-        if (sendModel.suggestedFee != null && sendModel.suggestedFee.estimateList != null) {
-            updateEstimateConfirmationTime(amountToSend, sendModel.pendingTransaction.bigIntFee.longValue(), coins);
+            if (sendModel.suggestedFee != null && sendModel.suggestedFee.estimateList != null) {
+                updateEstimateConfirmationTime(amountToSend, sendModel.pendingTransaction.bigIntFee.longValue(), coins);
+            }
+        } else {
+            // App is likely in low memory environment, leave page gracefully
+            dataListener.finishActivity();
         }
     }
 
@@ -697,7 +711,7 @@ public class SendViewModel extends BaseViewModel {
             return sendModel.unspentApiResponse.get(address);
         } else {
 
-            JSONObject unspentResponse = null;
+            JSONObject unspentResponse;
 
             //Get cache if is default account
             DefaultAccountUnspentCache cache = DefaultAccountUnspentCache.getInstance();
@@ -709,7 +723,7 @@ public class SendViewModel extends BaseViewModel {
                     try {
                         cache.setUnspentApiResponse(address, new Unspent().getUnspentOutputs(address));
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "getUnspentApiResponse: ", e);
                     }
                 }).start();
             } else {
@@ -941,14 +955,9 @@ public class SendViewModel extends BaseViewModel {
         int txSize = FeeUtil.estimatedSize(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = sendModel.absoluteSuggestedFee.doubleValue() / sendModel.pendingTransaction.bigIntAmount.doubleValue() * 100.0;
 
-        if (sendModel.absoluteSuggestedFee.longValue() > SendModel.LARGE_TX_FEE
+        return sendModel.absoluteSuggestedFee.longValue() > SendModel.LARGE_TX_FEE
                 && txSize > SendModel.LARGE_TX_SIZE
-                && relativeFee > SendModel.LARGE_TX_PERCENTAGE) {
-
-            return true;
-        } else {
-            return false;
-        }
+                && relativeFee > SendModel.LARGE_TX_PERCENTAGE;
     }
 
     /**
@@ -1070,11 +1079,8 @@ public class SendViewModel extends BaseViewModel {
         }
 
         //Test that amount is not zero
-        if (!(bAmount.compareTo(BigInteger.ZERO) >= 0)) {
-            return false;
-        }
+        return bAmount.compareTo(BigInteger.ZERO) >= 0;
 
-        return true;
     }
 
     /**
@@ -1132,7 +1138,7 @@ public class SendViewModel extends BaseViewModel {
                         });
 
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "submitPayment: ", e);
                 dataListener.onShowToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR);
             }
         }).start();
@@ -1192,7 +1198,7 @@ public class SendViewModel extends BaseViewModel {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "handleScannedDataForWatchOnlySpend: ", e);
         }
     }
 
@@ -1205,7 +1211,7 @@ public class SendViewModel extends BaseViewModel {
 
         } catch (Exception e) {
             dataListener.onShowToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
-            e.printStackTrace();
+            Log.e(TAG, "spendFromWatchOnlyNonBIP38: ", e);
         }
     }
 

@@ -788,4 +788,9 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             mp.start();
         }
     }
+
+    @Override
+    public void finishActivity() {
+        finish();
+    }
 }
