@@ -272,10 +272,9 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
     private void setupDestinationView() {
         binding.destination.setHorizontallyScrolling(false);
         binding.destination.setLines(3);
-        binding.destination.setOnTouchListener((view, motionEvent) -> {
+        binding.destination.setOnClickListener(view -> {
             binding.destination.setText("");
             viewModel.setReceivingAddress(null);
-            return false;
         });
         binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus && customKeypad != null)
