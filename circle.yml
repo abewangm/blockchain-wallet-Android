@@ -31,6 +31,9 @@ dependencies:
     - '/usr/local/android-sdk-linux/extras/android/m2repository'
 
 test:
+  pre:
+    # Decode Firebase API key
+    - echo $FIREBASE_API_JSON | base64 --decode > app/google-services.json
   override:
     - ./gradlew assembleDevDebug testDevDebugUnitTest testDevDebugUnitTestCoverage coveralls --no-daemon -Dpre-dex=false -Porg.gradle.parallel=false -Pcom.android.build.threadPoolSize=1 --stacktrace
   post:
