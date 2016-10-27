@@ -42,6 +42,7 @@ public class MainViewModel extends BaseViewModel {
     private OSUtil osUtil;
     @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
+    @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
 
     private long mBackPressed;
@@ -232,6 +233,7 @@ public class MainViewModel extends BaseViewModel {
         MultiAddrFactory.getInstance().wipe();
         prefs.logOut();
         appUtil.restartApp();
+        accessState.setPIN(null);
     }
 
     public boolean areLauncherShortcutsEnabled() {
