@@ -144,9 +144,10 @@ public class MainViewModel extends BaseViewModel {
                     e.printStackTrace();
                 }
 
-                dataListener.onFetchTransactionCompleted();
-
-                dataListener.onStartBalanceFragment();
+                if (dataListener != null) {
+                    dataListener.onFetchTransactionCompleted();
+                    dataListener.onStartBalanceFragment();
+                }
 
                 if (prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").length() > 0) {
                     String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");

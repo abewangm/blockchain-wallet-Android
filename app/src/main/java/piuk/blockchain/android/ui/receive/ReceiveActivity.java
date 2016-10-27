@@ -364,14 +364,14 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
             return;
         }
 
-        if (!amountBigInt.equals(BigInteger.ZERO)) {
-            assert receiveAddress != null;
-            mUri = BitcoinURI.convertToBitcoinURI(receiveAddress, Coin.valueOf(amountBigInt.longValue()), "", "");
-        } else {
-            mUri = "bitcoin:" + receiveAddress;
+        if (receiveAddress != null) {
+            if (!amountBigInt.equals(BigInteger.ZERO)) {
+                mUri = BitcoinURI.convertToBitcoinURI(receiveAddress, Coin.valueOf(amountBigInt.longValue()), "", "");
+            } else {
+                mUri = "bitcoin:" + receiveAddress;
+            }
+            mViewModel.generateQrCode(mUri);
         }
-
-        mViewModel.generateQrCode(mUri);
     }
 
     @Override

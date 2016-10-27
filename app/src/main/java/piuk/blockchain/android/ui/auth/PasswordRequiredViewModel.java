@@ -12,6 +12,7 @@ import info.blockchain.wallet.util.CharSequenceX;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -26,6 +27,7 @@ public class PasswordRequiredViewModel extends BaseViewModel {
     @Inject protected AppUtil mAppUtil;
     @Inject protected PrefsUtil mPrefsUtil;
     @Inject protected AuthDataManager mAuthDataManager;
+    @Inject protected AccessState mAccessState;
     private DataListener mDataListener;
     @VisibleForTesting boolean mWaitingForAuth = false;
 
