@@ -271,10 +271,9 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
     private void setupDestinationView() {
         binding.destination.setHorizontallyScrolling(false);
         binding.destination.setLines(3);
-        binding.destination.setOnTouchListener((view, motionEvent) -> {
+        binding.destination.setOnClickListener(view -> {
             binding.destination.setText("");
             viewModel.setReceivingAddress(null);
-            return false;
         });
         binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus && customKeypad != null)
@@ -424,6 +423,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         runOnUiThread(() -> {
 
             playAudio();
+            LocalBroadcastManager.getInstance(this).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
 
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
             LayoutInflater inflater = getLayoutInflater();
@@ -666,6 +666,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
         dialogBinding.confirmSend.setOnClickListener(v -> {
             if (ConnectivityStatus.hasConnectivity(this)) {
+                dialogBinding.confirmSend.setClickable(false);
                 viewModel.submitPayment(alertDialog);
             } else {
                 ToastCustom.makeText(this, getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
