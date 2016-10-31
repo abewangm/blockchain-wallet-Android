@@ -5,8 +5,8 @@ import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payload.Transaction;
-import info.blockchain.wallet.payload.Tx;
+import info.blockchain.wallet.transaction.Transaction;
+import info.blockchain.wallet.transaction.Tx;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,9 +60,7 @@ public class TransactionListDataManagerTest extends RxTest {
     public void generateTransactionListAccountTagAllPayloadUpgraded() throws Exception {
         // Arrange
         Account account = new Account();
-        account.setTags(new ArrayList<String>(){{
-            add("TAG_ALL");
-        }});
+        account.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isUpgraded()).thenReturn(true);
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
@@ -76,9 +74,7 @@ public class TransactionListDataManagerTest extends RxTest {
     public void generateTransactionListAccountTagAllPayloadNotUpgraded() throws Exception {
         // Arrange
         Account account = new Account();
-        account.setTags(new ArrayList<String>(){{
-            add("TAG_ALL");
-        }});
+        account.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isUpgraded()).thenReturn(false);
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
@@ -92,9 +88,7 @@ public class TransactionListDataManagerTest extends RxTest {
     public void generateTransactionListAccountImportedAddresses() throws Exception {
         // Arrange
         Account account = new Account();
-        account.setTags(new ArrayList<String>(){{
-            add("TAG_IMPORTED_ADDRESSES");
-        }});
+        account.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
         // Act
         mSubject.generateTransactionList(account);
         // Assert
@@ -205,9 +199,7 @@ public class TransactionListDataManagerTest extends RxTest {
     public void getBtcBalanceAccountTagAllUpgraded() throws Exception {
         // Arrange
         Account account = new Account();
-        account.setTags(new ArrayList<String>() {{
-            add("TAG_ALL");
-        }});
+        account.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isUpgraded()).thenReturn(true);
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
@@ -221,9 +213,7 @@ public class TransactionListDataManagerTest extends RxTest {
     public void getBtcBalanceAccountTagAllNotUpgraded() throws Exception {
         // Arrange
         Account account = new Account();
-        account.setTags(new ArrayList<String>() {{
-            add("TAG_ALL");
-        }});
+        account.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isUpgraded()).thenReturn(false);
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
@@ -237,9 +227,7 @@ public class TransactionListDataManagerTest extends RxTest {
     public void getBtcBalanceAccountTagImported() throws Exception {
         // Arrange
         Account account = new Account();
-        account.setTags(new ArrayList<String>() {{
-            add("TAG_IMPORTED_ADDRESSES");
-        }});
+        account.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
         // Act
         double value = mSubject.getBtcBalance(account);
         // Assert
@@ -287,7 +275,7 @@ public class TransactionListDataManagerTest extends RxTest {
         // Arrange
         TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
         Payload mockPayload = mock(Payload.class);
-        when(mockPayload.getNotes()).thenReturn(new HashMap<>());
+        when(mockPayload.getTransactionNotesMap()).thenReturn(new HashMap<>());
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
         when(mPayloadManager.savePayloadToServer()).thenReturn(true);
         // Act

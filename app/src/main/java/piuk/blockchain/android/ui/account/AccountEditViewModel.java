@@ -159,11 +159,10 @@ public class AccountEditViewModel extends BaseViewModel {
         } else if (addressIndex >= 0) {
             // V2
             ImportedAccount iAccount = null;
-            if (payloadManager.getPayload().getLegacyAddresses().size() > 0) {
+            if (payloadManager.getPayload().getLegacyAddressList().size() > 0) {
                 iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
-                        payloadManager.getPayload().getLegacyAddresses(),
-                        new ArrayList<>(),
-                        multiAddrFactory.getLegacyBalance());
+                        payloadManager.getPayload().getLegacyAddressList(),
+                        MultiAddrFactory.getInstance().getLegacyBalance());
             }
 
             if (iAccount != null) {
@@ -295,7 +294,7 @@ public class AccountEditViewModel extends BaseViewModel {
                 return false;
         } else {
             //V2 - must have a single unarchived address
-            List<LegacyAddress> allActiveLegacyAddresses = payloadManager.getPayload().getActiveLegacyAddresses();
+            List<LegacyAddress> allActiveLegacyAddresses = payloadManager.getPayload().getActiveLegacyAddressList();
             return (allActiveLegacyAddresses.size() > 1);
         }
 
@@ -585,12 +584,11 @@ public class AccountEditViewModel extends BaseViewModel {
         }
     }
 
-    @VisibleForTesting
     void importUnmatchedPrivateKey(ECKey key) throws Exception {
-        if (payloadManager.getPayload().getLegacyAddressStrings().contains(key.toAddress(MainNetParams.get()).toString())) {
+        if (payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(MainNetParams.get()).toString())) {
             // Wallet contains address associated with this private key, find & save it with scanned key
             String foundAddressString = key.toAddress(MainNetParams.get()).toString();
-            for (LegacyAddress legacyAddress : payloadManager.getPayload().getLegacyAddresses()) {
+            for (LegacyAddress legacyAddress : payloadManager.getPayload().getLegacyAddressList()) {
                 if (legacyAddress.getAddress().equals(foundAddressString)) {
                     importAddressPrivateKey(key, legacyAddress, false);
                 }
@@ -616,31 +614,31 @@ public class AccountEditViewModel extends BaseViewModel {
     private void remoteSaveUnmatchedPrivateKey(final LegacyAddress legacyAddress) {
 
         Payload updatedPayload = payloadManager.getPayload();
-        List<LegacyAddress> updatedLegacyAddresses = updatedPayload.getLegacyAddresses();
+        List<LegacyAddress> updatedLegacyAddresses = updatedPayload.getLegacyAddressList();
         updatedLegacyAddresses.add(legacyAddress);
-        updatedPayload.setLegacyAddresses(updatedLegacyAddresses);
+        updatedPayload.setLegacyAddressList(updatedLegacyAddresses);
         payloadManager.setPayload(updatedPayload);
 
         mCompositeSubscription.add(
                 accountEditDataManager.syncPayloadWithServer()
-                .subscribe(success -> {
-                    if (success) {
-                        List<String> legacyAddressList = payloadManager.getPayload().getLegacyAddressStrings();
-                        try {
-                            multiAddrFactory.refreshLegacyAddressData(legacyAddressList.toArray(new String[legacyAddressList.size()]), false);
-                        } catch (Exception e) {
-                            Log.e(AccountEditViewModel.class.getSimpleName(), "remoteSaveUnmatchedPrivateKey: ", e);
-                        }
+                        .subscribe(success -> {
+                            if (success) {
+                                List<String> legacyAddressList = payloadManager.getPayload().getLegacyAddressStringList();
+                                try {
+                                    multiAddrFactory.refreshLegacyAddressData(legacyAddressList.toArray(new String[legacyAddressList.size()]), false);
+                                } catch (Exception e) {
+                                    Log.e(AccountEditViewModel.class.getSimpleName(), "remoteSaveUnmatchedPrivateKey: ", e);
+                                }
 
-                        // Subscribe to new address only if successfully created
-                        dataListener.sendBroadcast("address", legacyAddress.getAddress());
-                        dataListener.setActivityResult(Activity.RESULT_OK);
-                    } else {
-                        throw Exceptions.propagate(new Throwable("Remote save failed"));
-                    }
-                }, throwable -> {
-                    dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-                }));
+                                // Subscribe to new address only if successfully created
+                                dataListener.sendBroadcast("address", legacyAddress.getAddress());
+                                dataListener.setActivityResult(Activity.RESULT_OK);
+                            } else {
+                                throw Exceptions.propagate(new Throwable("Remote save failed"));
+                            }
+                        }, throwable -> {
+                            dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
+                        }));
     }
 
     void showAddressDetails() {

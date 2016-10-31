@@ -158,7 +158,7 @@ public class AccountEditViewModelTest {
         when(activity.getIntent()).thenReturn(intent);
         Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
         LegacyAddress legacyAddress = new LegacyAddress();
-        when(mockPayload.getLegacyAddresses()).thenReturn(Collections.singletonList(legacyAddress));
+        when(mockPayload.getLegacyAddressList()).thenReturn(Collections.singletonList(legacyAddress));
         when(payloadManager.getPayload()).thenReturn(mockPayload);
         when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
         // Act
@@ -182,7 +182,7 @@ public class AccountEditViewModelTest {
         Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
         LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setWatchOnly(true);
-        when(mockPayload.getLegacyAddresses()).thenReturn(Collections.singletonList(legacyAddress));
+        when(mockPayload.getLegacyAddressList()).thenReturn(Collections.singletonList(legacyAddress));
         when(payloadManager.getPayload()).thenReturn(mockPayload);
         when(mockPayload.isUpgraded()).thenReturn(true);
         when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
@@ -661,9 +661,9 @@ public class AccountEditViewModelTest {
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
         List<String> legacyStrings = Arrays.asList("addr0", "addr1", "addr2");
-        when(mockPayload.getLegacyAddressStrings()).thenReturn(legacyStrings);
+        when(mockPayload.getLegacyAddressStringList()).thenReturn(legacyStrings);
         List<LegacyAddress> legacyAddresses = Collections.singletonList(new LegacyAddress("", 0L, "addr0", "", 0L, "", ""));
-        when(mockPayload.getLegacyAddresses()).thenReturn(legacyAddresses);
+        when(mockPayload.getLegacyAddressList()).thenReturn(legacyAddresses);
         when(payloadManager.getPayload()).thenReturn(mockPayload);
         ECKey mockEcKey = mock(ECKey.class);
         when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
@@ -685,7 +685,7 @@ public class AccountEditViewModelTest {
         // Arrange
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-        when(mockPayload.getLegacyAddressStrings()).thenReturn(new ArrayList<>());
+        when(mockPayload.getLegacyAddressList()).thenReturn(new ArrayList<>());
         when(payloadManager.getPayload()).thenReturn(mockPayload);
         ECKey mockEcKey = mock(ECKey.class);
         when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
@@ -708,7 +708,7 @@ public class AccountEditViewModelTest {
         // Arrange
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-        when(mockPayload.getLegacyAddressStrings()).thenReturn(new ArrayList<>());
+        when(mockPayload.getLegacyAddressList()).thenReturn(new ArrayList<>());
         when(payloadManager.getPayload()).thenReturn(mockPayload);
         ECKey mockEcKey = mock(ECKey.class);
         when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
