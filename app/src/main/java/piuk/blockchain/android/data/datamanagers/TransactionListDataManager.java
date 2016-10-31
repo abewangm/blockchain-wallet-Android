@@ -2,6 +2,7 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
@@ -12,7 +13,6 @@ import info.blockchain.wallet.payload.Tx;
 import info.blockchain.wallet.payload.TxMostRecentDateComparator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -44,8 +44,7 @@ public class TransactionListDataManager {
 
     /**
      * Generates a list of transactions for a specific {@link Account} or {@link LegacyAddress}.
-     * Will throw an exception if the object passed isn't either of the two types. The list will be
-     * sorted by date.
+     * The list will be sorted by date.
      *
      * @param object Either a {@link Account} or a {@link LegacyAddress}
      */
@@ -57,10 +56,11 @@ public class TransactionListDataManager {
             // V2
             transactionListStore.insertTransactions(MultiAddrFactory.getInstance().getAddressLegacyTxs(((LegacyAddress) object).getAddress()));
         } else {
-            throw new IllegalArgumentException("Object must be instance of Account.class or LegacyAddress.class");
+            Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
+            return;
         }
 
-        Collections.sort(transactionListStore.getList(), new TxMostRecentDateComparator());
+        transactionListStore.sort(new TxMostRecentDateComparator());
         listUpdateSubject.onNext(transactionListStore.getList());
         listUpdateSubject.onCompleted();
     }
@@ -105,15 +105,14 @@ public class TransactionListDataManager {
     }
 
     /**
-     * Get total BTC balance from an {@link Account} or {@link LegacyAddress}. Will throw an
-     * exception if the object passed isn't either of the two types.
+     * Get total BTC balance from an {@link Account} or {@link LegacyAddress}.
      *
      * @param object Either a {@link Account} or a {@link LegacyAddress}
      * @return A BTC value as a double.
      */
     public double getBtcBalance(Object object) {
         // Update Balance
-        double balance = 0D;
+        double balance = 0.0D;
         if (object instanceof Account) {
             // V3
             Account account = ((Account) object);
@@ -142,7 +141,8 @@ public class TransactionListDataManager {
             LegacyAddress legacyAddress = ((LegacyAddress) object);
             balance = MultiAddrFactory.getInstance().getLegacyBalance(legacyAddress.getAddress());
         } else {
-            throw new IllegalArgumentException("Object must be instance of Account.class or LegacyAddress.class");
+            Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
+            return balance;
         }
 
         return balance;

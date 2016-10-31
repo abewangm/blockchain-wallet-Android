@@ -505,11 +505,11 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         });
 
         dialogBinding.confirmChange.setText(getResources().getString(R.string.accept_higher_fee));
-        dialogBinding.confirmChange.setOnClickListener(v -> {
-            alertDialogFee.dismiss();
-        });
+        dialogBinding.confirmChange.setOnClickListener(v -> alertDialogFee.dismiss());
 
-        alertDialogFee.show();
+        if (getActivity() != null && !getActivity().isFinishing()) {
+            alertDialogFee.show();
+        }
     }
 
     @Override
@@ -673,7 +673,10 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             }
         });
 
-        alertDialog.show();
+        if (getActivity() != null && !getActivity().isFinishing()) {
+            alertDialog.show();
+        }
+
         // To prevent the dialog from appearing too large on Android N
         if (alertDialog.getWindow() != null) {
             alertDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
@@ -784,5 +787,16 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             });
             mp.start();
         }
+    }
+
+    @Override
+    public void finishActivity() {
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        viewModel.destroy();
     }
 }

@@ -1,11 +1,13 @@
 package piuk.blockchain.android.ui.receive;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -15,6 +17,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -54,6 +57,7 @@ import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.AddressAdapter;
+import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_SELECTED_ACCOUNT_POSITION;
@@ -360,14 +364,14 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
             return;
         }
 
-        if (!amountBigInt.equals(BigInteger.ZERO)) {
-            assert receiveAddress != null;
-            mUri = BitcoinURI.convertToBitcoinURI(receiveAddress, Coin.valueOf(amountBigInt.longValue()), "", "");
-        } else {
-            mUri = "bitcoin:" + receiveAddress;
+        if (receiveAddress != null) {
+            if (!amountBigInt.equals(BigInteger.ZERO)) {
+                mUri = BitcoinURI.convertToBitcoinURI(receiveAddress, Coin.valueOf(amountBigInt.longValue()), "", "");
+            } else {
+                mUri = "bitcoin:" + receiveAddress;
+            }
+            mViewModel.generateQrCode(mUri);
         }
-
-        mViewModel.generateQrCode(mUri);
     }
 
     @Override
@@ -433,11 +437,32 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
                 .setMessage(R.string.receive_address_to_share)
                 .setCancelable(false)
                 .setPositiveButton(R.string.yes, (dialog, whichButton) -> {
-                    setupBottomSheet(mUri);
-                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        PermissionUtil.requestWriteStoragePermissionFromActivity(mBinding.getRoot(), this);
+                    } else {
+                        showBottomSheet();
+                    }
                 })
                 .setNegativeButton(R.string.no, null)
                 .show();
+    }
+
+    private void showBottomSheet() {
+        setupBottomSheet(mUri);
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PermissionUtil.PERMISSION_REQUEST_WRITE_STORAGE) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                showBottomSheet();
+            } else {
+                // Permission request was denied.
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 
     private void showClipboardWarning() {

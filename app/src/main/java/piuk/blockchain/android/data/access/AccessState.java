@@ -167,6 +167,7 @@ public class AccessState {
     }
 
     public void logout(Context context) {
+        mPin = null;
         Intent intent = new Intent(context, LogoutActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.setAction(LOGOUT_ACTION);

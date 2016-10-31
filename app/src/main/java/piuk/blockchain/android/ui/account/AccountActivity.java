@@ -481,15 +481,17 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             alertDialog.dismiss();
         });
 
-        alertDialog.show();
+        if (!isFinishing()) {
+            alertDialog.show();
 
-        // This corrects the layout size after view drawn
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        if (alertDialog.getWindow() != null) {
-            lp.copyFrom(alertDialog.getWindow().getAttributes());
-            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-            alertDialog.getWindow().setAttributes(lp);
+            // This corrects the layout size after view drawn
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            if (alertDialog.getWindow() != null) {
+                lp.copyFrom(alertDialog.getWindow().getAttributes());
+                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                alertDialog.getWindow().setAttributes(lp);
+            }
         }
     }
 
@@ -542,5 +544,12 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             progress.dismiss();
             progress = null;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dismissProgressDialog();
+        viewModel.destroy();
     }
 }

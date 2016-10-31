@@ -42,6 +42,7 @@ public class MainViewModel extends BaseViewModel {
     private OSUtil osUtil;
     @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
+    @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
 
     private long mBackPressed;
@@ -144,9 +145,10 @@ public class MainViewModel extends BaseViewModel {
                     e.printStackTrace();
                 }
 
-                dataListener.onFetchTransactionCompleted();
-
-                dataListener.onStartBalanceFragment();
+                if (dataListener != null) {
+                    dataListener.onFetchTransactionCompleted();
+                    dataListener.onStartBalanceFragment();
+                }
 
                 if (prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").length() > 0) {
                     String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
@@ -231,6 +233,7 @@ public class MainViewModel extends BaseViewModel {
         MultiAddrFactory.getInstance().wipe();
         prefs.logOut();
         appUtil.restartApp();
+        accessState.setPIN(null);
     }
 
     public boolean areLauncherShortcutsEnabled() {

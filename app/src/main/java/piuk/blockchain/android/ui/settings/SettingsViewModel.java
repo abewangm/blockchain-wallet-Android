@@ -196,7 +196,7 @@ public class SettingsViewModel extends BaseViewModel {
         dataListener.setTorBlocked(settings.isTorBlocked());
 
         // Launcher shortcuts
-        dataListener.setLauncherShortcutVisibility(AndroidUtils.is25OrHigher());
+        dataListener.setLauncherShortcutVisibility(AndroidUtils.is25orHigher());
     }
 
     private String getTwoFaSummary(int type) {
