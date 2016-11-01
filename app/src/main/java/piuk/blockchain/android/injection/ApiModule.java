@@ -1,13 +1,12 @@
 package piuk.blockchain.android.injection;
 
-import info.blockchain.api.PinStore;
-import info.blockchain.api.WalletPayload;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import piuk.blockchain.android.data.stores.TransactionListStore;
 
 /**
  * Created by adambennett on 08/08/2016.
@@ -17,19 +16,14 @@ import dagger.Provides;
 public class ApiModule {
 
     @Provides
-    @Singleton
-    protected WalletPayload provideAccess() {
-        return new WalletPayload();
-    }
-
-    @Provides
-    @Singleton
-    protected PinStore providePinStore() {
-        return new PinStore();
-    }
-
-    @Provides
     protected PayloadManager providePayloadManager() {
         return PayloadManager.getInstance();
     }
+
+    @Provides
+    @Singleton
+    protected TransactionListStore provideTransactionListStore() {
+        return new TransactionListStore();
+    }
+
 }

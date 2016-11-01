@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Settings</string>
 
-    <string name="all_accounts">All</string>
+    <string name="all_accounts">All Wallets</string>
 
     <string name="please_wait">Please wait</string>
 
@@ -62,6 +62,7 @@
     <string name="create_pin">Create PIN</string>
     <string name="confirm_pin">Confirm PIN</string>
     <string name="create_pin_failed">PIN creation failed. Please pair device again.</string>
+    <string name="change_pin_new_matches_current">You can\'t use your current PIN as your new PIN</string>
     <string name="pairing_failed">Pairing failed. Please try again.</string>
 
     <string name="check_connectivity_exit">Blockchain Wallet cannot obtain an Internet connection. Please check the connectivity on your device and try again.</string>
@@ -75,7 +76,7 @@
     <string name="LOGIN">Log in to my Wallet</string>
     <string name="pair_your_wallet">Pair Your Wallet</string>
     <string name="manual_pairing">Manual Pairing</string>
-    <string name="pair_wallet_step_1">Log in to your Blockchain Wallet via your PC or Mac at https://blockchain.info/wallet.</string>
+    <string name="pair_wallet_step_1">Log in to your Blockchain Wallet via your PC or Mac at %1$s.</string>
     <string name="pair_wallet_step_2">Go to Settings / Wallet Information.</string>
     <string name="pair_wallet_step_3">Click Show Pairing Code to reveal a QR Code, a square black &amp; white barcode. Scan the code with your camera.</string>
     <string name="disable_two_factor">You must disable two-factor authentication before attempting to manually pair your wallet</string>
@@ -117,6 +118,8 @@
 
     <string name="support">Support</string>
     <string name="rate_us">Rate us</string>
+    <string name="licenses">Licenses</string>
+    <string name="email_chooser">Send e-mail…</string>
     <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">Free Merchant app</string>
     <string name="password_or_wipe">Enter using your password or forget this wallet</string>
@@ -383,21 +386,20 @@
     <string name="resend">Resend</string>
     <string name="verified">verified</string>
     <string name="unverified">unverified</string>
-
     <string name="allow">Allow</string>
     <string name="block">Block</string>
     <string name="security">Security</string>
     <string name="enable">Enable</string>
     <string name="disable">Disable</string>
-
     <string name="sms">SMS</string>
     <string name="google_authenticator">Google Authenticator</string>
     <string name="yubikey">Yubikey</string>
-
     <string name="disable_2fa_first">Please disable 2-step Verification via SMS in the security settings first.</string>
+    <string name="settings_field_cant_be_empty">Field can\'t be empty.</string>
 
     <string name="request_camera_permission">Camera access is required.</string>
     <string name="request_location_permission">Location access is required.</string>
+    <string name="request_write_storage_permission">Write external storage is required.</string>
     <string name="not_specified">not specified</string>
     <string name="update_failed">Failed to update.</string>
     <string name="verify_mobile">Verify Mobile</string>
@@ -405,6 +407,7 @@
     <string name="verify_sms_summary">We have sent your mobile phone an SMS message with a verification code. Enter the code to verify your mobile phone number.</string>
     <string name="mobile_description">Your mobile phone can be used to enable two-factor authentication, helping to secure your wallet from unauthorized access.</string>
 
+    <string name="enable_fingerprint">Fingerprint Unlock</string>
     <string name="two_fa">2-step Verification</string>
     <string name="tor_requests">Block Tor Requests</string>
     <string name="tor_summary">Would you like to block IP addresses that are known to be part of the Tor anonymizing network from accessing your wallet? The Tor network is frequently used by hackers attempting to access Blockchain users wallets.</string>
@@ -420,6 +423,8 @@
     <string name="sms_verified">Mobile number verified</string>
     <string name="preferences">Preferences</string>
     <string name="two_fa_summary">Protect your wallet from unauthorized access by enabling 2-Step Verification. You can choose to use your mobile phone number to secure your wallet. This code will be requested when you try to access your wallet via the web browser.\n\nIn order to use other authentication methods instead, please login to our web wallet.</string>
+    <string name="enable_launcher_shortcuts">Launcher Shortcuts</string>
+    <string name="preferences_shortcuts_summary">Enable this option to reveal a receive address when you long-press on the app icon in the launcher, making receiving bitcoin even faster.</string>
 
     <string name="rate_title">Rate Blockchain Wallet</string>
     <string name="rate_message">Enjoying the Blockchain Wallet? Please take a moment to leave a review in Google Play and let others know about it.</string>
@@ -506,4 +511,26 @@
     <string name="backup_word_mismatch">Word Mismatch</string>
     <string name="backup_done">DONE</string>
     <string name="backup_lost_mnemonic">Lost your 12 word recovery phrase?</string>
+
+    <!-- FINGERPRINT -->
+    <string name="fingerprint_prompt">Use your fingerprint for faster, easier access to your wallet.\n\nConfirm fingerprint to continue</string>
+    <string name="fingerprint_description">Confirm fingerprint to continue</string>
+    <string name="fingerprint_hint">Touch sensor</string>
+    <string name="fingerprint_login_title">Fingerprint login</string>
+    <string name="fingerprint_not_recognized">Fingerprint not recognized. Try again</string>
+    <string name="fingerprint_success">Fingerprint recognized</string>
+    <string name="fingerprint_use_pin">Use PIN</string>
+    <string name="fingerprint_disable_message">Are you sure you want to disable fingerprint login?</string>
+    <string name="fingerprint_no_fingerprints_added">No fingerprints have been registered to this device yet. Do you want to register a fingerprint now?</string>
+    <string name="fingerprint_key_invalidated_description">Either the fingerprints stored on this device have changed or the keyguard has been disabled</string>
+    <string name="fingerprint_key_invalidated_brief">Keys invalidated, PIN code required</string>
+    <string name="fingerprint_fatal_error_description">There was a problem setting up fingerprint login. Please try again later</string>
+    <string name="fingerprint_fatal_error_brief">Unexpected error</string>
+
+    <!-- LAUNCHER SHORTCUTS -->
+    <string name="shortcut_receive_copy_short">Copy Address</string>
+    <string name="shortcut_receive_copy_long">Copy receive address to another app</string>
+    <string name="shortcut_receive_qr_short">Show Receive QR</string>
+    <string name="shortcut_receive_qr_long">View QR code for receive address</string>
+    <string name="shortcut_receive_qr_error">Sorry, there was an error generating the QR code</string>
 </resources>

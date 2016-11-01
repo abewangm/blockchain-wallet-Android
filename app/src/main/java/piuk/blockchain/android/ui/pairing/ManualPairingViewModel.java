@@ -49,7 +49,7 @@ public class ManualPairingViewModel extends BaseViewModel {
     }
 
     public ManualPairingViewModel(DataListener listener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         mDataListener = listener;
     }
 

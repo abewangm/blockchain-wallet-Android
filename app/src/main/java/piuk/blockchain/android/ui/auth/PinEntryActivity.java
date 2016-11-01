@@ -11,7 +11,10 @@ import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import info.blockchain.wallet.util.CharSequenceX;
@@ -23,12 +26,17 @@ import piuk.blockchain.android.databinding.ActivityPinEntryBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.ViewUtils;
+import piuk.blockchain.android.util.annotations.Thunk;
 
 public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewModel.DataListener {
 
+    public static final String KEY_VALIDATING_PIN_FOR_RESULT = "validating_pin";
+    public static final String KEY_VALIDATED_PIN = "validated_pin";
+    public static final int REQUEST_CODE_VALIDATE_PIN = 88;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
     private static final int PIN_LENGTH = 4;
     private static final Handler mDelayHandler = new Handler();
@@ -36,7 +44,10 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
     private TextView[] mPinBoxArray = null;
     private MaterialProgressDialog mProgressDialog = null;
     private ActivityPinEntryBinding mBinding;
-    private PinEntryViewModel mViewModel;
+    private FingerprintDialog mFingerprintDialog;
+    private ViewGroup mKeyboardLayout;
+    private boolean mIsPaused = false;
+    @Thunk PinEntryViewModel mViewModel;
 
     private long mBackPressed;
 
@@ -63,8 +74,61 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
         mPinBoxArray[3] = mBinding.pinBox3;
 
         showConnectionDialogIfNeeded();
+        mKeyboardLayout = (ViewGroup) findViewById(R.id.keyboard_container);
 
         mViewModel.onViewReady();
+    }
+
+    @Override
+    public void showFingerprintDialog(CharSequenceX pincode) {
+        // Show icon for relaunching dialog
+        mBinding.fingerprintLogo.setVisibility(View.VISIBLE);
+        mBinding.fingerprintLogo.setOnClickListener(v -> mViewModel.checkFingerprintStatus());
+        // Show dialog itself if not already showing
+        if (mFingerprintDialog == null && mViewModel.canShowFingerprintDialog()) {
+            mFingerprintDialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.AUTHENTICATE);
+            mFingerprintDialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
+                @Override
+                public void onAuthenticated(CharSequenceX data) {
+                    dismissFingerprintDialog();
+                    mViewModel.loginWithDecryptedPin(data);
+
+                }
+
+                @Override
+                public void onCanceled() {
+                    dismissFingerprintDialog();
+                    showKeyboard();
+                }
+            });
+
+            mDelayHandler.postDelayed(() -> {
+                if (!isFinishing() && !mIsPaused) {
+                    mFingerprintDialog.show(getSupportFragmentManager(), FingerprintDialog.TAG);
+                } else {
+                    mFingerprintDialog = null;
+                }
+            }, 200);
+
+            hideKeyboard();
+        }
+    }
+
+    @Override
+    public void showKeyboard() {
+        if (mKeyboardLayout.getVisibility() == View.INVISIBLE) {
+            Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
+            mKeyboardLayout.startAnimation(bottomUp);
+            mKeyboardLayout.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideKeyboard() {
+        if (mKeyboardLayout.getVisibility() == View.VISIBLE) {
+            Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.top_down);
+            mKeyboardLayout.startAnimation(bottomUp);
+            mKeyboardLayout.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void showConnectionDialogIfNeeded() {
@@ -72,7 +136,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
             new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setMessage(getString(R.string.check_connectivity_exit))
                     .setCancelable(false)
-                    .setPositiveButton(R.string.dialog_continue, (dialog, id) -> restartPage())
+                    .setPositiveButton(R.string.dialog_continue, (dialog, id) -> restartPageAndClearTop())
                     .create()
                     .show();
         }
@@ -91,7 +155,10 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
 
     @Override
     public void onBackPressed() {
-        if (mViewModel.allowExit()) {
+        if (mViewModel.isForValidatingPinForResult()) {
+            finishWithResultCanceled();
+
+        } else if (mViewModel.allowExit()) {
             if (mBackPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
                 AccessState.getInstance().logout(this);
                 return;
@@ -129,16 +196,6 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
         startActivity(intent);
     }
 
-    private class ClearPinNumberRunnable implements Runnable {
-        @Override
-        public void run() {
-            for (TextView pinBox : getPinBoxArray()) {
-                // Reset PIN buttons to blank
-                pinBox.setBackgroundResource(R.drawable.rounded_view_blue_white_border);
-            }
-        }
-    }
-
     @Override
     public void goToUpgradeWalletActivity() {
         Intent intent = new Intent(this, UpgradeWalletActivity.class);
@@ -146,6 +203,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
         startActivity(intent);
     }
 
+    @SuppressWarnings("unused") // DataBindingMethod
     public void padClicked(View view) {
         mViewModel.padClicked(view);
     }
@@ -160,6 +218,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
         mBinding.titleBox.setVisibility(visibility);
     }
 
+    @SuppressWarnings("unused") // DataBindingMethod
     public void deleteClicked(View view) {
         mViewModel.onDeleteClicked();
     }
@@ -170,7 +229,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
     }
 
     @Override
-    public void restartPage() {
+    public void restartPageAndClearTop() {
         Intent intent = new Intent(this, PinEntryActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
@@ -205,7 +264,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
                     if (pw.length() > 0) {
                         mViewModel.validatePassword(new CharSequenceX(pw));
                     } else {
-                        mViewModel.incrementFailureCount();
+                        mViewModel.incrementFailureCountAndRestart();
                     }
 
                 }).show();
@@ -241,7 +300,25 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
     @Override
     protected void onResume() {
         super.onResume();
+        mIsPaused = false;
         mViewModel.clearPinBoxes();
+        mViewModel.checkFingerprintStatus();
+    }
+
+    @Override
+    public void finishWithResultOk(String pin) {
+        Bundle bundle = new Bundle();
+        bundle.putString(KEY_VALIDATED_PIN, pin);
+        Intent intent = new Intent();
+        intent.putExtras(bundle);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+
+    private void finishWithResultCanceled() {
+        Intent intent = new Intent();
+        setResult(RESULT_CANCELED, intent);
+        finish();
     }
 
     @Override
@@ -262,8 +339,38 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        mIsPaused = true;
+        dismissFingerprintDialog();
+    }
+
+    @Override
     protected void onDestroy() {
+        dismissProgressDialog();
         mViewModel.destroy();
         super.onDestroy();
+    }
+
+    @Thunk
+    void dismissFingerprintDialog() {
+        if (mFingerprintDialog != null && mFingerprintDialog.isVisible()) {
+            mFingerprintDialog.dismiss();
+            mFingerprintDialog = null;
+        }
+    }
+
+    private class ClearPinNumberRunnable implements Runnable {
+        ClearPinNumberRunnable() {
+            // Empty constructor
+        }
+
+        @Override
+        public void run() {
+            for (TextView pinBox : getPinBoxArray()) {
+                // Reset PIN buttons to blank
+                pinBox.setBackgroundResource(R.drawable.rounded_view_blue_white_border);
+            }
+        }
     }
 }

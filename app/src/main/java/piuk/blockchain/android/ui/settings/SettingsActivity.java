@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.settings;
 
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 
 import piuk.blockchain.android.R;
@@ -27,8 +28,8 @@ public class SettingsActivity extends BaseAuthActivity {
         //TODO - don't use NoActionBar in styles.xml (affects BalanceFragment, so don't just edit styles.xml)
         Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar_general);
         toolbar.setTitle(getResources().getString(R.string.action_settings));
-        toolbar.setTitleTextColor(getResources().getColor(R.color.white));
-        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp));
+        toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white));
+        toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.ic_arrow_back_white_24dp));
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 }

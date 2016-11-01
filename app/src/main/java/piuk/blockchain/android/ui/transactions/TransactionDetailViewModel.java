@@ -8,8 +8,8 @@ import android.support.v4.util.Pair;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payload.Transaction;
-import info.blockchain.wallet.payload.Tx;
+import info.blockchain.wallet.transaction.Transaction;
+import info.blockchain.wallet.transaction.Tx;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -36,7 +36,7 @@ import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import rx.Observable;
 
-import static piuk.blockchain.android.ui.home.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
 @SuppressWarnings("WeakerAccess")
 public class TransactionDetailViewModel extends BaseViewModel {
@@ -55,7 +55,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private double mBtcExchangeRate;
     private String mFiatType;
 
-    @VisibleForTesting Tx mTransaction;
+    @VisibleForTesting
+    Tx mTransaction;
 
     public interface DataListener {
 
@@ -90,7 +91,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
 
     public TransactionDetailViewModel(DataListener listener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         mDataListener = listener;
         mMonetaryUtil = new MonetaryUtil(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
 
@@ -212,12 +213,12 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
 
     private void setTransactionNote(Tx transaction) {
-        String notes = mPayloadManager.getPayload().getNotes().get(transaction.getHash());
+        String notes = mPayloadManager.getPayload().getTransactionNotesMap().get(transaction.getHash());
         mDataListener.setDescription(notes);
     }
 
     public String getTransactionNote() {
-        return mPayloadManager.getPayload().getNotes().get(mTransaction.getHash());
+        return mPayloadManager.getPayload().getTransactionNotesMap().get(mTransaction.getHash());
     }
 
     @VisibleForTesting
@@ -263,7 +264,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     @VisibleForTesting
     Observable<String> getTransactionValueString(String currency, Tx transaction) {
         if (currency.equals("USD")) {
-            return ExchangeRateFactory.getInstance().getHistoricPrice((long) Math.abs(transaction.getAmount()), mFiatType, transaction.getTS() * 1000)
+            return mExchangeRateFactory.getHistoricPrice((long) Math.abs(transaction.getAmount()), mFiatType, transaction.getTS() * 1000)
                     .map(aDouble -> {
                         int stringId = -1;
                         switch (transaction.getDirection()) {
@@ -278,7 +279,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
                                 break;
                         }
                         return mStringUtils.getString(stringId)
-                                + ExchangeRateFactory.getInstance().getSymbol(mFiatType)
+                                + mExchangeRateFactory.getSymbol(mFiatType)
                                 + mMonetaryUtil.getFiatFormat(mFiatType).format(aDouble);
                     });
         } else {
@@ -288,7 +289,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     private String getTransactionValueFiat(Tx transaction) {
         return mStringUtils.getString(R.string.transaction_detail_value)
-                + ExchangeRateFactory.getInstance().getSymbol(mFiatType)
+                + mExchangeRateFactory.getSymbol(mFiatType)
                 + mMonetaryUtil.getFiatFormat(mFiatType).format(mBtcExchangeRate * (Math.abs(transaction.getAmount()) / 1e8));
     }
 

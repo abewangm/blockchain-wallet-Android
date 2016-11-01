@@ -1,11 +1,13 @@
 package piuk.blockchain.android.ui.home;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -20,9 +22,10 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+
+import info.blockchain.wallet.payload.PayloadManager;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
@@ -30,17 +33,22 @@ import piuk.blockchain.android.ui.account.AccountActivity;
 import piuk.blockchain.android.ui.auth.LandingActivity;
 import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.send.SendActivity;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
+import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
+import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.ViewUtils;
+import piuk.blockchain.android.util.annotations.Thunk;
 
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.Communicator, MainViewModel.DataListener {
 
@@ -49,16 +57,16 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     private static final int MERCHANT_ACTIVITY = 1;
     public static final int SCAN_URI = 2007;
 
-    private boolean drawerIsOpen = false;
+    @Thunk boolean drawerIsOpen = false;
 
-    private Toolbar toolbar = null;
-    private MainViewModel mainViewModel;//MainActivity logic
+    private Toolbar toolbar;
+    private MainViewModel mainViewModel;
     private ActivityMainBinding binding;
     private MaterialProgressDialog fetchTransactionsProgress;
     private AlertDialog mRootedDialog;
-
     private AppUtil appUtil;
 
+    @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,8 +78,31 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         binding.setViewModel(mainViewModel);
 
         mainViewModel.onViewReady();
+
+        binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                // No-op
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                drawerIsOpen = true;
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                drawerIsOpen = false;
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                // No-op
+            }
+        });
     }
 
+    @SuppressLint("NewApi")
     @Override
     protected void onResume() {
         super.onResume();
@@ -79,6 +110,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
         mainViewModel.startWebSocketService();
         resetNavigationDrawer();
+
+        if (AndroidUtils.is25orHigher() && mainViewModel.areLauncherShortcutsEnabled()) {
+            LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(
+                    this,
+                    PayloadManager.getInstance(),
+                    getSystemService(ShortcutManager.class));
+
+            launcherShortcutHelper.generateReceiveShortcuts();
+        }
     }
 
     @Override
@@ -94,17 +134,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_activity_actions, menu);
+        getMenuInflater().inflate(R.menu.main_activity_actions, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
-
             case android.R.id.home:
                 binding.drawerLayout.openDrawer(GravityCompat.START);
                 return true;
@@ -171,7 +207,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     }
 
     private void doScanInput(String strResult) {
-
         Intent intent = new Intent(this, SendActivity.class);
         intent.putExtra("scan_data", strResult);
         startActivity(intent);
@@ -226,11 +261,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     @Override
     public void resetNavigationDrawer() {
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_menu_white_24dp));
+        toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.ic_menu_white_24dp));
+        toolbar.setTitle("");
         setSupportActionBar(toolbar);
+        ViewUtils.setElevation(toolbar, 0F);
 
-        View headerLayout = binding.nvView.getHeaderView(0);//TODO - future use for account selection
         MenuItem backUpMenuItem = binding.nvView.getMenu().findItem(R.id.nav_backup);
         MenuItem upgradeMenuItem = binding.nvView.getMenu().findItem(R.id.nav_upgrade);
 
@@ -251,10 +287,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 mainViewModel.getPayloadManager().getPayload().getHdWallet() != null &&
                 !mainViewModel.getPayloadManager().getPayload().getHdWallet().isMnemonicVerified()) {
             //Not backed up
-            drawable.setColorFilter(getResources().getColor(R.color.blockchain_send_red), PorterDuff.Mode.SRC_ATOP);
+            drawable.setColorFilter(ContextCompat.getColor(this, R.color.blockchain_send_red), PorterDuff.Mode.SRC_ATOP);
         } else {
             //Backed up
-            drawable.setColorFilter(getResources().getColor(R.color.alert_green), PorterDuff.Mode.SRC_ATOP);
+            drawable.setColorFilter(ContextCompat.getColor(this, R.color.alert_green), PorterDuff.Mode.SRC_ATOP);
         }
 
         binding.nvView.setNavigationItemSelectedListener(

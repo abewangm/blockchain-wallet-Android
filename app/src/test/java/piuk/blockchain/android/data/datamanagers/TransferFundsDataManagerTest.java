@@ -1,11 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import android.support.v4.util.Pair;
-
 import info.blockchain.api.Unspent;
-import piuk.blockchain.android.data.cache.DynamicFeeCache;
-import piuk.blockchain.android.ui.account.ItemAccount;
-import piuk.blockchain.android.ui.send.PendingTransaction;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.HDWallet;
@@ -19,6 +14,7 @@ import info.blockchain.wallet.payment.data.SweepBundle;
 import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.util.CharSequenceX;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -30,15 +26,18 @@ import org.mockito.MockitoAnnotations;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.ui.account.ItemAccount;
+import piuk.blockchain.android.ui.send.PendingTransaction;
 import rx.observers.TestSubscriber;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -67,7 +66,7 @@ public class TransferFundsDataManagerTest extends RxTest {
     @Test
     public void getTransferableFundTransactionListForDefaultAccount() throws Exception {
         // Arrange
-        TestSubscriber<Map<List<PendingTransaction>, Pair<Long, Long>>> subscriber = new TestSubscriber<>();
+        TestSubscriber<Triple> subscriber = new TestSubscriber<>();
         Payload mockPayload = mock(Payload.class);
         LegacyAddress legacyAddress1 = new LegacyAddress();
         legacyAddress1.setAddress("address");
@@ -84,7 +83,7 @@ public class TransferFundsDataManagerTest extends RxTest {
         HDWallet mockHdWallet = mock(HDWallet.class);
         when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
         when(mockHdWallet.getDefaultIndex()).thenReturn(0);
-        when(mockPayload.getLegacyAddresses()).thenReturn(legacyAddresses);
+        when(mockPayload.getLegacyAddressList()).thenReturn(legacyAddresses);
         when(mUnspentApi.getUnspentOutputs(anyString())).thenReturn(mock(JSONObject.class));
         UnspentOutputs mockUnspentOutputs = mock(UnspentOutputs.class);
         when(mPayment.getCoins(any(JSONObject.class))).thenReturn(mockUnspentOutputs);
@@ -101,25 +100,21 @@ public class TransferFundsDataManagerTest extends RxTest {
         subscriber.assertNoErrors();
     }
 
-        @Test
-    public void sendPaymentSuccess() throws Exception {
+    @Test
+    public void sendPaymentSuccessNoEncryption() throws Exception {
         // Arrange
         TestSubscriber<String> subscriber = new TestSubscriber<>();
         Payment mockPayment = mock(Payment.class);
         doAnswer(invocation -> {
-            ((Payment.SubmitPaymentListener) invocation.getArguments()[10]).onSuccess("hash");
+            ((Payment.SubmitPaymentListener) invocation.getArguments()[6]).onSuccess("hash");
             return null;
         }).when(mockPayment).submitPayment(
                 any(SpendableUnspentOutputs.class),
-                any(Account.class),
-                any(LegacyAddress.class),
-                anyString(),
+                any(ArrayList.class),
                 anyString(),
                 anyString(),
                 any(BigInteger.class),
                 any(BigInteger.class),
-                anyBoolean(),
-                anyString(),
                 any(Payment.SubmitPaymentListener.class));
 
         PendingTransaction transaction1 = new PendingTransaction();
@@ -134,6 +129,10 @@ public class TransferFundsDataManagerTest extends RxTest {
             add(transaction1);
         }};
         when(mPayloadManager.savePayloadToServer()).thenReturn(true);
+        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
+        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
+        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
+        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
 
         // Act
         mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).toBlocking().subscribe(subscriber);
@@ -144,24 +143,63 @@ public class TransferFundsDataManagerTest extends RxTest {
     }
 
     @Test
+    public void sendPaymentEncryptionThrowsException() throws Exception {
+        // Arrange
+        TestSubscriber<String> subscriber = new TestSubscriber<>();
+        Payment mockPayment = mock(Payment.class);
+        doAnswer(invocation -> {
+            ((Payment.SubmitPaymentListener) invocation.getArguments()[6]).onSuccess("hash");
+            return null;
+        }).when(mockPayment).submitPayment(
+                any(SpendableUnspentOutputs.class),
+                any(ArrayList.class),
+                anyString(),
+                anyString(),
+                any(BigInteger.class),
+                any(BigInteger.class),
+                any(Payment.SubmitPaymentListener.class));
+
+        PendingTransaction transaction1 = new PendingTransaction();
+        transaction1.sendingObject = new ItemAccount("", "", null, null);
+        transaction1.sendingObject.accountObject = new LegacyAddress();
+        transaction1.bigIntAmount = new BigInteger("1000000");
+        transaction1.bigIntFee = new BigInteger("100");
+
+        List<PendingTransaction> pendingTransactions = new ArrayList<PendingTransaction>() {{
+            add(transaction1);
+            add(transaction1);
+            add(transaction1);
+        }};
+        when(mPayloadManager.savePayloadToServer()).thenReturn(true);
+        Payload mockPayload = mock(Payload.class);
+        // For now, this method will cause an exception to be thrown
+        // In the future, this should be testable and this particular setup should be successful
+        when(mockPayload.isDoubleEncrypted()).thenReturn(true);
+        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+
+        // Act
+        mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).toBlocking().subscribe(subscriber);
+        // Assert
+        subscriber.assertError(Throwable.class);
+        subscriber.assertNotCompleted();
+        subscriber.assertNoValues();
+    }
+
+    @Test
     public void sendPaymentFailed() throws Exception {
         // Arrange
         TestSubscriber<String> subscriber = new TestSubscriber<>();
         Payment mockPayment = mock(Payment.class);
         doAnswer(invocation -> {
-            ((Payment.SubmitPaymentListener) invocation.getArguments()[10]).onFail("failed");
+            ((Payment.SubmitPaymentListener) invocation.getArguments()[6]).onFail("failed");
             return null;
         }).when(mockPayment).submitPayment(
                 any(SpendableUnspentOutputs.class),
-                any(Account.class),
-                any(LegacyAddress.class),
-                anyString(),
+                any(ArrayList.class),
                 anyString(),
                 anyString(),
                 any(BigInteger.class),
                 any(BigInteger.class),
-                anyBoolean(),
-                anyString(),
                 any(Payment.SubmitPaymentListener.class));
 
         PendingTransaction transaction1 = new PendingTransaction();
@@ -174,6 +212,10 @@ public class TransferFundsDataManagerTest extends RxTest {
             add(transaction1);
         }};
         when(mPayloadManager.savePayloadToServer()).thenReturn(true);
+        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
+        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
+        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
+        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
 
         // Act
         mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).toBlocking().subscribe(subscriber);
@@ -192,15 +234,11 @@ public class TransferFundsDataManagerTest extends RxTest {
                 .when(mockPayment)
                 .submitPayment(
                         any(SpendableUnspentOutputs.class),
-                        any(Account.class),
-                        any(LegacyAddress.class),
-                        anyString(),
+                        any(ArrayList.class),
                         anyString(),
                         anyString(),
                         any(BigInteger.class),
                         any(BigInteger.class),
-                        anyBoolean(),
-                        anyString(),
                         any(Payment.SubmitPaymentListener.class));
 
         PendingTransaction transaction1 = new PendingTransaction();

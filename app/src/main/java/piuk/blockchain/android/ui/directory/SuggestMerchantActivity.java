@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.directory;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -40,7 +41,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
-public class SuggestMerchantActivity extends BaseAuthActivity {
+public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapReadyCallback {
 
     private static final String SUGGEST_MERCHANT_URL = "https://merchant-directory.blockchain.info/api/suggest_merchant.php";
     TextView commandSave;
@@ -103,7 +104,12 @@ public class SuggestMerchantActivity extends BaseAuthActivity {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new MyLocationListener();
 
-        map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
+        ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+
         map.getUiSettings().setZoomControlsEnabled(true);
 
         try {
@@ -116,19 +122,15 @@ public class SuggestMerchantActivity extends BaseAuthActivity {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         }
 
-        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+        map.setOnMapClickListener(point -> {
+            map.clear();
+            MarkerOptions marker = new MarkerOptions().position(new LatLng(point.latitude, point.longitude));
+            map.addMarker(marker);
 
-            @Override
-            public void onMapClick(LatLng point) {
-                map.clear();
-                MarkerOptions marker = new MarkerOptions().position(new LatLng(point.latitude, point.longitude));
-                map.addMarker(marker);
-
-                populateAddressViews(point);
-            }
+            populateAddressViews(point);
         });
 
-        final List<String> categories = new ArrayList<String>();
+        final List<String> categories = new ArrayList<>();
         categories.add(getString(R.string.merchant_cat_hint));
         categories.add(getString(R.string.merchant_cat1));
         categories.add(getString(R.string.merchant_cat2));
@@ -137,68 +139,61 @@ public class SuggestMerchantActivity extends BaseAuthActivity {
         categories.add(getString(R.string.merchant_cat5));
 
         final Spinner spCategory = (Spinner) findViewById(R.id.merchant_category_spinner);
-        ArrayAdapter<String> categorySpinnerArrayAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, categories);
+        ArrayAdapter<String> categorySpinnerArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, categories);
         categorySpinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown);
         spCategory.setAdapter(categorySpinnerArrayAdapter);
 
         commandSave = (TextView) findViewById(R.id.command_save);
-        commandSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        commandSave.setOnClickListener(v -> {
 
-                if (commandSave.getText().toString().equals(getResources().getString(R.string.save))) {
-                    confirmLayout.setVisibility(View.GONE);
+            if (commandSave.getText().toString().equals(getResources().getString(R.string.save))) {
+                confirmLayout.setVisibility(View.GONE);
 
-                    final StringBuilder args = new StringBuilder();
-                    args.append("{");
-                    args.append("\"NAME\":\"" + edName.getText().toString());
-                    args.append("\",\"DESCRIPTION\":\"" + edDescription.getText().toString());
-                    args.append("\",\"STREET_ADDRESS\":\"" + edStreetAddress.getText().toString());
-                    args.append("\",\"CITY\":\"" + edCity.getText().toString());
-                    args.append("\",\"ZIP\":\"" + edPostal.getText().toString());
-                    args.append("\",\"TELEPHONE\":\"" + edTelephone.getText().toString());
-                    args.append("\",\"WEB\":\"" + edWeb.getText().toString());
-                    args.append("\",\"LATITUDE\":" + df.format(selectedY));
-                    args.append(",\"LONGITUDE\":" + df.format(selectedX));
-                    args.append(",\"CATEGORY\":" + Integer.toString(spCategory.getSelectedItemPosition()));
-                    args.append(",\"SOURCE\":\"Android\"");
-                    args.append("}");
+                final StringBuilder args = new StringBuilder();
+                args.append("{");
+                args.append("\"NAME\":\"").append(edName.getText().toString());
+                args.append("\",\"DESCRIPTION\":\"").append(edDescription.getText().toString());
+                args.append("\",\"STREET_ADDRESS\":\"").append(edStreetAddress.getText().toString());
+                args.append("\",\"CITY\":\"").append(edCity.getText().toString());
+                args.append("\",\"ZIP\":\"").append(edPostal.getText().toString());
+                args.append("\",\"TELEPHONE\":\"").append(edTelephone.getText().toString());
+                args.append("\",\"WEB\":\"").append(edWeb.getText().toString());
+                args.append("\",\"LATITUDE\":").append(df.format(selectedY));
+                args.append(",\"LONGITUDE\":").append(df.format(selectedX));
+                args.append(",\"CATEGORY\":").append(Integer.toString(spCategory.getSelectedItemPosition()));
+                args.append(",\"SOURCE\":\"Android\"");
+                args.append("}");
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
+                new Thread(() -> {
 
-                            Looper.prepare();
+                    Looper.prepare();
 
-                            String res = null;
-                            try {
-                                res = WebUtil.getInstance().postURLJson(SUGGEST_MERCHANT_URL, args.toString());
-                            } catch (Exception e) {
-                                ToastCustom.makeText(SuggestMerchantActivity.this, e.getMessage(), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                            }
+                    String res = null;
+                    try {
+                        res = WebUtil.getInstance().postURLJson(SUGGEST_MERCHANT_URL, args.toString());
+                    } catch (Exception e) {
+                        ToastCustom.makeText(SuggestMerchantActivity.this, e.getMessage(), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                    }
 
-                            if (res != null && res.contains("\"result\":1")) {
-                                ToastCustom.makeText(SuggestMerchantActivity.this, getString(R.string.ok_writing_merchant), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
-                                setResult(RESULT_OK);
-                                finish();
-                            } else {
-                                ToastCustom.makeText(SuggestMerchantActivity.this, getString(R.string.error_writing_merchant), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                            }
+                    if (res != null && res.contains("\"result\":1")) {
+                        ToastCustom.makeText(SuggestMerchantActivity.this, getString(R.string.ok_writing_merchant), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
+                        setResult(RESULT_OK);
+                        finish();
+                    } else {
+                        ToastCustom.makeText(SuggestMerchantActivity.this, getString(R.string.error_writing_merchant), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                    }
 
-                            Looper.loop();
+                    Looper.loop();
 
-                        }
+                }).start();
 
-                    }).start();
-
-                    finish();
-                } else {
-                    confirmLayout.setVisibility(View.VISIBLE);
-                    commandSave.setVisibility(View.VISIBLE);
-                    commandSave.setText(getResources().getString(R.string.save));
-                    mapView.setVisibility(View.GONE);
-                    edDescription.requestFocus();
-                }
+                finish();
+            } else {
+                confirmLayout.setVisibility(View.VISIBLE);
+                commandSave.setVisibility(View.VISIBLE);
+                commandSave.setText(getResources().getString(R.string.save));
+                mapView.setVisibility(View.GONE);
+                edDescription.requestFocus();
             }
         });
 
@@ -214,7 +209,7 @@ public class SuggestMerchantActivity extends BaseAuthActivity {
             currLocation.setLongitude(0.0);
         } else if (lastKnownByGps != null && lastKnownByNetwork == null) {
             currLocation = lastKnownByGps;
-        } else if (lastKnownByGps == null && lastKnownByNetwork != null) {
+        } else if (lastKnownByGps == null) {
             currLocation = lastKnownByNetwork;
         } else {
             currLocation = (lastKnownByGps.getAccuracy() <= lastKnownByNetwork.getAccuracy()) ? lastKnownByGps : lastKnownByNetwork;
@@ -315,7 +310,8 @@ public class SuggestMerchantActivity extends BaseAuthActivity {
 
         } catch (Exception e) {
             Log.e("", "", e);
-            ToastCustom.makeText(SuggestMerchantActivity.this, getString(R.string.address_lookup_fail), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            ToastCustom.makeText(SuggestMerchantActivity.this,
+                    getString(R.string.address_lookup_fail), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
         }
     }
 
@@ -335,23 +331,20 @@ public class SuggestMerchantActivity extends BaseAuthActivity {
 
         @Override
         public void onProviderDisabled(String provider) {
-            ;
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-            ;
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            ;
         }
     }
 
     class UpdateLastLocationThread extends AsyncTask<Void, Void, Void> {
 
-        public HashMap<String, String> result = new HashMap<String, String>();
+        public HashMap<String, String> result = new HashMap<>();
 
         Context mContext;
 
@@ -367,13 +360,10 @@ public class SuggestMerchantActivity extends BaseAuthActivity {
 
             if (currLocation != null) {
 
-                SuggestMerchantActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        zoomToLocation(currLocation.getLongitude(), currLocation.getLatitude());
-                        commandSave.setVisibility(View.VISIBLE);
-                        commandSave.setText(getResources().getString(R.string.next));
-                    }
+                SuggestMerchantActivity.this.runOnUiThread(() -> {
+                    zoomToLocation(currLocation.getLongitude(), currLocation.getLatitude());
+                    commandSave.setVisibility(View.VISIBLE);
+                    commandSave.setText(getResources().getString(R.string.next));
                 });
             }
 
@@ -393,12 +383,7 @@ public class SuggestMerchantActivity extends BaseAuthActivity {
         @Override
         protected Void doInBackground(LatLng... params) {
 
-            SuggestMerchantActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    progress.setVisibility(View.VISIBLE);
-                }
-            });
+            SuggestMerchantActivity.this.runOnUiThread(() -> progress.setVisibility(View.VISIBLE));
 
             Geocoder gc = new Geocoder(mContext, Locale.getDefault());
 
@@ -408,20 +393,17 @@ public class SuggestMerchantActivity extends BaseAuthActivity {
                 if (addrList.size() > 0) {
                     final Address address = addrList.get(0);
 
-                    SuggestMerchantActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (address.getMaxAddressLineIndex() > 0 && address.getAddressLine(0) != null) {
-                                edStreetAddress.setText(address.getAddressLine(0));
-                                ToastCustom.makeText(SuggestMerchantActivity.this, address.getAddressLine(0), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
-                            }
-                            if (address.getPostalCode() != null)
-                                edPostal.setText(address.getPostalCode());
-                            if (address.getLocality() != null)
-                                edCity.setText(address.getLocality());
-
-                            progress.setVisibility(View.GONE);
+                    SuggestMerchantActivity.this.runOnUiThread(() -> {
+                        if (address.getMaxAddressLineIndex() > 0 && address.getAddressLine(0) != null) {
+                            edStreetAddress.setText(address.getAddressLine(0));
+                            ToastCustom.makeText(SuggestMerchantActivity.this, address.getAddressLine(0), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
                         }
+                        if (address.getPostalCode() != null)
+                            edPostal.setText(address.getPostalCode());
+                        if (address.getLocality() != null)
+                            edCity.setText(address.getLocality());
+
+                        progress.setVisibility(View.GONE);
                     });
                 } else {
                     return null;

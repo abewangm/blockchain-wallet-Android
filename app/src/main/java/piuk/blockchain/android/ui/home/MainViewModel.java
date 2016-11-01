@@ -42,6 +42,7 @@ public class MainViewModel extends BaseViewModel {
     private OSUtil osUtil;
     @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
+    @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
 
     private long mBackPressed;
@@ -68,11 +69,11 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         this.context = context;
         this.dataListener = dataListener;
-        this.osUtil = new OSUtil(context);
-        this.appUtil.applyPRNGFixes();
+        osUtil = new OSUtil(context);
+        appUtil.applyPRNGFixes();
     }
 
     @Override
@@ -84,7 +85,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void checkIfShouldShowEmailVerification() {
-        if (appUtil.isNewlyCreated()) {
+        if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
             mCompositeSubscription.add(
                     getSettingsApi()
                             .compose(RxUtil.applySchedulers())
@@ -109,16 +110,15 @@ public class MainViewModel extends BaseViewModel {
     private void checkRooted() {
         if (new RootUtil().isDeviceRooted() &&
                 !prefs.getValue("disable_root_warning", false)) {
-            this.dataListener.onRooted();
+            dataListener.onRooted();
         }
     }
 
     private void checkConnectivity() {
-
         if (ConnectivityStatus.hasConnectivity(context)) {
             preLaunchChecks();
         } else {
-            this.dataListener.onConnectivityFail();
+            dataListener.onConnectivityFail();
         }
     }
 
@@ -145,9 +145,10 @@ public class MainViewModel extends BaseViewModel {
                     e.printStackTrace();
                 }
 
-                dataListener.onFetchTransactionCompleted();
-
-                dataListener.onStartBalanceFragment();
+                if (dataListener != null) {
+                    dataListener.onFetchTransactionCompleted();
+                    dataListener.onStartBalanceFragment();
+                }
 
                 if (prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").length() > 0) {
                     String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
@@ -165,7 +166,11 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void cacheDynamicFee() {
-        DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDynamicFee());
+        try {
+            DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDynamicFee());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void cacheDefaultAccountUnspentData() {
@@ -228,6 +233,11 @@ public class MainViewModel extends BaseViewModel {
         MultiAddrFactory.getInstance().wipe();
         prefs.logOut();
         appUtil.restartApp();
+        accessState.setPIN(null);
+    }
+
+    public boolean areLauncherShortcutsEnabled() {
+        return prefs.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true);
     }
 
     public void onBackPressed() {

@@ -2,55 +2,67 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 
-import info.blockchain.api.TransactionDetails;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payload.Transaction;
-import info.blockchain.wallet.payload.Tx;
-import info.blockchain.wallet.payload.TxMostRecentDateComparator;
+import info.blockchain.wallet.transaction.Transaction;
+import info.blockchain.wallet.transaction.Tx;
+import info.blockchain.wallet.transaction.TxMostRecentDateComparator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.services.TransactionDetailsService;
+import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.util.ListUtil;
 import rx.Observable;
+import rx.subjects.PublishSubject;
+import rx.subjects.Subject;
 
 public class TransactionListDataManager {
 
-    private final String TAG_ALL = "TAG_ALL";
-    private final String TAG_IMPORTED_ADDRESSES = "TAG_IMPORTED_ADDRESSES";
-    @VisibleForTesting List<Tx> mTransactionList = new ArrayList<>();
-    private PayloadManager mPayloadManager;
+    public final static int INDEX_ALL_REAL = -100;
+    public final static int INDEX_IMPORTED_ADDRESSES = -200;
+    private PayloadManager payloadManager;
+    private TransactionDetailsService transactionDetails;
+    private TransactionListStore transactionListStore;
+    private Subject<List<Tx>, List<Tx>> listUpdateSubject;
 
-    public TransactionListDataManager(PayloadManager payloadManager) {
-        mPayloadManager = payloadManager;
+    public TransactionListDataManager(PayloadManager payloadManager,
+                                      TransactionDetailsService transactionDetails,
+                                      TransactionListStore transactionListStore) {
+        this.payloadManager = payloadManager;
+        this.transactionDetails = transactionDetails;
+        this.transactionListStore = transactionListStore;
+        listUpdateSubject = PublishSubject.create();
     }
 
     /**
      * Generates a list of transactions for a specific {@link Account} or {@link LegacyAddress}.
-     * Will throw an exception if the object passed isn't either of the two types. The list will be
-     * sorted by date.
+     * The list will be sorted by date.
      *
      * @param object Either a {@link Account} or a {@link LegacyAddress}
      */
     public void generateTransactionList(Object object) {
         if (object instanceof Account) {
             // V3
-            mTransactionList.addAll(getV3Transactions((Account) object));
+            transactionListStore.insertTransactions(getV3Transactions((Account) object));
         } else if (object instanceof LegacyAddress) {
             // V2
-            ListUtil.addAllIfNotNull(mTransactionList, MultiAddrFactory.getInstance().getAddressLegacyTxs(((LegacyAddress) object).getAddress()));
+            transactionListStore.insertTransactions(MultiAddrFactory.getInstance().getAddressLegacyTxs(((LegacyAddress) object).getAddress()));
         } else {
-            throw new IllegalArgumentException("Object must be instance of Account.class or LegacyAddress.class");
+            Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
+            return;
         }
 
-        Collections.sort(mTransactionList, new TxMostRecentDateComparator());
+        transactionListStore.sort(new TxMostRecentDateComparator());
+        listUpdateSubject.onNext(transactionListStore.getList());
+        listUpdateSubject.onCompleted();
     }
 
     /**
@@ -60,14 +72,14 @@ public class TransactionListDataManager {
      */
     @NonNull
     public List<Tx> getTransactionList() {
-        return mTransactionList;
+        return transactionListStore.getList();
     }
 
     /**
      * Resets the list of Transactions.
      */
     public void clearTransactionList() {
-        mTransactionList.clear();
+        transactionListStore.clearList();
     }
 
     /**
@@ -78,27 +90,35 @@ public class TransactionListDataManager {
      */
     @NonNull
     public List<Tx> insertTransactionIntoListAndReturnSorted(Tx transaction) {
-        mTransactionList.add(transaction);
-        Collections.sort(mTransactionList, new TxMostRecentDateComparator());
-        return mTransactionList;
+        transactionListStore.insertTransactionIntoListAndSort(transaction);
+        return transactionListStore.getList();
     }
 
     /**
-     * Get total BTC balance from an {@link Account} or {@link LegacyAddress}. Will throw an
-     * exception if the object passed isn't either of the two types.
+     * Returns a subject that lets ViewModels subscribe to changes in the transaction list - specifically
+     * this subject will return the transaction list when it's first updated and then call onCompleted()
+     *
+     * @return  The list of transactions after initial sync
+     */
+    public Subject<List<Tx>, List<Tx>> getListUpdateSubject() {
+        return listUpdateSubject;
+    }
+
+    /**
+     * Get total BTC balance from an {@link Account} or {@link LegacyAddress}.
      *
      * @param object Either a {@link Account} or a {@link LegacyAddress}
      * @return A BTC value as a double.
      */
     public double getBtcBalance(Object object) {
         // Update Balance
-        double balance = 0D;
+        double balance = 0.0D;
         if (object instanceof Account) {
             // V3
             Account account = ((Account) object);
             // V3 - All
-            if (account.getTags().contains(TAG_ALL)) {
-                if (mPayloadManager.getPayload().isUpgraded()) {
+            if (account.getRealIdx() == INDEX_ALL_REAL) {
+                if (payloadManager.getPayload().isUpgraded()) {
                     // Balance = all xpubs + all legacy address balances
                     balance = ((double) MultiAddrFactory.getInstance().getXpubBalance())
                             + ((double) MultiAddrFactory.getInstance().getLegacyActiveBalance());
@@ -106,7 +126,7 @@ public class TransactionListDataManager {
                     // Balance = all legacy address balances
                     balance = ((double) MultiAddrFactory.getInstance().getLegacyActiveBalance());
                 }
-            } else if (account.getTags().contains(TAG_IMPORTED_ADDRESSES)) {
+            } else if (account.getRealIdx() == INDEX_IMPORTED_ADDRESSES) {
                 balance = ((double) MultiAddrFactory.getInstance().getLegacyActiveBalance());
             } else {
                 // V3 - Individual
@@ -121,7 +141,8 @@ public class TransactionListDataManager {
             LegacyAddress legacyAddress = ((LegacyAddress) object);
             balance = MultiAddrFactory.getInstance().getLegacyBalance(legacyAddress.getAddress());
         } else {
-            throw new IllegalArgumentException("Object must be instance of Account.class or LegacyAddress.class");
+            Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
+            return balance;
         }
 
         return balance;
@@ -134,8 +155,7 @@ public class TransactionListDataManager {
      * @return A Transaction object
      */
     public Observable<Transaction> getTransactionFromHash(String transactionHash) {
-        return Observable.fromCallable(() -> new TransactionDetails().getTransactionDetails(transactionHash))
-                .compose(RxUtil.applySchedulers());
+        return transactionDetails.getTransactionDetailsFromHash(transactionHash);
     }
 
     /**
@@ -146,22 +166,22 @@ public class TransactionListDataManager {
      * @return If save was successful
      */
     public Observable<Boolean> updateTransactionNotes(String transactionHash, String notes) {
-        mPayloadManager.getPayload().getNotes().put(transactionHash, notes);
-        return Observable.fromCallable(() -> mPayloadManager.savePayloadToServer())
+        payloadManager.getPayload().getTransactionNotesMap().put(transactionHash, notes);
+        return Observable.fromCallable(() -> payloadManager.savePayloadToServer())
                 .compose(RxUtil.applySchedulers());
     }
 
     private List<Tx> getV3Transactions(Account account) {
         List<Tx> transactions = new ArrayList<>();
 
-        if (account.getTags().contains(TAG_ALL)) {
-            if (mPayloadManager.getPayload().isUpgraded()) {
+        if (account.getRealIdx() == INDEX_ALL_REAL) {
+            if (payloadManager.getPayload().isUpgraded()) {
                 transactions.addAll(getAllXpubAndLegacyTxs());
             } else {
                 transactions.addAll(MultiAddrFactory.getInstance().getLegacyTxs());
             }
 
-        } else if (account.getTags().contains(TAG_IMPORTED_ADDRESSES)) {
+        } else if (account.getRealIdx() == INDEX_IMPORTED_ADDRESSES) {
             // V3 - Imported Addresses
             transactions.addAll(MultiAddrFactory.getInstance().getLegacyTxs());
         } else {

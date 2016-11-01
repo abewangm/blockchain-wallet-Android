@@ -72,7 +72,7 @@
     <string name="LOGIN">私の財布にログイン</string>
     <string name="pair_your_wallet">財布をペアリング</string>
     <string name="manual_pairing">手動ペアリング</string>
-    <string name="pair_wallet_step_1">https://blockchain.info/walletからPCもしくはMac経由でブロックチェーンウォレットにログインしてください。</string>
+    <string name="pair_wallet_step_1">%1$sからPCもしくはMac経由でブロックチェーンウォレットにログインしてください。</string>
     <string name="pair_wallet_step_2">旧財布を使用している場合はアカウント設定ボタンをクリックしてデバイスタブを選択してください。新規ベータ財布を使用している場合、設定／財布情報にアクセスしてください。</string>
     <string name="pair_wallet_step_3">ペアリングコードを表示をクリックしてQRコードを表示してください。これは四角い白黒のバーコードです。カメラでコードをスキャンしてください。</string>
     <string name="disable_two_factor">財布を手動でペアリングする前に2段階認証を無効にする必要があります</string>
@@ -337,7 +337,7 @@
     <string name="estimate_confirm_block_count">推定確認時間: ~%1$d分 (%2$dブロック)</string>
     <string name="fee_too_low_no_confirm">手数料が低すぎるため、取引が確認されない可能性があります。</string>
     <string name="transaction_surge">ビットコイン採掘ネットワークは現在アクティビティが集中しており、推奨手数料が通常より高額になっています。</string>
-    <string name="unsupported_encryption_version">財布バージョン%1$sに対応していません。</string>
+    <string name="unsupported_encryption_version">財布バージョン%1$sに対応していません %1$s。</string>
     <string name="logout">ログアウト</string>
     <string name="to_field_helper">ビットコインアドレスを入力するか選択</string>
 

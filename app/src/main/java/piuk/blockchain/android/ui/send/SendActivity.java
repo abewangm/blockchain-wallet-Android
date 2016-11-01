@@ -44,12 +44,14 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.home.BalanceFragment;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
+
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_SELECTED_ACCOUNT_POSITION;
 
 public class SendActivity extends BaseAuthActivity implements SendViewModel.DataListener, CustomKeypadCallback {
 
@@ -121,7 +123,6 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.send_activity_actions, menu);
         return super.onCreateOptionsMenu(menu);
@@ -129,9 +130,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
-
             case android.R.id.home:
                 onBackPressed();
                 return true;
@@ -294,6 +293,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     binding.accounts.spinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
+                    //noinspection deprecation
                     binding.accounts.spinner.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
 
@@ -318,7 +318,12 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             }
         });
 
-        binding.accounts.spinner.setSelection(viewModel.getDefaultAccount());
+        if (getIntent().hasExtra(KEY_SELECTED_ACCOUNT_POSITION)
+                && getIntent().getIntExtra(KEY_SELECTED_ACCOUNT_POSITION, -1) != -1) {
+            binding.accounts.spinner.setSelection(getIntent().getIntExtra(KEY_SELECTED_ACCOUNT_POSITION, -1));
+        } else {
+            binding.accounts.spinner.setSelection(viewModel.getDefaultAccount());
+        }
     }
 
     private void setupReceiveToView() {
@@ -332,6 +337,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     binding.spDestination.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
+                    //noinspection deprecation
                     binding.spDestination.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
 
@@ -499,11 +505,11 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         });
 
         dialogBinding.confirmChange.setText(getResources().getString(R.string.accept_higher_fee));
-        dialogBinding.confirmChange.setOnClickListener(v -> {
-            alertDialogFee.dismiss();
-        });
+        dialogBinding.confirmChange.setOnClickListener(v -> alertDialogFee.dismiss());
 
-        alertDialogFee.show();
+        if (getActivity() != null && !getActivity().isFinishing()) {
+            alertDialogFee.show();
+        }
     }
 
     @Override
@@ -549,11 +555,9 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                ;
             }
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                ;
             }
         };
 
@@ -568,11 +572,9 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                ;
             }
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                ;
             }
         };
 
@@ -638,7 +640,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         }
 
         dialogBinding.tvCustomizeFee.setOnClickListener(v -> {
-            if (alertDialog != null && alertDialog.isShowing()) {
+            if (alertDialog.isShowing()) {
                 alertDialog.cancel();
             }
 
@@ -657,7 +659,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         });
 
         dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialog != null && alertDialog.isShowing()) {
+            if (alertDialog.isShowing()) {
                 alertDialog.cancel();
             }
         });
@@ -672,9 +674,14 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             }
         });
 
-        alertDialog.show();
+        if (getActivity() != null && !getActivity().isFinishing()) {
+            alertDialog.show();
+        }
+
         // To prevent the dialog from appearing too large on Android N
-        alertDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        if (alertDialog.getWindow() != null) {
+            alertDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        }
 
         if (viewModel.isLargeTransaction()) {
             onShowLargeTransactionWarning(alertDialog);
@@ -781,5 +788,16 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             });
             mp.start();
         }
+    }
+
+    @Override
+    public void finishActivity() {
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        viewModel.destroy();
     }
 }

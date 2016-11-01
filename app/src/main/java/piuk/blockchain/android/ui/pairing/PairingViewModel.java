@@ -14,6 +14,7 @@ import org.spongycastle.util.encoders.Hex;
 
 import javax.inject.Inject;
 
+import dagger.Lazy;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.auth.PinEntryActivity;
@@ -26,10 +27,10 @@ public class PairingViewModel extends BaseViewModel {
 
     private Context context;
     @Inject protected AppUtil appUtil;
-    @Inject protected PayloadManager payloadManager;
+    @Inject protected Lazy<PayloadManager> payloadManager;
 
     public PairingViewModel(Context context) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         this.context = context;
     }
 
@@ -62,7 +63,7 @@ public class PairingViewModel extends BaseViewModel {
 
                 CharSequenceX password = new CharSequenceX(new String(Hex.decode(sharedKeyAndPassword[1]), "UTF-8"));
 
-                payloadManager.setTempPassword(password);
+                payloadManager.get().setTempPassword(password);
                 appUtil.setSharedKey(sharedKeyAndPassword[0]);
 
                 if (qrComponents.guid != null) {

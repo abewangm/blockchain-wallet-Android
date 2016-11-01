@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.receive;
 
 import com.google.common.collect.HashBiMap;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -11,9 +12,11 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseIntArray;
+import android.webkit.MimeTypeMap;
 
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
@@ -41,6 +44,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.BitcoinLinkGenerator;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -48,6 +52,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
 
+@SuppressWarnings("WeakerAccess")
 public class ReceiveViewModel extends BaseViewModel {
 
     public static final String TAG = ReceiveViewModel.class.getSimpleName();
@@ -62,6 +67,7 @@ public class ReceiveViewModel extends BaseViewModel {
     @Inject ReceiveDataManager mDataManager;
     @Inject WalletAccountHelper mWalletAccountHelper;
     @Inject SSLVerifyUtil mSSLVerifyUtil;
+    @Inject Context mApplicationContext;
     @VisibleForTesting HashBiMap<Integer, Object> mAccountMap;
     @VisibleForTesting SparseIntArray mSpinnerIndexMap;
     private ReceiveCurrencyHelper mCurrencyHelper;
@@ -85,7 +91,7 @@ public class ReceiveViewModel extends BaseViewModel {
     }
 
     public ReceiveViewModel(DataListener listener, Locale locale) {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
         mDataListener = listener;
 
         int btcUnitType = mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
@@ -140,10 +146,10 @@ public class ReceiveViewModel extends BaseViewModel {
         }
 
         // Legacy Addresses
-        List<LegacyAddress> legacyAddresses = mPayloadManager.getPayload().getLegacyAddresses();
+        List<LegacyAddress> legacyAddresses = mPayloadManager.getPayload().getLegacyAddressList();
         for (LegacyAddress legacyAddress : legacyAddresses) {
 
-            if (legacyAddress.getTag() == PayloadManager.ARCHIVED_ADDRESS)
+            if (legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS)
                 // Skip archived address
                 continue;
 
@@ -241,7 +247,7 @@ public class ReceiveViewModel extends BaseViewModel {
         try {
             int spinnerIndex = mAccountMap.inverse().get(account);
             int accountIndex = mSpinnerIndexMap.get(spinnerIndex);
-            return mPayloadManager.getReceiveAddress(accountIndex);
+            return mPayloadManager.getNextReceiveAddress(accountIndex);
         } catch (Exception e) {
             Log.e(TAG, "getV3ReceiveAddress: ", e);
             return null;
@@ -252,80 +258,88 @@ public class ReceiveViewModel extends BaseViewModel {
     public List<SendPaymentCodeData> getIntentDataList(String uri) {
         File file = getQrFile();
         FileOutputStream outputStream;
-        if (file != null) {
-            outputStream = getFileOutputStream(file);
+        outputStream = getFileOutputStream(file);
 
-            if (outputStream != null) {
-                Bitmap bitmap = mDataListener.getQrBitmap();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
+        if (outputStream != null) {
+            Bitmap bitmap = mDataListener.getQrBitmap();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
 
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "getIntentDataList: ", e);
-                    mDataListener.showToast(e.getMessage(), ToastCustom.TYPE_ERROR);
-                    return null;
-                }
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                Log.e(TAG, "getIntentDataList: ", e);
+                mDataListener.showToast(e.getMessage(), ToastCustom.TYPE_ERROR);
+                return null;
+            }
 
-                List<SendPaymentCodeData> dataList = new ArrayList<>();
+            List<SendPaymentCodeData> dataList = new ArrayList<>();
 
-                PackageManager packageManager = mAppUtil.getPackageManager();
+            PackageManager packageManager = mAppUtil.getPackageManager();
 
-                Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-                emailIntent.setType("application/image");
-                emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+            Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+            emailIntent.setType("application/image");
+            emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
 
-                Intent imageIntent = new Intent();
-                imageIntent.setAction(Intent.ACTION_SEND);
-                imageIntent.setType("image/png");
-                imageIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-
-                if (getFormattedEmailLink(uri) != null) {
-                    emailIntent.setData(getFormattedEmailLink(uri));
-                } else {
-                    mDataListener.showToast(mStringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
-                    return null;
-                }
-
-                HashMap<String, Pair<ResolveInfo, Intent>> intentHashMap = new HashMap<>();
-
-                List<ResolveInfo> emailInfos = packageManager.queryIntentActivities(emailIntent, 0);
-                addResolveInfoToMap(emailIntent, intentHashMap, emailInfos);
-
-                List<ResolveInfo> imageInfos = packageManager.queryIntentActivities(imageIntent, 0);
-                addResolveInfoToMap(imageIntent, intentHashMap, imageInfos);
-
-                SendPaymentCodeData d;
-
-                Iterator it = intentHashMap.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry mapItem = (Map.Entry) it.next();
-                    Pair<ResolveInfo, Intent> pair = (Pair<ResolveInfo, Intent>) mapItem.getValue();
-                    ResolveInfo resolveInfo = pair.first;
-                    String context = resolveInfo.activityInfo.packageName;
-                    String packageClassName = resolveInfo.activityInfo.name;
-                    CharSequence label = resolveInfo.loadLabel(packageManager);
-                    Drawable icon = resolveInfo.loadIcon(packageManager);
-
-                    Intent intent = pair.second;
-                    intent.setClassName(context, packageClassName);
-
-                    d = new SendPaymentCodeData(label.toString(), icon, intent);
-                    dataList.add(d);
-
-                    it.remove();
-                }
-
-                return dataList;
-
+            if (getFormattedEmailLink(uri) != null) {
+                emailIntent.setData(getFormattedEmailLink(uri));
             } else {
                 mDataListener.showToast(mStringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
                 return null;
             }
+
+            MimeTypeMap mime = MimeTypeMap.getSingleton();
+            String ext = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+            String type = mime.getMimeTypeFromExtension(ext);
+
+            Intent imageIntent = new Intent();
+            imageIntent.setAction(Intent.ACTION_SEND);
+            imageIntent.setType(type);
+
+            if (AndroidUtils.is23orHigher()) {
+                Uri uriForFile = FileProvider.getUriForFile(mApplicationContext, getAppUtil().getPackageName() + ".fileProvider", file);
+                imageIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                imageIntent.putExtra(Intent.EXTRA_STREAM, uriForFile);
+            } else {
+                imageIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                imageIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            }
+
+            HashMap<String, Pair<ResolveInfo, Intent>> intentHashMap = new HashMap<>();
+
+            List<ResolveInfo> emailInfos = packageManager.queryIntentActivities(emailIntent, 0);
+            addResolveInfoToMap(emailIntent, intentHashMap, emailInfos);
+
+            List<ResolveInfo> imageInfos = packageManager.queryIntentActivities(imageIntent, 0);
+            addResolveInfoToMap(imageIntent, intentHashMap, imageInfos);
+
+            SendPaymentCodeData d;
+
+            Iterator it = intentHashMap.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry mapItem = (Map.Entry) it.next();
+                Pair<ResolveInfo, Intent> pair = (Pair<ResolveInfo, Intent>) mapItem.getValue();
+                ResolveInfo resolveInfo = pair.first;
+                String context = resolveInfo.activityInfo.packageName;
+                String packageClassName = resolveInfo.activityInfo.name;
+                CharSequence label = resolveInfo.loadLabel(packageManager);
+                Drawable icon = resolveInfo.loadIcon(packageManager);
+
+                Intent intent = pair.second;
+                intent.setClassName(context, packageClassName);
+
+                d = new SendPaymentCodeData(label.toString(), icon, intent);
+                dataList.add(d);
+
+                it.remove();
+            }
+
+            return dataList;
+
         } else {
             mDataListener.showToast(mStringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
             return null;
         }
+
     }
 
     @Nullable
@@ -370,7 +384,7 @@ public class ReceiveViewModel extends BaseViewModel {
         return mAppUtil;
     }
 
-    public class SendPaymentCodeData {
+    public static class SendPaymentCodeData {
         private Drawable mLogo;
         private String mTitle;
         private Intent mIntent;

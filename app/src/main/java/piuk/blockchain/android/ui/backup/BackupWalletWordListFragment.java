@@ -6,6 +6,7 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,8 +37,10 @@ public class BackupWalletWordListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_backup_word_list, container, false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setElevation(0F);
+
+        ActionBar supportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && supportActionBar != null) {
+            supportActionBar.setElevation(0F);
         }
 
         Bundle bundle = getArguments();
@@ -54,7 +57,7 @@ public class BackupWalletWordListFragment extends Fragment {
         animExitToRight = AnimationUtils.loadAnimation(getActivity(), R.anim.exit_to_right);
         animEnterFromLeft = AnimationUtils.loadAnimation(getActivity(), R.anim.enter_from_left);
 
-        mnemonic = new BackupWalletUtil(getActivity()).getMnemonic(secondPassword);
+        mnemonic = new BackupWalletUtil().getMnemonic(secondPassword);
         if (currentWordIndex == mnemonic.length) {
             currentWordIndex = 0;
         }
@@ -65,6 +68,8 @@ public class BackupWalletWordListFragment extends Fragment {
 
             if (currentWordIndex >= 0) {
                 binding.previousWordAction.setVisibility(View.VISIBLE);
+            } else {
+                binding.previousWordAction.setVisibility(View.GONE);
             }
 
             if (currentWordIndex < mnemonic.length) {

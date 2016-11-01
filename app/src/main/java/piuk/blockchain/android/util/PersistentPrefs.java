@@ -25,6 +25,9 @@ interface PersistentPrefs {
     String KEY_SECURITY_TIME_ELAPSED = "security_time_elapsed";
     String KEY_SECURITY_TWO_FA_NEVER = "security_two_fa_never";
     String KEY_SECURITY_BACKUP_NEVER = "security_backup_never";
+    String KEY_ENCRYPTED_PIN_CODE = "encrypted_pin_code";
+    String KEY_FINGERPRINT_ENABLED = "fingerprint_enabled";
+    String KEY_RECEIVE_SHORTCUTS_ENABLED = "receive_shortcuts_enabled";
 
     String getValue(String name, String value);
 

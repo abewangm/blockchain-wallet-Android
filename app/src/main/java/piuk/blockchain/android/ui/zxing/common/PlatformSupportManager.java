@@ -59,7 +59,7 @@ public abstract class PlatformSupportManager<T> {
     }
     this.managedInterface = managedInterface;
     this.defaultImplementation = defaultImplementation;
-    this.implementations = new TreeMap<Integer,String>(Collections.reverseOrder());
+    this.implementations = new TreeMap<>(Collections.reverseOrder());
   }
   
   protected void addImplementationClass(int minVersion, String className) {
@@ -74,16 +74,9 @@ public abstract class PlatformSupportManager<T> {
           Class<? extends T> clazz = Class.forName(className).asSubclass(managedInterface);
           Log.i(TAG, "Using implementation " + clazz + " of " + managedInterface + " for SDK " + minVersion);
           return clazz.getConstructor().newInstance();
-        } catch (ClassNotFoundException cnfe) {
+        } catch (ClassNotFoundException | IllegalAccessException | NoSuchMethodException
+                | InstantiationException | InvocationTargetException cnfe) {
           Log.w(TAG, cnfe);
-        } catch (IllegalAccessException iae) {
-          Log.w(TAG, iae);
-        } catch (InstantiationException ie) {
-          Log.w(TAG, ie);
-        } catch (NoSuchMethodException nsme) {
-          Log.w(TAG, nsme);
-        } catch (InvocationTargetException ite) {
-          Log.w(TAG, ite);
         }
       }
     }

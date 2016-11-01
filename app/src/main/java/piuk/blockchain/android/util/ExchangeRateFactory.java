@@ -95,11 +95,11 @@ public class ExchangeRateFactory {
     }
 
     public String[] getCurrencies() {
-        return currencies;
+        return currencies.clone();
     }
 
     public String[] getCurrencyLabels() {
-        return currencyLabels;
+        return currencyLabels.clone();
     }
 
     /**

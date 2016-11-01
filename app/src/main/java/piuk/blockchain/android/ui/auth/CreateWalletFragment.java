@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.auth;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
@@ -24,25 +23,23 @@ import android.widget.TextView;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PasswordUtil;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentCreateWalletBinding;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.recover.RecoverFundsActivity;
 import piuk.blockchain.android.ui.settings.SettingsFragment;
+import piuk.blockchain.android.util.annotations.Thunk;
 
 public class CreateWalletFragment extends Fragment {
 
     public static final String KEY_INTENT_EMAIL = "intent_email";
     public static final String KEY_INTENT_PASSWORD = "intent_password";
 
-    private int pwStrength;
-    private int[] strengthVerdicts = {R.string.strength_weak, R.string.strength_medium, R.string.strength_normal, R.string.strength_strong};
-    private int[] strengthColors = {R.drawable.progress_red, R.drawable.progress_orange, R.drawable.progress_blue, R.drawable.progress_green};
+    @Thunk int pwStrength;
+    @Thunk final int[] strengthVerdicts = {R.string.strength_weak, R.string.strength_medium, R.string.strength_normal, R.string.strength_strong};
+    @Thunk final int[] strengthColors = {R.drawable.progress_red, R.drawable.progress_orange, R.drawable.progress_blue, R.drawable.progress_green};
 
-    private FragmentCreateWalletBinding binding;
+    @Thunk FragmentCreateWalletBinding binding;
     private boolean mRecoveringFunds = false;
 
     @Override
@@ -77,26 +74,21 @@ public class CreateWalletFragment extends Fragment {
         });
 
         binding.walletPass.addTextChangedListener(new TextWatcher() {
-            private final long DELAY = 200; // small delay before pass entropy calc - increases performance when user types fast.
-            private Timer timer = new Timer();
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                // No-op
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // No-op
             }
 
             @Override
             public void afterTextChanged(final Editable editable) {
-                timer.cancel();
-                timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-
+                binding.emailAddress.postDelayed(() -> {
+                    if (getActivity() != null && !getActivity().isFinishing()) {
                         setEntropyMeterVisible(View.VISIBLE);
 
                         final String pw = editable.toString();
@@ -116,60 +108,48 @@ public class CreateWalletFragment extends Fragment {
                         setProgress(pwStrengthLevel, pwStrength);
                     }
 
-                    private void setProgress(final int pwStrengthLevel, final int scorePerc) {
+                }, 200);
+            }
 
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                binding.entropyContainer.passStrengthBar.setProgress(scorePerc);
-                                binding.entropyContainer.passStrengthBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), strengthColors[pwStrengthLevel]));
-                                binding.entropyContainer.passStrengthVerdict.setText(getResources().getString(strengthVerdicts[pwStrengthLevel]));
-                            }
-                        });
-                    }
-
-                }, DELAY);
+            private void setProgress(final int pwStrengthLevel, final int scorePerc) {
+                binding.entropyContainer.passStrengthBar.setProgress(scorePerc);
+                binding.entropyContainer.passStrengthBar.setProgressDrawable(
+                        ContextCompat.getDrawable(getActivity(), strengthColors[pwStrengthLevel]));
+                binding.entropyContainer.passStrengthVerdict.setText(getResources().getString(strengthVerdicts[pwStrengthLevel]));
             }
         });
 
-        binding.commandNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        binding.commandNext.setOnClickListener(v -> {
 
-                final String em = binding.emailAddress.getText().toString().trim();
-                final String pw1 = binding.walletPass.getText().toString();
-                final String pw2 = binding.walletPassConfrirm.getText().toString();
+            final String em = binding.emailAddress.getText().toString().trim();
+            final String pw1 = binding.walletPass.getText().toString();
+            final String pw2 = binding.walletPassConfrirm.getText().toString();
 
-                if (!FormatsUtil.getInstance().isValidEmailAddress(em)) {
-                    ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                } else if (pw1.length() < 4) {
-                    ToastCustom.makeText(getActivity(), getString(R.string.invalid_password_too_short), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                } else if (pw1.length() > 255) {
-                    ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                } else if (!pw1.equals(pw2)) {
-                    ToastCustom.makeText(getActivity(), getString(R.string.password_mismatch_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                } else if (pwStrength < 50) {
+            if (!FormatsUtil.getInstance().isValidEmailAddress(em)) {
+                ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            } else if (pw1.length() < 4) {
+                ToastCustom.makeText(getActivity(), getString(R.string.invalid_password_too_short), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            } else if (pw1.length() > 255) {
+                ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            } else if (!pw1.equals(pw2)) {
+                ToastCustom.makeText(getActivity(), getString(R.string.password_mismatch_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            } else if (pwStrength < 50) {
 
-                    new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                            .setTitle(R.string.app_name)
-                            .setMessage(R.string.weak_password)
-                            .setCancelable(false)
-                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    binding.walletPass.setText("");
-                                    binding.walletPassConfrirm.setText("");
-                                    binding.walletPass.requestFocus();
-                                }
-                            }).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            hideKeyboard();
-                            getActivity().startActivity(getNextActivityIntent(em, pw1));
-                        }
-                    }).show();
-                } else {
+                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                        .setTitle(R.string.app_name)
+                        .setMessage(R.string.weak_password)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.yes, (dialog, whichButton) -> {
+                            binding.walletPass.setText("");
+                            binding.walletPassConfrirm.setText("");
+                            binding.walletPass.requestFocus();
+                        }).setNegativeButton(R.string.no, (dialog, whichButton) -> {
                     hideKeyboard();
                     getActivity().startActivity(getNextActivityIntent(em, pw1));
-                }
+                }).show();
+            } else {
+                hideKeyboard();
+                getActivity().startActivity(getNextActivityIntent(em, pw1));
             }
         });
 
@@ -177,7 +157,7 @@ public class CreateWalletFragment extends Fragment {
         String text2 = getString(R.string.blockchain_tos);
 
         Spannable spannable = new SpannableString(text + text2);
-        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.blockchain_blue)),
+        spannable.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getActivity(), R.color.blockchain_blue)),
                 text.length(), text.length() + text2.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         binding.tos.setText(spannable, TextView.BufferType.SPANNABLE);
 
@@ -206,7 +186,8 @@ public class CreateWalletFragment extends Fragment {
         }
     }
 
-    private void setEntropyMeterVisible(final int visible) {
-        getActivity().runOnUiThread(() -> binding.entropyContainer.entropyMeter.setVisibility(visible));
+    @Thunk
+    void setEntropyMeterVisible(final int visible) {
+        binding.entropyContainer.entropyMeter.setVisibility(visible);
     }
 }

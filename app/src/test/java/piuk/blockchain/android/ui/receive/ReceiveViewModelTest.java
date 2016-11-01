@@ -98,7 +98,7 @@ public class ReceiveViewModelTest {
 
         List<LegacyAddress> legacyAddresses = new ArrayList<>();
         LegacyAddress legacy0 = new LegacyAddress();
-        legacy0.setTag(PayloadManager.ARCHIVED_ADDRESS);
+        legacy0.setTag(LegacyAddress.ARCHIVED_ADDRESS);
         LegacyAddress legacy1 = new LegacyAddress();
         legacy1.setWatchOnly(true);
         LegacyAddress legacy2 = new LegacyAddress();
@@ -111,7 +111,7 @@ public class ReceiveViewModelTest {
         when(mockPayload.isUpgraded()).thenReturn(true);
         when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
         when(mockHdWallet.getAccounts()).thenReturn(accounts);
-        when(mockPayload.getLegacyAddresses()).thenReturn(legacyAddresses);
+        when(mockPayload.getLegacyAddressList()).thenReturn(legacyAddresses);
         // Act
         mSubject.onViewReady();
         // Assert
@@ -309,7 +309,7 @@ public class ReceiveViewModelTest {
         when(mockHdWallet.getAccounts()).thenReturn(accounts);
 
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mPayloadManager.getReceiveAddress(anyInt())).thenReturn("test address");
+        when(mPayloadManager.getNextReceiveAddress(anyInt())).thenReturn("test address");
         // Act
         mSubject.onViewReady(); // Update account list first
         String value = mSubject.getV3ReceiveAddress(account2);
@@ -335,7 +335,7 @@ public class ReceiveViewModelTest {
         when(mockHdWallet.getAccounts()).thenReturn(accounts);
 
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mPayloadManager.getReceiveAddress(anyInt())).thenThrow(new RuntimeException());
+        when(mPayloadManager.getNextReceiveAddress(anyInt())).thenThrow(new RuntimeException());
         // Act
         mSubject.onViewReady(); // Update account list first
         String value = mSubject.getV3ReceiveAddress(account2);
@@ -417,7 +417,7 @@ public class ReceiveViewModelTest {
         }
 
         @Override
-        protected WalletAccountHelper provideWalletAccountHelper() {
+        protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager, PrefsUtil prefsUtil, StringUtils stringUtils, ExchangeRateFactory exchangeRateFactory) {
             return mWalletAccountHelper;
         }
     }

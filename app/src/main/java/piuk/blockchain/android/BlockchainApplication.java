@@ -11,8 +11,14 @@ import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
+import info.blockchain.api.PinStore;
+
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.connectivity.ConnectionStateMonitor;
+import piuk.blockchain.android.data.services.PinStoreService;
 import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
 import rx.plugins.RxJavaHooks;
@@ -40,14 +46,17 @@ public class BlockchainApplication extends Application {
         super.onCreate();
         Injector.getInstance().init(this);
 
-        if (!BuildConfig.DEBUG) {
-            new LoggingExceptionHandler();
-        }
+        new LoggingExceptionHandler();
 
         RxJavaHooks.enableAssemblyTracking();
         RxJavaHooks.setOnError(throwable -> Log.e(RX_ERROR_TAG, throwable.getMessage(), throwable));
 
-        AccessState.getInstance().initAccessState(this);
+        AccessState.getInstance().initAccessState(this,
+                new PrefsUtil(this),
+                new PinStoreService(new PinStore()),
+                new AppUtil(this));
+
+        new ConnectionStateMonitor(this).enable();
 
         checkSecurityProviderAndPatchIfNeeded();
 

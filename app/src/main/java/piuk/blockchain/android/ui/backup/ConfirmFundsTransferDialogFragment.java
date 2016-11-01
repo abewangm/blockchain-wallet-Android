@@ -26,9 +26,9 @@ import info.blockchain.wallet.util.CharSequenceX;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.home.BalanceFragment;
 import piuk.blockchain.android.ui.send.AddressAdapter;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -51,6 +51,8 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
     private AppCompatButton mTransferButton;
     // Layouts
     private RelativeLayout mLoadingLayout;
+    // Dismiss Listener
+    private OnDismissListener mDismissListener;
 
     public static ConfirmFundsTransferDialogFragment newInstance() {
         ConfirmFundsTransferDialogFragment fragment = new ConfirmFundsTransferDialogFragment();
@@ -71,10 +73,12 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Window window = getDialog().getWindow();
-        WindowManager.LayoutParams params = window.getAttributes();
-        params.width = WindowManager.LayoutParams.MATCH_PARENT;
-        params.height = WindowManager.LayoutParams.MATCH_PARENT;
-        window.setAttributes(params);
+        if (window != null) {
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.height = WindowManager.LayoutParams.MATCH_PARENT;
+            window.setAttributes(params);
+        }
         getDialog().setCancelable(true);
     }
 
@@ -122,6 +126,8 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     mToSpinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
+                    //Deprecated, but necessary to prevent issues on < 16
+                    //noinspection deprecation
                     mToSpinner.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
 
@@ -212,6 +218,7 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
     public void dismissDialog() {
         Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+        if (mDismissListener != null) mDismissListener.onDismiss();
         dismiss();
     }
 
@@ -223,6 +230,17 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
     @Override
     public void onDestroy() {
         super.onDestroy();
+        dismissDialog();
         mViewModel.destroy();
+    }
+
+    public void setOnDismissListener(OnDismissListener listener) {
+        mDismissListener = listener;
+    }
+
+    public interface OnDismissListener {
+
+        void onDismiss();
+
     }
 }
