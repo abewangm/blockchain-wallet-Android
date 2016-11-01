@@ -120,7 +120,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             isBTC = false;
         }
 
-        balanceBarHeight = (int) ViewUtils.convertDpToPixel(96, getActivity());
+        balanceBarHeight = (int) getResources().getDimension(R.dimen.balance_bar_height);
 
         setupViews();
 
