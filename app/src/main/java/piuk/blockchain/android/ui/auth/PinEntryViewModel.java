@@ -399,16 +399,24 @@ public class PinEntryViewModel extends BaseViewModel {
                         }
                         mPrefsUtil.setValue(PrefsUtil.KEY_PIN_FAILS, 0);
                     } else {
-                        if (mValidatingPinForResult) {
-                            incrementFailureCount();
-                        } else {
-                            incrementFailureCountAndRestart();
-                        }
+                        handleValidateFailure();
                     }
                 }, throwable -> {
-                    showErrorToast(R.string.unexpected_error);
-                    mDataListener.restartPageAndClearTop();
+                    if (throwable instanceof InvalidCredentialsException) {
+                        handleValidateFailure();
+                    } else {
+                        showErrorToast(R.string.unexpected_error);
+                        mDataListener.restartPageAndClearTop();
+                    }
                 });
+    }
+
+    private void handleValidateFailure() {
+        if (mValidatingPinForResult) {
+            incrementFailureCount();
+        } else {
+            incrementFailureCountAndRestart();
+        }
     }
 
     private void incrementFailureCount() {

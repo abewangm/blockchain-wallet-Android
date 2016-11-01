@@ -1,6 +1,7 @@
 package piuk.blockchain.android.data.services;
 
 import info.blockchain.api.PinStore;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 
 import org.json.JSONObject;
 import org.junit.Before;
@@ -66,6 +67,30 @@ public class PinStoreServiceTest extends RxTest {
         subscriber.assertCompleted();
         subscriber.assertNoErrors();
         assertEquals(value, subscriber.getOnNextEvents().get(0));
+    }
+
+    @Test
+    public void validateAccessException() throws Exception {
+        // Arrange
+        TestSubscriber<JSONObject> subscriber = new TestSubscriber<>();
+        when(pinStore.validateAccess(anyString(), anyString())).thenThrow(Exception.class);
+        // Act
+        subject.validateAccess("", "").toBlocking().subscribe(subscriber);
+        // Assert
+        subscriber.assertNotCompleted();
+        subscriber.assertError(Throwable.class);
+    }
+
+    @Test
+    public void validateAccessInvalidCredentials() throws Exception {
+        // Arrange
+        TestSubscriber<JSONObject> subscriber = new TestSubscriber<>();
+        when(pinStore.validateAccess(anyString(), anyString())).thenThrow(new Exception("Incorrect PIN"));
+        // Act
+        subject.validateAccess("", "").toBlocking().subscribe(subscriber);
+        // Assert
+        subscriber.assertNotCompleted();
+        subscriber.assertError(InvalidCredentialsException.class);
     }
 
     private static final String SUCCESS_RESPONSE = "{\n" +
