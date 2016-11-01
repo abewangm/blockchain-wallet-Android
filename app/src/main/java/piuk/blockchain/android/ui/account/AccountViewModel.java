@@ -236,7 +236,10 @@ public class AccountViewModel extends BaseViewModel {
     }
 
     private void importWatchOnlyAddress(String address) {
-        if (!FormatsUtil.getInstance().isValidBitcoinAddress(correctAddressFormatting(address))) {
+        
+        address = correctAddressFormatting(address);
+
+        if (!FormatsUtil.getInstance().isValidBitcoinAddress(address)) {
             dataListener.showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
         } else if (payloadManager.getPayload().getLegacyAddressStringList().contains(address)) {
             dataListener.showToast(R.string.address_already_in_wallet, ToastCustom.TYPE_ERROR);
