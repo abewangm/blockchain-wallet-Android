@@ -75,7 +75,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public int balanceBarHeight;
     private BalanceHeaderAdapter accountsAdapter;
     @Thunk Communicator comm;
-    private double btc_fx = 319.13;//TODO remove hard coded when refactoring
     @Thunk boolean isBTC = true;
     // Accounts list
     @Thunk AppCompatSpinner accountSpinner;
@@ -457,7 +456,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             }
         }));
 
-        transactionAdapter = new BalanceListAdapter(viewModel.getTransactionList(), prefsUtil, viewModel.getMonetaryUtil(), dateUtil, btc_fx, isBTC);
+        String fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
+
+        transactionAdapter = new BalanceListAdapter(viewModel.getTransactionList(), prefsUtil, viewModel.getMonetaryUtil(), dateUtil, lastPrice, isBTC);
         transactionAdapter.setTxListClickListener(new BalanceListAdapter.TxListClickListener() {
             @Override
             public void onRowClicked(int position) {
@@ -574,10 +576,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void onRefreshBalanceAndTransactions() {
-
-        String strFiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        btc_fx = ExchangeRateFactory.getInstance().getLastPrice(strFiat);
-
         // Notify adapter of change, let DiffUtil work out what needs changing
         List<Tx> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
