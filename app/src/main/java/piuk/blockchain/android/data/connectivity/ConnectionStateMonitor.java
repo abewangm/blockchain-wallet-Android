@@ -1,11 +1,13 @@
 package piuk.blockchain.android.data.connectivity;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 
 import piuk.blockchain.android.data.rxjava.IgnorableSubscriber;
@@ -13,12 +15,13 @@ import piuk.blockchain.android.ui.balance.BalanceFragment;
 import rx.Completable;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class ConnectionStateMonitor extends ConnectivityManager.NetworkCallback {
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+class ConnectionStateMonitor extends ConnectivityManager.NetworkCallback {
 
     private final NetworkRequest networkRequest;
     private Context context;
 
-    public ConnectionStateMonitor(Context context) {
+    ConnectionStateMonitor(Context context) {
         this.context = context;
         networkRequest = new NetworkRequest.Builder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
