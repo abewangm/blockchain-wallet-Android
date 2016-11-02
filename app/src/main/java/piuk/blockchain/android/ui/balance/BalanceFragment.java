@@ -175,6 +175,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 setToolbarOffset(distance);
             }
         });
+
+        if (transactionAdapter != null) {
+            transactionAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
