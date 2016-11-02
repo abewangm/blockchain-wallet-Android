@@ -34,7 +34,6 @@ public class SettingsViewModel extends BaseViewModel {
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected AccessState accessState;
     @VisibleForTesting Settings settings;
-    @VisibleForTesting boolean show2FaAfterPhoneVerified = true;
     private DataListener dataListener;
     private MonetaryUtil monetaryUtil;
 
@@ -353,22 +352,6 @@ public class SettingsViewModel extends BaseViewModel {
     }
 
     /**
-     * @return flag to show the 2FA dialog after verifying number
-     */
-    boolean show2FaAfterPhoneVerified() {
-        return show2FaAfterPhoneVerified;
-    }
-
-    /**
-     * Sets the flag to show the 2FA dialog after verifying number
-     *
-     * @param show whether or not to show the 2FA dialog
-     */
-    void setShow2FaAfterPhoneVerified(boolean show) {
-        show2FaAfterPhoneVerified = show;
-    }
-
-    /**
      * Write key/value to {@link android.content.SharedPreferences}
      *
      * @param key   The key under which to store the data
@@ -433,8 +416,7 @@ public class SettingsViewModel extends BaseViewModel {
                                     throw Exceptions.propagate(new Throwable("Update SMS failed"));
                                 }
                             }, throwable -> {
-                                dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR);
-                                show2FaAfterPhoneVerified = false;
+                                showUpdateError();
                             }));
         }
     }
@@ -445,19 +427,24 @@ public class SettingsViewModel extends BaseViewModel {
      * @param code The verification code which has been sent to the user
      */
     void verifySms(@NonNull String code) {
+        dataListener.showProgressDialog(R.string.please_wait);
         mCompositeSubscription.add(
                 settingsDataManager.verifySms(code)
+                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(success -> {
                             if (success) {
                                 dataListener.showDialogSmsVerified();
                                 updateUi();
                             } else {
-                                throw Exceptions.propagate(new Throwable("Verify SMS failed"));
+                                showUpdateError();
                             }
                         }, throwable -> {
-                            dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR);
-                            show2FaAfterPhoneVerified = false;
+                            showUpdateError();
                         }));
+    }
+
+    private void showUpdateError() {
+        dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR);
     }
 
     /**
@@ -562,11 +549,15 @@ public class SettingsViewModel extends BaseViewModel {
 
                                 dataListener.goToPinEntryPage();
                             } else {
-                                throw Exceptions.propagate(new Throwable("CharsequenceX was null"));
+                                showInvalidPin();
                             }
                         }, throwable -> {
-                            dataListener.showToast(R.string.invalid_pin, ToastCustom.TYPE_ERROR);
+                            showInvalidPin();
                         }));
+    }
+
+    private void showInvalidPin() {
+        dataListener.showToast(R.string.invalid_pin, ToastCustom.TYPE_ERROR);
     }
 
     /**
@@ -593,13 +584,17 @@ public class SettingsViewModel extends BaseViewModel {
                             if (success) {
                                 dataListener.showToast(R.string.password_changed, ToastCustom.TYPE_OK);
                             } else {
-                                throw Exceptions.propagate(new Throwable("Update password failed"));
+                                showUpdatePasswordFailed(fallbackPassword);
                             }
                         }, throwable -> {
-                            payloadManager.setTempPassword(fallbackPassword);
-
-                            dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-                            dataListener.showToast(R.string.password_unchanged, ToastCustom.TYPE_ERROR);
+                            showUpdatePasswordFailed(fallbackPassword);
                         }));
+    }
+
+    private void showUpdatePasswordFailed(@NonNull CharSequenceX fallbackPassword) {
+        payloadManager.setTempPassword(fallbackPassword);
+
+        dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
+        dataListener.showToast(R.string.password_unchanged, ToastCustom.TYPE_ERROR);
     }
 }

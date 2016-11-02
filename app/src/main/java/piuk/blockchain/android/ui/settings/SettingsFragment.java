@@ -369,9 +369,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(success)
                 .setMessage(R.string.sms_verified)
-                .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) -> {
-                    if (viewModel.show2FaAfterPhoneVerified()) showDialogTwoFA();
-                })
+                .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) -> showDialogTwoFA())
                 .show();
     }
 
@@ -515,7 +513,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
             CountryPicker picker = CountryPicker.newInstance(getString(R.string.select_country));
             Country country = picker.getUserCountryInfo(getActivity());
-            setCountryFlag(countryTextView, country.getDialCode(), country.getFlag());
+            if (country.getDialCode().equals("+93")) {
+                setCountryFlag(countryTextView, "+1", R.drawable.flag_us);
+            } else {
+                setCountryFlag(countryTextView, country.getDialCode(), country.getFlag());
+            }
 
             countryTextView.setOnClickListener(v -> {
                 picker.show(getFragmentManager(), "COUNTRY_PICKER");
@@ -536,7 +538,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                     .setView(smsPickerView)
                     .setCancelable(false)
                     .setPositiveButton(R.string.update, null)
-                    .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> viewModel.setShow2FaAfterPhoneVerified(false));
+                    .setNegativeButton(android.R.string.cancel, null);
 
             if (!viewModel.isSmsVerified() && !viewModel.getSms().isEmpty()) {
                 alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) -> showDialogVerifySms());
@@ -621,7 +623,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
                 .setCancelable(false)
                 .setPositiveButton(R.string.verify, null)
-                .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> viewModel.setShow2FaAfterPhoneVerified(false))
+                .setNegativeButton(android.R.string.cancel, null)
                 .setNeutralButton(R.string.resend, (dialogInterface, i) -> viewModel.updateSms(viewModel.getSms()))
                 .create();
 
@@ -632,6 +634,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 if (codeS.length() > 0) {
                     viewModel.verifySms(codeS);
                     dialog.dismiss();
+                    ViewUtils.hideKeyboard(getActivity());
                 }
             });
         });
@@ -818,10 +821,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     private void showDialogTwoFA() {
         if (!viewModel.isSmsVerified()) {
             twoStepVerificationPref.setChecked(false);
-            viewModel.setShow2FaAfterPhoneVerified(true);
             showDialogMobile();
         } else {
-            viewModel.setShow2FaAfterPhoneVerified(false);
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setTitle(R.string.two_fa)
                     .setMessage(R.string.two_fa_summary)
