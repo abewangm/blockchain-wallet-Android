@@ -66,6 +66,8 @@ public class MainViewModel extends BaseViewModel {
         void kickToLauncherPage();
 
         void showEmailVerificationDialog(String email);
+
+        void showAddEmailDialog();
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -93,7 +95,11 @@ public class MainViewModel extends BaseViewModel {
                                 if (!settings.isEmailVerified()) {
                                     appUtil.setNewlyCreated(false);
                                     String email = settings.getEmail();
-                                    dataListener.showEmailVerificationDialog(email);
+                                    if (email != null && !email.isEmpty()) {
+                                        dataListener.showEmailVerificationDialog(email);
+                                    } else {
+                                        dataListener.showAddEmailDialog();
+                                    }
                                 }
                             }, Throwable::printStackTrace));
         }

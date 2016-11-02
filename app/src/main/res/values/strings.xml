@@ -489,6 +489,9 @@
     <!-- SECURITY CENTRE -->
     <string name="security_centre_email_title">Check your email</string>
     <string name="security_centre_email_message">We sent an email to %1$s. Look for an email from Blockchain and click the verification link to complete your wallet setup.</string>
+    <string name="security_centre_add_email_title">Email Address</string>
+    <string name="security_centre_add_email_message">Add and verify your emial address to receive alerts, prevent suspicious activity, and recover your Wallet ID if forgotten.</string>
+    <string name="security_centre_add_email_positive_button">Add</string>
     <string name="security_centre_backup_title">Backup your funds</string>
     <string name="security_centre_backup_message">For your security, we do not keep any passwords on file. Backup your wallet to ensure your bitcoins are safe in case you lose your password. </string>
     <string name="security_centre_backup_positive_button">Backup</string>

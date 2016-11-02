@@ -66,6 +66,7 @@ import static piuk.blockchain.android.ui.auth.PinEntryActivity.REQUEST_CODE_VALI
 public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceClickListener, SettingsViewModel.DataListener {
 
     public static final String EXTRA_SHOW_TWO_FA_DIALOG = "show_two_fa_dialog";
+    public static final String EXTRA_SHOW_ADD_EMAIL_DIALOG = "show_add_email_dialog";
     public static final String URL_TOS_POLICY = "https://blockchain.com/terms";
     public static final String URL_PRIVACY_POLICY = "https://blockchain.com/privacy";
     public static final int REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT = 1984;
@@ -187,6 +188,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         // Check if referred from Security Centre dialog
         if (getActivity().getIntent() != null && getActivity().getIntent().hasExtra(EXTRA_SHOW_TWO_FA_DIALOG)) {
             showDialogTwoFA();
+        } else if (getActivity().getIntent() != null && getActivity().getIntent().hasExtra(EXTRA_SHOW_ADD_EMAIL_DIALOG)) {
+            showDialogEmail();
         }
     }
 
