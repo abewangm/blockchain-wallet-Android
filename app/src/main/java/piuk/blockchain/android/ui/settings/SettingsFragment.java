@@ -541,7 +541,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                     .setNegativeButton(android.R.string.cancel, null);
 
             if (!viewModel.isSmsVerified() && !viewModel.getSms().isEmpty()) {
-                alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) -> showDialogVerifySms());
+                alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) -> {
+                    viewModel.updateSms(viewModel.getSms());
+                });
             }
 
             AlertDialog dialog = alertDialogSmsBuilder.create();
