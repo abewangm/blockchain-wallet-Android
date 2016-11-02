@@ -681,29 +681,31 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogEmailNotifications() {
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+        AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.email_notifications)
                 .setMessage(R.string.email_notifications_summary)
-                .setCancelable(false)
                 .setPositiveButton(R.string.enable, (dialogInterface, i) ->
                         viewModel.updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, true))
                 .setNegativeButton(R.string.disable, (dialogInterface, i) ->
                         viewModel.updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, false))
-                .create()
-                .show();
+                .create();
+
+        dialog.setOnCancelListener(dialogInterface -> emailNotificationPref.setChecked(!emailNotificationPref.isChecked()));
+        dialog.show();
     }
 
     private void showDialogSmsNotifications() {
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+        AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.sms_notifications)
                 .setMessage(R.string.sms_notifications_summary)
-                .setCancelable(false)
                 .setPositiveButton(R.string.enable, (dialogInterface, i) ->
                         viewModel.updateNotification(Settings.NOTIFICATION_TYPE_SMS, true))
                 .setNegativeButton(R.string.disable, (dialogInterface, i) ->
                         viewModel.updateNotification(Settings.NOTIFICATION_TYPE_SMS, false))
-                .create()
-                .show();
+                .create();
+
+        dialog.setOnCancelListener(dialogInterface -> smsNotificationPref.setChecked(!smsNotificationPref.isChecked()));
+        dialog.show();
     }
 
     private void showDialogChangePasswordWarning() {
