@@ -59,6 +59,7 @@ import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.util.DateUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.ListUtil;
+import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -69,6 +70,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public static final String ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH";
     public static final String KEY_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     public static final String KEY_TRANSACTION_LIST_POSITION = "transaction_list_position";
+    public static final String KEY_IS_BTC = "is_btc";
     private static final int SHOW_BTC = 1;
     private static final int SHOW_FIAT = 2;
     private static int BALANCE_DISPLAY_STATE = SHOW_BTC;
@@ -387,6 +389,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     private void sendClicked() {
         Intent intent = new Intent(getActivity(), SendActivity.class);
         intent.putExtra(KEY_SELECTED_ACCOUNT_POSITION, getSelectedAccountPosition());
+        intent.putExtra(KEY_IS_BTC, isBTC);
         startActivity(intent);
         binding.fab.collapse();
     }
@@ -394,6 +397,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     private void receiveClicked() {
         Intent intent = new Intent(getActivity(), ReceiveActivity.class);
         intent.putExtra(KEY_SELECTED_ACCOUNT_POSITION, getSelectedAccountPosition());
+        intent.putExtra(KEY_IS_BTC, isBTC);
         startActivity(intent);
         binding.fab.collapse();
     }
@@ -439,7 +443,17 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         accountSpinner = binding.accountsSpinner;
         viewModel.updateAccountList();
-        accountsAdapter = new BalanceHeaderAdapter(context, R.layout.spinner_balance_header, viewModel.getActiveAccountAndAddressList());
+
+        String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        accountsAdapter = new BalanceHeaderAdapter(
+                context,
+                R.layout.spinner_balance_header,
+                viewModel.getActiveAccountAndAddressList(),
+                isBTC,
+                new MonetaryUtil(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
+                fiat,
+                ExchangeRateFactory.getInstance().getLastPrice(fiat));
+
         accountsAdapter.setDropDownViewResource(R.layout.item_balance_account_dropdown);
         accountSpinner.setAdapter(accountsAdapter);
         accountSpinner.setOnTouchListener((v, event) -> event.getAction() == MotionEvent.ACTION_UP && ((MainActivity) getActivity()).getDrawerOpen());
@@ -501,7 +515,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             binding.fab.startAnimation(bounce);
         });
 
-        binding.swipeContainer.setProgressViewEndTarget(false, (int) (getResources().getDisplayMetrics().density * (72 + 20)));
+        binding.swipeContainer.setProgressViewEndTarget(false, (int) ViewUtils.convertDpToPixel(72 + 20, getActivity()));
         binding.swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -597,6 +611,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 72, getResources().getDisplayMetrics());
             binding.balance1.setPadding((int) px, 0, 0, 0);
         }
+
+        accountsAdapter.notifyBtcChanged(isBTC);
     }
 
     @Override

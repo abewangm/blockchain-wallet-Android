@@ -56,8 +56,8 @@ public class AccountEditDataManager {
                     // To default account
                     int defaultIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
                     Account defaultAccount = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultIndex);
-                    pendingTransaction.sendingObject = new ItemAccount(legacyAddress.getLabel(), sweepBundle.getSweepAmount().toString(), "", legacyAddress);
-                    pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", defaultAccount);
+                    pendingTransaction.sendingObject = new ItemAccount(legacyAddress.getLabel(), sweepBundle.getSweepAmount().toString(), "", sweepBundle.getSweepAmount().longValue(), legacyAddress);
+                    pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", sweepBundle.getSweepAmount().longValue(), defaultAccount);
                     pendingTransaction.unspentOutputBundle = payment.getSpendableCoins(unspentOutputs, sweepBundle.getSweepAmount(), suggestedFeePerKb);
                     pendingTransaction.bigIntAmount = sweepBundle.getSweepAmount();
                     pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee();

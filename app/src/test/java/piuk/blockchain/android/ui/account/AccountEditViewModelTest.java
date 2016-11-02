@@ -264,7 +264,7 @@ public class AccountEditViewModelTest {
         pendingTransaction.bigIntAmount = new BigInteger("1");
         pendingTransaction.bigIntFee = new BigInteger("1");
         LegacyAddress legacyAddress = new LegacyAddress();
-        pendingTransaction.sendingObject = new ItemAccount("", "", "", legacyAddress);
+        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress);
         Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
         when(payloadManager.getPayload()).thenReturn(mockPayload);
@@ -293,7 +293,7 @@ public class AccountEditViewModelTest {
         pendingTransaction.bigIntAmount = new BigInteger("1");
         pendingTransaction.bigIntFee = new BigInteger("1");
         LegacyAddress legacyAddress = new LegacyAddress();
-        pendingTransaction.sendingObject = new ItemAccount("", "", "", legacyAddress);
+        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress);
         Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
         when(payloadManager.getPayload()).thenReturn(mockPayload);
@@ -319,7 +319,7 @@ public class AccountEditViewModelTest {
         pendingTransaction.bigIntAmount = new BigInteger("1");
         pendingTransaction.bigIntFee = new BigInteger("1");
         LegacyAddress legacyAddress = new LegacyAddress();
-        pendingTransaction.sendingObject = new ItemAccount("", "", "", legacyAddress);
+        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress);
         Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
         when(mockPayload.isDoubleEncrypted()).thenReturn(true);
         when(payloadManager.getPayload()).thenReturn(mockPayload);

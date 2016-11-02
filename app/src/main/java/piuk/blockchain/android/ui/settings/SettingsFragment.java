@@ -21,6 +21,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceCategory;
 import android.support.v7.preference.PreferenceFragmentCompat;
+import android.support.v7.preference.PreferenceScreen;
 import android.support.v7.preference.SwitchPreferenceCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
@@ -110,6 +111,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     @SuppressLint("NewApi")
     @Override
     public void setUpUi() {
+        PreferenceScreen prefScreen = getPreferenceScreen();
+        if (prefScreen != null) prefScreen.removeAll();
+
         addPreferencesFromResource(R.xml.settings);
 
         // Profile
