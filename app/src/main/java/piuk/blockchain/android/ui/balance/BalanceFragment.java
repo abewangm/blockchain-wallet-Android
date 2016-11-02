@@ -594,7 +594,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         List<Tx> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
         transactionAdapter.onTransactionsUpdated(newTransactions);
-        binding.rvTransactions.scrollToPosition(0);
         binding.balanceLayout.post(() -> setToolbarOffset(0));
 
         //Display help text to user if no transactionList on selected account/address
