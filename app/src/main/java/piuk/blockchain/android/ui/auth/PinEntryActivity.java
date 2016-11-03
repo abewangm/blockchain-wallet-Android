@@ -358,6 +358,11 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
             mFingerprintDialog.dismiss();
             mFingerprintDialog = null;
         }
+
+        // Hide if fingerprint unlock has become unavailable
+        if (!mViewModel.getIfShouldShowFingerprintLogin()) {
+            mBinding.fingerprintLogo.setVisibility(View.GONE);
+        }
     }
 
     private class ClearPinNumberRunnable implements Runnable {

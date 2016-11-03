@@ -490,7 +490,7 @@
     <string name="security_centre_email_title">Check your email</string>
     <string name="security_centre_email_message">We sent an email to %1$s. Look for an email from Blockchain and click the verification link to complete your wallet setup.</string>
     <string name="security_centre_add_email_title">Email Address</string>
-    <string name="security_centre_add_email_message">Add and verify your emial address to receive alerts, prevent suspicious activity, and recover your Wallet ID if forgotten.</string>
+    <string name="security_centre_add_email_message">Add and verify your email address to receive alerts, prevent suspicious activity, and recover your Wallet ID if forgotten.</string>
     <string name="security_centre_add_email_positive_button">Add</string>
     <string name="security_centre_backup_title">Backup your funds</string>
     <string name="security_centre_backup_message">For your security, we do not keep any passwords on file. Backup your wallet to ensure your bitcoins are safe in case you lose your password. </string>
@@ -528,7 +528,8 @@
     <string name="fingerprint_no_fingerprints_added">No fingerprints have been registered to this device yet. Do you want to register a fingerprint now?</string>
     <string name="fingerprint_key_invalidated_description">Either the fingerprints stored on this device have changed or the keyguard has been disabled</string>
     <string name="fingerprint_key_invalidated_brief">Keys invalidated, PIN code required</string>
-    <string name="fingerprint_fatal_error_description">There was a problem setting up fingerprint login. Please try again later</string>
+    <string name="fingerprint_fatal_error_register_description">There have been too many failed attempts in the last 30 minutes. Please attempt setup again later.</string>
+    <string name="fingerprint_fatal_error_authenticate_description">There have been too many failed attempts. Please log in using your PIN instead.</string>
     <string name="fingerprint_fatal_error_brief">Unexpected error</string>
 
     <!-- LAUNCHER SHORTCUTS -->
