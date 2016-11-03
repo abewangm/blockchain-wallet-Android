@@ -159,19 +159,23 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         if (ContextCompat.checkSelfPermission(AccountActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             PermissionUtil.requestCameraPermissionFromActivity(binding.mainLayout, AccountActivity.this);
         } else {
-            new SecondPasswordHandler(this).validate(new SecondPasswordHandler.ResultListener() {
-                @Override
-                public void onNoSecondPassword() {
-                    viewModel.onScanButtonClicked();
-                }
-
-                @Override
-                public void onSecondPasswordValidated(String validateSecondPassword) {
-                    viewModel.setDoubleEncryptionPassword(new CharSequenceX(validateSecondPassword));
-                    viewModel.onScanButtonClicked();
-                }
-            });
+            onScanButtonClicked();
         }
+    }
+
+    private void onScanButtonClicked() {
+        new SecondPasswordHandler(this).validate(new SecondPasswordHandler.ResultListener() {
+            @Override
+            public void onNoSecondPassword() {
+                viewModel.onScanButtonClicked();
+            }
+
+            @Override
+            public void onSecondPasswordValidated(String validateSecondPassword) {
+                viewModel.setDoubleEncryptionPassword(new CharSequenceX(validateSecondPassword));
+                viewModel.onScanButtonClicked();
+            }
+        });
     }
 
     @Thunk
@@ -509,7 +513,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                viewModel.onScanButtonClicked();
+                onScanButtonClicked();
             } else {
                 // Permission request was denied.
             }
