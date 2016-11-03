@@ -286,7 +286,7 @@ public class PinEntryViewModel extends BaseViewModel {
                         mPrefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""),
                         mPrefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
                         password)
-                        .doOnTerminate(() -> {
+                        .doAfterTerminate(() -> {
                             mDataListener.dismissProgressDialog();
                             mCanShowFingerprintDialog = true;
                         })

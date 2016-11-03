@@ -306,7 +306,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
         mCompositeSubscription.add(
                 accountEditDataManager.getPendingTransactionForLegacyAddress(legacyAddress, new Payment())
-                        .doOnTerminate(() -> dataListener.dismissProgressDialog())
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(pendingTransaction -> {
                             if (pendingTransaction != null && pendingTransaction.bigIntAmount.compareTo(BigInteger.ZERO) == 1) {
                                 PaymentConfirmationDetails details = getTransactionDetailsForDisplay(pendingTransaction);
@@ -403,7 +403,7 @@ public class AccountEditViewModel extends BaseViewModel {
                         changeAddress,
                         pendingTransaction.bigIntFee,
                         pendingTransaction.bigIntAmount)
-                        .doOnTerminate(() -> dataListener.dismissProgressDialog())
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(hash -> {
                             legacyAddress.setTag(LegacyAddress.ARCHIVED_ADDRESS);
                             setArchive(true);
@@ -443,27 +443,32 @@ public class AccountEditViewModel extends BaseViewModel {
 
             mCompositeSubscription.add(
                     accountEditDataManager.syncPayloadWithServer()
-                            .doOnTerminate(() -> dataListener.dismissProgressDialog())
+                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                             .subscribe(success -> {
                                 if (success) {
                                     accountModel.setLabel(finalNewLabel);
                                     dataListener.setActivityResult(Activity.RESULT_OK);
                                 } else {
-                                    throw Exceptions.propagate(new Throwable("Remote save failed"));
+                                    reverLabelAndShowError(revertLabel);
                                 }
                             }, throwable -> {
-                                // Remote save not successful - revert
-                                if (account != null) {
-                                    account.setLabel(revertLabel);
-                                } else {
-                                    legacyAddress.setLabel(revertLabel);
-                                }
-                                accountModel.setLabel(revertLabel);
-                                dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
+                                reverLabelAndShowError(revertLabel);
+
                             }));
         } else {
             dataListener.showToast(R.string.label_cant_be_empty, ToastCustom.TYPE_ERROR);
         }
+    }
+
+    private void reverLabelAndShowError(String revertLabel) {
+        // Remote save not successful - revert
+        if (account != null) {
+            account.setLabel(revertLabel);
+        } else {
+            legacyAddress.setLabel(revertLabel);
+        }
+        accountModel.setLabel(revertLabel);
+        dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
     }
 
     @SuppressWarnings("unused")
@@ -480,19 +485,23 @@ public class AccountEditViewModel extends BaseViewModel {
 
         mCompositeSubscription.add(
                 accountEditDataManager.syncPayloadWithServer()
-                        .doOnTerminate(() -> dataListener.dismissProgressDialog())
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(success -> {
                             if (success) {
                                 setDefault(isDefault(account));
                                 dataListener.setActivityResult(Activity.RESULT_OK);
                             } else {
-                                throw Exceptions.propagate(new Throwable("Remote save failed"));
+                                revertDefaultAndShowError(revertDefault);
                             }
                         }, throwable -> {
-                            // Remote save not successful - revert
-                            payloadManager.getPayload().getHdWallet().setDefaultIndex(revertDefault);
-                            dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
+                            revertDefaultAndShowError(revertDefault);
                         }));
+    }
+
+    private void revertDefaultAndShowError(int revertDefault) {
+        // Remote save not successful - revert
+        payloadManager.getPayload().getHdWallet().setDefaultIndex(revertDefault);
+        dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
     }
 
     @SuppressWarnings("unused")
@@ -704,7 +713,7 @@ public class AccountEditViewModel extends BaseViewModel {
         boolean isArchived = toggleArchived();
         mCompositeSubscription.add(
                 accountEditDataManager.syncPayloadWithServer()
-                        .doOnTerminate(() -> dataListener.dismissProgressDialog())
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(success -> {
                             if (success) {
                                 accountEditDataManager.updateBalancesAndTransactions()
@@ -713,7 +722,7 @@ public class AccountEditViewModel extends BaseViewModel {
                                 setArchive(isArchived);
                                 dataListener.setActivityResult(Activity.RESULT_OK);
                             } else {
-                                throw Exceptions.propagate(new Throwable("Remote save failed"));
+                                dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
                             }
                         }, throwable -> {
                             dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);

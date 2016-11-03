@@ -52,7 +52,7 @@ public class LoggingExceptionHandler implements Thread.UncaughtExceptionHandler 
         sendException(throwable)
                 .subscribeOn(Schedulers.io())
                 // Restart the app
-                .doOnTerminate(() -> mAppUtil.restartApp())
+                .doAfterTerminate(() -> mAppUtil.restartApp())
                 .subscribe(s -> {
                     Log.d(LoggingExceptionHandler.class.getSimpleName(), "uncaughtException: ");
                 }, Throwable::printStackTrace);
