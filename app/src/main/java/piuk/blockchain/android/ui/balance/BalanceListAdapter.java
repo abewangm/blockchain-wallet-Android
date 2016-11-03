@@ -77,18 +77,20 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
             if (dirText.equals(MultiAddrFactory.SENT))
                 holder.direction.setText(holder.direction.getContext().getResources().getString(R.string.SENT));
 
-            Spannable span1;
+            Spannable spannable;
             if (mIsBtc) {
-                span1 = Spannable.Factory.getInstance().newSpannable(
+                spannable = Spannable.Factory.getInstance().newSpannable(
                         mMonetaryUtil.getDisplayAmountWithFormatting(Math.abs(tx.getAmount())) + " " + getDisplayUnits());
-                span1.setSpan(
-                        new RelativeSizeSpan(0.67f), span1.length() - getDisplayUnits().length(), span1.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spannable.setSpan(
+                        new RelativeSizeSpan(0.67f), spannable.length() - getDisplayUnits().length(), spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
-                span1 = Spannable.Factory.getInstance().newSpannable(
+                spannable = Spannable.Factory.getInstance().newSpannable(
                         mMonetaryUtil.getFiatFormat(strFiat).format(Math.abs(fiatBalance)) + " " + strFiat);
-                span1.setSpan(
-                        new RelativeSizeSpan(0.67f), span1.length() - 3, span1.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spannable.setSpan(
+                        new RelativeSizeSpan(0.67f), spannable.length() - 3, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
+
+            holder.result.setText(spannable);
 
             int nbConfirmations = 3;
             if (tx.isMove()) {
@@ -124,8 +126,6 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
             } else {
                 holder.watchOnly.setVisibility(View.GONE);
             }
-
-            holder.result.setText(span1);
 
             holder.result.setOnClickListener(v -> {
                 onViewFormatUpdated(!mIsBtc);
