@@ -825,8 +825,8 @@ public class SendViewModel extends BaseViewModel {
                     legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
                 }
 
-                if (legacyAddress != null && legacyAddress.isWatchOnly() && legacyAddress.getEncryptedKey() != null && legacyAddress.getEncryptedKey().isEmpty()) {
-
+                if (legacyAddress != null && legacyAddress.isWatchOnly() &&
+                        (legacyAddress.getEncryptedKey() == null || legacyAddress.getEncryptedKey().isEmpty())) {
                     dataListener.onShowSpendFromWatchOnly(((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject).getAddress());
 
                 } else if ((legacyAddress != null && legacyAddress.isWatchOnly()) || sendModel.verifiedSecondPassword != null) {
