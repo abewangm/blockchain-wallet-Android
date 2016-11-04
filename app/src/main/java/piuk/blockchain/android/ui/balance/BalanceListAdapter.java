@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.balance;
 
 import android.graphics.Color;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
@@ -164,6 +165,14 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
 
     void onViewFormatUpdated(boolean isBTC) {
         mIsBtc = isBTC;
+        notifyAdapterDataSetChanged(null);
+    }
+
+    void notifyAdapterDataSetChanged(@Nullable Double btcExchangeRate) {
+        if (btcExchangeRate != null) {
+            mBtcExchangeRate = btcExchangeRate;
+        }
+        mMonetaryUtil.updateUnit(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
         notifyDataSetChanged();
     }
 
