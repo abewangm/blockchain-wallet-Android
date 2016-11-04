@@ -15,6 +15,7 @@ import android.view.View;
 import info.blockchain.util.FeeUtil;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
+import info.blockchain.wallet.payload.HDWallet;
 import info.blockchain.wallet.payload.ImportedAccount;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.Payload;
@@ -285,16 +286,21 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     private boolean isArchivable() {
-        if (payloadManager.getPayload().isUpgraded()) {
+
+        Payload payload = payloadManager.getPayload();
+
+        if (payload.isUpgraded()) {
             //V3 - can't archive default account
-            int defaultIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
-            Account defaultAccount = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultIndex);
+            HDWallet hdWallet = payload.getHdWallet();
+
+            int defaultIndex = hdWallet.getDefaultIndex();
+            Account defaultAccount = hdWallet.getAccounts().get(defaultIndex);
 
             if (defaultAccount == account)
                 return false;
         } else {
             //V2 - must have a single unarchived address
-            List<LegacyAddress> allActiveLegacyAddresses = payloadManager.getPayload().getActiveLegacyAddressList();
+            List<LegacyAddress> allActiveLegacyAddresses = payload.getLegacyAddressList(LegacyAddress.NORMAL_ADDRESS);
             return (allActiveLegacyAddresses.size() > 1);
         }
 
