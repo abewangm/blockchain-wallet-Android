@@ -45,6 +45,7 @@ public class AccountViewModel extends BaseViewModel {
     @Inject TransferFundsDataManager fundsDataManager;
     @Inject PrefsUtil prefsUtil;
     @Inject AppUtil appUtil;
+    @Inject PrivateKeyFactory privateKeyFactory;
     @VisibleForTesting CharSequenceX doubleEncryptionPassword;
 
     AccountViewModel(DataListener dataListener) {
@@ -202,7 +203,7 @@ public class AccountViewModel extends BaseViewModel {
      */
     void onAddressScanned(String data) {
         try {
-            String format = PrivateKeyFactory.getInstance().getFormat(data);
+            String format = privateKeyFactory.getFormat(data);
             if (format != null) {
                 // Private key scanned
                 if (!format.equals(PrivateKeyFactory.BIP38)) {
@@ -265,7 +266,7 @@ public class AccountViewModel extends BaseViewModel {
     private void importNonBip38Address(String format, String data, @Nullable CharSequenceX secondPassword) {
         dataListener.showProgressDialog(R.string.please_wait);
         try {
-            ECKey key = PrivateKeyFactory.getInstance().getKey(format, data);
+            ECKey key = privateKeyFactory.getKey(format, data);
 
             handlePrivateKey(key, secondPassword);
         } catch (Exception e) {

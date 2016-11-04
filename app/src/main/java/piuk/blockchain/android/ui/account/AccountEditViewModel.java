@@ -66,6 +66,7 @@ public class AccountEditViewModel extends BaseViewModel {
     @Inject protected AccountEditDataManager accountEditDataManager;
     @Inject protected MultiAddrFactory multiAddrFactory;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
+    @Inject protected PrivateKeyFactory privateKeyFactory;
 
     // Visible for data binding
     public AccountEditModel accountModel;
@@ -683,7 +684,7 @@ public class AccountEditViewModel extends BaseViewModel {
         String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);
 
         try {
-            String format = PrivateKeyFactory.getInstance().getFormat(scanData);
+            String format = privateKeyFactory.getFormat(scanData);
             if (format != null) {
                 if (!format.equals(PrivateKeyFactory.BIP38)) {
                     importNonBIP38Address(format, scanData);
@@ -730,7 +731,7 @@ public class AccountEditViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
 
         try {
-            final ECKey key = PrivateKeyFactory.getInstance().getKey(format, data);
+            final ECKey key = privateKeyFactory.getKey(format, data);
             if (key != null && key.hasPrivKey()) {
                 final String keyAddress = key.toAddress(MainNetParams.get()).toString();
                 if (!legacyAddress.getAddress().equals(keyAddress)) {

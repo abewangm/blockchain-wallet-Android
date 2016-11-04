@@ -84,6 +84,7 @@ public class SendViewModel extends BaseViewModel {
     @Inject PrefsUtil prefsUtil;
     @Inject WalletAccountHelper walletAccountHelper;
     @Inject SSLVerifyUtil sslVerifyUtil;
+    @Inject PrivateKeyFactory privateKeyFactory;
 
     public SendViewModel(Context context, DataListener dataListener) {
 
@@ -1200,7 +1201,7 @@ public class SendViewModel extends BaseViewModel {
 
     public void handleScannedDataForWatchOnlySpend(String scanData) {
         try {
-            final String format = PrivateKeyFactory.getInstance().getFormat(scanData);
+            final String format = privateKeyFactory.getFormat(scanData);
             if (format != null) {
                 if (!format.equals(PrivateKeyFactory.BIP38)) {
                     spendFromWatchOnlyNonBIP38(format, scanData);
@@ -1220,7 +1221,7 @@ public class SendViewModel extends BaseViewModel {
     private void spendFromWatchOnlyNonBIP38(final String format, final String scanData) {
 
         try {
-            ECKey key = PrivateKeyFactory.getInstance().getKey(format, scanData);
+            ECKey key = privateKeyFactory.getKey(format, scanData);
             LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
             setTempLegacyAddressPrivateKey(legacyAddress, key);
 
