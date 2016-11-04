@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
+import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import javax.inject.Singleton;
 
@@ -72,4 +73,8 @@ public class ApplicationModule {
         return MultiAddrFactory.getInstance();
     }
 
+    @Provides
+    protected PrivateKeyFactory privateKeyFactory() {
+        return new PrivateKeyFactory();
+    }
 }

@@ -1,5 +1,7 @@
 package piuk.blockchain.android.injection;
 
+import info.blockchain.wallet.util.PrivateKeyFactory;
+
 import javax.inject.Singleton;
 
 import dagger.Component;
@@ -30,4 +32,5 @@ public interface ApplicationComponent {
 
     void inject(ReceiveCurrencyHelper receiveCurrencyHelper);
 
+    void inject (PrivateKeyFactory privateKeyFactory);
 }
