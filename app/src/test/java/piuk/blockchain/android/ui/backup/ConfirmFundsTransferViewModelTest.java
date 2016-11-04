@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.backup;
 
 import android.app.Application;
 
+import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.Payload;
@@ -48,7 +49,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -151,10 +152,10 @@ public class ConfirmFundsTransferViewModelTest {
     @Test
     public void sendPaymentAndArchive() throws Exception {
         // Arrange
-        when(mFundsDataManager.sendPayment(any(Payment.class), anyList(), any(CharSequenceX.class))).thenReturn(Observable.just("hash"));
+        when(mFundsDataManager.sendPayment(any(Payment.class), anyListOf(PendingTransaction.class), any(CharSequenceX.class))).thenReturn(Observable.just("hash"));
         when(mActivity.getIfArchiveChecked()).thenReturn(true);
         PendingTransaction transaction = new PendingTransaction();
-        transaction.sendingObject = new ItemAccount("", "", null, null);
+        transaction.sendingObject = new ItemAccount("", "", null, null, null);
         transaction.sendingObject.accountObject = new LegacyAddress();
         mSubject.mPendingTransactions = new ArrayList<PendingTransaction>() {{
             add(transaction);
@@ -176,7 +177,7 @@ public class ConfirmFundsTransferViewModelTest {
     @Test
     public void sendPaymentNoArchive() throws Exception {
         // Arrange
-        when(mFundsDataManager.sendPayment(any(Payment.class), anyList(), any(CharSequenceX.class))).thenReturn(Observable.just("hash"));
+        when(mFundsDataManager.sendPayment(any(Payment.class), anyListOf(PendingTransaction.class), any(CharSequenceX.class))).thenReturn(Observable.just("hash"));
         when(mActivity.getIfArchiveChecked()).thenReturn(false);
         // Act
         mSubject.sendPayment(new CharSequenceX("password"));
@@ -194,7 +195,7 @@ public class ConfirmFundsTransferViewModelTest {
     @Test
     public void sendPaymentError() throws Exception {
         // Arrange
-        when(mFundsDataManager.sendPayment(any(Payment.class), anyList(), any(CharSequenceX.class))).thenReturn(Observable.error(new Throwable()));
+        when(mFundsDataManager.sendPayment(any(Payment.class), anyListOf(PendingTransaction.class), any(CharSequenceX.class))).thenReturn(Observable.error(new Throwable()));
         when(mActivity.getIfArchiveChecked()).thenReturn(false);
         // Act
         mSubject.sendPayment(new CharSequenceX("password"));
@@ -243,7 +244,7 @@ public class ConfirmFundsTransferViewModelTest {
     public void archiveAllSuccessful() throws Exception {
         // Arrange
         PendingTransaction transaction = new PendingTransaction();
-        transaction.sendingObject = new ItemAccount("", "", null, null);
+        transaction.sendingObject = new ItemAccount("", "", null, null, null);
         transaction.sendingObject.accountObject = new LegacyAddress();
         mSubject.mPendingTransactions = new ArrayList<PendingTransaction>() {{
             add(transaction);
@@ -264,7 +265,7 @@ public class ConfirmFundsTransferViewModelTest {
     public void archiveAllUnsuccessful() throws Exception {
         // Arrange
         PendingTransaction transaction = new PendingTransaction();
-        transaction.sendingObject = new ItemAccount("", "", null, null);
+        transaction.sendingObject = new ItemAccount("", "", null, null, null);
         transaction.sendingObject.accountObject = new LegacyAddress();
         mSubject.mPendingTransactions = new ArrayList<PendingTransaction>() {{
             add(transaction);
@@ -285,7 +286,7 @@ public class ConfirmFundsTransferViewModelTest {
     public void archiveAllThrowsException() throws Exception {
         // Arrange
         PendingTransaction transaction = new PendingTransaction();
-        transaction.sendingObject = new ItemAccount("", "", null, null);
+        transaction.sendingObject = new ItemAccount("", "", null, null, null);
         transaction.sendingObject.accountObject = new LegacyAddress();
         mSubject.mPendingTransactions = new ArrayList<PendingTransaction>() {{
             add(transaction);
@@ -341,7 +342,7 @@ public class ConfirmFundsTransferViewModelTest {
         }
 
         @Override
-        protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager, PrefsUtil prefsUtil, StringUtils stringUtils, ExchangeRateFactory exchangeRateFactory) {
+        protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager, PrefsUtil prefsUtil, StringUtils stringUtils, ExchangeRateFactory exchangeRateFactory, MultiAddrFactory multiAddrFactory) {
             return mWalletAccountHelper;
         }
     }

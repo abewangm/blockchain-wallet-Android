@@ -57,9 +57,12 @@ import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.AddressAdapter;
+import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PermissionUtil;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_IS_BTC;
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_SELECTED_ACCOUNT_POSITION;
 
 public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewModel.DataListener, CustomKeypadCallback {
@@ -104,6 +107,10 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
         setSupportActionBar(toolbar);
 
         mViewModel.onViewReady();
+
+        if (getIntent().hasExtra(KEY_IS_BTC)) {
+            mIsBTC = getIntent().getBooleanExtra(KEY_IS_BTC, true);
+        }
 
         setupLayout();
 
@@ -163,7 +170,16 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
         mBinding.content.amountContainer.currencyFiat.setText(mViewModel.getCurrencyHelper().getFiatUnit());
 
         // Spinner
-        mReceiveToAdapter = new AddressAdapter(this, R.layout.spinner_item, mViewModel.getReceiveToList(), true);
+        mReceiveToAdapter = new AddressAdapter(
+                this,
+                R.layout.spinner_item,
+                mViewModel.getReceiveToList(),
+                true,
+                mIsBTC,
+                new MonetaryUtil(mViewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
+                mViewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY),
+                mViewModel.getCurrencyHelper().getLastPrice());
+
         mReceiveToAdapter.setDropDownViewResource(R.layout.spinner_dropdown);
         mBinding.content.accounts.spinner.setAdapter(mReceiveToAdapter);
         mBinding.content.accounts.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -387,10 +403,6 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
     @Override
     protected void onResume() {
         super.onResume();
-        mBinding.content.amountContainer.currencyBtc.setText(
-                mIsBTC ? mViewModel.getCurrencyHelper().getBtcUnit() : mViewModel.getCurrencyHelper().getFiatUnit());
-        mBinding.content.amountContainer.currencyFiat.setText(
-                mIsBTC ? mViewModel.getCurrencyHelper().getFiatUnit() : mViewModel.getCurrencyHelper().getBtcUnit());
         mViewModel.updateSpinnerList();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mFilter);

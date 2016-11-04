@@ -167,6 +167,9 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     }
 
                     String inputMapString = StringUtils.join(labelList.toArray(), "\n");
+                    if (inputMapString.isEmpty()) {
+                        inputMapString = mStringUtils.getString(R.string.transaction_detail_coinbase);
+                    }
                     mDataListener.setFromAddress(mTransactionHelper.addressToLabel(inputMapString));
 
                     // To Address

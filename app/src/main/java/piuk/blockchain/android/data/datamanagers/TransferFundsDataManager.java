@@ -71,7 +71,7 @@ public class TransferFundsDataManager {
                                 if (coins.getNotice() == null && sweepBundle.getSweepAmount().compareTo(SendCoins.bDust) == 1) {
                                     PendingTransaction pendingSpend = new PendingTransaction();
                                     pendingSpend.unspentOutputBundle = mPayment.getSpendableCoins(coins, sweepBundle.getSweepAmount(), suggestedFeePerKb);
-                                    pendingSpend.sendingObject = new ItemAccount(legacyAddress.getLabel(), "", "", legacyAddress);
+                                    pendingSpend.sendingObject = new ItemAccount(legacyAddress.getLabel(), "", "", null, legacyAddress);
                                     pendingSpend.bigIntFee = pendingSpend.unspentOutputBundle.getAbsoluteFee();
                                     pendingSpend.bigIntAmount = sweepBundle.getSweepAmount();
                                     pendingSpend.addressToReceiveIndex = addressToReceiveIndex;

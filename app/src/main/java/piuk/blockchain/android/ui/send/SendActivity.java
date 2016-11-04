@@ -48,9 +48,13 @@ import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PermissionUtil;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_IS_BTC;
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_SELECTED_ACCOUNT_POSITION;
 
 public class SendActivity extends BaseAuthActivity implements SendViewModel.DataListener, CustomKeypadCallback {
@@ -64,8 +68,9 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
     private CustomKeypad customKeypad;
 
-    private TextWatcher btcTextWatcher = null;
-    private TextWatcher fiatTextWatcher = null;
+    private TextWatcher btcTextWatcher;
+    private TextWatcher fiatTextWatcher;
+    private boolean isBtc = true;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -95,6 +100,10 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         setupToolbar();
 
         setCustomKeypad();
+
+        if (getIntent().hasExtra(KEY_IS_BTC)) {
+            isBtc = getIntent().getBooleanExtra(KEY_IS_BTC, true);
+        }
 
         setupViews();
 
@@ -283,7 +292,16 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
     private void setupSendFromView() {
 
-        binding.accounts.spinner.setAdapter(new AddressAdapter(this, R.layout.spinner_item, viewModel.getAddressList(false), true));
+        String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        binding.accounts.spinner.setAdapter(new AddressAdapter(
+                this,
+                R.layout.spinner_item,
+                viewModel.getAddressList(false),
+                true,
+                isBtc,
+                new MonetaryUtil(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
+                fiat,
+                ExchangeRateFactory.getInstance().getLastPrice(fiat)));
 
         // Set drop down width equal to clickable view
         binding.accounts.spinner.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -327,7 +345,16 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
     }
 
     private void setupReceiveToView() {
-        binding.spDestination.setAdapter(new AddressAdapter(this, R.layout.spinner_item, viewModel.getAddressList(true), false));
+        String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        binding.spDestination.setAdapter(new AddressAdapter(
+                this,
+                R.layout.spinner_item,
+                viewModel.getAddressList(true),
+                false,
+                isBtc,
+                new MonetaryUtil(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
+                fiat,
+                ExchangeRateFactory.getInstance().getLastPrice(fiat)));
 
         // Set drop down width equal to clickable view
         binding.spDestination.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {

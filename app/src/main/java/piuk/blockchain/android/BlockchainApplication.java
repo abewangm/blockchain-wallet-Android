@@ -14,7 +14,7 @@ import android.util.Log;
 import info.blockchain.api.PinStore;
 
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.connectivity.ConnectionStateMonitor;
+import piuk.blockchain.android.data.connectivity.ConnectivityManager;
 import piuk.blockchain.android.data.services.PinStoreService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AppUtil;
@@ -56,7 +56,7 @@ public class BlockchainApplication extends Application {
                 new PinStoreService(new PinStore()),
                 new AppUtil(this));
 
-        new ConnectionStateMonitor(this).enable();
+        ConnectivityManager.getInstance().registerNetworkListener(this);
 
         checkSecurityProviderAndPatchIfNeeded();
 

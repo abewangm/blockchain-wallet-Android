@@ -1,6 +1,7 @@
 package piuk.blockchain.android.data.services;
 
 import info.blockchain.api.PinStore;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 
 import org.json.JSONObject;
 
@@ -38,7 +39,29 @@ public class PinStoreService {
      * @return      A {@link JSONObject} which may or may not contain the field "success"
      */
     public Observable<JSONObject> validateAccess(String key, String pin) {
-        return Observable.fromCallable(() -> pinStore.validateAccess(key, pin))
+        return createValidateAccessObservable(key, pin)
                 .compose(RxUtil.applySchedulers());
+    }
+
+    private Observable<JSONObject> createValidateAccessObservable(String key, String pin) {
+        return Observable.create(subscriber -> {
+            try {
+                JSONObject object = pinStore.validateAccess(key, pin);
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(object);
+                    subscriber.onCompleted();
+                }
+            } catch (Exception e) {
+                if (e.getMessage() != null && e.getMessage().contains("Incorrect PIN")) {
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onError(new InvalidCredentialsException("Incorrect PIN"));
+                    }
+                } else {
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onError(e);
+                    }
+                }
+            }
+        });
     }
 }

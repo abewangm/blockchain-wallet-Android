@@ -21,6 +21,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceCategory;
 import android.support.v7.preference.PreferenceFragmentCompat;
+import android.support.v7.preference.PreferenceScreen;
 import android.support.v7.preference.SwitchPreferenceCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
@@ -65,6 +66,7 @@ import static piuk.blockchain.android.ui.auth.PinEntryActivity.REQUEST_CODE_VALI
 public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceClickListener, SettingsViewModel.DataListener {
 
     public static final String EXTRA_SHOW_TWO_FA_DIALOG = "show_two_fa_dialog";
+    public static final String EXTRA_SHOW_ADD_EMAIL_DIALOG = "show_add_email_dialog";
     public static final String URL_TOS_POLICY = "https://blockchain.com/terms";
     public static final String URL_PRIVACY_POLICY = "https://blockchain.com/privacy";
     public static final int REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT = 1984;
@@ -110,6 +112,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     @SuppressLint("NewApi")
     @Override
     public void setUpUi() {
+        PreferenceScreen prefScreen = getPreferenceScreen();
+        if (prefScreen != null) prefScreen.removeAll();
+
         addPreferencesFromResource(R.xml.settings);
 
         // Profile
@@ -183,6 +188,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         // Check if referred from Security Centre dialog
         if (getActivity().getIntent() != null && getActivity().getIntent().hasExtra(EXTRA_SHOW_TWO_FA_DIALOG)) {
             showDialogTwoFA();
+        } else if (getActivity().getIntent() != null && getActivity().getIntent().hasExtra(EXTRA_SHOW_ADD_EMAIL_DIALOG)) {
+            showDialogEmail();
         }
     }
 
@@ -365,9 +372,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(success)
                 .setMessage(R.string.sms_verified)
-                .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) -> {
-                    if (viewModel.show2FaAfterPhoneVerified()) showDialogTwoFA();
-                })
+                .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) -> showDialogTwoFA())
                 .show();
     }
 
@@ -511,7 +516,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
             CountryPicker picker = CountryPicker.newInstance(getString(R.string.select_country));
             Country country = picker.getUserCountryInfo(getActivity());
-            setCountryFlag(countryTextView, country.getDialCode(), country.getFlag());
+            if (country.getDialCode().equals("+93")) {
+                setCountryFlag(countryTextView, "+1", R.drawable.flag_us);
+            } else {
+                setCountryFlag(countryTextView, country.getDialCode(), country.getFlag());
+            }
 
             countryTextView.setOnClickListener(v -> {
                 picker.show(getFragmentManager(), "COUNTRY_PICKER");
@@ -532,10 +541,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                     .setView(smsPickerView)
                     .setCancelable(false)
                     .setPositiveButton(R.string.update, null)
-                    .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> viewModel.setShow2FaAfterPhoneVerified(false));
+                    .setNegativeButton(android.R.string.cancel, null);
 
             if (!viewModel.isSmsVerified() && !viewModel.getSms().isEmpty()) {
-                alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) -> showDialogVerifySms());
+                alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) -> {
+                    viewModel.updateSms(viewModel.getSms());
+                });
             }
 
             AlertDialog dialog = alertDialogSmsBuilder.create();
@@ -617,7 +628,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
                 .setCancelable(false)
                 .setPositiveButton(R.string.verify, null)
-                .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> viewModel.setShow2FaAfterPhoneVerified(false))
+                .setNegativeButton(android.R.string.cancel, null)
                 .setNeutralButton(R.string.resend, (dialogInterface, i) -> viewModel.updateSms(viewModel.getSms()))
                 .create();
 
@@ -628,6 +639,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 if (codeS.length() > 0) {
                     viewModel.verifySms(codeS);
                     dialog.dismiss();
+                    ViewUtils.hideKeyboard(getActivity());
                 }
             });
         });
@@ -677,29 +689,31 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogEmailNotifications() {
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+        AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.email_notifications)
                 .setMessage(R.string.email_notifications_summary)
-                .setCancelable(false)
                 .setPositiveButton(R.string.enable, (dialogInterface, i) ->
                         viewModel.updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, true))
                 .setNegativeButton(R.string.disable, (dialogInterface, i) ->
                         viewModel.updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, false))
-                .create()
-                .show();
+                .create();
+
+        dialog.setOnCancelListener(dialogInterface -> emailNotificationPref.setChecked(!emailNotificationPref.isChecked()));
+        dialog.show();
     }
 
     private void showDialogSmsNotifications() {
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+        AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.sms_notifications)
                 .setMessage(R.string.sms_notifications_summary)
-                .setCancelable(false)
                 .setPositiveButton(R.string.enable, (dialogInterface, i) ->
                         viewModel.updateNotification(Settings.NOTIFICATION_TYPE_SMS, true))
                 .setNegativeButton(R.string.disable, (dialogInterface, i) ->
                         viewModel.updateNotification(Settings.NOTIFICATION_TYPE_SMS, false))
-                .create()
-                .show();
+                .create();
+
+        dialog.setOnCancelListener(dialogInterface -> smsNotificationPref.setChecked(!smsNotificationPref.isChecked()));
+        dialog.show();
     }
 
     private void showDialogChangePasswordWarning() {
@@ -812,10 +826,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     private void showDialogTwoFA() {
         if (!viewModel.isSmsVerified()) {
             twoStepVerificationPref.setChecked(false);
-            viewModel.setShow2FaAfterPhoneVerified(true);
             showDialogMobile();
         } else {
-            viewModel.setShow2FaAfterPhoneVerified(false);
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setTitle(R.string.two_fa)
                     .setMessage(R.string.two_fa_summary)

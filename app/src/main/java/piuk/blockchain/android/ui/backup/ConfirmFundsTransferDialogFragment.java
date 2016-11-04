@@ -104,7 +104,10 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
         mLoadingLayout = (RelativeLayout) view.findViewById(R.id.loading_layout);
 
         AddressAdapter receiveToAdapter = new AddressAdapter(
-                getActivity(), R.layout.spinner_item, mViewModel.getReceiveToList(), true);
+                getActivity(),
+                R.layout.spinner_item,
+                mViewModel.getReceiveToList(),
+                true);
         receiveToAdapter.setDropDownViewResource(R.layout.spinner_dropdown);
         mToSpinner.setAdapter(receiveToAdapter);
         mToSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

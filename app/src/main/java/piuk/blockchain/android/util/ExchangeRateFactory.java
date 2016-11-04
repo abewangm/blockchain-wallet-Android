@@ -8,7 +8,9 @@ import info.blockchain.api.ExchangeTicker;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -113,8 +115,16 @@ public class ExchangeRateFactory {
      */
     public Observable<Double> getHistoricPrice(long satoshis, String currency, long timeInMillis) {
         return Observable.fromCallable(() -> new ExchangeTicker().getHistoricPrice(satoshis, currency, timeInMillis))
-                .map(Double::parseDouble)
+                .flatMap(this::parseStringValue)
                 .compose(RxUtil.applySchedulers());
+    }
+
+    private Observable<Double> parseStringValue(String value) {
+        return Observable.fromCallable(() -> {
+            NumberFormat format = NumberFormat.getInstance(Locale.getDefault());
+            Number number = format.parse(value);
+            return number.doubleValue();
+        });
     }
 
     /**

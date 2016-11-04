@@ -170,7 +170,7 @@ public class PinEntryViewModel extends BaseViewModel {
         return mCanShowFingerprintDialog;
     }
 
-    private boolean getIfShouldShowFingerprintLogin() {
+    public boolean getIfShouldShowFingerprintLogin() {
         return !(mValidatingPinForResult || mRecoveringFunds || isCreatingNewPin())
                 && mFingerprintHelper.getIfFingerprintUnlockEnabled()
                 && mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE) != null;
@@ -286,7 +286,7 @@ public class PinEntryViewModel extends BaseViewModel {
                         mPrefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""),
                         mPrefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
                         password)
-                        .doOnTerminate(() -> {
+                        .doAfterTerminate(() -> {
                             mDataListener.dismissProgressDialog();
                             mCanShowFingerprintDialog = true;
                         })
@@ -399,16 +399,24 @@ public class PinEntryViewModel extends BaseViewModel {
                         }
                         mPrefsUtil.setValue(PrefsUtil.KEY_PIN_FAILS, 0);
                     } else {
-                        if (mValidatingPinForResult) {
-                            incrementFailureCount();
-                        } else {
-                            incrementFailureCountAndRestart();
-                        }
+                        handleValidateFailure();
                     }
                 }, throwable -> {
-                    showErrorToast(R.string.unexpected_error);
-                    mDataListener.restartPageAndClearTop();
+                    if (throwable instanceof InvalidCredentialsException) {
+                        handleValidateFailure();
+                    } else {
+                        showErrorToast(R.string.unexpected_error);
+                        mDataListener.restartPageAndClearTop();
+                    }
                 });
+    }
+
+    private void handleValidateFailure() {
+        if (mValidatingPinForResult) {
+            incrementFailureCount();
+        } else {
+            incrementFailureCountAndRestart();
+        }
     }
 
     private void incrementFailureCount() {

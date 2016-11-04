@@ -121,6 +121,11 @@ public class ReceiveViewModel extends BaseViewModel {
         return mCurrencyHelper;
     }
 
+    @NonNull
+    public PrefsUtil getPrefsUtil() {
+        return mPrefsUtil;
+    }
+
     public void updateSpinnerList() {
         mAccountMap.clear();
         mSpinnerIndexMap.clear();
