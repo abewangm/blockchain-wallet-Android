@@ -6,7 +6,6 @@ import android.os.Looper;
 
 import info.blockchain.api.DynamicFee;
 import info.blockchain.api.ExchangeTicker;
-import info.blockchain.api.PersistentUrls;
 import info.blockchain.api.Settings;
 import info.blockchain.api.Unspent;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -80,7 +79,6 @@ public class MainViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        checkBackendEnvironment();
         checkRooted();
         checkConnectivity();
         checkIfShouldShowEmailVerification();
@@ -267,29 +265,5 @@ public class MainViewModel extends BaseViewModel {
         if (!osUtil.isServiceRunning(piuk.blockchain.android.data.websocket.WebSocketService.class)) {
             context.stopService(new Intent(context, piuk.blockchain.android.data.websocket.WebSocketService.class));
         }
-    }
-
-    private void checkBackendEnvironment() {
-
-        PersistentUrls urls = PersistentUrls.getInstance();
-
-//        if (BuildConfig.DOGFOOD || BuildConfig.DEBUG) {
-//            PrefsUtil prefsUtil = new PrefsUtil(context);
-//            int currentEnvironment = prefsUtil.getValue(PrefsUtil.KEY_BACKEND_ENVIRONMENT, 0);
-
-//            switch (currentEnvironment) {
-//                case 0:
-        urls.setProductionEnvironment();
-//                    break;
-//                case 1:
-//                    urls.setDevelopmentEnvironment();
-//                    break;
-//                case 2:
-//                    urls.setStagingEnvironment();
-//                    break;
-//            }
-//        }else{
-        urls.setProductionEnvironment();
-//        }
     }
 }

@@ -43,3 +43,6 @@ captures
 
 # Firebase config
 app/google-services.json
+
+# Environment URLs
+urls.properties

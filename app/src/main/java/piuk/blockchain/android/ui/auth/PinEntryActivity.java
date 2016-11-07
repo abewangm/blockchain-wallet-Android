@@ -21,6 +21,7 @@ import info.blockchain.wallet.util.CharSequenceX;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.api.UrlSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityPinEntryBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -75,6 +76,12 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
 
         showConnectionDialogIfNeeded();
         mKeyboardLayout = (ViewGroup) findViewById(R.id.keyboard_container);
+
+        if (!UrlSettings.getInstance().shouldShowDebugMenu()) {
+            UrlSettings.getInstance().setDefaultEnvironment();
+        } else {
+            // TODO: 07/11/2016 Show some kind of selector here
+        }
 
         mViewModel.onViewReady();
     }
