@@ -67,10 +67,12 @@ public class UrlSettingsTest {
     public void getCurrentEnvironmentDefault() throws Exception {
         // Arrange
         when(prefsUtil.getValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_PROD)).thenReturn("");
+        when(persistentUrls.getCurrentEnvironment()).thenReturn(PersistentUrls.Environment.PRODUCTION);
         subject = new UrlSettings();
         // Act
         PersistentUrls.Environment value = subject.getCurrentEnvironment();
         // Assert
+        verify(persistentUrls).getCurrentEnvironment();
         assertTrue(PRODUCTION.equals(value));
     }
 

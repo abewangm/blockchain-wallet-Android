@@ -16,13 +16,13 @@ import static info.blockchain.api.PersistentUrls.Environment.DEV;
 import static info.blockchain.api.PersistentUrls.Environment.STAGING;
 import static info.blockchain.api.PersistentUrls.KEY_ENV_PROD;
 
+@SuppressWarnings("WeakerAccess")
 public class UrlSettings {
 
     public static final String KEY_CURRENT_ENVIRONMENT = "current_environment";
 
     private static final String TAG = UrlSettings.class.getSimpleName();
 
-    private PersistentUrls.Environment environment;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected AppUtil appUtil;
     @Inject protected PersistentUrls persistentUrls;
@@ -46,7 +46,7 @@ public class UrlSettings {
 
     @NonNull
     public PersistentUrls.Environment getCurrentEnvironment() {
-        return environment;
+        return persistentUrls.getCurrentEnvironment();
     }
 
     /**
@@ -61,7 +61,6 @@ public class UrlSettings {
     }
 
     private void setEnvironment(PersistentUrls.Environment environment) {
-        this.environment = environment;
         switch (environment) {
             case PRODUCTION:
                 persistentUrls.setProductionEnvironment();
