@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.v7.app.AlertDialog;
 import android.widget.ArrayAdapter;
 
+import info.blockchain.api.PersistentUrls;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,7 +32,7 @@ class EnvironmentSwitcher {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 context, R.layout.item_environment_list, itemsList);
 
-        UrlSettings.Environment environment = urlSettings.getCurrentEnvironment();
+        PersistentUrls.Environment environment = urlSettings.getCurrentEnvironment();
         int selection;
         switch (environment) {
             case STAGING:
@@ -44,26 +46,26 @@ class EnvironmentSwitcher {
                 break;
         }
 
-        final UrlSettings.Environment[] selectedEnvironment = new UrlSettings.Environment[1];
+        final PersistentUrls.Environment[] selectedEnvironment = new PersistentUrls.Environment[1];
 
         new AlertDialog.Builder(context, R.style.AlertDialogStyle)
                 .setTitle("Choose Environment")
                 .setSingleChoiceItems(adapter, selection, (dialogInterface, i) -> {
                     switch (i) {
                         case 1:
-                            selectedEnvironment[0] = UrlSettings.Environment.STAGING;
+                            selectedEnvironment[0] = PersistentUrls.Environment.STAGING;
                             break;
                         case 2:
-                            selectedEnvironment[0] = UrlSettings.Environment.DEV;
+                            selectedEnvironment[0] = PersistentUrls.Environment.DEV;
                             break;
                         default:
-                            selectedEnvironment[0] = UrlSettings.Environment.PRODUCTION;
+                            selectedEnvironment[0] = PersistentUrls.Environment.PRODUCTION;
                             break;
                     }
                 })
                 .setPositiveButton("Select", (dialog, id) -> {
                     urlSettings.changeEnvironment(
-                            selectedEnvironment[0] != null ? selectedEnvironment[0] : UrlSettings.Environment.PRODUCTION);
+                            selectedEnvironment[0] != null ? selectedEnvironment[0] : PersistentUrls.Environment.PRODUCTION);
 
                     ToastCustom.makeText(
                             context,

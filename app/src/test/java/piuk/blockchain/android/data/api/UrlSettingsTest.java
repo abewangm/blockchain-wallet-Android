@@ -23,15 +23,15 @@ import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
+import static info.blockchain.api.PersistentUrls.Environment.DEV;
+import static info.blockchain.api.PersistentUrls.Environment.PRODUCTION;
+import static info.blockchain.api.PersistentUrls.Environment.STAGING;
+import static info.blockchain.api.PersistentUrls.KEY_ENV_PROD;
+import static info.blockchain.api.PersistentUrls.KEY_ENV_STAGING;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static piuk.blockchain.android.data.api.UrlSettings.Environment.DEV;
-import static piuk.blockchain.android.data.api.UrlSettings.Environment.PRODUCTION;
-import static piuk.blockchain.android.data.api.UrlSettings.Environment.STAGING;
 import static piuk.blockchain.android.data.api.UrlSettings.KEY_CURRENT_ENVIRONMENT;
-import static piuk.blockchain.android.data.api.UrlSettings.KEY_ENV_PROD;
-import static piuk.blockchain.android.data.api.UrlSettings.KEY_ENV_STAGING;
 
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
@@ -69,7 +69,7 @@ public class UrlSettingsTest {
         when(prefsUtil.getValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_PROD)).thenReturn("");
         subject = new UrlSettings();
         // Act
-        UrlSettings.Environment value = subject.getCurrentEnvironment();
+        PersistentUrls.Environment value = subject.getCurrentEnvironment();
         // Assert
         assertTrue(PRODUCTION.equals(value));
     }
@@ -80,9 +80,9 @@ public class UrlSettingsTest {
         when(prefsUtil.getValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_PROD)).thenReturn(KEY_ENV_STAGING);
         subject = new UrlSettings();
         // Act
-        UrlSettings.Environment value = subject.getCurrentEnvironment();
+        PersistentUrls.Environment value = subject.getCurrentEnvironment();
         // Assert
-        assertTrue(UrlSettings.Environment.STAGING.equals(value));
+        assertTrue(PersistentUrls.Environment.STAGING.equals(value));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class UrlSettingsTest {
         verify(persistentUrls).setTransactionDetailsUrl(BuildConfig.STAGING_TRANSACTION_URL);
         verify(persistentUrls).setUnspentUrl(BuildConfig.STAGING_UNSPENT_OUTPUTS_URL);
         verify(persistentUrls).setWalletPayloadUrl(BuildConfig.STAGING_WALLET_PAYLOAD_URL);
-        verify(persistentUrls).setCurrentEnvironment(PersistentUrls.Environment.STAGING);
+        verify(persistentUrls).setCurrentEnvironment(STAGING);
         verify(appUtil).clearCredentialsAndKeepEnvironment();
     }
 
@@ -123,7 +123,7 @@ public class UrlSettingsTest {
         verify(persistentUrls).setTransactionDetailsUrl(BuildConfig.DEV_TRANSACTION_URL);
         verify(persistentUrls).setUnspentUrl(BuildConfig.DEV_UNSPENT_OUTPUTS_URL);
         verify(persistentUrls).setWalletPayloadUrl(BuildConfig.DEV_WALLET_PAYLOAD_URL);
-        verify(persistentUrls).setCurrentEnvironment(PersistentUrls.Environment.DEV);
+        verify(persistentUrls).setCurrentEnvironment(DEV);
         verify(appUtil).clearCredentialsAndKeepEnvironment();
     }
 
