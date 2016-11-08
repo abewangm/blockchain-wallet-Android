@@ -77,10 +77,10 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
         showConnectionDialogIfNeeded();
         mKeyboardLayout = (ViewGroup) findViewById(R.id.keyboard_container);
 
-        if (!UrlSettings.getInstance().shouldShowDebugMenu()) {
-            UrlSettings.getInstance().setDefaultEnvironment();
-        } else {
-            // TODO: 07/11/2016 Show some kind of selector here
+        if (UrlSettings.getInstance().shouldShowDebugMenu()) {
+            mBinding.buttonSettings.setVisibility(View.VISIBLE);
+            mBinding.buttonSettings.setOnClickListener(view ->
+                    new EnvironmentSwitcher(this).showEnvironmentSelectionDialog());
         }
 
         mViewModel.onViewReady();
@@ -99,7 +99,6 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
                 public void onAuthenticated(CharSequenceX data) {
                     dismissFingerprintDialog();
                     mViewModel.loginWithDecryptedPin(data);
-
                 }
 
                 @Override
@@ -261,7 +260,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
-                .setMessage(this.getString(R.string.password_entry))
+                .setMessage(getString(R.string.password_entry))
                 .setView(ViewUtils.getAlertDialogEditTextLayout(this, password))
                 .setCancelable(false)
                 .setNegativeButton(android.R.string.cancel, (dialog, whichButton) -> mViewModel.getAppUtil().restartApp())

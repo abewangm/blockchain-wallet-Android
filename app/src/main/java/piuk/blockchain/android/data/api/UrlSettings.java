@@ -1,5 +1,7 @@
 package piuk.blockchain.android.data.api;
 
+import android.util.Log;
+
 import info.blockchain.api.PersistentUrls;
 
 import javax.inject.Inject;
@@ -9,31 +11,35 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
-import static piuk.blockchain.android.data.api.UrlSettings.Environment.PRODUCTION;
-
 public class UrlSettings {
 
-    enum Environment {
-        PRODUCTION,
-        STAGING,
-        DEV
-    }
+    public static final String KEY_CURRENT_ENVIRONMENT = "current_environment";
 
-    private static final String KEY_CURRENT_ENVIRONMENT = "current_environment";
+    private static final String TAG = UrlSettings.class.getSimpleName();
     private static final String KEY_ENV_PROD = "env_prod";
     private static final String KEY_ENV_STAGING = "env_staging";
     private static final String KEY_ENV_DEV = "env_dev";
 
     private static UrlSettings urlSettings;
+    private Environment environment;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected AppUtil appUtil;
 
     {
         Injector.getInstance().getAppComponent().inject(this);
+
+        // Restore saved environment
+        String storedEnv = prefsUtil.getValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_PROD);
+        if (Environment.fromString(storedEnv) != null) {
+            setEnvironment(Environment.fromString(storedEnv));
+        } else {
+            // Set default if empty
+            setEnvironment(Environment.PRODUCTION);
+        }
     }
 
     private UrlSettings() {
-        urlSettings = new UrlSettings();
+        // Empty Constructor
     }
 
     public static UrlSettings getInstance() {
@@ -44,19 +50,20 @@ public class UrlSettings {
     }
 
     public boolean shouldShowDebugMenu() {
-        return BuildConfig.DEBUG;
+        return BuildConfig.DEBUG || BuildConfig.DOGFOOD;
     }
 
-    public void setDefaultEnvironment() {
-        setEnvironment(PRODUCTION);
+    public Environment getCurrentEnvironment() {
+        return environment;
     }
 
     public void changeEnvironment(Environment environment) {
         setEnvironment(environment);
-        appUtil.clearCredentialsAndRestart();
+        appUtil.clearCredentialsAndKeepEnvironment();
     }
 
     private void setEnvironment(Environment environment) {
+        this.environment = environment;
         switch (environment) {
             case PRODUCTION:
                 PersistentUrls.getInstance().setProductionEnvironment();
@@ -86,6 +93,7 @@ public class UrlSettings {
         }
 
         storeEnvironment(environment);
+        Log.d(TAG, "setEnvironment: " + environment.getName());
     }
 
     private void storeEnvironment(Environment environment) {
@@ -99,6 +107,34 @@ public class UrlSettings {
             case DEV:
                 prefsUtil.setValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_DEV);
                 break;
+        }
+    }
+
+    public enum Environment {
+
+        PRODUCTION(KEY_ENV_PROD),
+        STAGING(KEY_ENV_STAGING),
+        DEV(KEY_ENV_DEV);
+
+        private String name;
+
+        Environment(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public static Environment fromString(String text) {
+            if (text != null) {
+                for (Environment environment : Environment.values()) {
+                    if (text.equalsIgnoreCase(environment.getName())) {
+                        return environment;
+                    }
+                }
+            }
+            return null;
         }
     }
 
