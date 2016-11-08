@@ -60,10 +60,12 @@ class EnvironmentSwitcher {
                     }
                 })
                 .setPositiveButton("Select", (dialog, id) -> {
-                    UrlSettings.getInstance().changeEnvironment(selectedEnvironment[0]);
+                    UrlSettings.getInstance().changeEnvironment(
+                            selectedEnvironment[0] != null ? selectedEnvironment[0] : UrlSettings.Environment.PRODUCTION);
+
                     ToastCustom.makeText(
                             context,
-                            "Environment set to " + selectedEnvironment[0].getName(),
+                            "Environment set to " + UrlSettings.getInstance().getCurrentEnvironment().getName(),
                             ToastCustom.LENGTH_SHORT,
                             ToastCustom.TYPE_OK);
                 })

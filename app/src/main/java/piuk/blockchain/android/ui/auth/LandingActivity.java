@@ -16,6 +16,7 @@ import piuk.blockchain.android.data.api.UrlSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityLandingBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.pairing.PairOrCreateWalletActivity;
 import piuk.blockchain.android.util.AppUtil;
 
@@ -42,6 +43,11 @@ public class LandingActivity extends BaseAuthActivity {
         setTitle(R.string.app_name);
 
         if (UrlSettings.getInstance().shouldShowDebugMenu()) {
+            ToastCustom.makeText(
+                    this, "Current environment: " + UrlSettings.getInstance().getCurrentEnvironment().getName(),
+                    ToastCustom.LENGTH_SHORT,
+                    ToastCustom.TYPE_GENERAL);
+
             binding.buttonSettings.setVisibility(View.VISIBLE);
             binding.buttonSettings.setOnClickListener(view ->
                     new EnvironmentSwitcher(this).showEnvironmentSelectionDialog());

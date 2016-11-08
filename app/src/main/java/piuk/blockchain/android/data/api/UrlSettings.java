@@ -1,5 +1,6 @@
 package piuk.blockchain.android.data.api;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import info.blockchain.api.PersistentUrls;
@@ -25,7 +26,7 @@ public class UrlSettings {
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected AppUtil appUtil;
 
-    {
+    private UrlSettings() {
         Injector.getInstance().getAppComponent().inject(this);
 
         // Restore saved environment
@@ -33,13 +34,9 @@ public class UrlSettings {
         if (Environment.fromString(storedEnv) != null) {
             setEnvironment(Environment.fromString(storedEnv));
         } else {
-            // Set default if empty
+            // Set default if empty or malformed for some reason
             setEnvironment(Environment.PRODUCTION);
         }
-    }
-
-    private UrlSettings() {
-        // Empty Constructor
     }
 
     public static UrlSettings getInstance() {
@@ -53,11 +50,18 @@ public class UrlSettings {
         return BuildConfig.DEBUG || BuildConfig.DOGFOOD;
     }
 
+    @NonNull
     public Environment getCurrentEnvironment() {
         return environment;
     }
 
-    public void changeEnvironment(Environment environment) {
+    /**
+     * Sets the current environment to whatever is passed to it. Clears all user data other than the
+     * selected env and restarts the app
+     *
+     * @param environment The new {@link Environment} to switch to
+     */
+    public void changeEnvironment(@NonNull Environment environment) {
         setEnvironment(environment);
         appUtil.clearCredentialsAndKeepEnvironment();
     }
