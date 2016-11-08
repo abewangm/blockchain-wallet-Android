@@ -17,10 +17,12 @@ class EnvironmentSwitcher {
 
     private Context context;
     private PrefsUtil prefsUtil;
+    private UrlSettings urlSettings;
 
-    EnvironmentSwitcher(Context context) {
+    EnvironmentSwitcher(Context context, UrlSettings urlSettings) {
         this.context = context;
         prefsUtil = new PrefsUtil(context);
+        this.urlSettings = urlSettings;
     }
 
     void showEnvironmentSelectionDialog() {
@@ -28,7 +30,7 @@ class EnvironmentSwitcher {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 context, R.layout.item_environment_list, itemsList);
 
-        UrlSettings.Environment environment = UrlSettings.getInstance().getCurrentEnvironment();
+        UrlSettings.Environment environment = urlSettings.getCurrentEnvironment();
         int selection;
         switch (environment) {
             case STAGING:
@@ -60,12 +62,12 @@ class EnvironmentSwitcher {
                     }
                 })
                 .setPositiveButton("Select", (dialog, id) -> {
-                    UrlSettings.getInstance().changeEnvironment(
+                    urlSettings.changeEnvironment(
                             selectedEnvironment[0] != null ? selectedEnvironment[0] : UrlSettings.Environment.PRODUCTION);
 
                     ToastCustom.makeText(
                             context,
-                            "Environment set to " + UrlSettings.getInstance().getCurrentEnvironment().getName(),
+                            "Environment set to " + urlSettings.getCurrentEnvironment().getName(),
                             ToastCustom.LENGTH_SHORT,
                             ToastCustom.TYPE_OK);
                 })

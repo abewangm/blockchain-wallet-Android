@@ -15,6 +15,7 @@ import android.view.View;
 import info.blockchain.util.FeeUtil;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
+import info.blockchain.wallet.payload.HDWallet;
 import info.blockchain.wallet.payload.ImportedAccount;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.Payload;
@@ -65,6 +66,7 @@ public class AccountEditViewModel extends BaseViewModel {
     @Inject protected AccountEditDataManager accountEditDataManager;
     @Inject protected MultiAddrFactory multiAddrFactory;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
+    @Inject protected PrivateKeyFactory privateKeyFactory;
 
     // Visible for data binding
     public AccountEditModel accountModel;
@@ -285,16 +287,21 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     private boolean isArchivable() {
-        if (payloadManager.getPayload().isUpgraded()) {
+
+        Payload payload = payloadManager.getPayload();
+
+        if (payload.isUpgraded()) {
             //V3 - can't archive default account
-            int defaultIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
-            Account defaultAccount = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultIndex);
+            HDWallet hdWallet = payload.getHdWallet();
+
+            int defaultIndex = hdWallet.getDefaultIndex();
+            Account defaultAccount = hdWallet.getAccounts().get(defaultIndex);
 
             if (defaultAccount == account)
                 return false;
         } else {
             //V2 - must have a single unarchived address
-            List<LegacyAddress> allActiveLegacyAddresses = payloadManager.getPayload().getActiveLegacyAddressList();
+            List<LegacyAddress> allActiveLegacyAddresses = payload.getLegacyAddressList(LegacyAddress.NORMAL_ADDRESS);
             return (allActiveLegacyAddresses.size() > 1);
         }
 
@@ -686,7 +693,7 @@ public class AccountEditViewModel extends BaseViewModel {
         String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);
 
         try {
-            String format = PrivateKeyFactory.getInstance().getFormat(scanData);
+            String format = privateKeyFactory.getFormat(scanData);
             if (format != null) {
                 if (!format.equals(PrivateKeyFactory.BIP38)) {
                     importNonBIP38Address(format, scanData);
@@ -733,7 +740,7 @@ public class AccountEditViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
 
         try {
-            final ECKey key = PrivateKeyFactory.getInstance().getKey(format, data);
+            final ECKey key = privateKeyFactory.getKey(format, data);
             if (key != null && key.hasPrivKey()) {
                 final String keyAddress = key.toAddress(MainNetParams.get()).toString();
                 if (!legacyAddress.getAddress().equals(keyAddress)) {

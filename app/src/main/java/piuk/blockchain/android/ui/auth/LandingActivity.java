@@ -42,15 +42,17 @@ public class LandingActivity extends BaseAuthActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_landing);
         setTitle(R.string.app_name);
 
-        if (UrlSettings.getInstance().shouldShowDebugMenu()) {
+        UrlSettings urlSettings = new UrlSettings();
+
+        if (urlSettings.shouldShowDebugMenu()) {
             ToastCustom.makeText(
-                    this, "Current environment: " + UrlSettings.getInstance().getCurrentEnvironment().getName(),
+                    this, "Current environment: " + urlSettings.getCurrentEnvironment().getName(),
                     ToastCustom.LENGTH_SHORT,
                     ToastCustom.TYPE_GENERAL);
 
             binding.buttonSettings.setVisibility(View.VISIBLE);
             binding.buttonSettings.setOnClickListener(view ->
-                    new EnvironmentSwitcher(this).showEnvironmentSelectionDialog());
+                    new EnvironmentSwitcher(this, urlSettings).showEnvironmentSelectionDialog());
         }
 
         binding.create.setOnClickListener(view -> startLandingActivity(CREATE_FRAGMENT));

@@ -77,15 +77,17 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
         showConnectionDialogIfNeeded();
         mKeyboardLayout = (ViewGroup) findViewById(R.id.keyboard_container);
 
-        if (UrlSettings.getInstance().shouldShowDebugMenu()) {
+        UrlSettings urlSettings = new UrlSettings();
+
+        if (urlSettings.shouldShowDebugMenu()) {
             ToastCustom.makeText(
-                    this, "Current environment: " + UrlSettings.getInstance().getCurrentEnvironment().getName(),
+                    this, "Current environment: " + urlSettings.getCurrentEnvironment().getName(),
                     ToastCustom.LENGTH_SHORT,
                     ToastCustom.TYPE_GENERAL);
 
             mBinding.buttonSettings.setVisibility(View.VISIBLE);
             mBinding.buttonSettings.setOnClickListener(view ->
-                    new EnvironmentSwitcher(this).showEnvironmentSelectionDialog());
+                    new EnvironmentSwitcher(this, urlSettings).showEnvironmentSelectionDialog());
         }
 
         mViewModel.onViewReady();
