@@ -55,4 +55,6 @@ interface PersistentPrefs {
 
     void logIn();
 
+    void clearPrefsAndKeepEnvironment();
+
 }

@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 apply from: '../jacoco.gradle'
+apply from: 'environment.gradle'
 
 android {
     compileSdkVersion 25
@@ -19,6 +20,25 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
+        // URLs for Staging and Dev
+        buildConfigField "String", "DEV_ADDRESS_INFO", devAddressInfo
+        buildConfigField "String", "STAGING_ADDRESS_INFO", stagingAddressInfo
+        buildConfigField "String", "DEV_BALANCE", devBalance
+        buildConfigField "String", "STAGING_BALANCE", stagingBalance
+        buildConfigField "String", "DEV_DYNAMIC_FEE", devDynamicFee
+        buildConfigField "String", "STAGING_DYNAMIC_FEE", stagingDynamicFee
+        buildConfigField "String", "DEV_MULTIADDR_URL", devMultiaddrUrl
+        buildConfigField "String", "STAGING_MULTIADDR_URL", stagingMultiaddrUrl
+        buildConfigField "String", "DEV_PIN_STORE_URL", devPinStoreUrl
+        buildConfigField "String", "STAGING_PIN_STORE_URL", stagingPinStoreUrl
+        buildConfigField "String", "DEV_SETTINGS_PAYLOAD_URL", devSettingsPayloadUrl
+        buildConfigField "String", "STAGING_SETTINGS_PAYLOAD_URL", stagingSettingdPayloadUrl
+        buildConfigField "String", "DEV_TRANSACTION_URL", devTransactionUrl
+        buildConfigField "String", "STAGING_TRANSACTION_URL", stagingTransactionUrl
+        buildConfigField "String", "DEV_UNSPENT_OUTPUTS_URL", devUnspentOutputsUrl
+        buildConfigField "String", "STAGING_UNSPENT_OUTPUTS_URL", stagingUnspentOutputsUrl
+        buildConfigField "String", "DEV_WALLET_PAYLOAD_URL", devWalletPayloadUrl
+        buildConfigField "String", "STAGING_WALLET_PAYLOAD_URL", stagingWalletPayloadUrl
     }
 
     buildTypes {

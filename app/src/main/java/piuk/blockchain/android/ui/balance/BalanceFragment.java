@@ -325,11 +325,15 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             actionA.setColorPressed(ContextCompat.getColor(getActivity(), R.color.blockchain_green_50));
             actionA.setTitle("Show Payload");
             actionA.setOnClickListener(v -> {
+
                 AlertDialog dialog = null;
                 try {
+                    String debugString = new JSONObject(viewModel.getPayloadManager().getBciWallet().getPayload().getDecryptedPayload()).toString(4);
+                    Log.d(TAG, debugString);
+
                     dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                             .setTitle("Payload")
-                            .setMessage(new JSONObject(viewModel.getPayloadManager().getBciWallet().getPayload().getDecryptedPayload()).toString(4))
+                            .setMessage(debugString)
                             .show();
                 } catch (JSONException e) {
                     Log.e(TAG, "initDebugFab: ", e);
@@ -348,10 +352,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             actionB.setOnClickListener(v -> {
                 AlertDialog dialog = null;
                 try {
-                    dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                            .setTitle("Unparsed wallet data")
-                            .setMessage(new JSONObject(viewModel.getPayloadManager().getBciWallet().getUnparsedWalletData()).toString(4))
-                            .show();
+                String unparsed = new JSONObject(viewModel.getPayloadManager().getBciWallet().getUnparsedWalletData()).toString(4);
+                Log.d(TAG, unparsed);
+                dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                        .setTitle("Unparsed wallet data")
+                        .setMessage(unparsed)
+                        .show();
                 } catch (JSONException e) {
                     Log.e(TAG, "initDebugFab: ", e);
                 }
@@ -359,26 +365,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 textView.setTextSize(9);
             });
 
-            com.getbase.floatingactionbutton.FloatingActionButton actionC = new com.getbase.floatingactionbutton.FloatingActionButton(context);
-            actionC.setColorNormal(ContextCompat.getColor(getActivity(), R.color.blockchain_receive_green));
-            actionC.setSize(com.getbase.floatingactionbutton.FloatingActionButton.SIZE_MINI);
-            debugIcon.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
-            actionC.setIconDrawable(debugIcon);
-            actionC.setColorPressed(ContextCompat.getColor(getActivity(), R.color.blockchain_green_50));
-            actionC.setTitle("Show parsed wallet data");
-            actionC.setOnClickListener(v -> {
-                AlertDialog dialog = null;
-                dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                        .setTitle("Parsed wallet data")
-                        .setMessage(viewModel.getPayloadManager().getBciWallet().toString())
-                        .show();
-                TextView textView = (TextView) dialog.findViewById(android.R.id.message);
-                textView.setTextSize(9);
-            });
-
             binding.fabDebug.addButton(actionA);
             binding.fabDebug.addButton(actionB);
-            binding.fabDebug.addButton(actionC);
         } else {
             binding.fabDebug.setVisibility(View.GONE);
         }
