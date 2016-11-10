@@ -24,6 +24,8 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import rx.Observable;
 import rx.exceptions.Exceptions;
+import rx.subjects.PublishSubject;
+import rx.subjects.Subject;
 
 public class AccessState {
 
@@ -37,6 +39,8 @@ public class AccessState {
     private boolean isLoggedIn = false;
     private PendingIntent logoutPendingIntent;
     private static AccessState instance;
+    private static final Subject<AuthEvent, AuthEvent> authEventSubject = PublishSubject.create();
+
 
     public void initAccessState(Context context, PrefsUtil prefs, PinStoreService pinStore, AppUtil appUtil) {
         this.prefs = prefs;
@@ -181,5 +185,24 @@ public class AccessState {
     public void setIsLoggedIn(boolean loggedIn) {
         prefs.logIn();
         isLoggedIn = loggedIn;
+        if (isLoggedIn) {
+            authEventSubject.onNext(AuthEvent.Login);
+        } else {
+            authEventSubject.onNext(AuthEvent.Logout);
+        }
+    }
+
+    /**
+     * Returns a {@link Subject} that publishes login/logout events
+     * TODO: Logout events aren't currently captured here
+     */
+    public Subject<AuthEvent, AuthEvent> getAuthEventSubject() {
+        return authEventSubject;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public enum AuthEvent {
+        Login,
+        Logout
     }
 }
