@@ -80,11 +80,14 @@ public class UrlSettingsTest {
     public void getCurrentEnvironmentStaging() throws Exception {
         // Arrange
         when(prefsUtil.getValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_PROD)).thenReturn(KEY_ENV_STAGING);
+        when(persistentUrls.getCurrentEnvironment()).thenReturn(STAGING);
         subject = new UrlSettings();
         // Act
         PersistentUrls.Environment value = subject.getCurrentEnvironment();
         // Assert
-        assertTrue(PersistentUrls.Environment.STAGING.equals(value));
+        verify(persistentUrls).getCurrentEnvironment();
+        verify(persistentUrls).setCurrentEnvironment(STAGING);
+        assertTrue(STAGING.equals(value));
     }
 
     @Test
