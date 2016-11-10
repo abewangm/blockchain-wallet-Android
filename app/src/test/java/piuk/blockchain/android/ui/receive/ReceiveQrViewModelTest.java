@@ -21,7 +21,7 @@ import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;

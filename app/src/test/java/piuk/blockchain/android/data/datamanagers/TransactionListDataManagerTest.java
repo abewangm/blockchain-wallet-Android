@@ -22,14 +22,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.subjects.Subject;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.services.TransactionDetailsService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
-import rx.Observable;
-import rx.observers.TestSubscriber;
-import rx.subjects.Subject;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -259,31 +259,29 @@ public class TransactionListDataManagerTest extends RxTest {
     @Test
     public void getTransactionFromHash() throws Exception {
         // Arrange
-        TestSubscriber<Transaction> subscriber = new TestSubscriber<>();
         Transaction mockTransaction = mock(Transaction.class);
         when(mTransactionDetails.getTransactionDetailsFromHash(anyString())).thenReturn(Observable.just(mockTransaction));
         // Act
-        mSubject.getTransactionFromHash("hash").toBlocking().subscribe(subscriber);
+        TestObserver<Transaction> observer = mSubject.getTransactionFromHash("hash").test();
         // Assert
-        assertEquals(mockTransaction, subscriber.getOnNextEvents().get(0));
-        subscriber.onCompleted();
-        subscriber.assertNoErrors();
+        assertEquals(mockTransaction, observer.values().get(0));
+        observer.onComplete();
+        observer.assertNoErrors();
     }
 
     @Test
     public void updateTransactionNotes() throws Exception {
         // Arrange
-        TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.getTransactionNotesMap()).thenReturn(new HashMap<>());
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
         when(mPayloadManager.savePayloadToServer()).thenReturn(true);
         // Act
-        mSubject.updateTransactionNotes("hash", "notes").toBlocking().subscribe(subscriber);
+        TestObserver<Boolean> observer = mSubject.updateTransactionNotes("hash", "notes").test();
         // Assert
-        assertEquals(subscriber.getOnNextEvents().get(0), true);
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
+        assertEquals(true, observer.values().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
     }
 
 }

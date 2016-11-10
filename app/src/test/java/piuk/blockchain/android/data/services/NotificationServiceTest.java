@@ -7,8 +7,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
-import rx.observers.TestSubscriber;
 
 public class NotificationServiceTest extends RxTest {
 
@@ -26,12 +26,12 @@ public class NotificationServiceTest extends RxTest {
     @Test
     public void sendNotificationToken() throws Exception {
         // Arrange
-        TestSubscriber<Void> subscriber = new TestSubscriber<>();
+
         // Act
-        subject.sendNotificationToken("", "", "").subscribe(subscriber);
+        TestObserver<Void> observer = subject.sendNotificationToken("", "", "").test();
         // Assert
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
+        observer.assertComplete();
+        observer.assertNoErrors();
     }
 
 }

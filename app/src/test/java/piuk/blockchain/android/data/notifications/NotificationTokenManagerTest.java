@@ -11,14 +11,14 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import io.reactivex.Completable;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.access.AccessState.AuthEvent;
 import piuk.blockchain.android.data.services.NotificationService;
-import rx.Completable;
-import rx.subjects.PublishSubject;
-import rx.subjects.Subject;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -66,7 +66,7 @@ public class NotificationTokenManagerTest {
         when(mockPayload.getGuid()).thenReturn("guid");
         when(mockPayload.getSharedKey()).thenReturn("sharedKey");
         when(payloadManager.getPayload()).thenReturn(mockPayload);
-        Subject<AuthEvent, AuthEvent> testSubject = PublishSubject.create();
+        Subject<AuthEvent> testSubject = PublishSubject.create();
         when(accessState.getAuthEventSubject()).thenReturn(testSubject);
         when(notificationService.sendNotificationToken(anyString(), anyString(), anyString())).thenReturn(Completable.complete());
         // Act

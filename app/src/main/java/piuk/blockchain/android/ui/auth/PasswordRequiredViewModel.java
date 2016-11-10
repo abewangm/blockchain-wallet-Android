@@ -20,7 +20,6 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
-import rx.Subscriber;
 
 public class PasswordRequiredViewModel extends BaseViewModel {
 
@@ -92,13 +91,13 @@ public class PasswordRequiredViewModel extends BaseViewModel {
         String guid = mPrefsUtil.getValue(PrefsUtil.KEY_GUID, "");
         mWaitingForAuth = true;
 
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 mAuthDataManager.getSessionId(guid)
                         .flatMap(sessionId -> mAuthDataManager.getEncryptedPayload(guid, sessionId))
                         .subscribe(response -> {
                             if (response.equals(WalletPayload.KEY_AUTH_REQUIRED)) {
                                 showCheckEmailDialog();
-                                mCompositeSubscription.add(
+                                compositeDisposable.add(
                                         mAuthDataManager.startPollingAuthStatus(guid).subscribe(payloadResponse -> {
                                             mWaitingForAuth = false;
 
@@ -150,29 +149,18 @@ public class PasswordRequiredViewModel extends BaseViewModel {
     private void showCheckEmailDialog() {
         mDataListener.showProgressDialog(R.string.check_email_to_auth_login, "120", true);
 
-        mCompositeSubscription.add(mAuthDataManager.createCheckEmailTimer()
+        compositeDisposable.add(mAuthDataManager.createCheckEmailTimer()
                 .takeUntil(integer -> !mWaitingForAuth)
-                .subscribe(new Subscriber<Integer>() {
-                    @Override
-                    public void onCompleted() {
-
+                .subscribe(integer -> {
+                    if (integer <= 0) {
+                        // Only called if timer has run out
+                        showErrorToastAndRestartApp(R.string.pairing_failed);
+                    } else {
+                        mDataListener.updateWaitingForAuthDialog(integer);
                     }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        showErrorToast(R.string.auth_failed);
-                        mWaitingForAuth = false;
-                    }
-
-                    @Override
-                    public void onNext(Integer integer) {
-                        if (integer <= 0) {
-                            // Only called if timer has run out
-                            showErrorToastAndRestartApp(R.string.pairing_failed);
-                        } else {
-                            mDataListener.updateWaitingForAuthDialog(integer);
-                        }
-                    }
+                }, throwable -> {
+                    showErrorToast(R.string.auth_failed);
+                    mWaitingForAuth = false;
                 }));
     }
 

@@ -24,6 +24,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.BR;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
@@ -35,8 +37,6 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import rx.Observable;
-import rx.subscriptions.CompositeSubscription;
 
 @SuppressWarnings("WeakerAccess")
 public class BalanceViewModel extends BaseObservable implements ViewModel {
@@ -54,7 +54,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected PayloadManager payloadManager;
     @Inject protected TransactionListDataManager transactionListDataManager;
-    @VisibleForTesting CompositeSubscription compositeSubscription;
+    @VisibleForTesting CompositeDisposable compositeDisposable;
 
     @Bindable
     public String getBalance() {
@@ -92,7 +92,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         activeAccountAndAddressBiMap = HashBiMap.create();
         transactionList = new ArrayList<>();
         osUtil = new OSUtil(context);
-        compositeSubscription = new CompositeSubscription();
+        compositeDisposable = new CompositeDisposable();
     }
 
     public void onViewReady() {
@@ -101,9 +101,9 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
             prefsUtil.setValue(PrefsUtil.KEY_FIRST_RUN, false);
         } else {
             // Check from this point forwards
-            compositeSubscription.add(
+            compositeDisposable.add(
                     transactionListDataManager.getListUpdateSubject()
-                            .compose(RxUtil.applySchedulers())
+                            .compose(RxUtil.applySchedulersToObservable())
                             .subscribe(txs -> {
                                         if (hasTransactions()) {
                                             if (!isBackedUp() && !getIfNeverPromptBackup()) {
@@ -116,9 +116,9 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
                                                     storeTimeOfLastSecurityPrompt();
                                                 }
                                             } else if (isBackedUp() && !getIfNeverPrompt2Fa()) {
-                                                compositeSubscription.add(
+                                                compositeDisposable.add(
                                                         getSettingsApi()
-                                                                .compose(RxUtil.applySchedulers())
+                                                                .compose(RxUtil.applySchedulersToObservable())
                                                                 .subscribe(settings -> {
                                                                     if (!settings.isSmsVerified()) {
                                                                         // Show dialog for 2FA, store date of dialog launch
@@ -189,7 +189,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     public void destroy() {
         context = null;
         dataListener = null;
-        compositeSubscription.clear();
+        compositeDisposable.clear();
     }
 
     public List<ItemAccount> getActiveAccountAndAddressList() {

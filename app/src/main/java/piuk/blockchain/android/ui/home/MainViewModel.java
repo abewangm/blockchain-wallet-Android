@@ -31,7 +31,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
-import rx.Observable;
+import io.reactivex.Observable;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
@@ -86,9 +86,9 @@ public class MainViewModel extends BaseViewModel {
 
     private void checkIfShouldShowEmailVerification() {
         if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
-            mCompositeSubscription.add(
+            compositeDisposable.add(
                     getSettingsApi()
-                            .compose(RxUtil.applySchedulers())
+                            .compose(RxUtil.applySchedulersToObservable())
                             .subscribe(settings -> {
                                 if (!settings.isEmailVerified()) {
                                     appUtil.setNewlyCreated(false);

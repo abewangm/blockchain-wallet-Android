@@ -10,8 +10,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
-import rx.observers.TestSubscriber;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -35,31 +35,29 @@ public class UnspentServiceTest extends RxTest {
     @Test
     public void getUnspentOutputsSuccess() throws Exception {
         // Arrange
-        TestSubscriber<UnspentOutputs> subscriber = new TestSubscriber<>();
         when(unspent.getUnspentOutputs(anyString())).thenReturn(new JSONObject());
         Payment mockPayment = mock(Payment.class);
         UnspentOutputs mockOutputs = mock(UnspentOutputs.class);
         when(mockPayment.getCoins(any(JSONObject.class))).thenReturn(mockOutputs);
         // Act
-        subject.getUnspentOutputs("legacy", mockPayment).toBlocking().subscribe(subscriber);
+        TestObserver<UnspentOutputs> observer = subject.getUnspentOutputs("legacy", mockPayment).test();
         // Assert
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals(mockOutputs, subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals(mockOutputs, observer.values().get(0));
     }
 
     @Test
     public void getUnspentOutputsFailure() throws Exception {
         // Arrange
-        TestSubscriber<UnspentOutputs> subscriber = new TestSubscriber<>();
         when(unspent.getUnspentOutputs(anyString())).thenReturn(null);
         Payment mockPayment = mock(Payment.class);
         // Act
-        subject.getUnspentOutputs("legacy", mockPayment).toBlocking().subscribe(subscriber);
+        TestObserver<UnspentOutputs> observer = subject.getUnspentOutputs("legacy", mockPayment).test();
         // Assert
-        subscriber.assertNotCompleted();
-        subscriber.assertNoValues();
-        subscriber.assertError(Throwable.class);
+        observer.assertNotComplete();
+        observer.assertNoValues();
+        observer.assertError(Throwable.class);
     }
 
 }

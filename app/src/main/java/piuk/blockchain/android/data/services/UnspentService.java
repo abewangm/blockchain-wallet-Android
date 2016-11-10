@@ -4,8 +4,8 @@ import info.blockchain.api.Unspent;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.data.UnspentOutputs;
 
-import rx.Observable;
-import rx.exceptions.Exceptions;
+import io.reactivex.Observable;
+import io.reactivex.exceptions.Exceptions;
 
 public class UnspentService {
 

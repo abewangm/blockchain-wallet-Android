@@ -18,6 +18,14 @@ import org.json.JSONObject;
 
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Completable;
+import io.reactivex.CompletableObserver;
+import io.reactivex.Maybe;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.exceptions.Exceptions;
+import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -26,11 +34,6 @@ import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.exceptions.Exceptions;
-import rx.schedulers.Schedulers;
 
 @SuppressWarnings("WeakerAccess")
 public class AuthDataManager {
@@ -69,9 +72,9 @@ public class AuthDataManager {
         return walletPayloadService.getSessionId(guid);
     }
 
-    public Observable<Void> updatePayload(String sharedKey, String guid, CharSequenceX password) {
+    public Completable updatePayload(String sharedKey, String guid, CharSequenceX password) {
         return getUpdatePayloadObservable(sharedKey, guid, password)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     public Observable<CharSequenceX> validatePin(String pin) {
@@ -80,19 +83,17 @@ public class AuthDataManager {
 
     public Observable<Boolean> createPin(CharSequenceX password, String pin) {
         return accessState.createPin(password, pin)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     public Observable<Payload> createHdWallet(String password, String walletName) {
         return Observable.fromCallable(() -> payloadManager.createHDWallet(password, walletName))
-                .compose(RxUtil.applySchedulers())
+                .compose(RxUtil.applySchedulersToObservable())
                 .doOnNext(payload -> {
-                    if (payload != null) {
-                        // Successfully created and saved
-                        appUtil.setNewlyCreated(true);
-                        prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
-                        appUtil.setSharedKey(payload.getSharedKey());
-                    }
+                    // Successfully created and saved
+                    appUtil.setNewlyCreated(true);
+                    prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
+                    appUtil.setSharedKey(payload.getSharedKey());
                 });
     }
 
@@ -109,28 +110,28 @@ public class AuthDataManager {
                         appUtil.setSharedKey(payload.getSharedKey());
                     }
                 })
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
-    public Observable<String> startPollingAuthStatus(String guid) {
+    public Maybe<String> startPollingAuthStatus(String guid) {
         // Get session id
         return getSessionId(guid)
                 // return Observable that emits ticks every two seconds, pass in Session ID
                 .flatMap(sessionId -> Observable.interval(2, TimeUnit.SECONDS)
                         // For each emission from the timer, try to get the payload
-                        .map(tick -> getEncryptedPayload(guid, sessionId).toBlocking().first())
-                        // If auth not required, emit payload
-                        .filter(s -> !s.equals(WalletPayload.KEY_AUTH_REQUIRED))
-                        // If error called, emit Auth Required
-                        .onErrorReturn(throwable -> Observable.just(WalletPayload.KEY_AUTH_REQUIRED).toBlocking().first())
-                        // Make sure threading is correct
-                        .compose(RxUtil.applySchedulers())
-                        // Only emit the first object
-                        .first());
+                        .map(tick -> getEncryptedPayload(guid, sessionId).blockingFirst()))
+                // If auth not required, emit payload
+                .filter(s -> !s.equals(WalletPayload.KEY_AUTH_REQUIRED))
+                // If error called, emit Auth Required
+                .onErrorReturn(throwable -> Observable.just(WalletPayload.KEY_AUTH_REQUIRED).blockingFirst())
+                // Make sure threading is correct
+                .compose(RxUtil.applySchedulersToObservable())
+                // Only emit the first object
+                .firstElement();
     }
 
-    private Observable<Void> getUpdatePayloadObservable(String sharedKey, String guid, CharSequenceX password) {
-        return Observable.defer(() -> Observable.create(subscriber -> {
+    private Completable getUpdatePayloadObservable(String sharedKey, String guid, CharSequenceX password) {
+        return Completable.defer(() -> Completable.create(subscriber -> {
             try {
                 payloadManager.initiatePayload(
                         sharedKey,
@@ -138,13 +139,12 @@ public class AuthDataManager {
                         password,
                         () -> {
                             payloadManager.setTempPassword(password);
-                            if (!subscriber.isUnsubscribed()) {
-                                subscriber.onNext(null);
-                                subscriber.onCompleted();
+                            if (!subscriber.isDisposed()) {
+                                subscriber.onComplete();
                             }
                         });
             } catch (Exception e) {
-                if (!subscriber.isUnsubscribed()) {
+                if (!subscriber.isDisposed()) {
                     subscriber.onError(e);
                 }
             }
@@ -215,17 +215,20 @@ public class AuthDataManager {
             appUtil.setSharedKey(sharedKey);
 
             updatePayload(sharedKey, guid, password)
-                    .compose(RxUtil.applySchedulers())
-                    .subscribe(new Subscriber<Void>() {
+                    .subscribe(new CompletableObserver() {
                         @Override
-                        public void onCompleted() {
+                        public void onSubscribe(Disposable d) {
+                            // No-op
+                        }
+
+                        @Override
+                        public void onComplete() {
                             prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
                             listener.onSuccess();
                         }
 
                         @Override
                         public void onError(Throwable throwable) {
-
                             if (throwable instanceof InvalidCredentialsException) {
                                 listener.onAuthFail();
 
@@ -240,11 +243,6 @@ public class AuthDataManager {
                             } else {
                                 listener.onPairFail();
                             }
-                        }
-
-                        @Override
-                        public void onNext(Void aVoid) {
-                            // No-op
                         }
                     });
         } else {

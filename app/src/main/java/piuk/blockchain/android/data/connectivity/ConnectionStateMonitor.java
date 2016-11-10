@@ -10,10 +10,10 @@ import android.net.NetworkRequest;
 import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 
-import piuk.blockchain.android.data.rxjava.IgnorableSubscriber;
+import io.reactivex.Completable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
-import rx.Completable;
-import rx.android.schedulers.AndroidSchedulers;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 class ConnectionStateMonitor extends ConnectivityManager.NetworkCallback {
@@ -37,7 +37,7 @@ class ConnectionStateMonitor extends ConnectivityManager.NetworkCallback {
 
     @Override
     public void onAvailable(Network network) {
-        broadcastOnMainThread().subscribe(new IgnorableSubscriber<>());
+        broadcastOnMainThread().subscribe(new IgnorableDefaultObserver<>());
     }
 
     private Completable broadcastOnMainThread() {

@@ -5,11 +5,9 @@ import android.support.annotation.CallSuper;
 import org.junit.After;
 import org.junit.Before;
 
-import rx.Scheduler;
-import rx.android.plugins.RxAndroidPlugins;
-import rx.android.plugins.RxAndroidSchedulersHook;
-import rx.plugins.RxJavaHooks;
-import rx.schedulers.Schedulers;
+import io.reactivex.android.plugins.RxAndroidPlugins;
+import io.reactivex.plugins.RxJavaPlugins;
+import io.reactivex.schedulers.TestScheduler;
 
 /**
  * Created by adambennett on 08/08/2016.
@@ -22,25 +20,24 @@ public class RxTest {
     @Before
     @CallSuper
     public void setUp() throws Exception {
-        RxAndroidPlugins.getInstance().reset();
-        RxJavaHooks.reset();
+        RxAndroidPlugins.reset();
+        RxJavaPlugins.reset();
 
-        RxAndroidPlugins.getInstance().registerSchedulersHook(new RxAndroidSchedulersHook() {
-            @Override
-            public Scheduler getMainThreadScheduler() {
-                return Schedulers.immediate();
-            }
-        });
+        RxAndroidPlugins.setInitMainThreadSchedulerHandler(schedulerCallable -> new TestScheduler());
 
-        RxJavaHooks.setOnIOScheduler(scheduler -> Schedulers.immediate());
-        RxJavaHooks.setOnComputationScheduler(scheduler -> Schedulers.immediate());
-        RxJavaHooks.setOnNewThreadScheduler(scheduler -> Schedulers.immediate());
+        RxJavaPlugins.setInitIoSchedulerHandler(schedulerCallable -> new TestScheduler());
+        RxJavaPlugins.onIoScheduler(new TestScheduler());
+        RxJavaPlugins.initIoScheduler(TestScheduler::new);
+        RxJavaPlugins.setIoSchedulerHandler(scheduler -> new TestScheduler());
+
+        RxJavaPlugins.setInitComputationSchedulerHandler(schedulerCallable -> new TestScheduler());
+        RxJavaPlugins.setInitNewThreadSchedulerHandler(schedulerCallable -> new TestScheduler());
     }
 
     @After
     @CallSuper
     public void tearDown() throws Exception {
-        RxAndroidPlugins.getInstance().reset();
-        RxJavaHooks.reset();
+        RxAndroidPlugins.reset();
+        RxJavaPlugins.reset();
     }
 }

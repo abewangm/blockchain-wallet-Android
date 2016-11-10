@@ -18,15 +18,15 @@ import org.mockito.MockitoAnnotations;
 import java.math.BigInteger;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.services.PaymentService;
 import piuk.blockchain.android.data.services.UnspentService;
 import piuk.blockchain.android.ui.send.PendingTransaction;
-import rx.Observable;
-import rx.observers.TestSubscriber;
 
-import static org.junit.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyListOf;
@@ -53,7 +53,6 @@ public class AccountEditDataManagerTest extends RxTest {
     @Test
     public void getPendingTransactionForLegacyAddress() throws Exception {
         // Arrange
-        TestSubscriber<PendingTransaction> subscriber = new TestSubscriber<>();
         LegacyAddress legacyAddress = new LegacyAddress();
         Payment payment = new Payment();
         SuggestedFee suggestedFee = new SuggestedFee();
@@ -66,17 +65,16 @@ public class AccountEditDataManagerTest extends RxTest {
         when(payloadManager.getNextReceiveAddress(anyInt())).thenReturn("address");
         when(unspentService.getUnspentOutputs(anyString(), any(Payment.class))).thenReturn(Observable.just(mock(UnspentOutputs.class)));
         // Act
-        subject.getPendingTransactionForLegacyAddress(legacyAddress, payment).toBlocking().subscribe(subscriber);
+        TestObserver<PendingTransaction> observer = subject.getPendingTransactionForLegacyAddress(legacyAddress, payment).test();
         // Assert
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals(PendingTransaction.class, subscriber.getOnNextEvents().get(0).getClass());
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals(PendingTransaction.class, observer.values().get(0).getClass());
     }
 
     @Test
     public void submitPayment() throws Exception {
         // Arrange
-        TestSubscriber<String> subscriber = new TestSubscriber<>();
         when(paymentService.submitPayment(
                 any(SpendableUnspentOutputs.class),
                 anyListOf(ECKey.class),
@@ -85,41 +83,40 @@ public class AccountEditDataManagerTest extends RxTest {
                 any(BigInteger.class),
                 any(BigInteger.class))).thenReturn(Observable.just("hash"));
         // Act
-        subject.submitPayment(mock(
+        TestObserver<String> observer = subject.submitPayment(mock(
                 SpendableUnspentOutputs.class),
                 mock(List.class),
                 "",
                 "",
                 mock(BigInteger.class),
-                mock(BigInteger.class)).toBlocking().subscribe(subscriber);
+                mock(BigInteger.class)).test();
         // Assert
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals("hash", subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals("hash", observer.values().get(0));
     }
 
     @Test
     public void syncPayloadWithServer() throws Exception {
         // Arrange
-        TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
         when(payloadManager.savePayloadToServer()).thenReturn(true);
         // Act
-        subject.syncPayloadWithServer().toBlocking().subscribe(subscriber);
+        TestObserver<Boolean> observer = subject.syncPayloadWithServer().test();
         // Assert
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals(true, subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals(true, observer.values().get(0).booleanValue());
     }
 
     @Test
     public void updateBalancesAndTransactions() throws Exception {
         // Arrange
-        TestSubscriber subscriber = new TestSubscriber();
+
         // Act
-        subject.updateBalancesAndTransactions().subscribe(subscriber);
+        TestObserver<Void> observer = subject.updateBalancesAndTransactions().test();
         // Assert
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
+        observer.assertComplete();
+        observer.assertNoErrors();
     }
 
 }

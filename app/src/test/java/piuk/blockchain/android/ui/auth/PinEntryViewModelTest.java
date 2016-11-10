@@ -29,6 +29,8 @@ import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 
+import io.reactivex.Completable;
+import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
@@ -45,10 +47,9 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
-import rx.Observable;
 
+import static io.reactivex.Observable.just;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -64,7 +65,6 @@ import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_EM
 import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_PASSWORD;
 import static piuk.blockchain.android.ui.auth.LandingActivity.KEY_INTENT_RECOVERING_FUNDS;
 import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATING_PIN_FOR_RESULT;
-import static rx.Observable.just;
 
 @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
@@ -131,28 +131,6 @@ public class PinEntryViewModelTest {
         mSubject.onViewReady();
         // Assert
         assertEquals(true, mSubject.isForValidatingPinForResult());
-    }
-
-    @Test
-    public void onViewReadyEmailAndPasswordInIntentCreateWalletFails() throws Exception {
-        // Arrange
-        String email = "example@email.com";
-        String password = "1234567890";
-        Intent intent = new Intent();
-        intent.putExtra(KEY_INTENT_EMAIL, email);
-        intent.putExtra(KEY_INTENT_PASSWORD, password);
-        when(mActivity.getPageIntent()).thenReturn(intent);
-        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(new CharSequenceX(""));
-        when(mAuthDataManager.createHdWallet(anyString(), anyString())).thenReturn(just(null));
-        // Act
-        mSubject.onViewReady();
-        // Assert
-        assertEquals(false, mSubject.allowExit());
-        verify(mActivity).showProgressDialog(anyInt(), anyString());
-        verify(mActivity, times(2)).dismissProgressDialog();
-        //noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), anyString());
     }
 
     @Test
@@ -254,7 +232,7 @@ public class PinEntryViewModelTest {
     public void loginWithDecryptedPin() throws Exception {
         // Arrange
         CharSequenceX pincode = new CharSequenceX("1234");
-        when(mAuthDataManager.validatePin(pincode.toString())).thenReturn(Observable.just(new CharSequenceX("password")));
+        when(mAuthDataManager.validatePin(pincode.toString())).thenReturn(just(new CharSequenceX("password")));
         // Act
         mSubject.loginWithDecryptedPin(pincode);
         // Assert
@@ -408,33 +386,11 @@ public class PinEntryViewModelTest {
     }
 
     @Test
-    public void padClickedVerifyPinForResultReturnsNull() throws Exception {
-        // Arrange
-        mSubject.mUserEnteredPin = "133";
-        mSubject.mValidatingPinForResult = true;
-        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
-        when(mAuthDataManager.validatePin(anyString())).thenReturn(just(null));
-        // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("7");
-        mSubject.padClicked(mockView);
-        // Assert
-        verify(mActivity).setTitleVisibility(View.INVISIBLE);
-        verify(mActivity).showProgressDialog(anyInt(), anyString());
-        verify(mAuthDataManager).validatePin(anyString());
-        verify(mActivity).setTitleString(anyInt());
-        verify(mActivity).setTitleVisibility(View.VISIBLE);
-        //noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
-        assertEquals("", mSubject.mUserEnteredPin);
-    }
-
-    @Test
-    public void padClickedVerifyPinValidateCalledReturnsNullIncrementsFailureCount() throws Exception {
+    public void padClickedVerifyPinValidateCalledReturnsErrorIncrementsFailureCount() throws Exception {
         // Arrange
         mSubject.mUserEnteredPin = "133";
         when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
-        when(mAuthDataManager.validatePin(anyString())).thenReturn(just(null));
+        when(mAuthDataManager.validatePin(anyString())).thenReturn(Observable.error(new InvalidCredentialsException()));
         // Act
         View mockView = mock(View.class);
         when(mockView.getTag()).thenReturn("7");
@@ -535,7 +491,7 @@ public class PinEntryViewModelTest {
     public void validatePasswordSuccessful() throws Exception {
         // Arrange
         CharSequenceX password = new CharSequenceX("1234567890");
-        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(just(null));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.complete());
         // Act
         mSubject.validatePassword(password);
         // Assert
@@ -553,7 +509,7 @@ public class PinEntryViewModelTest {
     public void validatePasswordThrowsGenericException() throws Exception {
         // Arrange
         CharSequenceX password = new CharSequenceX("1234567890");
-        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new Throwable()));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new Throwable()));
         // Act
         mSubject.validatePassword(password);
         // Assert
@@ -570,7 +526,7 @@ public class PinEntryViewModelTest {
     public void validatePasswordThrowsServerConnectionException() throws Exception {
         // Arrange
         CharSequenceX password = new CharSequenceX("1234567890");
-        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new ServerConnectionException()));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new ServerConnectionException()));
         // Act
         mSubject.validatePassword(password);
         // Assert
@@ -585,7 +541,7 @@ public class PinEntryViewModelTest {
     @Test
     public void updatePayloadInvalidCredentialsException() throws Exception {
         // Arrange
-        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new InvalidCredentialsException()));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new InvalidCredentialsException()));
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
@@ -600,7 +556,7 @@ public class PinEntryViewModelTest {
     @Test
     public void updatePayloadServerConnectionException() throws Exception {
         // Arrange
-        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new ServerConnectionException()));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new ServerConnectionException()));
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
@@ -616,7 +572,7 @@ public class PinEntryViewModelTest {
     @Test
     public void updatePayloadDecryptionException() throws Exception {
         // Arrange
-        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new DecryptionException()));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new DecryptionException()));
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
@@ -631,7 +587,7 @@ public class PinEntryViewModelTest {
     @Test
     public void updatePayloadPayloadExceptionException() throws Exception {
         // Arrange
-        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new PayloadException()));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new PayloadException()));
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
@@ -648,7 +604,7 @@ public class PinEntryViewModelTest {
     @Test
     public void updatePayloadHDWalletException() throws Exception {
         // Arrange
-        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new HDWalletException()));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new HDWalletException()));
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
@@ -665,7 +621,7 @@ public class PinEntryViewModelTest {
     @Test
     public void updatePayloadVersionNotSupported() throws Exception {
         // Arrange
-        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new UnsupportedVersionException()));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new UnsupportedVersionException()));
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
@@ -680,7 +636,7 @@ public class PinEntryViewModelTest {
     @Test
     public void updatePayloadSuccessfulSetLabels() throws Exception {
         // Arrange
-        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(just(null));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.complete());
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
         HDWallet mockHdWallet = mock(HDWallet.class);
@@ -708,7 +664,7 @@ public class PinEntryViewModelTest {
     @Test
     public void updatePayloadSuccessfulUpgradeWallet() throws Exception {
         // Arrange
-        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(just(null));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.complete());
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
@@ -728,7 +684,7 @@ public class PinEntryViewModelTest {
     @Test
     public void updatePayloadSuccessfulVerifyPin() throws Exception {
         // Arrange
-        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(just(null));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.complete());
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
@@ -807,16 +763,6 @@ public class PinEntryViewModelTest {
         AppUtil util = mSubject.getAppUtil();
         // Assert
         assertEquals(util, mAppUtil);
-    }
-
-    @Test
-    public void destroy() throws Exception {
-        // Arrange
-
-        // Act
-        mSubject.destroy();
-        // Assert
-        assertFalse(mSubject.mCompositeSubscription.hasSubscriptions());
     }
 
     private class MockApplicationModule extends ApplicationModule {

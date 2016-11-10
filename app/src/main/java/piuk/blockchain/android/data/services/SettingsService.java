@@ -2,8 +2,8 @@ package piuk.blockchain.android.data.services;
 
 import info.blockchain.api.Settings;
 
-import rx.Observable;
-import rx.Subscriber;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
 
 public class SettingsService {
 
@@ -111,31 +111,31 @@ public class SettingsService {
 
     private static class SettingsResultListener implements Settings.ResultListener {
 
-        private final Subscriber<? super Boolean> subscriber;
+        private final ObservableEmitter<? super Boolean> subscriber;
 
-        SettingsResultListener(Subscriber<? super Boolean> subscriber) {
+        SettingsResultListener(ObservableEmitter<? super Boolean> subscriber) {
             this.subscriber = subscriber;
         }
 
         @Override
         public void onSuccess() {
-            if (!subscriber.isUnsubscribed()) {
+            if (!subscriber.isDisposed()) {
                 subscriber.onNext(true);
-                subscriber.onCompleted();
+                subscriber.onComplete();
             }
         }
 
         @Override
         public void onFail() {
-            if (!subscriber.isUnsubscribed()) {
+            if (!subscriber.isDisposed()) {
                 subscriber.onNext(false);
-                subscriber.onCompleted();
+                subscriber.onComplete();
             }
         }
 
         @Override
         public void onBadRequest() {
-            if (!subscriber.isUnsubscribed()) {
+            if (!subscriber.isDisposed()) {
                 subscriber.onError(new Throwable("Request invalid"));
             }
         }

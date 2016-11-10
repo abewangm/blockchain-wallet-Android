@@ -16,13 +16,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.TransactionDetailsService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.util.ListUtil;
-import rx.Observable;
-import rx.subjects.PublishSubject;
-import rx.subjects.Subject;
 
 public class TransactionListDataManager {
 
@@ -31,7 +31,7 @@ public class TransactionListDataManager {
     private PayloadManager payloadManager;
     private TransactionDetailsService transactionDetails;
     private TransactionListStore transactionListStore;
-    private Subject<List<Tx>, List<Tx>> listUpdateSubject;
+    private Subject<List<Tx>> listUpdateSubject;
 
     public TransactionListDataManager(PayloadManager payloadManager,
                                       TransactionDetailsService transactionDetails,
@@ -62,7 +62,7 @@ public class TransactionListDataManager {
 
         transactionListStore.sort(new TxMostRecentDateComparator());
         listUpdateSubject.onNext(transactionListStore.getList());
-        listUpdateSubject.onCompleted();
+        listUpdateSubject.onComplete();
     }
 
     /**
@@ -100,7 +100,7 @@ public class TransactionListDataManager {
      *
      * @return  The list of transactions after initial sync
      */
-    public Subject<List<Tx>, List<Tx>> getListUpdateSubject() {
+    public Subject<List<Tx>> getListUpdateSubject() {
         return listUpdateSubject;
     }
 
@@ -168,7 +168,7 @@ public class TransactionListDataManager {
     public Observable<Boolean> updateTransactionNotes(String transactionHash, String notes) {
         payloadManager.getPayload().getTransactionNotesMap().put(transactionHash, notes);
         return Observable.fromCallable(() -> payloadManager.savePayloadToServer())
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     private List<Tx> getV3Transactions(Account account) {
