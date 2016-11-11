@@ -136,6 +136,7 @@ dependencies {
 
     // Enable crash reporting only for release version
     releaseCompile "com.google.firebase:firebase-crash:$googleServicesVersion"
+    compile "com.google.firebase:firebase-messaging:$googleServicesVersion"
     compile "com.google.android.gms:play-services-maps:$googleServicesVersion"
     compile 'org.slf4j:slf4j-api:1.7.13'
     compile 'org.bitcoinj:bitcoinj-core:0.13.4'
