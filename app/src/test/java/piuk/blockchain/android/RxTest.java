@@ -6,8 +6,8 @@ import org.junit.After;
 import org.junit.Before;
 
 import io.reactivex.android.plugins.RxAndroidPlugins;
+import io.reactivex.internal.schedulers.TrampolineScheduler;
 import io.reactivex.plugins.RxJavaPlugins;
-import io.reactivex.schedulers.TestScheduler;
 
 /**
  * Created by adambennett on 08/08/2016.
@@ -23,15 +23,11 @@ public class RxTest {
         RxAndroidPlugins.reset();
         RxJavaPlugins.reset();
 
-        RxAndroidPlugins.setInitMainThreadSchedulerHandler(schedulerCallable -> new TestScheduler());
+        RxAndroidPlugins.setInitMainThreadSchedulerHandler(schedulerCallable -> TrampolineScheduler.instance());
 
-        RxJavaPlugins.setInitIoSchedulerHandler(schedulerCallable -> new TestScheduler());
-        RxJavaPlugins.onIoScheduler(new TestScheduler());
-        RxJavaPlugins.initIoScheduler(TestScheduler::new);
-        RxJavaPlugins.setIoSchedulerHandler(scheduler -> new TestScheduler());
-
-        RxJavaPlugins.setInitComputationSchedulerHandler(schedulerCallable -> new TestScheduler());
-        RxJavaPlugins.setInitNewThreadSchedulerHandler(schedulerCallable -> new TestScheduler());
+        RxJavaPlugins.setInitIoSchedulerHandler(schedulerCallable -> TrampolineScheduler.instance());
+        RxJavaPlugins.setInitComputationSchedulerHandler(schedulerCallable -> TrampolineScheduler.instance());
+        RxJavaPlugins.setInitNewThreadSchedulerHandler(schedulerCallable -> TrampolineScheduler.instance());
     }
 
     @After

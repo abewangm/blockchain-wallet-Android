@@ -15,7 +15,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import io.reactivex.Maybe;
+import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
@@ -29,7 +29,6 @@ import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
-import io.reactivex.Observable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -108,7 +107,7 @@ public class ManualPairingViewModelTest {
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Maybe.just("1234567890"));
+        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
         doAnswer(invocation -> {
             ((AuthDataManager.DecryptPayloadListener) invocation.getArguments()[3]).onSuccess();
             return null;
@@ -133,7 +132,7 @@ public class ManualPairingViewModelTest {
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Maybe.just("1234567890"));
+        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
         doAnswer(invocation -> {
             ((AuthDataManager.DecryptPayloadListener) invocation.getArguments()[3]).onPairFail();
             return null;
@@ -160,7 +159,7 @@ public class ManualPairingViewModelTest {
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Maybe.just("1234567890"));
+        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
         doAnswer(invocation -> {
             ((AuthDataManager.DecryptPayloadListener) invocation.getArguments()[3]).onPairFail();
             return null;
@@ -187,7 +186,7 @@ public class ManualPairingViewModelTest {
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Maybe.just("1234567890"));
+        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
         doAnswer(invocation -> {
             ((AuthDataManager.DecryptPayloadListener) invocation.getArguments()[3]).onAuthFail();
             return null;
@@ -214,7 +213,7 @@ public class ManualPairingViewModelTest {
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Maybe.just("1234567890"));
+        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
         doAnswer(invocation -> {
             ((AuthDataManager.DecryptPayloadListener) invocation.getArguments()[3]).onFatalError();
             return null;
@@ -288,7 +287,7 @@ public class ManualPairingViewModelTest {
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Maybe.just(WalletPayload.KEY_AUTH_REQUIRED));
+        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
         when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
         // Act
         mSubject.onContinueClicked();
@@ -311,7 +310,7 @@ public class ManualPairingViewModelTest {
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Maybe.just("1234567890"));
+        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
         // Act
         mSubject.onContinueClicked();
@@ -332,7 +331,7 @@ public class ManualPairingViewModelTest {
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
         when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Maybe.error(new Throwable()));
+        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.error(new Throwable()));
         // Act
         mSubject.onContinueClicked();
         // Assert
@@ -355,7 +354,7 @@ public class ManualPairingViewModelTest {
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
         when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.just(0));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Maybe.just("1234567890"));
+        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
         // Act
         mSubject.onContinueClicked();
         // Assert
@@ -377,7 +376,7 @@ public class ManualPairingViewModelTest {
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
         when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.error(new Throwable()));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Maybe.just("1234567890"));
+        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
         // Act
         mSubject.onContinueClicked();
         // Assert

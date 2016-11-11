@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
-import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -113,21 +112,23 @@ public class AuthDataManager {
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    public Maybe<String> startPollingAuthStatus(String guid) {
+    public Observable<String> startPollingAuthStatus(String guid) {
         // Get session id
         return getSessionId(guid)
                 // return Observable that emits ticks every two seconds, pass in Session ID
                 .flatMap(sessionId -> Observable.interval(2, TimeUnit.SECONDS)
                         // For each emission from the timer, try to get the payload
-                        .map(tick -> getEncryptedPayload(guid, sessionId).blockingFirst()))
-                // If auth not required, emit payload
-                .filter(s -> !s.equals(WalletPayload.KEY_AUTH_REQUIRED))
-                // If error called, emit Auth Required
-                .onErrorReturn(throwable -> Observable.just(WalletPayload.KEY_AUTH_REQUIRED).blockingFirst())
-                // Make sure threading is correct
-                .compose(RxUtil.applySchedulersToObservable())
-                // Only emit the first object
-                .firstElement();
+                        .map(tick -> getEncryptedPayload(guid, sessionId).blockingFirst())
+                        // If auth not required, emit payload
+                        .filter(s -> !s.equals(WalletPayload.KEY_AUTH_REQUIRED))
+                        // If error called, emit Auth Required
+                        .onErrorReturn(throwable -> WalletPayload.KEY_AUTH_REQUIRED)
+                        // Make sure threading is correct
+                        .compose(RxUtil.applySchedulersToObservable())
+                        // Only emit the first object
+                        .firstElement()
+                        // As Observable rather than Maybe
+                        .toObservable());
     }
 
     private Completable getUpdatePayloadObservable(String sharedKey, String guid, CharSequenceX password) {
