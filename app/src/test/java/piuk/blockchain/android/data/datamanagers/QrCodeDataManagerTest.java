@@ -18,15 +18,15 @@ import static junit.framework.TestCase.assertEquals;
 
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
-public class ReceiveDataManagerTest extends RxTest {
+public class QrCodeDataManagerTest extends RxTest {
 
-    private ReceiveDataManager mSubject;
+    private QrCodeDataManager mSubject;
     private static final String TEST_URI = "bitcoin://1234567890";
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        mSubject = new ReceiveDataManager();
+        mSubject = new QrCodeDataManager();
     }
 
     @Test

@@ -14,8 +14,13 @@
 
         <item
             android:id="@+id/nav_addresses"
-            android:icon="@drawable/ic_person_grey600_24dp"
+            android:icon="@drawable/icon_accounthd"
             android:title="@string/addresses" />
+
+        <item
+            android:id="@+id/nav_contacts"
+            android:icon="@drawable/ic_person_grey600_24dp"
+            android:title="@string/contacts_title" />
 
         <item
             android:id="@+id/nav_map"

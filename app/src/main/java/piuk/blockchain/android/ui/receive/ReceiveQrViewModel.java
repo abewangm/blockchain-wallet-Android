@@ -8,7 +8,7 @@ import android.support.annotation.VisibleForTesting;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
+import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -19,7 +19,7 @@ public class ReceiveQrViewModel extends BaseViewModel {
     private static final int DIMENSION_QR_CODE = 600;
 
     private DataListener dataListener;
-    @Inject ReceiveDataManager receiveDataManager;
+    @Inject QrCodeDataManager qrCodeDataManager;
     @VisibleForTesting String receiveAddressString;
 
     interface DataListener {
@@ -60,7 +60,7 @@ public class ReceiveQrViewModel extends BaseViewModel {
             dataListener.setAddressLabel(labelString);
 
             compositeDisposable.add(
-                    receiveDataManager.generateQrCode("bitcoin:" + receiveAddressString, DIMENSION_QR_CODE)
+                    qrCodeDataManager.generateQrCode("bitcoin:" + receiveAddressString, DIMENSION_QR_CODE)
                             .subscribe(bitmap -> {
                                 dataListener.setImageBitmap(bitmap);
                             }, throwable -> {

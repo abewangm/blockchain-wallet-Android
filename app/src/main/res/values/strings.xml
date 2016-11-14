@@ -538,4 +538,14 @@
     <string name="shortcut_receive_qr_short">Show Receive QR</string>
     <string name="shortcut_receive_qr_long">View QR code for receive address</string>
     <string name="shortcut_receive_qr_error">Sorry, there was an error generating the QR code</string>
+
+    <!-- CONTACTS -->
+    <string name="contacts_title">Contacts</string>
+    <string name="contacts_loading_failed">Loading contacts failed, please try again</string>
+    <string name="contacts_pairing_method_title">Add Contact</string>
+    <string name="contact_choose_pairing_method">Choose the paring method you wish to use to add a trusted contact:</string>
+    <string name="contacts_send_link">Send link</string>
+    <string name="contacts_use_nfc">Use NFC</string>
+    <string name="contacts_view_my_qr_code">View My QR Code</string>
+
 </resources>

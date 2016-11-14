@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- MAIN LAYOUT-->
+    <LinearLayout
+        android:id="@+id/activity_contact_pairing"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="piuk.blockchain.android.ui.metadata.ContactPairingMethodActivity">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar_general" />
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="@string/contact_choose_pairing_method" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/button_qr_code"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="48dp"
+            android:layout_marginRight="48dp"
+            android:text="@string/scan_qr"
+            android:theme="@style/ButtonBlue" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/button_send_link"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="48dp"
+            android:layout_marginRight="48dp"
+            android:text="@string/contacts_send_link"
+            android:theme="@style/ButtonBlue" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/button_nfc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="48dp"
+            android:layout_marginRight="48dp"
+            android:text="@string/contacts_use_nfc"
+            android:theme="@style/ButtonBlue" />
+
+
+    </LinearLayout>
+</layout>

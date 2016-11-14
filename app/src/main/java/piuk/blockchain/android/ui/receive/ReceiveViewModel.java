@@ -39,7 +39,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
+import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -64,7 +64,7 @@ public class ReceiveViewModel extends BaseViewModel {
     @Inject AppUtil mAppUtil;
     @Inject PrefsUtil mPrefsUtil;
     @Inject StringUtils mStringUtils;
-    @Inject ReceiveDataManager mDataManager;
+    @Inject QrCodeDataManager mDataManager;
     @Inject WalletAccountHelper mWalletAccountHelper;
     @Inject SSLVerifyUtil mSSLVerifyUtil;
     @Inject Context mApplicationContext;

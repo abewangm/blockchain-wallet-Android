@@ -30,7 +30,7 @@ import java.util.Locale;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
+import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -64,7 +64,7 @@ public class ReceiveViewModelTest {
     @Mock AppUtil mAppUtil;
     @Mock PrefsUtil mPrefsUtil;
     @Mock StringUtils mStringUtils;
-    @Mock ReceiveDataManager mDataManager;
+    @Mock QrCodeDataManager mDataManager;
     @Mock ExchangeRateFactory mExchangeRateFactory;
     @Mock WalletAccountHelper mWalletAccountHelper;
     @Mock private ReceiveActivity mActivity;
@@ -402,7 +402,7 @@ public class ReceiveViewModelTest {
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected ReceiveDataManager provideReceiveDataManager() {
+        protected QrCodeDataManager provideReceiveDataManager() {
             return mDataManager;
         }
 

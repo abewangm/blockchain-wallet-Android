@@ -15,4 +15,5 @@
 	<dimen name="action_bar_height">56dp</dimen>
 	<dimen name="expandable_layout_base_height">72dp</dimen>
 	<dimen name="balance_bar_height">72dp</dimen>
+	<dimen name="app_bar_height">180dp</dimen>
 </resources>

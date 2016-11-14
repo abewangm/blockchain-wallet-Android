@@ -10,7 +10,7 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.zxing.Contents;
 import piuk.blockchain.android.ui.zxing.encode.QRCodeEncoder;
 
-public class ReceiveDataManager {
+public class QrCodeDataManager {
 
     /**
      * Generates a QR code in Bitmap format from a given URI to specified dimensions, wrapped in an

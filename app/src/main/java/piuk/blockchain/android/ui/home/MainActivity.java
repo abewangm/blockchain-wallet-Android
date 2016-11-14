@@ -38,6 +38,7 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
+import piuk.blockchain.android.ui.metadata.ContactsActivity;
 import piuk.blockchain.android.ui.send.SendActivity;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
@@ -235,6 +236,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 break;
             case R.id.nav_addresses:
                 startActivity(new Intent(MainActivity.this, AccountActivity.class));
+                break;
+            case R.id.nav_contacts:
+                ContactsActivity.start(this);
                 break;
             case R.id.nav_upgrade:
                 startActivity(new Intent(MainActivity.this, UpgradeWalletActivity.class));
