@@ -24,6 +24,7 @@ import org.robolectric.annotation.Config;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
@@ -40,10 +41,8 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
-import rx.Observable;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -301,16 +300,6 @@ public class ConfirmFundsTransferViewModelTest {
         verify(mActivity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
         verify(mActivity).dismissDialog();
         verifyNoMoreInteractions(mActivity);
-    }
-
-    @Test
-    public void destroy() throws Exception {
-        // Arrange
-
-        // Act
-        mSubject.destroy();
-        // Assert
-        assertFalse(mSubject.mCompositeSubscription.hasSubscriptions());
     }
 
     private class MockApplicationModule extends ApplicationModule {

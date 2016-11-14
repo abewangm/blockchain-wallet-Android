@@ -28,11 +28,11 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
-import rx.observers.TestSubscriber;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -68,7 +68,6 @@ public class TransferFundsDataManagerTest extends RxTest {
     @Test
     public void getTransferableFundTransactionListForDefaultAccount() throws Exception {
         // Arrange
-        TestSubscriber<Triple> subscriber = new TestSubscriber<>();
         Payload mockPayload = mock(Payload.class);
         LegacyAddress legacyAddress1 = new LegacyAddress();
         legacyAddress1.setAddress("address");
@@ -96,16 +95,15 @@ public class TransferFundsDataManagerTest extends RxTest {
         when(mockSweepBundle.getSweepAmount()).thenReturn(new BigInteger("5460"));
         when(mPayment.getSweepBundle(any(UnspentOutputs.class), any(BigInteger.class))).thenReturn(mockSweepBundle);
         // Act
-        mSubject.getTransferableFundTransactionListForDefaultAccount().toBlocking().subscribe(subscriber);
+        TestObserver<Triple<List<PendingTransaction>, Long, Long>> observer = mSubject.getTransferableFundTransactionListForDefaultAccount().test();
         // Assert
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
+        observer.assertComplete();
+        observer.assertNoErrors();
     }
 
     @Test
     public void sendPaymentSuccessNoEncryption() throws Exception {
         // Arrange
-        TestSubscriber<String> subscriber = new TestSubscriber<>();
         Payment mockPayment = mock(Payment.class);
         doAnswer(invocation -> {
             ((Payment.SubmitPaymentListener) invocation.getArguments()[6]).onSuccess("hash");
@@ -137,17 +135,16 @@ public class TransferFundsDataManagerTest extends RxTest {
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
 
         // Act
-        mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).toBlocking().subscribe(subscriber);
+        TestObserver<String> observer = mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
         // Assert
-        assertEquals("hash", subscriber.getOnNextEvents().get(0));
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
+        assertEquals("hash", observer.values().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
     }
 
     @Test
     public void sendPaymentEncryptionThrowsException() throws Exception {
         // Arrange
-        TestSubscriber<String> subscriber = new TestSubscriber<>();
         Payment mockPayment = mock(Payment.class);
         doAnswer(invocation -> {
             ((Payment.SubmitPaymentListener) invocation.getArguments()[6]).onSuccess("hash");
@@ -180,17 +177,16 @@ public class TransferFundsDataManagerTest extends RxTest {
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
 
         // Act
-        mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).toBlocking().subscribe(subscriber);
+        TestObserver<String> observer = mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
         // Assert
-        subscriber.assertError(Throwable.class);
-        subscriber.assertNotCompleted();
-        subscriber.assertNoValues();
+        observer.assertError(Throwable.class);
+        observer.assertNotComplete();
+        observer.assertNoValues();
     }
 
     @Test
     public void sendPaymentFailed() throws Exception {
         // Arrange
-        TestSubscriber<String> subscriber = new TestSubscriber<>();
         Payment mockPayment = mock(Payment.class);
         doAnswer(invocation -> {
             ((Payment.SubmitPaymentListener) invocation.getArguments()[6]).onFail("failed");
@@ -220,17 +216,16 @@ public class TransferFundsDataManagerTest extends RxTest {
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
 
         // Act
-        mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).toBlocking().subscribe(subscriber);
+        TestObserver<String> observer = mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
         // Assert
-        subscriber.assertError(Throwable.class);
-        subscriber.assertNotCompleted();
-        subscriber.assertNoValues();
+        observer.assertError(Throwable.class);
+        observer.assertNotComplete();
+        observer.assertNoValues();
     }
 
     @Test
     public void sendPaymentException() throws Exception {
         // Arrange
-        TestSubscriber<String> subscriber = new TestSubscriber<>();
         Payment mockPayment = mock(Payment.class);
         doThrow(new NullPointerException())
                 .when(mockPayment)
@@ -255,24 +250,23 @@ public class TransferFundsDataManagerTest extends RxTest {
         when(mPayloadManager.savePayloadToServer()).thenReturn(true);
 
         // Act
-        mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).toBlocking().subscribe(subscriber);
+        TestObserver<String> observer = mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
         // Assert
-        subscriber.assertError(Throwable.class);
-        subscriber.assertNotCompleted();
-        subscriber.assertNoValues();
+        observer.assertError(Throwable.class);
+        observer.assertNotComplete();
+        observer.assertNoValues();
     }
 
     @Test
     public void savePayloadToServer() throws Exception {
         // Arrange
-        TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
         when(mPayloadManager.savePayloadToServer()).thenReturn(true);
         // Act
-        mSubject.savePayloadToServer().toBlocking().subscribe(subscriber);
+        TestObserver<Boolean> observer = mSubject.savePayloadToServer().test();
         // Assert
-        assertEquals(true, subscriber.getOnNextEvents().get(0));
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
+        assertEquals(true, observer.values().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
     }
 
 }

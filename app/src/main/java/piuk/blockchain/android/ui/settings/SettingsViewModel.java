@@ -10,6 +10,8 @@ import info.blockchain.wallet.util.CharSequenceX;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
+import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
@@ -21,8 +23,6 @@ import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
-import rx.Observable;
-import rx.exceptions.Exceptions;
 
 @SuppressWarnings("WeakerAccess")
 public class SettingsViewModel extends BaseViewModel {
@@ -106,7 +106,7 @@ public class SettingsViewModel extends BaseViewModel {
     public void onViewReady() {
         dataListener.showProgressDialog(R.string.please_wait);
         // Fetch updated settings
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 settingsDataManager.updateSettings(
                         payloadManager.getPayload().getGuid(),
                         payloadManager.getPayload().getSharedKey())
@@ -382,7 +382,7 @@ public class SettingsViewModel extends BaseViewModel {
         if (!isStringValid(email)) {
             dataListener.setEmailSummary(stringUtils.getString(R.string.not_specified));
         } else {
-            mCompositeSubscription.add(
+            compositeDisposable.add(
                     settingsDataManager.updateEmail(email)
                             .subscribe(success -> {
                                 if (success) {
@@ -406,7 +406,7 @@ public class SettingsViewModel extends BaseViewModel {
         if (!isStringValid(sms)) {
             dataListener.setSmsSummary(stringUtils.getString(R.string.not_specified));
         } else {
-            mCompositeSubscription.add(
+            compositeDisposable.add(
                     settingsDataManager.updateSms(sms)
                             .subscribe(success -> {
                                 if (success) {
@@ -428,7 +428,7 @@ public class SettingsViewModel extends BaseViewModel {
      */
     void verifySms(@NonNull String code) {
         dataListener.showProgressDialog(R.string.please_wait);
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 settingsDataManager.verifySms(code)
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(success -> {
@@ -453,7 +453,7 @@ public class SettingsViewModel extends BaseViewModel {
      * @param blocked Whether or not to block Tor requests
      */
     void updateTor(boolean blocked) {
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 settingsDataManager.updateTor(blocked)
                         .subscribe(success -> {
                             if (success) {
@@ -475,7 +475,7 @@ public class SettingsViewModel extends BaseViewModel {
         if (!isStringValid(hint)) {
             dataListener.showToast(R.string.settings_field_cant_be_empty, ToastCustom.TYPE_ERROR);
         } else {
-            mCompositeSubscription.add(
+            compositeDisposable.add(
                     settingsDataManager.updatePasswordHint(hint)
                             .subscribe(success -> {
                                 if (success) {
@@ -496,7 +496,7 @@ public class SettingsViewModel extends BaseViewModel {
      * @see {@link Settings}
      */
     void updateTwoFa(int type) {
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 settingsDataManager.updateTwoFactor(type)
                         .subscribe(success -> {
                             if (success) {
@@ -517,7 +517,7 @@ public class SettingsViewModel extends BaseViewModel {
      * @see {@link Settings}
      */
     void updateNotification(int type, boolean enabled) {
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 settingsDataManager.updateNotifications(type, enabled)
                         .subscribe(success -> {
                             if (success) {
@@ -539,7 +539,7 @@ public class SettingsViewModel extends BaseViewModel {
     void validatePin(@NonNull CharSequenceX pin) {
         dataListener.showProgressDialog(R.string.please_wait);
 
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accessState.validatePin(pin.toString())
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(sequenceX -> {
@@ -570,7 +570,7 @@ public class SettingsViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
         payloadManager.setTempPassword(password);
 
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accessState.createPin(password, accessState.getPIN())
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .flatMap(success -> {

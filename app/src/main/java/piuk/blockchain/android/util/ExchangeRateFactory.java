@@ -16,7 +16,7 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
-import rx.Observable;
+import io.reactivex.Observable;
 
 /**
  * This class obtains info on the currencies communicated via https://blockchain.info/ticker
@@ -116,7 +116,7 @@ public class ExchangeRateFactory {
     public Observable<Double> getHistoricPrice(long satoshis, String currency, long timeInMillis) {
         return Observable.fromCallable(() -> new ExchangeTicker().getHistoricPrice(satoshis, currency, timeInMillis))
                 .flatMap(this::parseStringValue)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     private Observable<Double> parseStringValue(String value) {

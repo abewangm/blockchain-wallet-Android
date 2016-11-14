@@ -6,7 +6,7 @@ import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import org.json.JSONObject;
 
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import rx.Observable;
+import io.reactivex.Observable;
 
 public class PinStoreService {
 
@@ -28,7 +28,7 @@ public class PinStoreService {
     public Observable<Boolean> setAccessKey(String key, String value, String pin) {
         return Observable.fromCallable(() -> pinStore.setAccess(key, value, pin))
                 .map(jsonObject -> jsonObject.has("success"))
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -40,25 +40,25 @@ public class PinStoreService {
      */
     public Observable<JSONObject> validateAccess(String key, String pin) {
         return createValidateAccessObservable(key, pin)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     private Observable<JSONObject> createValidateAccessObservable(String key, String pin) {
-        return Observable.create(subscriber -> {
+        return Observable.create(observableEmitter -> {
             try {
                 JSONObject object = pinStore.validateAccess(key, pin);
-                if (!subscriber.isUnsubscribed()) {
-                    subscriber.onNext(object);
-                    subscriber.onCompleted();
+                if (!observableEmitter.isDisposed()) {
+                    observableEmitter.onNext(object);
+                    observableEmitter.onComplete();
                 }
             } catch (Exception e) {
                 if (e.getMessage() != null && e.getMessage().contains("Incorrect PIN")) {
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onError(new InvalidCredentialsException("Incorrect PIN"));
+                    if (!observableEmitter.isDisposed()) {
+                        observableEmitter.onError(new InvalidCredentialsException("Incorrect PIN"));
                     }
                 } else {
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onError(e);
+                    if (!observableEmitter.isDisposed()) {
+                        observableEmitter.onError(e);
                     }
                 }
             }

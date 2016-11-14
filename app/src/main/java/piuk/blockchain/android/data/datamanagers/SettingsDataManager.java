@@ -4,7 +4,7 @@ import info.blockchain.api.Settings;
 
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.SettingsService;
-import rx.Observable;
+import io.reactivex.Observable;
 
 public class SettingsDataManager {
 
@@ -23,7 +23,7 @@ public class SettingsDataManager {
      */
     public Observable<Settings> updateSettings(String guid, String sharedKey) {
         return settingsService.updateSettings(guid, sharedKey)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -34,7 +34,7 @@ public class SettingsDataManager {
      */
     public Observable<Boolean> updateEmail(String email) {
         return settingsService.updateEmail(email)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -45,7 +45,7 @@ public class SettingsDataManager {
      */
     public Observable<Boolean> updateSms(String sms) {
         return settingsService.updateSms(sms)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -56,7 +56,7 @@ public class SettingsDataManager {
      */
     public Observable<Boolean> verifySms(String code) {
         return settingsService.verifySms(code)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -67,7 +67,7 @@ public class SettingsDataManager {
      */
     public Observable<Boolean> updateTor(boolean blocked) {
         return settingsService.updateTor(blocked)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -78,7 +78,7 @@ public class SettingsDataManager {
      */
     public Observable<Boolean> updatePasswordHint(String hint) {
         return settingsService.updatePasswordHint(hint)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -92,10 +92,10 @@ public class SettingsDataManager {
     public Observable<Boolean> updateNotifications(int notificationType, boolean enabled) {
         if (enabled) {
             return settingsService.enableNotifications(notificationType)
-                    .compose(RxUtil.applySchedulers());
+                    .compose(RxUtil.applySchedulersToObservable());
         } else {
             return settingsService.disableNotifications(notificationType)
-                    .compose(RxUtil.applySchedulers());
+                    .compose(RxUtil.applySchedulersToObservable());
         }
     }
 
@@ -108,6 +108,6 @@ public class SettingsDataManager {
      */
     public Observable<Boolean> updateTwoFactor(int authType) {
         return settingsService.updateTwoFactor(authType)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 }

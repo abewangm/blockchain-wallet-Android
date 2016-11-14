@@ -2,8 +2,8 @@ package piuk.blockchain.android.data.services;
 
 import info.blockchain.api.Notifications;
 
-import rx.Completable;
-import rx.schedulers.Schedulers;
+import io.reactivex.Completable;
+import io.reactivex.schedulers.Schedulers;
 
 public class NotificationService {
 

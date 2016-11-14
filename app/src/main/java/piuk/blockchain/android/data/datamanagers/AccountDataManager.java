@@ -16,10 +16,10 @@ import org.bitcoinj.params.MainNetParams;
 
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.AddressInfoService;
-import rx.Observable;
-import rx.exceptions.Exceptions;
 
 import static piuk.blockchain.android.data.services.AddressInfoService.PARAMETER_FINAL_BALANCE;
 
@@ -45,7 +45,7 @@ public class AccountDataManager {
     public Observable<Account> createNewAccount(String accountLabel, @Nullable CharSequenceX secondPassword) {
         return Observable.fromCallable(() -> payloadManager.addAccount(accountLabel,
                 secondPassword != null ? secondPassword.toString() : null))
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -102,7 +102,7 @@ public class AccountDataManager {
      */
     public Observable<Boolean> updateLegacyAddress(LegacyAddress legacyAddress) {
         return createUpdateLegacyAddressObservable(legacyAddress)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     private Observable<Boolean> createUpdateLegacyAddressObservable(LegacyAddress address) {
@@ -115,7 +115,7 @@ public class AccountDataManager {
 
     private Observable<Boolean> savePayloadToServer() {
         return Observable.fromCallable(() -> payloadManager.savePayloadToServer())
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     private Observable<Long> addAddressAndUpdate(LegacyAddress address) {

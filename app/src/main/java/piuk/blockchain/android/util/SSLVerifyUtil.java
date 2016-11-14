@@ -14,12 +14,12 @@ import javax.inject.Inject;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLHandshakeException;
 
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.util.annotations.Thunk;
-import rx.Observable;
-import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
-import rx.subjects.Subject;
 
 // openssl s_client -showcerts -connect blockchain.info:443
 
@@ -30,7 +30,7 @@ public class SSLVerifyUtil {
     static final String TAG = SSLVerifyUtil.class.getSimpleName();
     @SuppressWarnings("WeakerAccess")
     @Thunk
-    static final Subject<SslEvent, SslEvent> mSslPinningSubject = PublishSubject.create();
+    static final Subject<SslEvent> mSslPinningSubject = PublishSubject.create();
 
     private Context context;
 
@@ -63,7 +63,7 @@ public class SSLVerifyUtil {
         }
     }
 
-    public Subject<SslEvent, SslEvent> getSslPinningSubject() {
+    public Subject<SslEvent> getSslPinningSubject() {
         return mSslPinningSubject;
     }
 

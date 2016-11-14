@@ -13,15 +13,16 @@ import org.bitcoinj.core.ECKey;
 import java.math.BigInteger;
 import java.util.List;
 
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.PaymentService;
 import piuk.blockchain.android.data.services.UnspentService;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
-import rx.Completable;
-import rx.Observable;
-import rx.schedulers.Schedulers;
 
 public class AccountEditDataManager {
 
@@ -68,7 +69,7 @@ public class AccountEditDataManager {
                     pendingTransaction.receivingAddress = receivingAddress;
                     return pendingTransaction;
                 })
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -96,13 +97,13 @@ public class AccountEditDataManager {
                 changeAddress,
                 bigIntFee,
                 bigIntAmount)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     // TODO: 21/10/2016 Move all PayloadManager methods out of here
     public Observable<Boolean> syncPayloadWithServer() {
         return Observable.fromCallable(() -> payloadManager.savePayloadToServer())
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     private Observable<String> getNextReceiveAddress(int defaultIndex) {
@@ -115,7 +116,7 @@ public class AccountEditDataManager {
      * effects.
      *
      * @return {@link Completable}
-     * @see {@link piuk.blockchain.android.data.rxjava.IgnorableSubscriber}
+     * @see {@link IgnorableDefaultObserver}
      */
     public Completable updateBalancesAndTransactions() {
         return Completable.fromCallable(() -> {

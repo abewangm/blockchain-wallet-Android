@@ -37,10 +37,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
-import piuk.blockchain.android.data.rxjava.IgnorableSubscriber;
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -53,7 +54,6 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
-import rx.exceptions.Exceptions;
 
 @SuppressWarnings("WeakerAccess")
 public class AccountEditViewModel extends BaseViewModel {
@@ -311,7 +311,7 @@ public class AccountEditViewModel extends BaseViewModel {
     void onClickTransferFunds() {
         dataListener.showProgressDialog(R.string.please_wait);
 
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accountEditDataManager.getPendingTransactionForLegacyAddress(legacyAddress, new Payment())
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(pendingTransaction -> {
@@ -403,7 +403,7 @@ public class AccountEditViewModel extends BaseViewModel {
             return;
         }
 
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accountEditDataManager.submitPayment(pendingTransaction.unspentOutputBundle,
                         keys,
                         pendingTransaction.receivingAddress,
@@ -421,7 +421,7 @@ public class AccountEditViewModel extends BaseViewModel {
                             long currentBalance = multiAddrFactory.getLegacyBalance();
                             long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
                             multiAddrFactory.setLegacyBalance(currentBalance - spentAmount);
-                            accountEditDataManager.syncPayloadWithServer().subscribe(new IgnorableSubscriber<>());
+                            accountEditDataManager.syncPayloadWithServer().subscribe(new IgnorableDefaultObserver<>());
 
                             accountModel.setTransferFundsVisibility(View.GONE);
                             dataListener.setActivityResult(Activity.RESULT_OK);
@@ -448,7 +448,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
             dataListener.showProgressDialog(R.string.please_wait);
 
-            mCompositeSubscription.add(
+            compositeDisposable.add(
                     accountEditDataManager.syncPayloadWithServer()
                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                             .subscribe(success -> {
@@ -490,7 +490,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
         dataListener.showProgressDialog(R.string.please_wait);
 
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accountEditDataManager.syncPayloadWithServer()
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(success -> {
@@ -562,7 +562,7 @@ public class AccountEditViewModel extends BaseViewModel {
     void importAddressPrivateKey(ECKey key, LegacyAddress address, boolean matchesIntendedAddress) throws Exception {
         setLegacyAddressKey(key, address, false);
 
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accountEditDataManager.syncPayloadWithServer()
                         .subscribe(success -> {
                             if (success) {
@@ -578,9 +578,7 @@ public class AccountEditViewModel extends BaseViewModel {
                             } else {
                                 throw Exceptions.propagate(new Throwable("Remote save failed"));
                             }
-                        }, throwable -> {
-                            dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-                        }));
+                        }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
     private void setLegacyAddressKey(ECKey key, LegacyAddress address, boolean watchOnly) throws Exception {
@@ -635,7 +633,7 @@ public class AccountEditViewModel extends BaseViewModel {
         updatedPayload.setLegacyAddressList(updatedLegacyAddresses);
         payloadManager.setPayload(updatedPayload);
 
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accountEditDataManager.syncPayloadWithServer()
                         .subscribe(success -> {
                             if (success) {
@@ -718,22 +716,20 @@ public class AccountEditViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
 
         boolean isArchived = toggleArchived();
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accountEditDataManager.syncPayloadWithServer()
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(success -> {
                             if (success) {
                                 accountEditDataManager.updateBalancesAndTransactions()
-                                        .subscribe(new IgnorableSubscriber<>());
+                                        .subscribe(new IgnorableDefaultObserver<>());
 
                                 setArchive(isArchived);
                                 dataListener.setActivityResult(Activity.RESULT_OK);
                             } else {
                                 dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
                             }
-                        }, throwable -> {
-                            dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-                        }));
+                        }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
     private void importNonBIP38Address(final String format, final String data) {

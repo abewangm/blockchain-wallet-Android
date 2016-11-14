@@ -121,7 +121,7 @@ android {
 ext {
     supportVersion = '25.0.0'
     googleServicesVersion = '9.8.0'
-    rxJavaVersion = '1.2.1'
+    rxJavaVersion = '2.0.1'
 }
 
 dependencies {
@@ -150,14 +150,14 @@ dependencies {
     compile 'com.getbase:floatingactionbutton:1.10.1'
     compile 'com.github.mukeshsolanki:country-picker-android:1.1.6'
     // RxJava
-    compile "io.reactivex:rxjava:$rxJavaVersion"
-    compile "io.reactivex:rxandroid:$rxJavaVersion"
+    compile "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
+    compile "io.reactivex.rxjava2:rxandroid:$rxJavaVersion"
     // Dagger2
     compile 'com.google.dagger:dagger:2.7'
     annotationProcessor 'com.google.guava:guava:19.0'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.7'
     // Fingerprint authentication
-    compile 'com.mtramin:rxfingerprint:1.2.2'
+    compile 'com.mtramin:rxfingerprint:2.0.0'
 
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
