@@ -121,7 +121,7 @@ android {
 ext {
     supportVersion = '25.0.0'
     googleServicesVersion = '9.8.0'
-    rxJavaVersion = '2.0.0'
+    rxJavaVersion = '2.0.1'
 }
 
 dependencies {
