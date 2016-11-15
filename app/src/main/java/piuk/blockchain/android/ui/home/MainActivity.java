@@ -50,6 +50,8 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
+
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.Communicator, MainViewModel.DataListener {
 
     private static final String SUPPORT_URI = "http://support.blockchain.com/";
@@ -382,6 +384,26 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 android.R.string.ok);
         securityPromptDialog.showDialog(getSupportFragmentManager());
         securityPromptDialog.setPositiveButtonListener(v -> securityPromptDialog.dismiss());
+    }
+
+    @Override
+    public void showAddEmailDialog() {
+        String message = getString(R.string.security_centre_add_email_message);
+        SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
+                R.string.security_centre_add_email_title,
+                message,
+                R.drawable.vector_email,
+                R.string.security_centre_add_email_positive_button,
+                true,
+                false);
+        securityPromptDialog.showDialog(getSupportFragmentManager());
+        securityPromptDialog.setPositiveButtonListener(v -> {
+            securityPromptDialog.dismiss();
+            Intent intent = new Intent(this, SettingsActivity.class);
+            intent.putExtra(EXTRA_SHOW_ADD_EMAIL_DIALOG, true);
+            startActivity(intent);
+        });
+        securityPromptDialog.setNegativeButtonListener(view -> securityPromptDialog.dismiss());
     }
 
     @Override

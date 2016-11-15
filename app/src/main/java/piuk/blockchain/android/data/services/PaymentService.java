@@ -8,8 +8,8 @@ import org.bitcoinj.core.ECKey;
 import java.math.BigInteger;
 import java.util.List;
 
-import rx.Observable;
-import rx.Subscriber;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
 
 public class PaymentService {
 
@@ -37,7 +37,7 @@ public class PaymentService {
                                             BigInteger bigIntFee,
                                             BigInteger bigIntAmount) {
 
-        return Observable.create(subscriber -> {
+        return Observable.create(observableOnSubscribe -> {
             try {
                 payment.submitPayment(
                         unspentOutputBundle,
@@ -46,10 +46,10 @@ public class PaymentService {
                         changeAddress,
                         bigIntFee,
                         bigIntAmount,
-                        new SubmitPaymentListener(subscriber));
+                        new SubmitPaymentListener(observableOnSubscribe));
             } catch (Exception e) {
-                if (subscriber != null) {
-                    subscriber.onError(new Throwable(e));
+                if (observableOnSubscribe != null && !observableOnSubscribe.isDisposed()) {
+                    observableOnSubscribe.onError(new Throwable(e));
                 }
             }
         });
@@ -57,23 +57,23 @@ public class PaymentService {
 
     private static class SubmitPaymentListener implements Payment.SubmitPaymentListener {
 
-        private final Subscriber<? super String> subscriber;
+        private final ObservableEmitter<? super String> subscriber;
 
-        SubmitPaymentListener(Subscriber<? super String> subscriber) {
+        SubmitPaymentListener(ObservableEmitter<String> subscriber) {
             this.subscriber = subscriber;
         }
 
         @Override
         public void onSuccess(String s) {
-            if (!subscriber.isUnsubscribed()) {
+            if (!subscriber.isDisposed()) {
                 subscriber.onNext(s);
-                subscriber.onCompleted();
+                subscriber.onComplete();
             }
         }
 
         @Override
         public void onFail(String s) {
-            if (!subscriber.isUnsubscribed()) {
+            if (!subscriber.isDisposed()) {
                 subscriber.onError(new Throwable(s));
             }
         }

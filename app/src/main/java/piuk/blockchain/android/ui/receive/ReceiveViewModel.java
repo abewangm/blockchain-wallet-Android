@@ -121,6 +121,11 @@ public class ReceiveViewModel extends BaseViewModel {
         return mCurrencyHelper;
     }
 
+    @NonNull
+    public PrefsUtil getPrefsUtil() {
+        return mPrefsUtil;
+    }
+
     public void updateSpinnerList() {
         mAccountMap.clear();
         mSpinnerIndexMap.clear();
@@ -162,8 +167,8 @@ public class ReceiveViewModel extends BaseViewModel {
 
     public void generateQrCode(String uri) {
         mDataListener.showQrLoading();
-        mCompositeSubscription.clear();
-        mCompositeSubscription.add(
+        compositeDisposable.clear();
+        compositeDisposable.add(
                 mDataManager.generateQrCode(uri, DIMENSION_QR_CODE)
                         .subscribe(qrCode -> {
                             mDataListener.showQrCode(qrCode);

@@ -1,0 +1,75 @@
+/**
+ * This loads Staging and Dev URLs from a file in the project root named 'urls.properties' which
+ * defines each respective URL and is hidden from VCS. The app will function correctly in production
+ * without it, but will crash if switched to another environment via the debug menu.
+ */
+
+// Address Info
+ext.devAddressInfo = '"Address Info dev URL not set"'
+ext.stagingAddressInfo = '"Address Info staging URL not set"'
+
+// Balance
+ext.devBalance = '"Balance dev URL not set"'
+ext.stagingBalance = '"Balance staging URL not set"'
+
+// Dynamic Fees
+ext.devDynamicFee = '"Dynamic Fee dev URL not set"'
+ext.stagingDynamicFee = '"Dynamic Fee staging URL not set"'
+
+// Multi Address
+ext.devMultiaddrUrl = '"Multi Address dev URL not set"'
+ext.stagingMultiaddrUrl = '"Multi Address staging URL not set"'
+
+// PIN Store
+ext.devPinStoreUrl = '"PIN Store dev URL not set"'
+ext.stagingPinStoreUrl = '"PIN Store staging URL not set"'
+
+// Settings Payload
+ext.devSettingsPayloadUrl = '"Settings Payload dev URL not set"'
+ext.stagingSettingdPayloadUrl = '"Settings Payload staging URL not set"'
+
+// Transaction Details
+ext.devTransactionUrl = '"Transaction Details dev URL not set"'
+ext.stagingTransactionUrl = '"Transaction Details staging URL not set"'
+
+// Unspent Outputs
+ext.devUnspentOutputsUrl = '"Unspent Outputs dev URL not set"'
+ext.stagingUnspentOutputsUrl = '"Unspent Outputs staging URL not set"'
+
+// Wallet Payload
+ext.devWalletPayloadUrl = '"Wallet Payload dev URL not set"'
+ext.stagingWalletPayloadUrl = '"Wallet Payload staging URL not set"'
+
+def propsFile = rootProject.file('urls.properties')
+
+if (propsFile.exists()) {
+    def props = new Properties()
+    props.load(new FileInputStream(propsFile))
+
+    devAddressInfo = new String(props['devAddressInfo'])
+    stagingAddressInfo = new String(props['stagingAddressInfo'])
+
+    devBalance = new String(props['devBalance'])
+    stagingBalance = new String(props['stagingBalance'])
+
+    devDynamicFee = new String(props['devDynamicFee'])
+    stagingDynamicFee = new String(props['stagingDynamicFee'])
+
+    devMultiaddrUrl = new String(props['devMultiaddrUrl'])
+    stagingMultiaddrUrl = new String(props['stagingMultiaddrUrl'])
+
+    devPinStoreUrl = new String(props['devPinStoreUrl'])
+    stagingPinStoreUrl = new String(props['stagingPinStoreUrl'])
+
+    devSettingsPayloadUrl = new String(props['devSettingsPayloadUrl'])
+    stagingSettingdPayloadUrl = new String(props['stagingSettingdPayloadUrl'])
+
+    devTransactionUrl = new String(props['devTransactionUrl'])
+    stagingTransactionUrl = new String(props['stagingTransactionUrl'])
+
+    devUnspentOutputsUrl = new String(props['devUnspentOutputsUrl'])
+    stagingUnspentOutputsUrl = new String(props['stagingUnspentOutputsUrl'])
+
+    devWalletPayloadUrl = new String(props['devWalletPayloadUrl'])
+    stagingWalletPayloadUrl = new String(props['stagingWalletPayloadUrl'])
+}

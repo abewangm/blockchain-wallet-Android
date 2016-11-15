@@ -59,6 +59,7 @@ import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.util.DateUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.ListUtil;
+import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -69,13 +70,13 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public static final String ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH";
     public static final String KEY_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     public static final String KEY_TRANSACTION_LIST_POSITION = "transaction_list_position";
+    public static final String KEY_IS_BTC = "is_btc";
     private static final int SHOW_BTC = 1;
     private static final int SHOW_FIAT = 2;
-    private static int BALANCE_DISPLAY_STATE = SHOW_BTC;
+    private int balanceDisplayState = SHOW_BTC;
     public int balanceBarHeight;
     private BalanceHeaderAdapter accountsAdapter;
     @Thunk Communicator comm;
-    private double btc_fx = 319.13;//TODO remove hard coded when refactoring
     @Thunk boolean isBTC = true;
     // Accounts list
     @Thunk AppCompatSpinner accountSpinner;
@@ -116,12 +117,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         setHasOptionsMenu(true);
 
-        BALANCE_DISPLAY_STATE = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-        if (BALANCE_DISPLAY_STATE == SHOW_FIAT) {
-            isBTC = false;
-        }
+        balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+        isBTC = balanceDisplayState != SHOW_FIAT;
 
-        balanceBarHeight = (int) ViewUtils.convertDpToPixel(96, getActivity());
+        balanceBarHeight = (int) getResources().getDimension(R.dimen.balance_bar_height);
 
         setupViews();
 
@@ -163,6 +162,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
         LocalBroadcastManager.getInstance(context).registerReceiver(receiver, filter);
 
+        balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+        isBTC = balanceDisplayState != SHOW_FIAT;
+
         viewModel.startWebSocketService();
         viewModel.updateAccountList();
         viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
@@ -174,6 +176,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 setToolbarOffset(distance);
             }
         });
+
+        if (transactionAdapter != null) {
+            String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+            transactionAdapter.notifyAdapterDataSetChanged(ExchangeRateFactory.getInstance().getLastPrice(fiat));
+        }
     }
 
     @Override
@@ -376,6 +383,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     private void sendClicked() {
         Intent intent = new Intent(getActivity(), SendActivity.class);
         intent.putExtra(KEY_SELECTED_ACCOUNT_POSITION, getSelectedAccountPosition());
+        intent.putExtra(KEY_IS_BTC, isBTC);
         startActivity(intent);
         binding.fab.collapse();
     }
@@ -383,6 +391,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     private void receiveClicked() {
         Intent intent = new Intent(getActivity(), ReceiveActivity.class);
         intent.putExtra(KEY_SELECTED_ACCOUNT_POSITION, getSelectedAccountPosition());
+        intent.putExtra(KEY_IS_BTC, isBTC);
         startActivity(intent);
         binding.fab.collapse();
     }
@@ -410,25 +419,35 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         binding.balance1.setOnTouchListener((v, event) -> {
 
-            if (BALANCE_DISPLAY_STATE == SHOW_BTC) {
-                BALANCE_DISPLAY_STATE = SHOW_FIAT;
+            if (balanceDisplayState == SHOW_BTC) {
+                balanceDisplayState = SHOW_FIAT;
                 isBTC = false;
                 viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
             } else {
-                BALANCE_DISPLAY_STATE = SHOW_BTC;
+                balanceDisplayState = SHOW_BTC;
                 isBTC = true;
                 viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
             }
 
             transactionAdapter.onViewFormatUpdated(isBTC);
-            prefsUtil.setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, BALANCE_DISPLAY_STATE);
+            prefsUtil.setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, balanceDisplayState);
 
             return false;
         });
 
         accountSpinner = binding.accountsSpinner;
         viewModel.updateAccountList();
-        accountsAdapter = new BalanceHeaderAdapter(context, R.layout.spinner_balance_header, viewModel.getActiveAccountAndAddressList());
+
+        String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        accountsAdapter = new BalanceHeaderAdapter(
+                context,
+                R.layout.spinner_balance_header,
+                viewModel.getActiveAccountAndAddressList(),
+                isBTC,
+                new MonetaryUtil(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
+                fiat,
+                ExchangeRateFactory.getInstance().getLastPrice(fiat));
+
         accountsAdapter.setDropDownViewResource(R.layout.item_balance_account_dropdown);
         accountSpinner.setAdapter(accountsAdapter);
         accountSpinner.setOnTouchListener((v, event) -> event.getAction() == MotionEvent.ACTION_UP && ((MainActivity) getActivity()).getDrawerOpen());
@@ -437,6 +456,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                 //Refresh balance header and tx list
                 viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
+                binding.rvTransactions.scrollToPosition(0);
             }
 
             @Override
@@ -445,7 +465,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             }
         }));
 
-        transactionAdapter = new BalanceListAdapter(viewModel.getTransactionList(), prefsUtil, viewModel.getMonetaryUtil(), dateUtil, btc_fx, isBTC);
+        String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
+
+        transactionAdapter = new BalanceListAdapter(viewModel.getTransactionList(), prefsUtil, viewModel.getMonetaryUtil(), dateUtil, lastPrice, isBTC);
         transactionAdapter.setTxListClickListener(new BalanceListAdapter.TxListClickListener() {
             @Override
             public void onRowClicked(int position) {
@@ -454,6 +477,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
             @Override
             public void onValueClicked(boolean isBtc) {
+                viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
                 viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBtc);
             }
         });
@@ -487,7 +511,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             binding.fab.startAnimation(bounce);
         });
 
-        binding.swipeContainer.setProgressViewEndTarget(false, (int) (getResources().getDisplayMetrics().density * (72 + 20)));
+        binding.swipeContainer.setProgressViewEndTarget(false, (int) ViewUtils.convertDpToPixel(72 + 20, getActivity()));
         binding.swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -562,15 +586,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void onRefreshBalanceAndTransactions() {
-
-        String strFiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        btc_fx = ExchangeRateFactory.getInstance().getLastPrice(strFiat);
-
         // Notify adapter of change, let DiffUtil work out what needs changing
         List<Tx> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
         transactionAdapter.onTransactionsUpdated(newTransactions);
-        binding.rvTransactions.scrollToPosition(0);
         binding.balanceLayout.post(() -> setToolbarOffset(0));
 
         //Display help text to user if no transactionList on selected account/address
@@ -587,6 +606,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 72, getResources().getDisplayMetrics());
             binding.balance1.setPadding((int) px, 0, 0, 0);
         }
+
+        accountsAdapter.notifyBtcChanged(isBTC);
     }
 
     @Override

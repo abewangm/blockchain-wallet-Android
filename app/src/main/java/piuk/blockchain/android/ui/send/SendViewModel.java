@@ -1272,4 +1272,8 @@ public class SendViewModel extends BaseViewModel {
     public void setWatchOnlySpendWarning(boolean enabled) {
         prefsUtil.setValue("WARN_WATCH_ONLY_SPEND", enabled);
     }
+
+    public PrefsUtil getPrefsUtil() {
+        return prefsUtil;
+    }
 }

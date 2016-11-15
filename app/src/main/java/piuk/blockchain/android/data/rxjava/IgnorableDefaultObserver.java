@@ -1,16 +1,15 @@
 package piuk.blockchain.android.data.rxjava;
 
-import rx.Observer;
-import rx.Subscriber;
-import rx.Subscription;
+import io.reactivex.CompletableObserver;
+import io.reactivex.observers.DefaultObserver;
 
 /**
  * To be used when the result of the subscription can be ignored
  */
-public class IgnorableSubscriber<T> extends Subscriber<T> implements Observer<T>, Subscription {
+public class IgnorableDefaultObserver<T> extends DefaultObserver<T> implements CompletableObserver {
 
     @Override
-    public void onCompleted() {
+    public void onComplete() {
         // No-op
     }
 

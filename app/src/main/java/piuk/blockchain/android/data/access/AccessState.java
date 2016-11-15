@@ -15,6 +15,10 @@ import org.spongycastle.util.encoders.Hex;
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 
+import io.reactivex.Observable;
+import io.reactivex.exceptions.Exceptions;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.PinStoreService;
 import piuk.blockchain.android.ui.auth.LogoutActivity;
@@ -22,8 +26,6 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import rx.Observable;
-import rx.exceptions.Exceptions;
 
 public class AccessState {
 
@@ -37,6 +39,8 @@ public class AccessState {
     private boolean isLoggedIn = false;
     private PendingIntent logoutPendingIntent;
     private static AccessState instance;
+    private static final Subject<AuthEvent> authEventSubject = PublishSubject.create();
+
 
     public void initAccessState(Context context, PrefsUtil prefs, PinStoreService pinStore, AppUtil appUtil) {
         this.prefs = prefs;
@@ -57,7 +61,7 @@ public class AccessState {
 
     public Observable<Boolean> createPin(CharSequenceX password, String passedPin) {
         return createPinObservable(password, passedPin)
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     public Observable<CharSequenceX> validatePin(String passedPin) {
@@ -82,13 +86,13 @@ public class AccessState {
                         throw Exceptions.propagate(new Throwable("Validate access failed"));
                     }
                 })
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     // TODO: 14/10/2016 This should be moved elsewhere in the
     public Observable<Boolean> syncPayloadToServer() {
         return Observable.fromCallable(() -> PayloadManager.getInstance().savePayloadToServer())
-                .compose(RxUtil.applySchedulers());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     private Observable<Boolean> createPinObservable(CharSequenceX password, String passedPin) {
@@ -118,9 +122,9 @@ public class AccessState {
                                 prefs.setValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, encryptedPassword);
                                 prefs.setValue(PrefsUtil.KEY_PIN_IDENTIFIER, key);
 
-                                if (!subscriber.isUnsubscribed()) {
+                                if (!subscriber.isDisposed()) {
                                     subscriber.onNext(true);
-                                    subscriber.onCompleted();
+                                    subscriber.onComplete();
                                 }
 
                             } catch (Exception e) {
@@ -128,14 +132,14 @@ public class AccessState {
                             }
 
                         }, throwable -> {
-                            if (!subscriber.isUnsubscribed()) {
+                            if (!subscriber.isDisposed()) {
                                 subscriber.onNext(false);
-                                subscriber.onCompleted();
+                                subscriber.onComplete();
                             }
                         });
 
             } catch (UnsupportedEncodingException e) {
-                if (!subscriber.isUnsubscribed()) {
+                if (!subscriber.isDisposed()) {
                     subscriber.onError(new Throwable(e));
                 }
             }
@@ -181,5 +185,24 @@ public class AccessState {
     public void setIsLoggedIn(boolean loggedIn) {
         prefs.logIn();
         isLoggedIn = loggedIn;
+        if (isLoggedIn) {
+            authEventSubject.onNext(AuthEvent.Login);
+        } else {
+            authEventSubject.onNext(AuthEvent.Logout);
+        }
+    }
+
+    /**
+     * Returns a {@link Subject} that publishes login/logout events
+     * TODO: Logout events aren't currently captured here
+     */
+    public Subject<AuthEvent> getAuthEventSubject() {
+        return authEventSubject;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public enum AuthEvent {
+        Login,
+        Logout
     }
 }

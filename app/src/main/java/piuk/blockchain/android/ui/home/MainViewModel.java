@@ -6,7 +6,6 @@ import android.os.Looper;
 
 import info.blockchain.api.DynamicFee;
 import info.blockchain.api.ExchangeTicker;
-import info.blockchain.api.PersistentUrls;
 import info.blockchain.api.Settings;
 import info.blockchain.api.Unspent;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -32,7 +31,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
-import rx.Observable;
+import io.reactivex.Observable;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
@@ -66,6 +65,8 @@ public class MainViewModel extends BaseViewModel {
         void kickToLauncherPage();
 
         void showEmailVerificationDialog(String email);
+
+        void showAddEmailDialog();
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -78,7 +79,6 @@ public class MainViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        checkBackendEnvironment();
         checkRooted();
         checkConnectivity();
         checkIfShouldShowEmailVerification();
@@ -86,14 +86,18 @@ public class MainViewModel extends BaseViewModel {
 
     private void checkIfShouldShowEmailVerification() {
         if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
-            mCompositeSubscription.add(
+            compositeDisposable.add(
                     getSettingsApi()
-                            .compose(RxUtil.applySchedulers())
+                            .compose(RxUtil.applySchedulersToObservable())
                             .subscribe(settings -> {
                                 if (!settings.isEmailVerified()) {
                                     appUtil.setNewlyCreated(false);
                                     String email = settings.getEmail();
-                                    dataListener.showEmailVerificationDialog(email);
+                                    if (email != null && !email.isEmpty()) {
+                                        dataListener.showEmailVerificationDialog(email);
+                                    } else {
+                                        dataListener.showAddEmailDialog();
+                                    }
                                 }
                             }, Throwable::printStackTrace));
         }
@@ -261,29 +265,5 @@ public class MainViewModel extends BaseViewModel {
         if (!osUtil.isServiceRunning(piuk.blockchain.android.data.websocket.WebSocketService.class)) {
             context.stopService(new Intent(context, piuk.blockchain.android.data.websocket.WebSocketService.class));
         }
-    }
-
-    private void checkBackendEnvironment() {
-
-        PersistentUrls urls = PersistentUrls.getInstance();
-
-//        if (BuildConfig.DOGFOOD || BuildConfig.DEBUG) {
-//            PrefsUtil prefsUtil = new PrefsUtil(context);
-//            int currentEnvironment = prefsUtil.getValue(PrefsUtil.KEY_BACKEND_ENVIRONMENT, 0);
-
-//            switch (currentEnvironment) {
-//                case 0:
-        urls.setProductionEnvironment();
-//                    break;
-//                case 1:
-//                    urls.setDevelopmentEnvironment();
-//                    break;
-//                case 2:
-//                    urls.setStagingEnvironment();
-//                    break;
-//            }
-//        }else{
-        urls.setProductionEnvironment();
-//        }
     }
 }

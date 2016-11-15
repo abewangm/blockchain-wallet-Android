@@ -3,6 +3,7 @@ package piuk.blockchain.android.injection;
 import android.app.Application;
 import android.content.Context;
 
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
@@ -76,5 +77,10 @@ public class ApplicationModule {
     @Provides
     protected PrivateKeyFactory privateKeyFactory() {
         return new PrivateKeyFactory();
+    }
+
+    @Provides
+    protected PersistentUrls providePersistentUrls() {
+        return PersistentUrls.getInstance();
     }
 }

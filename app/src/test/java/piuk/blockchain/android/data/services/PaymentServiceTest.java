@@ -12,8 +12,8 @@ import org.mockito.MockitoAnnotations;
 import java.math.BigInteger;
 import java.util.List;
 
+import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
-import rx.observers.TestSubscriber;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -39,7 +39,6 @@ public class PaymentServiceTest extends RxTest {
     @Test
     public void submitPaymentSuccess() throws Exception {
         // Arrange
-        TestSubscriber<String> subscriber = new TestSubscriber<>();
         doAnswer(invocation -> {
             ((Payment.SubmitPaymentListener) invocation.getArguments()[6]).onSuccess("hash");
             return null;
@@ -52,23 +51,22 @@ public class PaymentServiceTest extends RxTest {
                 any(BigInteger.class),
                 any(Payment.SubmitPaymentListener.class));
         // Act
-        subject.submitPayment(mock(
+        TestObserver<String> observer = subject.submitPayment(mock(
                 SpendableUnspentOutputs.class),
                 mock(List.class),
                 "",
                 "",
                 mock(BigInteger.class),
-                mock(BigInteger.class)).toBlocking().subscribe(subscriber);
+                mock(BigInteger.class)).test();
         // Assert
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals("hash", subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals("hash", observer.values().get(0));
     }
 
     @Test
     public void submitPaymentFailure() throws Exception {
         // Arrange
-        TestSubscriber<String> subscriber = new TestSubscriber<>();
         doAnswer(invocation -> {
             ((Payment.SubmitPaymentListener) invocation.getArguments()[6]).onFail("error");
             return null;
@@ -81,23 +79,22 @@ public class PaymentServiceTest extends RxTest {
                 any(BigInteger.class),
                 any(Payment.SubmitPaymentListener.class));
         // Act
-        subject.submitPayment(mock(
+        TestObserver<String> observer = subject.submitPayment(mock(
                 SpendableUnspentOutputs.class),
                 mock(List.class),
                 "",
                 "",
                 mock(BigInteger.class),
-                mock(BigInteger.class)).toBlocking().subscribe(subscriber);
+                mock(BigInteger.class)).test();
         // Assert
-        subscriber.assertNotCompleted();
-        subscriber.assertNoValues();
-        subscriber.assertError(Throwable.class);
+        observer.assertNotComplete();
+        observer.assertNoValues();
+        observer.assertError(Throwable.class);
     }
 
     @Test
     public void submitPaymentError() throws Exception {
         // Arrange
-        TestSubscriber<String> subscriber = new TestSubscriber<>();
         doThrow(new RuntimeException()).when(payment).submitPayment(
                 any(SpendableUnspentOutputs.class),
                 anyListOf(ECKey.class),
@@ -107,17 +104,17 @@ public class PaymentServiceTest extends RxTest {
                 any(BigInteger.class),
                 any(Payment.SubmitPaymentListener.class));
         // Act
-        subject.submitPayment(mock(
+        TestObserver<String> observer = subject.submitPayment(mock(
                 SpendableUnspentOutputs.class),
                 mock(List.class),
                 "",
                 "",
                 mock(BigInteger.class),
-                mock(BigInteger.class)).toBlocking().subscribe(subscriber);
+                mock(BigInteger.class)).test();
         // Assert
-        subscriber.assertNotCompleted();
-        subscriber.assertNoValues();
-        subscriber.assertError(Throwable.class);
+        observer.assertNotComplete();
+        observer.assertNoValues();
+        observer.assertError(Throwable.class);
     }
 
 }

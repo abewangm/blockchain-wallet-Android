@@ -24,6 +24,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.BR;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
@@ -35,8 +37,6 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import rx.Observable;
-import rx.subscriptions.CompositeSubscription;
 
 @SuppressWarnings("WeakerAccess")
 public class BalanceViewModel extends BaseObservable implements ViewModel {
@@ -54,7 +54,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected PayloadManager payloadManager;
     @Inject protected TransactionListDataManager transactionListDataManager;
-    @VisibleForTesting CompositeSubscription compositeSubscription;
+    @VisibleForTesting CompositeDisposable compositeDisposable;
 
     @Bindable
     public String getBalance() {
@@ -64,6 +64,10 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     public void setBalance(String balance) {
         model.setBalance(balance);
         notifyPropertyChanged(BR.balance);
+    }
+
+    public PrefsUtil getPrefsUtil() {
+        return prefsUtil;
     }
 
     public interface DataListener {
@@ -88,7 +92,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         activeAccountAndAddressBiMap = HashBiMap.create();
         transactionList = new ArrayList<>();
         osUtil = new OSUtil(context);
-        compositeSubscription = new CompositeSubscription();
+        compositeDisposable = new CompositeDisposable();
     }
 
     public void onViewReady() {
@@ -97,11 +101,11 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
             prefsUtil.setValue(PrefsUtil.KEY_FIRST_RUN, false);
         } else {
             // Check from this point forwards
-            compositeSubscription.add(
+            compositeDisposable.add(
                     transactionListDataManager.getListUpdateSubject()
-                            .compose(RxUtil.applySchedulers())
+                            .compose(RxUtil.applySchedulersToObservable())
                             .subscribe(txs -> {
-                                        if (!txs.isEmpty()) {
+                                        if (hasTransactions()) {
                                             if (!isBackedUp() && !getIfNeverPromptBackup()) {
                                                 // Show dialog and store date of dialog launch
                                                 if (getTimeOfLastSecurityPrompt() == 0) {
@@ -112,9 +116,9 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
                                                     storeTimeOfLastSecurityPrompt();
                                                 }
                                             } else if (isBackedUp() && !getIfNeverPrompt2Fa()) {
-                                                compositeSubscription.add(
+                                                compositeDisposable.add(
                                                         getSettingsApi()
-                                                                .compose(RxUtil.applySchedulers())
+                                                                .compose(RxUtil.applySchedulersToObservable())
                                                                 .subscribe(settings -> {
                                                                     if (!settings.isSmsVerified()) {
                                                                         // Show dialog for 2FA, store date of dialog launch
@@ -185,7 +189,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     public void destroy() {
         context = null;
         dataListener = null;
-        compositeSubscription.clear();
+        compositeDisposable.clear();
     }
 
     public List<ItemAccount> getActiveAccountAndAddressList() {
@@ -234,7 +238,12 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
 //                all.setsetTags(Collections.singletonList(TAG_ALL));
                 all.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
                 String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(all));
-                activeAccountAndAddressList.add(new ItemAccount(all.getLabel(), balance, null, null));
+                activeAccountAndAddressList.add(new ItemAccount(
+                        all.getLabel(),
+                        balance,
+                        null,
+                        Math.round(transactionListDataManager.getBtcBalance(all)),
+                        null));
                 activeAccountAndAddressBiMap.put(all, spinnerIndex);
                 spinnerIndex++;
 
@@ -247,7 +256,12 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
 //                iAccount.setTags(Collections.singletonList(TAG_ALL));
                 iAccount.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
                 String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
-                activeAccountAndAddressList.add(new ItemAccount(iAccount.getLabel(), balance, null, null));
+                activeAccountAndAddressList.add(new ItemAccount(
+                        iAccount.getLabel(),
+                        balance,
+                        null,
+                        Math.round(transactionListDataManager.getBtcBalance(iAccount)),
+                        null));
                 activeAccountAndAddressBiMap.put(iAccount, spinnerIndex);
                 spinnerIndex++;
             }
@@ -260,7 +274,12 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
             if (item.getLabel().trim().length() == 0)
                 item.setLabel("Account: " + accountIndex);//Give unlabeled account a label
             String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(item));
-            activeAccountAndAddressList.add(new ItemAccount(item.getLabel(), balance, null, null));
+            activeAccountAndAddressList.add(new ItemAccount(
+                    item.getLabel(),
+                    balance,
+                    null,
+                    Math.round(transactionListDataManager.getBtcBalance(item)),
+                    null));
             activeAccountAndAddressBiMap.put(item, spinnerIndex);
             spinnerIndex++;
             accountIndex++;
@@ -276,7 +295,12 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
 //            iAccount.setTags(Collections.singletonList(TAG_IMPORTED_ADDRESSES));
             iAccount.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
             String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
-            activeAccountAndAddressList.add(new ItemAccount(iAccount.getLabel(), balance, null, null));
+            activeAccountAndAddressList.add(new ItemAccount(
+                    iAccount.getLabel(),
+                    balance,
+                    null,
+                    Math.round(transactionListDataManager.getBtcBalance(iAccount)),
+                    null));
             activeAccountAndAddressBiMap.put(iAccount, spinnerIndex);
             spinnerIndex++;
 
@@ -294,7 +318,12 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
                 }
 
                 String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(legacyAddress));
-                activeAccountAndAddressList.add(new ItemAccount(labelOrAddress, balance, null, null));
+                activeAccountAndAddressList.add(new ItemAccount(
+                        labelOrAddress,
+                        balance,
+                        null,
+                        Math.round(transactionListDataManager.getBtcBalance(legacyAddress)),
+                        null));
                 activeAccountAndAddressBiMap.put(legacyAddress, spinnerIndex);
                 spinnerIndex++;
             }
@@ -314,7 +343,6 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
 
     //TODO refactor isBTC out
     public void updateBalanceAndTransactionList(Intent intent, int accountSpinnerPosition, boolean isBTC) {
-        double btc_balance;
 
         Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);//the current selected item in dropdown (Account or Legacy Address)
 
@@ -327,7 +355,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         transactionListDataManager.clearTransactionList();
         transactionListDataManager.generateTransactionList(object);
         transactionList = transactionListDataManager.getTransactionList();
-        btc_balance = transactionListDataManager.getBtcBalance(object);
+        double btc_balance = transactionListDataManager.getBtcBalance(object);
 
         // Returning from SendFragment the following will happen
         // After sending btc we create a "placeholder" tx until websocket handler refreshes list

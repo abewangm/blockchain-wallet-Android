@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 
+import piuk.blockchain.android.data.api.UrlSettings;
+
 public class PrefsUtil implements PersistentPrefs {
 
     private SharedPreferences preferenceManager;
@@ -106,5 +108,12 @@ public class PrefsUtil implements PersistentPrefs {
     @Override
     public void logIn() {
         setValue(PrefsUtil.LOGGED_OUT, false);
+    }
+
+    @Override
+    public void clearPrefsAndKeepEnvironment() {
+        String environment = getValue(UrlSettings.KEY_CURRENT_ENVIRONMENT, "");
+        clear();
+        setValue(UrlSettings.KEY_CURRENT_ENVIRONMENT, environment);
     }
 }

@@ -7,10 +7,10 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.services.SettingsService;
-import rx.Observable;
-import rx.observers.TestSubscriber;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyBoolean;
@@ -35,128 +35,119 @@ public class SettingsDataManagerTest extends RxTest {
     @Test
     public void updateSettings() throws Exception {
         // Arrange
-        TestSubscriber<Settings> subscriber = new TestSubscriber<>();
         Settings settings = new Settings();
         when(settingsService.updateSettings(anyString(), anyString())).thenReturn(Observable.just(settings));
         // Act
-        subject.updateSettings("guid", "sharedKey").toBlocking().subscribe(subscriber);
+        TestObserver<Settings> observer = subject.updateSettings("guid", "sharedKey").test();
         // Assert
         verify(settingsService).updateSettings(anyString(), anyString());
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals(settings, subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals(settings, observer.values().get(0));
     }
 
     @Test
     public void updateEmail() throws Exception {
         // Arrange
-        TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
         when(settingsService.updateEmail(anyString())).thenReturn(Observable.just(true));
         // Act
-        subject.updateEmail("email").toBlocking().subscribe(subscriber);
+        TestObserver<Boolean> observer = subject.updateEmail("email").test();
         // Assert
         verify(settingsService).updateEmail(anyString());
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals(true, subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals(true, observer.values().get(0));
     }
 
     @Test
     public void updateSms() throws Exception {
         // Arrange
-        TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
         when(settingsService.updateSms(anyString())).thenReturn(Observable.just(true));
         // Act
-        subject.updateSms("sms").toBlocking().subscribe(subscriber);
+        TestObserver<Boolean> observer = subject.updateSms("sms").test();
         // Assert
         verify(settingsService).updateSms(anyString());
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals(true, subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals(true, observer.values().get(0));
     }
 
     @Test
     public void verifySms() throws Exception {
         // Arrange
-        TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
         when(settingsService.verifySms(anyString())).thenReturn(Observable.just(true));
         // Act
-        subject.verifySms("code").toBlocking().subscribe(subscriber);
+        TestObserver<Boolean> observer = subject.verifySms("code").test();
         // Assert
         verify(settingsService).verifySms(anyString());
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals(true, subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals(true, observer.values().get(0));
     }
 
     @Test
     public void updateTor() throws Exception {
         // Arrange
-        TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
         when(settingsService.updateTor(anyBoolean())).thenReturn(Observable.just(true));
         // Act
-        subject.updateTor(true).toBlocking().subscribe(subscriber);
+        TestObserver<Boolean> observer = subject.updateTor(true).test();
         // Assert
         verify(settingsService).updateTor(anyBoolean());
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals(true, subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals(true, observer.values().get(0));
     }
 
     @Test
     public void updatePasswordHint() throws Exception {
         // Arrange
-        TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
         when(settingsService.updatePasswordHint(anyString())).thenReturn(Observable.just(true));
         // Act
-        subject.updatePasswordHint("hint").toBlocking().subscribe(subscriber);
+        TestObserver<Boolean> observer = subject.updatePasswordHint("hint").test();
         // Assert
         verify(settingsService).updatePasswordHint(anyString());
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals(true, subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals(true, observer.values().get(0));
     }
 
     @Test
     public void updateNotificationsEnabled() throws Exception {
         // Arrange
-        TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
         when(settingsService.enableNotifications(anyInt())).thenReturn(Observable.just(true));
         // Act
-        subject.updateNotifications(0, true).toBlocking().subscribe(subscriber);
+        TestObserver<Boolean> observer = subject.updateNotifications(0, true).test();
         // Assert
         verify(settingsService).enableNotifications(anyInt());
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals(true, subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals(true, observer.values().get(0));
     }
 
     @Test
     public void updateNotificationsDisabled() throws Exception {
         // Arrange
-        TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
         when(settingsService.disableNotifications(anyInt())).thenReturn(Observable.just(true));
         // Act
-        subject.updateNotifications(0, false).toBlocking().subscribe(subscriber);
+        TestObserver<Boolean> observer = subject.updateNotifications(0, false).test();
         // Assert
         verify(settingsService).disableNotifications(anyInt());
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals(true, subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals(true, observer.values().get(0));
     }
 
     @Test
     public void updateTwoFactor() throws Exception {
         // Arrange
-        TestSubscriber<Boolean> subscriber = new TestSubscriber<>();
         when(settingsService.updateTwoFactor(anyInt())).thenReturn(Observable.just(true));
         // Act
-        subject.updateTwoFactor(0).toBlocking().subscribe(subscriber);
+        TestObserver<Boolean> observer = subject.updateTwoFactor(0).test();
         // Assert
         verify(settingsService).updateTwoFactor(anyInt());
-        subscriber.assertCompleted();
-        subscriber.assertNoErrors();
-        assertEquals(true, subscriber.getOnNextEvents().get(0));
+        observer.assertComplete();
+        observer.assertNoErrors();
+        assertEquals(true, observer.values().get(0));
     }
 
 }

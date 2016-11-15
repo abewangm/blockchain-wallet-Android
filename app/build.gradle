@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 apply from: '../jacoco.gradle'
+apply from: 'environment.gradle'
 
 android {
     compileSdkVersion 25
@@ -14,12 +15,30 @@ android {
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 25
-        targetSdkVersion 24
         versionCode 230
         versionName "6.1.39"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
+        // URLs for Staging and Dev
+        buildConfigField "String", "DEV_ADDRESS_INFO", devAddressInfo
+        buildConfigField "String", "STAGING_ADDRESS_INFO", stagingAddressInfo
+        buildConfigField "String", "DEV_BALANCE", devBalance
+        buildConfigField "String", "STAGING_BALANCE", stagingBalance
+        buildConfigField "String", "DEV_DYNAMIC_FEE", devDynamicFee
+        buildConfigField "String", "STAGING_DYNAMIC_FEE", stagingDynamicFee
+        buildConfigField "String", "DEV_MULTIADDR_URL", devMultiaddrUrl
+        buildConfigField "String", "STAGING_MULTIADDR_URL", stagingMultiaddrUrl
+        buildConfigField "String", "DEV_PIN_STORE_URL", devPinStoreUrl
+        buildConfigField "String", "STAGING_PIN_STORE_URL", stagingPinStoreUrl
+        buildConfigField "String", "DEV_SETTINGS_PAYLOAD_URL", devSettingsPayloadUrl
+        buildConfigField "String", "STAGING_SETTINGS_PAYLOAD_URL", stagingSettingdPayloadUrl
+        buildConfigField "String", "DEV_TRANSACTION_URL", devTransactionUrl
+        buildConfigField "String", "STAGING_TRANSACTION_URL", stagingTransactionUrl
+        buildConfigField "String", "DEV_UNSPENT_OUTPUTS_URL", devUnspentOutputsUrl
+        buildConfigField "String", "STAGING_UNSPENT_OUTPUTS_URL", stagingUnspentOutputsUrl
+        buildConfigField "String", "DEV_WALLET_PAYLOAD_URL", devWalletPayloadUrl
+        buildConfigField "String", "STAGING_WALLET_PAYLOAD_URL", stagingWalletPayloadUrl
     }
 
     buildTypes {
@@ -102,7 +121,7 @@ android {
 ext {
     supportVersion = '25.0.0'
     googleServicesVersion = '9.8.0'
-    rxJavaVersion = '1.2.1'
+    rxJavaVersion = '2.0.1'
 }
 
 dependencies {
@@ -117,6 +136,7 @@ dependencies {
 
     // Enable crash reporting only for release version
     releaseCompile "com.google.firebase:firebase-crash:$googleServicesVersion"
+    compile "com.google.firebase:firebase-messaging:$googleServicesVersion"
     compile "com.google.android.gms:play-services-maps:$googleServicesVersion"
     compile 'org.slf4j:slf4j-api:1.7.13'
     compile 'org.bitcoinj:bitcoinj-core:0.13.4'
@@ -130,14 +150,14 @@ dependencies {
     compile 'com.getbase:floatingactionbutton:1.10.1'
     compile 'com.github.mukeshsolanki:country-picker-android:1.1.6'
     // RxJava
-    compile "io.reactivex:rxjava:$rxJavaVersion"
-    compile "io.reactivex:rxandroid:$rxJavaVersion"
+    compile "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
+    compile "io.reactivex.rxjava2:rxandroid:$rxJavaVersion"
     // Dagger2
     compile 'com.google.dagger:dagger:2.7'
     annotationProcessor 'com.google.guava:guava:19.0'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.7'
     // Fingerprint authentication
-    compile 'com.mtramin:rxfingerprint:1.2.2'
+    compile 'com.mtramin:rxfingerprint:2.0.0'
 
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'

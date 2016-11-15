@@ -59,7 +59,7 @@ public class ReceiveQrViewModel extends BaseViewModel {
             dataListener.setAddressInfo(receiveAddressString);
             dataListener.setAddressLabel(labelString);
 
-            mCompositeSubscription.add(
+            compositeDisposable.add(
                     receiveDataManager.generateQrCode("bitcoin:" + receiveAddressString, DIMENSION_QR_CODE)
                             .subscribe(bitmap -> {
                                 dataListener.setImageBitmap(bitmap);

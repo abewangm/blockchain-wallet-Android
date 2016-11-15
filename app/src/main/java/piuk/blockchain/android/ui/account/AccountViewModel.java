@@ -19,6 +19,7 @@ import org.bitcoinj.params.MainNetParams;
 
 import javax.inject.Inject;
 
+import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
@@ -30,7 +31,6 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
-import rx.exceptions.Exceptions;
 
 @SuppressWarnings("WeakerAccess")
 public class AccountViewModel extends BaseViewModel {
@@ -91,7 +91,7 @@ public class AccountViewModel extends BaseViewModel {
      * account. Prompt user when done calculating.
      */
     void checkTransferableLegacyFunds(boolean isAutoPopup) {
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 fundsDataManager.getTransferableFundTransactionListForDefaultAccount()
                         .subscribe(triple -> {
                             if (payloadManager.getPayload().isUpgraded() && !triple.getLeft().isEmpty()) {
@@ -116,7 +116,7 @@ public class AccountViewModel extends BaseViewModel {
      */
     void createNewAccount(String accountLabel) {
         dataListener.showProgressDialog(R.string.please_wait);
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accountDataManager.createNewAccount(accountLabel, doubleEncryptionPassword)
                         .subscribe(account -> {
                             dataListener.dismissProgressDialog();
@@ -146,7 +146,7 @@ public class AccountViewModel extends BaseViewModel {
      */
     void updateLegacyAddress(LegacyAddress address) {
         dataListener.showProgressDialog(R.string.saving_address);
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accountDataManager.updateLegacyAddress(address)
                         .subscribe(success -> {
                             if (success) {
@@ -309,7 +309,7 @@ public class AccountViewModel extends BaseViewModel {
     }
 
     private void setPrivateECKey(ECKey key, @Nullable CharSequenceX secondPassword) {
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accountDataManager.setPrivateKey(key, secondPassword)
                         .subscribe(success -> {
                             if (success) {

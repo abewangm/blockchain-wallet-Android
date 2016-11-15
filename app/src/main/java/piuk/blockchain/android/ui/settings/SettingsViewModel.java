@@ -10,6 +10,8 @@ import info.blockchain.wallet.util.CharSequenceX;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
+import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
@@ -21,8 +23,6 @@ import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
-import rx.Observable;
-import rx.exceptions.Exceptions;
 
 @SuppressWarnings("WeakerAccess")
 public class SettingsViewModel extends BaseViewModel {
@@ -34,7 +34,6 @@ public class SettingsViewModel extends BaseViewModel {
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected AccessState accessState;
     @VisibleForTesting Settings settings;
-    @VisibleForTesting boolean show2FaAfterPhoneVerified = true;
     private DataListener dataListener;
     private MonetaryUtil monetaryUtil;
 
@@ -107,7 +106,7 @@ public class SettingsViewModel extends BaseViewModel {
     public void onViewReady() {
         dataListener.showProgressDialog(R.string.please_wait);
         // Fetch updated settings
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 settingsDataManager.updateSettings(
                         payloadManager.getPayload().getGuid(),
                         payloadManager.getPayload().getSharedKey())
@@ -353,22 +352,6 @@ public class SettingsViewModel extends BaseViewModel {
     }
 
     /**
-     * @return flag to show the 2FA dialog after verifying number
-     */
-    boolean show2FaAfterPhoneVerified() {
-        return show2FaAfterPhoneVerified;
-    }
-
-    /**
-     * Sets the flag to show the 2FA dialog after verifying number
-     *
-     * @param show whether or not to show the 2FA dialog
-     */
-    void setShow2FaAfterPhoneVerified(boolean show) {
-        show2FaAfterPhoneVerified = show;
-    }
-
-    /**
      * Write key/value to {@link android.content.SharedPreferences}
      *
      * @param key   The key under which to store the data
@@ -399,7 +382,7 @@ public class SettingsViewModel extends BaseViewModel {
         if (!isStringValid(email)) {
             dataListener.setEmailSummary(stringUtils.getString(R.string.not_specified));
         } else {
-            mCompositeSubscription.add(
+            compositeDisposable.add(
                     settingsDataManager.updateEmail(email)
                             .subscribe(success -> {
                                 if (success) {
@@ -423,7 +406,7 @@ public class SettingsViewModel extends BaseViewModel {
         if (!isStringValid(sms)) {
             dataListener.setSmsSummary(stringUtils.getString(R.string.not_specified));
         } else {
-            mCompositeSubscription.add(
+            compositeDisposable.add(
                     settingsDataManager.updateSms(sms)
                             .subscribe(success -> {
                                 if (success) {
@@ -433,8 +416,7 @@ public class SettingsViewModel extends BaseViewModel {
                                     throw Exceptions.propagate(new Throwable("Update SMS failed"));
                                 }
                             }, throwable -> {
-                                dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR);
-                                show2FaAfterPhoneVerified = false;
+                                showUpdateError();
                             }));
         }
     }
@@ -445,19 +427,24 @@ public class SettingsViewModel extends BaseViewModel {
      * @param code The verification code which has been sent to the user
      */
     void verifySms(@NonNull String code) {
-        mCompositeSubscription.add(
+        dataListener.showProgressDialog(R.string.please_wait);
+        compositeDisposable.add(
                 settingsDataManager.verifySms(code)
+                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(success -> {
                             if (success) {
                                 dataListener.showDialogSmsVerified();
                                 updateUi();
                             } else {
-                                throw Exceptions.propagate(new Throwable("Verify SMS failed"));
+                                showUpdateError();
                             }
                         }, throwable -> {
-                            dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR);
-                            show2FaAfterPhoneVerified = false;
+                            showUpdateError();
                         }));
+    }
+
+    private void showUpdateError() {
+        dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR);
     }
 
     /**
@@ -466,7 +453,7 @@ public class SettingsViewModel extends BaseViewModel {
      * @param blocked Whether or not to block Tor requests
      */
     void updateTor(boolean blocked) {
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 settingsDataManager.updateTor(blocked)
                         .subscribe(success -> {
                             if (success) {
@@ -488,7 +475,7 @@ public class SettingsViewModel extends BaseViewModel {
         if (!isStringValid(hint)) {
             dataListener.showToast(R.string.settings_field_cant_be_empty, ToastCustom.TYPE_ERROR);
         } else {
-            mCompositeSubscription.add(
+            compositeDisposable.add(
                     settingsDataManager.updatePasswordHint(hint)
                             .subscribe(success -> {
                                 if (success) {
@@ -509,7 +496,7 @@ public class SettingsViewModel extends BaseViewModel {
      * @see {@link Settings}
      */
     void updateTwoFa(int type) {
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 settingsDataManager.updateTwoFactor(type)
                         .subscribe(success -> {
                             if (success) {
@@ -530,7 +517,7 @@ public class SettingsViewModel extends BaseViewModel {
      * @see {@link Settings}
      */
     void updateNotification(int type, boolean enabled) {
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 settingsDataManager.updateNotifications(type, enabled)
                         .subscribe(success -> {
                             if (success) {
@@ -552,7 +539,7 @@ public class SettingsViewModel extends BaseViewModel {
     void validatePin(@NonNull CharSequenceX pin) {
         dataListener.showProgressDialog(R.string.please_wait);
 
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accessState.validatePin(pin.toString())
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(sequenceX -> {
@@ -562,11 +549,15 @@ public class SettingsViewModel extends BaseViewModel {
 
                                 dataListener.goToPinEntryPage();
                             } else {
-                                throw Exceptions.propagate(new Throwable("CharsequenceX was null"));
+                                showInvalidPin();
                             }
                         }, throwable -> {
-                            dataListener.showToast(R.string.invalid_pin, ToastCustom.TYPE_ERROR);
+                            showInvalidPin();
                         }));
+    }
+
+    private void showInvalidPin() {
+        dataListener.showToast(R.string.invalid_pin, ToastCustom.TYPE_ERROR);
     }
 
     /**
@@ -579,7 +570,7 @@ public class SettingsViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
         payloadManager.setTempPassword(password);
 
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 accessState.createPin(password, accessState.getPIN())
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .flatMap(success -> {
@@ -593,13 +584,17 @@ public class SettingsViewModel extends BaseViewModel {
                             if (success) {
                                 dataListener.showToast(R.string.password_changed, ToastCustom.TYPE_OK);
                             } else {
-                                throw Exceptions.propagate(new Throwable("Update password failed"));
+                                showUpdatePasswordFailed(fallbackPassword);
                             }
                         }, throwable -> {
-                            payloadManager.setTempPassword(fallbackPassword);
-
-                            dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-                            dataListener.showToast(R.string.password_unchanged, ToastCustom.TYPE_ERROR);
+                            showUpdatePasswordFailed(fallbackPassword);
                         }));
+    }
+
+    private void showUpdatePasswordFailed(@NonNull CharSequenceX fallbackPassword) {
+        payloadManager.setTempPassword(fallbackPassword);
+
+        dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
+        dataListener.showToast(R.string.password_unchanged, ToastCustom.TYPE_ERROR);
     }
 }

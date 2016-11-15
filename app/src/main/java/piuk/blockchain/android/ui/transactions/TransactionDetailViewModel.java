@@ -34,7 +34,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
@@ -117,7 +117,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
 
     public void updateTransactionNote(String description) {
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 mTransactionListDataManager.updateTransactionNotes(mTransaction.getHash(), description)
                         .subscribe(aBoolean -> {
                             if (!aBoolean) {
@@ -147,7 +147,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
                 getTransactionValueString(mFiatType, transaction),
                 Pair::new);
 
-        mCompositeSubscription.add(
+        compositeDisposable.add(
                 zip.subscribe(o -> {
                     Transaction result = o.first;
                     String value = o.second;
@@ -167,6 +167,9 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     }
 
                     String inputMapString = StringUtils.join(labelList.toArray(), "\n");
+                    if (inputMapString.isEmpty()) {
+                        inputMapString = mStringUtils.getString(R.string.transaction_detail_coinbase);
+                    }
                     mDataListener.setFromAddress(mTransactionHelper.addressToLabel(inputMapString));
 
                     // To Address

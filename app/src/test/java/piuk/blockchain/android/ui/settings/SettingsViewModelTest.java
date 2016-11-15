@@ -8,12 +8,11 @@ import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
@@ -21,6 +20,7 @@ import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
@@ -34,7 +34,6 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
-import rx.Observable;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -75,11 +74,6 @@ public class SettingsViewModelTest {
                 new MockDataManagerModule());
 
         subject = new SettingsViewModel(activity);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        Mockito.validateMockitoUsage();
     }
 
     @Test
@@ -280,26 +274,6 @@ public class SettingsViewModelTest {
     }
 
     @Test
-    public void show2FaAfterPhoneVerified() throws Exception {
-        // Arrange
-        subject.show2FaAfterPhoneVerified = false;
-        // Act
-        boolean value = subject.show2FaAfterPhoneVerified();
-        // Assert
-        assertEquals(false, value);
-    }
-
-    @Test
-    public void setShow2FaAfterPhoneVerified() throws Exception {
-        // Arrange
-        subject.show2FaAfterPhoneVerified = false;
-        // Act
-        subject.setShow2FaAfterPhoneVerified(true);
-        // Assert
-        assertEquals(true, subject.show2FaAfterPhoneVerified);
-    }
-
-    @Test
     public void updateEmailInvalid() throws Exception {
         // Arrange
 
@@ -385,7 +359,6 @@ public class SettingsViewModelTest {
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
         verifyNoMoreInteractions(activity);
-        assertEquals(false, subject.show2FaAfterPhoneVerified);
     }
 
     @Test
@@ -393,9 +366,12 @@ public class SettingsViewModelTest {
         // Arrange
         when(settingsDataManager.verifySms(anyString())).thenReturn(Observable.just(true));
         when(settingsDataManager.updateNotifications(anyInt(), anyBoolean())).thenReturn(Observable.just(true));
+        subject.settings = new Settings();
         // Act
         subject.verifySms("code");
         // Assert
+        verify(activity).showProgressDialog(anyInt());
+        verify(activity).hideProgressDialog();
         verify(activity).showDialogSmsVerified();
     }
 
@@ -403,13 +379,30 @@ public class SettingsViewModelTest {
     public void verifySmsFailed() throws Exception {
         // Arrange
         when(settingsDataManager.verifySms(anyString())).thenReturn(Observable.just(false));
+        subject.settings = new Settings();
         // Act
         subject.verifySms("code");
         // Assert
+        verify(activity).showProgressDialog(anyInt());
+        verify(activity).hideProgressDialog();
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
         verifyNoMoreInteractions(activity);
-        assertEquals(false, subject.show2FaAfterPhoneVerified);
+    }
+
+    @Test
+    public void verifySmsError() throws Exception {
+        // Arrange
+        when(settingsDataManager.verifySms(anyString())).thenReturn(Observable.error(new Throwable()));
+        subject.settings = new Settings();
+        // Act
+        subject.verifySms("code");
+        // Assert
+        verify(activity).showProgressDialog(anyInt());
+        verify(activity).hideProgressDialog();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verifyNoMoreInteractions(activity);
     }
 
     @Test
@@ -532,14 +525,30 @@ public class SettingsViewModelTest {
         verifyNoMoreInteractions(activity);
     }
 
+    @Ignore
     @Test
     public void validatePinFailed() throws Exception {
+//        // Arrange
+//        when(accessState.validatePin(anyString())).thenReturn(Observable.just(null));
+//        // Act
+//        subject.validatePin(new CharSequenceX("1234"));
+//        // Assert
+//        verify(activity).showProgressDialog(anyInt());
+//        verify(activity).hideProgressDialog();
+//        //noinspection WrongConstant
+//        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+//        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void validatePinError() throws Exception {
         // Arrange
-        when(accessState.validatePin(anyString())).thenReturn(Observable.just(null));
+        when(accessState.validatePin(anyString())).thenReturn(Observable.error(new Throwable()));
         // Act
         subject.validatePin(new CharSequenceX("1234"));
         // Assert
         verify(activity).showProgressDialog(anyInt());
+        verify(activity).hideProgressDialog();
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
         verifyNoMoreInteractions(activity);
@@ -574,6 +583,24 @@ public class SettingsViewModelTest {
         subject.updatePassword(newPassword, oldPassword);
         // Assert
         verify(activity).showProgressDialog(anyInt());
+        verify(activity).hideProgressDialog();
+        verify(payloadManager).setTempPassword(oldPassword);
+        //noinspection WrongConstant
+        verify(activity, times(2)).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+    }
+
+    @Test
+    public void updatePasswordError() throws Exception {
+        // Arrange
+        CharSequenceX newPassword = new CharSequenceX("new password");
+        CharSequenceX oldPassword = new CharSequenceX("old password");
+        when(accessState.getPIN()).thenReturn("1234");
+        when(accessState.createPin(any(CharSequenceX.class), anyString())).thenReturn(Observable.error(new Throwable()));
+        // Act
+        subject.updatePassword(newPassword, oldPassword);
+        // Assert
+        verify(activity).showProgressDialog(anyInt());
+        verify(activity).hideProgressDialog();
         verify(payloadManager).setTempPassword(oldPassword);
         //noinspection WrongConstant
         verify(activity, times(2)).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));

@@ -33,6 +33,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import io.reactivex.Completable;
+import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
@@ -48,8 +50,6 @@ import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
-import rx.Completable;
-import rx.Observable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -264,7 +264,7 @@ public class AccountEditViewModelTest {
         pendingTransaction.bigIntAmount = new BigInteger("1");
         pendingTransaction.bigIntFee = new BigInteger("1");
         LegacyAddress legacyAddress = new LegacyAddress();
-        pendingTransaction.sendingObject = new ItemAccount("", "", "", legacyAddress);
+        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress);
         Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
         when(payloadManager.getPayload()).thenReturn(mockPayload);
@@ -293,7 +293,7 @@ public class AccountEditViewModelTest {
         pendingTransaction.bigIntAmount = new BigInteger("1");
         pendingTransaction.bigIntFee = new BigInteger("1");
         LegacyAddress legacyAddress = new LegacyAddress();
-        pendingTransaction.sendingObject = new ItemAccount("", "", "", legacyAddress);
+        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress);
         Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
         when(payloadManager.getPayload()).thenReturn(mockPayload);
@@ -319,7 +319,7 @@ public class AccountEditViewModelTest {
         pendingTransaction.bigIntAmount = new BigInteger("1");
         pendingTransaction.bigIntFee = new BigInteger("1");
         LegacyAddress legacyAddress = new LegacyAddress();
-        pendingTransaction.sendingObject = new ItemAccount("", "", "", legacyAddress);
+        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress);
         Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
         when(mockPayload.isDoubleEncrypted()).thenReturn(true);
         when(payloadManager.getPayload()).thenReturn(mockPayload);
@@ -353,6 +353,7 @@ public class AccountEditViewModelTest {
         subject.updateAccountLabel("label");
         // Assert
         verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
         verify(accountEditModel).setLabel(anyString());
         verify(activity).setActivityResult(anyInt());
     }
@@ -366,6 +367,22 @@ public class AccountEditViewModelTest {
         subject.updateAccountLabel("label");
         // Assert
         verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
+        verify(accountEditModel).setLabel(anyString());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+    }
+
+    @Test
+    public void updateAccountLabelError() throws Exception {
+        // Arrange
+        subject.legacyAddress = new LegacyAddress();
+        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.error(new Throwable()));
+        // Act
+        subject.updateAccountLabel("label");
+        // Assert
+        verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
         verify(accountEditModel).setLabel(anyString());
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
@@ -394,6 +411,7 @@ public class AccountEditViewModelTest {
         subject.onClickDefault(null);
         // Assert
         verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
         verify(activity).setActivityResult(anyInt());
     }
 
@@ -410,6 +428,25 @@ public class AccountEditViewModelTest {
         subject.onClickDefault(null);
         // Assert
         verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+    }
+
+    @Test
+    public void onClickDefaultError() throws Exception {
+        // Arrange
+        subject.account = new Account();
+        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
+        when(mockPayload.getHdWallet().getDefaultIndex()).thenReturn(0);
+        when(mockPayload.getHdWallet().getAccounts()).thenReturn(Collections.singletonList(new Account()));
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.error(new Throwable()));
+        // Act
+        subject.onClickDefault(null);
+        // Assert
+        verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
     }
@@ -550,6 +587,7 @@ public class AccountEditViewModelTest {
         subject.archiveAccount();
         // Assert
         verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
         verify(accountEditDataManager).updateBalancesAndTransactions();
         verify(activity).setActivityResult(anyInt());
     }
@@ -563,6 +601,21 @@ public class AccountEditViewModelTest {
         subject.archiveAccount();
         // Assert
         verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+    }
+
+    @Test
+    public void archiveAccountError() throws Exception {
+        // Arrange
+        subject.account = new Account();
+        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.error(new Throwable()));
+        // Act
+        subject.archiveAccount();
+        // Assert
+        verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
     }

@@ -70,8 +70,9 @@ public class DataManagerModule {
     protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager,
                                                              PrefsUtil prefsUtil,
                                                              StringUtils stringUtils,
-                                                             ExchangeRateFactory exchangeRateFactory) {
-        return new WalletAccountHelper(payloadManager, prefsUtil, stringUtils, exchangeRateFactory);
+                                                             ExchangeRateFactory exchangeRateFactory,
+                                                             MultiAddrFactory multiAddrFactory) {
+        return new WalletAccountHelper(payloadManager, prefsUtil, stringUtils, exchangeRateFactory, multiAddrFactory);
     }
 
     @Provides

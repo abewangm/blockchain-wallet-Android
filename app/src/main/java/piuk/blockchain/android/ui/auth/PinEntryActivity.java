@@ -21,6 +21,7 @@ import info.blockchain.wallet.util.CharSequenceX;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.api.UrlSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityPinEntryBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -76,6 +77,19 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
         showConnectionDialogIfNeeded();
         mKeyboardLayout = (ViewGroup) findViewById(R.id.keyboard_container);
 
+        UrlSettings urlSettings = new UrlSettings();
+
+        if (urlSettings.shouldShowDebugMenu()) {
+            ToastCustom.makeText(
+                    this, "Current environment: " + urlSettings.getCurrentEnvironment().getName(),
+                    ToastCustom.LENGTH_SHORT,
+                    ToastCustom.TYPE_GENERAL);
+
+            mBinding.buttonSettings.setVisibility(View.VISIBLE);
+            mBinding.buttonSettings.setOnClickListener(view ->
+                    new EnvironmentSwitcher(this, urlSettings).showEnvironmentSelectionDialog());
+        }
+
         mViewModel.onViewReady();
     }
 
@@ -92,7 +106,6 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
                 public void onAuthenticated(CharSequenceX data) {
                     dismissFingerprintDialog();
                     mViewModel.loginWithDecryptedPin(data);
-
                 }
 
                 @Override
@@ -254,7 +267,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
-                .setMessage(this.getString(R.string.password_entry))
+                .setMessage(getString(R.string.password_entry))
                 .setView(ViewUtils.getAlertDialogEditTextLayout(this, password))
                 .setCancelable(false)
                 .setNegativeButton(android.R.string.cancel, (dialog, whichButton) -> mViewModel.getAppUtil().restartApp())
@@ -357,6 +370,11 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
         if (mFingerprintDialog != null && mFingerprintDialog.isVisible()) {
             mFingerprintDialog.dismiss();
             mFingerprintDialog = null;
+        }
+
+        // Hide if fingerprint unlock has become unavailable
+        if (!mViewModel.getIfShouldShowFingerprintLogin()) {
+            mBinding.fingerprintLogo.setVisibility(View.GONE);
         }
     }
 

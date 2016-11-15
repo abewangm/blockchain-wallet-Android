@@ -42,4 +42,7 @@ projectFilesBackup/
 captures
 
 # Firebase config
-app/google-services.json
+google-services.json
+
+# Environment URLs
+urls.properties

@@ -13,15 +13,15 @@ import android.util.Log;
 
 import info.blockchain.api.PinStore;
 
+import io.reactivex.plugins.RxJavaPlugins;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.connectivity.ConnectionStateMonitor;
+import piuk.blockchain.android.data.connectivity.ConnectivityManager;
 import piuk.blockchain.android.data.services.PinStoreService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
-import rx.plugins.RxJavaHooks;
 
 /**
  * Created by adambennett on 04/08/2016.
@@ -48,15 +48,14 @@ public class BlockchainApplication extends Application {
 
         new LoggingExceptionHandler();
 
-        RxJavaHooks.enableAssemblyTracking();
-        RxJavaHooks.setOnError(throwable -> Log.e(RX_ERROR_TAG, throwable.getMessage(), throwable));
+        RxJavaPlugins.setErrorHandler(throwable -> Log.e(RX_ERROR_TAG, throwable.getMessage(), throwable));
 
         AccessState.getInstance().initAccessState(this,
                 new PrefsUtil(this),
                 new PinStoreService(new PinStore()),
                 new AppUtil(this));
 
-        new ConnectionStateMonitor(this).enable();
+        ConnectivityManager.getInstance().registerNetworkListener(this);
 
         checkSecurityProviderAndPatchIfNeeded();
 
