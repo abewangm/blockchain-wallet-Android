@@ -39,12 +39,20 @@ public class ContactsViewModel extends BaseViewModel {
         this.dataListener = dataListener;
     }
 
-    void onContactSelected(String mdid) {
-        // TODO: 14/11/2016 Select user object from HashMap
-        /**
-         * Not sure at all what we should show the user in this case. Dialog of options? Fragment?
-         * Presumably here we'll show send/request/delete?
-         */
+    void onSendMoneyClicked(String mdid) {
+
+    }
+
+    void onRequestMoneyClicked(String mdid) {
+
+    }
+
+    void onRenameContactClicked(String mdid) {
+
+    }
+
+    void onDeleteContactClicked(String mdid) {
+
     }
 
     void onViewQrClicked() {

@@ -10,8 +10,10 @@ import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import piuk.blockchain.android.R;
@@ -43,10 +45,42 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
         viewModel.onViewReady();
     }
 
+    private void showDialogForContact(String mdid) {
+        ArrayList<String> options = new ArrayList<>();
+        options.add("Send money");
+        options.add("Request money");
+        options.add("Rename Contact");
+        options.add("Delete Contact");
+
+        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, options);
+
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setAdapter(arrayAdapter, (dialogInterface, i) -> {
+                    switch (i) {
+                        case 0:
+                            viewModel.onSendMoneyClicked(mdid);
+                            break;
+                        case 1:
+                            viewModel.onRequestMoneyClicked(mdid);
+                            break;
+                        case 2:
+                            viewModel.onRenameContactClicked(mdid);
+                            break;
+                        case 3:
+                            viewModel.onDeleteContactClicked(mdid);
+                            break;
+                    }
+                })
+                .setPositiveButton(android.R.string.cancel, null)
+                .create()
+                .show();
+    }
+
     @Override
     public void onContactsLoaded(@NonNull List<ContactsListItem> contacts) {
         ContactsListAdapter contactsListAdapter = new ContactsListAdapter(contacts);
-        contactsListAdapter.setContactsClickListener(mdid -> viewModel.onContactSelected(mdid));
+        contactsListAdapter.setContactsClickListener(this::showDialogForContact);
         binding.contactsList.setAdapter(contactsListAdapter);
         binding.contactsList.setLayoutManager(new LinearLayoutManager(this));
 

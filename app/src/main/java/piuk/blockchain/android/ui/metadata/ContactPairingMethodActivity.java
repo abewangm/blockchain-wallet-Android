@@ -57,7 +57,7 @@ public class ContactPairingMethodActivity extends BaseAuthActivity implements Co
 
             viewModel.handleScanInput(extra);
             ToastCustom.makeText(this, extra, ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
-        } else if (requestCode == SCAN_URI) {
+        } else if (resultCode != RESULT_CANCELED && requestCode == SCAN_URI) {
             onShowToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
         }
     }
