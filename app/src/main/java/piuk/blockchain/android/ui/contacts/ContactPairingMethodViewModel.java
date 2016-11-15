@@ -1,9 +1,12 @@
-package piuk.blockchain.android.ui.metadata;
+package piuk.blockchain.android.ui.contacts;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
 
+import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.datamanagers.MetaDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -11,8 +14,9 @@ import piuk.blockchain.android.util.AppUtil;
 
 public class ContactPairingMethodViewModel extends BaseViewModel {
 
-    @Inject AppUtil appUtil;
     private DataListener dataListener;
+    @Inject AppUtil appUtil;
+    @Inject MetaDataManager metaDataManager;
 
     interface DataListener {
 
@@ -25,8 +29,15 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
         this.dataListener = dataListener;
     }
 
-    void handleScanInput(String extra) {
-        // TODO: 14/11/2016 Handle this input
+    void handleScanInput(@NonNull String extra) {
+        // TODO: 15/11/2016 Input validation
+
+        compositeDisposable.add(
+                metaDataManager.postToShare(extra)
+                        .flatMap(share -> metaDataManager.putTrusted(share.getMdid()))
+                        .subscribe(
+                                success -> dataListener.onShowToast(R.string.remote_save_ok, ToastCustom.TYPE_OK),
+                                throwable -> dataListener.onShowToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
     void onSendLinkClicked() {

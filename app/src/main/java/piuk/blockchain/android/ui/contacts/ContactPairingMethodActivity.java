@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.metadata;
+package piuk.blockchain.android.ui.contacts;
 
 import android.Manifest;
 import android.content.Context;
@@ -54,9 +54,8 @@ public class ContactPairingMethodActivity extends BaseAuthActivity implements Co
                 && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
 
             String extra = data.getStringExtra(CaptureActivity.SCAN_RESULT);
+            if (extra != null) viewModel.handleScanInput(extra);
 
-            viewModel.handleScanInput(extra);
-            ToastCustom.makeText(this, extra, ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
         } else if (resultCode != RESULT_CANCELED && requestCode == SCAN_URI) {
             onShowToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
         }

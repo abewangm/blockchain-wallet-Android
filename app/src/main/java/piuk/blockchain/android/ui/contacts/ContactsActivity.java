@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.metadata;
+package piuk.blockchain.android.ui.contacts;
 
 import android.content.Context;
 import android.content.Intent;
@@ -19,12 +19,14 @@ import java.util.List;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactsBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 public class ContactsActivity extends BaseAuthActivity implements ContactsViewModel.DataListener {
 
     private ActivityContactsBinding binding;
     private ContactsViewModel viewModel;
+    private MaterialProgressDialog materialProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +42,10 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
 
         setUiState(UI_STATE.LOADING);
 
-        binding.buttonDisplayQr.setOnClickListener(view -> viewModel.onViewQrClicked());
+        binding.buttonDisplayQr.setOnClickListener(view -> {
+            showProgressDialog();
+            viewModel.onViewQrClicked();
+        });
 
         viewModel.onViewReady();
     }
@@ -98,6 +103,8 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
 
     @Override
     public void showQrCode(@NonNull Bitmap bitmap) {
+        dismissProgressDialog();
+
         ImageView imageView = new ImageView(this);
         imageView.setImageBitmap(bitmap);
 
@@ -132,6 +139,20 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
     protected void onDestroy() {
         super.onDestroy();
         viewModel.destroy();
+    }
+
+    private void showProgressDialog() {
+        materialProgressDialog = new MaterialProgressDialog(this);
+        materialProgressDialog.setCancelable(false);
+        materialProgressDialog.setMessage(R.string.please_wait);
+        materialProgressDialog.show();
+    }
+
+    private void dismissProgressDialog() {
+        if (materialProgressDialog != null) {
+            materialProgressDialog.dismiss();
+            materialProgressDialog = null;
+        }
     }
 
     enum UI_STATE {

@@ -122,6 +122,7 @@ ext {
     supportVersion = '25.0.1'
     googleServicesVersion = '9.8.0'
     rxJavaVersion = '2.0.1'
+    retrofitVersion = '2.1.0'
 }
 
 dependencies {
@@ -152,6 +153,9 @@ dependencies {
     // RxJava
     compile "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
     compile "io.reactivex.rxjava2:rxandroid:$rxJavaVersion"
+    // Retrofit
+    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    compile "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     // Dagger2
     compile 'com.google.dagger:dagger:2.7'
     annotationProcessor 'com.google.guava:guava:19.0'

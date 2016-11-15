@@ -109,11 +109,11 @@
             android:name=".ui.transactions.TransactionDetailWebViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".ui.metadata.ContactsActivity"
+            android:name=".ui.contacts.ContactsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-            android:name=".ui.metadata.ContactPairingMethodActivity"
+            android:name=".ui.contacts.ContactPairingMethodActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <service android:name=".data.websocket.WebSocketService" />

@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.metadata;
+package piuk.blockchain.android.ui.contacts;
 
 import android.support.annotation.NonNull;
 

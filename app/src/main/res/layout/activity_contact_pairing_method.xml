@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context="piuk.blockchain.android.ui.metadata.ContactPairingMethodActivity">
+        tools:context="piuk.blockchain.android.ui.contacts.ContactPairingMethodActivity">
 
         <include
             android:id="@+id/toolbar"

@@ -21,6 +21,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +29,7 @@ import android.view.View;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.datamanagers.MetaDataManager;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
 import piuk.blockchain.android.ui.account.AccountActivity;
 import piuk.blockchain.android.ui.auth.LandingActivity;
@@ -35,10 +37,10 @@ import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.contacts.ContactsActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
-import piuk.blockchain.android.ui.metadata.ContactsActivity;
 import piuk.blockchain.android.ui.send.SendActivity;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
@@ -51,6 +53,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+import static android.app.Activity.RESULT_OK;
 import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
 
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.Communicator, MainViewModel.DataListener {

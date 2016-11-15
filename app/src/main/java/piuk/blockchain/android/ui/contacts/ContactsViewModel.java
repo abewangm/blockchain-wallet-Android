@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.metadata;
+package piuk.blockchain.android.ui.contacts;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
@@ -10,6 +10,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.datamanagers.MetaDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -21,6 +22,7 @@ public class ContactsViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     @Inject QrCodeDataManager qrCodeDataManager;
+    @Inject MetaDataManager metaDataManager;
 
     interface DataListener {
 
@@ -56,10 +58,9 @@ public class ContactsViewModel extends BaseViewModel {
     }
 
     void onViewQrClicked() {
-        // TODO: 14/11/2016 Generate correct URI for user
-        String uri = "???";
         compositeDisposable.add(
-                qrCodeDataManager.generateQrCode(uri, DIMENSION_QR_CODE)
+                metaDataManager.postShare()
+                        .flatMap(share -> qrCodeDataManager.generateQrCode(share.getId(), DIMENSION_QR_CODE))
                         .subscribe(
                                 bitmap -> dataListener.showQrCode(bitmap),
                                 throwable -> dataListener.onShowToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));

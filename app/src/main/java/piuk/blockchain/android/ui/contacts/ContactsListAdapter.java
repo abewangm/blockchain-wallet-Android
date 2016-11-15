@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.metadata;
+package piuk.blockchain.android.ui.contacts;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
