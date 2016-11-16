@@ -117,11 +117,9 @@ public class SettingsViewModel extends BaseViewModel {
                             dataListener.setUpUi();
                             updateUi();
                         })
-                        .subscribe(updatedSettings -> {
-                            settings = updatedSettings;
-                        }, throwable -> {
-                            settings = new Settings();
-                        }));
+                        .subscribe(
+                                updatedSettings -> settings = updatedSettings,
+                                throwable -> settings = new Settings()));
     }
 
     private void updateUi() {
@@ -174,6 +172,12 @@ public class SettingsViewModel extends BaseViewModel {
 
                 if (type == Settings.NOTIFICATION_TYPE_SMS) {
                     dataListener.setSmsNotificationPref(true);
+                }
+
+                if (type == Settings.NOTIFICATION_TYPE_ALL) {
+                    dataListener.setSmsNotificationPref(true);
+                    dataListener.setEmailNotificationPref(true);
+                    break;
                 }
             }
         }
