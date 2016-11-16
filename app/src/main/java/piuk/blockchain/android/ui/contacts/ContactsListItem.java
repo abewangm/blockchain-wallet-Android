@@ -1,27 +1,31 @@
 package piuk.blockchain.android.ui.contacts;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-public class ContactsListItem {
+class ContactsListItem {
 
     private String mdid;
     private String contactName;
     private String status;
 
-    public ContactsListItem(@NonNull String mdid, @NonNull String contactName, @NonNull String status) {
+    ContactsListItem(@NonNull String mdid, @NonNull String contactName, @NonNull String status) {
         this.mdid = mdid;
         this.contactName = contactName;
         this.status = status;
     }
 
-    public String getContactName() {
+    @Nullable
+    String getContactName() {
         return contactName;
     }
 
-    public String getMdid() {
+    @NonNull
+    String getMdid() {
         return mdid;
     }
 
+    @NonNull
     public String getStatus() {
         return status;
     }

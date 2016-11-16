@@ -534,7 +534,7 @@ public class SettingsViewModelTest {
 //        subject.validatePin(new CharSequenceX("1234"));
 //        // Assert
 //        verify(activity).showProgressDialog(anyInt());
-//        verify(activity).hideProgressDialog();
+//        verify(activity).dismissProgressDialog();
 //        //noinspection WrongConstant
 //        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
 //        verifyNoMoreInteractions(activity);

@@ -24,8 +24,10 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 public class ContactsActivity extends BaseAuthActivity implements ContactsViewModel.DataListener {
 
+    private static final int REQUEST_PAIRING = 98;
     private ActivityContactsBinding binding;
     private ContactsViewModel viewModel;
+    private ContactsListAdapter contactsListAdapter;
     private MaterialProgressDialog materialProgressDialog;
 
     @Override
@@ -38,14 +40,16 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        binding.fab.setOnClickListener(view -> ContactPairingMethodActivity.start(this));
+        binding.fab.setOnClickListener(view -> startPairingActivity());
 
-        setUiState(UI_STATE.LOADING);
+        binding.buttonDisplayQr.setOnClickListener(view -> viewModel.onViewQrClicked());
 
-        binding.buttonDisplayQr.setOnClickListener(view -> {
-            showProgressDialog();
-            viewModel.onViewQrClicked();
-        });
+        binding.buttonRetry.setOnClickListener(view -> viewModel.onViewReady());
+
+        contactsListAdapter = new ContactsListAdapter(new ArrayList<>());
+        contactsListAdapter.setContactsClickListener(this::showDialogForContact);
+        binding.layoutContent.setAdapter(contactsListAdapter);
+        binding.layoutContent.setLayoutManager(new LinearLayoutManager(this));
 
         viewModel.onViewReady();
     }
@@ -84,27 +88,11 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
 
     @Override
     public void onContactsLoaded(@NonNull List<ContactsListItem> contacts) {
-        ContactsListAdapter contactsListAdapter = new ContactsListAdapter(contacts);
-        contactsListAdapter.setContactsClickListener(this::showDialogForContact);
-        binding.contactsList.setAdapter(contactsListAdapter);
-        binding.contactsList.setLayoutManager(new LinearLayoutManager(this));
-
-        setUiState(UI_STATE.CONTENT);
-    }
-
-    @Override
-    public void showContactsLoadingFailed() {
-        setUiState(UI_STATE.FAILURE);
-        binding.layoutFailure.setOnClickListener(view -> {
-            setUiState(UI_STATE.LOADING);
-            viewModel.onViewReady();
-        });
+        contactsListAdapter.onContactsUpdated(contacts);
     }
 
     @Override
     public void showQrCode(@NonNull Bitmap bitmap) {
-        dismissProgressDialog();
-
         ImageView imageView = new ImageView(this);
         imageView.setImageBitmap(bitmap);
 
@@ -135,20 +123,35 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
         context.startActivity(starter);
     }
 
+    private void startPairingActivity() {
+        Intent intent = new Intent(this, ContactPairingMethodActivity.class);
+        startActivityForResult(intent, REQUEST_PAIRING);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_PAIRING && resultCode == RESULT_OK) {
+            viewModel.onViewReady();
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         viewModel.destroy();
     }
 
-    private void showProgressDialog() {
+    @Override
+    public void showProgressDialog() {
         materialProgressDialog = new MaterialProgressDialog(this);
         materialProgressDialog.setCancelable(false);
         materialProgressDialog.setMessage(R.string.please_wait);
         materialProgressDialog.show();
     }
 
-    private void dismissProgressDialog() {
+    @Override
+    public void dismissProgressDialog() {
         if (materialProgressDialog != null) {
             materialProgressDialog.dismiss();
             materialProgressDialog = null;
@@ -158,26 +161,38 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
     enum UI_STATE {
         LOADING,
         CONTENT,
-        FAILURE
+        FAILURE,
+        EMPTY
     }
 
-    private void setUiState(UI_STATE uiState) {
+    @Override
+    public void setUiState(UI_STATE uiState) {
         switch (uiState) {
             case LOADING:
-                binding.contactsList.setVisibility(View.GONE);
-                binding.progressBar.setVisibility(View.VISIBLE);
+                binding.layoutLoading.setVisibility(View.VISIBLE);
+                binding.layoutContent.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.GONE);
+                binding.layoutEmpty.setVisibility(View.GONE);
                 break;
             case CONTENT:
-                binding.contactsList.setVisibility(View.VISIBLE);
-                binding.progressBar.setVisibility(View.GONE);
+                binding.layoutLoading.setVisibility(View.GONE);
+                binding.layoutContent.setVisibility(View.VISIBLE);
                 binding.layoutFailure.setVisibility(View.GONE);
+                binding.layoutEmpty.setVisibility(View.GONE);
                 break;
             case FAILURE:
-                binding.contactsList.setVisibility(View.GONE);
-                binding.progressBar.setVisibility(View.GONE);
+                binding.layoutLoading.setVisibility(View.GONE);
+                binding.layoutContent.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.VISIBLE);
+                binding.layoutEmpty.setVisibility(View.GONE);
                 break;
+            case EMPTY:
+                binding.layoutLoading.setVisibility(View.GONE);
+                binding.layoutContent.setVisibility(View.GONE);
+                binding.layoutFailure.setVisibility(View.GONE);
+                binding.layoutEmpty.setVisibility(View.VISIBLE);
+                break;
+
         }
     }
 }

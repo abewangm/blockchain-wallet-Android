@@ -36,14 +36,23 @@
 
         <!-- LOADING LAYOUT -->
         <ProgressBar
-            android:id="@+id/progress_bar"
+            android:id="@+id/layout_loading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center" />
 
+        <!-- EMPTY LAYOUT -->
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/layout_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/contacts_no_contacts_found"
+            android:visibility="gone" />
+
         <!-- CONTENT LAYOUT -->
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/contacts_list"
+            android:id="@+id/layout_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="56dp"

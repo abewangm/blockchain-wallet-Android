@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.contacts;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
@@ -22,6 +23,8 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
 
         void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
+        void finishActivityWithResult(int resultCode);
+
     }
 
     ContactPairingMethodViewModel(DataListener dataListener) {
@@ -30,14 +33,16 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
     }
 
     void handleScanInput(@NonNull String extra) {
-        // TODO: 15/11/2016 Input validation
+        // TODO: 15/11/2016 Input validation?
 
         compositeDisposable.add(
                 metaDataManager.postToShare(extra)
                         .flatMap(share -> metaDataManager.putTrusted(share.getMdid()))
                         .subscribe(
-                                success -> dataListener.onShowToast(R.string.remote_save_ok, ToastCustom.TYPE_OK),
-                                throwable -> dataListener.onShowToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
+                                success -> {
+                                    dataListener.onShowToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
+                                    dataListener.finishActivityWithResult(Activity.RESULT_OK);
+                                }, throwable -> dataListener.onShowToast(R.string.pairing_failed, ToastCustom.TYPE_ERROR)));
     }
 
     void onSendLinkClicked() {

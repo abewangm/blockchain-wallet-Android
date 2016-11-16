@@ -82,6 +82,18 @@ public class ContactPairingMethodActivity extends BaseAuthActivity implements Co
         }
     }
 
+    @Override
+    public void finishActivityWithResult(int resultCode) {
+        setResult(resultCode);
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_CANCELED);
+        super.onBackPressed();
+    }
+
     private void startScanActivity() {
         if (!viewModel.isCameraOpen()) {
             Intent intent = new Intent(this, CaptureActivity.class);

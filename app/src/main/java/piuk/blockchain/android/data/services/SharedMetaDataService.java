@@ -1,10 +1,13 @@
 package piuk.blockchain.android.data.services;
 
 import info.blockchain.api.metadata.Metadata;
+import info.blockchain.api.metadata.data.Message;
 import info.blockchain.api.metadata.data.Share;
 import info.blockchain.api.metadata.data.Trusted;
 
 import org.bitcoinj.core.ECKey;
+
+import java.util.List;
 
 import io.reactivex.Observable;
 
@@ -118,6 +121,46 @@ public class SharedMetaDataService {
      */
     public Observable<Boolean> deleteShare(String token, String uuid) {
         return Observable.fromCallable(() -> metadata.deleteShare(token, uuid));
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // MESSAGES SPECIFIC
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Adds a message to the shared metadata service. Signed.
+     *
+     * @param token         A signed web token in JSON format
+     * @param ecKey         A user generated ECKey
+     * @param recipientMdid The MDID of the message's recipient
+     * @param message       The message itself in plaintext
+     * @param type          An integer message type todo define these somewhere
+     * @return A {@link Message} object
+     */
+    public Observable<Message> postMessage(String token, ECKey ecKey, String recipientMdid, String message, int type) {
+        return Observable.fromCallable(() -> metadata.postMessage(token, ecKey, recipientMdid, message, type));
+    }
+
+    /**
+     * Get messages sent to my MDID. Optionally only processed messages
+     *
+     * @param token         A signed web token in JSON format
+     * @param onlyProcessed Flag for only getting processed messages
+     * @return A list of {@link Message} objects
+     */
+    public Observable<List<Message>> getMessages(String token, boolean onlyProcessed) {
+        return Observable.fromCallable(() -> metadata.getMessages(token, onlyProcessed));
+    }
+
+    /**
+     * Get a specific message using a message ID
+     *
+     * @param token     A signed web token in JSON format
+     * @param messageId The ID of the message to be retrieved
+     * @return A {@link Message} object
+     */
+    public Observable<Message> getMessageForId(String token, String messageId) {
+        return Observable.fromCallable(() -> metadata.getMessage(token, messageId));
     }
 
 }

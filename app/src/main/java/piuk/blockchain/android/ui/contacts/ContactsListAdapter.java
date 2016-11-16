@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.contacts;
 
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +44,12 @@ class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.Conta
     @Override
     public int getItemCount() {
         return contacts != null ? contacts.size() : 0;
+    }
+
+    void onContactsUpdated(List<ContactsListItem> contacts) {
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new ContactsDiffUtil(this.contacts, contacts));
+        this.contacts = contacts;
+        diffResult.dispatchUpdatesTo(this);
     }
 
     static class ContactsViewHolder extends RecyclerView.ViewHolder {

@@ -3,10 +3,6 @@ package piuk.blockchain.android.injection;
 import android.app.Application;
 import android.content.Context;
 
-import piuk.blockchain.android.data.metadata.di.DaggerMetaDataComponent;
-import piuk.blockchain.android.data.metadata.di.MetaDataComponent;
-import piuk.blockchain.android.data.metadata.di.MetaDataModule;
-
 /**
  * Created by adambennett on 08/08/2016.
  */
@@ -31,7 +27,7 @@ public enum Injector {
         MetaDataModule metaDataModule = new MetaDataModule();
 
         initAppComponent(applicationModule, apiModule, managerModule);
-        initMetaDataComponent(applicationModule, apiModule, metaDataModule);
+        initMetaDataComponent(apiModule, metaDataModule);
     }
 
     protected void initAppComponent(ApplicationModule applicationModule, ApiModule apiModule, DataManagerModule managerModule) {
@@ -44,10 +40,9 @@ public enum Injector {
         dataManagerComponent = applicationComponent.plus(managerModule);
     }
 
-    protected void initMetaDataComponent(ApplicationModule applicationModule, ApiModule apiModule, MetaDataModule metaDataModule) {
+    protected void initMetaDataComponent(ApiModule apiModule, MetaDataModule metaDataModule) {
 
         metaDataComponent = DaggerMetaDataComponent.builder()
-                .applicationModule(applicationModule)
                 .apiModule(apiModule)
                 .metaDataModule(metaDataModule)
                 .build();

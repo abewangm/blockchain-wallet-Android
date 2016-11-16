@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.metadata.di;
+package piuk.blockchain.android.injection;
 
 import info.blockchain.api.metadata.Metadata;
 

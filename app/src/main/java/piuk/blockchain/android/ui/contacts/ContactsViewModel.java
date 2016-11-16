@@ -3,8 +3,9 @@ package piuk.blockchain.android.ui.contacts;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.util.Log;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -28,11 +29,15 @@ public class ContactsViewModel extends BaseViewModel {
 
         void onContactsLoaded(@NonNull List<ContactsListItem> contacts);
 
-        void showContactsLoadingFailed();
-
         void showQrCode(@NonNull Bitmap bitmap);
 
         void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
+
+        void setUiState(ContactsActivity.UI_STATE uiState);
+
+        void showProgressDialog();
+
+        void dismissProgressDialog();
 
     }
 
@@ -54,29 +59,77 @@ public class ContactsViewModel extends BaseViewModel {
     }
 
     void onDeleteContactClicked(String mdid) {
-
+        dataListener.showProgressDialog();
+        compositeDisposable.add(
+                metaDataManager.deleteTrusted(mdid)
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .subscribe(success -> {
+                            if (success) {
+                                onViewReady();
+                            } else {
+                                dataListener.onShowToast(R.string.contacts_delete_contact_failed, ToastCustom.TYPE_ERROR);
+                            }
+                        }, throwable -> dataListener.onShowToast(R.string.contacts_delete_contact_failed, ToastCustom.TYPE_ERROR)));
     }
 
     void onViewQrClicked() {
+        // TODO: 16/11/2016
+        /**
+         * This will need to subscribe to the notification service somehow and listen for when
+         * the recipient accepts their invitation. Once this is done, the dialog will need to be
+         * dismissed and the user will have to make a call to {@link info.blockchain.api.metadata.MetadataService#postToShare(String, String)}
+         * to add them as a contact themselves
+         */
+
+        dataListener.showProgressDialog();
+
         compositeDisposable.add(
                 metaDataManager.postShare()
                         .flatMap(share -> qrCodeDataManager.generateQrCode(share.getId(), DIMENSION_QR_CODE))
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(
                                 bitmap -> dataListener.showQrCode(bitmap),
                                 throwable -> dataListener.onShowToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
     }
 
+    private static final String TAG = ContactsViewModel.class.getSimpleName();
+
     @Override
     public void onViewReady() {
-        // TODO: 14/11/2016 Load users
+        dataListener.setUiState(ContactsActivity.UI_STATE.LOADING);
+        compositeDisposable.add(
+                metaDataManager.getTrustedList()
+                        .subscribe(trusted -> {
+                            ArrayList<ContactsListItem> list = new ArrayList<>();
 
-        ContactsListItem user1 = new ContactsListItem("mdid:12345", "Adam", "Waiting for confirmation");
-        ContactsListItem user2 = new ContactsListItem("mdid:67890", "Riaan", "Trusted");
-        ContactsListItem user3 = new ContactsListItem("mdid:11111", "Matt", "Trusted");
-        ContactsListItem user4 = new ContactsListItem("mdid:22222", "Sjors", "Trusted");
-        ContactsListItem user5 = new ContactsListItem("mdid:33333", "Mats", "Waiting for confirmation");
-        ContactsListItem user6 = new ContactsListItem("mdid:44444", "Antoine", "French");
+                            for (String contact : trusted.getContacts()) {
+                                list.add(new ContactsListItem(contact, contact, "Trusted"));
+                            }
 
-        dataListener.onContactsLoaded(Arrays.asList(user1, user2, user3, user4, user5, user6));
+                            if (!list.isEmpty()) {
+                                dataListener.setUiState(ContactsActivity.UI_STATE.CONTENT);
+                                dataListener.onContactsLoaded(list);
+                            } else {
+                                dataListener.setUiState(ContactsActivity.UI_STATE.EMPTY);
+                            }
+
+                            Log.d(TAG, "onViewReady: " + list);
+
+                        }, throwable -> {
+                            Log.e(TAG, "onViewReady: ", throwable);
+                            dataListener.setUiState(ContactsActivity.UI_STATE.FAILURE);
+                        }));
+
+        // TODO: 16/11/2016 Move me to my own function. I will likely need to be called from system-wide broadcasts
+        compositeDisposable.add(
+                metaDataManager.getMessages(true)
+                        .subscribe(
+                                messages -> {
+                                    Log.d(TAG, "onViewReady: " + messages);
+                                },
+                                throwable -> {
+                                    Log.e(TAG, "onViewReady: ", throwable);
+                                    dataListener.onShowToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
+                                }));
     }
 }
