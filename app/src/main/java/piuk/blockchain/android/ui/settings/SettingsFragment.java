@@ -215,6 +215,18 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     @Override
+    public void showWarningDialog(@StringRes int message) {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(message)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.ok, null)
+                .setOnDismissListener(dialogInterface -> showDialogVerifySms())
+                .create()
+                .show();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);

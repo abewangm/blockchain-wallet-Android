@@ -94,6 +94,8 @@ public class SettingsViewModel extends BaseViewModel {
         void goToPinEntryPage();
 
         void setLauncherShortcutVisibility(boolean visible);
+
+        void showWarningDialog(@StringRes int message);
     }
 
     SettingsViewModel(DataListener dataListener) {
@@ -391,9 +393,7 @@ public class SettingsViewModel extends BaseViewModel {
                                 } else {
                                     throw Exceptions.propagate(new Throwable("Update email failed"));
                                 }
-                            }, throwable -> {
-                                dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR);
-                            }));
+                            }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
         }
     }
 
@@ -415,9 +415,7 @@ public class SettingsViewModel extends BaseViewModel {
                                 } else {
                                     throw Exceptions.propagate(new Throwable("Update SMS failed"));
                                 }
-                            }, throwable -> {
-                                showUpdateError();
-                            }));
+                            }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
         }
     }
 
@@ -436,15 +434,9 @@ public class SettingsViewModel extends BaseViewModel {
                                 dataListener.showDialogSmsVerified();
                                 updateUi();
                             } else {
-                                showUpdateError();
+                                dataListener.showWarningDialog(R.string.verify_sms_failed);
                             }
-                        }, throwable -> {
-                            showUpdateError();
-                        }));
-    }
-
-    private void showUpdateError() {
-        dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR);
+                        }, throwable -> dataListener.showWarningDialog(R.string.verify_sms_failed)));
     }
 
     /**
@@ -461,9 +453,7 @@ public class SettingsViewModel extends BaseViewModel {
                             } else {
                                 throw Exceptions.propagate(new Throwable("Update TOR failed"));
                             }
-                        }, throwable -> {
-                            dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR);
-                        }));
+                        }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     /**
@@ -483,9 +473,7 @@ public class SettingsViewModel extends BaseViewModel {
                                 } else {
                                     throw Exceptions.propagate(new Throwable("Update password hint failed"));
                                 }
-                            }, throwable -> {
-                                dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR);
-                            }));
+                            }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
         }
     }
 
@@ -504,9 +492,7 @@ public class SettingsViewModel extends BaseViewModel {
                             } else {
                                 throw Exceptions.propagate(new Throwable("Update 2FA failed"));
                             }
-                        }, throwable -> {
-                            dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR);
-                        }));
+                        }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     /**
@@ -525,9 +511,7 @@ public class SettingsViewModel extends BaseViewModel {
                             } else {
                                 throw Exceptions.propagate(new Throwable("Update notification failed"));
                             }
-                        }, throwable -> {
-                            dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR);
-                        }));
+                        }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     /**
@@ -551,9 +535,7 @@ public class SettingsViewModel extends BaseViewModel {
                             } else {
                                 showInvalidPin();
                             }
-                        }, throwable -> {
-                            showInvalidPin();
-                        }));
+                        }, throwable -> showInvalidPin()));
     }
 
     private void showInvalidPin() {
@@ -586,9 +568,7 @@ public class SettingsViewModel extends BaseViewModel {
                             } else {
                                 showUpdatePasswordFailed(fallbackPassword);
                             }
-                        }, throwable -> {
-                            showUpdatePasswordFailed(fallbackPassword);
-                        }));
+                        }, throwable -> showUpdatePasswordFailed(fallbackPassword)));
     }
 
     private void showUpdatePasswordFailed(@NonNull CharSequenceX fallbackPassword) {
