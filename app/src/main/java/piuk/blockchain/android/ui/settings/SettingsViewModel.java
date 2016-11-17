@@ -271,7 +271,7 @@ public class SettingsViewModel extends BaseViewModel {
      *
      * @param pinCode A {@link CharSequenceX} wrapping the validated PIN code
      */
-    void pinCodeValidated(CharSequenceX pinCode) {
+    void pinCodeValidatedForFingerprint(CharSequenceX pinCode) {
         dataListener.showFingerprintDialog(pinCode);
     }
 
@@ -519,31 +519,13 @@ public class SettingsViewModel extends BaseViewModel {
     }
 
     /**
-     * Validates a passed PIN number. If valid, takes the user to the PIN entry page to create a new
-     * PIN number.
-     *
-     * @param pin A {@link CharSequenceX} wrapping the PIN number
+     * PIN code validated, take user to PIN change page
      */
-    void validatePin(@NonNull CharSequenceX pin) {
-        dataListener.showProgressDialog(R.string.please_wait);
+    void pinCodeValidatedForChange() {
+        prefsUtil.removeValue(PrefsUtil.KEY_PIN_FAILS);
+        prefsUtil.removeValue(PrefsUtil.KEY_PIN_IDENTIFIER);
 
-        compositeDisposable.add(
-                accessState.validatePin(pin.toString())
-                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
-                        .subscribe(sequenceX -> {
-                            if (sequenceX != null) {
-                                prefsUtil.removeValue(PrefsUtil.KEY_PIN_FAILS);
-                                prefsUtil.removeValue(PrefsUtil.KEY_PIN_IDENTIFIER);
-
-                                dataListener.goToPinEntryPage();
-                            } else {
-                                showInvalidPin();
-                            }
-                        }, throwable -> showInvalidPin()));
-    }
-
-    private void showInvalidPin() {
-        dataListener.showToast(R.string.invalid_pin, ToastCustom.TYPE_ERROR);
+        dataListener.goToPinEntryPage();
     }
 
     /**

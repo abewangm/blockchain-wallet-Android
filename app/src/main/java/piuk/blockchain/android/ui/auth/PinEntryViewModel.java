@@ -428,7 +428,7 @@ public class PinEntryViewModel extends BaseViewModel {
             textView.setBackgroundResource(R.drawable.rounded_view_blue_white_border);
         }
         mDataListener.setTitleVisibility(View.VISIBLE);
-        mDataListener.setTitleString(R.string.confirm_pin);
+        mDataListener.setTitleString(R.string.pin_entry);
     }
 
     public void incrementFailureCountAndRestart() {

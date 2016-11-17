@@ -694,9 +694,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_VALIDATE_PIN && resultCode == RESULT_OK) {
-            viewModel.validatePin(new CharSequenceX(data.getStringExtra(KEY_VALIDATED_PIN)));
+            viewModel.pinCodeValidatedForChange();
         } else if (requestCode == REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT && resultCode == RESULT_OK) {
-            viewModel.pinCodeValidated(new CharSequenceX(data.getStringExtra(KEY_VALIDATED_PIN)));
+            viewModel.pinCodeValidatedForFingerprint(new CharSequenceX(data.getStringExtra(KEY_VALIDATED_PIN)));
         }
     }
 
