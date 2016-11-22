@@ -16,11 +16,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -73,7 +74,7 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
     @Thunk ReceiveViewModel mViewModel;
     @Thunk ActivityReceiveBinding mBinding;
     private CustomKeypad mCustomKeypad;
-    private BottomSheetBehavior mBottomSheetBehavior;
+    private BottomSheetDialog bottomSheetDialog;
     private AddressAdapter mReceiveToAdapter;
 
     @Thunk boolean mTextChangeAllowed = true;
@@ -124,29 +125,6 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
 
     private void setupLayout() {
         setCustomKeypad();
-
-        // Bottom Sheet
-        mBottomSheetBehavior = BottomSheetBehavior.from(mBinding.bottomSheet.bottomSheet);
-        mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                // No-op
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                mBinding.content.receiveMainContentShadow.setAlpha(slideOffset / 2f);
-                if (slideOffset > 0) {
-                    mBinding.content.receiveMainContentShadow.setVisibility(View.VISIBLE);
-                    mBinding.content.receiveMainContentShadow.bringToFront();
-                } else {
-                    mBinding.content.receiveMainContentShadow.setVisibility(View.GONE);
-                }
-            }
-        });
-
-        mBinding.content.receiveMainContentShadow.setOnClickListener(view ->
-                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED));
 
         if (mViewModel.getReceiveToList().size() == 1) {
             mBinding.content.fromRow.setVisibility(View.GONE);
@@ -431,8 +409,16 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
         List<ReceiveViewModel.SendPaymentCodeData> list = mViewModel.getIntentDataList(uri);
         if (list != null) {
             ShareReceiveIntentAdapter adapter = new ShareReceiveIntentAdapter(list);
-            mBinding.bottomSheet.recyclerView.setAdapter(adapter);
-            mBinding.bottomSheet.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            adapter.setItemClickedListener(() -> bottomSheetDialog.dismiss());
+
+            View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_receive, null);
+            RecyclerView recyclerView = (RecyclerView) sheetView.findViewById(R.id.recycler_view);
+            recyclerView.setAdapter(adapter);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+            bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialog);
+            bottomSheetDialog.setContentView(sheetView);
+
             adapter.notifyDataSetChanged();
         }
     }
@@ -461,7 +447,7 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
 
     private void showBottomSheet() {
         setupBottomSheet(mUri);
-        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        bottomSheetDialog.show();
     }
 
     @Override
@@ -576,8 +562,6 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
     public void onBackPressed() {
         if (mCustomKeypad.isVisible()) {
             onKeypadClose();
-        } else if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         } else {
             super.onBackPressed();
         }
