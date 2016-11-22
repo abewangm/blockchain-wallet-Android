@@ -119,9 +119,10 @@ android {
 }
 
 ext {
-    supportVersion = '25.0.0'
-    googleServicesVersion = '9.8.0'
+    supportVersion = '25.0.1'
+    googleServicesVersion = '10.0.0'
     rxJavaVersion = '2.0.1'
+    daggerVersion = '2.8'
 }
 
 dependencies {
@@ -153,9 +154,9 @@ dependencies {
     compile "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
     compile "io.reactivex.rxjava2:rxandroid:$rxJavaVersion"
     // Dagger2
-    compile 'com.google.dagger:dagger:2.7'
+    compile "com.google.dagger:dagger:$daggerVersion"
+    annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
     annotationProcessor 'com.google.guava:guava:19.0'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.7'
     // Fingerprint authentication
     compile 'com.mtramin:rxfingerprint:2.0.0'
 
