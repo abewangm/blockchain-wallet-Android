@@ -17,10 +17,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashSet;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -38,13 +42,11 @@ class WebSocketHandler {
 
     @Thunk static final String TAG = WebSocketHandler.class.getSimpleName();
 
-    private final static long PING_INTERVAL = 20000L; // Ping every 20 seconds
-    private final static long PONG_TIMEOUT = 5000L; // Pong timeout after 5 seconds
+    private final static long PING_INTERVAL = 20 * 1000L;
+    private final static long RETRY_INTERVAL = 5 * 1000L;
 
     private String[] xpubs;
     private String[] addrs;
-    private Timer pingTimer;
-    boolean pingPongSuccess = false;
     @Thunk String guid;
     @Thunk WebSocket connection;
     @Thunk HashSet<String> subHashSet = new HashSet<>();
@@ -52,6 +54,7 @@ class WebSocketHandler {
     @Thunk MonetaryUtil monetaryUtil;
     @Thunk PayloadManager payloadManager;
     @Thunk Context context;
+    @Thunk CompositeDisposable compositeDisposable;
 
     public WebSocketHandler(Context context, String guid, String[] xpubs, String[] addrs) {
         this.context = context;
@@ -61,13 +64,14 @@ class WebSocketHandler {
         payloadManager = PayloadManager.getInstance();
         final PrefsUtil prefsUtil = new PrefsUtil(context);
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
+        compositeDisposable = new CompositeDisposable();
     }
 
     public void send(String message) {
         // Make sure each message is only sent once per socket lifetime
         if (!subHashSet.contains(message)) {
             try {
-                if (connection != null && connection.isOpen()) {
+                if (isConnected()) {
                     connection.sendText(message);
                     subHashSet.add(message);
                 }
@@ -77,7 +81,7 @@ class WebSocketHandler {
         }
     }
 
-    public synchronized void subscribe() {
+    public void subscribe() {
         if (guid == null) {
             return;
         }
@@ -96,72 +100,53 @@ class WebSocketHandler {
         }
     }
 
-    public synchronized void subscribeToXpub(String xpub) {
+    public void subscribeToXpub(String xpub) {
         if (xpub != null && !xpub.isEmpty()) {
             send("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpub + "\"}");
         }
     }
 
-    public synchronized void subscribeToAddress(String address) {
+    public void subscribeToAddress(String address) {
         if (address != null && !address.isEmpty())
             send("{\"op\":\"addr_sub\", \"addr\":\"" + address + "\"}");
     }
 
     public void stop() {
-        Log.d(TAG, "stop: ");
-        stopPingTimer();
-
-        if (connection != null && connection.isOpen()) {
+        if (isConnected()) {
             connection.disconnect();
+            connection = null;
         }
     }
 
     public void start() {
         stop();
         connectToWebSocket().subscribe(new IgnorableDefaultObserver<>());
-        startPingTimer();
-    }
-
-    private void startPingTimer() {
-        pingTimer = new Timer();
-        pingTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (connection != null) {
-                    if (connection.isOpen()) {
-                        pingPongSuccess = false;
-                        connection.sendPing();
-                        startPongTimer();
-                        Log.d(TAG, "run: sendPing");
-                    } else {
-                        start();
-                        Log.d(TAG, "run: start");
-                    }
-                }
-            }
-        }, PING_INTERVAL, PING_INTERVAL);
-    }
-
-    private void stopPingTimer() {
-        if (pingTimer != null) pingTimer.cancel();
     }
 
     @Thunk
-    void startPongTimer() {
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (!pingPongSuccess) {
-                    // Ping pong unsuccessful after x seconds - restart connection
-                    start();
-                }
-            }
-        }, PONG_TIMEOUT);
+    void attemptReconnection() {
+        if (compositeDisposable.size() == 0) {
+            compositeDisposable.add(
+                    getReconnectionObservable()
+                            .subscribe(
+                                    value -> Log.d(TAG, "attemptReconnection: " + value),
+                                    throwable -> Log.e(TAG, "attemptReconnection: ", throwable)
+                            ));
+        }
+    }
+
+    private Observable<Long> getReconnectionObservable() {
+        return Observable.interval(RETRY_INTERVAL, TimeUnit.MILLISECONDS)
+                .takeUntil((ObservableSource<Object>) aLong -> isConnected())
+                .doOnNext(tick -> start());
+    }
+
+    private boolean isConnected() {
+        return connection != null && connection.isOpen();
     }
 
     @Thunk
     void updateBalancesAndTransactions() {
-        Log.d(TAG, "updateBalancesAndTransactions: ");
         updateBalancesAndTxs().subscribe(new IgnorableDefaultObserver<>());
     }
 
@@ -170,7 +155,6 @@ class WebSocketHandler {
             payloadManager.updateBalancesAndTransactions();
             return Void.TYPE;
         }).doOnComplete(() -> {
-            Log.d(TAG, "updateBalancesAndTxs: send broadcast");
             Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }).compose(RxUtil.applySchedulersToCompletable());
@@ -178,24 +162,22 @@ class WebSocketHandler {
 
     private Completable connectToWebSocket() {
         return Completable.fromCallable(() -> {
-            // Seems we make a new connection here, so we should clear our HashSet
             subHashSet.clear();
-            Log.d(TAG, "doInBackground: started");
 
             connection = new WebSocketFactory()
                     .createSocket("wss://ws.blockchain.info/inv")
-                    .addHeader("Origin", "https://blockchain.info").recreate()
+                    .addHeader("Origin", "https://blockchain.info")
+                    .setPingInterval(PING_INTERVAL)
+                    .recreate()
                     .addListener(new WebSocketAdapter() {
                         @Override
-                        public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
-                            super.onPongFrame(websocket, frame);
-                            pingPongSuccess = true;
-                            Log.d(TAG, "onPongFrame: ");
+                        public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
+                            super.onConnected(websocket, headers);
+                            compositeDisposable.clear();
                         }
 
                         @Override
                         public void onTextMessage(WebSocket websocket, String message) {
-                            Log.d(TAG, "onTextMessage: ");
                             if (guid == null) {
                                 return;
                             }
@@ -207,14 +189,21 @@ class WebSocketHandler {
                             } catch (JSONException je) {
                                 Log.e(TAG, "onTextMessage: ", je);
                             }
-
                         }
-                    });
-            connection.connect();
-            subscribe();
 
+                        @Override
+                        public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
+                            super.onDisconnected(websocket, serverCloseFrame, clientCloseFrame, closedByServer);
+                            stop();
+                            attemptReconnection();
+                        }
+
+                    }).connect();
+
+            subscribe();
+            // Necessary but meaningless return type for Completable
             return Void.TYPE;
-        }).compose(RxUtil.applySchedulersToCompletable());
+        });
     }
 
     @Thunk
@@ -222,7 +211,6 @@ class WebSocketHandler {
         try {
             String op = (String) jsonObject.get("op");
             if (op.equals("utx") && jsonObject.has("x")) {
-
                 JSONObject objX = (JSONObject) jsonObject.get("x");
 
                 long value = 0L;
@@ -296,11 +284,8 @@ class WebSocketHandler {
                     // Remote update to wallet data detected
                     if (payloadManager.getTempPassword() != null) {
                         // Download changed payload
-                        payloadManager.initiatePayload(payloadManager.getPayload().getSharedKey(),
-                                payloadManager.getPayload().getGuid(),
-                                payloadManager.getTempPassword(), () -> {
-                                    // No-op
-                                });
+                        //noinspection ThrowableResultOfMethodCallIgnored
+                        downloadChangedPayload().blockingGet();
                         ToastCustom.makeText(context, context.getString(R.string.wallet_updated), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
                         updateBalancesAndTransactions();
                     }
@@ -311,6 +296,18 @@ class WebSocketHandler {
         } catch (Exception e) {
             Log.e(TAG, "attemptParseMessage: ", e);
         }
+    }
+
+    private Completable downloadChangedPayload() {
+        return Completable.fromCallable(() -> {
+            payloadManager.initiatePayload(
+                    payloadManager.getPayload().getSharedKey(),
+                    payloadManager.getPayload().getGuid(),
+                    payloadManager.getTempPassword(), () -> {
+                        // No-op, blocking call
+                    });
+            return Void.TYPE;
+        }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     private void triggerNotification(String title, String marquee, String text) {

@@ -104,7 +104,8 @@ public class WebSocketService extends Service {
         super.onDestroy();
     }
 
-    public class LocalBinder extends Binder {
+    private class LocalBinder extends Binder {
+        @SuppressWarnings("unused") // Necessary for implementing bound Android Service
         public WebSocketService getService() {
             return WebSocketService.this;
         }

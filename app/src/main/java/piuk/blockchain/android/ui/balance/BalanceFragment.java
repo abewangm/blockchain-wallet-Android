@@ -165,7 +165,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
         isBTC = balanceDisplayState != SHOW_FIAT;
 
-        viewModel.startWebSocketService();
         viewModel.updateAccountList();
         viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
 
