@@ -8,22 +8,22 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import info.blockchain.wallet.payload.PayloadManager;
 
 import javax.inject.Inject;
 
 import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.util.MonetaryUtil;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 public class WebSocketService extends Service {
 
-    private static final String TAG = WebSocketService.class.getSimpleName();
-
     public static final String ACTION_INTENT = "info.blockchain.wallet.WebSocketService.SUBSCRIBE_TO_ADDRESS";
     private final IBinder binder = new LocalBinder();
     @Inject protected PayloadManager payloadManager;
+    @Inject protected PrefsUtil prefsUtil;
     @Thunk WebSocketHandler webSocketHandler;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -47,7 +47,6 @@ public class WebSocketService extends Service {
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "onCreate: ");
         super.onCreate();
 
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
@@ -57,7 +56,14 @@ public class WebSocketService extends Service {
         String[] xpubs = getXpubs();
 
         if (addrs.length > 0 || xpubs.length > 0) {
-            webSocketHandler = new WebSocketHandler(getApplicationContext(), payloadManager.getPayload().getGuid(), xpubs, addrs);
+            webSocketHandler = new WebSocketHandler(
+                    getApplicationContext(),
+                    payloadManager,
+                    new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
+                    payloadManager.getPayload().getGuid(),
+                    xpubs,
+                    addrs);
+
             webSocketHandler.start();
         }
     }
@@ -98,13 +104,17 @@ public class WebSocketService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy: ");
-        if (webSocketHandler != null) webSocketHandler.stop();
+        if (webSocketHandler != null) webSocketHandler.stopPermanently();
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(receiver);
         super.onDestroy();
     }
 
     private class LocalBinder extends Binder {
+
+        LocalBinder() {
+            // Empty constructor
+        }
+
         @SuppressWarnings("unused") // Necessary for implementing bound Android Service
         public WebSocketService getService() {
             return WebSocketService.this;

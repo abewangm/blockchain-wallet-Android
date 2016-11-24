@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.UrlSettings;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppRate;
@@ -85,6 +86,7 @@ class EnvironmentSwitcher {
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER);
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER);
         AppRate.reset(context);
+        AccessState.getInstance().setPIN(null);
 
         ToastCustom.makeText(context, "Timers reset", ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
     }

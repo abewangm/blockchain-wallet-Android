@@ -33,7 +33,6 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.NotificationsUtil;
-import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 
@@ -45,6 +44,7 @@ class WebSocketHandler {
     private final static long PING_INTERVAL = 20 * 1000L;
     private final static long RETRY_INTERVAL = 5 * 1000L;
 
+    private boolean stoppedDeliberately = false;
     private String[] xpubs;
     private String[] addrs;
     @Thunk String guid;
@@ -54,20 +54,51 @@ class WebSocketHandler {
     @Thunk MonetaryUtil monetaryUtil;
     @Thunk PayloadManager payloadManager;
     @Thunk Context context;
-    @Thunk CompositeDisposable compositeDisposable;
+    @Thunk CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    public WebSocketHandler(Context context, String guid, String[] xpubs, String[] addrs) {
+    public WebSocketHandler(Context context,
+                            PayloadManager payloadManager,
+                            MonetaryUtil monetaryUtil,
+                            String guid,
+                            String[] xpubs,
+                            String[] addrs) {
+
         this.context = context;
+        this.payloadManager = payloadManager;
+        this.monetaryUtil = monetaryUtil;
         this.guid = guid;
         this.xpubs = xpubs;
         this.addrs = addrs;
-        payloadManager = PayloadManager.getInstance();
-        final PrefsUtil prefsUtil = new PrefsUtil(context);
-        monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
-        compositeDisposable = new CompositeDisposable();
     }
 
-    public void send(String message) {
+    /**
+     * Starts listening for updates to subscribed xpubs and addresses. Will attempt reconnection
+     * every 5 seconds if it cannot connect immediately.
+     */
+    public void start() {
+        stop();
+        stoppedDeliberately = false;
+        connectToWebSocket()
+                .doOnError(throwable -> attemptReconnection())
+                .subscribe(new IgnorableDefaultObserver<>());
+    }
+
+    /**
+     * Halts and disconnects the WebSocket service whilst preventing reconnection until {@link
+     * #start()} is called
+     */
+    public void stopPermanently() {
+        stoppedDeliberately = true;
+        stop();
+    }
+
+    private void stop() {
+        if (isConnected()) {
+            connection.disconnect();
+        }
+    }
+
+    private void send(String message) {
         // Make sure each message is only sent once per socket lifetime
         if (!subHashSet.contains(message)) {
             try {
@@ -81,7 +112,7 @@ class WebSocketHandler {
         }
     }
 
-    public void subscribe() {
+    private void subscribe() {
         if (guid == null) {
             return;
         }
@@ -111,21 +142,9 @@ class WebSocketHandler {
             send("{\"op\":\"addr_sub\", \"addr\":\"" + address + "\"}");
     }
 
-    public void stop() {
-        if (isConnected()) {
-            connection.disconnect();
-            connection = null;
-        }
-    }
-
-    public void start() {
-        stop();
-        connectToWebSocket().subscribe(new IgnorableDefaultObserver<>());
-    }
-
     @Thunk
     void attemptReconnection() {
-        if (compositeDisposable.size() == 0) {
+        if (compositeDisposable.size() == 0 && !stoppedDeliberately) {
             compositeDisposable.add(
                     getReconnectionObservable()
                             .subscribe(
@@ -154,7 +173,7 @@ class WebSocketHandler {
         return Completable.fromCallable(() -> {
             payloadManager.updateBalancesAndTransactions();
             return Void.TYPE;
-        }).doOnComplete(() -> {
+        }).doAfterTerminate(() -> {
             Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }).compose(RxUtil.applySchedulersToCompletable());
@@ -168,7 +187,6 @@ class WebSocketHandler {
                     .createSocket("wss://ws.blockchain.info/inv")
                     .addHeader("Origin", "https://blockchain.info")
                     .setPingInterval(PING_INTERVAL)
-                    .recreate()
                     .addListener(new WebSocketAdapter() {
                         @Override
                         public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
@@ -194,7 +212,6 @@ class WebSocketHandler {
                         @Override
                         public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
                             super.onDisconnected(websocket, serverCloseFrame, clientCloseFrame, closedByServer);
-                            stop();
                             attemptReconnection();
                         }
 
@@ -203,7 +220,7 @@ class WebSocketHandler {
             subscribe();
             // Necessary but meaningless return type for Completable
             return Void.TYPE;
-        });
+        }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     @Thunk

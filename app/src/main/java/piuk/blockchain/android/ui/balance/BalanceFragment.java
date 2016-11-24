@@ -93,12 +93,13 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            if (ACTION_INTENT.equals(intent.getAction())) {
+            if (intent.getAction().equals(ACTION_INTENT) && getActivity() != null) {
                 binding.swipeContainer.setRefreshing(true);
                 viewModel.updateAccountList();
                 viewModel.updateBalanceAndTransactionList(intent, accountSpinner.getSelectedItemPosition(), isBTC);
                 transactionAdapter.onTransactionsUpdated(viewModel.getTransactionList());
                 binding.swipeContainer.setRefreshing(false);
+                binding.rvTransactions.getAdapter().notifyDataSetChanged();
                 // Check backup status on receiving funds
                 viewModel.onViewReady();
             }

@@ -262,6 +262,7 @@
     <string name="decrypting_wallet">Decrypting Wallet…</string>
     <string name="password_unchanged">Password unchanged</string>
     <string name="password_changed">Password changed</string>
+    <string name="password_changed_explanation">Your password has been changed, please re-pair your wallet</string>
     <string name="verify_email2">Your verified email address is used to send login codes when suspicious or unusual activity is detected, to remind you of your wallet login ID, and to send bitcoin payment alerts when you receive funds. We will not use your email address for marketing purposes.</string>
     <string name="disable_root_warning">Disable rooted device warning</string>
 
