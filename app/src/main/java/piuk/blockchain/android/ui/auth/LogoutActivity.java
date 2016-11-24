@@ -25,7 +25,7 @@ public class LogoutActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(this, WebSocketService.class);
 
-                if (!new OSUtil(this).isServiceRunning(WebSocketService.class)) {
+                if (new OSUtil(this).isServiceRunning(WebSocketService.class)) {
                     stopService(intent);
                 }
 
