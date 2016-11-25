@@ -26,7 +26,8 @@ public class InstanceIdService extends FirebaseInstanceIdService {
         Log.d(TAG, "Refreshed token: " + refreshedToken);
 
         if (refreshedToken != null) {
-            notificationTokenManager.storeAndUpdateToken(refreshedToken);
+            // FIXME: 15/11/2016 This will need re-enabling once metadata is live
+//            notificationTokenManager.storeAndUpdateToken(refreshedToken);
         }
     }
 }
