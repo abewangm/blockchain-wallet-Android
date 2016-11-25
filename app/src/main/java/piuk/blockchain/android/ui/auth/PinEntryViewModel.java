@@ -19,6 +19,8 @@ import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
 
+import org.spongycastle.crypto.InvalidCipherTextException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -325,6 +327,16 @@ public class PinEntryViewModel extends BaseViewModel {
                                 //This shouldn't happen. HD fatal error - not safe to continue - don't clear credentials
                                 mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
                                 mAppUtil.restartApp();
+
+                            } else if (throwable instanceof InvalidCipherTextException) {
+                                // Password changed on web, needs re-pairing
+                                mDataListener.showToast(R.string.password_changed_explanation, ToastCustom.TYPE_ERROR);
+                                mAccessState.setPIN(null);
+                                mAppUtil.clearCredentialsAndRestart();
+
+                            } else {
+                                mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                                mAppUtil.clearCredentialsAndRestart();
                             }
 
                         }));

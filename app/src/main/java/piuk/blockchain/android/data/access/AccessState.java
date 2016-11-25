@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
+import android.support.annotation.Nullable;
 
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -146,7 +147,7 @@ public class AccessState {
         });
     }
 
-    public void setPIN(String pin) {
+    public void setPIN(@Nullable String pin) {
         mPin = pin;
     }
 
