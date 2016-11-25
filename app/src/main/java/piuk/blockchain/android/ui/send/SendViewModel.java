@@ -598,7 +598,7 @@ public class SendViewModel extends BaseViewModel {
         validateCustomFee(amountToSend.add(customFee), sweepBundle.getSweepAmount());
 
         SpendableUnspentOutputs unspentOutputBundle = payment.getSpendableCoins(coins,
-                amountToSend,
+                amountToSend.add(customFee),
                 BigInteger.ZERO);
 
         sendModel.pendingTransaction.bigIntAmount = amountToSend;

@@ -5,7 +5,7 @@ apply from: 'environment.gradle'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '25.0.1'
 
     // Introduced to prevent crash during DEXing step since SDK 23, but also speeds up DEXing in general
     dexOptions {
@@ -120,7 +120,7 @@ android {
 
 ext {
     supportVersion = '25.0.1'
-    googleServicesVersion = '9.8.0'
+    googleServicesVersion = '10.0.0'
     rxJavaVersion = '2.0.1'
 }
 
