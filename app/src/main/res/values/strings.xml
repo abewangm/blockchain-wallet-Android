@@ -554,5 +554,6 @@
     <string name="contacts_no_contacts_found">No contacts found</string>
     <string name="contacts_delete_contact_failed">Deleting contact failed, please try again</string>
     <string name="contacts_error_getting_messages">Error getting messages</string>
+    <string name="contacts_error_sending_payment_request">There was an error sending your payment request, please try again</string>
 
 </resources>

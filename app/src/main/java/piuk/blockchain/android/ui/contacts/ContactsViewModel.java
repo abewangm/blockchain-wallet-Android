@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.util.Log;
 
+import info.blockchain.wallet.metadata.data.PaymentRequest;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +53,21 @@ public class ContactsViewModel extends BaseViewModel {
     }
 
     void onRequestMoneyClicked(String mdid) {
+        dataListener.showProgressDialog();
 
+        PaymentRequest paymentRequest = new PaymentRequest();
+        paymentRequest.setAmount(1_000_000L);
+        paymentRequest.setNote("Test Payment");
+
+        compositeDisposable.add(
+                metaDataManager.sendPaymentRequest(mdid, paymentRequest)
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .subscribe(
+                                message -> Log.d(TAG, "onRequestMoneyClicked: " + message),
+                                throwable -> {
+                                    dataListener.onShowToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR);
+                                    Log.e(TAG, "onRequestMoneyClicked: ", throwable);
+                                }));
     }
 
     void onRenameContactClicked(String mdid) {
@@ -61,7 +77,7 @@ public class ContactsViewModel extends BaseViewModel {
     void onDeleteContactClicked(String mdid) {
         dataListener.showProgressDialog();
         compositeDisposable.add(
-                metaDataManager.deleteInvitation(mdid)
+                metaDataManager.deleteTrusted(mdid)
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(success -> {
                             if (success) {

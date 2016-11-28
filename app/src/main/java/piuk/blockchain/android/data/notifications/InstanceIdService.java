@@ -19,6 +19,10 @@ public class InstanceIdService extends FirebaseInstanceIdService {
         Injector.getInstance().getAppComponent().inject(this);
     }
 
+    public InstanceIdService() {
+        Log.d(TAG, "InstanceIdService: constructor instantiated");
+    }
+
     @Override
     public void onTokenRefresh() {
         // Get updated InstanceID token.

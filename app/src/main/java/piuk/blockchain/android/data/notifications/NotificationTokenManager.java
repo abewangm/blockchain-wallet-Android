@@ -1,13 +1,19 @@
 package piuk.blockchain.android.data.notifications;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 
+import io.reactivex.Completable;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.NotificationService;
+import piuk.blockchain.android.util.PrefsUtil;
 
 public class NotificationTokenManager {
 
@@ -16,11 +22,13 @@ public class NotificationTokenManager {
     private NotificationService notificationService;
     private AccessState accessState;
     private PayloadManager payloadManager;
+    private PrefsUtil prefsUtil;
 
-    public NotificationTokenManager(NotificationService notificationService, AccessState accessState, PayloadManager payloadManager) {
+    public NotificationTokenManager(NotificationService notificationService, AccessState accessState, PayloadManager payloadManager, PrefsUtil prefsUtil) {
         this.notificationService = notificationService;
         this.accessState = accessState;
         this.payloadManager = payloadManager;
+        this.prefsUtil = prefsUtil;
     }
 
     /**
@@ -42,6 +50,41 @@ public class NotificationTokenManager {
                 }
             }, Throwable::printStackTrace);
         }
+
+        prefsUtil.setValue(PrefsUtil.KEY_FIREBASE_TOKEN, token);
+    }
+
+    // TODO: 28/11/2016 This may want to be transformed into an Observable?
+
+    /**
+     * Returns the stored Firebase token, otherwise attempts to trigger a refresh of the token which
+     * will be handled appropriately by {@link FcmCallbackService}
+     *
+     * @return The Firebase token
+     */
+    @Nullable
+    public String getFirebaseToken() {
+        return !prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "").isEmpty()
+                ? prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "")
+                : FirebaseInstanceId.getInstance().getToken();
+    }
+
+    /**
+     * Removes the stored token from Shared Preferences
+     */
+    public void clearStoredToken() {
+        prefsUtil.removeValue(PrefsUtil.KEY_FIREBASE_TOKEN);
+    }
+
+    /**
+     * Resets Instance ID and revokes all tokens. Clears stored token if successful.
+     */
+    public Completable revokeAccessToken() {
+        return Completable.fromCallable(() -> {
+            FirebaseInstanceId.getInstance().deleteInstanceId();
+            return Void.TYPE;
+        }).doOnComplete(this::clearStoredToken)
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     private void sendFirebaseToken(String refreshedToken) {
