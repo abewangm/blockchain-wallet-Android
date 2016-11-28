@@ -1,6 +1,6 @@
 package piuk.blockchain.android.injection;
 
-import info.blockchain.api.metadata.Metadata;
+import info.blockchain.wallet.metadata.MetadataShared;
 
 import javax.inject.Singleton;
 
@@ -16,7 +16,7 @@ public class MetaDataModule {
     @Provides
     @Singleton
     protected SharedMetaDataService provideSharedMetaDataService() {
-        return new SharedMetaDataService(new Metadata());
+        return new SharedMetaDataService(new MetadataShared());
     }
 
     @Provides

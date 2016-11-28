@@ -124,6 +124,7 @@ ext {
     googleServicesVersion = '10.0.0'
     rxJavaVersion = '2.0.1'
     daggerVersion = '2.8'
+    okHttpVersion = '3.4.2'
 }
 
 dependencies {
@@ -157,6 +158,9 @@ dependencies {
     // Retrofit
     compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
     compile "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    // OkHttp
+    compile "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
+    compile "com.squareup.okhttp3:okhttp:$okHttpVersion"
     // Dagger2
     compile "com.google.dagger:dagger:$daggerVersion"
     annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
@@ -194,7 +198,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:3.3.0-beta4'
+        classpath 'me.tatarka:gradle-retrolambda:3.3.1'
     }
 }
 

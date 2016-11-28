@@ -15,7 +15,7 @@ public class InstanceIdService extends FirebaseInstanceIdService {
 
     @Inject protected NotificationTokenManager notificationTokenManager;
 
-    public InstanceIdService() {
+    {
         Injector.getInstance().getAppComponent().inject(this);
     }
 

@@ -9,10 +9,6 @@ public class FcmCallbackService extends FirebaseMessagingService {
 
     private static final String TAG = FcmCallbackService.class.getSimpleName();
 
-    public FcmCallbackService() {
-        Log.d(TAG, "FcmCallbackService: Constructor invoked");
-    }
-
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.d(TAG, "onMessageReceived: " + remoteMessage);

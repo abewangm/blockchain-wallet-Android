@@ -72,15 +72,15 @@ public class ContactsViewModel extends BaseViewModel {
                         }, throwable -> dataListener.onShowToast(R.string.contacts_delete_contact_failed, ToastCustom.TYPE_ERROR)));
     }
 
-    void onViewQrClicked() {
-        // TODO: 16/11/2016
-        /**
-         * This will need to subscribe to the notification service somehow and listen for when
-         * the recipient accepts their invitation. Once this is done, the dialog will need to be
-         * dismissed and the user will have to make a call to {@link info.blockchain.api.metadata.MetadataService#postToShare(String, String)}
-         * to add them as a contact themselves
-         */
+    // TODO: 16/11/2016
 
+    /**
+     * This will need to subscribe to the notification service somehow and listen for when the
+     * recipient accepts their invitation. Once this is done, the dialog will need to be dismissed
+     * and the user will have to make a call to {@link piuk.blockchain.android.data.services.SharedMetaDataService#putTrusted(String,
+     * String)} to add them as a contact themselves
+     */
+    void onViewQrClicked() {
         dataListener.showProgressDialog();
 
         compositeDisposable.add(
@@ -113,14 +113,13 @@ public class ContactsViewModel extends BaseViewModel {
                                 dataListener.setUiState(ContactsActivity.UI_STATE.EMPTY);
                             }
 
-                            Log.d(TAG, "onViewReady: " + list);
-
                         }, throwable -> {
                             Log.e(TAG, "onViewReady: ", throwable);
                             dataListener.setUiState(ContactsActivity.UI_STATE.FAILURE);
                         }));
 
         // TODO: 16/11/2016 Move me to my own function. I will likely need to be called from system-wide broadcasts
+        // I'm only here for testing purposes
         compositeDisposable.add(
                 metaDataManager.getPaymentRequests(true)
                         .subscribe(
