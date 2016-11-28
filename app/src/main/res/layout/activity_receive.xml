@@ -17,10 +17,5 @@
             android:id="@+id/content"
             layout="@layout/activity_receive_content" />
 
-        <!-- include bottom sheet -->
-        <include
-            android:id="@+id/bottom_sheet"
-            layout="@layout/bottom_sheet_receive" />
-
     </android.support.design.widget.CoordinatorLayout>
 </layout>

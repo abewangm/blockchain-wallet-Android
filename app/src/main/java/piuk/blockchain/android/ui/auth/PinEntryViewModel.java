@@ -10,6 +10,7 @@ import android.support.annotation.VisibleForTesting;
 import android.view.View;
 import android.widget.TextView;
 
+import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
@@ -18,6 +19,8 @@ import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
+
+import org.spongycastle.crypto.InvalidCipherTextException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +31,8 @@ import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.datamanagers.MetaDataManager;
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -60,6 +65,7 @@ public class PinEntryViewModel extends BaseViewModel {
     @Inject protected SSLVerifyUtil mSSLVerifyUtil;
     @Inject protected FingerprintHelper mFingerprintHelper;
     @Inject protected AccessState mAccessState;
+    @Inject protected MetaDataManager mMetaDataManager;
 
     private String mEmail;
     private CharSequenceX mPassword;
@@ -107,6 +113,8 @@ public class PinEntryViewModel extends BaseViewModel {
         void showFingerprintDialog(CharSequenceX pincode);
 
         void showKeyboard();
+
+        void showAccountLockedDialog();
 
     }
 
@@ -299,6 +307,11 @@ public class PinEntryViewModel extends BaseViewModel {
                                 mDataListener.goToUpgradeWalletActivity();
                             } else {
                                 mAppUtil.restartAppWithVerifiedPin();
+                                // TODO: 28/11/2016 How to handle this if it fails?
+                                // Might be best to delegate this function to a different manager that
+                                // can retry the call at a later date
+                                mMetaDataManager.setMetadataNode(mPayloadManager.getMasterKey())
+                                        .subscribe(new IgnorableDefaultObserver<>());
                             }
 
                         }, throwable -> {
@@ -325,6 +338,19 @@ public class PinEntryViewModel extends BaseViewModel {
                                 //This shouldn't happen. HD fatal error - not safe to continue - don't clear credentials
                                 mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
                                 mAppUtil.restartApp();
+
+                            } else if (throwable instanceof InvalidCipherTextException) {
+                                // Password changed on web, needs re-pairing
+                                mDataListener.showToast(R.string.password_changed_explanation, ToastCustom.TYPE_ERROR);
+                                mAccessState.setPIN(null);
+                                mAppUtil.clearCredentialsAndRestart();
+
+                            } else if (throwable instanceof AccountLockedException) {
+                                    mDataListener.showAccountLockedDialog();
+
+                            } else {
+                                mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                                mAppUtil.clearCredentialsAndRestart();
                             }
 
                         }));
@@ -428,7 +454,7 @@ public class PinEntryViewModel extends BaseViewModel {
             textView.setBackgroundResource(R.drawable.rounded_view_blue_white_border);
         }
         mDataListener.setTitleVisibility(View.VISIBLE);
-        mDataListener.setTitleString(R.string.confirm_pin);
+        mDataListener.setTitleString(R.string.pin_entry);
     }
 
     public void incrementFailureCountAndRestart() {

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.TextView;
 
+import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
@@ -26,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.spongycastle.crypto.InvalidCipherTextException;
 
 import java.util.ArrayList;
 
@@ -407,6 +409,51 @@ public class PinEntryViewModelTest {
     }
 
     @Test
+    public void padClickedVerifyPinValidateCalledReturnsInvalidCipherText() throws Exception {
+        // Arrange
+        mSubject.mUserEnteredPin = "133";
+        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
+        when(mAuthDataManager.validatePin(anyString())).thenReturn(just(new CharSequenceX("")));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new InvalidCipherTextException()));
+        // Act
+        View mockView = mock(View.class);
+        when(mockView.getTag()).thenReturn("7");
+        mSubject.padClicked(mockView);
+        // Assert
+        verify(mActivity).setTitleVisibility(View.INVISIBLE);
+        verify(mActivity, times(2)).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).validatePin(anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        verify(mPrefsUtil).setValue(anyString(), anyInt());
+        //noinspection WrongConstant
+        verify(mActivity).showToast(anyInt(), anyString());
+        verify(mAccessState).setPIN(null);
+        verify(mAppUtil).clearCredentialsAndRestart();
+    }
+
+    @Test
+    public void padClickedVerifyPinValidateCalledReturnsGenericException() throws Exception {
+        // Arrange
+        mSubject.mUserEnteredPin = "133";
+        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
+        when(mAuthDataManager.validatePin(anyString())).thenReturn(just(new CharSequenceX("")));
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new Exception()));
+        // Act
+        View mockView = mock(View.class);
+        when(mockView.getTag()).thenReturn("7");
+        mSubject.padClicked(mockView);
+        // Assert
+        verify(mActivity).setTitleVisibility(View.INVISIBLE);
+        verify(mActivity, times(2)).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).validatePin(anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        verify(mPrefsUtil).setValue(anyString(), anyInt());
+        //noinspection WrongConstant
+        verify(mActivity).showToast(anyInt(), anyString());
+        verify(mAppUtil).clearCredentialsAndRestart();
+    }
+
+    @Test
     public void padClickedCreatePinCreateSuccessful() throws Exception {
         // Arrange
         mSubject.mUserEnteredPin = "133";
@@ -631,6 +678,21 @@ public class PinEntryViewModelTest {
         verify(mActivity).showProgressDialog(anyInt(), anyString());
         verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
         verify(mActivity).showWalletVersionNotSupportedDialog(anyString());
+    }
+
+    @Test
+    public void updatePayloadAccountLocked() throws Exception {
+        // Arrange
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new AccountLockedException()));
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        mSubject.updatePayload(new CharSequenceX(""));
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        verify(mActivity).showAccountLockedDialog();
     }
 
     @Test

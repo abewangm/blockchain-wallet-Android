@@ -1,37 +1,56 @@
 package piuk.blockchain.android.data.services;
 
-import info.blockchain.api.metadata.Metadata;
-import info.blockchain.api.metadata.data.Message;
-import info.blockchain.api.metadata.data.Share;
-import info.blockchain.api.metadata.data.Trusted;
+import info.blockchain.wallet.metadata.MetadataShared;
+import info.blockchain.wallet.metadata.data.Invitation;
+import info.blockchain.wallet.metadata.data.Message;
+import info.blockchain.wallet.metadata.data.PaymentRequest;
+import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
+import info.blockchain.wallet.metadata.data.Trusted;
 
-import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
 
 import java.util.List;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 
 public class SharedMetaDataService {
 
-    private Metadata metadata;
+    private MetadataShared metadata;
 
-    public SharedMetaDataService(Metadata metadata) {
+    public SharedMetaDataService(MetadataShared metadata) {
         this.metadata = metadata;
     }
 
+    /**
+     * Sets the node for the metadata service. The service will crash without it. Can return and
+     * error which will need to be handled.
+     *
+     * @param deterministicKey A {@link DeterministicKey}, see {@link info.blockchain.wallet.payload.PayloadManager#getMasterKey()}
+     */
+    public Completable setMetadataNode(DeterministicKey deterministicKey) {
+        return Completable.fromCallable(() -> {
+            metadata.setMetadataNode(deterministicKey);
+            return Void.TYPE;
+        });
+    }
+
     ///////////////////////////////////////////////////////////////////////////
-    // CONTACTS SPECIFIC
+    // ACCESS TOKEN
     ///////////////////////////////////////////////////////////////////////////
 
     /**
      * Generates a signed JSON web token from a nonce using an ECKey
      *
-     * @param ecKey A user generated ECKey
      * @return A signed web token in JSON format
      */
-    public Observable<String> getToken(ECKey ecKey) {
-        return Observable.fromCallable(() -> metadata.getToken(ecKey));
+    public Observable<String> getToken() {
+        return Observable.fromCallable(() -> metadata.getToken());
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // CONTACTS SPECIFIC
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * Returns a {@link Trusted} object containing a list of trusted users
@@ -81,35 +100,35 @@ public class SharedMetaDataService {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Obtains a one-time UUID for sharing
+     * Creates a new invite for linking two users together
      *
      * @param token A signed web token in JSON format
-     * @return A {@link Share} object
+     * @return An {@link Invitation} object
      */
-    public Observable<Share> postShare(String token) {
-        return Observable.fromCallable(() -> metadata.postShare(token));
+    public Observable<Invitation> createInvitation(String token) {
+        return Observable.fromCallable(() -> metadata.createInvitation(token));
     }
 
     /**
-     * Sets the UUID of the recipient
+     * Accepts an invitation from another user
      *
      * @param token A signed web token in JSON format
      * @param uuid  A UUID
-     * @return A {@link Share} object
+     * @return An {@link Invitation} object
      */
-    public Observable<Share> postToShare(String token, String uuid) {
-        return Observable.fromCallable(() -> metadata.postToShare(token, uuid));
+    public Observable<Invitation> acceptInvitation(String token, String uuid) {
+        return Observable.fromCallable(() -> metadata.acceptInvitation(token, uuid));
     }
 
     /**
-     * Gets the MDID of a sender from one-time UUID
+     * Gets the MDID of a sender from an Invitation
      *
      * @param token A signed web token in JSON format
      * @param uuid  A UUID
-     * @return A {@link Share} object
+     * @return A {@link Invitation} object
      */
-    public Observable<Share> getShare(String token, String uuid) {
-        return Observable.fromCallable(() -> metadata.getShare(token, uuid));
+    public Observable<Invitation> readInvitation(String token, String uuid) {
+        return Observable.fromCallable(() -> metadata.readInvitation(token, uuid));
     }
 
     /**
@@ -119,48 +138,63 @@ public class SharedMetaDataService {
      * @param uuid  A UUID
      * @return True is successful
      */
-    public Observable<Boolean> deleteShare(String token, String uuid) {
-        return Observable.fromCallable(() -> metadata.deleteShare(token, uuid));
+    public Observable<Boolean> deleteInvitation(String token, String uuid) {
+        return Observable.fromCallable(() -> metadata.deleteInvitation(token, uuid));
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // MESSAGES SPECIFIC
+    // PAYMENT REQUEST SPECIFIC
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Adds a message to the shared metadata service. Signed.
+     * Sends a payment request to a user in the trusted contacts list
      *
-     * @param token         A signed web token in JSON format
-     * @param ecKey         A user generated ECKey
-     * @param recipientMdid The MDID of the message's recipient
-     * @param message       The message itself in plaintext
-     * @param type          An integer message type todo define these somewhere
+     * @param token          A signed web token in JSON format
+     * @param recipientMdid  The MDID of the message's recipient
+     * @param paymentRequest A PaymentRequest object containing information about the proposed
+     *                       transaction
      * @return A {@link Message} object
      */
-    public Observable<Message> postMessage(String token, ECKey ecKey, String recipientMdid, String message, int type) {
-        return Observable.fromCallable(() -> metadata.postMessage(token, ecKey, recipientMdid, message, type));
+    public Observable<Message> sendPaymentRequest(String token, String recipientMdid, PaymentRequest paymentRequest) {
+        return Observable.fromCallable(() -> metadata.sendPaymentRequest(token, recipientMdid, paymentRequest));
     }
 
     /**
-     * Get messages sent to my MDID. Optionally only processed messages
+     * Accepts a payment request from a user and optionally adds a note to the transaction
      *
-     * @param token         A signed web token in JSON format
-     * @param onlyProcessed Flag for only getting processed messages
-     * @return A list of {@link Message} objects
+     * @param token          A signed web token in JSON format
+     * @param recipientMdid  The MDID of the message's recipient
+     * @param paymentRequest A PaymentRequest object containing information about the proposed
+     *                       transaction
+     * @param note           An optional note for the transaction
+     * @param receiveAddress The address which you wish to user to receive bitcoin
+     * @return A {@link Message} object
      */
-    public Observable<List<Message>> getMessages(String token, boolean onlyProcessed) {
-        return Observable.fromCallable(() -> metadata.getMessages(token, onlyProcessed));
+    public Observable<Message> acceptPaymentRequest(String token, String recipientMdid, PaymentRequest paymentRequest, String note, String receiveAddress) {
+        return Observable.fromCallable(() -> metadata.acceptPaymentRequest(token, recipientMdid, paymentRequest, note, receiveAddress));
     }
 
     /**
-     * Get a specific message using a message ID
+     * Returns a list of payment requests. Optionally, choose to only see requests that are
+     * processed
      *
-     * @param token     A signed web token in JSON format
-     * @param messageId The ID of the message to be retrieved
-     * @return A {@link Message} object
+     * @param token         A signed web token in JSON format
+     * @param onlyProcessed If true, returns only processed payment requests
+     * @return A list of {@link PaymentRequest} objects
      */
-    public Observable<Message> getMessageForId(String token, String messageId) {
-        return Observable.fromCallable(() -> metadata.getMessage(token, messageId));
+    public Observable<List<PaymentRequest>> getPaymentRequests(String token, boolean onlyProcessed) {
+        return Observable.fromCallable(() -> metadata.getPaymentRequests(token, onlyProcessed));
     }
 
+    /**
+     * Returns a list of payment request responses, ie whether or not another user has paid you.
+     * Optionally, choose to only see requests that are processed
+     *
+     * @param token         A signed web token in JSON format
+     * @param onlyProcessed If true, returns only processed payment requests
+     * @return A list of {@link PaymentRequestResponse} objects
+     */
+    public Observable<List<PaymentRequestResponse>> getPaymentRequestResponses(String token, boolean onlyProcessed) {
+        return Observable.fromCallable(() -> metadata.getPaymentRequestResponses(token, onlyProcessed));
+    }
 }

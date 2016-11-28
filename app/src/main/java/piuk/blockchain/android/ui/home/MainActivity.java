@@ -113,8 +113,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     protected void onResume() {
         super.onResume();
         appUtil.deleteQR();
-
-        mainViewModel.startWebSocketService();
         resetNavigationDrawer();
 
         if (AndroidUtils.is25orHigher() && mainViewModel.areLauncherShortcutsEnabled()) {

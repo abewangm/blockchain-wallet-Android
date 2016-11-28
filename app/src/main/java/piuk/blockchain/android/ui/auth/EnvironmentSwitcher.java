@@ -87,6 +87,7 @@ class EnvironmentSwitcher {
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER);
         AccessState.getInstance().setPIN(null);
         AppRate.reset(context);
+        AccessState.getInstance().setPIN(null);
 
         ToastCustom.makeText(context, "Timers reset", ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
     }

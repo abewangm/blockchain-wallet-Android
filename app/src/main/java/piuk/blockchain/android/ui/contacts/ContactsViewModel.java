@@ -61,7 +61,7 @@ public class ContactsViewModel extends BaseViewModel {
     void onDeleteContactClicked(String mdid) {
         dataListener.showProgressDialog();
         compositeDisposable.add(
-                metaDataManager.deleteTrusted(mdid)
+                metaDataManager.deleteInvitation(mdid)
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(success -> {
                             if (success) {
@@ -84,7 +84,7 @@ public class ContactsViewModel extends BaseViewModel {
         dataListener.showProgressDialog();
 
         compositeDisposable.add(
-                metaDataManager.postShare()
+                metaDataManager.createInvitation()
                         .flatMap(share -> qrCodeDataManager.generateQrCode(share.getId(), DIMENSION_QR_CODE))
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(
@@ -122,7 +122,7 @@ public class ContactsViewModel extends BaseViewModel {
 
         // TODO: 16/11/2016 Move me to my own function. I will likely need to be called from system-wide broadcasts
         compositeDisposable.add(
-                metaDataManager.getMessages(true)
+                metaDataManager.getPaymentRequests(true)
                         .subscribe(
                                 messages -> {
                                     Log.d(TAG, "onViewReady: " + messages);

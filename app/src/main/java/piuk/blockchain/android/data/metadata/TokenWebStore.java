@@ -12,6 +12,7 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.data.services.SharedMetaDataService;
 import piuk.blockchain.android.injection.Injector;
 
+@SuppressWarnings("WeakerAccess")
 public class TokenWebStore implements TokenStore {
 
     @Inject SharedMetaDataService metaDataService;

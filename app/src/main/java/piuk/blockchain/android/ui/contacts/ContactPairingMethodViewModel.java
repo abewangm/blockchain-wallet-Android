@@ -36,7 +36,7 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
         // TODO: 15/11/2016 Input validation?
 
         compositeDisposable.add(
-                metaDataManager.postToShare(extra)
+                metaDataManager.acceptInvitation(extra)
                         .flatMap(share -> metaDataManager.putTrusted(share.getMdid()))
                         .subscribe(
                                 success -> {

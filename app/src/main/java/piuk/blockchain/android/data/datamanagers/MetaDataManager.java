@@ -1,16 +1,19 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import info.blockchain.api.metadata.data.Message;
-import info.blockchain.api.metadata.data.Share;
-import info.blockchain.api.metadata.data.Trusted;
+import info.blockchain.wallet.metadata.data.Invitation;
+import info.blockchain.wallet.metadata.data.Message;
+import info.blockchain.wallet.metadata.data.PaymentRequest;
+import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
+import info.blockchain.wallet.metadata.data.Trusted;
 import info.blockchain.wallet.payload.PayloadManager;
 
-import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
 import piuk.blockchain.android.data.metadata.TokenMemoryStore;
@@ -68,47 +71,66 @@ public class MetaDataManager {
     }
 
     /**
-     * Creates a one time UUID for pairing with another user
+     * Sets the node for the metadata service. The service will crash without it. Can return and
+     * error which will need to be handled.
      *
-     * @return A {@link Share} object with an id for sharing
+     * @param deterministicKey A {@link DeterministicKey}, see {@link info.blockchain.wallet.payload.PayloadManager#getMasterKey()}
      */
-    public Observable<Share> postShare() {
-        return callWithToken(accessToken -> sharedMetaDataService.postShare(accessToken))
+    public Completable setMetadataNode(DeterministicKey deterministicKey) {
+          return sharedMetaDataService.setMetadataNode(deterministicKey)
+                  .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // INVITATIONS
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Creates a new invite for linking two users together
+     *
+     * @return An {@link Invitation} object
+     */
+    public Observable<Invitation> createInvitation() {
+        return callWithToken(accessToken -> sharedMetaDataService.createInvitation(accessToken))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Takes another user's UUID and gets their MDID
+     * Accepts an invitation from another user
      *
-     * @param uuid The user's UUID
-     * @return A {@link Share} object with an MDID
+     * @param uuid  A UUID
+     * @return An {@link Invitation} object
      */
-    public Observable<Share> postToShare(String uuid) {
-        return callWithToken(accessToken -> sharedMetaDataService.postToShare(accessToken, uuid))
+    public Observable<Invitation> acceptInvitation(String uuid) {
+        return callWithToken(accessToken -> sharedMetaDataService.acceptInvitation(accessToken, uuid))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Adds another user's MDID to your trusted list
+     * Gets the MDID of a sender from an Invitation
      *
-     * @param mdid The user's MDID
-     * @return True if successful
+     * @param uuid  A UUID
+     * @return A {@link Invitation} object
      */
-    public Observable<Boolean> putTrusted(String mdid) {
-        return callWithToken(accessToken -> sharedMetaDataService.putTrusted(accessToken, mdid))
+    public Observable<Invitation> readInvitation(String uuid) {
+        return callWithToken(accessToken -> sharedMetaDataService.readInvitation(accessToken, uuid))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Deletes a specified contact from the trusted list
+     * Deletes a one-time UUID
      *
-     * @param mdid The MDID you wish to delete
-     * @return True is delete operation was successful
+     * @param uuid  A UUID
+     * @return True is successful
      */
-    public Observable<Boolean> deleteTrusted(String mdid) {
-        return callWithToken(accessToken -> sharedMetaDataService.deleteTrusted(accessToken, mdid))
+    public Observable<Boolean> deleteInvitation(String uuid) {
+        return callWithToken(accessToken -> sharedMetaDataService.deleteInvitation(accessToken, uuid))
                 .compose(RxUtil.applySchedulersToObservable());
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // TRUSTED LIST
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * Returns the user's list of trusted users
@@ -121,38 +143,92 @@ public class MetaDataManager {
     }
 
     /**
-     * Adds a message to the shared metadata service. Signed.
+     * Check if a contact is trusted or not
      *
-     * @param ecKey         A user generated ECKey
-     * @param recipientMdid The MDID of the message's recipient
-     * @param message       The message itself in plaintext
-     * @param type          An integer message type todo define these somewhere
-     * @return A {@link Message} object
+     * @param mdid  The MDID of the user you wish to check
+     * @return True if the user is trusted
      */
-    public Observable<Message> postMessage(ECKey ecKey, String recipientMdid, String message, int type) {
-        return callWithToken(accessToken -> sharedMetaDataService.postMessage(accessToken, ecKey, recipientMdid, message, type))
+    public Observable<Boolean> getIfTrusted(String mdid) {
+        return callWithToken(accessToken -> sharedMetaDataService.getIfTrusted(accessToken, mdid))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Returns a list of the user's messages. Optionally return only those which are processed
+     * Add a contact to the trusted user list
      *
-     * @param onlyProcessed Flag for only getting processed messages
-     * @return A list of {@link Message} objects
+     * @param mdid  The MDID of the user you wish to trust
+     * @return True if successful
      */
-    public Observable<List<Message>> getMessages(boolean onlyProcessed) {
-        return callWithToken(accessToken -> sharedMetaDataService.getMessages(accessToken, onlyProcessed))
+    public Observable<Boolean> putTrusted(String mdid) {
+        return callWithToken(accessToken -> sharedMetaDataService.putTrusted(accessToken, mdid))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Get a specific message using a message ID
+     * Remove a contact from the list of trusted users
      *
-     * @param messageId The ID of the message to be retrieved
+     * @param mdid  The MDID of the user you wish to delete
+     * @return True if successful
+     */
+    public Observable<Boolean> deleteTrusted(String mdid) {
+        return callWithToken(accessToken -> sharedMetaDataService.deleteTrusted(accessToken, mdid))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PAYMENT REQUESTS
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Sends a payment request to a user in the trusted contacts list
+     *
+     * @param recipientMdid  The MDID of the message's recipient
+     * @param paymentRequest A PaymentRequest object containing information about the proposed
+     *                       transaction
      * @return A {@link Message} object
      */
-    public Observable<Message> getMessageForId(String messageId) {
-        return callWithToken(accessToken -> sharedMetaDataService.getMessageForId(accessToken, messageId));
+    public Observable<Message> sendPaymentRequest(String recipientMdid, PaymentRequest paymentRequest) {
+        return callWithToken(accessToken -> sharedMetaDataService.sendPaymentRequest(accessToken, recipientMdid, paymentRequest))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Accepts a payment request from a user and optionally adds a note to the transaction
+     *
+     * @param recipientMdid  The MDID of the message's recipient
+     * @param paymentRequest A PaymentRequest object containing information about the proposed
+     *                       transaction
+     * @param note           An optional note for the transaction
+     * @param receiveAddress The address which you wish to user to receive bitcoin
+     * @return A {@link Message} object
+     */
+    public Observable<Message> acceptPaymentRequest(String recipientMdid, PaymentRequest paymentRequest, String note, String receiveAddress) {
+        return callWithToken(accessToken -> sharedMetaDataService.acceptPaymentRequest(accessToken, recipientMdid, paymentRequest, note, receiveAddress))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Returns a list of payment requests. Optionally, choose to only see requests that are
+     * processed
+     *
+     * @param onlyProcessed If true, returns only processed payment requests
+     * @return A list of {@link PaymentRequest} objects
+     */
+    public Observable<List<PaymentRequest>> getPaymentRequests(boolean onlyProcessed) {
+        return callWithToken(accessToken -> sharedMetaDataService.getPaymentRequests(accessToken, onlyProcessed))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Returns a list of payment request responses, ie whether or not another user has paid you.
+     * Optionally, choose to only see requests that are processed
+     *
+     * @param onlyProcessed If true, returns only processed payment requests
+     * @return A list of {@link PaymentRequestResponse} objects
+     */
+    public Observable<List<PaymentRequestResponse>> getPaymentRequestResponses(boolean onlyProcessed) {
+        return callWithToken(accessToken -> sharedMetaDataService.getPaymentRequestResponses(accessToken, onlyProcessed))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
 }
