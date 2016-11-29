@@ -177,9 +177,15 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             }
         });
 
+        String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiat);
+
         if (transactionAdapter != null) {
-            String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-            transactionAdapter.notifyAdapterDataSetChanged(ExchangeRateFactory.getInstance().getLastPrice(fiat));
+            transactionAdapter.notifyAdapterDataSetChanged(lastPrice);
+        }
+
+        if (accountsAdapter != null) {
+            accountsAdapter.notifyFiatUnitsChanged(fiat, lastPrice);
         }
     }
 
@@ -477,6 +483,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
             @Override
             public void onValueClicked(boolean isBtc) {
+                isBTC = isBtc;
                 viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
                 viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBtc);
             }

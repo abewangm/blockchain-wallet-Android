@@ -20,8 +20,8 @@ class BalanceHeaderAdapter extends ArrayAdapter<ItemAccount> {
 
     private boolean isBtc;
     private final MonetaryUtil monetaryUtil;
-    private final String fiatUnits;
-    private final double exchangeRate;
+    private String fiatUnits;
+    private double exchangeRate;
 
     BalanceHeaderAdapter(Context context,
                          int textViewResourceId,
@@ -86,8 +86,14 @@ class BalanceHeaderAdapter extends ArrayAdapter<ItemAccount> {
         }
     }
 
-    public void notifyBtcChanged(boolean isBtc) {
+    void notifyBtcChanged(boolean isBtc) {
         this.isBtc = isBtc;
+        notifyDataSetChanged();
+    }
+
+    void notifyFiatUnitsChanged(String fiatUnits, double exchangeRate) {
+        this.fiatUnits = fiatUnits;
+        this.exchangeRate = exchangeRate;
         notifyDataSetChanged();
     }
 }
