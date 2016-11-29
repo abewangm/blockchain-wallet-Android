@@ -120,7 +120,7 @@ android {
 
 ext {
     supportVersion = '25.0.1'
-    googleServicesVersion = '10.0.0'
+    googleServicesVersion = '10.0.1'
     rxJavaVersion = '2.0.1'
 }
 

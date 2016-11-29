@@ -81,7 +81,7 @@ public class SettingsService {
      *
      * @param notificationType The type of notification to disable
      * @return A {@link Observable<Boolean>}, where the boolean represents a successful save or not
-     * @see {@link Settings}
+     * @see Settings
      */
     public Observable<Boolean> disableNotifications(int notificationType) {
         return Observable.create(subscriber -> settingsApi.disableNotification(notificationType, new SettingsResultListener(subscriber)));
@@ -92,7 +92,7 @@ public class SettingsService {
      *
      * @param notificationType The type of notification to enable
      * @return A {@link Observable<Boolean>}, where the boolean represents a successful save or not
-     * @see {@link Settings}
+     * @see Settings
      */
     public Observable<Boolean> enableNotifications(int notificationType) {
         return Observable.create(subscriber -> settingsApi.enableNotification(notificationType, new SettingsResultListener(subscriber)));
@@ -103,7 +103,7 @@ public class SettingsService {
      *
      * @param authType The auth type being used for 2FA
      * @return A {@link Observable<Boolean>}, where the boolean represents a successful save or not
-     * @see {@link Settings}
+     * @see Settings
      */
     public Observable<Boolean> updateTwoFactor(int authType) {
         return Observable.create(subscriber -> settingsApi.setAuthType(authType, new SettingsResultListener(subscriber)));
