@@ -5,14 +5,19 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.InputType;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +26,8 @@ import piuk.blockchain.android.databinding.ActivityContactsBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.ViewUtils;
+
 
 public class ContactsActivity extends BaseAuthActivity implements ContactsViewModel.DataListener {
 
@@ -124,8 +131,27 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
     }
 
     private void startPairingActivity() {
-        Intent intent = new Intent(this, ContactPairingMethodActivity.class);
-        startActivityForResult(intent, REQUEST_PAIRING);
+        AppCompatEditText editText = new AppCompatEditText(this);
+        editText.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
+        editText.setHint(R.string.contacts_name_field_hint);
+
+        final String[] name = new String[1];
+
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.contacts_add_contact_title)
+                .setView(ViewUtils.getAlertDialogEditTextLayout(this, editText))
+                .setPositiveButton(R.string.contacts_add_button, (dialogInterface, i) -> {
+                    name[0] = editText.getText().toString().trim();
+                    if (name[0].isEmpty()) {
+                        ToastCustom.makeText(this, getString(R.string.contacts_name_cannot_be_empty), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                    } else {
+                        Intent intent = new Intent(this, ContactPairingMethodActivity.class);
+                        intent.putExtra(ContactPairingMethodActivity.INTENT_KEY_CONTACT_NAME, name[0]);
+                        startActivityForResult(intent, REQUEST_PAIRING);
+                    }
+                })
+                .create()
+                .show();
     }
 
     @Override
@@ -158,15 +184,18 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
         }
     }
 
-    enum UI_STATE {
-        LOADING,
-        CONTENT,
-        FAILURE,
-        EMPTY
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({LOADING, CONTENT, FAILURE, EMPTY})
+    @interface UiState {
     }
 
+    public static final int LOADING = 0;
+    public static final int CONTENT = 1;
+    public static final int FAILURE = 2;
+    public static final int EMPTY = 3;
+
     @Override
-    public void setUiState(UI_STATE uiState) {
+    public void setUiState(@UiState int uiState) {
         switch (uiState) {
             case LOADING:
                 binding.layoutLoading.setVisibility(View.VISIBLE);

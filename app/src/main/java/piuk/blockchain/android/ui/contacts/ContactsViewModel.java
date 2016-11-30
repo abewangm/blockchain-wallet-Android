@@ -35,7 +35,7 @@ public class ContactsViewModel extends BaseViewModel {
 
         void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
-        void setUiState(ContactsActivity.UI_STATE uiState);
+        void setUiState(@ContactsActivity.UiState int uiState);
 
         void showProgressDialog();
 
@@ -112,7 +112,7 @@ public class ContactsViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        dataListener.setUiState(ContactsActivity.UI_STATE.LOADING);
+        dataListener.setUiState(ContactsActivity.LOADING);
         compositeDisposable.add(
                 metaDataManager.getTrustedList()
                         .subscribe(trusted -> {
@@ -123,15 +123,15 @@ public class ContactsViewModel extends BaseViewModel {
                             }
 
                             if (!list.isEmpty()) {
-                                dataListener.setUiState(ContactsActivity.UI_STATE.CONTENT);
+                                dataListener.setUiState(ContactsActivity.CONTENT);
                                 dataListener.onContactsLoaded(list);
                             } else {
-                                dataListener.setUiState(ContactsActivity.UI_STATE.EMPTY);
+                                dataListener.setUiState(ContactsActivity.EMPTY);
                             }
 
                         }, throwable -> {
                             Log.e(TAG, "onViewReady: ", throwable);
-                            dataListener.setUiState(ContactsActivity.UI_STATE.FAILURE);
+                            dataListener.setUiState(ContactsActivity.FAILURE);
                         }));
 
         // TODO: 16/11/2016 Move me to my own function. I will likely need to be called from system-wide broadcasts

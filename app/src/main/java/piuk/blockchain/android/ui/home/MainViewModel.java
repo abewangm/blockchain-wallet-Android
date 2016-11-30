@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.home;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
+import android.util.Log;
 
 import info.blockchain.api.DynamicFee;
 import info.blockchain.api.ExchangeTicker;
@@ -19,10 +20,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
+import piuk.blockchain.android.data.datamanagers.MetaDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
@@ -32,10 +35,11 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
-import io.reactivex.Observable;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
+
+    private static final String TAG = MainViewModel.class.getSimpleName();
 
     private Context context;
     private DataListener dataListener;
@@ -44,6 +48,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected AppUtil appUtil;
     @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
+    @Inject protected MetaDataManager metaDataManager;
 
     private long mBackPressed;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
@@ -84,6 +89,16 @@ public class MainViewModel extends BaseViewModel {
         checkConnectivity();
         checkIfShouldShowEmailVerification();
         startWebSocketService();
+    }
+
+    private void registerNodeForMetaDataService() {
+        // TODO: 28/11/2016 How to handle this if it fails?
+        // Might be best to delegate this function to a different manager that
+        // can retry the call at a later date
+        metaDataManager.setMetadataNode(payloadManager.getMasterKey())
+                .subscribe(() -> {
+                    // No-op
+                }, throwable -> Log.wtf(TAG, "updatePayload: ", throwable));
     }
 
     private void checkIfShouldShowEmailVerification() {

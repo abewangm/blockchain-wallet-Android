@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.UiThread;
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -32,7 +31,6 @@ import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
-import piuk.blockchain.android.data.datamanagers.MetaDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -53,8 +51,6 @@ import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATING_PI
 @SuppressWarnings("WeakerAccess")
 public class PinEntryViewModel extends BaseViewModel {
 
-    private static final String TAG = PinEntryViewModel.class.getSimpleName();
-
     private static final int PIN_LENGTH = 4;
     private static final int MAX_ATTEMPTS = 4;
 
@@ -67,7 +63,6 @@ public class PinEntryViewModel extends BaseViewModel {
     @Inject protected SSLVerifyUtil mSSLVerifyUtil;
     @Inject protected FingerprintHelper mFingerprintHelper;
     @Inject protected AccessState mAccessState;
-    @Inject protected MetaDataManager mMetaDataManager;
 
     private String mEmail;
     private CharSequenceX mPassword;
@@ -309,13 +304,6 @@ public class PinEntryViewModel extends BaseViewModel {
                                 mDataListener.goToUpgradeWalletActivity();
                             } else {
                                 mAppUtil.restartAppWithVerifiedPin();
-                                // TODO: 28/11/2016 How to handle this if it fails?
-                                // Might be best to delegate this function to a different manager that
-                                // can retry the call at a later date
-                                mMetaDataManager.setMetadataNode(mPayloadManager.getMasterKey())
-                                        .subscribe(() -> {
-                                            // No-op
-                                        }, throwable -> Log.wtf(TAG, "updatePayload: ", throwable));
                             }
 
                         }, throwable -> {

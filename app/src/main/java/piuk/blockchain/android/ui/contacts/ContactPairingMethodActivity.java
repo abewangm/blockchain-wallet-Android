@@ -20,6 +20,7 @@ import piuk.blockchain.android.util.PermissionUtil;
 public class ContactPairingMethodActivity extends BaseAuthActivity implements ContactPairingMethodViewModel.DataListener {
 
     public static final int SCAN_URI = 2007;
+    public static final String INTENT_KEY_CONTACT_NAME = "key_contact_name";
 
     private ActivityContactPairingMethodBinding binding;
     private ContactPairingMethodViewModel viewModel;
@@ -92,6 +93,11 @@ public class ContactPairingMethodActivity extends BaseAuthActivity implements Co
     public void onBackPressed() {
         setResult(RESULT_CANCELED);
         super.onBackPressed();
+    }
+
+    @Override
+    public Intent getPageIntent() {
+        return getIntent();
     }
 
     private void startScanActivity() {

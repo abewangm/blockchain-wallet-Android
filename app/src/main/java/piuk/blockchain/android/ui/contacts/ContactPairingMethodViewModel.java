@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.contacts;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
@@ -13,13 +14,18 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 
+import static piuk.blockchain.android.ui.contacts.ContactPairingMethodActivity.INTENT_KEY_CONTACT_NAME;
+
 public class ContactPairingMethodViewModel extends BaseViewModel {
 
     private DataListener dataListener;
+    private String contactName;
     @Inject AppUtil appUtil;
     @Inject MetaDataManager metaDataManager;
 
     interface DataListener {
+
+        Intent getPageIntent();
 
         void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
@@ -32,8 +38,19 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
         this.dataListener = dataListener;
     }
 
+    @Override
+    public void onViewReady() {
+        Intent pageIntent = dataListener.getPageIntent();
+        if (pageIntent != null && pageIntent.hasExtra(INTENT_KEY_CONTACT_NAME)) {
+            // Don't need contact name in all flows to this page
+            contactName = pageIntent.getStringExtra(INTENT_KEY_CONTACT_NAME);
+        }
+    }
+
     void handleScanInput(@NonNull String extra) {
         // TODO: 15/11/2016 Input validation?
+
+        // TODO: 30/11/2016 We're supposed to do something here with a contact name, but I have no idea what
 
         compositeDisposable.add(
                 metaDataManager.acceptInvitation(extra)
@@ -61,8 +78,4 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
         return appUtil.isCameraOpen();
     }
 
-    @Override
-    public void onViewReady() {
-        // No-op
-    }
 }
