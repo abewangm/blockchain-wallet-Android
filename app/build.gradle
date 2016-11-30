@@ -53,7 +53,7 @@ android {
             buildConfigField "boolean", "DOGFOOD", "false"
         }
         debug {
-            resValue "string", "google_maps_key", "AIzaSyASTnx7wjsCTkMr_RtLQYTzMAf7A9SWIMw"
+            resValue "string", "google_maps_key", "AIzaSyDOrXqr30C3vjiUM4HMeZO8HFpTIH8CVaM"
             multiDexEnabled true
             buildConfigField "boolean", "DOGFOOD", "false"
         }

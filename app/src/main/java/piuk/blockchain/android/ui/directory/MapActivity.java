@@ -144,6 +144,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
 
     @Override
     public void onMapReady(GoogleMap map) {
+        this.map = map;
 
         map.setMyLocationEnabled(true);
         map.setOnMarkerClickListener(marker -> {
