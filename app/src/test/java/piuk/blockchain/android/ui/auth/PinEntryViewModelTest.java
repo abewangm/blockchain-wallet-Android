@@ -517,7 +517,7 @@ public class PinEntryViewModelTest {
         verify(mActivity).showProgressDialog(anyInt(), anyString());
         verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
         verify(mPayloadManager).setTempPassword(new CharSequenceX(""));
-        verify(mActivity).dismissProgressDialog();
+        verify(mActivity, times(2)).dismissProgressDialog();
         //noinspection WrongConstant
         verify(mActivity).showToast(anyInt(), anyString());
         verify(mActivity).showValidationDialog();
@@ -537,6 +537,38 @@ public class PinEntryViewModelTest {
         verify(mActivity).dismissProgressDialog();
         //noinspection WrongConstant
         verify(mActivity).showToast(anyInt(), anyString());
+    }
+
+    @Test
+    public void validatePasswordThrowsHDWalletExceptionException() throws Exception {
+        // Arrange
+        CharSequenceX password = new CharSequenceX("1234567890");
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new HDWalletException()));
+        // Act
+        mSubject.validatePassword(password);
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        verify(mPayloadManager).setTempPassword(new CharSequenceX(""));
+        verify(mActivity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(mActivity).showToast(anyInt(), anyString());
+        verify(mAppUtil).restartApp();
+    }
+
+    @Test
+    public void validatePasswordThrowsAccountLockedException() throws Exception {
+        // Arrange
+        CharSequenceX password = new CharSequenceX("1234567890");
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new AccountLockedException()));
+        // Act
+        mSubject.validatePassword(password);
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        verify(mPayloadManager).setTempPassword(new CharSequenceX(""));
+        verify(mActivity).dismissProgressDialog();
+        verify(mActivity).showAccountLockedDialog();
     }
 
     @Test

@@ -349,17 +349,28 @@ public class PinEntryViewModel extends BaseViewModel {
                         mPrefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
                         password)
                         .doOnSubscribe(disposable -> mPayloadManager.setTempPassword(new CharSequenceX("")))
+                        .doAfterTerminate(() -> mDataListener.dismissProgressDialog())
                         .subscribe(() -> {
                             mDataListener.showToast(R.string.pin_4_strikes_password_accepted, ToastCustom.TYPE_OK);
                             mPrefsUtil.removeValue(PrefsUtil.KEY_PIN_FAILS);
                             mPrefsUtil.removeValue(PrefsUtil.KEY_PIN_IDENTIFIER);
                             mDataListener.restartPageAndClearTop();
-                            mDataListener.dismissProgressDialog();
                         }, throwable -> {
 
                             if (throwable instanceof ServerConnectionException) {
-                                mDataListener.dismissProgressDialog();
                                 mDataListener.showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+                            } else if (throwable instanceof PayloadException) {
+                                //This shouldn't happen - Payload retrieved from server couldn't be parsed
+                                mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                                mAppUtil.restartApp();
+
+                            } else if (throwable instanceof HDWalletException) {
+                                //This shouldn't happen. HD fatal error - not safe to continue - don't clear credentials
+                                mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                                mAppUtil.restartApp();
+
+                            } else if (throwable instanceof AccountLockedException) {
+                                mDataListener.showAccountLockedDialog();
 
                             } else {
                                 showErrorToast(R.string.invalid_password);
