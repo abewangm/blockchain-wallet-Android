@@ -351,7 +351,7 @@ public class SettingsViewModel extends BaseViewModel {
 
     /**
      * @return the current auth type
-     * @see {@link Settings}
+     * @see Settings
      */
     int getAuthType() {
         return settings.getAuthType();
@@ -485,7 +485,7 @@ public class SettingsViewModel extends BaseViewModel {
      * Sets the auth type used for 2FA. Pass in {@link Settings#AUTH_TYPE_OFF} to disable 2FA
      *
      * @param type The auth type used for 2FA
-     * @see {@link Settings}
+     * @see Settings
      */
     void updateTwoFa(int type) {
         compositeDisposable.add(
@@ -504,7 +504,7 @@ public class SettingsViewModel extends BaseViewModel {
      *
      * @param type    The notification type to be updated
      * @param enabled Whether or not to enable the notification type
-     * @see {@link Settings}
+     * @see Settings
      */
     void updateNotification(int type, boolean enabled) {
         compositeDisposable.add(

@@ -194,7 +194,6 @@ public class AccessState {
 
     /**
      * Returns a {@link Subject} that publishes login/logout events
-     * TODO: Logout events aren't currently captured here
      */
     public Subject<AuthEvent> getAuthEventSubject() {
         return authEventSubject;

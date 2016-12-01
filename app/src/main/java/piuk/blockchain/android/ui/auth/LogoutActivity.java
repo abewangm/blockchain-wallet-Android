@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.util.AndroidUtils;
 
 /**
  * Created by adambennett on 04/08/2016.
@@ -19,8 +20,14 @@ public class LogoutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         if (getIntent() != null && getIntent().getAction() != null) {
             if (getIntent().getAction().equals(AccessState.LOGOUT_ACTION)) {
-                finish();
-                System.exit(0);
+                if (AndroidUtils.is16orHigher()) {
+                    AccessState.getInstance().setIsLoggedIn(false);
+                    finishAffinity();
+                } else {
+                    finish();
+                    // Shouldn't call System.exit(0) if it can be avoided
+                    System.exit(0);
+                }
             }
         }
     }

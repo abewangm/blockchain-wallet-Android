@@ -7,9 +7,8 @@ android {
     compileSdkVersion 25
     buildToolsVersion '25.0.1'
 
-    // Introduced to prevent crash during DEXing step since SDK 23, but also speeds up DEXing in general
     dexOptions {
-        javaMaxHeapSize "2g"
+        javaMaxHeapSize "3g"
     }
 
     defaultConfig {
@@ -53,7 +52,7 @@ android {
             buildConfigField "boolean", "DOGFOOD", "false"
         }
         debug {
-            resValue "string", "google_maps_key", "AIzaSyASTnx7wjsCTkMr_RtLQYTzMAf7A9SWIMw"
+            resValue "string", "google_maps_key", "AIzaSyDOrXqr30C3vjiUM4HMeZO8HFpTIH8CVaM"
             multiDexEnabled true
             buildConfigField "boolean", "DOGFOOD", "false"
         }
@@ -120,8 +119,9 @@ android {
 
 ext {
     supportVersion = '25.0.1'
-    googleServicesVersion = '10.0.0'
+    googleServicesVersion = '10.0.1'
     rxJavaVersion = '2.0.1'
+    daggerVersion = '2.8'
 }
 
 dependencies {
@@ -138,7 +138,6 @@ dependencies {
     releaseCompile "com.google.firebase:firebase-crash:$googleServicesVersion"
     compile "com.google.firebase:firebase-messaging:$googleServicesVersion"
     compile "com.google.android.gms:play-services-maps:$googleServicesVersion"
-    compile 'org.slf4j:slf4j-api:1.7.13'
     compile 'org.bitcoinj:bitcoinj-core:0.13.4'
     compile 'commons-io:commons-io:2.4'
     compile 'commons-codec:commons-codec:1.10'
@@ -153,11 +152,11 @@ dependencies {
     compile "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
     compile "io.reactivex.rxjava2:rxandroid:$rxJavaVersion"
     // Dagger2
-    compile 'com.google.dagger:dagger:2.7'
+    compile "com.google.dagger:dagger:$daggerVersion"
+    annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
     annotationProcessor 'com.google.guava:guava:19.0'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.7'
     // Fingerprint authentication
-    compile 'com.mtramin:rxfingerprint:2.0.0'
+    compile 'com.mtramin:rxfingerprint:2.0.1'
 
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
@@ -174,7 +173,6 @@ dependencies {
 
     // Unit Tests
     testCompile 'org.json:json:20140107'
-    testCompile 'org.slf4j:slf4j-simple:1.7.13'
     testCompile 'org.mockito:mockito-core:1.9.5'
     testCompile 'org.hamcrest:hamcrest-junit:2.0.0.0'
     testCompile('org.robolectric:robolectric:3.1.4') {
@@ -189,7 +187,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:3.3.0-beta4'
+        classpath 'me.tatarka:gradle-retrolambda:3.3.1'
     }
 }
 
