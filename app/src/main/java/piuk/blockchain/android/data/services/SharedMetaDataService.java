@@ -100,7 +100,7 @@ public class SharedMetaDataService {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Creates a new invite for linking two users together
+     * Creates a new invite and associated invite ID for linking two users together
      *
      * @param token A signed web token in JSON format
      * @return An {@link Invitation} object
@@ -113,33 +113,35 @@ public class SharedMetaDataService {
      * Accepts an invitation from another user
      *
      * @param token A signed web token in JSON format
-     * @param uuid  A UUID
+     * @param invitationId An invitation ID
      * @return An {@link Invitation} object
      */
-    public Observable<Invitation> acceptInvitation(String token, String uuid) {
-        return Observable.fromCallable(() -> metadata.acceptInvitation(token, uuid));
+    public Observable<Invitation> acceptInvitation(String token, String invitationId) {
+        return Observable.fromCallable(() -> metadata.acceptInvitation(token, invitationId));
     }
 
     /**
-     * Gets the MDID of a sender from an Invitation
+     * Gets the MDID of a user from an invitation ID, stored in {@link Invitation#getContact()}.
+     * getContact() will be null if the recipient hasn't yet accepted the invitataion and revealed
+     * their MDID
      *
      * @param token A signed web token in JSON format
-     * @param uuid  A UUID
+     * @param invitationId An invitation ID
      * @return A {@link Invitation} object
      */
-    public Observable<Invitation> readInvitation(String token, String uuid) {
-        return Observable.fromCallable(() -> metadata.readInvitation(token, uuid));
+    public Observable<Invitation> readInvitation(String token, String invitationId) {
+        return Observable.fromCallable(() -> metadata.readInvitation(token, invitationId));
     }
 
     /**
-     * Deletes a one-time UUID
+     * Deletes an invite from another user
      *
      * @param token A signed web token in JSON format
-     * @param uuid  A UUID
+     * @param invitationId An invitation ID
      * @return True is successful
      */
-    public Observable<Boolean> deleteInvitation(String token, String uuid) {
-        return Observable.fromCallable(() -> metadata.deleteInvitation(token, uuid));
+    public Observable<Boolean> deleteInvitation(String token, String invitationId) {
+        return Observable.fromCallable(() -> metadata.deleteInvitation(token, invitationId));
     }
 
     ///////////////////////////////////////////////////////////////////////////

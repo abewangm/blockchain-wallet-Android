@@ -43,6 +43,11 @@ public class ContactPairingMethodActivity extends BaseAuthActivity implements Co
     }
 
     @Override
+    public void onShareIntentGenerated(Intent intent) {
+        startActivity(Intent.createChooser(intent, getString(R.string.contacts_share_invitation)));
+    }
+
+    @Override
     public void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }

@@ -77,8 +77,8 @@ public class MetaDataManager {
      * @param deterministicKey A {@link DeterministicKey}, see {@link info.blockchain.wallet.payload.PayloadManager#getMasterKey()}
      */
     public Completable setMetadataNode(DeterministicKey deterministicKey) {
-          return sharedMetaDataService.setMetadataNode(deterministicKey)
-                  .compose(RxUtil.applySchedulersToCompletable());
+        return sharedMetaDataService.setMetadataNode(deterministicKey)
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@ public class MetaDataManager {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Creates a new invite for linking two users together
+     * Creates a new invite and associated invite ID for linking two users together
      *
      * @return An {@link Invitation} object
      */
@@ -98,33 +98,35 @@ public class MetaDataManager {
     /**
      * Accepts an invitation from another user
      *
-     * @param uuid  A UUID
+     * @param invitationId An invitation ID
      * @return An {@link Invitation} object
      */
-    public Observable<Invitation> acceptInvitation(String uuid) {
-        return callWithToken(accessToken -> sharedMetaDataService.acceptInvitation(accessToken, uuid))
+    public Observable<Invitation> acceptInvitation(String invitationId) {
+        return callWithToken(accessToken -> sharedMetaDataService.acceptInvitation(accessToken, invitationId))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Gets the MDID of a sender from an Invitation
+     * Gets the MDID of a user from an invitation ID, stored in {@link Invitation#getContact()}.
+     * getContact() will be null if the recipient hasn't yet accepted the invitataion and revealed
+     * their MDID
      *
-     * @param uuid  A UUID
+     * @param invitationId An invitation ID
      * @return A {@link Invitation} object
      */
-    public Observable<Invitation> readInvitation(String uuid) {
-        return callWithToken(accessToken -> sharedMetaDataService.readInvitation(accessToken, uuid))
+    public Observable<Invitation> readInvitation(String invitationId) {
+        return callWithToken(accessToken -> sharedMetaDataService.readInvitation(accessToken, invitationId))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Deletes a one-time UUID
+     * Deletes an invite from another user
      *
-     * @param uuid  A UUID
+     * @param invitationId An invitation ID
      * @return True is successful
      */
-    public Observable<Boolean> deleteInvitation(String uuid) {
-        return callWithToken(accessToken -> sharedMetaDataService.deleteInvitation(accessToken, uuid))
+    public Observable<Boolean> deleteInvitation(String invitationId) {
+        return callWithToken(accessToken -> sharedMetaDataService.deleteInvitation(accessToken, invitationId))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -145,7 +147,7 @@ public class MetaDataManager {
     /**
      * Check if a contact is trusted or not
      *
-     * @param mdid  The MDID of the user you wish to check
+     * @param mdid The MDID of the user you wish to check
      * @return True if the user is trusted
      */
     public Observable<Boolean> getIfTrusted(String mdid) {
@@ -156,7 +158,7 @@ public class MetaDataManager {
     /**
      * Add a contact to the trusted user list
      *
-     * @param mdid  The MDID of the user you wish to trust
+     * @param mdid The MDID of the user you wish to trust
      * @return True if successful
      */
     public Observable<Boolean> putTrusted(String mdid) {
@@ -167,7 +169,7 @@ public class MetaDataManager {
     /**
      * Remove a contact from the list of trusted users
      *
-     * @param mdid  The MDID of the user you wish to delete
+     * @param mdid The MDID of the user you wish to delete
      * @return True if successful
      */
     public Observable<Boolean> deleteTrusted(String mdid) {

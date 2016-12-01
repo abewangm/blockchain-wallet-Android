@@ -5,19 +5,18 @@ import android.net.UrlQuerySanitizer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.net.URI;
-
+@SuppressWarnings("WeakerAccess")
 public class MetaDataUri {
 
-    private static final String SCHEME = "blockchain://";
+    private static final String SCHEME = "http://blockchain.info/";
 
     private String from;
     private String message;
-    private String mdid;
+    private String inviteId;
     private UriType uriType;
 
     public enum UriType {
-
+        // There may be more types in the future
         INVITE("invite"),
         REQUEST_PAYMENT("request_payment");
 
@@ -55,31 +54,35 @@ public class MetaDataUri {
                     .append("&");
         }
 
-        stringBuilder.append("from=")
-                .append(Uri.encode(from))
-                .append("&mdid_hash=")
-                .append(mdid);
+        // TODO: 01/12/2016 This probably needs to be mandatory in future
+        if (from != null) {
+            stringBuilder.append("from=")
+                    .append(Uri.encode(from));
+        }
+
+        stringBuilder.append("&invite_id=")
+                .append(inviteId);
 
         return Uri.parse(stringBuilder.toString());
     }
 
-    public static MetaDataUri decode(String uri) {
+    public static MetaDataUri decode(String data) {
 
         MetaDataUri metaDataUri = new MetaDataUri();
 
-        // Use java.net.URI to get authority
-        URI uri1 = URI.create(uri);
-        metaDataUri.setUriType(UriType.fromString(uri1.getAuthority()));
+        // android.net.Uri to get authority
+        Uri uri = Uri.parse(data);
+        metaDataUri.setUriType(UriType.fromString(uri.getAuthority()));
 
-        // Use UrlQuerySanitizer for everything else, as URI.getQueryParameter() is broken pre-Jelly Bean
-        UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(uri);
+        // Use UrlQuerySanitizer for everything else, as android.net.Uri.getQueryParameter() is broken pre-Jelly Bean
+        UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(data);
 
-        String mdid = sanitizer.getValue("mdid_hash");
-        metaDataUri.setMdid(mdid);
+        String mdid = sanitizer.getValue("invite_id");
+        metaDataUri.setInviteId(mdid);
         String from = sanitizer.getValue("from");
-        metaDataUri.setFrom(from.replaceAll("_", " "));
+        metaDataUri.setFrom(Uri.decode(from));
         String message = sanitizer.getValue("message");
-        metaDataUri.setMessage(message != null ? message.replaceAll("_", " ") : null);
+        metaDataUri.setMessage(message != null ? Uri.decode(message) : null);
 
         return metaDataUri;
     }
@@ -95,8 +98,8 @@ public class MetaDataUri {
     }
 
     @NonNull
-    public String getMdid() {
-        return mdid;
+    public String getInviteId() {
+        return inviteId;
     }
 
     public UriType getUriType() {
@@ -111,8 +114,8 @@ public class MetaDataUri {
         this.message = message;
     }
 
-    void setMdid(String mdid) {
-        this.mdid = mdid;
+    void setInviteId(String inviteId) {
+        this.inviteId = inviteId;
     }
 
     void setUriType(UriType uriType) {
@@ -137,8 +140,8 @@ public class MetaDataUri {
             return this;
         }
 
-        public Builder setMdid(String mdid) {
-            metaDataUri.setMdid(mdid);
+        public Builder setInviteId(String mdid) {
+            metaDataUri.setInviteId(mdid);
             return this;
         }
 
@@ -156,7 +159,7 @@ public class MetaDataUri {
         @SuppressWarnings("ConstantConditions")
         public MetaDataUri create() {
             if (metaDataUri.getUriType() == null) throw new AssertionError("URI type must be set");
-            if (metaDataUri.getMdid() == null) throw new AssertionError("MDID must be set");
+            if (metaDataUri.getInviteId() == null) throw new AssertionError("Invite ID must be set");
             if (metaDataUri.getFrom() == null) throw new AssertionError("From must be set");
 
             return metaDataUri;

@@ -64,6 +64,8 @@ public class MainViewModel extends BaseViewModel {
 
         void onScanInput(String strUri);
 
+        void onStartContactsActivity(String data);
+
         void onStartBalanceFragment();
 
         void onExitConfirmToast();
@@ -73,6 +75,10 @@ public class MainViewModel extends BaseViewModel {
         void showEmailVerificationDialog(String email);
 
         void showAddEmailDialog();
+
+        void showProgressDialog();
+
+        void hideProgressDialog();
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -89,16 +95,33 @@ public class MainViewModel extends BaseViewModel {
         checkConnectivity();
         checkIfShouldShowEmailVerification();
         startWebSocketService();
+        registerNodeForMetaDataService();
     }
 
     private void registerNodeForMetaDataService() {
         // TODO: 28/11/2016 How to handle this if it fails?
         // Might be best to delegate this function to a different manager that
         // can retry the call at a later date
-        metaDataManager.setMetadataNode(payloadManager.getMasterKey())
-                .subscribe(() -> {
-                    // No-op
-                }, throwable -> Log.wtf(TAG, "updatePayload: ", throwable));
+
+        String uri = null;
+
+        if (prefs.getValue(PrefsUtil.KEY_METADATA_URI, "").length() > 0) {
+            uri = prefs.getValue(PrefsUtil.KEY_METADATA_URI, "");
+            prefs.removeValue(PrefsUtil.KEY_METADATA_URI);
+        }
+
+        final String finalUri = uri;
+        if (finalUri != null) dataListener.showProgressDialog();
+
+        compositeDisposable.add(
+                metaDataManager.setMetadataNode(payloadManager.getMasterKey())
+                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
+                        .subscribe(() -> {
+                            if (finalUri != null) {
+                                dataListener.onStartContactsActivity(finalUri);
+                            }
+                            // TODO: 01/12/2016 Should probably inform the user here if coming from URI click
+                        }, throwable -> Log.wtf(TAG, "registerNodeForMetaDataService: ", throwable)));
     }
 
     private void checkIfShouldShowEmailVerification() {
@@ -173,7 +196,7 @@ public class MainViewModel extends BaseViewModel {
 
                 if (prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").length() > 0) {
                     String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
-                    prefs.setValue(PrefsUtil.KEY_SCHEME_URL, "");
+                    prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
                     dataListener.onScanInput(strUri);
                 }
 

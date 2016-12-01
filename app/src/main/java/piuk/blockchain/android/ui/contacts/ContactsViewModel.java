@@ -1,23 +1,32 @@
 package piuk.blockchain.android.ui.contacts;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.util.Log;
 
 import info.blockchain.wallet.metadata.data.PaymentRequest;
+import info.blockchain.wallet.metadata.data.Trusted;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.MetaDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
+import piuk.blockchain.android.data.metadata.MetaDataUri;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.DialogButtonCallback;
+import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.annotations.Thunk;
+
+import static piuk.blockchain.android.ui.contacts.ContactsActivity.EXTRA_METADATA_URI;
 
 public class ContactsViewModel extends BaseViewModel {
 
@@ -26,8 +35,11 @@ public class ContactsViewModel extends BaseViewModel {
     private DataListener dataListener;
     @Inject QrCodeDataManager qrCodeDataManager;
     @Inject MetaDataManager metaDataManager;
+    @Inject PrefsUtil prefsUtil;
 
     interface DataListener {
+
+        Intent getPageIntent();
 
         void onContactsLoaded(@NonNull List<ContactsListItem> contacts);
 
@@ -40,6 +52,8 @@ public class ContactsViewModel extends BaseViewModel {
         void showProgressDialog();
 
         void dismissProgressDialog();
+
+        void showAddContactConfirmation(String name, DialogButtonCallback dialogButtonCallback);
 
     }
 
@@ -101,11 +115,22 @@ public class ContactsViewModel extends BaseViewModel {
 
         compositeDisposable.add(
                 metaDataManager.createInvitation()
-                        .flatMap(share -> qrCodeDataManager.generateQrCode(share.getId(), DIMENSION_QR_CODE))
+                        .flatMap(share -> getMetaDataUriString(share.getId()))
+                        .flatMap(uri -> qrCodeDataManager.generateQrCode(uri, DIMENSION_QR_CODE))
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(
                                 bitmap -> dataListener.showQrCode(bitmap),
                                 throwable -> dataListener.onShowToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+    }
+
+    private Observable<String> getMetaDataUriString(String invitationId) {
+        MetaDataUri uri = new MetaDataUri.Builder()
+                .setFrom("TEST USER")
+                .setInviteId(invitationId)
+                .setUriType(MetaDataUri.UriType.INVITE)
+                .create();
+
+        return Observable.just(uri.encode().toString());
     }
 
     private static final String TAG = ContactsViewModel.class.getSimpleName();
@@ -115,24 +140,12 @@ public class ContactsViewModel extends BaseViewModel {
         dataListener.setUiState(ContactsActivity.LOADING);
         compositeDisposable.add(
                 metaDataManager.getTrustedList()
-                        .subscribe(trusted -> {
-                            ArrayList<ContactsListItem> list = new ArrayList<>();
-
-                            for (String contact : trusted.getContacts()) {
-                                list.add(new ContactsListItem(contact, contact, "Trusted"));
-                            }
-
-                            if (!list.isEmpty()) {
-                                dataListener.setUiState(ContactsActivity.CONTENT);
-                                dataListener.onContactsLoaded(list);
-                            } else {
-                                dataListener.setUiState(ContactsActivity.EMPTY);
-                            }
-
-                        }, throwable -> {
-                            Log.e(TAG, "onViewReady: ", throwable);
-                            dataListener.setUiState(ContactsActivity.FAILURE);
-                        }));
+                        .subscribe(
+                                this::handleContactListUpdate,
+                                throwable -> {
+                                    Log.e(TAG, "onViewReady: ", throwable);
+                                    dataListener.setUiState(ContactsActivity.FAILURE);
+                                }));
 
         // TODO: 16/11/2016 Move me to my own function. I will likely need to be called from system-wide broadcasts
         // I'm only here for testing purposes
@@ -146,5 +159,59 @@ public class ContactsViewModel extends BaseViewModel {
                                     Log.e(TAG, "onViewReady: ", throwable);
                                     dataListener.onShowToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
                                 }));
+
+        Intent intent = dataListener.getPageIntent();
+        if (intent != null && intent.hasExtra(EXTRA_METADATA_URI)) {
+            MetaDataUri uriObject = MetaDataUri.decode(intent.getStringExtra(EXTRA_METADATA_URI));
+            handleIncomingUri(uriObject);
+        }
+
+    }
+
+    private void handleContactListUpdate(Trusted trusted) {
+        ArrayList<ContactsListItem> list = new ArrayList<>();
+
+        for (String contact : trusted.getContacts()) {
+            list.add(new ContactsListItem(contact, contact, "Trusted"));
+        }
+
+        if (!list.isEmpty()) {
+            dataListener.setUiState(ContactsActivity.CONTENT);
+            dataListener.onContactsLoaded(list);
+        } else {
+            dataListener.setUiState(ContactsActivity.EMPTY);
+        }
+    }
+
+    private void handleIncomingUri(MetaDataUri metaDataUri) {
+        String name = metaDataUri.getFrom();
+        dataListener.showAddContactConfirmation(name, new DialogButtonCallback() {
+            @Override
+            public void onPositiveClicked() {
+                addUser(metaDataUri);
+            }
+
+            @Override
+            public void onNegativeClicked() {
+                // Ignore
+            }
+        });
+    }
+
+    @Thunk
+    void addUser(MetaDataUri metaDataUri) {
+        String name = metaDataUri.getFrom();
+        String inviteId = metaDataUri.getInviteId();
+
+        dataListener.showProgressDialog();
+
+        compositeDisposable.add(
+                metaDataManager.acceptInvitation(inviteId)
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .flatMap(invitation -> metaDataManager.getTrustedList())
+                        .subscribe(trusted -> {
+                            handleContactListUpdate(trusted);
+                            dataListener.onShowToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
+                        }, throwable -> dataListener.onShowToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR)));
     }
 }

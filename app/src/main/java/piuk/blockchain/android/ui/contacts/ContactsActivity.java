@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
@@ -26,10 +27,13 @@ import piuk.blockchain.android.databinding.ActivityContactsBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.ViewUtils;
 
 
 public class ContactsActivity extends BaseAuthActivity implements ContactsViewModel.DataListener {
+
+    public static final String EXTRA_METADATA_URI = "metadata_uri";
 
     private static final int REQUEST_PAIRING = 98;
     private ActivityContactsBinding binding;
@@ -117,6 +121,11 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
     }
 
     @Override
+    public Intent getPageIntent() {
+        return getIntent();
+    }
+
+    @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
@@ -125,8 +134,9 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
     /**
      * Static method to assist with launching this activity
      */
-    public static void start(Context context) {
+    public static void start(Context context, @Nullable Bundle extras) {
         Intent starter = new Intent(context, ContactsActivity.class);
+        if (extras != null) starter.putExtras(extras);
         context.startActivity(starter);
     }
 
@@ -150,6 +160,17 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
                         startActivityForResult(intent, REQUEST_PAIRING);
                     }
                 })
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showAddContactConfirmation(String name, DialogButtonCallback dialogButtonCallback) {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.contacts_add_contact_title)
+                .setMessage(String.format(getString(R.string.contacts_add_are_you_sure), name))
+                .setPositiveButton(R.string.contacts_add_button, (dialogInterface, i) -> dialogButtonCallback.onPositiveClicked())
+                .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> dialogButtonCallback.onNegativeClicked())
                 .create()
                 .show();
     }

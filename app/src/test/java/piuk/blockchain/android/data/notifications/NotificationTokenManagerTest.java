@@ -19,6 +19,7 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.access.AccessState.AuthEvent;
 import piuk.blockchain.android.data.services.NotificationService;
+import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -33,12 +34,13 @@ public class NotificationTokenManagerTest {
     @Mock NotificationService notificationService;
     @Mock AccessState accessState;
     @Mock PayloadManager payloadManager;
+    @Mock PrefsUtil prefsUtil;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        subject = new NotificationTokenManager(notificationService, accessState, payloadManager);
+        subject = new NotificationTokenManager(notificationService, accessState, payloadManager, prefsUtil);
     }
 
     @Test

@@ -553,11 +553,15 @@
     <string name="contacts_view_my_qr_code">View My QR Code</string>
     <string name="contacts_no_contacts_found">No contacts found</string>
     <string name="contacts_delete_contact_failed">Deleting contact failed, please try again</string>
+    <string name="contacts_add_contact_failed">Adding contact failed, please try again</string>
+    <string name="contacts_add_contact_success">Contact added successfully</string>
     <string name="contacts_error_getting_messages">Error getting messages</string>
     <string name="contacts_error_sending_payment_request">There was an error sending your payment request, please try again</string>
     <string name="contacts_add_contact_title">Add contact</string>
     <string name="contacts_name_cannot_be_empty">Invalid name</string>
     <string name="contacts_name_field_hint">Name</string>
     <string name="contacts_add_button">Add</string>
+    <string name="contacts_share_invitation">Share invitation</string>
+    <string name="contacts_add_are_you_sure">Are you sure you wish to add %1$s as a trusted contact?</string>
 
 </resources>

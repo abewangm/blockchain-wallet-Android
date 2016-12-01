@@ -51,6 +51,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+import static piuk.blockchain.android.ui.contacts.ContactsActivity.EXTRA_METADATA_URI;
 import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
 
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.Communicator, MainViewModel.DataListener {
@@ -67,6 +68,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     private ActivityMainBinding binding;
     private MaterialProgressDialog fetchTransactionsProgress;
     private AlertDialog mRootedDialog;
+    private MaterialProgressDialog materialProgressDialog;
     private AppUtil appUtil;
 
     @SuppressLint("NewApi")
@@ -236,7 +238,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 startActivity(new Intent(MainActivity.this, AccountActivity.class));
                 break;
             case R.id.nav_contacts:
-                ContactsActivity.start(this);
+                ContactsActivity.start(this, null);
                 break;
             case R.id.nav_upgrade:
                 startActivity(new Intent(MainActivity.this, UpgradeWalletActivity.class));
@@ -449,6 +451,29 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
         if (fetchTransactionsProgress != null && fetchTransactionsProgress.isShowing()) {
             fetchTransactionsProgress.dismiss();
+        }
+    }
+
+    @Override
+    public void onStartContactsActivity(String data) {
+        Bundle bundle = new Bundle();
+        bundle.putString(EXTRA_METADATA_URI, data);
+        ContactsActivity.start(this, bundle);
+    }
+
+    @Override
+    public void showProgressDialog() {
+        materialProgressDialog = new MaterialProgressDialog(this);
+        materialProgressDialog.setCancelable(false);
+        materialProgressDialog.setMessage(R.string.please_wait);
+        materialProgressDialog.show();
+    }
+
+    @Override
+    public void hideProgressDialog() {
+        if (materialProgressDialog != null) {
+            materialProgressDialog.dismiss();
+            materialProgressDialog = null;
         }
     }
 

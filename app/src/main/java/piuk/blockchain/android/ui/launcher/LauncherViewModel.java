@@ -53,13 +53,20 @@ public class LauncherViewModel extends BaseViewModel {
         mDataListener = listener;
     }
 
+    private static final String TAG = LauncherViewModel.class.getSimpleName();
+
     @Override
     public void onViewReady() {
         // Store incoming URI if needed
         String action = mDataListener.getPageIntent().getAction();
         String scheme = mDataListener.getPageIntent().getScheme();
+        String intentData = mDataListener.getPageIntent().getDataString();
         if (action != null && Intent.ACTION_VIEW.equals(action) && scheme != null && scheme.equals("bitcoin")) {
-            mPrefsUtil.setValue(PrefsUtil.KEY_SCHEME_URL, mDataListener.getPageIntent().getData().toString());
+            mPrefsUtil.setValue(PrefsUtil.KEY_SCHEME_URL, intentData);
+        }
+
+        if (action != null && Intent.ACTION_VIEW.equals(action) && intentData != null && intentData.contains("blockchain")) {
+            mPrefsUtil.setValue(PrefsUtil.KEY_METADATA_URI, intentData);
         }
 
         boolean isPinValidated = false;

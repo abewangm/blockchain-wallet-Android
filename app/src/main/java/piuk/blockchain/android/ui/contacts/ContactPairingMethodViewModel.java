@@ -7,8 +7,10 @@ import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.MetaDataManager;
+import piuk.blockchain.android.data.metadata.MetaDataUri;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -30,6 +32,8 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
         void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
         void finishActivityWithResult(int resultCode);
+
+        void onShareIntentGenerated(Intent intent);
 
     }
 
@@ -63,7 +67,16 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
     }
 
     void onSendLinkClicked() {
-        // TODO: 14/11/2016 Generate link and share
+        compositeDisposable.add(
+                getUri().subscribe(metaDataUri -> {
+                    Intent intent = new Intent();
+                    intent.setAction(Intent.ACTION_SEND);
+                    intent.putExtra(Intent.EXTRA_TEXT, metaDataUri.encode().toString());
+                    intent.setType("text/plain");
+                    dataListener.onShareIntentGenerated(intent);
+
+                }, throwable -> dataListener.onShowToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+
     }
 
     void onNfcClicked() {
@@ -72,6 +85,16 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
          * Although to be honest, using a URI for sharing will allow NFC use anyway, but it might
          * be good to make the option explicit?
          */
+    }
+
+    private Observable<MetaDataUri> getUri() {
+        return metaDataManager.createInvitation()
+                .map(invitation -> new MetaDataUri.Builder()
+                        .setUriType(MetaDataUri.UriType.INVITE)
+                        .setFrom("TEST USER")
+                        .setInviteId(invitation.getMdid())
+                        .create());
+
     }
 
     boolean isCameraOpen() {

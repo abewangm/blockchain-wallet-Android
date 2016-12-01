@@ -17,6 +17,7 @@ interface PersistentPrefs {
     String KEY_EMAIL_VERIFY_ASK_LATER = "email_verify_ask_later";
     String KEY_BALANCE_DISPLAY_STATE = "balance_display_state";
     String KEY_SCHEME_URL = "scheme_url";
+    String KEY_METADATA_URI = "metadata_uri";
     String KEY_CURRENT_APP_VERSION = "KEY_CURRENT_APP_VERSION";
     String KEY_NEWLY_CREATED_WALLET = "newly_created_wallet";
     String LOGGED_OUT = "logged_out";
