@@ -66,27 +66,13 @@ public class UrlSettings {
                 persistentUrls.setProductionEnvironment();
                 break;
             case STAGING:
-                persistentUrls.setAddressInfoUrl(BuildConfig.STAGING_ADDRESS_INFO);
-                persistentUrls.setBalanceUrl(BuildConfig.STAGING_BALANCE);
-                persistentUrls.setDynamicFeeUrl(BuildConfig.STAGING_DYNAMIC_FEE);
-                persistentUrls.setMultiAddressUrl(BuildConfig.STAGING_MULTIADDR_URL);
-                persistentUrls.setPinstoreUrl(BuildConfig.STAGING_PIN_STORE_URL);
-                persistentUrls.setSettingsUrl(BuildConfig.STAGING_SETTINGS_PAYLOAD_URL);
-                persistentUrls.setTransactionDetailsUrl(BuildConfig.STAGING_TRANSACTION_URL);
-                persistentUrls.setUnspentUrl(BuildConfig.STAGING_UNSPENT_OUTPUTS_URL);
-                persistentUrls.setWalletPayloadUrl(BuildConfig.STAGING_WALLET_PAYLOAD_URL);
+                persistentUrls.setCurrentApiUrl(BuildConfig.STAGING_API_SERVER);
+                persistentUrls.setCurrentServerUrl(BuildConfig.STAGING_BASE_SERVER);
                 persistentUrls.setCurrentEnvironment(STAGING);
                 break;
             case DEV:
-                persistentUrls.setAddressInfoUrl(BuildConfig.DEV_ADDRESS_INFO);
-                persistentUrls.setBalanceUrl(BuildConfig.DEV_BALANCE);
-                persistentUrls.setDynamicFeeUrl(BuildConfig.DEV_DYNAMIC_FEE);
-                persistentUrls.setMultiAddressUrl(BuildConfig.DEV_MULTIADDR_URL);
-                persistentUrls.setPinstoreUrl(BuildConfig.DEV_PIN_STORE_URL);
-                persistentUrls.setSettingsUrl(BuildConfig.DEV_SETTINGS_PAYLOAD_URL);
-                persistentUrls.setTransactionDetailsUrl(BuildConfig.DEV_TRANSACTION_URL);
-                persistentUrls.setUnspentUrl(BuildConfig.DEV_UNSPENT_OUTPUTS_URL);
-                persistentUrls.setWalletPayloadUrl(BuildConfig.DEV_WALLET_PAYLOAD_URL);
+                persistentUrls.setCurrentApiUrl(BuildConfig.DEV_API_SERVER);
+                persistentUrls.setCurrentServerUrl(BuildConfig.DEV_BASE_SERVER);
                 persistentUrls.setCurrentEnvironment(DEV);
                 break;
         }

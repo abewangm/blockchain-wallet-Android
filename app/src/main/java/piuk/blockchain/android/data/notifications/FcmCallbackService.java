@@ -5,9 +5,14 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import android.util.Log;
 
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
+
 public class FcmCallbackService extends FirebaseMessagingService {
 
     private static final String TAG = FcmCallbackService.class.getSimpleName();
+
+    public static final Subject<NotificationPayload> notificationSubject = PublishSubject.create();
 
     public FcmCallbackService() {
         Log.d(TAG, "FcmCallbackService: constructor instantiated");
@@ -22,12 +27,39 @@ public class FcmCallbackService extends FirebaseMessagingService {
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
+
+            // Parse data, emit events
+            notificationSubject.onNext(new NotificationPayload());
+
         }
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+            RemoteMessage.Notification notification = remoteMessage.getNotification();
+
+            Log.d(TAG, "Message Notification Body: " + notification.getBody());
+
+
+            // Emit notification
+//            new NotificationsUtil(getApplicationContext()).setNotification(
+//                    remoteMessage.getNotification().getTitle(),
+//                    remoteMessage.getNotification().getBody(),
+//                    remoteMessage.getNotification().getTag(),
+//                    remoteMessage.getNotification().getIcon());
+//            etc
         }
+    }
+
+    public static Subject<NotificationPayload> getNotificationSubject() {
+        return notificationSubject;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class NotificationPayload {
+
+        // lol i dunno because nothing is working right now
+        String payload;
+
     }
 
 }

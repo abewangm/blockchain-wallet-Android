@@ -124,6 +124,7 @@
                         android:maxLines="1"
                         android:paddingRight="8dp"
                         android:textColorHint="@color/light_grey_text"
+                        android:textColor="@color/black"
                         android:textSize="16sp" />
 
                     <android.support.v7.widget.AppCompatImageView

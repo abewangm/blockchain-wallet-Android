@@ -19,6 +19,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.MetaDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.metadata.MetaDataUri;
+import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -28,8 +29,10 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 import static piuk.blockchain.android.ui.contacts.ContactsActivity.EXTRA_METADATA_URI;
 
+@SuppressWarnings("WeakerAccess")
 public class ContactsViewModel extends BaseViewModel {
 
+    private static final String TAG = ContactsViewModel.class.getSimpleName();
     private static final int DIMENSION_QR_CODE = 600;
 
     private DataListener dataListener;
@@ -62,16 +65,57 @@ public class ContactsViewModel extends BaseViewModel {
         this.dataListener = dataListener;
     }
 
-    void onSendMoneyClicked(String mdid) {
+    @Override
+    public void onViewReady() {
+        // Subscribe to notification events
+        subscribeToNotifications();
 
+        dataListener.setUiState(ContactsActivity.LOADING);
+        compositeDisposable.add(
+                metaDataManager.getTrustedList()
+                        .subscribe(
+                                this::handleContactListUpdate,
+                                throwable -> {
+                                    Log.e(TAG, "onViewReady: ", throwable);
+                                    dataListener.setUiState(ContactsActivity.FAILURE);
+                                }));
+
+        // TODO: 16/11/2016 Move me to my own function. I will likely need to be called from system-wide broadcasts
+        // I'm only here for testing purposes
+        compositeDisposable.add(
+                metaDataManager.getPaymentRequests(true)
+                        .subscribe(
+                                messages -> {
+                                    Log.d(TAG, "onViewReady: " + messages);
+                                },
+                                throwable -> {
+                                    Log.e(TAG, "onViewReady: ", throwable);
+                                    dataListener.onShowToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
+                                }));
+
+        Intent intent = dataListener.getPageIntent();
+        if (intent != null && intent.hasExtra(EXTRA_METADATA_URI)) {
+            MetaDataUri uriObject = MetaDataUri.decode(intent.getStringExtra(EXTRA_METADATA_URI));
+            handleIncomingUri(uriObject);
+        }
     }
 
-    void onRequestMoneyClicked(String mdid) {
+    private void subscribeToNotifications() {
+        FcmCallbackService.getNotificationSubject().subscribe(
+                notificationPayload -> {
+                    // TODO: 02/12/2016 Filter specific events that are relevant to this page
+                }, throwable -> {
+                    // TODO: 02/12/2016
+                });
+    }
+
+    void onSendMoneyClicked(String mdid) {
+        // Send payment request
         dataListener.showProgressDialog();
 
         PaymentRequest paymentRequest = new PaymentRequest();
         paymentRequest.setAmount(1_000_000L);
-        paymentRequest.setNote("Test Payment");
+        paymentRequest.setNote("I owe you 1,000,000 satoshi for something");
 
         compositeDisposable.add(
                 metaDataManager.sendPaymentRequest(mdid, paymentRequest)
@@ -82,6 +126,13 @@ public class ContactsViewModel extends BaseViewModel {
                                     dataListener.onShowToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR);
                                     Log.e(TAG, "onRequestMoneyClicked: ", throwable);
                                 }));
+
+        // User should get back a notification with a payment request response
+        // Download response from getPaymentRequestResponses(...)
+    }
+
+    void onRequestMoneyClicked(String mdid) {
+
     }
 
     void onRenameContactClicked(String mdid) {
@@ -131,41 +182,6 @@ public class ContactsViewModel extends BaseViewModel {
                 .create();
 
         return Observable.just(uri.encode().toString());
-    }
-
-    private static final String TAG = ContactsViewModel.class.getSimpleName();
-
-    @Override
-    public void onViewReady() {
-        dataListener.setUiState(ContactsActivity.LOADING);
-        compositeDisposable.add(
-                metaDataManager.getTrustedList()
-                        .subscribe(
-                                this::handleContactListUpdate,
-                                throwable -> {
-                                    Log.e(TAG, "onViewReady: ", throwable);
-                                    dataListener.setUiState(ContactsActivity.FAILURE);
-                                }));
-
-        // TODO: 16/11/2016 Move me to my own function. I will likely need to be called from system-wide broadcasts
-        // I'm only here for testing purposes
-        compositeDisposable.add(
-                metaDataManager.getPaymentRequests(true)
-                        .subscribe(
-                                messages -> {
-                                    Log.d(TAG, "onViewReady: " + messages);
-                                },
-                                throwable -> {
-                                    Log.e(TAG, "onViewReady: ", throwable);
-                                    dataListener.onShowToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
-                                }));
-
-        Intent intent = dataListener.getPageIntent();
-        if (intent != null && intent.hasExtra(EXTRA_METADATA_URI)) {
-            MetaDataUri uriObject = MetaDataUri.decode(intent.getStringExtra(EXTRA_METADATA_URI));
-            handleIncomingUri(uriObject);
-        }
-
     }
 
     private void handleContactListUpdate(Trusted trusted) {

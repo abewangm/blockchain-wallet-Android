@@ -20,24 +20,10 @@ android {
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
         // URLs for Staging and Dev
-        buildConfigField "String", "DEV_ADDRESS_INFO", devAddressInfo
-        buildConfigField "String", "STAGING_ADDRESS_INFO", stagingAddressInfo
-        buildConfigField "String", "DEV_BALANCE", devBalance
-        buildConfigField "String", "STAGING_BALANCE", stagingBalance
-        buildConfigField "String", "DEV_DYNAMIC_FEE", devDynamicFee
-        buildConfigField "String", "STAGING_DYNAMIC_FEE", stagingDynamicFee
-        buildConfigField "String", "DEV_MULTIADDR_URL", devMultiaddrUrl
-        buildConfigField "String", "STAGING_MULTIADDR_URL", stagingMultiaddrUrl
-        buildConfigField "String", "DEV_PIN_STORE_URL", devPinStoreUrl
-        buildConfigField "String", "STAGING_PIN_STORE_URL", stagingPinStoreUrl
-        buildConfigField "String", "DEV_SETTINGS_PAYLOAD_URL", devSettingsPayloadUrl
-        buildConfigField "String", "STAGING_SETTINGS_PAYLOAD_URL", stagingSettingdPayloadUrl
-        buildConfigField "String", "DEV_TRANSACTION_URL", devTransactionUrl
-        buildConfigField "String", "STAGING_TRANSACTION_URL", stagingTransactionUrl
-        buildConfigField "String", "DEV_UNSPENT_OUTPUTS_URL", devUnspentOutputsUrl
-        buildConfigField "String", "STAGING_UNSPENT_OUTPUTS_URL", stagingUnspentOutputsUrl
-        buildConfigField "String", "DEV_WALLET_PAYLOAD_URL", devWalletPayloadUrl
-        buildConfigField "String", "STAGING_WALLET_PAYLOAD_URL", stagingWalletPayloadUrl
+        buildConfigField "String", "DEV_BASE_SERVER", devBaseServer
+        buildConfigField "String", "STAGING_BASE_SERVER", stagingBaseServer
+        buildConfigField "String", "DEV_API_SERVER", devApiServer
+        buildConfigField "String", "STAGING_API_SERVER", stagingApiServer
     }
 
     buildTypes {
@@ -52,7 +38,7 @@ android {
             buildConfigField "boolean", "DOGFOOD", "false"
         }
         debug {
-            resValue "string", "google_maps_key", "AIzaSyASTnx7wjsCTkMr_RtLQYTzMAf7A9SWIMw"
+            resValue "string", "google_maps_key", "AIzaSyDOrXqr30C3vjiUM4HMeZO8HFpTIH8CVaM"
             multiDexEnabled true
             buildConfigField "boolean", "DOGFOOD", "false"
         }

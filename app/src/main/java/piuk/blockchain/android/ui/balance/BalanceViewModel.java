@@ -187,7 +187,6 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         context = null;
         dataListener = null;
         compositeDisposable.clear();
-        Injector.getInstance().releaseViewModelScope();
     }
 
     public List<ItemAccount> getActiveAccountAndAddressList() {

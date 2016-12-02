@@ -33,17 +33,18 @@ import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
+import piuk.blockchain.android.util.annotations.Thunk;
 
 @SuppressWarnings("WeakerAccess")
 public class AuthDataManager {
 
     private WalletPayloadService walletPayloadService;
     private PayloadManager payloadManager;
-    private PrefsUtil prefsUtil;
     private AppUtil appUtil;
     private AESUtilWrapper aesUtilWrapper;
     private AccessState accessState;
     private StringUtils stringUtils;
+    @Thunk PrefsUtil prefsUtil;
     @VisibleForTesting protected int timer;
 
     public AuthDataManager(PayloadManager payloadManager,
