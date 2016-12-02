@@ -5,7 +5,6 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pair;
-import android.util.Log;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -27,6 +26,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.injection.Injector;
@@ -35,9 +35,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import io.reactivex.Observable;
 
-import static piuk.blockchain.android.ui.backup.BackupWalletCompletedFragment.TAG;
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
 @SuppressWarnings("WeakerAccess")
@@ -199,8 +197,6 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     mDataListener.setTransactionValueFiat(getTransactionValueFiat(transaction));
                     mDataListener.setFromAddress(mStringUtils.getString(R.string.transaction_details_unknown));
                     mDataListener.onDataLoaded();
-
-                    Log.e(TAG, "updateUiFromTransaction: ", throwable);
                 }));
     }
 
