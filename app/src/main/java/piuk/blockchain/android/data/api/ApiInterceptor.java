@@ -12,9 +12,9 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 
-public class APIInterceptor implements Interceptor {
+public class ApiInterceptor implements Interceptor {
 
-    private static final String TAG = APIInterceptor.class.getSimpleName();
+    private static final String TAG = ApiInterceptor.class.getSimpleName();
 
     @Override
     public Response intercept(Chain chain) throws IOException {

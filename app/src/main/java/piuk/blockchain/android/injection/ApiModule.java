@@ -16,7 +16,7 @@ import dagger.Module;
 import dagger.Provides;
 import okhttp3.OkHttpClient;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.api.APIInterceptor;
+import piuk.blockchain.android.data.api.ApiInterceptor;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.services.NotificationService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
@@ -61,7 +61,7 @@ public class ApiModule {
                 .connectTimeout(API_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(API_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(API_TIMEOUT, TimeUnit.SECONDS)
-                .addInterceptor(new APIInterceptor())
+                .addInterceptor(new ApiInterceptor())
                 .build();
     }
 
