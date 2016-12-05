@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
+import info.blockchain.wallet.metadata.data.Contact;
+
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
@@ -66,9 +68,9 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
                                 }, throwable -> dataListener.onShowToast(R.string.pairing_failed, ToastCustom.TYPE_ERROR)));
     }
 
-    void onSendLinkClicked() {
+    void onSendLinkClicked(Contact contact) {
         compositeDisposable.add(
-                getUri().subscribe(metaDataUri -> {
+                getUri(contact).subscribe(metaDataUri -> {
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_SEND);
                     intent.putExtra(Intent.EXTRA_TEXT, metaDataUri.encode().toString());
@@ -87,8 +89,8 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
          */
     }
 
-    private Observable<MetaDataUri> getUri() {
-        return metaDataManager.createInvitation()
+    private Observable<MetaDataUri> getUri(Contact contact) {
+        return metaDataManager.createInvitation(contact)
                 .map(invitation -> new MetaDataUri.Builder()
                         .setUriType(MetaDataUri.UriType.INVITE)
                         .setFrom("TEST USER")

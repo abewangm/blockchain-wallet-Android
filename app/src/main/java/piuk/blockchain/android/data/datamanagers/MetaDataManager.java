@@ -1,5 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import info.blockchain.wallet.metadata.data.Contact;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.PaymentRequest;
@@ -88,11 +89,12 @@ public class MetaDataManager {
     /**
      * Creates a new invite and associated invite ID for linking two users together
      *
+     * @param contact The contact details of the user
      * @return An {@link Invitation} object
      */
-    public Observable<Invitation> createInvitation() {
-        return callWithToken(accessToken -> sharedMetaDataService.createInvitation(accessToken))
-                .compose(RxUtil.applySchedulersToObservable());
+    public Observable<Invitation> createInvitation(Contact contact) {
+        return callWithToken(accessToken -> sharedMetaDataService.createInvitation(accessToken, contact)
+                .compose(RxUtil.applySchedulersToObservable()));
     }
 
     /**

@@ -37,7 +37,8 @@ public class ContactPairingMethodActivity extends BaseAuthActivity implements Co
 
         binding.buttonQrCode.setOnClickListener(view -> requestScanActivity());
 
-        binding.buttonSendLink.setOnClickListener(view -> viewModel.onSendLinkClicked());
+        // TODO: 05/12/2016 Somehow need to get a contact here? Is it the sender or the receiver?
+        binding.buttonSendLink.setOnClickListener(view -> viewModel.onSendLinkClicked(null));
 
         binding.buttonNfc.setOnClickListener(view -> viewModel.onNfcClicked());
     }

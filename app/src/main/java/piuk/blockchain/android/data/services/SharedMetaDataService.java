@@ -1,6 +1,7 @@
 package piuk.blockchain.android.data.services;
 
 import info.blockchain.wallet.metadata.MetadataShared;
+import info.blockchain.wallet.metadata.data.Contact;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.PaymentRequest;
@@ -102,17 +103,18 @@ public class SharedMetaDataService {
     /**
      * Creates a new invite and associated invite ID for linking two users together
      *
-     * @param token A signed web token in JSON format
+     * @param token       A signed web token in JSON format
+     * @param contactInfo The user's contact information
      * @return An {@link Invitation} object
      */
-    public Observable<Invitation> createInvitation(String token) {
-        return Observable.fromCallable(() -> metadata.createInvitation(token));
+    public Observable<Invitation> createInvitation(String token, Contact contactInfo) {
+        return Observable.fromCallable(() -> metadata.createInvitation(token, contactInfo));
     }
 
     /**
      * Accepts an invitation from another user
      *
-     * @param token A signed web token in JSON format
+     * @param token        A signed web token in JSON format
      * @param invitationId An invitation ID
      * @return An {@link Invitation} object
      */
@@ -125,7 +127,7 @@ public class SharedMetaDataService {
      * getContact() will be null if the recipient hasn't yet accepted the invitataion and revealed
      * their MDID
      *
-     * @param token A signed web token in JSON format
+     * @param token        A signed web token in JSON format
      * @param invitationId An invitation ID
      * @return A {@link Invitation} object
      */
@@ -136,7 +138,7 @@ public class SharedMetaDataService {
     /**
      * Deletes an invite from another user
      *
-     * @param token A signed web token in JSON format
+     * @param token        A signed web token in JSON format
      * @param invitationId An invitation ID
      * @return True is successful
      */

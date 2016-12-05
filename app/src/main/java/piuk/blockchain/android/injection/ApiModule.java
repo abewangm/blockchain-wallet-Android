@@ -1,7 +1,5 @@
 package piuk.blockchain.android.injection;
 
-import com.google.gson.Gson;
-
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.api.Notifications;
 import info.blockchain.api.PersistentUrls;
@@ -22,7 +20,7 @@ import piuk.blockchain.android.data.services.NotificationService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.util.PrefsUtil;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by adambennett on 08/08/2016.
@@ -67,20 +65,14 @@ public class ApiModule {
 
     @Provides
     @Singleton
-    protected Gson provideGsonInstance() {
-        return new Gson();
-    }
-
-    @Provides
-    @Singleton
-    protected GsonConverterFactory provideGsonConverterFactory(Gson gson) {
-        return GsonConverterFactory.create(gson);
+    protected JacksonConverterFactory provideJacksonConverterFactory() {
+        return JacksonConverterFactory.create();
     }
 
     @Provides
     @Singleton
     @Named("api")
-    protected Retrofit provideRetrofitApiInstance(OkHttpClient okHttpClient, GsonConverterFactory converterFactory) {
+    protected Retrofit provideRetrofitApiInstance(OkHttpClient okHttpClient, JacksonConverterFactory converterFactory) {
         // TODO: 02/12/2016 For now this only provides the metadata dev URL, this will change
         return new Retrofit.Builder()
                 .baseUrl(MetadataEndpoints.API_URL)
@@ -92,7 +84,7 @@ public class ApiModule {
     @Provides
     @Singleton
     @Named("server")
-    protected Retrofit provideRetrofitBlockchainInstance(OkHttpClient okHttpClient, GsonConverterFactory converterFactory) {
+    protected Retrofit provideRetrofitBlockchainInstance(OkHttpClient okHttpClient, JacksonConverterFactory converterFactory) {
         return new Retrofit.Builder()
                 .baseUrl(PersistentUrls.getInstance().getCurrentBaseServerUrl())
                 .client(okHttpClient)

@@ -165,7 +165,8 @@ public class ContactsViewModel extends BaseViewModel {
         dataListener.showProgressDialog();
 
         compositeDisposable.add(
-                metaDataManager.createInvitation()
+                // TODO: 05/12/2016 Meant to pass in contact here - is that the current user?
+                metaDataManager.createInvitation(null)
                         .flatMap(share -> getMetaDataUriString(share.getId()))
                         .flatMap(uri -> qrCodeDataManager.generateQrCode(uri, DIMENSION_QR_CODE))
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())

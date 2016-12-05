@@ -45,7 +45,6 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Inject
     @Named("server")
     protected Retrofit retrofitServer;
-    @Inject protected Gson gson;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -91,11 +90,6 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Override
     public Retrofit getRetrofitServerInstance() {
         return retrofitServer;
-    }
-
-    @Override
-    public Gson getGsonInstance() {
-        return gson;
     }
 
     /**
