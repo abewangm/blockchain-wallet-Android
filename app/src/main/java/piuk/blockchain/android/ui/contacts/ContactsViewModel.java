@@ -16,10 +16,11 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.datamanagers.MetaDataManager;
+import piuk.blockchain.android.data.datamanagers.SharedMetadataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.metadata.MetaDataUri;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
+import piuk.blockchain.android.data.services.SharedMetadataService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -37,7 +38,7 @@ public class ContactsViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     @Inject QrCodeDataManager qrCodeDataManager;
-    @Inject MetaDataManager metaDataManager;
+    @Inject SharedMetadataManager sharedMetadataManager;
     @Inject PrefsUtil prefsUtil;
 
     interface DataListener {
@@ -72,7 +73,7 @@ public class ContactsViewModel extends BaseViewModel {
 
         dataListener.setUiState(ContactsActivity.LOADING);
         compositeDisposable.add(
-                metaDataManager.getTrustedList()
+                sharedMetadataManager.getTrustedList()
                         .subscribe(
                                 this::handleContactListUpdate,
                                 throwable -> {
@@ -83,7 +84,7 @@ public class ContactsViewModel extends BaseViewModel {
         // TODO: 16/11/2016 Move me to my own function. I will likely need to be called from system-wide broadcasts
         // I'm only here for testing purposes
         compositeDisposable.add(
-                metaDataManager.getPaymentRequests(true)
+                sharedMetadataManager.getPaymentRequests(true)
                         .subscribe(
                                 messages -> {
                                     Log.d(TAG, "onViewReady: " + messages);
@@ -118,7 +119,7 @@ public class ContactsViewModel extends BaseViewModel {
         paymentRequest.setNote("I owe you 1,000,000 satoshi for something");
 
         compositeDisposable.add(
-                metaDataManager.sendPaymentRequest(mdid, paymentRequest)
+                sharedMetadataManager.sendPaymentRequest(mdid, paymentRequest)
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(
                                 message -> Log.d(TAG, "onRequestMoneyClicked: " + message),
@@ -142,7 +143,7 @@ public class ContactsViewModel extends BaseViewModel {
     void onDeleteContactClicked(String mdid) {
         dataListener.showProgressDialog();
         compositeDisposable.add(
-                metaDataManager.deleteTrusted(mdid)
+                sharedMetadataManager.deleteTrusted(mdid)
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(success -> {
                             if (success) {
@@ -158,7 +159,7 @@ public class ContactsViewModel extends BaseViewModel {
     /**
      * This will need to subscribe to the notification service somehow and listen for when the
      * recipient accepts their invitation. Once this is done, the dialog will need to be dismissed
-     * and the user will have to make a call to {@link piuk.blockchain.android.data.services.SharedMetaDataService#putTrusted(String,
+     * and the user will have to make a call to {@link SharedMetadataService#putTrusted(String,
      * String)} to add them as a contact themselves
      */
     void onViewQrClicked() {
@@ -166,7 +167,7 @@ public class ContactsViewModel extends BaseViewModel {
 
         compositeDisposable.add(
                 // TODO: 05/12/2016 Meant to pass in contact here - is that the current user?
-                metaDataManager.createInvitation(null)
+                sharedMetadataManager.createInvitation(null)
                         .flatMap(share -> getMetaDataUriString(share.getId()))
                         .flatMap(uri -> qrCodeDataManager.generateQrCode(uri, DIMENSION_QR_CODE))
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
@@ -223,9 +224,9 @@ public class ContactsViewModel extends BaseViewModel {
         dataListener.showProgressDialog();
 
         compositeDisposable.add(
-                metaDataManager.acceptInvitation(inviteId)
+                sharedMetadataManager.acceptInvitation(inviteId)
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                        .flatMap(invitation -> metaDataManager.getTrustedList())
+                        .flatMap(invitation -> sharedMetadataManager.getTrustedList())
                         .subscribe(trusted -> {
                             handleContactListUpdate(trusted);
                             dataListener.onShowToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);

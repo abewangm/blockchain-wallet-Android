@@ -27,7 +27,7 @@ public enum Injector {
         MetaDataModule metaDataModule = new MetaDataModule();
 
         initAppComponent(applicationModule, apiModule, managerModule);
-        initMetaDataComponent(apiModule, metaDataModule);
+        initMetaDataComponent(metaDataModule);
     }
 
     protected void initAppComponent(ApplicationModule applicationModule, ApiModule apiModule, DataManagerModule managerModule) {
@@ -40,10 +40,9 @@ public enum Injector {
         dataManagerComponent = applicationComponent.plus(managerModule);
     }
 
-    protected void initMetaDataComponent(ApiModule apiModule, MetaDataModule metaDataModule) {
+    protected void initMetaDataComponent(MetaDataModule metaDataModule) {
 
         metaDataComponent = DaggerMetaDataComponent.builder()
-                .apiModule(apiModule)
                 .metaDataModule(metaDataModule)
                 .build();
     }

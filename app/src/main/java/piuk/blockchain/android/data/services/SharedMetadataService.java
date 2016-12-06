@@ -15,11 +15,11 @@ import java.util.List;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 
-public class SharedMetaDataService {
+public class SharedMetadataService {
 
     private MetadataShared metadata;
 
-    public SharedMetaDataService(MetadataShared metadata) {
+    public SharedMetadataService(MetadataShared metadata) {
         this.metadata = metadata;
     }
 
@@ -104,7 +104,7 @@ public class SharedMetaDataService {
      * Creates a new invite and associated invite ID for linking two users together
      *
      * @param token       A signed web token in JSON format
-     * @param contactInfo The user's contact information
+     * @param contactInfo The contact info of the invite sender
      * @return An {@link Invitation} object
      */
     public Observable<Invitation> createInvitation(String token, Contact contactInfo) {

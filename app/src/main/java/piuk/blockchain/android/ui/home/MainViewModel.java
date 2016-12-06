@@ -25,7 +25,7 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
-import piuk.blockchain.android.data.datamanagers.MetaDataManager;
+import piuk.blockchain.android.data.datamanagers.SharedMetadataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
@@ -48,7 +48,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected AppUtil appUtil;
     @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
-    @Inject protected MetaDataManager metaDataManager;
+    @Inject protected SharedMetadataManager metaDataManagerShared;
 
     private long mBackPressed;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
@@ -114,7 +114,7 @@ public class MainViewModel extends BaseViewModel {
         if (finalUri != null) dataListener.showProgressDialog();
 
         compositeDisposable.add(
-                metaDataManager.setMetadataNode(payloadManager.getMasterKey())
+                metaDataManagerShared.setMetadataNode(payloadManager.getMasterKey())
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(() -> {
                             if (finalUri != null) {

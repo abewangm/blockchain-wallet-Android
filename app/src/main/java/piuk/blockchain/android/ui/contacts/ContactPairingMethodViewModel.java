@@ -11,7 +11,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.datamanagers.MetaDataManager;
+import piuk.blockchain.android.data.datamanagers.SharedMetadataManager;
 import piuk.blockchain.android.data.metadata.MetaDataUri;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -25,7 +25,7 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
     private DataListener dataListener;
     private String contactName;
     @Inject AppUtil appUtil;
-    @Inject MetaDataManager metaDataManager;
+    @Inject SharedMetadataManager sharedMetadataManager;
 
     interface DataListener {
 
@@ -59,8 +59,8 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
         // TODO: 30/11/2016 We're supposed to do something here with a contact name, but I have no idea what
 
         compositeDisposable.add(
-                metaDataManager.acceptInvitation(extra)
-                        .flatMap(share -> metaDataManager.putTrusted(share.getMdid()))
+                sharedMetadataManager.acceptInvitation(extra)
+                        .flatMap(share -> sharedMetadataManager.putTrusted(share.getMdid()))
                         .subscribe(
                                 success -> {
                                     dataListener.onShowToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
@@ -90,7 +90,7 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
     }
 
     private Observable<MetaDataUri> getUri(Contact contact) {
-        return metaDataManager.createInvitation(contact)
+        return sharedMetadataManager.createInvitation(contact)
                 .map(invitation -> new MetaDataUri.Builder()
                         .setUriType(MetaDataUri.UriType.INVITE)
                         .setFrom("TEST USER")

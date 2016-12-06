@@ -6,7 +6,6 @@ import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.PaymentRequest;
 import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 import info.blockchain.wallet.metadata.data.Trusted;
-import info.blockchain.wallet.payload.PayloadManager;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
@@ -20,14 +19,13 @@ import io.reactivex.functions.Function;
 import piuk.blockchain.android.data.metadata.TokenMemoryStore;
 import piuk.blockchain.android.data.metadata.TokenWebStore;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.services.SharedMetaDataService;
+import piuk.blockchain.android.data.services.SharedMetadataService;
 import piuk.blockchain.android.injection.Injector;
 
 @SuppressWarnings("WeakerAccess")
-public class MetaDataManager {
+public class SharedMetadataManager {
 
-    @Inject protected SharedMetaDataService sharedMetaDataService;
-    @Inject protected PayloadManager payloadManager;
+    @Inject protected SharedMetadataService sharedMetaDataService;
     @Inject protected TokenWebStore webStore;
     @Inject protected TokenMemoryStore memoryStore;
 
@@ -89,11 +87,11 @@ public class MetaDataManager {
     /**
      * Creates a new invite and associated invite ID for linking two users together
      *
-     * @param contact The contact details of the user
+     * @param contactInfo The contact info of the invite sender
      * @return An {@link Invitation} object
      */
-    public Observable<Invitation> createInvitation(Contact contact) {
-        return callWithToken(accessToken -> sharedMetaDataService.createInvitation(accessToken, contact)
+    public Observable<Invitation> createInvitation(Contact contactInfo) {
+        return callWithToken(accessToken -> sharedMetaDataService.createInvitation(accessToken, contactInfo)
                 .compose(RxUtil.applySchedulersToObservable()));
     }
 
