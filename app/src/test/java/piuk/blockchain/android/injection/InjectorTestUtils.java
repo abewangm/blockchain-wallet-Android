@@ -15,9 +15,8 @@ public class InjectorTestUtils {
     }
 
     public static void initMetaDataComponent(Injector injector,
-                                                ApiModule apiModule,
                                                 MetaDataModule metaDataModule) {
-        injector.initMetaDataComponent(apiModule, metaDataModule);
+        injector.initMetaDataComponent(metaDataModule);
     }
 
 }
