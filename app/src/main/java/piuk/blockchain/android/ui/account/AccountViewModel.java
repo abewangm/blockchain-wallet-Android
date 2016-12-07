@@ -104,9 +104,7 @@ public class AccountViewModel extends BaseViewModel {
                                 dataListener.onSetTransferLegacyFundsMenuItemVisible(false);
                             }
                             dataListener.dismissProgressDialog();
-                        }, throwable -> {
-                            dataListener.onSetTransferLegacyFundsMenuItemVisible(false);
-                        }));
+                        }, throwable -> dataListener.onSetTransferLegacyFundsMenuItemVisible(false)));
     }
 
     /**
@@ -318,8 +316,6 @@ public class AccountViewModel extends BaseViewModel {
                             } else {
                                 throw Exceptions.propagate(new Throwable("Save unsuccessful"));
                             }
-                        }, throwable -> {
-                            dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-                        }));
+                        }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 }

@@ -1173,7 +1173,7 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Update balance immediately after spend - until refresh from server
      */
-    private void updateInternalBalances() {
+    private void updateInternalBalances() { 
 
         BigInteger totalSent = sendModel.pendingTransaction.bigIntAmount.add(sendModel.pendingTransaction.bigIntFee);
 
@@ -1190,7 +1190,7 @@ public class SendViewModel extends BaseViewModel {
             //Set individual xpub balance
             MultiAddrFactory.getInstance().setXpubAmount(
                     account.getXpub(),
-                    MultiAddrFactory.getInstance().getXpubAmounts().get(account.getXpub()) - updatedBalance);
+                    MultiAddrFactory.getInstance().getXpubAmounts().get(account.getXpub()) - totalSent.longValue());
 
         } else {
             MultiAddrFactory.getInstance().setLegacyBalance(MultiAddrFactory.getInstance().getLegacyBalance() - totalSent.longValue());
