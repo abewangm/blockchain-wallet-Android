@@ -15,17 +15,21 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import info.blockchain.wallet.payload.PayloadManager;
+
+import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
@@ -77,7 +81,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         mainViewModel = new MainViewModel(this, this);
-        binding.setViewModel(mainViewModel);
 
         mainViewModel.onViewReady();
 
@@ -102,7 +105,24 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 // No-op
             }
         });
+
+        // Select transactions by default
+        binding.bottomNavigation.setDefaultSelectedIndex(1);
+
+        binding.bottomNavigation.setOnMenuItemClickListener(new BottomNavigation.OnMenuItemSelectionListener() {
+            @Override
+            public void onMenuItemSelect(@IdRes int i, int i1, boolean b) {
+                Log.d(TAG, "onMenuItemSelect: ");
+            }
+
+            @Override
+            public void onMenuItemReselect(@IdRes int i, int i1, boolean b) {
+
+            }
+        });
     }
+
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     @SuppressLint("NewApi")
     @Override
@@ -183,14 +203,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
         if (drawerIsOpen) {
             binding.drawerLayout.closeDrawers();
-
+// TODO: 07/12/2016 I will need fixing
         } else if (getCurrentFragment() instanceof BalanceFragment) {
-            if (((BalanceFragment) getCurrentFragment()).isFabExpanded()) {
-                ((BalanceFragment) getCurrentFragment()).collapseFab();
-            } else {
                 mainViewModel.onBackPressed();
-            }
         } else {
+            // Switch to balance fragment
             Fragment fragment = new BalanceFragment();
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
