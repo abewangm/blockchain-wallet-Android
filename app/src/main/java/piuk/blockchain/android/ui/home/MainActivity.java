@@ -2,8 +2,6 @@ package piuk.blockchain.android.ui.home;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,6 +15,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -32,6 +33,7 @@ import info.blockchain.wallet.payload.PayloadManager;
 import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
 import piuk.blockchain.android.ui.account.AccountActivity;
 import piuk.blockchain.android.ui.auth.LandingActivity;
@@ -42,7 +44,8 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
-import piuk.blockchain.android.ui.send.SendActivity;
+import piuk.blockchain.android.ui.receive.ReceiveFragment;
+import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
@@ -56,21 +59,27 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
 
-public class MainActivity extends BaseAuthActivity implements BalanceFragment.Communicator, MainViewModel.DataListener {
+public class MainActivity extends BaseAuthActivity implements BalanceFragment.Communicator,
+        MainViewModel.DataListener,
+        SendFragment.OnBalanceFragmentInteractionListener {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String SUPPORT_URI = "http://support.blockchain.com/";
     private static final int REQUEST_BACKUP = 2225;
     private static final int MERCHANT_ACTIVITY = 1;
     public static final int SCAN_URI = 2007;
+    private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
     @Thunk boolean drawerIsOpen = false;
 
-    private Toolbar toolbar;
     private MainViewModel mainViewModel;
     private ActivityMainBinding binding;
     private MaterialProgressDialog fetchTransactionsProgress;
     private AlertDialog mRootedDialog;
     private AppUtil appUtil;
+    private long backPressed;
+    private boolean returningResult = false;
 
     @SuppressLint("NewApi")
     @Override
@@ -111,18 +120,32 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
         binding.bottomNavigation.setOnMenuItemClickListener(new BottomNavigation.OnMenuItemSelectionListener() {
             @Override
-            public void onMenuItemSelect(@IdRes int i, int i1, boolean b) {
-                Log.d(TAG, "onMenuItemSelect: ");
+            public void onMenuItemSelect(@IdRes int menuId, int position, boolean b) {
+                switch (menuId) {
+                    case R.id.action_send:
+                        if (!(getCurrentFragment() instanceof SendFragment)) {
+                            // This is a bit of a hack to allow the selection of the correct button
+                            // On the bottom nav bar, but without starting the fragment again
+                            startSendFragment(null);
+                        }
+                        break;
+                    case R.id.action_transactions:
+                        onStartBalanceFragment();
+                        break;
+                    case R.id.action_receive:
+                        startReceiveFragment();
+                        break;
+                }
             }
 
             @Override
-            public void onMenuItemReselect(@IdRes int i, int i1, boolean b) {
-
+            public void onMenuItemReselect(@IdRes int menuId, int position, boolean b) {
+                if (menuId == R.id.action_transactions && getCurrentFragment() instanceof BalanceFragment) {
+                    ((BalanceFragment) getCurrentFragment()).onScrollToTop();
+                }
             }
         });
     }
-
-    private static final String TAG = MainActivity.class.getSimpleName();
 
     @SuppressLint("NewApi")
     @Override
@@ -139,6 +162,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
             launcherShortcutHelper.generateReceiveShortcuts();
         }
+
+        // Reset state of the bottom nav bar, but not if returning from a scan
+        if (!returningResult) {
+            binding.bottomNavigation.setSelectedIndex(1, false);
+        }
+        returningResult = false;
+        binding.bottomNavigation.setExpanded(true, false);
     }
 
     @Override
@@ -164,8 +194,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             case android.R.id.home:
                 binding.drawerLayout.openDrawer(GravityCompat.START);
                 return true;
-
-            case R.id.action_qr:
+            case R.id.action_qr_main:
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), this);
                 } else {
@@ -177,8 +206,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         }
     }
 
-    private Fragment getCurrentFragment() {
-        return getFragmentManager().findFragmentById(R.id.content_frame);
+    @Thunk
+    Fragment getCurrentFragment() {
+        return getSupportFragmentManager().findFragmentById(R.id.content_frame);
     }
 
     public boolean getDrawerOpen() {
@@ -195,23 +225,45 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_BACKUP) {
             resetNavigationDrawer();
+        } else {
+            if (data != null) {
+                returningResult = true;
+            }
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
     @Override
     public void onBackPressed() {
-
         if (drawerIsOpen) {
             binding.drawerLayout.closeDrawers();
-// TODO: 07/12/2016 I will need fixing
         } else if (getCurrentFragment() instanceof BalanceFragment) {
-                mainViewModel.onBackPressed();
+            handleBackPressed();
+        } else if (getCurrentFragment() instanceof SendFragment) {
+            ((SendFragment) getCurrentFragment()).onBackPressed();
+        } else if (getCurrentFragment() instanceof ReceiveFragment) {
+            ((ReceiveFragment) getCurrentFragment()).onBackPressed();
         } else {
             // Switch to balance fragment
-            Fragment fragment = new BalanceFragment();
-            FragmentManager fragmentManager = getFragmentManager();
+            BalanceFragment fragment = new BalanceFragment();
+            FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
         }
+    }
+
+    public void handleBackPressed() {
+        if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+            AccessState.getInstance().logout(this);
+            return;
+        } else {
+            onExitConfirmToast();
+        }
+
+        backPressed = System.currentTimeMillis();
+    }
+
+    public void onExitConfirmToast() {
+        ToastCustom.makeText(getActivity(), getString(R.string.exit_confirm), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
     }
 
     private void startScanActivity() {
@@ -224,22 +276,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     }
 
     private void doScanInput(String strResult) {
-        Intent intent = new Intent(this, SendActivity.class);
-        intent.putExtra("scan_data", strResult);
-        startActivity(intent);
-    }
-
-    @Override
-    public void setNavigationDrawerToggleEnabled(boolean enabled) {
-        for (int i = 0; i < toolbar.getChildCount(); i++) {
-            toolbar.getChildAt(i).setEnabled(enabled);
-            toolbar.getChildAt(i).setClickable(enabled);
-        }
-
-        if (enabled)
-            binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        else
-            binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        startSendFragment(strResult);
     }
 
     public void selectDrawerItem(MenuItem menuItem) {
@@ -277,8 +314,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void resetNavigationDrawer() {
-
-        toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
         toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.ic_menu_white_24dp));
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
@@ -318,7 +354,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     }
 
     private void startMerchantActivity() {
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             PermissionUtil.requestLocationPermissionFromActivity(binding.getRoot(), this);
@@ -450,7 +485,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void onFetchTransactionsStart() {
-
         fetchTransactionsProgress = new MaterialProgressDialog(this);
         fetchTransactionsProgress.setCancelable(false);
         fetchTransactionsProgress.setMessage(getString(R.string.please_wait));
@@ -459,7 +493,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void onFetchTransactionCompleted() {
-
         if (fetchTransactionsProgress != null && fetchTransactionsProgress.isShowing()) {
             fetchTransactionsProgress.dismiss();
         }
@@ -472,18 +505,63 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void onStartBalanceFragment() {
-        if (!isFinishing()) {
-            Handler handler = new Handler();
-            handler.post(() -> {
-                Fragment fragment = new BalanceFragment();
-                FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commitAllowingStateLoss();
-            });
+        BalanceFragment fragment = new BalanceFragment();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+        transaction.replace(R.id.content_frame, fragment).commitAllowingStateLoss();
+    }
+
+    public void startSendFragment(String scanData) {
+        boolean isBTC;
+        int selectedAccountPosition;
+        try {
+            isBTC = ((BalanceFragment) getCurrentFragment()).getIsBTC();
+            selectedAccountPosition = ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
+        } catch (ClassCastException e) {
+            Log.e(TAG, "startSendFragment: ", e);
+            isBTC = true;
+            selectedAccountPosition = -1;
         }
+
+        SendFragment sendFragment = SendFragment.newInstance(scanData, isBTC, selectedAccountPosition);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+        transaction.replace(R.id.content_frame, sendFragment).commitAllowingStateLoss();
+    }
+
+    public void startReceiveFragment() {
+        boolean isBTC;
+        int selectedAccountPosition;
+        try {
+            isBTC = ((BalanceFragment) getCurrentFragment()).getIsBTC();
+            selectedAccountPosition = ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
+        } catch (ClassCastException e) {
+            Log.e(TAG, "startReceiveFragment: ", e);
+            isBTC = true;
+            selectedAccountPosition = -1;
+        }
+
+        ReceiveFragment sendFragment = ReceiveFragment.newInstance(isBTC, selectedAccountPosition);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+        transaction.replace(R.id.content_frame, sendFragment).commitAllowingStateLoss();
+    }
+
+    public BottomNavigation getBottomNavigationView() {
+        return binding.bottomNavigation;
     }
 
     @Override
-    public void onExitConfirmToast() {
-        ToastCustom.makeText(this, getString(R.string.exit_confirm), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
+    public void onBalanceFragmentClose() {
+        binding.bottomNavigation.setSelectedIndex(1, false);
+    }
+
+    // Ensure bottom nav button selected after scanning for result
+    @Override
+    public void onBalanceFragmentStart() {
+        binding.bottomNavigation.setSelectedIndex(0, false);
     }
 }

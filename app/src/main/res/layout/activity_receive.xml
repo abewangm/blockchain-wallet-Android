@@ -7,11 +7,6 @@
         android:layout_height="match_parent"
         tools:context=".ui.receive.ReceiveActivity">
 
-        <!-- include toolbar -->
-        <include
-            android:id="@+id/toolbar"
-            layout="@layout/toolbar_general" />
-
         <!-- include main content -->
         <include
             android:id="@+id/content"

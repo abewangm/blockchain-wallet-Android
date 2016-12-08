@@ -45,9 +45,6 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
 
-    private long mBackPressed;
-    private static final int COOL_DOWN_MILLIS = 2 * 1000;
-
     public interface DataListener {
         void onRooted();
 
@@ -60,8 +57,6 @@ public class MainViewModel extends BaseViewModel {
         void onScanInput(String strUri);
 
         void onStartBalanceFragment();
-
-        void onExitConfirmToast();
 
         void kickToLauncherPage();
 
@@ -243,17 +238,6 @@ public class MainViewModel extends BaseViewModel {
 
     public boolean areLauncherShortcutsEnabled() {
         return prefs.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true);
-    }
-
-    public void onBackPressed() {
-        if (mBackPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-            AccessState.getInstance().logout(context);
-            return;
-        } else {
-            dataListener.onExitConfirmToast();
-        }
-
-        mBackPressed = System.currentTimeMillis();
     }
 
     private void startWebSocketService() {

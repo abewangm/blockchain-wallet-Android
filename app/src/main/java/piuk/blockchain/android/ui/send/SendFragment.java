@@ -15,9 +15,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -27,12 +29,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivitySendBinding;
 import piuk.blockchain.android.databinding.AlertGenericWarningBinding;
@@ -40,11 +44,11 @@ import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.balance.BalanceFragment;
+import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
@@ -54,28 +58,34 @@ import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_IS_BTC;
-import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_SELECTED_ACCOUNT_POSITION;
+import static android.databinding.DataBindingUtil.inflate;
 
-public class SendActivity extends BaseAuthActivity implements SendViewModel.DataListener, CustomKeypadCallback {
 
-    private final int SCAN_URI = 2007;
-    private final int SCAN_PRIVX = 2008;
+public class SendFragment extends Fragment implements SendViewModel.DataListener, CustomKeypadCallback {
+
+    private static final String ARG_SCAN_DATA = "scan_data";
+    private static final String ARG_IS_BTC = "is_btc";
+    private static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
+    private static final int SCAN_URI = 2007;
+    private static final int SCAN_PRIVX = 2008;
+    private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
     @Thunk ActivitySendBinding binding;
     @Thunk SendViewModel viewModel;
     @Thunk AlertDialog transactionSuccessDialog;
-
+    private OnBalanceFragmentInteractionListener listener;
     private CustomKeypad customKeypad;
-
     private TextWatcher btcTextWatcher;
     private TextWatcher fiatTextWatcher;
-    private boolean isBtc = true;
+
+    private String scanData;
+    private boolean isBtc;
+    private int selectedAccountPosition = -1;
+    private long backPressed;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-
             if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
                 ((AddressAdapter) binding.accounts.spinner.getAdapter()).updateData(viewModel.getAddressList(false));
                 ((AddressAdapter) binding.spDestination.getAdapter()).updateData(viewModel.getAddressList(true));
@@ -83,69 +93,87 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         }
     };
 
-    private Activity getActivity() {
-        return this;
+    public SendFragment() {
+        // Required empty public constructor
+    }
+
+    public static SendFragment newInstance(String scanData, boolean isBtc, int selectedAccountPosition) {
+        SendFragment fragment = new SendFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_SCAN_DATA, scanData);
+        args.putBoolean(ARG_IS_BTC, isBtc);
+        args.putInt(ARG_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if (getArguments() != null) {
+            scanData = getArguments().getString(ARG_SCAN_DATA);
+            isBtc = getArguments().getBoolean(ARG_IS_BTC, true);
+            selectedAccountPosition = getArguments().getInt(ARG_SELECTED_ACCOUNT_POSITION);
+        }
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_send);
-        viewModel = new SendViewModel(this, this);
+        binding = DataBindingUtil.inflate(inflater, R.layout.activity_send, container, false);
+        viewModel = new SendViewModel(getContext(), this);
         binding.setViewModel(viewModel);
 
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         setupToolbar();
 
         setCustomKeypad();
 
-        if (getIntent().hasExtra(KEY_IS_BTC)) {
-            isBtc = getIntent().getBooleanExtra(KEY_IS_BTC, true);
-        }
-
         setupViews();
 
-        String scanData = getIntent().getStringExtra("scan_data");
         if (scanData != null) viewModel.handleIncomingQRScan(scanData);
+
+        setHasOptionsMenu(true);
+
+        return binding.getRoot();
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
+
+        if (listener != null) {
+            listener.onBalanceFragmentStart();
+        }
     }
 
     @Override
     public void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(receiver);
         super.onPause();
     }
 
     private void setupToolbar() {
-        binding.toolbarContainer.toolbarGeneral.setTitle(getResources().getString(R.string.send_bitcoin));
-        setSupportActionBar(binding.toolbarContainer.toolbarGeneral);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.send_bitcoin);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.send_activity_actions, menu);
-        return super.onCreateOptionsMenu(menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem menuItem = menu.findItem(R.id.action_qr_main);
+        menuItem.setVisible(false);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
             case R.id.action_qr:
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), this);
+                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), getActivity());
                 } else {
                     startScanActivity(SCAN_URI);
                 }
@@ -153,7 +181,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             case R.id.action_send:
                 customKeypad.setNumpadVisibility(View.GONE);
 
-                if (ConnectivityStatus.hasConnectivity(this)) {
+                if (ConnectivityStatus.hasConnectivity(getActivity())) {
                     ItemAccount selectedItem = (ItemAccount) binding.accounts.spinner.getSelectedItem();
                     viewModel.setSendingAddress(selectedItem);
                     viewModel.calculateTransactionAmounts(selectedItem,
@@ -161,7 +189,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
                             binding.customFee.getText().toString(),
                             () -> viewModel.sendClicked(false, binding.destination.getText().toString()));
                 } else {
-                    ToastCustom.makeText(this, getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                    ToastCustom.makeText(getActivity(), getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                 }
                 return true;
             default:
@@ -170,11 +198,11 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
     }
 
     private void startScanActivity(int code) {
-        if (!new AppUtil(this).isCameraOpen()) {
-            Intent intent = new Intent(this, CaptureActivity.class);
+        if (!new AppUtil(getActivity()).isCameraOpen()) {
+            Intent intent = new Intent(getActivity(), CaptureActivity.class);
             startActivityForResult(intent, code);
         } else {
-            ToastCustom.makeText(this, getString(R.string.camera_unavailable), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            ToastCustom.makeText(getActivity(), getString(R.string.camera_unavailable), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
         }
     }
 
@@ -191,13 +219,27 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         }
     }
 
-    @Override
     public void onBackPressed() {
         if (customKeypad.isVisible()) {
-            onKeypadClose();
+            closeKeypad();
         } else {
-            super.onBackPressed();
+            handleBackPressed();
         }
+    }
+
+    public void handleBackPressed() {
+        if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+            AccessState.getInstance().logout(getContext());
+            return;
+        } else {
+            onExitConfirmToast();
+        }
+
+        backPressed = System.currentTimeMillis();
+    }
+
+    public void onExitConfirmToast() {
+        ToastCustom.makeText(getActivity(), getString(R.string.exit_confirm), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
     }
 
     @Override
@@ -213,14 +255,25 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         }
     }
 
-    @Override
-    public void onKeypadClose() {
+    private void closeKeypad() {
         customKeypad.setNumpadVisibility(View.GONE);
     }
 
-    private void setCustomKeypad() {
+    @Override
+    public void onKeypadClose() {
+        // Show bottom nav
+        ((MainActivity) getActivity()).getBottomNavigationView().setExpanded(true, true);
+    }
 
-        customKeypad = new CustomKeypad(this, (binding.keypad.numericPad));
+    @Override
+    public void onKeypadOpen() {
+        // Hide bottom nav
+        ((MainActivity) getActivity()).getBottomNavigationView().setExpanded(false, true);
+    }
+
+    private void setCustomKeypad() {
+        customKeypad = binding.keyboard;
+        customKeypad.setCallback(this);
         customKeypad.setDecimalSeparator(viewModel.getDefaultSeparator());
 
         //Enable custom keypad and disables default keyboard from popping up
@@ -294,7 +347,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
         String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         binding.accounts.spinner.setAdapter(new AddressAdapter(
-                this,
+                getContext(),
                 R.layout.spinner_item,
                 viewModel.getAddressList(false),
                 true,
@@ -336,9 +389,8 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             }
         });
 
-        if (getIntent().hasExtra(KEY_SELECTED_ACCOUNT_POSITION)
-                && getIntent().getIntExtra(KEY_SELECTED_ACCOUNT_POSITION, -1) != -1) {
-            binding.accounts.spinner.setSelection(getIntent().getIntExtra(KEY_SELECTED_ACCOUNT_POSITION, -1));
+        if (selectedAccountPosition != -1) {
+            binding.accounts.spinner.setSelection(selectedAccountPosition);
         } else {
             binding.accounts.spinner.setSelection(viewModel.getDefaultAccount());
         }
@@ -347,7 +399,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
     private void setupReceiveToView() {
         String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         binding.spDestination.setAdapter(new AddressAdapter(
-                this,
+                getContext(),
                 R.layout.spinner_item,
                 viewModel.getAddressList(true),
                 false,
@@ -441,19 +493,17 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
     @Override
     public void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
-        ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
+        ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
 
     @Override
     public void onShowTransactionSuccess() {
-
-        runOnUiThread(() -> {
-
+        getActivity().runOnUiThread(() -> {
             playAudio();
-            LocalBroadcastManager.getInstance(this).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
+            LocalBroadcastManager.getInstance(getActivity()).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
 
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-            LayoutInflater inflater = getLayoutInflater();
+            LayoutInflater inflater = getActivity().getLayoutInflater();
             View dialogView = inflater.inflate(R.layout.modal_transaction_success, null);
             transactionSuccessDialog = dialogBuilder.setView(dialogView)
                     .setPositiveButton(getString(R.string.done), null)
@@ -469,12 +519,12 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
             // happen if the user choses to rate the app - they'll return to the main page.
             if (appRate.shouldShowDialog()) {
                 AlertDialog ratingDialog = appRate.getRateDialog();
-                ratingDialog.setOnDismissListener(d -> finish());
+                ratingDialog.setOnDismissListener(d -> finishPage());
                 transactionSuccessDialog.show();
                 transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
             } else {
                 transactionSuccessDialog.show();
-                transactionSuccessDialog.setOnDismissListener(dialogInterface -> finish());
+                transactionSuccessDialog.setOnDismissListener(dialogInterface -> finishPage());
             }
 
             dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
@@ -493,8 +543,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
     @Override
     public void onShowBIP38PassphrasePrompt(String scanData) {
-
-        runOnUiThread(() -> {
+        getActivity().runOnUiThread(() -> {
             final EditText password = new EditText(getActivity());
             password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
@@ -512,7 +561,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
     private void onShowLargeTransactionWarning(AlertDialog alertDialog) {
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-        AlertGenericWarningBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(getActivity()),
+        AlertGenericWarningBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
                 R.layout.alert_generic_warning, null, false);
         dialogBuilder.setView(dialogBinding.getRoot());
 
@@ -551,13 +600,12 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
     @Override
     public void onSetSpendAllAmount(String textFromSatoshis) {
-        runOnUiThread(() -> binding.amountRow.amountBtc.setText(textFromSatoshis));
+        getActivity().runOnUiThread(() -> binding.amountRow.amountBtc.setText(textFromSatoshis));
     }
 
     @Override
     public void onShowSpendFromWatchOnly(String address) {
-
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.privx_required)
                 .setMessage(String.format(getString(R.string.watch_only_spend_instructionss), address))
                 .setCancelable(false)
@@ -574,7 +622,6 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
     }
 
     private void setBtcTextWatcher() {
-
         btcTextWatcher = new TextWatcher() {
             public void afterTextChanged(Editable editable) {
                 viewModel.afterBtcTextChanged(editable.toString());
@@ -591,7 +638,6 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
     }
 
     private void setFiatTextWatcher() {
-
         fiatTextWatcher = new TextWatcher() {
             public void afterTextChanged(Editable editable) {
                 viewModel.afterFiatTextChanged(editable.toString());
@@ -618,8 +664,8 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
     @Override
     public void onShowPaymentDetails(PaymentConfirmationDetails details) {
 
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(SendActivity.this);
-        FragmentSendConfirmBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(SendActivity.this),
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        FragmentSendConfirmBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
                 R.layout.fragment_send_confirm, null, false);
         dialogBuilder.setView(dialogBinding.getRoot());
 
@@ -655,14 +701,14 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         }
 
         final String finalFeeMessage = feeMessage;
-        dialogBinding.ivFeeInfo.setOnClickListener(view -> new AlertDialog.Builder(SendActivity.this)
+        dialogBinding.ivFeeInfo.setOnClickListener(view -> new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.transaction_fee)
                 .setMessage(finalFeeMessage)
                 .setPositiveButton(android.R.string.ok, null).show());
 
         if (details.isSurge) {
-            dialogBinding.confirmFeeBtc.setTextColor(ContextCompat.getColor(SendActivity.this, R.color.blockchain_send_red));
-            dialogBinding.confirmFeeFiat.setTextColor(ContextCompat.getColor(SendActivity.this, R.color.blockchain_send_red));
+            dialogBinding.confirmFeeBtc.setTextColor(ContextCompat.getColor(getContext(), R.color.blockchain_send_red));
+            dialogBinding.confirmFeeFiat.setTextColor(ContextCompat.getColor(getContext(), R.color.blockchain_send_red));
             dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
         }
 
@@ -671,7 +717,7 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
                 alertDialog.cancel();
             }
 
-            runOnUiThread(() -> {
+            getActivity().runOnUiThread(() -> {
                 binding.customFeeContainer.setVisibility(View.VISIBLE);
 
                 binding.customFee.setText(details.btcFee);
@@ -692,11 +738,11 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
         });
 
         dialogBinding.confirmSend.setOnClickListener(v -> {
-            if (ConnectivityStatus.hasConnectivity(this)) {
+            if (ConnectivityStatus.hasConnectivity(getActivity())) {
                 dialogBinding.confirmSend.setClickable(false);
                 viewModel.submitPayment(alertDialog);
             } else {
-                ToastCustom.makeText(this, getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                ToastCustom.makeText(getActivity(), getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                 // Queue tx here
             }
         });
@@ -717,9 +763,8 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
 
     @Override
     public void onShowReceiveToWatchOnlyWarning(String address) {
-
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        AlertWatchOnlySpendBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(getActivity()),
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle);
+        AlertWatchOnlySpendBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
                 R.layout.alert_watch_only_spend, null, false);
         dialogBuilder.setView(dialogBinding.getRoot());
         dialogBuilder.setCancelable(false);
@@ -750,8 +795,8 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
                                int positiveAction,
                                int negativeAction) {
 
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        AlertGenericWarningBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(SendActivity.this),
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        AlertGenericWarningBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
                 R.layout.alert_generic_warning, null, false);
         dialogBuilder.setView(dialogBinding.getRoot());
 
@@ -792,23 +837,22 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
     }
 
     private void alertCustomSpend(String btcFee, String btcFeeUnit) {
-
         String message = getResources().getString(R.string.recommended_fee)
                 + "\n\n"
                 + btcFee
                 + " " + btcFeeUnit;
 
-        new AlertDialog.Builder(this)
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.transaction_fee)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, null).show();
     }
 
     private void playAudio() {
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        AudioManager audioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
         if (audioManager != null && audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
             MediaPlayer mp;
-            mp = MediaPlayer.create(getApplicationContext(), R.raw.beep);
+            mp = MediaPlayer.create(getActivity().getApplicationContext(), R.raw.beep);
             mp.setOnCompletionListener(mp1 -> {
                 mp1.reset();
                 mp1.release();
@@ -818,13 +862,38 @@ public class SendActivity extends BaseAuthActivity implements SendViewModel.Data
     }
 
     @Override
-    public void finishActivity() {
-        finish();
+    public void finishPage() {
+        if (listener != null) {
+            listener.onBalanceFragmentClose();
+        }
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         viewModel.destroy();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnBalanceFragmentInteractionListener) {
+            listener = (OnBalanceFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context + " must implement OnBalanceFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
+    }
+
+    public interface OnBalanceFragmentInteractionListener {
+
+        void onBalanceFragmentClose();
+
+        void onBalanceFragmentStart();
     }
 }

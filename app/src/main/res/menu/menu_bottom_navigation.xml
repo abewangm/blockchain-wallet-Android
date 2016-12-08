@@ -4,12 +4,12 @@
     android:background="@color/blockchain_pearl_white"
     app:bbn_itemColorActive="@color/blockchain_blue"
     app:bbn_itemColorInactive="@color/blockchain_grey"
-    app:bbn_rippleColor="@color/blockchain_dark_blue">
+    app:bbn_rippleColor="@color/blockchain_transfer_blue">
 
     <item
         android:id="@+id/action_send"
         android:icon="@drawable/icon_send"
-        android:title="@string/receive_bitcoin" />
+        android:title="@string/send_bitcoin" />
     <item
         android:id="@+id/action_transactions"
         android:icon="@drawable/vector_transactions"

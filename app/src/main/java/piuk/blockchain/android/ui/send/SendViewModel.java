@@ -183,7 +183,7 @@ public class SendViewModel extends BaseViewModel {
 
         void onShowBIP38PassphrasePrompt(String scanData);
 
-        void finishActivity();
+        void finishPage();
     }
 
     public int getDefaultAccount() {
@@ -576,7 +576,7 @@ public class SendViewModel extends BaseViewModel {
             return spendableCoins.getAbsoluteFee();
         } else {
             // App is likely in low memory environment, leave page gracefully
-            dataListener.finishActivity();
+            dataListener.finishPage();
             return null;
         }
     }
@@ -639,7 +639,7 @@ public class SendViewModel extends BaseViewModel {
             }
         } else {
             // App is likely in low memory environment, leave page gracefully
-            dataListener.finishActivity();
+            dataListener.finishPage();
         }
     }
 

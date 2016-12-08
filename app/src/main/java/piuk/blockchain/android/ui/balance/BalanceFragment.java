@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.balance;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -24,8 +24,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 
 import info.blockchain.wallet.transaction.Tx;
@@ -40,8 +38,7 @@ import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.home.SecurityPromptDialog;
-import piuk.blockchain.android.ui.receive.ReceiveActivity;
-import piuk.blockchain.android.ui.send.SendActivity;
+import piuk.blockchain.android.ui.home.TransactionSelectedListener;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.settings.SettingsFragment;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
@@ -53,13 +50,12 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-public class BalanceFragment extends Fragment implements BalanceViewModel.DataListener {
+public class BalanceFragment extends Fragment implements BalanceViewModel.DataListener, TransactionSelectedListener {
 
-    private static final String TAG = "BalanceFragment";
+    @Thunk static final String TAG = BalanceFragment.class.getSimpleName();
+
     public static final String ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH";
-    public static final String KEY_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     public static final String KEY_TRANSACTION_LIST_POSITION = "transaction_list_position";
-    public static final String KEY_IS_BTC = "is_btc";
     private static final int SHOW_BTC = 1;
     private static final int SHOW_FIAT = 2;
     private int balanceDisplayState = SHOW_BTC;
@@ -223,7 +219,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         });
 
         if (getActivity() != null && !getActivity().isFinishing() && isAdded()) {
-            securityPromptDialog.showDialog(((AppCompatActivity) getActivity()).getSupportFragmentManager());
+            securityPromptDialog.showDialog(getActivity().getSupportFragmentManager());
         }
     }
 
@@ -255,103 +251,17 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         });
 
         if (getActivity() != null && !getActivity().isFinishing() && isAdded()) {
-            securityPromptDialog.showDialog(((AppCompatActivity) getActivity()).getSupportFragmentManager());
+            securityPromptDialog.showDialog(getActivity().getSupportFragmentManager());
         }
-    }
-
-    private void initFab() {
-// TODO: 07/12/2016 kill this
-        //First icon when fab expands
-//        actionA.setOnClickListener(v -> sendClicked());
-
-        //Second icon when fab expands
-//        actionB.setOnClickListener(v -> receiveClicked());
-    }
-
-    /**
-     * Only available for Dogfood/Debug build
-     */
-    private void initDebugFab() {
-
-//        if (BuildConfig.DOGFOOD || BuildConfig.DEBUG) {
-//            binding.fabDebug.setVisibility(View.VISIBLE);
-//
-//            com.getbase.floatingactionbutton.FloatingActionButton actionA = new com.getbase.floatingactionbutton.FloatingActionButton(context);
-//            actionA.setColorNormal(ContextCompat.getColor(getActivity(), R.color.blockchain_receive_green));
-//            actionA.setSize(com.getbase.floatingactionbutton.FloatingActionButton.SIZE_MINI);
-//            Drawable debugIcon = ContextCompat.getDrawable(getActivity(), R.drawable.icon_news);
-//            debugIcon.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
-//            actionA.setIconDrawable(debugIcon);
-//            actionA.setColorPressed(ContextCompat.getColor(getActivity(), R.color.blockchain_green_50));
-//            actionA.setTitle("Show Payload");
-//            actionA.setOnClickListener(v -> {
-//
-//                AlertDialog dialog = null;
-//                try {
-//                    String debugString = new JSONObject(viewModel.getPayloadManager().getBciWallet().getPayload().getDecryptedPayload()).toString(4);
-//                    Log.d(TAG, debugString);
-//
-//                    dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                            .setTitle("Payload")
-//                            .setMessage(debugString)
-//                            .show();
-//                } catch (JSONException e) {
-//                    Log.e(TAG, "initDebugFab: ", e);
-//                }
-//                TextView textView = (TextView) dialog.findViewById(android.R.id.message);
-//                textView.setTextSize(9);
-//            });
-//
-//            com.getbase.floatingactionbutton.FloatingActionButton actionB = new com.getbase.floatingactionbutton.FloatingActionButton(context);
-//            actionB.setColorNormal(ContextCompat.getColor(getActivity(), R.color.blockchain_receive_green));
-//            actionB.setSize(com.getbase.floatingactionbutton.FloatingActionButton.SIZE_MINI);
-//            debugIcon.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
-//            actionB.setIconDrawable(debugIcon);
-//            actionB.setColorPressed(ContextCompat.getColor(getActivity(), R.color.blockchain_green_50));
-//            actionB.setTitle("Show unparsed wallet data");
-//            actionB.setOnClickListener(v -> {
-//                AlertDialog dialog = null;
-//                try {
-//                String unparsed = new JSONObject(viewModel.getPayloadManager().getBciWallet().getUnparsedWalletData()).toString(4);
-//                Log.d(TAG, unparsed);
-//                dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                        .setTitle("Unparsed wallet data")
-//                        .setMessage(unparsed)
-//                        .show();
-//                } catch (JSONException e) {
-//                    Log.e(TAG, "initDebugFab: ", e);
-//                }
-//                TextView textView = (TextView) dialog.findViewById(android.R.id.message);
-//                textView.setTextSize(9);
-//            });
-//
-//            binding.fabDebug.addButton(actionA);
-//            binding.fabDebug.addButton(actionB);
-//        } else {
-//            binding.fabDebug.setVisibility(View.GONE);
-//        }
-    }
-
-    private void sendClicked() {
-        Intent intent = new Intent(getActivity(), SendActivity.class);
-        intent.putExtra(KEY_SELECTED_ACCOUNT_POSITION, getSelectedAccountPosition());
-        intent.putExtra(KEY_IS_BTC, isBTC);
-        startActivity(intent);
-    }
-
-    private void receiveClicked() {
-        Intent intent = new Intent(getActivity(), ReceiveActivity.class);
-        intent.putExtra(KEY_SELECTED_ACCOUNT_POSITION, getSelectedAccountPosition());
-        intent.putExtra(KEY_IS_BTC, isBTC);
-        startActivity(intent);
     }
 
     /**
      * Position is offset to account for first item being "All Wallets". If returned result is -1,
-     * {@link SendActivity} and {@link ReceiveActivity} can safely ignore and choose the defaults
+     * {@link piuk.blockchain.android.ui.send.SendFragment} and {@link
+     * piuk.blockchain.android.ui.receive.ReceiveFragment} can safely ignore and choose the defaults
      * instead.
      */
-    private int getSelectedAccountPosition() {
+    public int getSelectedAccountPosition() {
         int position = accountSpinner.getSelectedItemPosition();
         if (position >= accountSpinner.getCount() - 1) {
             // End of list is imported addresses, ignore
@@ -361,10 +271,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         return position - 1;
     }
 
-    private void setupViews() {
-        initFab();
-        initDebugFab();
+    public boolean getIsBTC() {
+        return isBTC;
+    }
 
+    private void setupViews() {
         binding.noTransactionMessage.noTxMessage.setVisibility(View.GONE);
 
         binding.balance1.setOnTouchListener((v, event) -> {
@@ -454,11 +365,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             });
             accountsAdapter.notifyDataSetChanged();
         }
-
-        binding.noTransactionMessage.noTxMessage.setOnClickListener(v -> {
-            Animation bounce = AnimationUtils.loadAnimation(context, R.anim.jump);
-            // TODO: 07/12/2016 Remove fab from empty layout
-        });
 
         binding.swipeContainer.setProgressViewEndTarget(false, (int) ViewUtils.convertDpToPixel(72 + 20, getActivity()));
         binding.swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -565,11 +471,17 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         viewModel.destroy();
     }
 
+    @Override
+    public void onScrollToTop() {
+        if (getActivity() != null && !getActivity().isFinishing()) {
+            binding.rvTransactions.smoothScrollToPosition(0);
+        }
+    }
+
     public interface Communicator {
 
-        void setNavigationDrawerToggleEnabled(boolean enabled);
-
         void resetNavigationDrawer();
+
     }
 
     abstract class CollapseActionbarScrollListener extends RecyclerView.OnScrollListener {

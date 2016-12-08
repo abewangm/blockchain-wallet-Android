@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:orientation="vertical">
 
         <View
@@ -39,8 +38,7 @@
             android:background="@color/blockchain_navigation_bar"
             android:gravity="center_horizontal"
             android:shrinkColumns="*"
-            android:stretchColumns="*"
-            android:visibility="gone">
+            android:stretchColumns="*">
 
             <TableRow
                 android:id="@+id/tableRow1"
@@ -66,7 +64,7 @@
                         android:gravity="center_vertical|center_horizontal"
                         android:text="1"
                         android:textColor="@color/blockchain_blue"
-                        android:textSize="@dimen/pinentry_num_text_size"></TextView>
+                        android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
 
@@ -88,7 +86,7 @@
                         android:gravity="center_vertical|center_horizontal"
                         android:text="2"
                         android:textColor="@color/blockchain_blue"
-                        android:textSize="@dimen/pinentry_num_text_size"></TextView>
+                        android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
 
@@ -110,7 +108,7 @@
                         android:gravity="center_vertical|center_horizontal"
                         android:text="3"
                         android:textColor="@color/blockchain_blue"
-                        android:textSize="@dimen/pinentry_num_text_size"></TextView>
+                        android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
 
@@ -160,7 +158,7 @@
                         android:gravity="center_vertical|center_horizontal"
                         android:text="4"
                         android:textColor="@color/blockchain_blue"
-                        android:textSize="@dimen/pinentry_num_text_size"></TextView>
+                        android:textSize="@dimen/pinentry_num_text_size" />
 
 
                 </LinearLayout>
@@ -183,7 +181,7 @@
                         android:gravity="center_vertical|center_horizontal"
                         android:text="5"
                         android:textColor="@color/blockchain_blue"
-                        android:textSize="@dimen/pinentry_num_text_size"></TextView>
+                        android:textSize="@dimen/pinentry_num_text_size" />
 
 
                 </LinearLayout>
@@ -206,18 +204,17 @@
                         android:gravity="center_vertical|center_horizontal"
                         android:text="6"
                         android:textColor="@color/blockchain_blue"
-                        android:textSize="@dimen/pinentry_num_text_size"></TextView>
+                        android:textSize="@dimen/pinentry_num_text_size" />
 
 
                 </LinearLayout>
 
-                <LinearLayout
+                <View
                     android:layout_width="0dip"
                     android:layout_height="54dip"
                     android:layout_weight="1"
                     android:background="@color/blockchain_pearl_white"
-                    android:gravity="center"
-                    android:orientation="vertical"></LinearLayout>
+                    android:gravity="center" />
 
             </TableRow>
 
@@ -245,7 +242,7 @@
                         android:gravity="center_vertical|center_horizontal"
                         android:text="7"
                         android:textColor="@color/blockchain_blue"
-                        android:textSize="@dimen/pinentry_num_text_size"></TextView>
+                        android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
 
@@ -267,7 +264,7 @@
                         android:gravity="center_vertical|center_horizontal"
                         android:text="8"
                         android:textColor="@color/blockchain_blue"
-                        android:textSize="@dimen/pinentry_num_text_size"></TextView>
+                        android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
 
@@ -289,17 +286,16 @@
                         android:gravity="center_vertical|center_horizontal"
                         android:text="9"
                         android:textColor="@color/blockchain_blue"
-                        android:textSize="@dimen/pinentry_num_text_size"></TextView>
+                        android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
 
-                <LinearLayout
+                <View
                     android:layout_width="0dip"
                     android:layout_height="54dip"
                     android:layout_weight="1"
                     android:background="@color/blockchain_pearl_white"
-                    android:gravity="center"
-                    android:orientation="vertical"></LinearLayout>
+                    android:gravity="center" />
             </TableRow>
 
             <TableRow
@@ -326,7 +322,7 @@
                         android:gravity="center_vertical|center_horizontal"
                         android:text="."
                         android:textColor="@color/blockchain_blue"
-                        android:textSize="@dimen/pinentry_num_text_size"></TextView>
+                        android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
 
@@ -349,17 +345,16 @@
                         android:gravity="center_vertical|center_horizontal"
                         android:text="0"
                         android:textColor="@color/blockchain_blue"
-                        android:textSize="@dimen/pinentry_num_text_size"></TextView>
+                        android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
 
-                <LinearLayout
+                <View
                     android:layout_width="0dip"
                     android:layout_height="54dip"
                     android:layout_weight="1"
                     android:background="@color/blockchain_pearl_white"
-                    android:gravity="center"
-                    android:orientation="vertical"></LinearLayout>
+                    android:gravity="center" />
 
                 <LinearLayout
                     android:id="@+id/buttonDone"
@@ -389,4 +384,4 @@
         </TableLayout>
 
     </LinearLayout>
-</layout>
+</merge>
