@@ -12,7 +12,7 @@
         android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blockchain_light_grey"
+        android:background="@color/blockchain_pearl_white"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
@@ -215,7 +215,6 @@
                     android:textColor="@color/blockchain_send_red" />
 
             </LinearLayout>
-
         </ScrollView>
 
         <piuk.blockchain.android.ui.customviews.CustomKeypad

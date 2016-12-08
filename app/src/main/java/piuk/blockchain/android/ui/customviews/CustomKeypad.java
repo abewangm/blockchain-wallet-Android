@@ -1,7 +1,9 @@
 package piuk.blockchain.android.ui.customviews;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -44,6 +46,7 @@ public class CustomKeypad extends LinearLayout implements View.OnClickListener {
         init();
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public CustomKeypad(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();

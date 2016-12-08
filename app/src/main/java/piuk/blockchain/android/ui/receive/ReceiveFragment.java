@@ -80,6 +80,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     private CustomKeypad customKeypad;
     private BottomSheetDialog bottomSheetDialog;
     private AddressAdapter addressAdapter;
+    private OnReceiveFragmentInteractionListener listener;
 
     @Thunk boolean textChangeAllowed = true;
     private boolean showInfoButton = false;
@@ -131,7 +132,12 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         binding = DataBindingUtil.inflate(inflater, R.layout.activity_receive, container, false);
         viewModel = new ReceiveViewModel(this, Locale.getDefault());
 
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.receive_bitcoin);
+        if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.receive_bitcoin);
+        } else {
+            finishPage();
+            return binding.getRoot();
+        }
 
         viewModel.onViewReady();
 
@@ -633,12 +639,40 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     @Override
     public void onKeypadClose() {
         // Show bottom nav
-        ((MainActivity) getActivity()).getBottomNavigationView().setExpanded(true, true);
+        ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
     }
 
     @Override
     public void onKeypadOpen() {
         // Hide bottom nav
-        ((MainActivity) getActivity()).getBottomNavigationView().setExpanded(false, true);
+        ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
+    }
+
+    public void finishPage() {
+        if (listener != null) {
+            listener.onReceiveFragmentClose();
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnReceiveFragmentInteractionListener) {
+            listener = (OnReceiveFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context + " must implement OnSendFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
+    }
+
+    public interface OnReceiveFragmentInteractionListener {
+
+        void onReceiveFragmentClose();
+
     }
 }

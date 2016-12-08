@@ -73,7 +73,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Thunk ActivitySendBinding binding;
     @Thunk SendViewModel viewModel;
     @Thunk AlertDialog transactionSuccessDialog;
-    private OnBalanceFragmentInteractionListener listener;
+    private OnSendFragmentInteractionListener listener;
     private CustomKeypad customKeypad;
     private TextWatcher btcTextWatcher;
     private TextWatcher fiatTextWatcher;
@@ -141,7 +141,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
 
         if (listener != null) {
-            listener.onBalanceFragmentStart();
+            listener.onSendFragmentStart();
         }
     }
 
@@ -152,7 +152,11 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     private void setupToolbar() {
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.send_bitcoin);
+        if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.send_bitcoin);
+        } else {
+            finishPage();
+        }
     }
 
     @Override
@@ -262,13 +266,13 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Override
     public void onKeypadClose() {
         // Show bottom nav
-        ((MainActivity) getActivity()).getBottomNavigationView().setExpanded(true, true);
+        ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
     }
 
     @Override
     public void onKeypadOpen() {
         // Hide bottom nav
-        ((MainActivity) getActivity()).getBottomNavigationView().setExpanded(false, true);
+        ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
     }
 
     private void setCustomKeypad() {
@@ -864,7 +868,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Override
     public void finishPage() {
         if (listener != null) {
-            listener.onBalanceFragmentClose();
+            listener.onSendFragmentClose();
         }
     }
 
@@ -877,10 +881,10 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnBalanceFragmentInteractionListener) {
-            listener = (OnBalanceFragmentInteractionListener) context;
+        if (context instanceof OnSendFragmentInteractionListener) {
+            listener = (OnSendFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context + " must implement OnBalanceFragmentInteractionListener");
+            throw new RuntimeException(context + " must implement OnSendFragmentInteractionListener");
         }
     }
 
@@ -890,10 +894,10 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         listener = null;
     }
 
-    public interface OnBalanceFragmentInteractionListener {
+    public interface OnSendFragmentInteractionListener {
 
-        void onBalanceFragmentClose();
+        void onSendFragmentClose();
 
-        void onBalanceFragmentStart();
+        void onSendFragmentStart();
     }
 }

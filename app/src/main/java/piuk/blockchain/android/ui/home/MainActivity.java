@@ -13,7 +13,6 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -28,9 +27,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import info.blockchain.wallet.payload.PayloadManager;
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 
-import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
+import info.blockchain.wallet.payload.PayloadManager;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
@@ -61,7 +61,8 @@ import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_AD
 
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.Communicator,
         MainViewModel.DataListener,
-        SendFragment.OnBalanceFragmentInteractionListener {
+        SendFragment.OnSendFragmentInteractionListener,
+        ReceiveFragment.OnReceiveFragmentInteractionListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -115,35 +116,47 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             }
         });
 
-        // Select transactions by default
-        binding.bottomNavigation.setDefaultSelectedIndex(1);
+        // Create items
+        AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.blockchain_pearl_white);
+        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.transactions, R.drawable.vector_transactions, R.color.blockchain_pearl_white);
+        AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.receive_bitcoin, R.drawable.vector_receive, R.color.blockchain_pearl_white);
 
-        binding.bottomNavigation.setOnMenuItemClickListener(new BottomNavigation.OnMenuItemSelectionListener() {
-            @Override
-            public void onMenuItemSelect(@IdRes int menuId, int position, boolean b) {
-                switch (menuId) {
-                    case R.id.action_send:
+        // Add items
+        binding.bottomNavigation.addItem(item1);
+        binding.bottomNavigation.addItem(item2);
+        binding.bottomNavigation.addItem(item3);
+
+        binding.bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.blockchain_blue));
+        binding.bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.blockchain_grey));
+        binding.bottomNavigation.setForceTint(true);
+        binding.bottomNavigation.setUseElevation(true);
+
+        // Select transactions by default
+        binding.bottomNavigation.setCurrentItem(1);
+        binding.bottomNavigation.setOnTabSelectedListener((position, wasSelected) -> {
+            if (!wasSelected) {
+                switch (position) {
+                    case 0:
                         if (!(getCurrentFragment() instanceof SendFragment)) {
                             // This is a bit of a hack to allow the selection of the correct button
                             // On the bottom nav bar, but without starting the fragment again
                             startSendFragment(null);
                         }
                         break;
-                    case R.id.action_transactions:
+                    case 1:
                         onStartBalanceFragment();
                         break;
-                    case R.id.action_receive:
+                    case 2:
                         startReceiveFragment();
                         break;
                 }
-            }
-
-            @Override
-            public void onMenuItemReselect(@IdRes int menuId, int position, boolean b) {
-                if (menuId == R.id.action_transactions && getCurrentFragment() instanceof BalanceFragment) {
+            } else {
+                if (position == 1 && getCurrentFragment() instanceof BalanceFragment) {
                     ((BalanceFragment) getCurrentFragment()).onScrollToTop();
                 }
             }
+
+            return true;
         });
     }
 
@@ -163,12 +176,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             launcherShortcutHelper.generateReceiveShortcuts();
         }
 
+        binding.bottomNavigation.restoreBottomNavigation(false);
         // Reset state of the bottom nav bar, but not if returning from a scan
         if (!returningResult) {
-            binding.bottomNavigation.setSelectedIndex(1, false);
+            runOnUiThread(() -> binding.bottomNavigation.setCurrentItem(1));
         }
         returningResult = false;
-        binding.bottomNavigation.setExpanded(true, false);
     }
 
     @Override
@@ -550,18 +563,23 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         transaction.replace(R.id.content_frame, sendFragment).commitAllowingStateLoss();
     }
 
-    public BottomNavigation getBottomNavigationView() {
+    public AHBottomNavigation getBottomNavigationView() {
         return binding.bottomNavigation;
     }
 
     @Override
-    public void onBalanceFragmentClose() {
-        binding.bottomNavigation.setSelectedIndex(1, false);
+    public void onSendFragmentClose() {
+        binding.bottomNavigation.setCurrentItem(1);
     }
 
     // Ensure bottom nav button selected after scanning for result
     @Override
-    public void onBalanceFragmentStart() {
-        binding.bottomNavigation.setSelectedIndex(0, false);
+    public void onSendFragmentStart() {
+        binding.bottomNavigation.setCurrentItem(0);
+    }
+
+    @Override
+    public void onReceiveFragmentClose() {
+        binding.bottomNavigation.setCurrentItem(1);
     }
 }

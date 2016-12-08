@@ -147,7 +147,7 @@ dependencies {
     compile 'com.neovisionaries:nv-websocket-client:1.19'
     compile('com.google.zxing:core:3.3.0') { transitive = true }
     compile 'com.github.mukeshsolanki:country-picker-android:1.1.6'
-    compile 'it.sephiroth.android.library.bottomnavigation:bottom-navigation:2.0.1-rc1'
+    compile 'com.aurelhubert:ahbottomnavigation:2.0.2'
     // RxJava
     compile "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
     compile "io.reactivex.rxjava2:rxandroid:$rxJavaVersion"
