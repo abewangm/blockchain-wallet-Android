@@ -1,0 +1,412 @@
+package piuk.blockchain.android.ui.auth;
+
+
+import android.content.Intent;
+import android.databinding.DataBindingUtil;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatEditText;
+import android.text.InputType;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.TextView;
+
+import info.blockchain.wallet.util.CharSequenceX;
+
+import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.api.UrlSettings;
+import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
+import piuk.blockchain.android.databinding.FragmentPinEntryBinding;
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
+import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
+import piuk.blockchain.android.util.DialogButtonCallback;
+import piuk.blockchain.android.util.ViewUtils;
+import piuk.blockchain.android.util.annotations.Thunk;
+
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
+
+public class PinEntryFragment extends Fragment implements PinEntryViewModel.DataListener  {
+
+    public static final String KEY_VALIDATING_PIN_FOR_RESULT = "validating_pin";
+    public static final String KEY_VALIDATED_PIN = "validated_pin";
+    public static final int REQUEST_CODE_VALIDATE_PIN = 88;
+    private static final int COOL_DOWN_MILLIS = 2 * 1000;
+    private static final int PIN_LENGTH = 4;
+    private static final Handler mDelayHandler = new Handler();
+
+    private TextView[] mPinBoxArray = null;
+    private MaterialProgressDialog mProgressDialog = null;
+    private FragmentPinEntryBinding mBinding;
+    private FingerprintDialog mFingerprintDialog;
+    private ViewGroup mKeyboardLayout;
+    private boolean mIsPaused = false;
+    @Thunk PinEntryViewModel mViewModel;
+
+    private long mBackPressed;
+
+    public PinEntryFragment() {
+        // Required empty public constructor
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_pin_entry, container, false);
+
+        mViewModel = new PinEntryViewModel(this);
+
+        mKeyboardLayout = (ViewGroup) mBinding.getRoot().findViewById(R.id.keyboard);
+
+        // Set title state
+        if (mViewModel.isCreatingNewPin()) {
+            mBinding.titleBox.setText(R.string.create_pin);
+        } else {
+            mBinding.titleBox.setText(R.string.pin_entry);
+        }
+
+        mPinBoxArray = new TextView[PIN_LENGTH];
+        mPinBoxArray[0] = mBinding.pinBox0;
+        mPinBoxArray[1] = mBinding.pinBox1;
+        mPinBoxArray[2] = mBinding.pinBox2;
+        mPinBoxArray[3] = mBinding.pinBox3;
+
+        showConnectionDialogIfNeeded();
+
+        UrlSettings urlSettings = new UrlSettings();
+
+        if (urlSettings.shouldShowDebugMenu()) {
+            ToastCustom.makeText(
+                    getContext(), "Current environment: " + urlSettings.getCurrentEnvironment().getName(),
+                    ToastCustom.LENGTH_SHORT,
+                    ToastCustom.TYPE_GENERAL);
+
+            mBinding.buttonSettings.setVisibility(View.VISIBLE);
+            mBinding.buttonSettings.setOnClickListener(view ->
+                    new EnvironmentSwitcher(getContext(), urlSettings).showEnvironmentSelectionDialog());
+        }
+
+        mViewModel.onViewReady();
+
+        return mBinding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+    }
+
+    @Override
+    public void showFingerprintDialog(CharSequenceX pincode) {
+        // Show icon for relaunching dialog
+        mBinding.fingerprintLogo.setVisibility(View.VISIBLE);
+        mBinding.fingerprintLogo.setOnClickListener(v -> mViewModel.checkFingerprintStatus());
+        // Show dialog itself if not already showing
+        if (mFingerprintDialog == null && mViewModel.canShowFingerprintDialog()) {
+            mFingerprintDialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.AUTHENTICATE);
+            mFingerprintDialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
+                @Override
+                public void onAuthenticated(CharSequenceX data) {
+                    dismissFingerprintDialog();
+                    mViewModel.loginWithDecryptedPin(data);
+                }
+
+                @Override
+                public void onCanceled() {
+                    dismissFingerprintDialog();
+                    showKeyboard();
+                }
+            });
+
+            mDelayHandler.postDelayed(() -> {
+                if (!getActivity().isFinishing() && !mIsPaused) {
+                    mFingerprintDialog.show(getActivity().getSupportFragmentManager(), FingerprintDialog.TAG);
+                } else {
+                    mFingerprintDialog = null;
+                }
+            }, 200);
+
+            hideKeyboard();
+        }
+    }
+
+    @Override
+    public void showKeyboard() {
+        if (mKeyboardLayout.getVisibility() == View.INVISIBLE) {
+            Animation bottomUp = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_up);
+            mKeyboardLayout.startAnimation(bottomUp);
+            mKeyboardLayout.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideKeyboard() {
+        if (mKeyboardLayout.getVisibility() == View.VISIBLE) {
+            Animation bottomUp = AnimationUtils.loadAnimation(getContext(), R.anim.top_down);
+            mKeyboardLayout.startAnimation(bottomUp);
+            mKeyboardLayout.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void showConnectionDialogIfNeeded() {
+        if (!ConnectivityStatus.hasConnectivity(getContext())) {
+            new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                    .setMessage(getString(R.string.check_connectivity_exit))
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.dialog_continue, (dialog, id) -> restartPageAndClearTop())
+                    .create()
+                    .show();
+        }
+    }
+
+    @Override
+    public void showMaxAttemptsDialog() {
+        new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.password_or_wipe)
+                .setCancelable(false)
+                .setPositiveButton(R.string.use_password, (dialog, whichButton) -> showValidationDialog())
+                .setNegativeButton(R.string.wipe_wallet, (dialog, whichButton) -> mViewModel.resetApp())
+                .show();
+    }
+
+    // TODO: 09/12/2016 Notify back pressed
+    public void onBackPressed() {
+        if (mViewModel.isForValidatingPinForResult()) {
+            finishWithResultCanceled();
+
+        } else if (mViewModel.allowExit()) {
+            if (mBackPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+                AccessState.getInstance().logout(getContext());
+                return;
+            } else {
+                ToastCustom.makeText(getContext(), getString(R.string.exit_confirm), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
+            }
+
+            mBackPressed = System.currentTimeMillis();
+        }
+    }
+
+    @Override
+    public void showWalletVersionNotSupportedDialog(String walletVersion) {
+        new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                .setTitle(R.string.warning)
+                .setMessage(String.format(getString(R.string.unsupported_encryption_version), walletVersion))
+                .setCancelable(false)
+                .setPositiveButton(R.string.exit, (dialog, whichButton) -> AccessState.getInstance().logout(getContext()))
+                .setNegativeButton(R.string.logout, (dialog, which) -> {
+                    mViewModel.getAppUtil().clearCredentialsAndRestart();
+                    mViewModel.getAppUtil().restartApp();
+                })
+                .show();
+    }
+
+    @Override
+    public void clearPinBoxes() {
+        mDelayHandler.postDelayed(new ClearPinNumberRunnable(), 200);
+    }
+
+    @Override
+    public void goToPasswordRequiredActivity() {
+        Intent intent = new Intent(getContext(), PasswordRequiredActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    @Override
+    public void goToUpgradeWalletActivity() {
+        Intent intent = new Intent(getContext(), UpgradeWalletActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    public void padClicked(View view) {
+        mViewModel.padClicked(view);
+    }
+
+    @Override
+    public void setTitleString(@StringRes int title) {
+        mDelayHandler.postDelayed(() -> mBinding.titleBox.setText(title), 200);
+    }
+
+    @Override
+    public void setTitleVisibility(@ViewUtils.Visibility int visibility) {
+        mBinding.titleBox.setVisibility(visibility);
+    }
+
+    public void deleteClicked() {
+        mViewModel.onDeleteClicked();
+    }
+
+    public boolean allowExit() {
+        return mViewModel.allowExit();
+    }
+
+    public boolean isValidatingPinForResult() {
+        return mViewModel.isForValidatingPinForResult();
+    }
+
+    @Override
+    public TextView[] getPinBoxArray() {
+        return mPinBoxArray;
+    }
+
+    @Override
+    public void restartPageAndClearTop() {
+        Intent intent = new Intent(getContext(), PinEntryActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    @Override
+    public void showCommonPinWarning(DialogButtonCallback callback) {
+        new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                .setTitle(R.string.common_pin_dialog_title)
+                .setMessage(R.string.common_pin_dialog_message)
+                .setPositiveButton(R.string.common_pin_dialog_try_again, (dialogInterface, i) -> callback.onPositiveClicked())
+                .setNegativeButton(R.string.common_pin_dialog_continue, (dialogInterface, i) -> callback.onNegativeClicked())
+                .setCancelable(false)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showValidationDialog() {
+        final AppCompatEditText password = new AppCompatEditText(getContext());
+        password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+
+        new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(getString(R.string.password_entry))
+                .setView(ViewUtils.getAlertDialogEditTextLayout(getContext(), password))
+                .setCancelable(false)
+                .setNegativeButton(android.R.string.cancel, (dialog, whichButton) -> mViewModel.getAppUtil().restartApp())
+                .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
+                    final String pw = password.getText().toString();
+
+                    if (pw.length() > 0) {
+                        mViewModel.validatePassword(new CharSequenceX(pw));
+                    } else {
+                        mViewModel.incrementFailureCountAndRestart();
+                    }
+
+                }).show();
+    }
+
+    @Override
+    public void showAccountLockedDialog() {
+        new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                .setTitle(R.string.account_locked_title)
+                .setMessage(R.string.account_locked_message)
+                .setCancelable(false)
+                .setPositiveButton(R.string.exit, (dialogInterface, i) -> getActivity().finish())
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
+        ToastCustom.makeText(getContext(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
+    public void showProgressDialog(@StringRes int messageId, @Nullable String suffix) {
+        dismissProgressDialog();
+        mProgressDialog = new MaterialProgressDialog(getContext());
+        mProgressDialog.setCancelable(false);
+        if (suffix != null) {
+            mProgressDialog.setMessage(getString(messageId) + suffix);
+        } else {
+            mProgressDialog.setMessage(getString(messageId));
+        }
+
+        if (!getActivity().isFinishing()) mProgressDialog.show();
+    }
+
+    @Override
+    public void dismissProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mIsPaused = false;
+        mViewModel.clearPinBoxes();
+        mViewModel.checkFingerprintStatus();
+    }
+
+    @Override
+    public void finishWithResultOk(String pin) {
+        Bundle bundle = new Bundle();
+        bundle.putString(KEY_VALIDATED_PIN, pin);
+        Intent intent = new Intent();
+        intent.putExtras(bundle);
+        getActivity().setResult(RESULT_OK, intent);
+        getActivity().finish();
+    }
+
+    private void finishWithResultCanceled() {
+        Intent intent = new Intent();
+        getActivity().setResult(RESULT_CANCELED, intent);
+        getActivity().finish();
+    }
+
+    @Override
+    public Intent getPageIntent() {
+        return getActivity().getIntent();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mIsPaused = true;
+        dismissFingerprintDialog();
+    }
+
+    @Override
+    public void onDestroy() {
+        dismissProgressDialog();
+        mViewModel.destroy();
+        super.onDestroy();
+    }
+
+    @Thunk
+    void dismissFingerprintDialog() {
+        if (mFingerprintDialog != null && mFingerprintDialog.isVisible()) {
+            mFingerprintDialog.dismiss();
+            mFingerprintDialog = null;
+        }
+
+        // Hide if fingerprint unlock has become unavailable
+        if (!mViewModel.getIfShouldShowFingerprintLogin()) {
+            mBinding.fingerprintLogo.setVisibility(View.GONE);
+        }
+    }
+
+    private class ClearPinNumberRunnable implements Runnable {
+        ClearPinNumberRunnable() {
+            // Empty constructor
+        }
+
+        @Override
+        public void run() {
+            for (TextView pinBox : getPinBoxArray()) {
+                // Reset PIN buttons to blank
+                pinBox.setBackgroundResource(R.drawable.rounded_view_blue_white_border);
+            }
+        }
+    }
+}

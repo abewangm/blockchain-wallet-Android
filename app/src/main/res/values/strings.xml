@@ -544,4 +544,8 @@
     <string name="shortcut_receive_qr_long">View QR code for receive address</string>
     <string name="shortcut_receive_qr_error">Sorry, there was an error generating the QR code</string>
 
+    <!-- SWIPE TO RECEIVE -->
+    <string name="swipe_receive_hint">Swipe to receive</string>
+    <string name="swipe_receive_copy">Tap to copy this address</string>
+
 </resources>
