@@ -37,6 +37,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.ImportedAccount;
@@ -65,6 +66,7 @@ import piuk.blockchain.android.ui.send.AddressAdapter;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataListener, CustomKeypadCallback {
@@ -132,12 +134,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         binding = DataBindingUtil.inflate(inflater, R.layout.activity_receive, container, false);
         viewModel = new ReceiveViewModel(this, Locale.getDefault());
 
-        if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.receive_bitcoin);
-        } else {
-            finishPage();
-            return binding.getRoot();
-        }
+        setupToolbar();
 
         viewModel.onViewReady();
 
@@ -152,6 +149,18 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         setHasOptionsMenu(true);
 
         return binding.getRoot();
+    }
+
+    private void setupToolbar() {
+        if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.receive_bitcoin);
+
+            ViewUtils.setElevation(
+                    getActivity().findViewById(R.id.appbar_layout),
+                    ViewUtils.convertDpToPixel(5F, getContext()));
+        } else {
+            finishPage();
+        }
     }
 
     private void setupLayout() {
@@ -640,12 +649,34 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void onKeypadClose() {
         // Show bottom nav
         ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+        // Resize activity back to initial state
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+
+        layoutParams.addRule(RelativeLayout.ABOVE, 0);
+        layoutParams.setMargins(
+                0, 0, 0, (int) getResources().getDimension(R.dimen.action_bar_height));
+
+        binding.content.scrollView.setLayoutParams(layoutParams);
     }
 
     @Override
     public void onKeypadOpen() {
         // Hide bottom nav
         ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
+    }
+
+    @Override
+    public void onKeypadOpenCompleted() {
+        // Resize activity around keyboard view
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+
+        layoutParams.addRule(RelativeLayout.ABOVE, R.id.keyboard);
+
+        binding.content.scrollView.setLayoutParams(layoutParams);
     }
 
     public void finishPage() {
@@ -660,7 +691,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         if (context instanceof OnReceiveFragmentInteractionListener) {
             listener = (OnReceiveFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context + " must implement OnSendFragmentInteractionListener");
+            throw new RuntimeException(context + " must implement OnReceiveFragmentInteractionListener");
         }
     }
 

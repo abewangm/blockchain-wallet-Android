@@ -114,6 +114,22 @@ public class CustomKeypad extends LinearLayout implements View.OnClickListener {
         if (!isVisible()) {
             Animation bottomUp = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_up);
             startAnimation(bottomUp);
+            bottomUp.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    if (callback != null) callback.onKeypadOpenCompleted();
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
             setVisibility(View.VISIBLE);
             if (callback != null) callback.onKeypadOpen();
         }

@@ -34,6 +34,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
@@ -56,6 +57,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 import static android.databinding.DataBindingUtil.inflate;
@@ -154,6 +156,10 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     private void setupToolbar() {
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.send_bitcoin);
+
+            ViewUtils.setElevation(
+                    getActivity().findViewById(R.id.appbar_layout),
+                    ViewUtils.convertDpToPixel(5F, getContext()));
         } else {
             finishPage();
         }
@@ -267,12 +273,31 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     public void onKeypadClose() {
         // Show bottom nav
         ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+        // Resize activity back to initial state
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+
+        layoutParams.addRule(RelativeLayout.ABOVE, 0);
+        binding.scrollView.setLayoutParams(layoutParams);
     }
 
     @Override
     public void onKeypadOpen() {
         // Hide bottom nav
         ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
+    }
+
+    @Override
+    public void onKeypadOpenCompleted() {
+        // Resize activity around keyboard view
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+
+        layoutParams.addRule(RelativeLayout.ABOVE, R.id.keyboard);
+
+        binding.scrollView.setLayoutParams(layoutParams);
     }
 
     private void setCustomKeypad() {
