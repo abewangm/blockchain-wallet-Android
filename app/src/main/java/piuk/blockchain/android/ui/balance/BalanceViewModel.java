@@ -338,7 +338,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         return transactionList;
     }
 
-    //TODO refactor getIsBTC out
+    //TODO refactor isBTC out
     public void updateBalanceAndTransactionList(Intent intent, int accountSpinnerPosition, boolean isBTC) {
 
         Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);//the current selected item in dropdown (Account or Legacy Address)

@@ -110,7 +110,7 @@ public class CustomKeypad extends LinearLayout implements View.OnClickListener {
         }
     }
 
-    public void showKeyboard() {
+    private void showKeyboard() {
         if (!isVisible()) {
             Animation bottomUp = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_up);
             startAnimation(bottomUp);

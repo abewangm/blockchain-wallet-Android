@@ -39,9 +39,9 @@ import android.widget.RelativeLayout;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
-import piuk.blockchain.android.databinding.ActivitySendBinding;
 import piuk.blockchain.android.databinding.AlertGenericWarningBinding;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
+import piuk.blockchain.android.databinding.FragmentSendBinding;
 import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
@@ -72,7 +72,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     private static final int SCAN_PRIVX = 2008;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
-    @Thunk ActivitySendBinding binding;
+    @Thunk FragmentSendBinding binding;
     @Thunk SendViewModel viewModel;
     @Thunk AlertDialog transactionSuccessDialog;
     private OnSendFragmentInteractionListener listener;
@@ -117,7 +117,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
             selectedAccountPosition = getArguments().getInt(ARG_SELECTED_ACCOUNT_POSITION);
         }
 
-        binding = DataBindingUtil.inflate(inflater, R.layout.activity_send, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_send, container, false);
         viewModel = new SendViewModel(getContext(), this);
         binding.setViewModel(viewModel);
 

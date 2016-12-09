@@ -519,10 +519,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     @Override
     public void onStartBalanceFragment() {
         BalanceFragment fragment = new BalanceFragment();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-        transaction.replace(R.id.content_frame, fragment).commitAllowingStateLoss();
+        startFragmentWithAnimation(fragment);
     }
 
     public void startSendFragment(String scanData) {
@@ -538,10 +535,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         }
 
         SendFragment sendFragment = SendFragment.newInstance(scanData, isBTC, selectedAccountPosition);
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-        transaction.replace(R.id.content_frame, sendFragment).commitAllowingStateLoss();
+        startFragmentWithAnimation(sendFragment);
     }
 
     public void startReceiveFragment() {
@@ -556,11 +550,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             selectedAccountPosition = -1;
         }
 
-        ReceiveFragment sendFragment = ReceiveFragment.newInstance(isBTC, selectedAccountPosition);
+        ReceiveFragment receiveFragment = ReceiveFragment.newInstance(isBTC, selectedAccountPosition);
+        startFragmentWithAnimation(receiveFragment);
+    }
+
+    private void startFragmentWithAnimation(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-        transaction.replace(R.id.content_frame, sendFragment).commitAllowingStateLoss();
+        transaction.replace(R.id.content_frame, fragment).commitAllowingStateLoss();
     }
 
     public AHBottomNavigation getBottomNavigationView() {

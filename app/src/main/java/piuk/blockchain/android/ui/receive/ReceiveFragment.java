@@ -55,8 +55,8 @@ import java.util.Locale;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.databinding.ActivityReceiveBinding;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
+import piuk.blockchain.android.databinding.FragmentReceiveBinding;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
@@ -78,7 +78,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
     @Thunk ReceiveViewModel viewModel;
-    @Thunk ActivityReceiveBinding binding;
+    @Thunk FragmentReceiveBinding binding;
     private CustomKeypad customKeypad;
     private BottomSheetDialog bottomSheetDialog;
     private AddressAdapter addressAdapter;
@@ -131,7 +131,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        binding = DataBindingUtil.inflate(inflater, R.layout.activity_receive, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_receive, container, false);
         viewModel = new ReceiveViewModel(this, Locale.getDefault());
 
         setupToolbar();
