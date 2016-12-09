@@ -75,7 +75,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryViewMo
         mPinBoxArray[3] = mBinding.pinBox3;
 
         showConnectionDialogIfNeeded();
-        mKeyboardLayout = (ViewGroup) findViewById(R.id.keyboard_container);
+        mKeyboardLayout = (ViewGroup) findViewById(R.id.keyboard);
 
         UrlSettings urlSettings = new UrlSettings();
 

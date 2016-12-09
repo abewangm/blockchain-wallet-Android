@@ -120,7 +120,8 @@ android {
 ext {
     supportVersion = '25.0.1'
     googleServicesVersion = '10.0.1'
-    rxJavaVersion = '2.0.1'
+    rxJavaVersion = '2.0.2'
+    rxAndroidVersion = '2.0.1'
     daggerVersion = '2.8'
 }
 
@@ -146,11 +147,11 @@ dependencies {
     compile 'org.thoughtcrime.ssl.pinning:AndroidPinning:1.0.0'
     compile 'com.neovisionaries:nv-websocket-client:1.19'
     compile('com.google.zxing:core:3.3.0') { transitive = true }
-    compile 'com.getbase:floatingactionbutton:1.10.1'
     compile 'com.github.mukeshsolanki:country-picker-android:1.1.6'
+    compile 'com.aurelhubert:ahbottomnavigation:2.0.2'
     // RxJava
     compile "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
-    compile "io.reactivex.rxjava2:rxandroid:$rxJavaVersion"
+    compile "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
     // Dagger2
     compile "com.google.dagger:dagger:$daggerVersion"
     annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
@@ -187,7 +188,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:3.3.1'
+        classpath 'me.tatarka:gradle-retrolambda:3.4.0'
     }
 }
 

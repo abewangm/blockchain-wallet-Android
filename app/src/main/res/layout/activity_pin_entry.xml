@@ -105,7 +105,7 @@
         </LinearLayout>
 
         <include
-            android:id="@+id/keyboard_container"
+            android:id="@+id/keyboard"
             layout="@layout/activity_pin_entry_keyboard_include"
             android:visibility="invisible" />
 

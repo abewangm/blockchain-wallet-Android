@@ -8,12 +8,6 @@
 -keep,allowshrinking,allowoptimization class * { <methods>; }
 -keepattributes Signature
 
-# For the FAB library
--keepclassmembers class com.getbase.floatingactionbutton.FloatingActionsMenu$RotatingDrawable {
-   void set*(***);
-   *** get*();
-}
-
 # Support V7
 -dontwarn android.support.v7.**
 -keep class android.support.v7.** { *; }
@@ -115,5 +109,7 @@
 -dontnote com.google.common.cache.Striped64,com.google.common.cache.Striped64$Cell
 
 # slf4j
--dontwarn org.slf4j.MDC
--dontwarn org.slf4j.MarkerFactory
+-dontwarn org.slf4j.**
+
+# Apache Commons
+-dontwarn org.apache.**
