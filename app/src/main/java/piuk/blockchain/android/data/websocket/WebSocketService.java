@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -29,9 +30,14 @@ public class WebSocketService extends Service {
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
-            if (ACTION_INTENT.equals(intent.getAction())) {
-                webSocketHandler.subscribeToAddress(intent.getStringExtra("address"));
-                webSocketHandler.subscribeToXpub(intent.getStringExtra("xpub"));
+            if (intent.getAction().equals(ACTION_INTENT)) {
+                if (intent.hasExtra("address")) {
+                    webSocketHandler.subscribeToAddress(intent.getStringExtra("address"));
+                    Log.d(WebSocketService.class.getSimpleName(), "onReceive: " + intent.getStringExtra("address"));
+                }
+                if (intent.hasExtra("xpub")) {
+                    webSocketHandler.subscribeToXpub(intent.getStringExtra("xpub"));
+                }
             }
         }
     };
@@ -55,17 +61,15 @@ public class WebSocketService extends Service {
         String[] addrs = getAddresses();
         String[] xpubs = getXpubs();
 
-        if (addrs.length > 0 || xpubs.length > 0) {
-            webSocketHandler = new WebSocketHandler(
-                    getApplicationContext(),
-                    payloadManager,
-                    new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
-                    payloadManager.getPayload().getGuid(),
-                    xpubs,
-                    addrs);
+        webSocketHandler = new WebSocketHandler(
+                getApplicationContext(),
+                payloadManager,
+                new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
+                payloadManager.getPayload().getGuid(),
+                xpubs,
+                addrs);
 
-            webSocketHandler.start();
-        }
+        webSocketHandler.start();
     }
 
     private String[] getXpubs() {

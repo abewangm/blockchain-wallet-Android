@@ -19,7 +19,7 @@ import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveFragment;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
-public class PinEntryActivity extends BaseAuthActivity {
+public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragment.OnPinEntryFragmentInteractionListener {
 
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
     private ActivityPinEntryBinding binding;
@@ -48,6 +48,7 @@ public class PinEntryActivity extends BaseAuthActivity {
                     new Fragment());
 
             lockViewpager();
+            pinEntryFragment.hideSwipeHint();
         } else {
             swipeToReceiveFragment = new SwipeToReceiveFragment();
 
@@ -62,6 +63,11 @@ public class PinEntryActivity extends BaseAuthActivity {
 
     private void lockViewpager() {
         binding.viewpager.lockToCurrentPage();
+    }
+
+    @Override
+    public void onSwipePressed() {
+        binding.viewpager.setCurrentItem(1);
     }
 
     @Override

@@ -2,59 +2,91 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveFragment">
 
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/blockchain_blue">
 
-        <android.support.v7.widget.AppCompatTextView
+        <!-- MAIN LAYOUT -->
+        <RelativeLayout
+            android:id="@+id/content_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/qr_code"
-            android:padding="20dp"
-            android:text="@string/swipe_receive_copy"
-            android:gravity="center"
-            android:textColor="@color/blockchain_pearl_white" />
+            android:layout_height="match_parent">
 
-        <ProgressBar
-            android:id="@+id/progressbar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_marginTop="48dp"
-            android:progressDrawable="@drawable/progress_white" />
+            <android.support.v7.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/qr_code"
+                android:gravity="center"
+                android:padding="20dp"
+                android:text="@string/swipe_receive_copy"
+                android:textColor="@color/blockchain_pearl_white" />
 
-        <android.support.v7.widget.AppCompatImageView
-            android:id="@+id/qr_code"
-            android:layout_width="220dp"
-            android:layout_height="220dp"
-            android:layout_centerInParent="true" />
+            <ProgressBar
+                android:id="@+id/progressbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="48dp"
+                android:indeterminateTint="@color/blockchain_pearl_white"
+                android:indeterminateTintMode="src_atop" />
 
-        <android.support.v7.widget.AppCompatTextView
-            android:id="@+id/receiving_account"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/qr_code"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
-            android:padding="16dp"
-            android:textColor="@color/blockchain_pearl_white"
-            android:textSize="20sp"
-            android:visibility="invisible" />
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/qr_code"
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:layout_centerInParent="true"
+                android:visibility="invisible" />
 
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/receiving_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/receiving_account"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
-            android:inputType="none"
-            android:maxLines="1"
-            android:padding="16dp"
-            android:textColor="@color/blockchain_pearl_white"
-            android:textIsSelectable="true"
-            android:textSize="14sp" />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/receiving_account"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/qr_code"
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:padding="16dp"
+                android:textColor="@color/blockchain_pearl_white"
+                android:textSize="20sp"
+                tools:text="My Bitcoin Wallet" />
 
-    </RelativeLayout>
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/receiving_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/receiving_account"
+                android:layout_centerHorizontal="true"
+                android:background="@android:color/transparent"
+                android:gravity="center"
+                android:inputType="none"
+                android:maxLines="1"
+                android:padding="8dp"
+                android:textColor="@color/blockchain_pearl_white"
+                android:textIsSelectable="true"
+                android:textSize="14sp"
+                tools:text="A bitcoin address" />
+
+        </RelativeLayout>
+
+        <!-- NO AVAILABLE ADDRESSES LAYOUT -->
+
+        <RelativeLayout
+            android:id="@+id/error_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:padding="16dp"
+                android:text="@string/swipe_receive_no_addresses"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@color/blockchain_pearl_white" />
+
+        </RelativeLayout>
+
+    </FrameLayout>
 </layout>

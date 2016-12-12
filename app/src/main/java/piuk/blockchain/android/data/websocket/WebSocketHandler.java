@@ -138,8 +138,9 @@ class WebSocketHandler {
     }
 
     public void subscribeToAddress(String address) {
-        if (address != null && !address.isEmpty())
+        if (address != null && !address.isEmpty()) {
             send("{\"op\":\"addr_sub\", \"addr\":\"" + address + "\"}");
+        }
     }
 
     @Thunk
@@ -196,10 +197,6 @@ class WebSocketHandler {
 
                         @Override
                         public void onTextMessage(WebSocket websocket, String message) {
-                            if (guid == null) {
-                                return;
-                            }
-
                             JSONObject jsonObject;
                             try {
                                 jsonObject = new JSONObject(message);

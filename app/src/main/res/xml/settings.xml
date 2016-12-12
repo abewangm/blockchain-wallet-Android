@@ -55,10 +55,10 @@
             android:key="tor" />
         <SwitchPreferenceCompat
             android:defaultValue="true"
-            android:title="@string/enable_launcher_shortcuts"
+            android:title="@string/shortcut_settings_enable"
             android:key="receive_shortcuts_enabled"
             android:persistent="true"
-            android:summary="@string/preferences_shortcuts_summary"/>
+            android:summary="@string/shortcut_settings_summary"/>
     </PreferenceCategory>
 
     <PreferenceCategory

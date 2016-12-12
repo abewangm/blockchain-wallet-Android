@@ -66,7 +66,7 @@ import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_EMAIL;
 import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_PASSWORD;
 import static piuk.blockchain.android.ui.auth.LandingActivity.KEY_INTENT_RECOVERING_FUNDS;
-import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATING_PIN_FOR_RESULT;
+import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 
 @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
@@ -75,7 +75,7 @@ public class PinEntryViewModelTest {
 
     private PinEntryViewModel mSubject;
 
-    @Mock private PinEntryActivity mActivity;
+    @Mock private PinEntryViewModel.DataListener mActivity;
     @Mock private AuthDataManager mAuthDataManager;
     @Mock private AppUtil mAppUtil;
     @Mock private PrefsUtil mPrefsUtil;

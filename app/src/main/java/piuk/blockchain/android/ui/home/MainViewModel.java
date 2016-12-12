@@ -27,6 +27,7 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
@@ -44,6 +45,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected AppUtil appUtil;
     @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
+    @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
 
     public interface DataListener {
         void onRooted();
@@ -145,6 +147,8 @@ public class MainViewModel extends BaseViewModel {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                swipeToReceiveHelper.updateAndStoreAddresses();
 
                 if (dataListener != null) {
                     dataListener.onFetchTransactionCompleted();
