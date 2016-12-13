@@ -5,7 +5,7 @@ apply from: 'environment.gradle'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.1'
+    buildToolsVersion '25.0.2'
 
     dexOptions {
         javaMaxHeapSize "3g"
@@ -111,7 +111,7 @@ ext {
     rxAndroidVersion = '2.0.1'
     daggerVersion = '2.8'
     retrofitVersion = '2.1.0'
-    okHttpVersion = '3.4.2'
+    okHttpVersion = '3.5.0'
 }
 
 dependencies {

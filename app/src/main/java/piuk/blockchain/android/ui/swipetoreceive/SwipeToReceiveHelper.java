@@ -36,7 +36,7 @@ public class SwipeToReceiveHelper {
 
     /**
      * Derives 5 addresses from the current point on the receive chain. Stores them alongside
-     * the account name in SharedPrefs.
+     * the account name in SharedPrefs. Only stores addresses if enabled in SharedPrefs.
      */
     public void updateAndStoreAddresses() {
         if (getIfSwipeEnabled()) {
@@ -80,8 +80,10 @@ public class SwipeToReceiveHelper {
     }
 
     /**
-     * Returns a List of the next 5 available unused (at the time of storage) receive addresses
+     * Returns a List of the next 5 available unused (at the time of storage) receive addresses. Can
+     * return an empty list.
      */
+    @NonNull
     List<String> getReceiveAddresses() {
         String addressString = prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, "");
         if (addressString.isEmpty()) {
@@ -92,7 +94,7 @@ public class SwipeToReceiveHelper {
     }
 
     /**
-     * Returns the account name associated with the receive addresses
+     * Returns the account name associated with the receive addresses.
      */
     @NonNull
     String getAccountName() {
