@@ -80,8 +80,8 @@
 
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/button_settings"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:background="?selectableItemBackgroundBorderless"

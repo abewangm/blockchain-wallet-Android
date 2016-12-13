@@ -10,7 +10,7 @@ import org.bitcoinj.core.AddressFormatException;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,8 +67,8 @@ public class SwipeToReceiveHelper {
      */
     Observable<String> getNextAvailableAddress() {
         return getBalanceOfAddresses(getReceiveAddresses())
-                .map(stringLongHashMap -> {
-                    for (Map.Entry<String, Long> entry : stringLongHashMap.entrySet()) {
+                .map(linkedHashMap -> {
+                    for (Map.Entry<String, Long> entry : linkedHashMap.entrySet()) {
                         String address = entry.getKey();
                         Long balance = entry.getValue();
                         if (balance == 0L) {
@@ -105,7 +105,7 @@ public class SwipeToReceiveHelper {
         return prefsUtil.getValue(PrefsUtil.KEY_SWIPE_TO_RECEIVE_ENABLED, true);
     }
 
-    private Observable<HashMap<String, Long>> getBalanceOfAddresses(List<String> addresses) {
+    private Observable<LinkedHashMap<String, Long>> getBalanceOfAddresses(List<String> addresses) {
         return Observable.fromCallable(() -> multiAddrFactory.getAddressBalanceFromApi(addresses))
                 .compose(RxUtil.applySchedulersToObservable());
     }

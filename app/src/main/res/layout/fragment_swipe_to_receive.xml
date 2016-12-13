@@ -4,45 +4,48 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/blockchain_blue">
 
         <!-- MAIN LAYOUT -->
         <RelativeLayout
             android:id="@+id/content_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
-            <android.support.v7.widget.AppCompatTextView
+            <FrameLayout
+                android:id="@+id/qr_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/qr_code"
-                android:gravity="center"
-                android:padding="20dp"
-                android:text="@string/swipe_receive_copy"
-                android:textColor="@color/blockchain_pearl_white" />
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="48dp">
 
-            <ProgressBar
-                android:id="@+id/progressbar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_marginTop="48dp"
-                android:indeterminateTint="@color/blockchain_pearl_white"
-                android:indeterminateTintMode="src_atop" />
+                <ProgressBar
+                    android:id="@+id/progressbar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="@color/blockchain_pearl_white"
+                    android:indeterminateTintMode="src_atop" />
 
-            <android.support.v7.widget.AppCompatImageView
-                android:id="@+id/qr_code"
-                android:layout_width="220dp"
-                android:layout_height="220dp"
-                android:layout_centerInParent="true"
-                android:visibility="invisible" />
+                <android.support.v7.widget.AppCompatImageView
+                    android:id="@+id/qr_code"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:adjustViewBounds="true"
+                    android:maxWidth="@dimen/swipe_receive_qr_size"
+                    android:maxHeight="@dimen/swipe_receive_qr_size"
+                    android:paddingLeft="32dp"
+                    android:paddingRight="32dp"
+                    android:visibility="invisible" />
+            </FrameLayout>
 
             <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/receiving_account"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/qr_code"
+                android:layout_below="@+id/qr_layout"
                 android:layout_centerHorizontal="true"
                 android:gravity="center"
                 android:padding="16dp"
@@ -73,7 +76,8 @@
         <RelativeLayout
             android:id="@+id/error_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:visibility="gone">
 
             <android.support.v7.widget.AppCompatTextView
@@ -87,6 +91,5 @@
                 android:textColor="@color/blockchain_pearl_white" />
 
         </RelativeLayout>
-
     </FrameLayout>
 </layout>

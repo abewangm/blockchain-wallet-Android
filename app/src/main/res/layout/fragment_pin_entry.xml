@@ -5,144 +5,112 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/blockchain_blue"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:gravity="bottom"
         android:orientation="vertical"
-        tools:context=".PinEntryView">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <android.support.v7.widget.AppCompatImageView
-                android:id="@+id/button_settings"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:background="?selectableItemBackgroundBorderless"
-                android:padding="16dp"
-                android:visibility="gone"
-                app:srcCompat="@drawable/ic_settings_white_24dp"
-                tools:visibility="visible" />
-
-            <LinearLayout
-                android:id="@+id/swipe_hint_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:background="?selectableItemBackground"
-                android:orientation="horizontal">
-
-                <android.support.v7.widget.AppCompatTextView
-                    android:id="@+id/swipe_message"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:paddingLeft="16dp"
-                    android:text="@string/swipe_receive_hint"
-                    android:textColor="@color/blockchain_pearl_white"
-                    android:textSize="16dp" />
-
-                <android.support.v7.widget.AppCompatImageView
-                    android:id="@+id/swipe_arrow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:rotation="180"
-                    app:srcCompat="@drawable/ic_arrow_back_white_24dp" />
-
-            </LinearLayout>
-        </RelativeLayout>
+        tools:background="@color/blockchain_blue">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="124dp"
-                android:layout_height="113dp"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center_horizontal"
-                android:src="@drawable/logo3x" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:gravity="center_horizontal"
-                    android:orientation="horizontal"
-                    android:paddingBottom="5dp"
-                    android:paddingTop="24dp">
-
-                    <TextView
-                        android:id="@+id/pinBox0"
-                        android:layout_width="60dip"
-                        android:layout_height="60dip"
-                        android:layout_margin="10dip"
-                        android:background="@drawable/rounded_view_blue_white_border" />
-
-                    <TextView
-                        android:id="@+id/pinBox1"
-                        android:layout_width="60dip"
-                        android:layout_height="60dip"
-                        android:layout_margin="10dip"
-                        android:background="@drawable/rounded_view_blue_white_border" />
-
-                    <TextView
-                        android:id="@+id/pinBox2"
-                        android:layout_width="60dip"
-                        android:layout_height="60dip"
-                        android:layout_margin="10dip"
-                        android:background="@drawable/rounded_view_blue_white_border" />
-
-                    <TextView
-                        android:id="@+id/pinBox3"
-                        android:layout_width="60dip"
-                        android:layout_height="60dip"
-                        android:layout_margin="10dip"
-                        android:background="@drawable/rounded_view_blue_white_border" />
-
-                </LinearLayout>
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/titleBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="10dip"
-                    android:text="@string/pin_entry"
-                    android:textColor="@color/white"
-                    android:textSize="18sp" />
+                    android:id="@+id/pinBox0"
+                    android:layout_width="@dimen/pinentry_circle_size"
+                    android:layout_height="@dimen/pinentry_circle_size"
+                    android:layout_margin="10dip"
+                    android:background="@drawable/rounded_view_blue_white_border" />
 
-                <android.support.v7.widget.AppCompatImageView
-                    android:id="@+id/fingerprint_logo"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="16dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:elevation="5dp"
-                    android:tint="@color/white"
-                    android:visibility="gone"
-                    app:srcCompat="@drawable/ic_fingerprint" />
+                <TextView
+                    android:id="@+id/pinBox1"
+                    android:layout_width="@dimen/pinentry_circle_size"
+                    android:layout_height="@dimen/pinentry_circle_size"
+                    android:layout_margin="10dip"
+                    android:background="@drawable/rounded_view_blue_white_border" />
+
+                <TextView
+                    android:id="@+id/pinBox2"
+                    android:layout_width="@dimen/pinentry_circle_size"
+                    android:layout_height="@dimen/pinentry_circle_size"
+                    android:layout_margin="10dip"
+                    android:background="@drawable/rounded_view_blue_white_border" />
+
+                <TextView
+                    android:id="@+id/pinBox3"
+                    android:layout_width="@dimen/pinentry_circle_size"
+                    android:layout_height="@dimen/pinentry_circle_size"
+                    android:layout_margin="10dip"
+                    android:background="@drawable/rounded_view_blue_white_border" />
 
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/titleBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="10dip"
+                android:text="@string/pin_entry"
+                android:textColor="@color/white"
+                android:textSize="@dimen/pinentry_hint_size" />
+
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/fingerprint_logo"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_margin="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/white"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_fingerprint" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/swipe_hint_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackground"
+            android:gravity="right"
+            android:orientation="horizontal"
+            android:paddingBottom="8dp">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="16dp"
+                android:text="@string/swipe_receive_hint"
+                android:textColor="@color/blockchain_pearl_white"
+                android:textSize="14sp" />
+
+            <android.support.v7.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:rotation="180"
+                app:srcCompat="@drawable/ic_arrow_back_white_24dp" />
+
         </LinearLayout>
 
         <include
             android:id="@+id/keyboard"
             layout="@layout/activity_pin_entry_keyboard_include"
-            android:visibility="invisible" />
+            android:visibility="invisible"
+            tools:visibility="visible" />
 
     </LinearLayout>
 </layout>

@@ -23,7 +23,6 @@ import info.blockchain.wallet.util.CharSequenceX;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.api.UrlSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.FragmentPinEntryBinding;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -93,19 +92,6 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
         pinBoxArray[3] = binding.pinBox3;
 
         showConnectionDialogIfNeeded();
-
-        UrlSettings urlSettings = new UrlSettings();
-
-        if (urlSettings.shouldShowDebugMenu()) {
-            ToastCustom.makeText(
-                    getContext(), "Current environment: " + urlSettings.getCurrentEnvironment().getName(),
-                    ToastCustom.LENGTH_SHORT,
-                    ToastCustom.TYPE_GENERAL);
-
-            binding.buttonSettings.setVisibility(View.VISIBLE);
-            binding.buttonSettings.setOnClickListener(view ->
-                    new EnvironmentSwitcher(getContext(), urlSettings).showEnvironmentSelectionDialog());
-        }
 
         binding.swipeHintLayout.setOnClickListener(view -> listener.onSwipePressed());
 

@@ -7,7 +7,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="@color/blockchain_navigation_bar"
-        android:gravity="center_horizontal"
+        android:gravity="center"
         android:shrinkColumns="*"
         android:stretchColumns="*">
 
