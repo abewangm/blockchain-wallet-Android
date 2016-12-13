@@ -165,6 +165,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     protected void onResume() {
         super.onResume();
         appUtil.deleteQR();
+        mainViewModel.storeSwipeReceiveAddresses();
         resetNavigationDrawer();
 
         if (AndroidUtils.is25orHigher() && mainViewModel.areLauncherShortcutsEnabled()) {
@@ -563,6 +564,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     public AHBottomNavigation getBottomNavigationView() {
         return binding.bottomNavigation;
+    }
+
+    @Override
+    public void clearAllDynamicShortcuts() {
+        if (AndroidUtils.is25orHigher()) {
+            getSystemService(ShortcutManager.class).removeAllDynamicShortcuts();
+        }
     }
 
     @Override

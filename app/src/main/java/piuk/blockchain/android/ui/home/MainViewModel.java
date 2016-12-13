@@ -19,6 +19,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
@@ -33,7 +34,6 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
-import io.reactivex.Observable;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
@@ -65,6 +65,8 @@ public class MainViewModel extends BaseViewModel {
         void showEmailVerificationDialog(String email);
 
         void showAddEmailDialog();
+
+        void clearAllDynamicShortcuts();
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -81,6 +83,10 @@ public class MainViewModel extends BaseViewModel {
         checkConnectivity();
         checkIfShouldShowEmailVerification();
         startWebSocketService();
+    }
+
+    public void storeSwipeReceiveAddresses() {
+        swipeToReceiveHelper.updateAndStoreAddresses();
     }
 
     private void checkIfShouldShowEmailVerification() {
@@ -148,7 +154,7 @@ public class MainViewModel extends BaseViewModel {
                     e.printStackTrace();
                 }
 
-                swipeToReceiveHelper.updateAndStoreAddresses();
+                storeSwipeReceiveAddresses();
 
                 if (dataListener != null) {
                     dataListener.onFetchTransactionCompleted();
@@ -233,6 +239,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public void unpair() {
+        dataListener.clearAllDynamicShortcuts();
         payloadManager.wipe();
         MultiAddrFactory.getInstance().wipe();
         prefs.logOut();

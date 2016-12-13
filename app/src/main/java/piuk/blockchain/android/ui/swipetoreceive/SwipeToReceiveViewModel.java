@@ -2,8 +2,6 @@ package piuk.blockchain.android.ui.swipetoreceive;
 
 import android.graphics.Bitmap;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-
 import javax.inject.Inject;
 
 import io.reactivex.exceptions.Exceptions;
@@ -12,6 +10,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 
 
+@SuppressWarnings("WeakerAccess")
 public class SwipeToReceiveViewModel extends BaseViewModel {
 
     private static final int DIMENSION_QR_CODE = 600;
@@ -19,7 +18,6 @@ public class SwipeToReceiveViewModel extends BaseViewModel {
     private DataListener dataListener;
     @Inject ReceiveDataManager dataManager;
     @Inject SwipeToReceiveHelper swipeToReceiveHelper;
-    @Inject MultiAddrFactory multiAddrFactory;
 
     interface DataListener {
 

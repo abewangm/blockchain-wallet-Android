@@ -27,20 +27,17 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragme
 
     // Fragments
     private PinEntryFragment pinEntryFragment;
-    private SwipeToReceiveFragment swipeToReceiveFragment;
-    private FragmentPagerAdapter fragmentPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_pin_entry);
+        pinEntryFragment = PinEntryFragment.newInstance(!shouldHideSwipeToReceive());
 
-        pinEntryFragment = new PinEntryFragment();
-
-        if (getIntent().hasExtra(PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT) || isCreatingNewPin()) {
+        final FragmentPagerAdapter fragmentPagerAdapter;
+        if (shouldHideSwipeToReceive()) {
             // Don't bother instantiating the QR fragment + ViewModel if not necessary
             fragmentPagerAdapter = new MyFragmentPagerAdapter(
                     getSupportFragmentManager(),
@@ -48,9 +45,8 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragme
                     new Fragment());
 
             lockViewpager();
-            pinEntryFragment.hideSwipeHint();
         } else {
-            swipeToReceiveFragment = new SwipeToReceiveFragment();
+            final SwipeToReceiveFragment swipeToReceiveFragment = new SwipeToReceiveFragment();
 
             fragmentPagerAdapter = new MyFragmentPagerAdapter(
                     getSupportFragmentManager(),
@@ -59,6 +55,12 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragme
         }
 
         binding.viewpager.setAdapter(fragmentPagerAdapter);
+    }
+
+    private boolean shouldHideSwipeToReceive() {
+        return getIntent().hasExtra(PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT)
+                || isCreatingNewPin()
+                || !new PrefsUtil(this).getValue(PrefsUtil.KEY_SWIPE_TO_RECEIVE_ENABLED, true);
     }
 
     private void lockViewpager() {

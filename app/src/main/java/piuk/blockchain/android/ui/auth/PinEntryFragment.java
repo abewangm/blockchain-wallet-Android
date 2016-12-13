@@ -43,6 +43,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     public static final String KEY_VALIDATED_PIN = "validated_pin";
     public static final int REQUEST_CODE_VALIDATE_PIN = 88;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
+    private static final String KEY_SHOW_SWIPE_HINT = "show_swipe_hint";
     private static final int PIN_LENGTH = 4;
     private static final Handler HANDLER = new Handler();
 
@@ -59,6 +60,14 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
 
     public PinEntryFragment() {
         // Required empty public constructor
+    }
+
+    public static PinEntryFragment newInstance(boolean showSwipeHint) {
+        Bundle args = new Bundle();
+        args.putBoolean(KEY_SHOW_SWIPE_HINT, showSwipeHint);
+        PinEntryFragment fragment = new PinEntryFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -101,6 +110,13 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
         binding.swipeHintLayout.setOnClickListener(view -> listener.onSwipePressed());
 
         viewModel.onViewReady();
+
+        if (getArguments() != null) {
+            boolean showSwipeHint = getArguments().getBoolean(KEY_SHOW_SWIPE_HINT);
+            if (!showSwipeHint) {
+                binding.swipeHintLayout.setVisibility(View.GONE);
+            }
+        }
 
         return binding.getRoot();
     }
@@ -235,10 +251,6 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
         Intent intent = new Intent(getContext(), UpgradeWalletActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-    }
-
-    public void hideSwipeHint() {
-        binding.swipeHintLayout.setVisibility(View.GONE);
     }
 
     public void padClicked(View view) {

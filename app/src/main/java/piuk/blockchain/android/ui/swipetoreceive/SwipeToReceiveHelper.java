@@ -20,9 +20,9 @@ import piuk.blockchain.android.util.PrefsUtil;
 
 public class SwipeToReceiveHelper {
 
+    public static final String KEY_SWIPE_RECEIVE_ADDRESSES = "swipe_receive_addresses";
+    public static final String KEY_SWIPE_RECEIVE_ACCOUNT_NAME = "swipe_receive_account_name";
     private static final String TAG = SwipeToReceiveHelper.class.getSimpleName();
-    private static final String KEY_SWIPE_RECEIVE_ADDRESSES = "swipe_receive_addresses";
-    private static final String KEY_SWIPE_RECEIVE_ACCOUNT_NAME = "swipe_receive_account_name";
 
     private PayloadManager payloadManager;
     private MultiAddrFactory multiAddrFactory;
@@ -39,24 +39,26 @@ public class SwipeToReceiveHelper {
      * the account name in SharedPrefs.
      */
     public void updateAndStoreAddresses() {
-        int numOfAddresses = 5;
+        if (getIfSwipeEnabled()) {
+            int numOfAddresses = 5;
 
-        int defaultAccountIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
-        String receiveAccountName = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultAccountIndex).getLabel();
-        storeAccountName(receiveAccountName);
+            int defaultAccountIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
+            String receiveAccountName = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultAccountIndex).getLabel();
+            storeAccountName(receiveAccountName);
 
-        StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder();
 
-        for (int i = 0; i < numOfAddresses; i++) {
-            try {
-                String receiveAddress = payloadManager.getReceiveAddressAtPosition(defaultAccountIndex, i);
-                stringBuilder.append(receiveAddress).append(",");
-            } catch (AddressFormatException e) {
-                Log.e(TAG, "updateAndStoreAddresses: ", e);
+            for (int i = 0; i < numOfAddresses; i++) {
+                try {
+                    String receiveAddress = payloadManager.getReceiveAddressAtPosition(defaultAccountIndex, i);
+                    stringBuilder.append(receiveAddress).append(",");
+                } catch (AddressFormatException e) {
+                    Log.e(TAG, "updateAndStoreAddresses: ", e);
+                }
             }
-        }
 
-        storeAddresses(stringBuilder.toString());
+            storeAddresses(stringBuilder.toString());
+        }
     }
 
     /**
@@ -95,6 +97,10 @@ public class SwipeToReceiveHelper {
     @NonNull
     String getAccountName() {
         return prefsUtil.getValue(KEY_SWIPE_RECEIVE_ACCOUNT_NAME, "");
+    }
+
+    private boolean getIfSwipeEnabled() {
+        return prefsUtil.getValue(PrefsUtil.KEY_SWIPE_TO_RECEIVE_ENABLED, true);
     }
 
     private Observable<HashMap<String, Long>> getBalanceOfAddresses(List<String> addresses) {
