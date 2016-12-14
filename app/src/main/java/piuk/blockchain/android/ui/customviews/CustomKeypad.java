@@ -52,7 +52,7 @@ public class CustomKeypad extends LinearLayout implements View.OnClickListener {
         init();
     }
 
-    public void init() {
+    private void init() {
         setOrientation(LinearLayout.HORIZONTAL);
         setGravity(Gravity.BOTTOM);
 

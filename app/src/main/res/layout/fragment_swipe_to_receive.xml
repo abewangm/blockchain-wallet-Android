@@ -2,16 +2,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveFragment">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/blockchain_blue">
+        android:background="@color/blockchain_blue"
+        android:orientation="vertical">
 
         <!-- MAIN LAYOUT -->
         <RelativeLayout
             android:id="@+id/content_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <FrameLayout
                 android:id="@+id/qr_layout"
@@ -34,8 +35,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:adjustViewBounds="true"
-                    android:maxWidth="@dimen/swipe_receive_qr_size"
                     android:maxHeight="@dimen/swipe_receive_qr_size"
+                    android:maxWidth="@dimen/swipe_receive_qr_size"
                     android:paddingLeft="32dp"
                     android:paddingRight="32dp"
                     android:visibility="invisible" />
@@ -76,8 +77,7 @@
         <RelativeLayout
             android:id="@+id/error_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_height="match_parent"
             android:visibility="gone">
 
             <android.support.v7.widget.AppCompatTextView
@@ -91,5 +91,5 @@
                 android:textColor="@color/blockchain_pearl_white" />
 
         </RelativeLayout>
-    </FrameLayout>
+    </LinearLayout>
 </layout>

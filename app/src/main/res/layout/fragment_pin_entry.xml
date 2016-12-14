@@ -5,7 +5,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="@android:color/transparent"
         android:gravity="bottom"
         android:orientation="vertical"
@@ -14,6 +14,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:layout_marginTop="16dp"
             android:orientation="vertical">
 
@@ -22,44 +23,58 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:gravity="center_horizontal"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="32dp"
+                android:paddingRight="32dp">
 
-                <TextView
+                <ImageView
                     android:id="@+id/pinBox0"
-                    android:layout_width="@dimen/pinentry_circle_size"
-                    android:layout_height="@dimen/pinentry_circle_size"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_margin="10dip"
-                    android:background="@drawable/rounded_view_blue_white_border" />
+                    android:layout_weight="1"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/rounded_view_blue_white_border" />
 
-                <TextView
+                <ImageView
                     android:id="@+id/pinBox1"
-                    android:layout_width="@dimen/pinentry_circle_size"
-                    android:layout_height="@dimen/pinentry_circle_size"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_margin="10dip"
-                    android:background="@drawable/rounded_view_blue_white_border" />
+                    android:layout_weight="1"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/rounded_view_blue_white_border" />
 
-                <TextView
+                <ImageView
                     android:id="@+id/pinBox2"
-                    android:layout_width="@dimen/pinentry_circle_size"
-                    android:layout_height="@dimen/pinentry_circle_size"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_margin="10dip"
-                    android:background="@drawable/rounded_view_blue_white_border" />
+                    android:layout_weight="1"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/rounded_view_blue_white_border" />
 
-                <TextView
+                <ImageView
                     android:id="@+id/pinBox3"
-                    android:layout_width="@dimen/pinentry_circle_size"
-                    android:layout_height="@dimen/pinentry_circle_size"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_margin="10dip"
-                    android:background="@drawable/rounded_view_blue_white_border" />
+                    android:layout_weight="1"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/rounded_view_blue_white_border" />
 
             </LinearLayout>
 
             <TextView
                 android:id="@+id/titleBox"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:padding="10dip"
+                android:layout_gravity="center_horizontal"
+                android:padding="@dimen/pinentry_padding"
                 android:text="@string/pin_entry"
                 android:textColor="@color/white"
                 android:textSize="@dimen/pinentry_hint_size" />
@@ -81,6 +96,7 @@
             android:id="@+id/swipe_hint_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:background="?selectableItemBackground"
             android:gravity="right"
             android:orientation="horizontal"
@@ -106,9 +122,10 @@
 
         </LinearLayout>
 
-        <include
+        <piuk.blockchain.android.ui.customviews.PinEntryKeypad
             android:id="@+id/keyboard"
-            layout="@layout/activity_pin_entry_keyboard_include"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:visibility="invisible"
             tools:visibility="visible" />
 

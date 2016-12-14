@@ -40,7 +40,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragme
         final FragmentPagerAdapter fragmentPagerAdapter;
         if (shouldHideSwipeToReceive()) {
             // Don't bother instantiating the QR fragment + ViewModel if not necessary
-            fragmentPagerAdapter = new MyFragmentPagerAdapter(
+            fragmentPagerAdapter = new SwipeToReceiveFragmentPagerAdapter(
                     getSupportFragmentManager(),
                     pinEntryFragment,
                     new Fragment());
@@ -49,7 +49,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragme
         } else {
             final SwipeToReceiveFragment swipeToReceiveFragment = new SwipeToReceiveFragment();
 
-            fragmentPagerAdapter = new MyFragmentPagerAdapter(
+            fragmentPagerAdapter = new SwipeToReceiveFragmentPagerAdapter(
                     getSupportFragmentManager(),
                     pinEntryFragment,
                     swipeToReceiveFragment);
@@ -110,16 +110,6 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragme
         finish();
     }
 
-    @SuppressWarnings("unused") // DataBindingMethod
-    public void padClicked(View view) {
-        pinEntryFragment.padClicked(view);
-    }
-
-    @SuppressWarnings("unused") // DataBindingMethod
-    public void deleteClicked(View view) {
-        pinEntryFragment.deleteClicked();
-    }
-
     public boolean isCreatingNewPin() {
         return new PrefsUtil(this).getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "").isEmpty();
     }
@@ -136,15 +126,15 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragme
         // No-op
     }
 
-    private static class MyFragmentPagerAdapter extends FragmentPagerAdapter {
+    private static class SwipeToReceiveFragmentPagerAdapter extends FragmentPagerAdapter {
 
         private static final int NUM_ITEMS = 2;
         private final Fragment pinEntryFragment;
         private final Fragment swipeToReceiveFragment;
 
-        MyFragmentPagerAdapter(FragmentManager fm,
-                               Fragment pinEntryFragment,
-                               Fragment swipeToReceiveFragment) {
+        SwipeToReceiveFragmentPagerAdapter(FragmentManager fm,
+                                           Fragment pinEntryFragment,
+                                           Fragment swipeToReceiveFragment) {
             super(fm);
             this.pinEntryFragment = pinEntryFragment;
             this.swipeToReceiveFragment = swipeToReceiveFragment;

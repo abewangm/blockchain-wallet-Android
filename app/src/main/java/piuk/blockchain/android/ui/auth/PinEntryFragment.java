@@ -17,7 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.TextView;
+import android.widget.ImageView;
 
 import info.blockchain.wallet.util.CharSequenceX;
 
@@ -26,6 +26,7 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.FragmentPinEntryBinding;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
+import piuk.blockchain.android.ui.customviews.PinEntryKeypad;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
@@ -36,6 +37,7 @@ import piuk.blockchain.android.util.annotations.Thunk;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
+@SuppressWarnings("WeakerAccess")
 public class PinEntryFragment extends Fragment implements PinEntryViewModel.DataListener  {
 
     public static final String KEY_VALIDATING_PIN_FOR_RESULT = "validating_pin";
@@ -46,7 +48,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     private static final int PIN_LENGTH = 4;
     private static final Handler HANDLER = new Handler();
 
-    private TextView[] pinBoxArray;
+    private ImageView[] pinBoxArray;
     private MaterialProgressDialog materialProgressDialog;
     private FragmentPinEntryBinding binding;
     private FingerprintDialog fingerprintDialog;
@@ -85,7 +87,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
             binding.titleBox.setText(R.string.pin_entry);
         }
 
-        pinBoxArray = new TextView[PIN_LENGTH];
+        pinBoxArray = new ImageView[PIN_LENGTH];
         pinBoxArray[0] = binding.pinBox0;
         pinBoxArray[1] = binding.pinBox1;
         pinBoxArray[2] = binding.pinBox2;
@@ -103,6 +105,18 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
                 binding.swipeHintLayout.setVisibility(View.GONE);
             }
         }
+
+        binding.keyboard.setPadClickedListener(new PinEntryKeypad.OnPinEntryPadClickedListener() {
+            @Override
+            public void onNumberClicked(String number) {
+                viewModel.onPadClicked(number);
+            }
+
+            @Override
+            public void onDeleteClicked() {
+                viewModel.onDeleteClicked();
+            }
+        });
 
         return binding.getRoot();
     }
@@ -239,10 +253,6 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
         startActivity(intent);
     }
 
-    public void padClicked(View view) {
-        viewModel.padClicked(view);
-    }
-
     @Override
     public void setTitleString(@StringRes int title) {
         HANDLER.postDelayed(() -> binding.titleBox.setText(title), 200);
@@ -251,10 +261,6 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     @Override
     public void setTitleVisibility(@ViewUtils.Visibility int visibility) {
         binding.titleBox.setVisibility(visibility);
-    }
-
-    public void deleteClicked() {
-        viewModel.onDeleteClicked();
     }
 
     public boolean allowExit() {
@@ -266,7 +272,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     }
 
     @Override
-    public TextView[] getPinBoxArray() {
+    public ImageView[] getPinBoxArray() {
         return pinBoxArray;
     }
 
@@ -413,9 +419,9 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
 
         @Override
         public void run() {
-            for (TextView pinBox : getPinBoxArray()) {
+            for (ImageView pinBox : getPinBoxArray()) {
                 // Reset PIN buttons to blank
-                pinBox.setBackgroundResource(R.drawable.rounded_view_blue_white_border);
+                pinBox.setImageResource(R.drawable.rounded_view_blue_white_border);
             }
         }
     }
