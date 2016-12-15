@@ -33,7 +33,6 @@ public class WebSocketService extends Service {
             if (intent.getAction().equals(ACTION_INTENT)) {
                 if (intent.hasExtra("address")) {
                     webSocketHandler.subscribeToAddress(intent.getStringExtra("address"));
-                    Log.d(WebSocketService.class.getSimpleName(), "onReceive: " + intent.getStringExtra("address"));
                 }
                 if (intent.hasExtra("xpub")) {
                     webSocketHandler.subscribeToXpub(intent.getStringExtra("xpub"));
