@@ -12,7 +12,7 @@ import android.view.Window;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.api.UrlSettings;
+import piuk.blockchain.android.data.api.DebugSettings;
 import piuk.blockchain.android.databinding.ActivityPinEntryBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -57,17 +57,19 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragme
 
         binding.viewpager.setAdapter(fragmentPagerAdapter);
 
-        UrlSettings urlSettings = new UrlSettings();
+        DebugSettings debugSettings = new DebugSettings();
 
-        if (urlSettings.shouldShowDebugMenu()) {
+        if (debugSettings.shouldShowDebugMenu()) {
             ToastCustom.makeText(
-                    this, "Current environment: " + urlSettings.getCurrentEnvironment().getName(),
+                    this,
+                    "Current environment: "
+                            + debugSettings.getCurrentEnvironment().getName(),
                     ToastCustom.LENGTH_SHORT,
                     ToastCustom.TYPE_GENERAL);
 
             binding.buttonSettings.setVisibility(View.VISIBLE);
             binding.buttonSettings.setOnClickListener(view ->
-                    new EnvironmentSwitcher(this, urlSettings).showEnvironmentSelectionDialog());
+                    new EnvironmentSwitcher(this, debugSettings).showEnvironmentSelectionDialog());
         }
     }
 

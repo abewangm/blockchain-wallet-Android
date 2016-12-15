@@ -19,11 +19,16 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
-        // URLs for Staging and Dev
+        // URLs for Staging, Dev and TestNet Support
         buildConfigField "String", "DEV_BASE_SERVER", devBaseServer
         buildConfigField "String", "STAGING_BASE_SERVER", stagingBaseServer
+        buildConfigField "String", "TESTNET_BASE_SERVER", testnetBaseServer
         buildConfigField "String", "DEV_API_SERVER", devApiServer
         buildConfigField "String", "STAGING_API_SERVER", stagingApiServer
+        buildConfigField "String", "TESTNET_API_SERVER", testnetApiServer
+        buildConfigField "String", "DEV_WEBSOCKET", devWebsocket
+        buildConfigField "String", "STAGING_WEBSOCKET", stagingWebsocket
+        buildConfigField "String", "TESTNET_WEBSOCKET", testnetWebsocket
     }
 
     buildTypes {
@@ -130,7 +135,8 @@ dependencies {
     compile "com.google.android.gms:play-services-maps:$googleServicesVersion"
     compile 'org.bitcoinj:bitcoinj-core:0.13.4'
     compile 'commons-io:commons-io:2.4'
-    compile 'commons-codec:commons-codec:1.10'
+    // Keep at 1.4 to match Android implementation
+    compile 'commons-codec:commons-codec:1.4'
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'com.android.support:multidex:1.0.1'
     compile 'org.thoughtcrime.ssl.pinning:AndroidPinning:1.0.0'

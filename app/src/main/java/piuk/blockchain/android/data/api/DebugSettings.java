@@ -5,6 +5,9 @@ import android.util.Log;
 
 import info.blockchain.api.PersistentUrls;
 
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.TestNet3Params;
+
 import javax.inject.Inject;
 
 import piuk.blockchain.android.BuildConfig;
@@ -14,20 +17,21 @@ import piuk.blockchain.android.util.PrefsUtil;
 
 import static info.blockchain.api.PersistentUrls.Environment.DEV;
 import static info.blockchain.api.PersistentUrls.Environment.STAGING;
+import static info.blockchain.api.PersistentUrls.Environment.TESTNET;
 import static info.blockchain.api.PersistentUrls.KEY_ENV_PROD;
 
 @SuppressWarnings("WeakerAccess")
-public class UrlSettings {
+public class DebugSettings {
 
     public static final String KEY_CURRENT_ENVIRONMENT = "current_environment";
 
-    private static final String TAG = UrlSettings.class.getSimpleName();
+    private static final String TAG = DebugSettings.class.getSimpleName();
 
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected AppUtil appUtil;
     @Inject protected PersistentUrls persistentUrls;
 
-    public UrlSettings() {
+    public DebugSettings() {
         Injector.getInstance().getAppComponent().inject(this);
 
         // Restore saved environment
@@ -62,18 +66,29 @@ public class UrlSettings {
 
     private void setEnvironment(PersistentUrls.Environment environment) {
         switch (environment) {
-            case PRODUCTION:
-                persistentUrls.setProductionEnvironment();
-                break;
             case STAGING:
+                persistentUrls.setCurrentNetworkParams(MainNetParams.get());
                 persistentUrls.setCurrentApiUrl(BuildConfig.STAGING_API_SERVER);
                 persistentUrls.setCurrentServerUrl(BuildConfig.STAGING_BASE_SERVER);
+                persistentUrls.setCurrentWebsocketUrl(BuildConfig.STAGING_WEBSOCKET);
                 persistentUrls.setCurrentEnvironment(STAGING);
                 break;
             case DEV:
+                persistentUrls.setCurrentNetworkParams(MainNetParams.get());
                 persistentUrls.setCurrentApiUrl(BuildConfig.DEV_API_SERVER);
                 persistentUrls.setCurrentServerUrl(BuildConfig.DEV_BASE_SERVER);
+                persistentUrls.setCurrentWebsocketUrl(BuildConfig.DEV_WEBSOCKET);
                 persistentUrls.setCurrentEnvironment(DEV);
+                break;
+            case TESTNET:
+                persistentUrls.setCurrentNetworkParams(TestNet3Params.get());
+                persistentUrls.setCurrentApiUrl(BuildConfig.TESTNET_API_SERVER);
+                persistentUrls.setCurrentServerUrl(BuildConfig.TESTNET_BASE_SERVER);
+                persistentUrls.setCurrentWebsocketUrl(BuildConfig.TESTNET_WEBSOCKET);
+                persistentUrls.setCurrentEnvironment(TESTNET);
+                break;
+            default:
+                persistentUrls.setProductionEnvironment();
                 break;
         }
 
