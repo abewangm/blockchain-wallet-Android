@@ -19,6 +19,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
@@ -27,12 +28,12 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
-import io.reactivex.Observable;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
@@ -44,6 +45,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected AppUtil appUtil;
     @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
+    @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
 
     public interface DataListener {
         void onRooted();
@@ -63,6 +65,8 @@ public class MainViewModel extends BaseViewModel {
         void showEmailVerificationDialog(String email);
 
         void showAddEmailDialog();
+
+        void clearAllDynamicShortcuts();
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -79,6 +83,10 @@ public class MainViewModel extends BaseViewModel {
         checkConnectivity();
         checkIfShouldShowEmailVerification();
         startWebSocketService();
+    }
+
+    public void storeSwipeReceiveAddresses() {
+        swipeToReceiveHelper.updateAndStoreAddresses();
     }
 
     private void checkIfShouldShowEmailVerification() {
@@ -145,6 +153,8 @@ public class MainViewModel extends BaseViewModel {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                storeSwipeReceiveAddresses();
 
                 if (dataListener != null) {
                     dataListener.onFetchTransactionCompleted();
@@ -229,6 +239,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public void unpair() {
+        dataListener.clearAllDynamicShortcuts();
         payloadManager.wipe();
         MultiAddrFactory.getInstance().wipe();
         prefs.logOut();

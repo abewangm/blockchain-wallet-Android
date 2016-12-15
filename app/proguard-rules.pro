@@ -4,6 +4,7 @@
 
 # These lines allow optimisation whilst preserving stack traces
 -optimizations !code/allocation/variable
+-optimizations !class/unboxing/enum
 -keepattributes SourceFile, LineNumberTable
 -keep,allowshrinking,allowoptimization class * { <methods>; }
 -keepattributes Signature

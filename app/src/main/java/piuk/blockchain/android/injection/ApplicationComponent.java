@@ -5,6 +5,7 @@ import info.blockchain.wallet.util.PrivateKeyFactory;
 import javax.inject.Singleton;
 
 import dagger.Component;
+import piuk.blockchain.android.BlockchainApplication;
 import piuk.blockchain.android.data.api.UrlSettings;
 import piuk.blockchain.android.data.notifications.InstanceIdService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
@@ -42,4 +43,6 @@ public interface ApplicationComponent {
     void inject(InstanceIdService instanceIdService);
 
     void inject(WebSocketService webSocketService);
+
+    void inject(BlockchainApplication blockchainApplication);
 }

@@ -5,7 +5,7 @@ apply from: 'environment.gradle'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.1'
+    buildToolsVersion '25.0.2'
 
     dexOptions {
         javaMaxHeapSize "3g"
@@ -20,24 +20,10 @@ android {
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
         // URLs for Staging and Dev
-        buildConfigField "String", "DEV_ADDRESS_INFO", devAddressInfo
-        buildConfigField "String", "STAGING_ADDRESS_INFO", stagingAddressInfo
-        buildConfigField "String", "DEV_BALANCE", devBalance
-        buildConfigField "String", "STAGING_BALANCE", stagingBalance
-        buildConfigField "String", "DEV_DYNAMIC_FEE", devDynamicFee
-        buildConfigField "String", "STAGING_DYNAMIC_FEE", stagingDynamicFee
-        buildConfigField "String", "DEV_MULTIADDR_URL", devMultiaddrUrl
-        buildConfigField "String", "STAGING_MULTIADDR_URL", stagingMultiaddrUrl
-        buildConfigField "String", "DEV_PIN_STORE_URL", devPinStoreUrl
-        buildConfigField "String", "STAGING_PIN_STORE_URL", stagingPinStoreUrl
-        buildConfigField "String", "DEV_SETTINGS_PAYLOAD_URL", devSettingsPayloadUrl
-        buildConfigField "String", "STAGING_SETTINGS_PAYLOAD_URL", stagingSettingdPayloadUrl
-        buildConfigField "String", "DEV_TRANSACTION_URL", devTransactionUrl
-        buildConfigField "String", "STAGING_TRANSACTION_URL", stagingTransactionUrl
-        buildConfigField "String", "DEV_UNSPENT_OUTPUTS_URL", devUnspentOutputsUrl
-        buildConfigField "String", "STAGING_UNSPENT_OUTPUTS_URL", stagingUnspentOutputsUrl
-        buildConfigField "String", "DEV_WALLET_PAYLOAD_URL", devWalletPayloadUrl
-        buildConfigField "String", "STAGING_WALLET_PAYLOAD_URL", stagingWalletPayloadUrl
+        buildConfigField "String", "DEV_BASE_SERVER", devBaseServer
+        buildConfigField "String", "STAGING_BASE_SERVER", stagingBaseServer
+        buildConfigField "String", "DEV_API_SERVER", devApiServer
+        buildConfigField "String", "STAGING_API_SERVER", stagingApiServer
     }
 
     buildTypes {
@@ -94,6 +80,7 @@ android {
         fatal 'StopShip'
     }
     packagingOptions {
+        exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
     }
@@ -118,11 +105,13 @@ android {
 }
 
 ext {
-    supportVersion = '25.0.1'
+    supportVersion = '25.1.0'
     googleServicesVersion = '10.0.1'
     rxJavaVersion = '2.0.2'
     rxAndroidVersion = '2.0.1'
     daggerVersion = '2.8'
+    retrofitVersion = '2.1.0'
+    okHttpVersion = '3.5.0'
 }
 
 dependencies {
@@ -152,6 +141,12 @@ dependencies {
     // RxJava
     compile "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
     compile "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
+    // Retrofit
+    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    compile "com.squareup.retrofit2:converter-jackson:$retrofitVersion"
+    // OkHttp
+    compile "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
+    compile "com.squareup.okhttp3:okhttp:$okHttpVersion"
     // Dagger2
     compile "com.google.dagger:dagger:$daggerVersion"
     annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"

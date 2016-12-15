@@ -11,7 +11,12 @@ import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
+import info.blockchain.BlockchainFramework;
+import info.blockchain.FrameworkInterface;
 import info.blockchain.api.PinStore;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import io.reactivex.plugins.RxJavaPlugins;
 import piuk.blockchain.android.data.access.AccessState;
@@ -22,15 +27,23 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
+import retrofit2.Retrofit;
 
 /**
  * Created by adambennett on 04/08/2016.
  */
 
-public class BlockchainApplication extends Application {
+public class BlockchainApplication extends Application implements FrameworkInterface {
 
     @Thunk static final String TAG = BlockchainApplication.class.getSimpleName();
     private static final String RX_ERROR_TAG = "RxJava Error";
+
+    @Inject
+    @Named("api")
+    protected Retrofit retrofitApi;
+    @Inject
+    @Named("server")
+    protected Retrofit retrofitServer;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -44,7 +57,12 @@ public class BlockchainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        // Init objects first
         Injector.getInstance().init(this);
+        // Inject into Application
+        Injector.getInstance().getAppComponent().inject(this);
+        // Pass objects to JAR
+        BlockchainFramework.init(this);
 
         new LoggingExceptionHandler();
 
@@ -60,6 +78,17 @@ public class BlockchainApplication extends Application {
         checkSecurityProviderAndPatchIfNeeded();
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
+
+    // Pass instances to JAR Framework
+    @Override
+    public Retrofit getRetrofitApiInstance() {
+        return retrofitApi;
+    }
+
+    @Override
+    public Retrofit getRetrofitServerInstance() {
+        return retrofitServer;
     }
 
     /**

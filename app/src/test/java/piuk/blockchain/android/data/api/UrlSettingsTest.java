@@ -98,15 +98,8 @@ public class UrlSettingsTest {
         subject.changeEnvironment(STAGING);
         // Assert
         verify(persistentUrls).setProductionEnvironment();
-        verify(persistentUrls).setAddressInfoUrl(BuildConfig.STAGING_ADDRESS_INFO);
-        verify(persistentUrls).setBalanceUrl(BuildConfig.STAGING_BALANCE);
-        verify(persistentUrls).setDynamicFeeUrl(BuildConfig.STAGING_DYNAMIC_FEE);
-        verify(persistentUrls).setMultiAddressUrl(BuildConfig.STAGING_MULTIADDR_URL);
-        verify(persistentUrls).setPinstoreUrl(BuildConfig.STAGING_PIN_STORE_URL);
-        verify(persistentUrls).setSettingsUrl(BuildConfig.STAGING_SETTINGS_PAYLOAD_URL);
-        verify(persistentUrls).setTransactionDetailsUrl(BuildConfig.STAGING_TRANSACTION_URL);
-        verify(persistentUrls).setUnspentUrl(BuildConfig.STAGING_UNSPENT_OUTPUTS_URL);
-        verify(persistentUrls).setWalletPayloadUrl(BuildConfig.STAGING_WALLET_PAYLOAD_URL);
+        verify(persistentUrls).setCurrentApiUrl(BuildConfig.STAGING_API_SERVER);
+        verify(persistentUrls).setCurrentServerUrl(BuildConfig.STAGING_BASE_SERVER);
         verify(persistentUrls).setCurrentEnvironment(STAGING);
         verify(appUtil).clearCredentialsAndKeepEnvironment();
     }
@@ -119,15 +112,8 @@ public class UrlSettingsTest {
         subject.changeEnvironment(DEV);
         // Assert
         verify(persistentUrls).setProductionEnvironment();
-        verify(persistentUrls).setAddressInfoUrl(BuildConfig.DEV_ADDRESS_INFO);
-        verify(persistentUrls).setBalanceUrl(BuildConfig.DEV_BALANCE);
-        verify(persistentUrls).setDynamicFeeUrl(BuildConfig.DEV_DYNAMIC_FEE);
-        verify(persistentUrls).setMultiAddressUrl(BuildConfig.DEV_MULTIADDR_URL);
-        verify(persistentUrls).setPinstoreUrl(BuildConfig.DEV_PIN_STORE_URL);
-        verify(persistentUrls).setSettingsUrl(BuildConfig.DEV_SETTINGS_PAYLOAD_URL);
-        verify(persistentUrls).setTransactionDetailsUrl(BuildConfig.DEV_TRANSACTION_URL);
-        verify(persistentUrls).setUnspentUrl(BuildConfig.DEV_UNSPENT_OUTPUTS_URL);
-        verify(persistentUrls).setWalletPayloadUrl(BuildConfig.DEV_WALLET_PAYLOAD_URL);
+        verify(persistentUrls).setCurrentApiUrl(BuildConfig.DEV_API_SERVER);
+        verify(persistentUrls).setCurrentServerUrl(BuildConfig.DEV_BASE_SERVER);
         verify(persistentUrls).setCurrentEnvironment(DEV);
         verify(appUtil).clearCredentialsAndKeepEnvironment();
     }

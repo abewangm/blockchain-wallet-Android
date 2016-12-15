@@ -30,7 +30,7 @@ public class LandingActivity extends BaseAuthActivity {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CREATE_FRAGMENT, LOGIN_FRAGMENT})
-    public @interface StartingFragment {
+    @interface StartingFragment {
     }
 
     public static final int CREATE_FRAGMENT = 0;
