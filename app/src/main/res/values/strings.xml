@@ -488,6 +488,7 @@
     <string name="transaction_detail_value">Value:\u0020</string>
     <string name="transaction_details_unknown">Unknown</string>
     <string name="transaction_detail_coinbase">No Inputs (Newly Generated Coins)</string>
+    <string name="transaction_detail_double_spend">May be at risk for a double spend.</string>
 
     <!-- SECURITY CENTRE -->
     <string name="security_centre_email_title">Check your email</string>

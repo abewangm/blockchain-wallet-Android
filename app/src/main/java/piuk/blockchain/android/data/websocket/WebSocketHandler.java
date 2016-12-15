@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
@@ -301,7 +302,7 @@ class WebSocketHandler {
                         // Download changed payload
                         //noinspection ThrowableResultOfMethodCallIgnored
                         downloadChangedPayload().blockingGet();
-                        ToastCustom.makeText(context, context.getString(R.string.wallet_updated), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
+                        showToast().subscribeOn(AndroidSchedulers.mainThread());
                         updateBalancesAndTransactions();
                     }
 
@@ -311,6 +312,15 @@ class WebSocketHandler {
         } catch (Exception e) {
             Log.e(TAG, "attemptParseMessage: ", e);
         }
+    }
+
+    private Completable showToast() {
+        return Completable.fromRunnable(
+                () -> ToastCustom.makeText(
+                        context,
+                        context.getString(R.string.wallet_updated),
+                        ToastCustom.LENGTH_SHORT,
+                        ToastCustom.TYPE_GENERAL));
     }
 
     private Completable downloadChangedPayload() {
