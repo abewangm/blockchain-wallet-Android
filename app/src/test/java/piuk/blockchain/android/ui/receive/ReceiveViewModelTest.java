@@ -67,7 +67,7 @@ public class ReceiveViewModelTest {
     @Mock QrCodeDataManager mDataManager;
     @Mock ExchangeRateFactory mExchangeRateFactory;
     @Mock WalletAccountHelper mWalletAccountHelper;
-    @Mock private ReceiveActivity mActivity;
+    @Mock private ReceiveViewModel.DataListener mActivity;
 
     @Before
     public void setUp() throws Exception {
@@ -77,8 +77,7 @@ public class ReceiveViewModelTest {
                 Injector.getInstance(),
                 new MockApplicationModule(RuntimeEnvironment.application),
                 new MockApiModule(),
-                new MockDataManagerModule()
-        );
+                new MockDataManagerModule());
 
         mSubject = new ReceiveViewModel(mActivity, Locale.UK);
     }

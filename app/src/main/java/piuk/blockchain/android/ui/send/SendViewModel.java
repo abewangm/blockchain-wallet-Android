@@ -183,7 +183,7 @@ public class SendViewModel extends BaseViewModel {
 
         void onShowBIP38PassphrasePrompt(String scanData);
 
-        void finishActivity();
+        void finishPage();
     }
 
     public int getDefaultAccount() {
@@ -576,7 +576,7 @@ public class SendViewModel extends BaseViewModel {
             return spendableCoins.getAbsoluteFee();
         } else {
             // App is likely in low memory environment, leave page gracefully
-            dataListener.finishActivity();
+            dataListener.finishPage();
             return null;
         }
     }
@@ -639,7 +639,7 @@ public class SendViewModel extends BaseViewModel {
             }
         } else {
             // App is likely in low memory environment, leave page gracefully
-            dataListener.finishActivity();
+            dataListener.finishPage();
         }
     }
 
@@ -1173,7 +1173,7 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Update balance immediately after spend - until refresh from server
      */
-    private void updateInternalBalances() {
+    private void updateInternalBalances() { 
 
         BigInteger totalSent = sendModel.pendingTransaction.bigIntAmount.add(sendModel.pendingTransaction.bigIntFee);
 
@@ -1190,7 +1190,7 @@ public class SendViewModel extends BaseViewModel {
             //Set individual xpub balance
             MultiAddrFactory.getInstance().setXpubAmount(
                     account.getXpub(),
-                    MultiAddrFactory.getInstance().getXpubAmounts().get(account.getXpub()) - updatedBalance);
+                    MultiAddrFactory.getInstance().getXpubAmounts().get(account.getXpub()) - totalSent.longValue());
 
         } else {
             MultiAddrFactory.getInstance().setLegacyBalance(MultiAddrFactory.getInstance().getLegacyBalance() - totalSent.longValue());

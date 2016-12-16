@@ -2,7 +2,6 @@ package piuk.blockchain.android;
 
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.security.ProviderInstaller;
-import com.google.gson.Gson;
 
 import android.app.Application;
 import android.content.Context;

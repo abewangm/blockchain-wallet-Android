@@ -7,7 +7,6 @@ import info.blockchain.api.Settings;
 import info.blockchain.api.TransactionDetails;
 import info.blockchain.api.Unspent;
 import info.blockchain.api.WalletPayload;
-import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
@@ -18,15 +17,13 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
-import piuk.blockchain.android.data.datamanagers.MetadataManager;
+import piuk.blockchain.android.data.datamanagers.ContactsManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
-import piuk.blockchain.android.data.datamanagers.SharedMetadataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
 import piuk.blockchain.android.data.services.AddressInfoService;
-import piuk.blockchain.android.data.services.MetadataService;
 import piuk.blockchain.android.data.services.PaymentService;
 import piuk.blockchain.android.data.services.SettingsService;
 import piuk.blockchain.android.data.services.TransactionDetailsService;
@@ -35,6 +32,7 @@ import piuk.blockchain.android.data.services.WalletPayloadService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.ui.transactions.TransactionHelper;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
@@ -131,15 +129,17 @@ public class DataManagerModule {
                 payloadManager);
     }
 
-    @Provides
-    @ViewModelScope
-    protected SharedMetadataManager provideSharedMetaDataManager() {
-        return new SharedMetadataManager();
-    }
+//    @Provides
+//    @ViewModelScope
+//    protected ContactsManager provideSharedMetaDataManager() {
+//        return new ContactsManager();
+//    }
 
     @Provides
     @ViewModelScope
-    protected MetadataManager provideMetaDataManager() {
-        return new MetadataManager(new MetadataService(new Metadata()));
+    protected SwipeToReceiveHelper swipeToReceiveHelper(PayloadManager
+                                                                payloadManager, MultiAddrFactory
+                                                                multiAddrFactory, PrefsUtil prefsUtil) {
+        return new SwipeToReceiveHelper(payloadManager, multiAddrFactory, prefsUtil);
     }
 }

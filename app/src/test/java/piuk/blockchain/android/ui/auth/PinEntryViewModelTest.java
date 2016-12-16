@@ -4,7 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ImageView;
 
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
@@ -66,7 +66,7 @@ import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_EMAIL;
 import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_PASSWORD;
 import static piuk.blockchain.android.ui.auth.LandingActivity.KEY_INTENT_RECOVERING_FUNDS;
-import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATING_PIN_FOR_RESULT;
+import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 
 @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
@@ -75,7 +75,7 @@ public class PinEntryViewModelTest {
 
     private PinEntryViewModel mSubject;
 
-    @Mock private PinEntryActivity mActivity;
+    @Mock private PinEntryViewModel.DataListener mActivity;
     @Mock private AuthDataManager mAuthDataManager;
     @Mock private AppUtil mAppUtil;
     @Mock private PrefsUtil mPrefsUtil;
@@ -94,8 +94,8 @@ public class PinEntryViewModelTest {
                 new MockApiModule(),
                 new MockDataManagerModule());
 
-        TextView mockTextView = mock(TextView.class);
-        when(mActivity.getPinBoxArray()).thenReturn(new TextView[]{mockTextView, mockTextView, mockTextView, mockTextView});
+        ImageView mockImageView = mock(ImageView.class);
+        when(mActivity.getPinBoxArray()).thenReturn(new ImageView[]{mockImageView, mockImageView, mockImageView, mockImageView});
 
         mSubject = new PinEntryViewModel(mActivity);
     }
@@ -258,9 +258,7 @@ public class PinEntryViewModelTest {
         // Arrange
         mSubject.mUserEnteredPin = "0000";
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("0");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("0");
         // Assert
         verifyZeroInteractions(mActivity);
     }
@@ -270,11 +268,9 @@ public class PinEntryViewModelTest {
         // Arrange
         mSubject.mUserEnteredPin = "000";
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("0");
         when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
         when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(new CharSequenceX(""));
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("0");
         // Assert
         verify(mActivity).clearPinBoxes();
         //noinspection WrongConstant
@@ -289,9 +285,7 @@ public class PinEntryViewModelTest {
         mSubject.mUserEnteredPin = "123";
         when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("");
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("4");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("4");
         // Assert
         verify(mActivity).showCommonPinWarning(any(DialogButtonCallback.class));
     }
@@ -306,9 +300,7 @@ public class PinEntryViewModelTest {
             return null;
         }).when(mActivity).showCommonPinWarning(any(DialogButtonCallback.class));
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("4");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("4");
         // Assert
         verify(mActivity).showCommonPinWarning(any(DialogButtonCallback.class));
         verify(mActivity).clearPinBoxes();
@@ -326,9 +318,7 @@ public class PinEntryViewModelTest {
             return null;
         }).when(mActivity).showCommonPinWarning(any(DialogButtonCallback.class));
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("4");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("4");
         // Assert
         verify(mActivity).showCommonPinWarning(any(DialogButtonCallback.class));
         assertEquals("", mSubject.mUserEnteredPin);
@@ -342,9 +332,7 @@ public class PinEntryViewModelTest {
         when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("");
         when(mAccessState.getPIN()).thenReturn("2580");
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("0");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("0");
         // Assert
         verify(mActivity).dismissProgressDialog();
         //noinspection WrongConstant
@@ -359,9 +347,7 @@ public class PinEntryViewModelTest {
         when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
         when(mAuthDataManager.validatePin(anyString())).thenReturn(just(new CharSequenceX("")));
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("7");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("7");
         // Assert
         verify(mActivity).setTitleVisibility(View.INVISIBLE);
         verify(mActivity, times(2)).showProgressDialog(anyInt(), anyString());
@@ -376,9 +362,7 @@ public class PinEntryViewModelTest {
         when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
         when(mAuthDataManager.validatePin(anyString())).thenReturn(just(new CharSequenceX("")));
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("7");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("7");
         // Assert
         verify(mActivity).setTitleVisibility(View.INVISIBLE);
         verify(mActivity).showProgressDialog(anyInt(), anyString());
@@ -394,9 +378,7 @@ public class PinEntryViewModelTest {
         when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
         when(mAuthDataManager.validatePin(anyString())).thenReturn(Observable.error(new InvalidCredentialsException()));
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("7");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("7");
         // Assert
         verify(mActivity).setTitleVisibility(View.INVISIBLE);
         verify(mActivity).showProgressDialog(anyInt(), anyString());
@@ -416,9 +398,7 @@ public class PinEntryViewModelTest {
         when(mAuthDataManager.validatePin(anyString())).thenReturn(just(new CharSequenceX("")));
         when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new InvalidCipherTextException()));
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("7");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("7");
         // Assert
         verify(mActivity).setTitleVisibility(View.INVISIBLE);
         verify(mActivity, times(2)).showProgressDialog(anyInt(), anyString());
@@ -439,9 +419,7 @@ public class PinEntryViewModelTest {
         when(mAuthDataManager.validatePin(anyString())).thenReturn(just(new CharSequenceX("")));
         when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new Exception()));
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("7");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("7");
         // Assert
         verify(mActivity).setTitleVisibility(View.INVISIBLE);
         verify(mActivity, times(2)).showProgressDialog(anyInt(), anyString());
@@ -461,9 +439,7 @@ public class PinEntryViewModelTest {
         when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
         when(mAuthDataManager.createPin(any(CharSequenceX.class), anyString())).thenReturn(just(true));
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("7");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("7");
         // Assert
         verify(mActivity, times(2)).showProgressDialog(anyInt(), anyString());
         verify(mAuthDataManager).createPin(any(CharSequenceX.class), anyString());
@@ -479,9 +455,7 @@ public class PinEntryViewModelTest {
         when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
         when(mAuthDataManager.createPin(any(CharSequenceX.class), anyString())).thenReturn(just(false));
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("7");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("7");
         // Assert
         verify(mActivity).showProgressDialog(anyInt(), anyString());
         verify(mAuthDataManager).createPin(any(CharSequenceX.class), anyString());
@@ -498,9 +472,7 @@ public class PinEntryViewModelTest {
         when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
         when(mAuthDataManager.createPin(any(CharSequenceX.class), anyString())).thenReturn(just(true));
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("7");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("7");
         // Assert
         assertEquals("1337", mSubject.mUserEnteredConfirmationPin);
         assertEquals("", mSubject.mUserEnteredPin);
@@ -514,9 +486,7 @@ public class PinEntryViewModelTest {
         when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
         when(mAuthDataManager.createPin(any(CharSequenceX.class), anyString())).thenReturn(just(true));
         // Act
-        View mockView = mock(View.class);
-        when(mockView.getTag()).thenReturn("7");
-        mSubject.padClicked(mockView);
+        mSubject.onPadClicked("7");
         // Assert
         //noinspection WrongConstant
         verify(mActivity).showToast(anyInt(), anyString());
@@ -563,7 +533,7 @@ public class PinEntryViewModelTest {
         verify(mActivity).showProgressDialog(anyInt(), anyString());
         verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
         verify(mPayloadManager).setTempPassword(new CharSequenceX(""));
-        verify(mActivity).dismissProgressDialog();
+        verify(mActivity, times(2)).dismissProgressDialog();
         //noinspection WrongConstant
         verify(mActivity).showToast(anyInt(), anyString());
         verify(mActivity).showValidationDialog();
@@ -583,6 +553,38 @@ public class PinEntryViewModelTest {
         verify(mActivity).dismissProgressDialog();
         //noinspection WrongConstant
         verify(mActivity).showToast(anyInt(), anyString());
+    }
+
+    @Test
+    public void validatePasswordThrowsHDWalletExceptionException() throws Exception {
+        // Arrange
+        CharSequenceX password = new CharSequenceX("1234567890");
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new HDWalletException()));
+        // Act
+        mSubject.validatePassword(password);
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        verify(mPayloadManager).setTempPassword(new CharSequenceX(""));
+        verify(mActivity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(mActivity).showToast(anyInt(), anyString());
+        verify(mAppUtil).restartApp();
+    }
+
+    @Test
+    public void validatePasswordThrowsAccountLockedException() throws Exception {
+        // Arrange
+        CharSequenceX password = new CharSequenceX("1234567890");
+        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new AccountLockedException()));
+        // Act
+        mSubject.validatePassword(password);
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), anyString());
+        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
+        verify(mPayloadManager).setTempPassword(new CharSequenceX(""));
+        verify(mActivity).dismissProgressDialog();
+        verify(mActivity).showAccountLockedDialog();
     }
 
     @Test

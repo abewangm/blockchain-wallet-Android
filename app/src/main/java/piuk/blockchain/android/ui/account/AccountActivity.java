@@ -72,6 +72,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         public void onReceive(Context context, final Intent intent) {
             if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
                 onUpdateAccountsList();
+                // Check if we need to hide/show the transfer funds icon in the Toolbar
+                viewModel.checkTransferableLegacyFunds(false);
             }
         }
     };
@@ -500,7 +502,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     private void transferSpendableFunds() {
         ConfirmFundsTransferDialogFragment fragment = ConfirmFundsTransferDialogFragment.newInstance();
-        fragment.setOnDismissListener(() -> viewModel.checkTransferableLegacyFunds(false));
         fragment.show(getSupportFragmentManager(), ConfirmFundsTransferDialogFragment.TAG);
     }
 

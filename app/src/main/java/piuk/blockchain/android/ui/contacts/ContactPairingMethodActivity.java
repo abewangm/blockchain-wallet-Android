@@ -10,6 +10,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 
+import info.blockchain.wallet.contacts.data.Contact;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactPairingMethodBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -37,8 +39,16 @@ public class ContactPairingMethodActivity extends BaseAuthActivity implements Co
 
         binding.buttonQrCode.setOnClickListener(view -> requestScanActivity());
 
-        // TODO: 05/12/2016 Somehow need to get a contact here? Is it the sender or the receiver?
-        binding.buttonSendLink.setOnClickListener(view -> viewModel.onSendLinkClicked(null));
+        // TODO: 15/12/2016 prompt for details
+        Contact myDetails = new Contact();
+        myDetails.setName("James");
+        myDetails.setSurname("Moore");
+
+        Contact recipientDetails = new Contact();
+        recipientDetails.setName("Jack");
+        recipientDetails.setSurname("Jones");
+
+        binding.buttonSendLink.setOnClickListener(view -> viewModel.onSendLinkClicked(myDetails, recipientDetails));
 
         binding.buttonNfc.setOnClickListener(view -> viewModel.onNfcClicked());
     }

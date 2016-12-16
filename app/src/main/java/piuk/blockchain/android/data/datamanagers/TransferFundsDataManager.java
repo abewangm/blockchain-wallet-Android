@@ -92,8 +92,8 @@ public class TransferFundsDataManager {
      * Check if there are any spendable legacy funds that need to be sent to a HD wallet. Constructs
      * a list of {@link PendingTransaction} objects with outputs set to the default HD account.
      *
-     * @return Returns a Map which bundles together the List of {@link PendingTransaction} objects,
-     * as well as a Pair which contains the total to send and the total fees, in that order.
+     * @return Returns a Triple object which bundles together the List of {@link PendingTransaction} objects,
+     * as well as the total to send and the total fees, in that order.
      */
     public Observable<Triple<List<PendingTransaction>, Long, Long>> getTransferableFundTransactionListForDefaultAccount() {
         return getTransferableFundTransactionList(mPayloadManager.getPayload().getHdWallet().getDefaultIndex());

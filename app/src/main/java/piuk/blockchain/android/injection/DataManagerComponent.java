@@ -19,6 +19,7 @@ import piuk.blockchain.android.ui.receive.ReceiveViewModel;
 import piuk.blockchain.android.ui.recover.RecoverFundsViewModel;
 import piuk.blockchain.android.ui.send.SendViewModel;
 import piuk.blockchain.android.ui.settings.SettingsViewModel;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveViewModel;
 import piuk.blockchain.android.ui.transactions.TransactionDetailViewModel;
 
 /**
@@ -67,4 +68,6 @@ public interface DataManagerComponent {
     void inject(ContactsViewModel contactsViewModel);
 
     void inject(ContactPairingMethodViewModel contactPairingMethodViewModel);
+
+    void inject(SwipeToReceiveViewModel swipeToReceiveViewModel);
 }

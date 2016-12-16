@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.home;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
-import android.util.Log;
 
 import info.blockchain.api.DynamicFee;
 import info.blockchain.api.ExchangeTicker;
@@ -25,11 +24,11 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
-import piuk.blockchain.android.data.datamanagers.SharedMetadataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
@@ -48,10 +47,11 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected AppUtil appUtil;
     @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
-    @Inject protected SharedMetadataManager metaDataManagerShared;
+//    @Inject protected ContactsManager metaDataManagerShared;
 
     private long mBackPressed;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
+    @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
 
     public interface DataListener {
         void onRooted();
@@ -68,8 +68,6 @@ public class MainViewModel extends BaseViewModel {
 
         void onStartBalanceFragment();
 
-        void onExitConfirmToast();
-
         void kickToLauncherPage();
 
         void showEmailVerificationDialog(String email);
@@ -79,6 +77,8 @@ public class MainViewModel extends BaseViewModel {
         void showProgressDialog();
 
         void hideProgressDialog();
+
+        void clearAllDynamicShortcuts();
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -113,15 +113,20 @@ public class MainViewModel extends BaseViewModel {
         final String finalUri = uri;
         if (finalUri != null) dataListener.showProgressDialog();
 
-        compositeDisposable.add(
-                metaDataManagerShared.setMetadataNode(payloadManager.getMasterKey())
-                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
-                        .subscribe(() -> {
-                            if (finalUri != null) {
-                                dataListener.onStartContactsActivity(finalUri);
-                            }
-                            // TODO: 01/12/2016 Should probably inform the user here if coming from URI click
-                        }, throwable -> Log.wtf(TAG, "registerNodeForMetaDataService: ", throwable)));
+        // TODO: 15/12/2016 Only load metadata nodes if any metadata service gets used. Not on wallet login
+//        compositeDisposable.add(
+//                metaDataManagerShared.setMetadataNode(payloadManager.getMasterKey())
+//                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
+//                        .subscribe(() -> {
+//                            if (finalUri != null) {
+//                                dataListener.onStartContactsActivity(finalUri);
+//                            }
+//                            // TODO: 01/12/2016 Should probably inform the user here if coming from URI click
+//                        }, throwable -> Log.wtf(TAG, "registerNodeForMetaDataService: ", throwable)));
+    }
+
+    public void storeSwipeReceiveAddresses() {
+        swipeToReceiveHelper.updateAndStoreAddresses();
     }
 
     private void checkIfShouldShowEmailVerification() {
@@ -188,6 +193,8 @@ public class MainViewModel extends BaseViewModel {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                storeSwipeReceiveAddresses();
 
                 if (dataListener != null) {
                     dataListener.onFetchTransactionCompleted();
@@ -272,6 +279,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public void unpair() {
+        dataListener.clearAllDynamicShortcuts();
         payloadManager.wipe();
         MultiAddrFactory.getInstance().wipe();
         prefs.logOut();
@@ -281,17 +289,6 @@ public class MainViewModel extends BaseViewModel {
 
     public boolean areLauncherShortcutsEnabled() {
         return prefs.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true);
-    }
-
-    public void onBackPressed() {
-        if (mBackPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-            AccessState.getInstance().logout(context);
-            return;
-        } else {
-            dataListener.onExitConfirmToast();
-        }
-
-        mBackPressed = System.currentTimeMillis();
     }
 
     private void startWebSocketService() {

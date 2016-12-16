@@ -5,14 +5,16 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
-import info.blockchain.wallet.metadata.data.Contact;
+import info.blockchain.wallet.contacts.Contacts;
+import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.metadata.MetadataNodeFactory;
+import info.blockchain.wallet.payload.PayloadManager;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.datamanagers.SharedMetadataManager;
-import piuk.blockchain.android.data.metadata.MetaDataUri;
+import piuk.blockchain.android.data.datamanagers.ContactsManager;
+import piuk.blockchain.android.data.services.ContactsService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -25,7 +27,8 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
     private DataListener dataListener;
     private String contactName;
     @Inject AppUtil appUtil;
-    @Inject SharedMetadataManager sharedMetadataManager;
+//    @Inject
+    ContactsManager contactManager;
 
     interface DataListener {
 
@@ -46,6 +49,26 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
+
+        //
+        // TODO: 15/12/2016  I bypassed injection here
+        Contacts contacts = null;
+        try {
+
+            // TODO: 15/12/2016 prompt for second pw if any
+            String secondPassword = null;
+
+            PayloadManager pm = PayloadManager.getInstance();
+            pm.loadNodes(secondPassword);
+            MetadataNodeFactory fac = pm.getMetadataNodeFactory();
+            contacts = new Contacts(fac.getMetadataNode(), fac.getSharedMetadataNode());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ContactsService contactsService = new ContactsService(contacts);
+        contactManager = new ContactsManager(contactsService);
+
+
         Intent pageIntent = dataListener.getPageIntent();
         if (pageIntent != null && pageIntent.hasExtra(INTENT_KEY_CONTACT_NAME)) {
             // Don't need contact name in all flows to this page
@@ -56,11 +79,8 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
     void handleScanInput(@NonNull String extra) {
         // TODO: 15/11/2016 Input validation?
 
-        // TODO: 30/11/2016 We're supposed to do something here with a contact name, but I have no idea what
-
         compositeDisposable.add(
-                sharedMetadataManager.acceptInvitation(extra)
-                        .flatMap(share -> sharedMetadataManager.putTrusted(share.getMdid()))
+                contactManager.acceptInvitation(extra)
                         .subscribe(
                                 success -> {
                                     dataListener.onShowToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
@@ -68,12 +88,14 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
                                 }, throwable -> dataListener.onShowToast(R.string.pairing_failed, ToastCustom.TYPE_ERROR)));
     }
 
-    void onSendLinkClicked(Contact contact) {
+    void onSendLinkClicked(Contact myDetails, Contact recipientDetails) {
         compositeDisposable.add(
-                getUri(contact).subscribe(metaDataUri -> {
+                contactManager.createInvitation(myDetails, recipientDetails)
+                .subscribe(
+                        metaDataUri -> {
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_SEND);
-                    intent.putExtra(Intent.EXTRA_TEXT, metaDataUri.encode().toString());
+                    intent.putExtra(Intent.EXTRA_TEXT, metaDataUri.createURI());
                     intent.setType("text/plain");
                     dataListener.onShareIntentGenerated(intent);
 
@@ -89,15 +111,15 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
          */
     }
 
-    private Observable<MetaDataUri> getUri(Contact contact) {
-        return sharedMetadataManager.createInvitation(contact)
-                .map(invitation -> new MetaDataUri.Builder()
-                        .setUriType(MetaDataUri.UriType.INVITE)
-                        .setFrom("TEST USER")
-                        .setInviteId(invitation.getMdid())
-                        .create());
-
-    }
+//    private Observable<MetaDataUri> getUri(Contact contact) {
+//        return contactManager.createInvitation(contact)
+//                .map(invitation -> new MetaDataUri.Builder()
+//                        .setUriType(MetaDataUri.UriType.INVITE)
+//                        .setFrom("TEST USER")
+//                        .setInviteId(invitation.getMdid())
+//                        .create());
+//
+//    }
 
     boolean isCameraOpen() {
         return appUtil.isCameraOpen();

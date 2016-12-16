@@ -41,11 +41,6 @@
         <item name="color">@android:color/white</item>
     </style>
 
-    <style name="menu_labels_style">
-        <item name="android:background">@drawable/fab_label_background</item>
-        <item name="android:textColor">@color/white</item>
-    </style>
-
     <style name="AlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
         <!-- Used for the buttons -->
         <item name="colorAccent">@color/blockchain_blue</item>
@@ -190,5 +185,44 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="BottomNavTextAppearance" parent="PlainTheme">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="PinEntryButtonLayout">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@drawable/selector_pearl_white</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">@dimen/pinentry_padding</item>
+    </style>
+
+    <style name="PinEntryButtonNumberText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/blockchain_blue</item>
+        <item name="android:textSize">@dimen/pinentry_num_text_size</item>
+    </style>
+
+    <style name="PinEntryButtonLetterText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/blockchain_grey</item>
+        <item name="android:textSize">@dimen/pinentry_alpha_text_size</item>
+    </style>
+
+    <style name="PinEntryKeyboardHorizontalContainer">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:baselineAligned">false</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
 
 </resources>
