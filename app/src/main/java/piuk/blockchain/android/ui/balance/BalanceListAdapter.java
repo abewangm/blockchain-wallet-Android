@@ -129,11 +129,11 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
                 holder.watchOnly.setVisibility(View.GONE);
             }
 
-//            if (tx.isDoubleSpend()) {
-//                holder.doubleSpend.setVisibility(View.VISIBLE);
-//            } else {
-//                holder.doubleSpend.setVisibility(View.GONE);
-//            }
+            if (tx.isDoubleSpend()) {
+                holder.doubleSpend.setVisibility(View.VISIBLE);
+            } else {
+                holder.doubleSpend.setVisibility(View.GONE);
+            }
 
             holder.result.setOnClickListener(v -> {
                 onViewFormatUpdated(!mIsBtc);
