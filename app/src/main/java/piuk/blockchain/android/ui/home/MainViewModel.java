@@ -121,6 +121,17 @@ public class MainViewModel extends BaseViewModel {
                         .subscribe(() -> {
                             if (finalUri != null) {
                                 dataListener.onStartContactsActivity(finalUri);
+                            } else {
+                                compositeDisposable.add(
+                                        contactsDataManager.getMessages(true)
+                                        .subscribe(
+                                                messages -> {
+                                                    // TODO: 19/12/2016 Notify the UI that a message has been received
+                                                    Log.d(TAG, "registerNodeForMetaDataService: " + messages);
+                                                }, throwable -> {
+                                                    Log.e(TAG, "registerNodeForMetaDataService: ", throwable);
+                                                }
+                                        ));
                             }
                             // TODO: 01/12/2016 Should probably inform the user here if coming from URI click
                         }, throwable -> Log.wtf(TAG, "registerNodeForMetaDataService: ", throwable)));

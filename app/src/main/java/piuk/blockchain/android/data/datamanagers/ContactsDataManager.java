@@ -145,7 +145,7 @@ public class ContactsDataManager {
     }
 
     /**
-     * Returns a {@link List<Contact>} object containing a list of trusted users
+     * Returns a {@link List<Contact>} object containing a list of trusted users. List can be empty.
      *
      * @return A {@link List<Contact>} object
      */
@@ -323,7 +323,7 @@ public class ContactsDataManager {
 
     /**
      * Returns a list of {@link Message} objects, with a flag to only return those which haven't
-     * been read yet
+     * been read yet. Can return an empty list.
      *
      * @param onlyNew If true, returns only the unread messages
      * @return An {@link Observable} wrapping a list of Message objects

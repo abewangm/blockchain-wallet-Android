@@ -23,8 +23,7 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
     private DataListener dataListener;
     private String contactName;
     @Inject AppUtil appUtil;
-//    @Inject
-    ContactsDataManager contactManager;
+    @Inject ContactsDataManager contactManager;
 
     interface DataListener {
 
@@ -39,32 +38,12 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
     }
 
     ContactPairingMethodViewModel(DataListener dataListener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getAppComponent().inject(this);
         this.dataListener = dataListener;
     }
 
     @Override
     public void onViewReady() {
-
-//        //
-//        // TODO: 15/12/2016  I bypassed injection here
-//        Contacts contacts = null;
-//        try {
-//
-//            // TODO: 15/12/2016 prompt for second pw if any
-//            String secondPassword = null;
-//
-//            PayloadManager pm = PayloadManager.getInstance();
-//            pm.loadNodes(secondPassword);
-//            MetadataNodeFactory fac = pm.getMetadataNodeFactory();
-//            contacts = new Contacts(fac.getMetadataNode(), fac.getSharedMetadataNode());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        ContactsService contactsService = new ContactsService(contacts);
-//        contactManager = new ContactsDataManager(contactsService);
-
-
         Intent pageIntent = dataListener.getPageIntent();
         if (pageIntent != null && pageIntent.hasExtra(INTENT_KEY_CONTACT_NAME)) {
             // Don't need contact name in all flows to this page
@@ -91,6 +70,7 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
                         metaDataUri -> {
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_SEND);
+                            // FIXME java.lang.ClassNotFoundException: Didn't find class "org.apache.http.client.utils.URIBuilder" on path
                     intent.putExtra(Intent.EXTRA_TEXT, metaDataUri.createURI());
                     intent.setType("text/plain");
                     dataListener.onShareIntentGenerated(intent);

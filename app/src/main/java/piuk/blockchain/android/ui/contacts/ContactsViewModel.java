@@ -68,7 +68,8 @@ public class ContactsViewModel extends BaseViewModel {
 
         dataListener.setUiState(ContactsActivity.LOADING);
         compositeDisposable.add(
-                contactsDataManager.getContactList()
+                contactsDataManager.fetchContacts()
+                        .andThen(contactsDataManager.getContactList())
                         .subscribe(
                                 this::handleContactListUpdate,
                                 throwable -> {

@@ -10,6 +10,7 @@ import piuk.blockchain.android.data.api.UrlSettings;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.InstanceIdService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
+import piuk.blockchain.android.ui.contacts.ContactPairingMethodViewModel;
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -48,4 +49,6 @@ public interface ApplicationComponent {
     void inject(BlockchainApplication blockchainApplication);
 
     void inject(ContactsDataManager contactsDataManager);
+
+    void inject(ContactPairingMethodViewModel contactPairingMethodViewModel);
 }
