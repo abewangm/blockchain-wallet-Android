@@ -6,18 +6,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.util.Log;
 
-import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.metadata.data.PaymentRequest;
-import info.blockchain.wallet.payload.PayloadManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import piuk.blockchain.android.data.datamanagers.ContactsManager;
+import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.services.ContactsService;
@@ -35,8 +32,7 @@ public class ContactsViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     @Inject QrCodeDataManager qrCodeDataManager;
-//    @Inject
-    ContactsManager contactsManager;
+    @Inject ContactsDataManager contactsDataManager;
     @Inject PrefsUtil prefsUtil;
 
     interface DataListener {
@@ -67,30 +63,12 @@ public class ContactsViewModel extends BaseViewModel {
     @Override
     public void onViewReady() {
 
-        //
-        // TODO: 15/12/2016  I bypassed injection here
-        Contacts contacts = null;
-        try {
-
-            // TODO: 15/12/2016 prompt for second pw if any
-            String secondPassword = null;
-
-            PayloadManager pm = PayloadManager.getInstance();
-            pm.loadNodes(secondPassword);
-            MetadataNodeFactory fac = pm.getMetadataNodeFactory();
-            contacts = new Contacts(fac.getMetadataNode(), fac.getSharedMetadataNode());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        ContactsService contactsService = new ContactsService(contacts);
-        contactsManager = new ContactsManager(contactsService);
-
         // Subscribe to notification events
         subscribeToNotifications();
 
         dataListener.setUiState(ContactsActivity.LOADING);
         compositeDisposable.add(
-                contactsManager.getContactList()
+                contactsDataManager.getContactList()
                         .subscribe(
                                 this::handleContactListUpdate,
                                 throwable -> {

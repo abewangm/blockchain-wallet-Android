@@ -7,8 +7,11 @@ import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.PaymentRequest;
 import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 
+import org.bitcoinj.crypto.DeterministicKey;
+
 import java.util.List;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 
 public class ContactsService {
@@ -20,8 +23,50 @@ public class ContactsService {
     }
 
     ///////////////////////////////////////////////////////////////////////////
+    // INIT METHODS AND AUTH
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Initialises the Contacts service
+     *
+     * @param metaDataHDNode       The key for the metadata service
+     * @param sharedMetaDataHDNode The key for the shared metadata service
+     * @return A {@link Completable} object
+     */
+    public Completable initContactsService(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode) {
+        return Completable.fromCallable(() -> {
+            contacts.init(metaDataHDNode, sharedMetaDataHDNode);
+            return Void.TYPE;
+        });
+    }
+
+    /**
+     * Invalidates the access token for re-authing
+     *
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable invalidate() {
+        return Completable.fromCallable(() -> {
+            contacts.invalidateToken();
+            return Void.TYPE;
+        });
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
     // CONTACTS SPECIFIC
     ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Fetches an updated version of the contacts list
+     *
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable fetchContacts() {
+        return Completable.fromCallable(() -> {
+            contacts.fetch();
+            return Void.TYPE;
+        });
+    }
 
     /**
      * Returns a {@link List<Contact>} object containing a list of trusted users
@@ -29,8 +74,7 @@ public class ContactsService {
      * @return A {@link List<Contact>} object
      */
     public Observable<List<Contact>> getContactList() {
-
-        return Observable.fromCallable(() -> contacts.getContactList());
+        return Observable.just(contacts.getContactList());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -40,7 +84,7 @@ public class ContactsService {
     /**
      * Creates a new invite and associated invite ID for linking two users together
      *
-     * @param myDetails       My details that will be visible in invitation url
+     * @param myDetails        My details that will be visible in invitation url
      * @param recipientDetails Recipient details - This will be added to my contacts list
      * @return An {@link Invitation} object
      */
@@ -69,8 +113,11 @@ public class ContactsService {
      * @param paymentRequest A PaymentRequest object containing information about the proposed
      *                       transaction
      */
-    public void sendPaymentRequest(String recipientMdid, PaymentRequest paymentRequest) throws Exception {
-        contacts.sendPaymentRequest(recipientMdid, paymentRequest);
+    public Completable sendPaymentRequest(String recipientMdid, PaymentRequest paymentRequest) {
+        return Completable.fromCallable(() -> {
+            contacts.sendPaymentRequest(recipientMdid, paymentRequest);
+            return Void.TYPE;
+        });
     }
 
     /**
@@ -84,7 +131,6 @@ public class ContactsService {
      * @return A {@link Message} object
      */
     public Observable<Message> acceptPaymentRequest(String recipientMdid, PaymentRequest paymentRequest, String note, String receiveAddress) {
-        // TODO: 15/12/2016 probably no need to catch returned message?
         return Observable.fromCallable(() -> contacts.acceptPaymentRequest(recipientMdid, paymentRequest, note, receiveAddress));
     }
 

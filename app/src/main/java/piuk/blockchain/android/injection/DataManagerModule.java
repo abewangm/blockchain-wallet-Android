@@ -17,7 +17,6 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
-import piuk.blockchain.android.data.datamanagers.ContactsManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
@@ -128,12 +127,6 @@ public class DataManagerModule {
                 new PaymentService(new Payment()),
                 payloadManager);
     }
-
-//    @Provides
-//    @ViewModelScope
-//    protected ContactsManager provideSharedMetaDataManager() {
-//        return new ContactsManager();
-//    }
 
     @Provides
     @ViewModelScope

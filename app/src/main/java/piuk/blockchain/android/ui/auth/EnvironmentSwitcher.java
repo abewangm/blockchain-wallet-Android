@@ -64,16 +64,23 @@ class EnvironmentSwitcher {
                             break;
                     }
                 })
-                .setPositiveButton("Select", (dialog, id) -> {
-                    urlSettings.changeEnvironment(
-                            selectedEnvironment[0] != null ? selectedEnvironment[0] : PersistentUrls.Environment.PRODUCTION);
+                .setPositiveButton("Select", (dialog, id) ->
+                        new AlertDialog.Builder(context, R.style.AlertDialogStyle)
+                                .setTitle("Warning")
+                                .setMessage("The app will now restart. To ensure correct behaviour, please remove the app from memory (by swiping it away from recents) to avoid any unexpected behaviour.")
+                                .setPositiveButton(android.R.string.ok, (dialog1, which) -> {
+                                    urlSettings.changeEnvironment(
+                                            selectedEnvironment[0] != null ? selectedEnvironment[0] : PersistentUrls.Environment.PRODUCTION);
 
-                    ToastCustom.makeText(
-                            context,
-                            "Environment set to " + urlSettings.getCurrentEnvironment().getName(),
-                            ToastCustom.LENGTH_SHORT,
-                            ToastCustom.TYPE_OK);
-                })
+                                    ToastCustom.makeText(
+                                            context,
+                                            "Environment set to " + urlSettings.getCurrentEnvironment().getName(),
+                                            ToastCustom.LENGTH_SHORT,
+                                            ToastCustom.TYPE_OK);
+                                })
+                                .setNegativeButton(android.R.string.cancel, (dialog1, which) -> dialog1.dismiss())
+                                .create()
+                                .show())
                 .setNegativeButton("Reset Timers", (dialogInterface, i) -> resetAllTimers())
                 .create()
                 .show();

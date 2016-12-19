@@ -13,10 +13,4 @@ public class InjectorTestUtils {
                                                 DataManagerModule managerModule) {
         injector.initAppComponent(applicationModule, apiModule, managerModule);
     }
-
-    public static void initMetaDataComponent(Injector injector,
-                                                ContactsModule metaDataModule) {
-        injector.initMetaDataComponent(metaDataModule);
-    }
-
 }

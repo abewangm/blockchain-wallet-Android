@@ -22,7 +22,8 @@ public class ApiInterceptor implements Interceptor {
         long startTime = System.nanoTime();
 
         String requestLog = String.format(
-                "Sending request %s with headers %s%n%s",
+                "Sending request of type %s to %s with headers %s%n%s",
+                request.method(),
                 request.url(),
                 chain.connection(),
                 request.headers());

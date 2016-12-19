@@ -5,16 +5,12 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
-import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.metadata.MetadataNodeFactory;
-import info.blockchain.wallet.payload.PayloadManager;
 
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.datamanagers.ContactsManager;
-import piuk.blockchain.android.data.services.ContactsService;
+import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -28,7 +24,7 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
     private String contactName;
     @Inject AppUtil appUtil;
 //    @Inject
-    ContactsManager contactManager;
+    ContactsDataManager contactManager;
 
     interface DataListener {
 
@@ -50,23 +46,23 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
     @Override
     public void onViewReady() {
 
-        //
-        // TODO: 15/12/2016  I bypassed injection here
-        Contacts contacts = null;
-        try {
-
-            // TODO: 15/12/2016 prompt for second pw if any
-            String secondPassword = null;
-
-            PayloadManager pm = PayloadManager.getInstance();
-            pm.loadNodes(secondPassword);
-            MetadataNodeFactory fac = pm.getMetadataNodeFactory();
-            contacts = new Contacts(fac.getMetadataNode(), fac.getSharedMetadataNode());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        ContactsService contactsService = new ContactsService(contacts);
-        contactManager = new ContactsManager(contactsService);
+//        //
+//        // TODO: 15/12/2016  I bypassed injection here
+//        Contacts contacts = null;
+//        try {
+//
+//            // TODO: 15/12/2016 prompt for second pw if any
+//            String secondPassword = null;
+//
+//            PayloadManager pm = PayloadManager.getInstance();
+//            pm.loadNodes(secondPassword);
+//            MetadataNodeFactory fac = pm.getMetadataNodeFactory();
+//            contacts = new Contacts(fac.getMetadataNode(), fac.getSharedMetadataNode());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        ContactsService contactsService = new ContactsService(contacts);
+//        contactManager = new ContactsDataManager(contactsService);
 
 
         Intent pageIntent = dataListener.getPageIntent();

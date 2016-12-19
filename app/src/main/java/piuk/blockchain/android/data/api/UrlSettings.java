@@ -49,6 +49,16 @@ public class UrlSettings {
         return persistentUrls.getCurrentEnvironment();
     }
 
+    @NonNull
+    public String getBaseServerUrl() {
+        return PersistentUrls.getInstance().getCurrentBaseServerUrl();
+    }
+
+    @NonNull
+    public String getBaseApiUrl() {
+        return PersistentUrls.getInstance().getCurrentBaseApiUrl();
+    }
+
     /**
      * Sets the current environment to whatever is passed to it. Clears all user data other than the
      * selected env and restarts the app
