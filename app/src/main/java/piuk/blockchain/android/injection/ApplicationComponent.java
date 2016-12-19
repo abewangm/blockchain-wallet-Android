@@ -6,7 +6,7 @@ import javax.inject.Singleton;
 
 import dagger.Component;
 import piuk.blockchain.android.BlockchainApplication;
-import piuk.blockchain.android.data.api.UrlSettings;
+import piuk.blockchain.android.data.api.DebugSettings;
 import piuk.blockchain.android.data.notifications.InstanceIdService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper;
@@ -36,7 +36,7 @@ public interface ApplicationComponent {
 
     void inject(ReceiveCurrencyHelper receiveCurrencyHelper);
 
-    void inject(UrlSettings urlSettings);
+    void inject(DebugSettings debugSettings);
 
     void inject(PrivateKeyFactory privateKeyFactory);
 

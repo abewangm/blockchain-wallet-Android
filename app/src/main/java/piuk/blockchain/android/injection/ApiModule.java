@@ -1,6 +1,5 @@
 package piuk.blockchain.android.injection;
 
-import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.api.Notifications;
 import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -72,9 +71,8 @@ public class ApiModule {
     @Singleton
     @Named("api")
     protected Retrofit provideRetrofitApiInstance(OkHttpClient okHttpClient, JacksonConverterFactory converterFactory) {
-        // TODO: 02/12/2016 For now this only provides the metadata dev URL, this will change
         return new Retrofit.Builder()
-                .baseUrl(MetadataEndpoints.API_URL)
+                .baseUrl(PersistentUrls.getInstance().getCurrentBaseApiUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .build();

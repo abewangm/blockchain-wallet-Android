@@ -5,14 +5,14 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 
-import piuk.blockchain.android.data.api.UrlSettings;
+import piuk.blockchain.android.data.api.DebugSettings;
 
 public class PrefsUtil implements PersistentPrefs {
 
     private SharedPreferences preferenceManager;
 
     public PrefsUtil(Context context) {
-        this.preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
+        preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     @Override
@@ -112,8 +112,8 @@ public class PrefsUtil implements PersistentPrefs {
 
     @Override
     public void clearPrefsAndKeepEnvironment() {
-        String environment = getValue(UrlSettings.KEY_CURRENT_ENVIRONMENT, "");
+        String environment = getValue(DebugSettings.KEY_CURRENT_ENVIRONMENT, "");
         clear();
-        setValue(UrlSettings.KEY_CURRENT_ENVIRONMENT, environment);
+        setValue(DebugSettings.KEY_CURRENT_ENVIRONMENT, environment);
     }
 }
