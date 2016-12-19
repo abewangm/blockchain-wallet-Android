@@ -18,7 +18,7 @@ import io.reactivex.functions.Function;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.ContactsService;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "AnonymousInnerClassMayBeStatic"})
 public class ContactsDataManager {
 
     private ContactsService contactsService;
@@ -55,12 +55,19 @@ public class ContactsDataManager {
     }
 
     /**
+     * Invalidates the access token for re-authing
+     */
+    private Completable invalidate() {
+        return contactsService.invalidate()
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
      * Calls a function and invalidates the access token on failure before calling the original
      * function again, which will trigger getting another access token.
      */
     private <T> Observable<T> callWithToken(ObservableTokenRequest<T> function) {
         ObservableTokenFunction<T> tokenFunction = new ObservableTokenFunction<T>() {
-
             @Override
             public Observable<T> apply(Void empty) {
                 return function.apply();
@@ -74,7 +81,6 @@ public class ContactsDataManager {
 
     private Completable callWithToken(CompletableTokenRequest function) {
         CompletableTokenFunction tokenFunction = new CompletableTokenFunction() {
-
             @Override
             public Completable apply(Void aVoid) {
                 return function.apply();
@@ -87,11 +93,12 @@ public class ContactsDataManager {
     }
 
     // For collapsing into Lambdas
-    interface ObservableTokenRequest<T> {
+    private interface ObservableTokenRequest<T> {
         Observable<T> apply();
     }
 
-    interface CompletableTokenRequest {
+    // For collapsing into Lambdas
+    private interface CompletableTokenRequest {
         Completable apply();
     }
 
@@ -103,11 +110,58 @@ public class ContactsDataManager {
         public abstract Completable apply(Void empty);
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // CONTACTS
+    ///////////////////////////////////////////////////////////////////////////
+
     /**
-     * Invalidates the access token for re-authing
+     * Fetches an updated version of the contacts list
+     *
+     * @return A {@link Completable} object, ie an asynchronous void operation
      */
-    private Completable invalidate() {
-        return contactsService.invalidate()
+    public Completable fetchContacts() {
+        return contactsService.fetchContacts()
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Saves the contacts list that's currently in memory to the metadata endpoint
+     *
+     * @return A {@link Completable} object, ie an asynchronous void operation≈≈
+     */
+    public Completable saveContacts() {
+        return contactsService.saveContacts()
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Completely wipes your contact list from the metadata endpoint. Does not update memory.
+     *
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable wipeContacts() {
+        return contactsService.wipeContacts()
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Returns a {@link List<Contact>} object containing a list of trusted users
+     *
+     * @return A {@link List<Contact>} object
+     */
+    public Observable<List<Contact>> getContactList() {
+        return contactsService.getContactList()
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Inserts a contact into the locally stored Contacts list. Does not save to server.
+     *
+     * @param contact The {@link Contact} to be stored
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable addContact(Contact contact) {
+        return contactsService.addContact(contact)
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -123,8 +177,8 @@ public class ContactsDataManager {
      * @return A {@link Contact} object
      */
     public Observable<Contact> createInvitation(Contact myDetails, Contact recipientDetails) {
-        return callWithToken(() -> contactsService.createInvitation(myDetails, recipientDetails)
-                .compose(RxUtil.applySchedulersToObservable()));
+        return callWithToken(() -> contactsService.createInvitation(myDetails, recipientDetails))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -134,27 +188,31 @@ public class ContactsDataManager {
      * @return An {@link Invitation} object
      */
     public Observable<Contact> acceptInvitation(String invitationUrl) {
-        return callWithToken(() -> contactsService.acceptInvitation(invitationUrl)
-                .compose(RxUtil.applySchedulersToObservable()));
+        return callWithToken(() -> contactsService.acceptInvitation(invitationUrl))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Fetches an updated version of the contacts list
+     * Returns some Contact information from an invitation link
      *
-     * @return A Completable object, ie an asynchronous void operation
+     * @param url The URL which has been sent to the user
+     * @return An {@link Observable} wrapping a Contact
      */
-    public Completable fetchContacts() {
-        return contactsService.fetchContacts()
-                .compose(RxUtil.applySchedulersToCompletable());
+    public Observable<Contact> readInvitationLink(String url) {
+        return callWithToken(() -> contactsService.readInvitationLink(url))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Returns a list of Contact objects, stored in memory in the Contacts object
+     * Allows the user to poll to check if the passed Contact has accepted their invite
      *
-     * @return An Observable wrapping a list of {@link Contact} objects
+     * @param contact The {@link Contact} to be queried
+     * @return An {@link Observable} wrapping a boolean value, returning true if the invitation has
+     * been accepted
      */
-    public Observable<List<Contact>> getContactList() {
-        return contactsService.getContactList();
+    public Observable<Boolean> readInvitationSent(Contact contact) {
+        return callWithToken(() -> contactsService.readInvitationSent(contact))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -209,6 +267,105 @@ public class ContactsDataManager {
     public Observable<List<PaymentRequestResponse>> getPaymentRequestResponses(boolean onlyNew) {
         return callWithToken(() -> contactsService.getPaymentRequestResponses(onlyNew)
                 .compose(RxUtil.applySchedulersToObservable()));
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // XPUB AND MDID HANDLING
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Returns the XPub associated with an MDID, should the user already be in your trusted contacts
+     * list
+     *
+     * @param mdid The MDID of the user you wish to query
+     * @return A {@link Observable} wrapping a String
+     */
+    public Observable<String> fetchXpub(String mdid) {
+        return contactsService.fetchXpub(mdid)
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Publishes the user's XPub to the metadata service
+     *
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable publishXpub() {
+        return contactsService.publishXpub()
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Adds a user's MDID to the trusted list in Shared Metadata
+     *
+     * @param mdid The user's MDID
+     * @return An {@link Observable} wrapping a boolean, representing a successful save
+     */
+    public Observable<Boolean> addTrusted(String mdid) {
+        return callWithToken(() -> contactsService.addTrusted(mdid))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Removes a user's MDID from the trusted list in Shared Metadata
+     *
+     * @param mdid The user's MDID
+     * @return An {@link Observable} wrapping a boolean, representing a successful deletion
+     */
+    public Observable<Boolean> deleteTrusted(String mdid) {
+        return callWithToken(() -> contactsService.deleteTrusted(mdid))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // MESSAGES
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Returns a list of {@link Message} objects, with a flag to only return those which haven't
+     * been read yet
+     *
+     * @param onlyNew If true, returns only the unread messages
+     * @return An {@link Observable} wrapping a list of Message objects
+     */
+    public Observable<List<Message>> getMessages(boolean onlyNew) {
+        return callWithToken(() -> contactsService.getMessages(onlyNew))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Allows users to read a particular message by retrieving it from the Shared Metadata service
+     *
+     * @param messageId The ID of the message to be read
+     * @return An {@link Observable} wrapping a {@link Message}
+     */
+    public Observable<Message> readMessage(String messageId) {
+        return callWithToken(() -> contactsService.readMessage(messageId))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Marks a message as read or unread
+     *
+     * @param messageId  The ID of the message to be marked as read/unread
+     * @param markAsRead A flag setting the read status
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable markMessageAsRead(String messageId, boolean markAsRead) {
+        return callWithToken(() -> contactsService.markMessageAsRead(messageId, markAsRead))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Decrypts a message from a specific user
+     *
+     * @param message The string to be decrypted
+     * @param mdid    The MDID of the user who sent the message
+     * @return An {@link Observable} containing the decrypted message
+     */
+    public Observable<Message> decryptMessageFrom(Message message, String mdid) {
+        return callWithToken(() -> contactsService.decryptMessageFrom(message, mdid))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
 }
