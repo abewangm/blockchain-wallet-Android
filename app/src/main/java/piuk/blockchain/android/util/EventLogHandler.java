@@ -29,11 +29,13 @@ public class EventLogHandler {
     }
 
     public void logLegacyEvent(boolean active) {
-        logEvent(PrefsUtil.KEY_EVENT_LEGACY, URL_EVENT_LEGACY, active);
+        // TODO: 20/12/2016 Disabled
+//        logEvent(PrefsUtil.KEY_EVENT_LEGACY, URL_EVENT_LEGACY, active);
     }
 
     public void logBackupEvent(boolean active) {
-        logEvent(PrefsUtil.KEY_EVENT_BACKUP, URL_EVENT_BACKUP, active);
+        // TODO: 20/12/2016 Disabled 
+//        logEvent(PrefsUtil.KEY_EVENT_BACKUP, URL_EVENT_BACKUP, active);
     }
 
     private void logEvent(String key, String url, boolean active) {
