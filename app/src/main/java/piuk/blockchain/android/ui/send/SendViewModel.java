@@ -1234,7 +1234,7 @@ public class SendViewModel extends BaseViewModel {
 
             //Create copy, otherwise pass by ref will override private key in wallet payload
             LegacyAddress tempLegacyAddress = new LegacyAddress();
-            tempLegacyAddress.setEncryptedKey(key.getPrivKeyBytes());
+            tempLegacyAddress.setEncryptedKeyBytes(key.getPrivKeyBytes());
             tempLegacyAddress.setAddress(key.toAddress(MainNetParams.get()).toString());
             tempLegacyAddress.setLabel(legacyAddress.getLabel());
             tempLegacyAddress.setWatchOnly(true);
