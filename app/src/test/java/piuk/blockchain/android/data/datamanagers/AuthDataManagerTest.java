@@ -170,16 +170,16 @@ public class AuthDataManagerTest extends RxTest {
     @Ignore // Seems that anything involving timers is now broken for testing
     @Test
     public void startPollingAuthStatusSuccess() throws Exception {
-//        // Arrange
+//         Arrange
 //        when(mWalletPayloadService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
 //        when(mWalletPayloadService.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
-//        // Act
+//         Act
 //        TestObserver<String> observer = mSubject.startPollingAuthStatus("1234567890").test();
-//        // Assert
+//         Assert
 //        verify(mWalletPayloadService).getSessionId(anyString());
 //        verify(mWalletPayloadService).getEncryptedPayload(anyString(), anyString());
+//        assertEquals(STRING_TO_RETURN, observer.values().get(0));
 //        observer.assertComplete();
-//        observer.onNext(STRING_TO_RETURN);
 //        observer.assertNoErrors();
     }
 

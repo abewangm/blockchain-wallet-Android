@@ -16,8 +16,7 @@ public class SwipeToReceiveViewModel extends BaseViewModel {
     private static final int DIMENSION_QR_CODE = 600;
 
     private DataListener dataListener;
-    @Inject
-    QrCodeDataManager dataManager;
+    @Inject QrCodeDataManager dataManager;
     @Inject SwipeToReceiveHelper swipeToReceiveHelper;
 
     interface DataListener {

@@ -22,6 +22,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -30,6 +31,9 @@ import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +44,7 @@ public class SwipeToReceiveViewModelTest {
     private SwipeToReceiveViewModel subject;
     @Mock SwipeToReceiveViewModel.DataListener activity;
     @Mock SwipeToReceiveHelper swipeToReceiveHelper;
+    @Mock QrCodeDataManager qrCodeDataManager;
 
     @Before
     public void setUp() throws Exception {
@@ -87,6 +92,7 @@ public class SwipeToReceiveViewModelTest {
         when(swipeToReceiveHelper.getReceiveAddresses()).thenReturn(addresses);
         when(swipeToReceiveHelper.getAccountName()).thenReturn("Account");
         when(swipeToReceiveHelper.getNextAvailableAddress()).thenReturn(Observable.just("addr0"));
+        when(qrCodeDataManager.generateQrCode(anyString(), anyInt())).thenReturn(Observable.just(mock(Bitmap.class)));
         // Act
         subject.onViewReady();
         // Assert
@@ -112,6 +118,11 @@ public class SwipeToReceiveViewModelTest {
                                                             MultiAddrFactory multiAddrFactory,
                                                             PrefsUtil prefsUtil) {
             return swipeToReceiveHelper;
+        }
+
+        @Override
+        protected QrCodeDataManager provideReceiveDataManager() {
+            return qrCodeDataManager;
         }
     }
 }
