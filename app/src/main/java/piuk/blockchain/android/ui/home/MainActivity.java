@@ -481,7 +481,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                     intent.setData(Uri.parse(url));
                     startActivity(intent);
                 })
-                .setNegativeButton(R.string.survey_negative_button, null)
+                .setNegativeButton(R.string.polite_no, null)
                 .create()
                 .show();
     }
