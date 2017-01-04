@@ -54,6 +54,7 @@ public class AccountViewModel extends BaseViewModel {
     }
 
     public interface DataListener {
+
         void onShowTransferableLegacyFundsWarning(boolean isAutoPopup);
 
         void onSetTransferLegacyFundsMenuItemVisible(boolean visible);
@@ -90,14 +91,14 @@ public class AccountViewModel extends BaseViewModel {
      * Silently check if there are any spendable legacy funds that need to be sent to default
      * account. Prompt user when done calculating.
      */
-    void checkTransferableLegacyFunds(boolean isAutoPopup) {
+    void checkTransferableLegacyFunds(boolean isAutoPopup, boolean showWarningDialog) {
         compositeDisposable.add(
                 fundsDataManager.getTransferableFundTransactionListForDefaultAccount()
                         .subscribe(triple -> {
                             if (payloadManager.getPayload().isUpgraded() && !triple.getLeft().isEmpty()) {
                                 dataListener.onSetTransferLegacyFundsMenuItemVisible(true);
 
-                                if (prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true) || !isAutoPopup) {
+                                if ((prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true) || !isAutoPopup) && showWarningDialog) {
                                     dataListener.onShowTransferableLegacyFundsWarning(isAutoPopup);
                                 }
                             } else {

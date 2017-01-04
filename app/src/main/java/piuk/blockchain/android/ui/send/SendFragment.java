@@ -545,7 +545,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
             // If should show app rate, success dialog shows first and launches
             // rate dialog on dismiss. Dismissing rate dialog then closes the page. This will
-            // happen if the user choses to rate the app - they'll return to the main page.
+            // happen if the user chooses to rate the app - they'll return to the main page.
             if (appRate.shouldShowDialog()) {
                 AlertDialog ratingDialog = appRate.getRateDialog();
                 ratingDialog.setOnDismissListener(d -> finishPage());

@@ -14,8 +14,8 @@ android {
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 25
-        versionCode 232
-        versionName "6.1.41"
+        versionCode 235
+        versionName "6.2.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
@@ -112,7 +112,7 @@ android {
 ext {
     supportVersion = '25.1.0'
     googleServicesVersion = '10.0.1'
-    rxJavaVersion = '2.0.2'
+    rxJavaVersion = '2.0.4'
     rxAndroidVersion = '2.0.1'
     daggerVersion = '2.8'
     retrofitVersion = '2.1.0'

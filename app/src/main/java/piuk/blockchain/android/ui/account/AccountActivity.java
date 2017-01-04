@@ -73,7 +73,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
                 onUpdateAccountsList();
                 // Check if we need to hide/show the transfer funds icon in the Toolbar
-                viewModel.checkTransferableLegacyFunds(false);
+                viewModel.checkTransferableLegacyFunds(false, false);
             }
         }
     };
@@ -128,7 +128,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.account_activity_actions, menu);
         transferFundsMenuItem = menu.findItem(R.id.action_transfer_funds);
-        viewModel.checkTransferableLegacyFunds(true);//Auto popup
+        viewModel.checkTransferableLegacyFunds(true, true);//Auto popup
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -141,7 +141,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 return true;
             case R.id.action_transfer_funds:
                 showProgressDialog(R.string.please_wait);
-                viewModel.checkTransferableLegacyFunds(false);//Not auto popup
+                viewModel.checkTransferableLegacyFunds(false, true);//Not auto popup
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

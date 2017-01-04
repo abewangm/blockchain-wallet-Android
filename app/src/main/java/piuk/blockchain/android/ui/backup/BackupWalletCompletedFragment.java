@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import info.blockchain.api.Unspent;
+import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 
@@ -78,7 +79,11 @@ public class BackupWalletCompletedFragment extends Fragment {
 
         if (getArguments() != null && getArguments().getBoolean(KEY_CHECK_TRANSFER)) {
             TransferFundsDataManager fundsHelper =
-                    new TransferFundsDataManager(PayloadManager.getInstance(), new Unspent(), new Payment());
+                    new TransferFundsDataManager(
+                            PayloadManager.getInstance(),
+                            MultiAddrFactory.getInstance(),
+                            new Unspent(),
+                            new Payment());
             compositeDisposable.add(
                     fundsHelper.getTransferableFundTransactionListForDefaultAccount()
                             .subscribe(triple -> {

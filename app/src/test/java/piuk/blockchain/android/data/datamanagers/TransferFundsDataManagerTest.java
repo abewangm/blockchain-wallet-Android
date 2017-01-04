@@ -47,16 +47,17 @@ import static org.mockito.Mockito.when;
 
 public class TransferFundsDataManagerTest extends RxTest {
 
-    private TransferFundsDataManager mSubject;
-    @Mock PayloadManager mPayloadManager;
-    @Mock Unspent mUnspentApi;
-    @Mock Payment mPayment;
+    private TransferFundsDataManager subject;
+    @Mock PayloadManager payloadManager;
+    @Mock Unspent unspentApi;
+    @Mock Payment payment;
+    @Mock MultiAddrFactory multiAddrFactory;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
-        mSubject = new TransferFundsDataManager(mPayloadManager, mUnspentApi, mPayment);
+        subject = new TransferFundsDataManager(payloadManager, multiAddrFactory, unspentApi, payment);
     }
 
     @After
@@ -80,22 +81,22 @@ public class TransferFundsDataManagerTest extends RxTest {
         suggestedFee.defaultFeePerKb = new BigInteger("100");
         DynamicFeeCache.getInstance().setSuggestedFee(suggestedFee);
         MultiAddrFactory.getInstance().setLegacyBalance("address", 1000000L);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
         HDWallet mockHdWallet = mock(HDWallet.class);
         when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
         when(mockHdWallet.getDefaultIndex()).thenReturn(0);
         when(mockPayload.getLegacyAddressList()).thenReturn(legacyAddresses);
-        when(mUnspentApi.getUnspentOutputs(anyString())).thenReturn(mock(JSONObject.class));
+        when(unspentApi.getUnspentOutputs(anyString())).thenReturn(mock(JSONObject.class));
         UnspentOutputs mockUnspentOutputs = mock(UnspentOutputs.class);
-        when(mPayment.getCoins(any(JSONObject.class))).thenReturn(mockUnspentOutputs);
+        when(payment.getCoins(any(JSONObject.class))).thenReturn(mockUnspentOutputs);
         SpendableUnspentOutputs mockSpendableUnspentOutputs = mock(SpendableUnspentOutputs.class);
-        when(mPayment.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class))).thenReturn(mockSpendableUnspentOutputs);
+        when(payment.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class))).thenReturn(mockSpendableUnspentOutputs);
         when(mockSpendableUnspentOutputs.getAbsoluteFee()).thenReturn(new BigInteger("10"));
         SweepBundle mockSweepBundle = mock(SweepBundle.class);
         when(mockSweepBundle.getSweepAmount()).thenReturn(new BigInteger("5460"));
-        when(mPayment.getSweepBundle(any(UnspentOutputs.class), any(BigInteger.class))).thenReturn(mockSweepBundle);
+        when(payment.getSweepBundle(any(UnspentOutputs.class), any(BigInteger.class))).thenReturn(mockSweepBundle);
         // Act
-        TestObserver<Triple<List<PendingTransaction>, Long, Long>> observer = mSubject.getTransferableFundTransactionListForDefaultAccount().test();
+        TestObserver<Triple<List<PendingTransaction>, Long, Long>> observer = subject.getTransferableFundTransactionListForDefaultAccount().test();
         // Assert
         observer.assertComplete();
         observer.assertNoErrors();
@@ -128,14 +129,14 @@ public class TransferFundsDataManagerTest extends RxTest {
             add(transaction1);
             add(transaction1);
         }};
-        when(mPayloadManager.savePayloadToServer()).thenReturn(true);
+        when(payloadManager.savePayloadToServer()).thenReturn(true);
         Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
         when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
 
         // Act
-        TestObserver<String> observer = mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
+        TestObserver<String> observer = subject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
         // Assert
         assertEquals("hash", observer.values().get(0));
         observer.assertComplete();
@@ -169,15 +170,15 @@ public class TransferFundsDataManagerTest extends RxTest {
             add(transaction1);
             add(transaction1);
         }};
-        when(mPayloadManager.savePayloadToServer()).thenReturn(true);
+        when(payloadManager.savePayloadToServer()).thenReturn(true);
         Payload mockPayload = mock(Payload.class);
         // For now, this method will cause an exception to be thrown
         // In the future, this should be testable and this particular setup should be successful
         when(mockPayload.isDoubleEncrypted()).thenReturn(true);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
 
         // Act
-        TestObserver<String> observer = mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
+        TestObserver<String> observer = subject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
         // Assert
         observer.assertError(Throwable.class);
         observer.assertNotComplete();
@@ -209,14 +210,14 @@ public class TransferFundsDataManagerTest extends RxTest {
             add(transaction1);
             add(transaction1);
         }};
-        when(mPayloadManager.savePayloadToServer()).thenReturn(true);
+        when(payloadManager.savePayloadToServer()).thenReturn(true);
         Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
         when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
 
         // Act
-        TestObserver<String> observer = mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
+        TestObserver<String> observer = subject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
         // Assert
         observer.assertError(Throwable.class);
         observer.assertNotComplete();
@@ -247,10 +248,10 @@ public class TransferFundsDataManagerTest extends RxTest {
             add(transaction1);
             add(transaction1);
         }};
-        when(mPayloadManager.savePayloadToServer()).thenReturn(true);
+        when(payloadManager.savePayloadToServer()).thenReturn(true);
 
         // Act
-        TestObserver<String> observer = mSubject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
+        TestObserver<String> observer = subject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
         // Assert
         observer.assertError(Throwable.class);
         observer.assertNotComplete();
@@ -260,9 +261,9 @@ public class TransferFundsDataManagerTest extends RxTest {
     @Test
     public void savePayloadToServer() throws Exception {
         // Arrange
-        when(mPayloadManager.savePayloadToServer()).thenReturn(true);
+        when(payloadManager.savePayloadToServer()).thenReturn(true);
         // Act
-        TestObserver<Boolean> observer = mSubject.savePayloadToServer().test();
+        TestObserver<Boolean> observer = subject.savePayloadToServer().test();
         // Assert
         assertEquals(true, observer.values().get(0));
         observer.assertComplete();
