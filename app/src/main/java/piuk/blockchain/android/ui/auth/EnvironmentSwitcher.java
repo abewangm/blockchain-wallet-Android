@@ -12,6 +12,7 @@ import java.util.List;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.DebugSettings;
+import piuk.blockchain.android.ui.account.AccountViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -91,6 +92,7 @@ class EnvironmentSwitcher {
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_TIME_ELAPSED);
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER);
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER);
+        prefsUtil.removeValue(AccountViewModel.KEY_WARN_TRANSFER_ALL);
         AppRate.reset(context);
         AccessState.getInstance().setPIN(null);
 
