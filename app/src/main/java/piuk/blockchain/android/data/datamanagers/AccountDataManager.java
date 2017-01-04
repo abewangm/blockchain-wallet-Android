@@ -63,7 +63,6 @@ public class AccountDataManager {
         try {
             setKeyForLegacyAddress(legacyAddress, key, secondPassword);
         } catch (Exception e) {
-            e.printStackTrace();
             return Observable.error(e);
         }
         legacyAddress.setWatchOnly(false);

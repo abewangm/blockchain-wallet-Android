@@ -364,14 +364,8 @@ public class ReceiveActivity extends BaseAuthActivity implements ReceiveViewMode
 
         mBinding.content.receivingAddress.setText(receiveAddress);
 
-        long amountLong;
-        if (mIsBTC) {
-            amountLong = mViewModel.getCurrencyHelper().getLongAmount(
-                    mBinding.content.amountContainer.amountBtc.getText().toString());
-        } else {
-            amountLong = mViewModel.getCurrencyHelper().getLongAmount(
-                    mBinding.content.amountContainer.amountFiat.getText().toString());
-        }
+        long amountLong = mViewModel.getCurrencyHelper().getLongAmount(
+                mBinding.content.amountContainer.amountBtc.getText().toString());
 
         BigInteger amountBigInt = mViewModel.getCurrencyHelper().getUndenominatedAmount(amountLong);
 
