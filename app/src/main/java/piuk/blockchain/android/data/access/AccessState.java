@@ -102,6 +102,7 @@ public class AccessState {
         }
 
         mPin = passedPin;
+        appUtil.applyPRNGFixes();
 
         return Observable.create(subscriber -> {
             try {
