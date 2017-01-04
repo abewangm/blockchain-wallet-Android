@@ -85,6 +85,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 transactionAdapter.onTransactionsUpdated(viewModel.getTransactionList());
                 binding.swipeContainer.setRefreshing(false);
                 binding.rvTransactions.getAdapter().notifyDataSetChanged();
+                binding.rvTransactions.scrollToPosition(0);
                 // Check backup status on receiving funds
                 viewModel.onViewReady();
             }
