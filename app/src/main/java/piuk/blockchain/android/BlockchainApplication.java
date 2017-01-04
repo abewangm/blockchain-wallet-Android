@@ -24,6 +24,7 @@ import piuk.blockchain.android.data.connectivity.ConnectivityManager;
 import piuk.blockchain.android.data.services.PinStoreService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.ApplicationLifeCycle;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
@@ -68,16 +69,34 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
         RxJavaPlugins.setErrorHandler(throwable -> Log.e(RX_ERROR_TAG, throwable.getMessage(), throwable));
 
+        AppUtil appUtil = new AppUtil(this);
+
         AccessState.getInstance().initAccessState(this,
                 new PrefsUtil(this),
                 new PinStoreService(new PinStore()),
-                new AppUtil(this));
+                appUtil);
+
+        // Apply PRNG fixes on app start if needed
+        appUtil.applyPRNGFixes();
 
         ConnectivityManager.getInstance().registerNetworkListener(this);
 
         checkSecurityProviderAndPatchIfNeeded();
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+
+        ApplicationLifeCycle.getInstance().addListener(new ApplicationLifeCycle.LifeCycleListener() {
+            @Override
+            public void onBecameForeground() {
+                // Ensure that PRNG fixes are always current for the session
+                appUtil.applyPRNGFixes();
+            }
+
+            @Override
+            public void onBecameBackground() {
+                // No-op
+            }
+        });
     }
 
     // Pass instances to JAR Framework
