@@ -56,12 +56,8 @@ public class AccountDataManager {
      * @return An {@link Observable<Boolean>} representing a successful save
      */
     public Observable<Boolean> setPrivateKey(ECKey key, @Nullable CharSequenceX secondPassword) {
-        try {
-            return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword))
-                    .compose(RxUtil.applySchedulersToObservable());
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
+        return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
