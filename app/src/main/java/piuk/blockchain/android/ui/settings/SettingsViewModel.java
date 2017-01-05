@@ -118,8 +118,13 @@ public class SettingsViewModel extends BaseViewModel {
                                     handleUpdate();
                                 },
                                 throwable -> {
-                                    settings = new Settings();
+                                    if (settings == null) {
+                                        // Show unloaded if necessary, keep old settings if failed update
+                                        settings = new Settings();
+                                    }
                                     handleUpdate();
+                                    // Warn error when updating
+                                    dataListener.showToast(R.string.settings_error_updating, ToastCustom.TYPE_ERROR);
                                 }));
     }
 

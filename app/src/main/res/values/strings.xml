@@ -400,6 +400,7 @@
     <string name="yubikey">Yubikey</string>
     <string name="disable_2fa_first">Please disable 2-step Verification via SMS in the security settings first.</string>
     <string name="settings_field_cant_be_empty">Field can\'t be empty.</string>
+    <string name="settings_error_updating">Error updating settings, please try again</string>
 
     <string name="request_camera_permission">Camera access is required.</string>
     <string name="request_location_permission">Location access is required.</string>
