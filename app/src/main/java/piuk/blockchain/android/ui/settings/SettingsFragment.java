@@ -98,7 +98,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
+            if (intent.getAction().equals(BalanceFragment.ACTION_INTENT)) {
                 viewModel.onViewReady();
             }
         }

@@ -2,9 +2,9 @@ package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.api.Settings;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.SettingsService;
-import io.reactivex.Observable;
 
 public class SettingsDataManager {
 
@@ -19,7 +19,7 @@ public class SettingsDataManager {
      *
      * @param guid      The user's GUID
      * @param sharedKey The shared key
-     * @return {@link Observable < Settings >} wrapping the Settings object
+     * @return {@link Observable<Settings>} wrapping the Settings object
      */
     public Observable<Settings> updateSettings(String guid, String sharedKey) {
         return settingsService.updateSettings(guid, sharedKey)
