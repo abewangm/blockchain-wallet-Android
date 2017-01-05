@@ -17,6 +17,15 @@ public class PermissionUtil {
     public static final int PERMISSION_REQUEST_CAMERA = 161;
     public static final int PERMISSION_REQUEST_WRITE_STORAGE = 162;
 
+    // android.app.Fragment
+
+    /**
+     * Requests the camera permission from an Android framework fragment
+     *
+     * @param parentView The root view of the fragment
+     * @param context   A context
+     * @param fragment  An Android framework {@link android.app.Fragment}
+     */
     public static void requestCameraPermissionFromFragment(View parentView, Context context, final Fragment fragment) {
         // Permission has not been granted and must be requested.
         if (FragmentCompat.shouldShowRequestPermissionRationale(fragment, Manifest.permission.CAMERA)) {
@@ -31,6 +40,31 @@ public class PermissionUtil {
 
         } else {
             FragmentCompat.requestPermissions(fragment,
+                    new String[]{Manifest.permission.CAMERA},
+                    PERMISSION_REQUEST_CAMERA);
+        }
+    }
+
+    /**
+     * Requests the camera permission from an Appcompat fragment
+     *
+     * @param parentView The root view of the fragment
+     * @param fragment  An Android framework {@link android.support.v4.app.Fragment}
+     */
+    public static void requestCameraPermissionFromFragment(View parentView, final android.support.v4.app.Fragment fragment) {
+        // Permission has not been granted and must be requested.
+        if (fragment.shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+
+            Snackbar.make(parentView, fragment.getString(R.string.request_camera_permission),
+                    Snackbar.LENGTH_INDEFINITE).setAction(fragment.getString(R.string.ok_cap), view -> {
+                // Request the permission
+                fragment.requestPermissions(
+                        new String[]{Manifest.permission.CAMERA},
+                        PERMISSION_REQUEST_CAMERA);
+            }).show();
+
+        } else {
+            fragment.requestPermissions(
                     new String[]{Manifest.permission.CAMERA},
                     PERMISSION_REQUEST_CAMERA);
         }
@@ -89,6 +123,25 @@ public class PermissionUtil {
 
         } else {
             ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_REQUEST_WRITE_STORAGE);
+        }
+    }
+
+    public static void requestWriteStoragePermissionFromFragment(View parentView, final android.support.v4.app.Fragment fragment) {
+        // Permission has not been granted and must be requested.
+        if (fragment.shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+            Snackbar.make(parentView, fragment.getString(R.string.request_write_storage_permission),
+                    Snackbar.LENGTH_INDEFINITE).setAction(fragment.getString(R.string.ok_cap), view -> {
+                // Request the permission
+                fragment.requestPermissions(
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        PERMISSION_REQUEST_WRITE_STORAGE);
+            }).show();
+
+        } else {
+            fragment.requestPermissions(
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     PERMISSION_REQUEST_WRITE_STORAGE);
         }

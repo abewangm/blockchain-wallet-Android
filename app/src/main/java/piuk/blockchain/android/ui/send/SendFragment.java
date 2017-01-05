@@ -183,7 +183,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         switch (item.getItemId()) {
             case R.id.action_qr:
                 if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), getActivity());
+                    PermissionUtil.requestCameraPermissionFromFragment(binding.getRoot(), this);
                 } else {
                     startScanActivity(SCAN_URI);
                 }

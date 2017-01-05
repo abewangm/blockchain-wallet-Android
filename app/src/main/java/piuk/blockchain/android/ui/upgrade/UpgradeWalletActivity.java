@@ -173,7 +173,6 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                 try {
                     if (ConnectivityStatus.hasConnectivity(UpgradeWalletActivity.this)) {
                         appUtil.setNewlyCreated(true);
-                        appUtil.applyPRNGFixes();
 
                         payloadManager.upgradeV2PayloadToV3(
                                 secondPassword,

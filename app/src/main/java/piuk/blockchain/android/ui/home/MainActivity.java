@@ -401,6 +401,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        returningResult = true;
+
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startScanActivity();
@@ -472,6 +474,22 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     }
 
     @Override
+    public void showSurveyPrompt() {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.survey_message)
+                .setPositiveButton(R.string.survey_positive_button, (dialog, which) -> {
+                    String url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV";
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(url));
+                    startActivity(intent);
+                })
+                .setNegativeButton(R.string.polite_no, null)
+                .create()
+                .show();
+    }
+
+    @Override
     public void onConnectivityFail() {
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogStyle);
@@ -522,6 +540,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     public void onStartBalanceFragment() {
         BalanceFragment fragment = new BalanceFragment();
         startFragmentWithAnimation(fragment);
+        mainViewModel.checkIfShouldShowSurvey();
     }
 
     public void startSendFragment(String scanData) {
