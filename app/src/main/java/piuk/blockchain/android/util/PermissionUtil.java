@@ -17,8 +17,6 @@ public class PermissionUtil {
     public static final int PERMISSION_REQUEST_CAMERA = 161;
     public static final int PERMISSION_REQUEST_WRITE_STORAGE = 162;
 
-    // android.app.Fragment
-
     /**
      * Requests the camera permission from an Android framework fragment
      *
