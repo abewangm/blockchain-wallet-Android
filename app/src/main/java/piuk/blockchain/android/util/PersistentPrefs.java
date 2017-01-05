@@ -32,6 +32,8 @@ interface PersistentPrefs {
     String KEY_FINGERPRINT_ENABLED = "fingerprint_enabled";
     String KEY_RECEIVE_SHORTCUTS_ENABLED = "receive_shortcuts_enabled";
     String KEY_SWIPE_TO_RECEIVE_ENABLED = "swipe_to_receive_enabled";
+    String KEY_SURVEY_COMPLETED = "survey_completed";
+    String KEY_SURVEY_VISITS = "survey_visits";
 
     String getValue(String name, String value);
 

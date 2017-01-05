@@ -93,6 +93,8 @@ class EnvironmentSwitcher {
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER);
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER);
         prefsUtil.removeValue(AccountViewModel.KEY_WARN_TRANSFER_ALL);
+        prefsUtil.removeValue(PrefsUtil.KEY_SURVEY_COMPLETED);
+        prefsUtil.removeValue(PrefsUtil.KEY_SURVEY_VISITS);
         AppRate.reset(context);
         AccessState.getInstance().setPIN(null);
 

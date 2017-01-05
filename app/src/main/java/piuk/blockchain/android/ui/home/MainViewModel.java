@@ -17,6 +17,7 @@ import info.blockchain.wallet.util.WebUtil;
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -70,6 +71,8 @@ public class MainViewModel extends BaseViewModel {
         void showAddEmailDialog();
 
         void clearAllDynamicShortcuts();
+
+        void showSurveyPrompt();
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -108,6 +111,29 @@ public class MainViewModel extends BaseViewModel {
                                 }
                             }, Throwable::printStackTrace));
         }
+    }
+
+    public void checkIfShouldShowSurvey() {
+        if (!prefs.getValue(PrefsUtil.KEY_SURVEY_COMPLETED, false)) {
+            int visitsToPageThisSession = prefs.getValue(PrefsUtil.KEY_SURVEY_VISITS, 0);
+            // Trigger first time coming back to transaction tab
+            if (visitsToPageThisSession == 1) {
+                // Don't show past June 30th
+                Calendar surveyCutoffDate = Calendar.getInstance();
+                surveyCutoffDate.set(Calendar.YEAR, 2017);
+                surveyCutoffDate.set(Calendar.MONTH, Calendar.JUNE);
+                surveyCutoffDate.set(Calendar.DAY_OF_MONTH, 30);
+
+                if (Calendar.getInstance().before(surveyCutoffDate)) {
+                    dataListener.showSurveyPrompt();
+                    prefs.setValue(PrefsUtil.KEY_SURVEY_COMPLETED, true);
+                }
+            } else {
+                visitsToPageThisSession++;
+                prefs.setValue(PrefsUtil.KEY_SURVEY_VISITS, visitsToPageThisSession);
+            }
+        }
+
     }
 
     private Observable<Settings> getSettingsApi() {
