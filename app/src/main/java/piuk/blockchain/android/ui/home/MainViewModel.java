@@ -77,7 +77,6 @@ public class MainViewModel extends BaseViewModel {
         this.context = context;
         this.dataListener = dataListener;
         osUtil = new OSUtil(context);
-        appUtil.applyPRNGFixes();
     }
 
     @Override
