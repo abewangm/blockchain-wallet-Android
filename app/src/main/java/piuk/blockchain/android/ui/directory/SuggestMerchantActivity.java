@@ -17,6 +17,7 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
+import android.support.annotation.StringRes;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -79,12 +80,12 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        this.setContentView(R.layout.activity_suggest_merchant);
+        setContentView(R.layout.activity_suggest_merchant);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
         setSupportActionBar(toolbar);
 
-        this.setTitle(R.string.suggest_merchant);
+        setTitle(R.string.suggest_merchant);
 
         edName = (EditText) findViewById(R.id.merchant_name);
         edDescription = (EditText) findViewById(R.id.description);
@@ -152,13 +153,13 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
 
                 final StringBuilder args = new StringBuilder();
                 args.append("{");
-                args.append("\"NAME\":\"").append(edName.getText().toString());
-                args.append("\",\"DESCRIPTION\":\"").append(edDescription.getText().toString());
-                args.append("\",\"STREET_ADDRESS\":\"").append(edStreetAddress.getText().toString());
-                args.append("\",\"CITY\":\"").append(edCity.getText().toString());
-                args.append("\",\"ZIP\":\"").append(edPostal.getText().toString());
-                args.append("\",\"TELEPHONE\":\"").append(edTelephone.getText().toString());
-                args.append("\",\"WEB\":\"").append(edWeb.getText().toString());
+                args.append("\"NAME\":\"").append(edName.getText());
+                args.append("\",\"DESCRIPTION\":\"").append(edDescription.getText());
+                args.append("\",\"STREET_ADDRESS\":\"").append(edStreetAddress.getText());
+                args.append("\",\"CITY\":\"").append(edCity.getText());
+                args.append("\",\"ZIP\":\"").append(edPostal.getText());
+                args.append("\",\"TELEPHONE\":\"").append(edTelephone.getText());
+                args.append("\",\"WEB\":\"").append(edWeb.getText());
                 args.append("\",\"LATITUDE\":").append(df.format(selectedY));
                 args.append(",\"LONGITUDE\":").append(df.format(selectedX));
                 args.append(",\"CATEGORY\":").append(Integer.toString(spCategory.getSelectedItemPosition()));
@@ -173,15 +174,15 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
                     try {
                         res = WebUtil.getInstance().postURLJson(SUGGEST_MERCHANT_URL, args.toString());
                     } catch (Exception e) {
-                        ToastCustom.makeText(SuggestMerchantActivity.this, e.getMessage(), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                        onShowToast(e.getMessage(), ToastCustom.TYPE_ERROR);
                     }
 
                     if (res != null && res.contains("\"result\":1")) {
-                        ToastCustom.makeText(SuggestMerchantActivity.this, getString(R.string.ok_writing_merchant), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
+                        onShowToast(R.string.ok_writing_merchant, ToastCustom.TYPE_OK);
                         setResult(RESULT_OK);
                         finish();
                     } else {
-                        ToastCustom.makeText(SuggestMerchantActivity.this, getString(R.string.error_writing_merchant), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                        onShowToast(R.string.error_writing_merchant, ToastCustom.TYPE_ERROR);
                     }
 
                     Looper.loop();
@@ -224,6 +225,14 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
             currLocation.setLongitude(strULon);
             currLocation.setLatitude(strULat);
         }
+    }
+
+    public void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
+        onShowToast(getString(message), toastType);
+    }
+
+    public void onShowToast(String message, @ToastCustom.ToastType String toastType) {
+        runOnUiThread(() -> ToastCustom.makeText(this, message, ToastCustom.LENGTH_SHORT, toastType));
     }
 
     @Override
@@ -312,8 +321,7 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
 
         } catch (Exception e) {
             Log.e("", "", e);
-            ToastCustom.makeText(SuggestMerchantActivity.this,
-                    getString(R.string.address_lookup_fail), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            onShowToast(R.string.address_lookup_fail, ToastCustom.TYPE_ERROR);
         }
     }
 
@@ -351,7 +359,6 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
         Context mContext;
 
         public UpdateLastLocationThread(Context context) {
-            super();
             mContext = context;
         }
 
@@ -362,7 +369,7 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
 
             if (currLocation != null) {
 
-                SuggestMerchantActivity.this.runOnUiThread(() -> {
+                runOnUiThread(() -> {
                     zoomToLocation(currLocation.getLongitude(), currLocation.getLatitude());
                     commandSave.setVisibility(View.VISIBLE);
                     commandSave.setText(getResources().getString(R.string.next));
@@ -378,14 +385,13 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
         Context mContext;
 
         public ReverseGeocodingTask(Context context) {
-            super();
             mContext = context;
         }
 
         @Override
         protected Void doInBackground(LatLng... params) {
 
-            SuggestMerchantActivity.this.runOnUiThread(() -> progress.setVisibility(View.VISIBLE));
+            runOnUiThread(() -> progress.setVisibility(View.VISIBLE));
 
             Geocoder gc = new Geocoder(mContext, Locale.getDefault());
 
@@ -395,10 +401,10 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
                 if (addrList.size() > 0) {
                     final Address address = addrList.get(0);
 
-                    SuggestMerchantActivity.this.runOnUiThread(() -> {
+                    runOnUiThread(() -> {
                         if (address.getMaxAddressLineIndex() > 0 && address.getAddressLine(0) != null) {
                             edStreetAddress.setText(address.getAddressLine(0));
-                            ToastCustom.makeText(SuggestMerchantActivity.this, address.getAddressLine(0), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
+                            onShowToast(address.getAddressLine(0), ToastCustom.TYPE_GENERAL);
                         }
                         if (address.getPostalCode() != null)
                             edPostal.setText(address.getPostalCode());

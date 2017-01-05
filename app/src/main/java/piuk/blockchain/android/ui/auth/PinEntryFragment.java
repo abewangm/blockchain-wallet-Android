@@ -213,7 +213,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
                 AccessState.getInstance().logout(getContext());
                 return;
             } else {
-                ToastCustom.makeText(getContext(), getString(R.string.exit_confirm), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
+                showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL);
             }
 
             backPressed = System.currentTimeMillis();
