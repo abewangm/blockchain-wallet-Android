@@ -7,16 +7,14 @@ import android.support.v7.app.AppCompatActivity;
 
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.websocket.WebSocketService;
-import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.AndroidUtils;
+import piuk.blockchain.android.util.OSUtil;
 
 /**
  * Created by adambennett on 04/08/2016.
  */
 
 public class LogoutActivity extends AppCompatActivity {
-
-    public static final String TAG = LogoutActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
