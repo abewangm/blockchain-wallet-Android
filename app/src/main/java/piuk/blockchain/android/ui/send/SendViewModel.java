@@ -63,15 +63,17 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
+import piuk.blockchain.android.util.StringUtils;
+import piuk.blockchain.android.util.annotations.Thunk;
 
+@SuppressWarnings("WeakerAccess")
 public class SendViewModel extends BaseViewModel {
 
     private final String TAG = getClass().getSimpleName();
 
-    private DataListener dataListener;
+    @Thunk DataListener dataListener;
     private Context context;
 
-    private PayloadManager payloadManager;
     private MonetaryUtil monetaryUtil;
     private Payment payment;
     public SendModel sendModel;
@@ -85,8 +87,10 @@ public class SendViewModel extends BaseViewModel {
     @Inject WalletAccountHelper walletAccountHelper;
     @Inject SSLVerifyUtil sslVerifyUtil;
     @Inject PrivateKeyFactory privateKeyFactory;
+    @Inject PayloadManager payloadManager;
+    @Inject StringUtils stringUtils;
 
-    public SendViewModel(Context context, DataListener dataListener) {
+    SendViewModel(Context context, DataListener dataListener) {
 
         Injector.getInstance().getDataManagerComponent().inject(this);
 
@@ -96,7 +100,6 @@ public class SendViewModel extends BaseViewModel {
 
         this.context = context;
         this.dataListener = dataListener;
-        payloadManager = PayloadManager.getInstance();
         monetaryUtil = new MonetaryUtil(btcUnit);
         payment = new Payment();
 
@@ -140,11 +143,12 @@ public class SendViewModel extends BaseViewModel {
         dataListener = null;
     }
 
-    public String getDefaultSeparator() {
+    String getDefaultSeparator() {
         return sendModel.defaultSeparator;
     }
 
     public interface DataListener {
+
         void onHideSendingAddressField();
 
         void onHideReceivingAddressField();
@@ -183,10 +187,10 @@ public class SendViewModel extends BaseViewModel {
 
         void onShowBIP38PassphrasePrompt(String scanData);
 
-        void finishActivity();
+        void finishPage();
     }
 
-    public int getDefaultAccount() {
+    int getDefaultAccount() {
 
         int result = 0;
         if (payloadManager.getPayload().isUpgraded()) {
@@ -216,7 +220,7 @@ public class SendViewModel extends BaseViewModel {
      * @param includeAddressBookEntries Whether or not to include a user's Address book
      * @return List of account details (balance, label, tag, account/address/address_book object)
      */
-    public List<ItemAccount> getAddressList(boolean includeAddressBookEntries) {
+    List<ItemAccount> getAddressList(boolean includeAddressBookEntries) {
 
         ArrayList<ItemAccount> result = new ArrayList<ItemAccount>() {{
             addAll(walletAccountHelper.getAccountItems(sendModel.isBTC));
@@ -279,7 +283,7 @@ public class SendViewModel extends BaseViewModel {
      *
      * @param btcAmountText (btc, mbtc or bits)
      */
-    public void afterBtcTextChanged(String btcAmountText) {
+    void afterBtcTextChanged(String btcAmountText) {
 
         if (isExceedingMaximumBTCAmount(btcAmountText)) {
             return;
@@ -342,7 +346,7 @@ public class SendViewModel extends BaseViewModel {
      *
      * @param fiatAmountText (any currency)
      */
-    public void afterFiatTextChanged(String fiatAmountText) {
+    void afterFiatTextChanged(String fiatAmountText) {
 
         dataListener.onRemoveFiatTextChangeListener();
 
@@ -386,11 +390,11 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Handle incoming scan data or bitcoin links
      */
-    public void handleIncomingQRScan(String scanData) {
+    void handleIncomingQRScan(String scanData) {
 
         scanData = scanData.trim();
 
-        String btcAddress = null;
+        String btcAddress;
         String btcAmount = null;
 
         // check for poorly formed BIP21 URIs
@@ -454,9 +458,9 @@ public class SendViewModel extends BaseViewModel {
     }
 
     /**
-     * Get cahced dynamic fee from Bci dynamic fee API
+     * Get cached dynamic fee from Bci dynamic fee API
      */
-    public void getSuggestedFee() {
+    private void getSuggestedFee() {
 
         //Get cached fee
         sendModel.suggestedFee = DynamicFeeCache.getInstance().getSuggestedFee();
@@ -481,19 +485,21 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Wrapper for calculateTransactionAmounts
      */
-    public void spendAllClicked(ItemAccount sendAddressItem, String customFeeText) {
+    void spendAllClicked(ItemAccount sendAddressItem, String customFeeText) {
         calculateTransactionAmounts(true, sendAddressItem, null, customFeeText, null);
     }
 
     /**
      * Wrapper for calculateTransactionAmounts
      */
-    public void calculateTransactionAmounts(ItemAccount sendAddressItem, String amountToSendText, String customFeeText, TransactionDataListener listener) {
+    void calculateTransactionAmounts(ItemAccount sendAddressItem, String amountToSendText, String customFeeText, TransactionDataListener listener) {
         calculateTransactionAmounts(false, sendAddressItem, amountToSendText, customFeeText, listener);
     }
 
-    public interface TransactionDataListener {
+    interface TransactionDataListener {
+
         void onReady();
+
     }
 
     /**
@@ -576,7 +582,7 @@ public class SendViewModel extends BaseViewModel {
             return spendableCoins.getAbsoluteFee();
         } else {
             // App is likely in low memory environment, leave page gracefully
-            dataListener.finishActivity();
+            dataListener.finishPage();
             return null;
         }
     }
@@ -639,7 +645,7 @@ public class SendViewModel extends BaseViewModel {
             }
         } else {
             // App is likely in low memory environment, leave page gracefully
-            dataListener.finishActivity();
+            dataListener.finishPage();
         }
     }
 
@@ -655,27 +661,28 @@ public class SendViewModel extends BaseViewModel {
     }
 
     /**
-     * Update max available. Values are bound to UI, so UI will apdate automatically
+     * Update max available. Values are bound to UI, so UI will update automatically
      */
     private void updateMaxAvailable(long balanceAfterFee) {
         sendModel.maxAvailable = BigInteger.valueOf(balanceAfterFee);
         sendModel.setMaxAvailableProgressVisibility(View.GONE);
         sendModel.setMaxAvailableVisibility(View.VISIBLE);
 
-        if (balanceAfterFee <= 0) {
-            sendModel.setMaxAvailableColor(ContextCompat.getColor(context, R.color.blockchain_send_red));
-        } else {
-            sendModel.setMaxAvailableColor(ContextCompat.getColor(context, R.color.blockchain_blue));
-        }
-
         //Format for display
         if (!sendModel.isBTC) {
             double fiatBalance = sendModel.btcExchange * (Math.max(balanceAfterFee, 0.0) / 1e8);
             String fiatBalanceFormatted = monetaryUtil.getFiatFormat(sendModel.fiatUnit).format(fiatBalance);
-            sendModel.setMaxAviable(context.getString(R.string.max_available) + " " + fiatBalanceFormatted + " " + sendModel.fiatUnit);
+            sendModel.setMaxAvailable(stringUtils.getString(R.string.max_available) + " " + fiatBalanceFormatted + " " + sendModel.fiatUnit);
         } else {
             String btcAmountFormatted = monetaryUtil.getBTCFormat().format(monetaryUtil.getDenominatedAmount(Math.max(balanceAfterFee, 0.0) / 1e8));
-            sendModel.setMaxAviable(context.getString(R.string.max_available) + " " + btcAmountFormatted + " " + sendModel.btcUnit);
+            sendModel.setMaxAvailable(stringUtils.getString(R.string.max_available) + " " + btcAmountFormatted + " " + sendModel.btcUnit);
+        }
+
+        if (balanceAfterFee <= 0) {
+            sendModel.setMaxAvailable(stringUtils.getString(R.string.insufficient_funds));
+            sendModel.setMaxAvailableColor(ContextCompat.getColor(context, R.color.blockchain_send_red));
+        } else {
+            sendModel.setMaxAvailableColor(ContextCompat.getColor(context, R.color.blockchain_blue));
         }
     }
 
@@ -808,7 +815,7 @@ public class SendViewModel extends BaseViewModel {
     /**
      * //TODO could be improved Sanity checks before prompting confirmation
      */
-    public void sendClicked(boolean bypassFeeCheck, String address) {
+    void sendClicked(boolean bypassFeeCheck, String address) {
 
         if (FormatsUtil.getInstance().isValidBitcoinAddress(address)) {
             //Receiving address manual or scanned input
@@ -870,7 +877,7 @@ public class SendViewModel extends BaseViewModel {
             if (sendModel.absoluteSuggestedFeeEstimates != null
                     && sendModel.pendingTransaction.bigIntFee.compareTo(sendModel.absoluteSuggestedFeeEstimates[0]) > 0) {
 
-                String message = String.format(context.getString(R.string.high_fee_not_necessary_info),
+                String message = String.format(stringUtils.getString(R.string.high_fee_not_necessary_info),
                         monetaryUtil.getDisplayAmount(sendModel.pendingTransaction.bigIntFee.longValue()) + " " + sendModel.btcUnit,
                         monetaryUtil.getDisplayAmount(sendModel.absoluteSuggestedFeeEstimates[0].longValue()) + " " + sendModel.btcUnit);
 
@@ -886,7 +893,7 @@ public class SendViewModel extends BaseViewModel {
             if (sendModel.absoluteSuggestedFeeEstimates != null
                     && sendModel.pendingTransaction.bigIntFee.compareTo(sendModel.absoluteSuggestedFeeEstimates[5]) < 0) {
 
-                String message = String.format(context.getString(R.string.low_fee_suggestion),
+                String message = String.format(stringUtils.getString(R.string.low_fee_suggestion),
                         monetaryUtil.getDisplayAmount(sendModel.pendingTransaction.bigIntFee.longValue()) + " " + sendModel.btcUnit,
                         monetaryUtil.getDisplayAmount(sendModel.absoluteSuggestedFeeEstimates[5].longValue()) + " " + sendModel.btcUnit);
 
@@ -907,7 +914,8 @@ public class SendViewModel extends BaseViewModel {
      * Sets payment confirmation details to be displayed to user and fires callback to display
      * this.
      */
-    private void confirmPayment() {
+    @Thunk
+    void confirmPayment() {
 
         PendingTransaction pendingTransaction = sendModel.pendingTransaction;
 
@@ -948,7 +956,7 @@ public class SendViewModel extends BaseViewModel {
      * Returns true if transaction is large by checking if fee > USD 0.50, size > 516, fee > 1% of
      * total
      */
-    public boolean isLargeTransaction() {
+    boolean isLargeTransaction() {
 
         int txSize = FeeUtil.estimatedSize(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = sendModel.absoluteSuggestedFee.doubleValue() / sendModel.pendingTransaction.bigIntAmount.doubleValue() * 100.0;
@@ -1015,7 +1023,7 @@ public class SendViewModel extends BaseViewModel {
         return true;
     }
 
-    public void setSendingAddress(ItemAccount selectedItem) {
+    void setSendingAddress(ItemAccount selectedItem) {
         sendModel.pendingTransaction.sendingObject = selectedItem;
     }
 
@@ -1023,7 +1031,7 @@ public class SendViewModel extends BaseViewModel {
      * Set the receiving object. Null can be passed to reset receiving address for when user
      * customizes address
      */
-    public void setReceivingAddress(@Nullable ItemAccount selectedItem) {
+    void setReceivingAddress(@Nullable ItemAccount selectedItem) {
 
         sendModel.pendingTransaction.receivingObject = selectedItem;
 
@@ -1146,7 +1154,8 @@ public class SendViewModel extends BaseViewModel {
 
     }
 
-    private void handleSuccessfulPayment() {
+    @Thunk
+    void handleSuccessfulPayment() {
         if (sendModel.pendingTransaction.isHD()) {
             // increment change address counter
             ((Account) sendModel.pendingTransaction.sendingObject.accountObject).incChange();
@@ -1157,7 +1166,8 @@ public class SendViewModel extends BaseViewModel {
         dataListener.onShowTransactionSuccess();
     }
 
-    private void clearUnspentResponseCache() {
+    @Thunk
+    void clearUnspentResponseCache() {
 
         DefaultAccountUnspentCache.getInstance().destroy();
 
@@ -1197,7 +1207,7 @@ public class SendViewModel extends BaseViewModel {
         }
     }
 
-    public void handleScannedDataForWatchOnlySpend(String scanData) {
+    void handleScannedDataForWatchOnlySpend(String scanData) {
         try {
             final String format = privateKeyFactory.getFormat(scanData);
             if (format != null) {
@@ -1246,7 +1256,7 @@ public class SendViewModel extends BaseViewModel {
         }
     }
 
-    public void spendFromWatchOnlyBIP38(String pw, String scanData) {
+    void spendFromWatchOnlyBIP38(String pw, String scanData) {
         new Thread(() -> {
 
             Looper.prepare();
@@ -1267,7 +1277,7 @@ public class SendViewModel extends BaseViewModel {
         }).start();
     }
 
-    public void setWatchOnlySpendWarning(boolean enabled) {
+    void setWatchOnlySpendWarning(boolean enabled) {
         prefsUtil.setValue("WARN_WATCH_ONLY_SPEND", enabled);
     }
 

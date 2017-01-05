@@ -53,7 +53,7 @@ public class ViewUtils {
     }
 
     /**
-     * Returns a properly padded Framelayout which wraps an {@link AppCompatEditText}. Once wrapped,
+     * Returns a properly padded FrameLayout which wraps an {@link AppCompatEditText}. Once wrapped,
      * the view will conform to the Material Design guidelines for spacing within a Dialog.
      *
      * @param context  The current Activity or Fragment context

@@ -326,7 +326,7 @@ public class ConfirmFundsTransferViewModelTest {
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager) {
+        protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
             return mFundsDataManager;
         }
 

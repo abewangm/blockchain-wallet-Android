@@ -60,7 +60,6 @@ public class AccountDataManager {
             return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword))
                     .compose(RxUtil.applySchedulersToObservable());
         } catch (Exception e) {
-            e.printStackTrace();
             return Observable.error(e);
         }
     }

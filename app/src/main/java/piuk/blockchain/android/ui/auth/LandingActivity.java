@@ -12,7 +12,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.api.UrlSettings;
+import piuk.blockchain.android.data.api.DebugSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityLandingBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -30,7 +30,7 @@ public class LandingActivity extends BaseAuthActivity {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CREATE_FRAGMENT, LOGIN_FRAGMENT})
-    public @interface StartingFragment {
+    @interface StartingFragment {
     }
 
     public static final int CREATE_FRAGMENT = 0;
@@ -42,17 +42,19 @@ public class LandingActivity extends BaseAuthActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_landing);
         setTitle(R.string.app_name);
 
-        UrlSettings urlSettings = new UrlSettings();
+        DebugSettings debugSettings = new DebugSettings();
 
-        if (urlSettings.shouldShowDebugMenu()) {
+        if (debugSettings.shouldShowDebugMenu()) {
             ToastCustom.makeText(
-                    this, "Current environment: " + urlSettings.getCurrentEnvironment().getName(),
+                    this,
+                    "Current environment: "
+                            + debugSettings.getCurrentEnvironment().getName(),
                     ToastCustom.LENGTH_SHORT,
                     ToastCustom.TYPE_GENERAL);
 
             binding.buttonSettings.setVisibility(View.VISIBLE);
             binding.buttonSettings.setOnClickListener(view ->
-                    new EnvironmentSwitcher(this, urlSettings).showEnvironmentSelectionDialog());
+                    new EnvironmentSwitcher(this, debugSettings).showEnvironmentSelectionDialog());
         }
 
         binding.create.setOnClickListener(view -> startLandingActivity(CREATE_FRAGMENT));

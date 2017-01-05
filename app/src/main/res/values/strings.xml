@@ -13,6 +13,7 @@
 
     <string name="send_bitcoin">Send</string>
     <string name="receive_bitcoin">Receive</string>
+    <string name="transactions">Transactions</string>
 
     <string name="cancel">Cancel</string>
     <string name="yes">Yes</string>
@@ -264,6 +265,7 @@
     <string name="decrypting_wallet">Decrypting Wallet…</string>
     <string name="password_unchanged">Password unchanged</string>
     <string name="password_changed">Password changed</string>
+    <string name="password_changed_explanation">Your password has been changed, please re-pair your wallet</string>
     <string name="verify_email2">Your verified email address is used to send login codes when suspicious or unusual activity is detected, to remind you of your wallet login ID, and to send bitcoin payment alerts when you receive funds. We will not use your email address for marketing purposes.</string>
     <string name="disable_root_warning">Disable rooted device warning</string>
 
@@ -426,8 +428,6 @@
     <string name="sms_verified">Mobile number verified</string>
     <string name="preferences">Preferences</string>
     <string name="two_fa_summary">Protect your wallet from unauthorized access by enabling 2-Step Verification. You can choose to use your mobile phone number to secure your wallet. This code will be requested when you try to access your wallet via the web browser.\n\nIn order to use other authentication methods instead, please login to our web wallet.</string>
-    <string name="enable_launcher_shortcuts">Launcher Shortcuts</string>
-    <string name="preferences_shortcuts_summary">Enable this option to reveal a receive address when you long-press on the app icon in the launcher, making receiving bitcoin even faster.</string>
 
     <string name="rate_title">Rate Blockchain Wallet</string>
     <string name="rate_message">Enjoying the Blockchain Wallet? Please take a moment to leave a review in Google Play and let others know about it.</string>
@@ -488,6 +488,7 @@
     <string name="transaction_detail_value">Value:\u0020</string>
     <string name="transaction_details_unknown">Unknown</string>
     <string name="transaction_detail_coinbase">No Inputs (Newly Generated Coins)</string>
+    <string name="transaction_detail_double_spend">May be at risk for a double spend.</string>
 
     <!-- SECURITY CENTRE -->
     <string name="security_centre_email_title">Check your email</string>
@@ -541,4 +542,16 @@
     <string name="shortcut_receive_qr_short">Show Receive QR</string>
     <string name="shortcut_receive_qr_long">View QR code for receive address</string>
     <string name="shortcut_receive_qr_error">Sorry, there was an error generating the QR code</string>
+    <string name="shortcut_settings_enable">Launcher Shortcuts</string>
+    <string name="shortcut_settings_summary">Enable this option to reveal a receive address when you long-press on the app icon in the launcher, making receiving bitcoin even faster.</string>
+
+    <!-- SWIPE TO RECEIVE -->
+    <string name="swipe_receive_hint">Swipe to receive</string>
+    <string name="swipe_receive_preference_summary">Enable this option to reveal a receive address when you swipe left on the PIN screen, making receiving bitcoin even faster. Five addresses will be loaded consecutively, after which logging in is required to show new addresses.</string>
+    <string name="swipe_receive_no_addresses">No more addresses can be loaded right now. Log in to the app to load more.</string>
+
+    <!-- SURVEY PROMPT -->
+    <string name="survey_message">Would you like to fill out a short survey to help improve your wallet experience?\n\nWe value your feedback!</string>
+    <string name="survey_positive_button">Take survey</string>
+
 </resources>

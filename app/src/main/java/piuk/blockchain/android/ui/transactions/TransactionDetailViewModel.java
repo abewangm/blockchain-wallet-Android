@@ -26,6 +26,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.injection.Injector;
@@ -34,7 +35,6 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import io.reactivex.Observable;
 
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
@@ -81,6 +81,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
         void setDate(String date);
 
         void setDescription(String description);
+
+        void setIsDoubleSpend(boolean isDoubleSpend);
 
         void setTransactionColour(@ColorRes int colour);
 
@@ -188,6 +190,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     mDataListener.setToAddresses(recipients);
                     mDataListener.setTransactionValueFiat(value);
                     mDataListener.onDataLoaded();
+                    mDataListener.setIsDoubleSpend(result.isDoubleSpend());
 
                 }, throwable -> {
                     // Show error state

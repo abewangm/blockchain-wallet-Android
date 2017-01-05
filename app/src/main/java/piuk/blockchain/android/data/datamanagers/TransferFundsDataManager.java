@@ -21,24 +21,26 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.util.annotations.Thunk;
-import io.reactivex.Observable;
 
+@SuppressWarnings("WeakerAccess")
 public class TransferFundsDataManager {
 
-    @SuppressWarnings("WeakerAccess")
-    @Thunk PayloadManager mPayloadManager;
-    private Unspent mUnspentApi;
-    private Payment mPayment;
+    @Thunk PayloadManager payloadManager;
+    @Thunk MultiAddrFactory multiAddrFactory;
+    private Unspent unspentApi;
+    private Payment payment;
 
-    public TransferFundsDataManager(PayloadManager payloadManager, Unspent unspentApi, Payment payment) {
-        mPayloadManager = payloadManager;
-        mUnspentApi = unspentApi;
-        mPayment = payment;
+    public TransferFundsDataManager(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory, Unspent unspentApi, Payment payment) {
+        this.payloadManager = payloadManager;
+        this.multiAddrFactory = multiAddrFactory;
+        this.unspentApi = unspentApi;
+        this.payment = payment;
     }
 
     /**
@@ -54,23 +56,23 @@ public class TransferFundsDataManager {
         return Observable.fromCallable(() -> {
                     BigInteger suggestedFeePerKb = DynamicFeeCache.getInstance().getSuggestedFee().defaultFeePerKb;
                     List<PendingTransaction> pendingTransactionList = new ArrayList<>();
-                    List<LegacyAddress> legacyAddresses = mPayloadManager.getPayload().getLegacyAddressList();
+                    List<LegacyAddress> legacyAddresses = payloadManager.getPayload().getLegacyAddressList();
 
                     long totalToSend = 0L;
                     long totalFee = 0L;
 
                     for (LegacyAddress legacyAddress : legacyAddresses) {
 
-                        if (!legacyAddress.isWatchOnly() && MultiAddrFactory.getInstance().getLegacyBalance(legacyAddress.getAddress()) > 0) {
-                            JSONObject unspentResponse = mUnspentApi.getUnspentOutputs(legacyAddress.getAddress());
+                        if (!legacyAddress.isWatchOnly() && multiAddrFactory.getLegacyBalance(legacyAddress.getAddress()) > 0) {
+                            JSONObject unspentResponse = unspentApi.getUnspentOutputs(legacyAddress.getAddress());
                             if (unspentResponse != null) {
-                                UnspentOutputs coins = mPayment.getCoins(unspentResponse);
-                                SweepBundle sweepBundle = mPayment.getSweepBundle(coins, suggestedFeePerKb);
+                                UnspentOutputs coins = payment.getCoins(unspentResponse);
+                                SweepBundle sweepBundle = payment.getSweepBundle(coins, suggestedFeePerKb);
 
                                 // Don't sweep if there are still unconfirmed funds in address
                                 if (coins.getNotice() == null && sweepBundle.getSweepAmount().compareTo(SendCoins.bDust) == 1) {
                                     PendingTransaction pendingSpend = new PendingTransaction();
-                                    pendingSpend.unspentOutputBundle = mPayment.getSpendableCoins(coins, sweepBundle.getSweepAmount(), suggestedFeePerKb);
+                                    pendingSpend.unspentOutputBundle = payment.getSpendableCoins(coins, sweepBundle.getSweepAmount(), suggestedFeePerKb);
                                     pendingSpend.sendingObject = new ItemAccount(legacyAddress.getLabel(), "", "", null, legacyAddress);
                                     pendingSpend.bigIntFee = pendingSpend.unspentOutputBundle.getAbsoluteFee();
                                     pendingSpend.bigIntAmount = sweepBundle.getSweepAmount();
@@ -92,11 +94,11 @@ public class TransferFundsDataManager {
      * Check if there are any spendable legacy funds that need to be sent to a HD wallet. Constructs
      * a list of {@link PendingTransaction} objects with outputs set to the default HD account.
      *
-     * @return Returns a Triple object which bundles together the List of {@link PendingTransaction} objects,
-     * as well as the total to send and the total fees, in that order.
+     * @return Returns a Triple object which bundles together the List of {@link PendingTransaction}
+     * objects, as well as the total to send and the total fees, in that order.
      */
     public Observable<Triple<List<PendingTransaction>, Long, Long>> getTransferableFundTransactionListForDefaultAccount() {
-        return getTransferableFundTransactionList(mPayloadManager.getPayload().getHdWallet().getDefaultIndex());
+        return getTransferableFundTransactionList(payloadManager.getPayload().getHdWallet().getDefaultIndex());
     }
 
     /**
@@ -126,10 +128,10 @@ public class TransferFundsDataManager {
 
                     LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
                     String changeAddress = legacyAddress.getAddress();
-                    String receivingAddress = mPayloadManager.getNextReceiveAddress(pendingTransaction.addressToReceiveIndex);
+                    String receivingAddress = payloadManager.getNextReceiveAddress(pendingTransaction.addressToReceiveIndex);
 
                     List<ECKey> keys = new ArrayList<>();
-                    if (mPayloadManager.getPayload().isDoubleEncrypted()) {
+                    if (payloadManager.getPayload().isDoubleEncrypted()) {
                         ECKey walletKey = legacyAddress.getECKey(secondPassword);
                         keys.add(walletKey);
                     } else {
@@ -151,20 +153,23 @@ public class TransferFundsDataManager {
                                         subscriber.onNext(s);
                                     }
 
-                                    mPayloadManager.getPayload().getHdWallet().getAccounts().get(pendingTransaction.addressToReceiveIndex).incReceive();
+                                    payloadManager.getPayload().getHdWallet().getAccounts().get(pendingTransaction.addressToReceiveIndex).incReceive();
 
-                                    long currentBalance = MultiAddrFactory.getInstance().getLegacyBalance();
+                                    long currentTotalBalance = multiAddrFactory.getLegacyBalance();
+                                    long currentAddressBalance = multiAddrFactory.getLegacyBalance(legacyAddress.getAddress());
                                     long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
 
-                                    MultiAddrFactory.getInstance().setLegacyBalance(currentBalance - spentAmount);
+                                    // Update Balances temporarily rather than wait for sync
+                                    multiAddrFactory.setLegacyBalance(currentTotalBalance - spentAmount);
+                                    multiAddrFactory.setLegacyBalance(
+                                            legacyAddress.getAddress(),
+                                            currentAddressBalance - spentAmount);
 
                                     if (finalI == pendingTransactions.size() - 1) {
                                         savePayloadToServer()
-                                                .blockingSubscribe(aBoolean -> {
-                                                    // No-op
-                                                }, throwable -> {
-                                                    // No-op
-                                                });
+                                                .blockingSubscribe(
+                                                        aBoolean -> {},
+                                                        Throwable::printStackTrace);
                                         if (!subscriber.isDisposed()) {
                                             subscriber.onComplete();
                                         }
@@ -194,7 +199,7 @@ public class TransferFundsDataManager {
      * @return boolean indicating success or not
      */
     public Observable<Boolean> savePayloadToServer() {
-        return Observable.fromCallable(() -> mPayloadManager.savePayloadToServer())
+        return Observable.fromCallable(() -> payloadManager.savePayloadToServer())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 }

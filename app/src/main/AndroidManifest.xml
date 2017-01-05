@@ -109,15 +109,6 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-            android:name=".ui.send.SendActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-
-        <activity
-            android:name=".ui.receive.ReceiveActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-
-        <activity
             android:name=".ui.receive.ReceiveQrActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.ReceiveQrWindow" />
@@ -131,7 +122,9 @@
             android:name=".ui.transactions.TransactionDetailWebViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
-        <service android:name=".data.websocket.WebSocketService" />
+        <service
+            android:name=".data.websocket.WebSocketService"
+            android:stopWithTask="true" />
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
@@ -155,7 +148,7 @@
             android:name=".data.notifications.FcmCallbackService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
@@ -163,7 +156,7 @@
             android:name=".data.notifications.InstanceIdService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
 

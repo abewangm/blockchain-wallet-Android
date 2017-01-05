@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
 
+import info.blockchain.api.Balance;
 import info.blockchain.api.DynamicFee;
 import info.blockchain.api.ExchangeTicker;
 import info.blockchain.api.Settings;
@@ -11,27 +12,32 @@ import info.blockchain.api.Unspent;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.util.WebUtil;
 
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
-import io.reactivex.Observable;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
@@ -43,9 +49,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected AppUtil appUtil;
     @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
-
-    private long mBackPressed;
-    private static final int COOL_DOWN_MILLIS = 2 * 1000;
+    @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
 
     public interface DataListener {
         void onRooted();
@@ -60,13 +64,15 @@ public class MainViewModel extends BaseViewModel {
 
         void onStartBalanceFragment();
 
-        void onExitConfirmToast();
-
         void kickToLauncherPage();
 
         void showEmailVerificationDialog(String email);
 
         void showAddEmailDialog();
+
+        void clearAllDynamicShortcuts();
+
+        void showSurveyPrompt();
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -74,7 +80,6 @@ public class MainViewModel extends BaseViewModel {
         this.context = context;
         this.dataListener = dataListener;
         osUtil = new OSUtil(context);
-        appUtil.applyPRNGFixes();
     }
 
     @Override
@@ -82,6 +87,11 @@ public class MainViewModel extends BaseViewModel {
         checkRooted();
         checkConnectivity();
         checkIfShouldShowEmailVerification();
+        startWebSocketService();
+    }
+
+    public void storeSwipeReceiveAddresses() {
+        swipeToReceiveHelper.updateAndStoreAddresses();
     }
 
     private void checkIfShouldShowEmailVerification() {
@@ -101,6 +111,29 @@ public class MainViewModel extends BaseViewModel {
                                 }
                             }, Throwable::printStackTrace));
         }
+    }
+
+    public void checkIfShouldShowSurvey() {
+        if (!prefs.getValue(PrefsUtil.KEY_SURVEY_COMPLETED, false)) {
+            int visitsToPageThisSession = prefs.getValue(PrefsUtil.KEY_SURVEY_VISITS, 0);
+            // Trigger first time coming back to transaction tab
+            if (visitsToPageThisSession == 1) {
+                // Don't show past June 30th
+                Calendar surveyCutoffDate = Calendar.getInstance();
+                surveyCutoffDate.set(Calendar.YEAR, 2017);
+                surveyCutoffDate.set(Calendar.MONTH, Calendar.JUNE);
+                surveyCutoffDate.set(Calendar.DAY_OF_MONTH, 30);
+
+                if (Calendar.getInstance().before(surveyCutoffDate)) {
+                    dataListener.showSurveyPrompt();
+                    prefs.setValue(PrefsUtil.KEY_SURVEY_COMPLETED, true);
+                }
+            } else {
+                visitsToPageThisSession++;
+                prefs.setValue(PrefsUtil.KEY_SURVEY_VISITS, visitsToPageThisSession);
+            }
+        }
+
     }
 
     private Observable<Settings> getSettingsApi() {
@@ -136,6 +169,7 @@ public class MainViewModel extends BaseViewModel {
                 Looper.prepare();
                 cacheDynamicFee();
                 cacheDefaultAccountUnspentData();
+                logEvents();
                 Looper.loop();
             }).start();
 
@@ -148,6 +182,8 @@ public class MainViewModel extends BaseViewModel {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                storeSwipeReceiveAddresses();
 
                 if (dataListener != null) {
                     dataListener.onFetchTransactionCompleted();
@@ -201,7 +237,6 @@ public class MainViewModel extends BaseViewModel {
         appUtil.deleteQR();
         context = null;
         dataListener = null;
-        stopWebSocketService();
         DynamicFeeCache.getInstance().destroy();
     }
 
@@ -233,6 +268,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public void unpair() {
+        dataListener.clearAllDynamicShortcuts();
         payloadManager.wipe();
         MultiAddrFactory.getInstance().wipe();
         prefs.logOut();
@@ -244,26 +280,31 @@ public class MainViewModel extends BaseViewModel {
         return prefs.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true);
     }
 
-    public void onBackPressed() {
-        if (mBackPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-            AccessState.getInstance().logout(context);
-            return;
+    private void startWebSocketService() {
+        Intent intent = new Intent(context, WebSocketService.class);
+
+        if (!osUtil.isServiceRunning(WebSocketService.class)) {
+            context.startService(intent);
         } else {
-            dataListener.onExitConfirmToast();
-        }
-
-        mBackPressed = System.currentTimeMillis();
-    }
-
-    public void startWebSocketService() {
-        if (!osUtil.isServiceRunning(piuk.blockchain.android.data.websocket.WebSocketService.class)) {
-            context.startService(new Intent(context, piuk.blockchain.android.data.websocket.WebSocketService.class));
+            // Restarting this here ensures re-subscription after app restart - the service may remain
+            // running, but the subscription to the WebSocket won't be restarted unless onCreate called
+            context.stopService(intent);
+            context.startService(intent);
         }
     }
 
-    public void stopWebSocketService() {
-        if (!osUtil.isServiceRunning(piuk.blockchain.android.data.websocket.WebSocketService.class)) {
-            context.stopService(new Intent(context, piuk.blockchain.android.data.websocket.WebSocketService.class));
+    private void logEvents() {
+
+        EventLogHandler handler = new EventLogHandler(prefs, WebUtil.getInstance());
+        handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncrypted());
+        handler.logBackupEvent(payloadManager.getPayload().getHdWallet().isMnemonicVerified());
+
+        try {
+            List<String> activeLegacyAddressStrings = PayloadManager.getInstance().getPayload().getLegacyAddressStringList();
+            long balance = new Balance().getTotalBalance(activeLegacyAddressStrings);
+            handler.logLegacyEvent(balance > 0L);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
