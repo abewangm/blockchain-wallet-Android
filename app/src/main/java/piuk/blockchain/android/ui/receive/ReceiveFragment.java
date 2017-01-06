@@ -470,7 +470,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 .setCancelable(false)
                 .setPositiveButton(R.string.yes, (dialog, whichButton) -> {
                     if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                        PermissionUtil.requestWriteStoragePermissionFromActivity(binding.getRoot(), getActivity());
+                        PermissionUtil.requestWriteStoragePermissionFromFragment(binding.getRoot(), this);
                     } else {
                         showBottomSheet();
                     }

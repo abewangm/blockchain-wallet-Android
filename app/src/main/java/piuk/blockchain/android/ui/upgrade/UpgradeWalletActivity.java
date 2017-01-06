@@ -6,6 +6,7 @@ import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -93,7 +94,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
         if (payloadManager.getTempPassword() == null) {
             // Force re-login
             appUtil.clearCredentialsAndRestart();
-            ToastCustom.makeText(this, getString(R.string.upgrade_fail_info), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            showToast(R.string.upgrade_fail_info, ToastCustom.TYPE_ERROR);
             return;
         }
 
@@ -113,11 +114,11 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                         String password2 = ((EditText) pwLayout.findViewById(R.id.pw2)).getText().toString();
 
                         if (password1.length() < 4 || password1.length() > 255 || password2.length() < 4 || password2.length() > 255) {
-                            ToastCustom.makeText(UpgradeWalletActivity.this, getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                            showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
                         } else {
 
                             if (!password2.equals(password1)) {
-                                ToastCustom.makeText(UpgradeWalletActivity.this, getString(R.string.password_mismatch_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                                showToast(R.string.password_mismatch_error, ToastCustom.TYPE_ERROR);
                             } else {
 
                                 final CharSequenceX currentPassword = payloadManager.getTempPassword();
@@ -127,19 +128,20 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                                         .subscribe(success -> {
                                             if (success) {
                                                 PayloadBridge.getInstance().remoteSaveThread(null);
-                                                ToastCustom.makeText(this, getString(R.string.password_changed), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
+                                                showToast(R.string.password_changed, ToastCustom.TYPE_OK);
                                             } else {
                                                 throw Exceptions.propagate(new Throwable("Create PIN failed"));
                                             }
                                         }, throwable -> {
                                             payloadManager.setTempPassword(currentPassword);
-                                            ToastCustom.makeText(this, getString(R.string.remote_save_ko), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                                            ToastCustom.makeText(this, getString(R.string.password_unchanged), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                                            showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
+                                            showToast(R.string.password_unchanged, ToastCustom.TYPE_ERROR);
                                         });
                             }
                         }
                     })
-                    .setNegativeButton(R.string.no, (dialog, whichButton) -> ToastCustom.makeText(this, getString(R.string.password_unchanged), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL)).show();
+                    .setNegativeButton(R.string.no, (dialog, whichButton) -> showToast(R.string.password_unchanged, ToastCustom.TYPE_GENERAL))
+                    .show();
 
         }
     }
@@ -179,8 +181,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                                 new PayloadManager.UpgradePayloadListener() {
                                     @Override
                                     public void onDoubleEncryptionPasswordError() {
-                                        ToastCustom.makeText(UpgradeWalletActivity.this, getString(R.string.double_encryption_password_error),
-                                                ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                                        showToast(R.string.double_encryption_password_error, ToastCustom.TYPE_ERROR);
                                         upgradeClicked(null);
                                     }
 
@@ -221,6 +222,11 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
             binding.pager.setVisibility(View.GONE);
             binding.upgradeActionContainer.setVisibility(View.GONE);
         });
+    }
+
+    @Thunk
+    void showToast(@StringRes int message, @ToastCustom.ToastType String type) {
+        runOnUiThread(() -> ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, type));
     }
 
     @Thunk

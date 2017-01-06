@@ -117,7 +117,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
                                                         getSettingsApi()
                                                                 .compose(RxUtil.applySchedulersToObservable())
                                                                 .subscribe(settings -> {
-                                                                    if (!settings.isSmsVerified()) {
+                                                                    if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
                                                                         // Show dialog for 2FA, store date of dialog launch
                                                                         if (getTimeOfLastSecurityPrompt() == 0L
                                                                                 || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {

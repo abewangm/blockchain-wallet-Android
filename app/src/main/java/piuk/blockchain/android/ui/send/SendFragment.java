@@ -183,7 +183,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         switch (item.getItemId()) {
             case R.id.action_qr:
                 if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), getActivity());
+                    PermissionUtil.requestCameraPermissionFromFragment(binding.getRoot(), this);
                 } else {
                     startScanActivity(SCAN_URI);
                 }
@@ -485,7 +485,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     @Override
     public void onShowInvalidAmount() {
-        ToastCustom.makeText(getActivity(), getString(R.string.invalid_amount), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
+        onShowToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR);
     }
 
     @Override
@@ -522,7 +522,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     @Override
     public void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
-        ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
+        // TODO: 05/01/2017 Shouldn't have to explicitly run on UI thread, convert calling method to Rx and schedule appropriately
+        getActivity().runOnUiThread(() -> ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType));
     }
 
     @Override

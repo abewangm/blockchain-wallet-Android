@@ -112,14 +112,26 @@ public class SettingsViewModel extends BaseViewModel {
                 settingsDataManager.updateSettings(
                         payloadManager.getPayload().getGuid(),
                         payloadManager.getPayload().getSharedKey())
-                        .doAfterTerminate(() -> {
-                            dataListener.hideProgressDialog();
-                            dataListener.setUpUi();
-                            updateUi();
-                        })
                         .subscribe(
-                                updatedSettings -> settings = updatedSettings,
-                                throwable -> settings = new Settings()));
+                                updatedSettings -> {
+                                    settings = updatedSettings;
+                                    handleUpdate();
+                                },
+                                throwable -> {
+                                    if (settings == null) {
+                                        // Show unloaded if necessary, keep old settings if failed update
+                                        settings = new Settings();
+                                    }
+                                    handleUpdate();
+                                    // Warn error when updating
+                                    dataListener.showToast(R.string.settings_error_updating, ToastCustom.TYPE_ERROR);
+                                }));
+    }
+
+    private void handleUpdate() {
+        dataListener.hideProgressDialog();
+        dataListener.setUpUi();
+        updateUi();
     }
 
     private void updateUi() {

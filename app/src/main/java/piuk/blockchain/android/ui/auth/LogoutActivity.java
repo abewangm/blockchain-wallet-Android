@@ -17,8 +17,6 @@ import piuk.blockchain.android.util.PrefsUtil;
 
 public class LogoutActivity extends AppCompatActivity {
 
-    public static final String TAG = LogoutActivity.class.getSimpleName();
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

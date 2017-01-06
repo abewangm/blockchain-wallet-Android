@@ -32,6 +32,8 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 
 import info.blockchain.wallet.payload.PayloadManager;
 
+import java.util.Arrays;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
@@ -122,10 +124,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.receive_bitcoin, R.drawable.vector_receive, R.color.blockchain_pearl_white);
 
         // Add items
-        binding.bottomNavigation.addItem(item1);
-        binding.bottomNavigation.addItem(item2);
-        binding.bottomNavigation.addItem(item3);
+        binding.bottomNavigation.addItems(Arrays.asList(item1, item2, item3));
 
+        // Styling
         binding.bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.blockchain_blue));
         binding.bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.blockchain_grey));
         binding.bottomNavigation.setForceTint(true);
@@ -400,6 +401,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        returningResult = true;
+
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startScanActivity();

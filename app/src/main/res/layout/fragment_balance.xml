@@ -23,7 +23,8 @@
 
             <include
                 android:id="@+id/no_transaction_message"
-                layout="@layout/include_no_transaction_message" />
+                layout="@layout/include_no_transaction_message"
+                tools:visibility="gone" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rvTransactions"

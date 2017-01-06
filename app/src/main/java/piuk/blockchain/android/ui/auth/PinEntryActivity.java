@@ -123,11 +123,6 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragme
         return new AppUtil(this).detectObscuredWindow(this, event) || super.dispatchTouchEvent(event);
     }
 
-    @Override
-    protected void startLogoutTimer() {
-        // No-op
-    }
-
     private static class SwipeToReceiveFragmentPagerAdapter extends FragmentPagerAdapter {
 
         private static final int NUM_ITEMS = 2;

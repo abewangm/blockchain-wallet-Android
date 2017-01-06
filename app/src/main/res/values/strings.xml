@@ -400,6 +400,7 @@
     <string name="yubikey">Yubikey</string>
     <string name="disable_2fa_first">Please disable 2-step Verification via SMS in the security settings first.</string>
     <string name="settings_field_cant_be_empty">Field can\'t be empty.</string>
+    <string name="settings_error_updating">Error updating settings, please try again</string>
 
     <string name="request_camera_permission">Camera access is required.</string>
     <string name="request_location_permission">Location access is required.</string>
@@ -422,7 +423,7 @@
     <string name="change_password_summary">Your password is never shared with our servers, which means we cannot help reset your password if you forget it. Make sure you write down your recovery phrase which can restore access to your wallet in the event of a lost password.</string>
     <string name="verify_email_notice">We have sent your email address a verification link. Click the verification link to verify your email address.</string>
     <string name="email_notifications">Email Notifications</string>
-    <string name="email_notifications_summary">Enable notifications to receive an email whenever you receive bitcoins. Only labeled addresses and imported addresses are eligible to trigger notifications.</string>
+    <string name="email_notifications_summary">Get notified when you receive bitcoin.</string>
     <string name="current_password">Current Password</string>
     <string name="new_password">New Password</string>
     <string name="sms_verified">Mobile number verified</string>
