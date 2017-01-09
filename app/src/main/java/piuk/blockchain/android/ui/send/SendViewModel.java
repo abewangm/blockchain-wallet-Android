@@ -29,6 +29,7 @@ import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.Wallet.ExceededMaxTransactionSize;
 import org.bitcoinj.crypto.BIP38PrivateKey;
 import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
@@ -662,7 +663,7 @@ public class SendViewModel extends BaseViewModel {
         sendModel.setMaxAvailableProgressVisibility(View.GONE);
         sendModel.setMaxAvailableVisibility(View.VISIBLE);
 
-        if (balanceAfterFee <= 0) {
+        if (balanceAfterFee <= 0 && context != null) {
             sendModel.setMaxAvailableColor(ContextCompat.getColor(context, R.color.blockchain_send_red));
         } else {
             sendModel.setMaxAvailableColor(ContextCompat.getColor(context, R.color.blockchain_blue));
