@@ -19,11 +19,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.util.AppUtil;
@@ -31,7 +33,6 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
-import io.reactivex.Observable;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
@@ -82,6 +83,7 @@ public class MainViewModel extends BaseViewModel {
         checkRooted();
         checkConnectivity();
         checkIfShouldShowEmailVerification();
+        startWebSocketService();
     }
 
     private void checkIfShouldShowEmailVerification() {
@@ -255,9 +257,16 @@ public class MainViewModel extends BaseViewModel {
         mBackPressed = System.currentTimeMillis();
     }
 
-    public void startWebSocketService() {
-        if (!osUtil.isServiceRunning(piuk.blockchain.android.data.websocket.WebSocketService.class)) {
-            context.startService(new Intent(context, piuk.blockchain.android.data.websocket.WebSocketService.class));
+    private void startWebSocketService() {
+        Intent intent = new Intent(context, WebSocketService.class);
+
+        if (!osUtil.isServiceRunning(WebSocketService.class)) {
+            context.startService(intent);
+        } else {
+            // Restarting this here ensures re-subscription after app restart - the service may remain
+            // running, but the subscription to the WebSocket won't be restarted unless onCreate called
+            context.stopService(intent);
+            context.startService(intent);
         }
     }
 
