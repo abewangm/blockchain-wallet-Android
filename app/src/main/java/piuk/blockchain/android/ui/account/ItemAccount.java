@@ -5,12 +5,12 @@ import android.support.annotation.Nullable;
 
 public class ItemAccount {
 
-    public String label;
-    public String displayBalance;
-    public String tag;
-    public Long absoluteBalance;
+    @NonNull public String label;
+    @NonNull public String displayBalance;
+    @Nullable public String tag;
+    @Nullable public Long absoluteBalance;
 
-    public Object accountObject;
+    @Nullable public Object accountObject;
 
     public ItemAccount(@NonNull String label,
                        @NonNull String displayBalance,

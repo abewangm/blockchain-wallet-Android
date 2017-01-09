@@ -93,7 +93,7 @@ public class AddressAdapter extends ArrayAdapter<ItemAccount> {
             if (isBtc) {
                 binding.tvBalance.setText(item.displayBalance);
             } else {
-                double btcBalance = item.absoluteBalance / 1e8;
+                double btcBalance = item.absoluteBalance != null ? item.absoluteBalance / 1e8 : 0D;
                 double fiatBalance = exchangeRate * btcBalance;
 
                 String balance = monetaryUtil.getFiatFormat(fiatUnits).format(Math.abs(fiatBalance)) + " " + fiatUnits;
@@ -113,6 +113,7 @@ public class AddressAdapter extends ArrayAdapter<ItemAccount> {
                 ItemAccount item = getItem(position);
                 binding.text.setText(item.label);
             }
+
             return binding.getRoot();
         }
     }
