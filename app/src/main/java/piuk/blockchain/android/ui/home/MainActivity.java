@@ -32,6 +32,8 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 
 import info.blockchain.wallet.payload.PayloadManager;
 
+import java.util.Arrays;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
@@ -125,10 +127,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.receive_bitcoin, R.drawable.vector_receive, R.color.blockchain_pearl_white);
 
         // Add items
-        binding.bottomNavigation.addItem(item1);
-        binding.bottomNavigation.addItem(item2);
-        binding.bottomNavigation.addItem(item3);
+        binding.bottomNavigation.addItems(Arrays.asList(item1, item2, item3));
 
+        // Styling
         binding.bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.blockchain_blue));
         binding.bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.blockchain_grey));
         binding.bottomNavigation.setForceTint(true);
@@ -406,6 +407,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        returningResult = true;
+
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startScanActivity();
@@ -474,6 +477,22 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             startActivity(intent);
         });
         securityPromptDialog.setNegativeButtonListener(view -> securityPromptDialog.dismiss());
+    }
+
+    @Override
+    public void showSurveyPrompt() {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.survey_message)
+                .setPositiveButton(R.string.survey_positive_button, (dialog, which) -> {
+                    String url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV";
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(url));
+                    startActivity(intent);
+                })
+                .setNegativeButton(R.string.polite_no, null)
+                .create()
+                .show();
     }
 
     @Override
@@ -550,6 +569,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     public void onStartBalanceFragment() {
         BalanceFragment fragment = new BalanceFragment();
         startFragmentWithAnimation(fragment);
+        mainViewModel.checkIfShouldShowSurvey();
     }
 
     public void startSendFragment(String scanData) {

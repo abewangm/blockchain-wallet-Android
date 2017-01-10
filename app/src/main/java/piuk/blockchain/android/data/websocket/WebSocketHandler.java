@@ -10,6 +10,7 @@ import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import org.json.JSONArray;
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
@@ -185,7 +187,7 @@ class WebSocketHandler {
             subHashSet.clear();
 
             connection = new WebSocketFactory()
-                    .createSocket("wss://ws.blockchain.info/inv")
+                    .createSocket(PersistentUrls.getInstance().getCurrentWebsocketUrl())
                     .addHeader("Origin", "https://blockchain.info")
                     .setPingInterval(PING_INTERVAL)
                     .addListener(new WebSocketAdapter() {
@@ -300,7 +302,7 @@ class WebSocketHandler {
                         // Download changed payload
                         //noinspection ThrowableResultOfMethodCallIgnored
                         downloadChangedPayload().blockingGet();
-                        ToastCustom.makeText(context, context.getString(R.string.wallet_updated), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
+                        showToast().subscribeOn(AndroidSchedulers.mainThread());
                         updateBalancesAndTransactions();
                     }
 
@@ -310,6 +312,15 @@ class WebSocketHandler {
         } catch (Exception e) {
             Log.e(TAG, "attemptParseMessage: ", e);
         }
+    }
+
+    private Completable showToast() {
+        return Completable.fromRunnable(
+                () -> ToastCustom.makeText(
+                        context,
+                        context.getString(R.string.wallet_updated),
+                        ToastCustom.LENGTH_SHORT,
+                        ToastCustom.TYPE_GENERAL));
     }
 
     private Completable downloadChangedPayload() {

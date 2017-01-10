@@ -170,11 +170,9 @@ public class ReceiveViewModel extends BaseViewModel {
         compositeDisposable.clear();
         compositeDisposable.add(
                 mDataManager.generateQrCode(uri, DIMENSION_QR_CODE)
-                        .subscribe(qrCode -> {
-                            mDataListener.showQrCode(qrCode);
-                        }, throwable -> {
-                            mDataListener.showQrCode(null);
-                        }));
+                        .subscribe(
+                                qrCode -> mDataListener.showQrCode(qrCode),
+                                throwable -> mDataListener.showQrCode(null)));
     }
 
     public int getDefaultSpinnerPosition() {

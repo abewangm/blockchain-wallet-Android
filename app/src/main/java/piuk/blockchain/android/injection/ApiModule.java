@@ -1,7 +1,7 @@
 package piuk.blockchain.android.injection;
 
-
 import info.blockchain.api.Notifications;
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -15,7 +15,6 @@ import dagger.Provides;
 import okhttp3.OkHttpClient;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.ApiInterceptor;
-import piuk.blockchain.android.data.api.UrlSettings;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.services.ContactsService;
@@ -85,7 +84,7 @@ public class ApiModule {
     @Named("api")
     protected Retrofit provideRetrofitApiInstance(OkHttpClient okHttpClient, JacksonConverterFactory converterFactory) {
         return new Retrofit.Builder()
-                .baseUrl(new UrlSettings().getBaseApiUrl())
+                .baseUrl(PersistentUrls.getInstance().getCurrentBaseApiUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .build();
@@ -96,7 +95,7 @@ public class ApiModule {
     @Named("server")
     protected Retrofit provideRetrofitBlockchainInstance(OkHttpClient okHttpClient, JacksonConverterFactory converterFactory) {
         return new Retrofit.Builder()
-                .baseUrl(new UrlSettings().getBaseServerUrl())
+                .baseUrl(PersistentUrls.getInstance().getCurrentBaseServerUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .build();

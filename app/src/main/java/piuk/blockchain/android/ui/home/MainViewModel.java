@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Looper;
 import android.util.Log;
 
+import info.blockchain.api.Balance;
 import info.blockchain.api.DynamicFee;
 import info.blockchain.api.ExchangeTicker;
 import info.blockchain.api.Settings;
@@ -12,10 +13,12 @@ import info.blockchain.api.Unspent;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.util.WebUtil;
 
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -32,6 +35,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -78,6 +82,8 @@ public class MainViewModel extends BaseViewModel {
         void hideProgressDialog();
 
         void clearAllDynamicShortcuts();
+
+        void showSurveyPrompt();
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -85,7 +91,6 @@ public class MainViewModel extends BaseViewModel {
         this.context = context;
         this.dataListener = dataListener;
         osUtil = new OSUtil(context);
-        appUtil.applyPRNGFixes();
     }
 
     @Override
@@ -160,6 +165,29 @@ public class MainViewModel extends BaseViewModel {
         }
     }
 
+    public void checkIfShouldShowSurvey() {
+        if (!prefs.getValue(PrefsUtil.KEY_SURVEY_COMPLETED, false)) {
+            int visitsToPageThisSession = prefs.getValue(PrefsUtil.KEY_SURVEY_VISITS, 0);
+            // Trigger first time coming back to transaction tab
+            if (visitsToPageThisSession == 1) {
+                // Don't show past June 30th
+                Calendar surveyCutoffDate = Calendar.getInstance();
+                surveyCutoffDate.set(Calendar.YEAR, 2017);
+                surveyCutoffDate.set(Calendar.MONTH, Calendar.JUNE);
+                surveyCutoffDate.set(Calendar.DAY_OF_MONTH, 30);
+
+                if (Calendar.getInstance().before(surveyCutoffDate)) {
+                    dataListener.showSurveyPrompt();
+                    prefs.setValue(PrefsUtil.KEY_SURVEY_COMPLETED, true);
+                }
+            } else {
+                visitsToPageThisSession++;
+                prefs.setValue(PrefsUtil.KEY_SURVEY_VISITS, visitsToPageThisSession);
+            }
+        }
+
+    }
+
     private Observable<Settings> getSettingsApi() {
         return Observable.fromCallable(() -> new Settings(payloadManager.getPayload().getGuid(), payloadManager.getPayload().getSharedKey()));
     }
@@ -193,6 +221,7 @@ public class MainViewModel extends BaseViewModel {
                 Looper.prepare();
                 cacheDynamicFee();
                 cacheDefaultAccountUnspentData();
+                logEvents();
                 Looper.loop();
             }).start();
 
@@ -313,6 +342,21 @@ public class MainViewModel extends BaseViewModel {
             // running, but the subscription to the WebSocket won't be restarted unless onCreate called
             context.stopService(intent);
             context.startService(intent);
+        }
+    }
+
+    private void logEvents() {
+
+        EventLogHandler handler = new EventLogHandler(prefs, WebUtil.getInstance());
+        handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncrypted());
+        handler.logBackupEvent(payloadManager.getPayload().getHdWallet().isMnemonicVerified());
+
+        try {
+            List<String> activeLegacyAddressStrings = PayloadManager.getInstance().getPayload().getLegacyAddressStringList();
+            long balance = new Balance().getTotalBalance(activeLegacyAddressStrings);
+            handler.logLegacyEvent(balance > 0L);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -114,10 +114,29 @@ public class AccountViewModelTest {
         when(payloadManager.getPayload()).thenReturn(mockPayload);
         when(prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true)).thenReturn(true);
         // Act
-        subject.checkTransferableLegacyFunds(false);
+        subject.checkTransferableLegacyFunds(false, true);
         // Assert
         verify(activity).onSetTransferLegacyFundsMenuItemVisible(true);
         verify(activity).onShowTransferableLegacyFundsWarning(false);
+        verify(activity).dismissProgressDialog();
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void checkTransferableLegacyFundsWarnTransferAllTrueDontShowDialog() throws Exception {
+        // Arrange
+        Triple triple = Triple.of(new ArrayList<PendingTransaction>() {{
+            add(new PendingTransaction());
+        }}, 1L, 2L);
+        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.just(triple));
+        Payload mockPayload = mock(Payload.class);
+        when(mockPayload.isUpgraded()).thenReturn(true);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true)).thenReturn(true);
+        // Act
+        subject.checkTransferableLegacyFunds(false, false);
+        // Assert
+        verify(activity).onSetTransferLegacyFundsMenuItemVisible(true);
         verify(activity).dismissProgressDialog();
         verifyNoMoreInteractions(activity);
     }
@@ -131,7 +150,7 @@ public class AccountViewModelTest {
         when(mockPayload.isUpgraded()).thenReturn(true);
         when(payloadManager.getPayload()).thenReturn(mockPayload);
         // Act
-        subject.checkTransferableLegacyFunds(true);
+        subject.checkTransferableLegacyFunds(true, true);
         // Assert
         verify(activity).onSetTransferLegacyFundsMenuItemVisible(false);
         verify(activity).dismissProgressDialog();
@@ -143,7 +162,7 @@ public class AccountViewModelTest {
         // Arrange
         when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.error(new Throwable()));
         // Act
-        subject.checkTransferableLegacyFunds(true);
+        subject.checkTransferableLegacyFunds(true, true);
         // Assert
         verify(activity).onSetTransferLegacyFundsMenuItemVisible(false);
         verifyNoMoreInteractions(activity);
@@ -461,7 +480,7 @@ public class AccountViewModelTest {
 
     private class MockDataManagerModule extends DataManagerModule {
         @Override
-        protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager) {
+        protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
             return fundsDataManager;
         }
 

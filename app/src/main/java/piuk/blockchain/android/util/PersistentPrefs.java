@@ -26,11 +26,16 @@ interface PersistentPrefs {
     String KEY_SECURITY_TIME_ELAPSED = "security_time_elapsed";
     String KEY_SECURITY_TWO_FA_NEVER = "security_two_fa_never";
     String KEY_SECURITY_BACKUP_NEVER = "security_backup_never";
+    String KEY_EVENT_2ND_PW = "event_2nd_pw";
+    String KEY_EVENT_LEGACY = "event_legacy";
+    String KEY_EVENT_BACKUP = "event_backup";
     String KEY_ENCRYPTED_PIN_CODE = "encrypted_pin_code";
     String KEY_FINGERPRINT_ENABLED = "fingerprint_enabled";
     String KEY_RECEIVE_SHORTCUTS_ENABLED = "receive_shortcuts_enabled";
     String KEY_FIREBASE_TOKEN = "firebase_token";
     String KEY_SWIPE_TO_RECEIVE_ENABLED = "swipe_to_receive_enabled";
+    String KEY_SURVEY_COMPLETED = "survey_completed";
+    String KEY_SURVEY_VISITS = "survey_visits";
 
     String getValue(String name, String value);
 

@@ -12,7 +12,6 @@ import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.params.MainNetParams;
 
 import java.util.List;
 
@@ -57,18 +56,8 @@ public class AccountDataManager {
      * @return An {@link Observable<Boolean>} representing a successful save
      */
     public Observable<Boolean> setPrivateKey(ECKey key, @Nullable CharSequenceX secondPassword) {
-        Payload payload = payloadManager.getPayload();
-        int index = payload.getLegacyAddressStringList().indexOf(key.toAddress(MainNetParams.get()).toString());
-        LegacyAddress legacyAddress = payload.getLegacyAddressList().get(index);
-        try {
-            setKeyForLegacyAddress(legacyAddress, key, secondPassword);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Observable.error(e);
-        }
-        legacyAddress.setWatchOnly(false);
-        payloadManager.setPayload(payload);
-        return savePayloadToServer();
+        return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -81,13 +70,13 @@ public class AccountDataManager {
     public void setKeyForLegacyAddress(LegacyAddress legacyAddress, ECKey key, @Nullable CharSequenceX secondPassword) throws Exception {
         // If double encrypted, save encrypted in payload
         if (!payloadManager.getPayload().isDoubleEncrypted()) {
-            legacyAddress.setEncryptedKey(key.getPrivKeyBytes());
+            legacyAddress.setEncryptedKeyBytes(key.getPrivKeyBytes());
         } else {
             String encryptedKey = Base58.encode(key.getPrivKeyBytes());
             String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
-                        payloadManager.getPayload().getSharedKey(),
-                        secondPassword != null ? secondPassword.toString() : null,
-                        payloadManager.getPayload().getOptions().getIterations());
+                    payloadManager.getPayload().getSharedKey(),
+                    secondPassword != null ? secondPassword.toString() : null,
+                    payloadManager.getPayload().getOptions().getIterations());
 
             legacyAddress.setEncryptedKey(encrypted2);
         }
@@ -111,11 +100,6 @@ public class AccountDataManager {
                         Boolean::booleanValue,
                         aBoolean -> addAddressAndUpdate(address).flatMap(total -> Observable.just(true)),
                         aBoolean -> Observable.just(false)));
-    }
-
-    private Observable<Boolean> savePayloadToServer() {
-        return Observable.fromCallable(() -> payloadManager.savePayloadToServer())
-                .compose(RxUtil.applySchedulersToObservable());
     }
 
     private Observable<Long> addAddressAndUpdate(LegacyAddress address) {

@@ -88,8 +88,9 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager) {
-        return new TransferFundsDataManager(payloadManager, new Unspent(), new Payment());
+    protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager,
+                                                                       MultiAddrFactory multiAddrFactory) {
+        return new TransferFundsDataManager(payloadManager, multiAddrFactory, new Unspent(), new Payment());
     }
 
     @Provides

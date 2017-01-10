@@ -180,7 +180,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         binding.content.amountContainer.amountFiat.setKeyListener(
                 DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
         binding.content.amountContainer.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
-        binding.content.amountContainer.amountFiat.setText("0" + getDefaultDecimalSeparator() + "00");
         binding.content.amountContainer.amountFiat.addTextChangedListener(mFiatTextWatcher);
 
         // Units
@@ -383,14 +382,8 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
         binding.content.receivingAddress.setText(receiveAddress);
 
-        long amountLong;
-        if (isBtc) {
-            amountLong = viewModel.getCurrencyHelper().getLongAmount(
-                    binding.content.amountContainer.amountBtc.getText().toString());
-        } else {
-            amountLong = viewModel.getCurrencyHelper().getLongAmount(
-                    binding.content.amountContainer.amountFiat.getText().toString());
-        }
+        long amountLong = viewModel.getCurrencyHelper().getLongAmount(
+                binding.content.amountContainer.amountBtc.getText().toString());
 
         BigInteger amountBigInt = viewModel.getCurrencyHelper().getUndenominatedAmount(amountLong);
 
@@ -477,7 +470,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 .setCancelable(false)
                 .setPositiveButton(R.string.yes, (dialog, whichButton) -> {
                     if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                        PermissionUtil.requestWriteStoragePermissionFromActivity(binding.getRoot(), getActivity());
+                        PermissionUtil.requestWriteStoragePermissionFromFragment(binding.getRoot(), this);
                     } else {
                         showBottomSheet();
                     }

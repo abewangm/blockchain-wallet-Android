@@ -8,13 +8,10 @@ import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
 
-import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.NetworkParameters;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -26,9 +23,7 @@ import piuk.blockchain.android.data.services.AddressInfoService;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -102,15 +97,8 @@ public class AccountDataManagerTest extends RxTest {
     @Test
     public void setPrivateKeySuccessNoDoubleEncryption() throws Exception {
         // Arrange
-        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
-        //noinspection SuspiciousMethodCalls
-        when(mockPayload.getLegacyAddressStringList().indexOf(any())).thenReturn(0);
-        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-        when(mockPayload.getLegacyAddressList().get(anyInt())).thenReturn(mock(LegacyAddress.class));
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        when(payloadManager.savePayloadToServer()).thenReturn(true);
         ECKey mockECKey = mock(ECKey.class);
-        when(mockECKey.toAddress(any(NetworkParameters.class))).thenReturn(mock(Address.class));
+        when(payloadManager.setKeyForLegacyAddress(any(ECKey.class), any(CharSequenceX.class))).thenReturn(true);
         // Act
         TestObserver<Boolean> observer = subject.setPrivateKey(mockECKey, null).test();
         // Assert
@@ -122,18 +110,8 @@ public class AccountDataManagerTest extends RxTest {
     @Test
     public void setPrivateKeySuccessWithDoubleEncryption() throws Exception {
         // Arrange
-        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
-        //noinspection SuspiciousMethodCalls
-        when(mockPayload.getLegacyAddressStringList().indexOf(any())).thenReturn(0);
-        when(mockPayload.isDoubleEncrypted()).thenReturn(true);
-        when(mockPayload.getLegacyAddressList().get(anyInt())).thenReturn(mock(LegacyAddress.class));
-        when(mockPayload.getSharedKey()).thenReturn("shared key");
-        when(mockPayload.getOptions().getIterations()).thenReturn(10);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        when(payloadManager.savePayloadToServer()).thenReturn(true);
         ECKey mockECKey = mock(ECKey.class);
-        when(mockECKey.toAddress(any(NetworkParameters.class))).thenReturn(mock(Address.class));
-        when(mockECKey.getPrivKeyBytes()).thenReturn(new byte[0]);
+        when(payloadManager.setKeyForLegacyAddress(any(ECKey.class), any(CharSequenceX.class))).thenReturn(true);
         // Act
         TestObserver<Boolean> observer = subject.setPrivateKey(mockECKey, new CharSequenceX("password")).test();
         // Assert

@@ -123,6 +123,7 @@ public class PinEntryViewModel extends BaseViewModel {
     @Override
     public void onViewReady() {
         mSSLVerifyUtil.validateSSL();
+        mAppUtil.applyPRNGFixes();
 
         if (mDataListener.getPageIntent() != null) {
             Bundle extras = mDataListener.getPageIntent().getExtras();
@@ -493,6 +494,7 @@ public class PinEntryViewModel extends BaseViewModel {
     }
 
     private void createWallet() {
+        mAppUtil.applyPRNGFixes();
         compositeDisposable.add(
                 mAuthDataManager.createHdWallet(mPassword.toString(), mStringUtils.getString(R.string.default_wallet_name))
                         .doAfterTerminate(() -> mDataListener.dismissProgressDialog())

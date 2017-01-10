@@ -82,6 +82,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
         void setDescription(String description);
 
+        void setIsDoubleSpend(boolean isDoubleSpend);
+
         void setTransactionColour(@ColorRes int colour);
 
         void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
@@ -188,6 +190,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     mDataListener.setToAddresses(recipients);
                     mDataListener.setTransactionValueFiat(value);
                     mDataListener.onDataLoaded();
+                    mDataListener.setIsDoubleSpend(result.isDoubleSpend());
 
                 }, throwable -> {
                     // Show error state

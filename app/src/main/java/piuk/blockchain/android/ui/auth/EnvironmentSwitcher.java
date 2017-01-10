@@ -11,7 +11,8 @@ import java.util.List;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.api.UrlSettings;
+import piuk.blockchain.android.data.api.DebugSettings;
+import piuk.blockchain.android.ui.account.AccountViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -20,20 +21,20 @@ class EnvironmentSwitcher {
 
     private Context context;
     private PrefsUtil prefsUtil;
-    private UrlSettings urlSettings;
+    private DebugSettings debugSettings;
 
-    EnvironmentSwitcher(Context context, UrlSettings urlSettings) {
+    EnvironmentSwitcher(Context context, DebugSettings debugSettings) {
         this.context = context;
         prefsUtil = new PrefsUtil(context);
-        this.urlSettings = urlSettings;
+        this.debugSettings = debugSettings;
     }
 
     void showEnvironmentSelectionDialog() {
-        List<String> itemsList = Arrays.asList("Production", "Staging", "Dev");
+        List<String> itemsList = Arrays.asList("Production", "Staging", "Dev", "TestNet");
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 context, R.layout.item_environment_list, itemsList);
 
-        PersistentUrls.Environment environment = urlSettings.getCurrentEnvironment();
+        PersistentUrls.Environment environment = debugSettings.getCurrentEnvironment();
         int selection;
         switch (environment) {
             case STAGING:
@@ -41,6 +42,9 @@ class EnvironmentSwitcher {
                 break;
             case DEV:
                 selection = 2;
+                break;
+            case TESTNET:
+                selection = 3;
                 break;
             default:
                 selection = 0;
@@ -59,28 +63,25 @@ class EnvironmentSwitcher {
                         case 2:
                             selectedEnvironment[0] = PersistentUrls.Environment.DEV;
                             break;
+                        case 3:
+                            selectedEnvironment[0] = PersistentUrls.Environment.TESTNET;
+                            break;
                         default:
                             selectedEnvironment[0] = PersistentUrls.Environment.PRODUCTION;
                             break;
                     }
                 })
-                .setPositiveButton("Select", (dialog, id) ->
-                        new AlertDialog.Builder(context, R.style.AlertDialogStyle)
-                                .setTitle("Warning")
-                                .setMessage("The app will now restart. To ensure correct behaviour, please remove the app from memory (by swiping it away from recents) to avoid any unexpected behaviour.")
-                                .setPositiveButton(android.R.string.ok, (dialog1, which) -> {
-                                    urlSettings.changeEnvironment(
-                                            selectedEnvironment[0] != null ? selectedEnvironment[0] : PersistentUrls.Environment.PRODUCTION);
 
-                                    ToastCustom.makeText(
-                                            context,
-                                            "Environment set to " + urlSettings.getCurrentEnvironment().getName(),
-                                            ToastCustom.LENGTH_SHORT,
-                                            ToastCustom.TYPE_OK);
-                                })
-                                .setNegativeButton(android.R.string.cancel, (dialog1, which) -> dialog1.dismiss())
-                                .create()
-                                .show())
+                .setPositiveButton("Select", (dialog, id) -> {
+                    debugSettings.changeEnvironment(
+                            selectedEnvironment[0] != null ? selectedEnvironment[0] : PersistentUrls.Environment.PRODUCTION);
+
+                    ToastCustom.makeText(
+                            context,
+                            "Environment set to " + debugSettings.getCurrentEnvironment().getName(),
+                            ToastCustom.LENGTH_SHORT,
+                            ToastCustom.TYPE_OK);
+                })
                 .setNegativeButton("Reset Timers", (dialogInterface, i) -> resetAllTimers())
                 .create()
                 .show();
@@ -92,7 +93,10 @@ class EnvironmentSwitcher {
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_TIME_ELAPSED);
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER);
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER);
-        AccessState.getInstance().setPIN(null);
+        prefsUtil.removeValue(AccountViewModel.KEY_WARN_TRANSFER_ALL);
+        prefsUtil.removeValue(PrefsUtil.KEY_SURVEY_COMPLETED);
+        prefsUtil.removeValue(PrefsUtil.KEY_SURVEY_VISITS);
+
         AppRate.reset(context);
         AccessState.getInstance().setPIN(null);
 

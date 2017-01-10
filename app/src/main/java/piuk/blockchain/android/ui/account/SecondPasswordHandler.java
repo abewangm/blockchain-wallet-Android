@@ -1,13 +1,17 @@
 package piuk.blockchain.android.ui.account;
 
 import android.content.Context;
+import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
 
 import info.blockchain.wallet.payload.PayloadManager;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ViewUtils;
 
@@ -15,10 +19,11 @@ public class SecondPasswordHandler {
 
     private Context context;
     private PayloadManager payloadManager;
+    private MaterialProgressDialog materialProgressDialog;
 
     public SecondPasswordHandler(Context context) {
         this.context = context;
-        this.payloadManager = PayloadManager.getInstance();
+        payloadManager = PayloadManager.getInstance();
     }
 
     public interface ResultListener {
@@ -45,15 +50,49 @@ public class SecondPasswordHandler {
 
                         String secondPassword = passwordField.getText().toString();
 
-                        // TODO: 18/11/2016 Make this asynchronous, validating the password can take
-                        // a long time if the user has increased their PBKDF2 iterations
-                        if (secondPassword.length() > 0 && payloadManager.validateSecondPassword(secondPassword)) {
-                            listener.onSecondPasswordValidated(secondPassword);
-
+                        if (secondPassword.length() > 0) {
+                            showProgressDialog(R.string.validating_password);
+                            validateSecondPassword(secondPassword)
+                                    .compose(RxUtil.applySchedulersToObservable())
+                                    .doAfterTerminate(this::dismissProgressDialog)
+                                    .subscribe(success -> {
+                                        if (success) {
+                                            listener.onSecondPasswordValidated(secondPassword);
+                                        } else {
+                                            showErrorToast();
+                                        }
+                                    }, throwable -> showErrorToast());
                         } else {
-                            ToastCustom.makeText(context, context.getString(R.string.double_encryption_password_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                            showErrorToast();
                         }
                     }).setNegativeButton(android.R.string.cancel, null).show();
+        }
+    }
+
+    private void showErrorToast() {
+        ToastCustom.makeText(
+                context,
+                context.getString(R.string.double_encryption_password_error),
+                ToastCustom.LENGTH_SHORT,
+                ToastCustom.TYPE_ERROR);
+    }
+
+    private Observable<Boolean> validateSecondPassword(String password) {
+        return Observable.fromCallable(() -> payloadManager.validateSecondPassword(password));
+    }
+
+    public void showProgressDialog(@StringRes int messageId) {
+        dismissProgressDialog();
+        materialProgressDialog = new MaterialProgressDialog(context);
+        materialProgressDialog.setCancelable(false);
+        materialProgressDialog.setMessage(context.getString(messageId));
+        materialProgressDialog.show();
+    }
+
+    public void dismissProgressDialog() {
+        if (materialProgressDialog != null && materialProgressDialog.isShowing()) {
+            materialProgressDialog.dismiss();
+            materialProgressDialog = null;
         }
     }
 }

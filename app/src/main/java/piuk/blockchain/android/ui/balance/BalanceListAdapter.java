@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.style.RelativeSizeSpan;
@@ -49,7 +50,7 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
 
     @Override
     public BalanceListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.txs_layout_expandable, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.txs_layout, parent, false);
         return new ViewHolder(v);
     }
 
@@ -128,6 +129,12 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
                 holder.watchOnly.setVisibility(View.GONE);
             }
 
+            if (tx.isDoubleSpend()) {
+                holder.doubleSpend.setVisibility(View.VISIBLE);
+            } else {
+                holder.doubleSpend.setVisibility(View.GONE);
+            }
+
             holder.result.setOnClickListener(v -> {
                 onViewFormatUpdated(!mIsBtc);
                 if (mListClickListener != null) mListClickListener.onValueClicked(mIsBtc);
@@ -191,6 +198,7 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
         TextView timeSince;
         TextView direction;
         TextView watchOnly;
+        AppCompatImageView doubleSpend;
 
         ViewHolder(View view) {
             super(view);
@@ -199,6 +207,7 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
             timeSince = (TextView) view.findViewById(R.id.ts);
             direction = (TextView) view.findViewById(R.id.direction);
             watchOnly = (TextView) view.findViewById(R.id.watch_only);
+            doubleSpend = (AppCompatImageView) view.findViewById(R.id.double_spend_warning);
         }
     }
 }

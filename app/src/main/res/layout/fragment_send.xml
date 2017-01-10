@@ -119,9 +119,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal|center_vertical"
                         android:gravity="center_horizontal|center_vertical"
-                        android:paddingBottom="16dp"
-                        android:paddingTop="16dp"
-                        android:text="@{viewModel.sendModel.maxAviable}"
+                        android:padding="16dp"
+                        android:text="@{viewModel.sendModel.maxAvailable}"
                         android:textAlignment="gravity"
                         android:textColor="@{viewModel.sendModel.maxAvailableColor}"
                         android:visibility="@{viewModel.sendModel.maxAvailableVisibility}" />

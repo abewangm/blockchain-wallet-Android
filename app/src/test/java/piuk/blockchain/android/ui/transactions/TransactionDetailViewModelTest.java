@@ -42,6 +42,7 @@ import piuk.blockchain.android.util.StringUtils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
@@ -210,6 +211,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         verify(mActivity).setTransactionValueBtc(anyString());
         verify(mActivity).setTransactionValueFiat(anyString());
         verify(mActivity).onDataLoaded();
+        verify(mActivity).setIsDoubleSpend(anyBoolean());
         verifyNoMoreInteractions(mActivity);
     }
 

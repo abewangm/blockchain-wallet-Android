@@ -400,6 +400,7 @@
     <string name="yubikey">Yubikey</string>
     <string name="disable_2fa_first">Please disable 2-step Verification via SMS in the security settings first.</string>
     <string name="settings_field_cant_be_empty">Field can\'t be empty.</string>
+    <string name="settings_error_updating">Error updating settings, please try again</string>
 
     <string name="request_camera_permission">Camera access is required.</string>
     <string name="request_location_permission">Location access is required.</string>
@@ -422,7 +423,7 @@
     <string name="change_password_summary">Your password is never shared with our servers, which means we cannot help reset your password if you forget it. Make sure you write down your recovery phrase which can restore access to your wallet in the event of a lost password.</string>
     <string name="verify_email_notice">We have sent your email address a verification link. Click the verification link to verify your email address.</string>
     <string name="email_notifications">Email Notifications</string>
-    <string name="email_notifications_summary">Enable notifications to receive an email whenever you receive bitcoins. Only labeled addresses and imported addresses are eligible to trigger notifications.</string>
+    <string name="email_notifications_summary">Get notified when you receive bitcoin.</string>
     <string name="current_password">Current Password</string>
     <string name="new_password">New Password</string>
     <string name="sms_verified">Mobile number verified</string>
@@ -488,6 +489,7 @@
     <string name="transaction_detail_value">Value:\u0020</string>
     <string name="transaction_details_unknown">Unknown</string>
     <string name="transaction_detail_coinbase">No Inputs (Newly Generated Coins)</string>
+    <string name="transaction_detail_double_spend">May be at risk for a double spend.</string>
 
     <!-- SECURITY CENTRE -->
     <string name="security_centre_email_title">Check your email</string>
@@ -569,5 +571,9 @@
     <string name="swipe_receive_hint">Swipe to receive</string>
     <string name="swipe_receive_preference_summary">Enable this option to reveal a receive address when you swipe left on the PIN screen, making receiving bitcoin even faster. Five addresses will be loaded consecutively, after which logging in is required to show new addresses.</string>
     <string name="swipe_receive_no_addresses">No more addresses can be loaded right now. Log in to the app to load more.</string>
+
+    <!-- SURVEY PROMPT -->
+    <string name="survey_message">Would you like to fill out a short survey to help improve your wallet experience?\n\nWe value your feedback!</string>
+    <string name="survey_positive_button">Take survey</string>
 
 </resources>
