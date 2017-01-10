@@ -24,6 +24,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -53,6 +54,7 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PermissionUtil;
@@ -68,6 +70,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     private static final String ARG_SCAN_DATA = "scan_data";
     private static final String ARG_IS_BTC = "is_btc";
     private static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
+    private static final String ARG_SCAN_DATA_ADDRESS_INPUT_ROUTE = "address_input_route";
     private static final int SCAN_URI = 2007;
     private static final int SCAN_PRIVX = 2008;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
@@ -99,12 +102,13 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         // Required empty public constructor
     }
 
-    public static SendFragment newInstance(String scanData, boolean isBtc, int selectedAccountPosition) {
+    public static SendFragment newInstance(String scanData, String scanRoute, boolean isBtc, int selectedAccountPosition) {
         SendFragment fragment = new SendFragment();
         Bundle args = new Bundle();
         args.putString(ARG_SCAN_DATA, scanData);
         args.putBoolean(ARG_IS_BTC, isBtc);
         args.putInt(ARG_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
+        args.putString(ARG_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute);
         fragment.setArguments(args);
         return fragment;
     }
@@ -129,7 +133,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
         setupViews();
 
-        if (scanData != null) viewModel.handleIncomingQRScan(scanData);
+        if (scanData != null) viewModel.handleIncomingQRScan(scanData, getArguments().getString(ARG_SCAN_DATA_ADDRESS_INPUT_ROUTE, null));
 
         setHasOptionsMenu(true);
 
@@ -221,7 +225,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         if (resultCode == Activity.RESULT_OK && requestCode == SCAN_URI
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
 
-            viewModel.handleIncomingQRScan(data.getStringExtra(CaptureActivity.SCAN_RESULT));
+            viewModel.handleIncomingQRScan(data.getStringExtra(CaptureActivity.SCAN_RESULT),
+                EventLogHandler.URL_EVENT_TX_INPUT_FROM_QR);
 
         } else if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
             final String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);

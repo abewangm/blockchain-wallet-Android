@@ -1,5 +1,7 @@
 package piuk.blockchain.android.ui.send;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Looper;
 import android.support.annotation.Nullable;
@@ -27,6 +29,7 @@ import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
+import info.blockchain.wallet.util.WebUtil;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
@@ -59,6 +62,7 @@ import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
+import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -89,6 +93,8 @@ public class SendViewModel extends BaseViewModel {
     @Inject PrivateKeyFactory privateKeyFactory;
     @Inject PayloadManager payloadManager;
     @Inject StringUtils stringUtils;
+
+    private String metric_input_flag = null;
 
     SendViewModel(Context context, DataListener dataListener) {
 
@@ -390,7 +396,9 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Handle incoming scan data or bitcoin links
      */
-    void handleIncomingQRScan(String scanData) {
+    void handleIncomingQRScan(String scanData, String scanRoute) {
+
+        metric_input_flag = scanRoute;
 
         scanData = scanData.trim();
 
@@ -817,6 +825,8 @@ public class SendViewModel extends BaseViewModel {
      */
     void sendClicked(boolean bypassFeeCheck, String address) {
 
+        checkClipboardPaste(address);
+
         if (FormatsUtil.getInstance().isValidBitcoinAddress(address)) {
             //Receiving address manual or scanned input
             sendModel.pendingTransaction.receivingAddress = address;
@@ -1033,6 +1043,8 @@ public class SendViewModel extends BaseViewModel {
      */
     void setReceivingAddress(@Nullable ItemAccount selectedItem) {
 
+        metric_input_flag = null;
+
         sendModel.pendingTransaction.receivingObject = selectedItem;
 
         if (selectedItem != null) {
@@ -1062,6 +1074,9 @@ public class SendViewModel extends BaseViewModel {
                 AddressBookEntry addressBook = ((AddressBookEntry) selectedItem.accountObject);
                 sendModel.pendingTransaction.receivingAddress = addressBook.getAddress();
             }
+
+            metric_input_flag = EventLogHandler.URL_EVENT_TX_INPUT_FROM_DROPDOWN;
+
         } else {
             sendModel.pendingTransaction.receivingAddress = "";
         }
@@ -1164,6 +1179,24 @@ public class SendViewModel extends BaseViewModel {
         updateInternalBalances();
         PayloadBridge.getInstance().remoteSaveThread(null);
         dataListener.onShowTransactionSuccess();
+
+        logAddressInputMetric();
+    }
+
+    private void logAddressInputMetric() {
+        EventLogHandler handler = new EventLogHandler(prefsUtil, WebUtil.getInstance());
+        if (metric_input_flag != null) handler.logAddressInputEvent(metric_input_flag);
+    }
+
+    private void checkClipboardPaste(String address) {
+
+        ClipboardManager clipMan = (ClipboardManager)context.getSystemService(context.CLIPBOARD_SERVICE);
+        ClipData clip = clipMan.getPrimaryClip();
+        if (clip != null && clip.getItemCount() > 0) {
+            if(clip.getItemAt(0).coerceToText(context).toString().equals(address)) {
+                metric_input_flag = EventLogHandler.URL_EVENT_TX_INPUT_FROM_PASTE;
+            }
+        }
     }
 
     @Thunk
