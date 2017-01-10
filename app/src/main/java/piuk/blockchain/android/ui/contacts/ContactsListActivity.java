@@ -10,11 +10,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.LinearLayoutManager;
-import android.text.InputType;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
 import java.lang.annotation.Retention;
@@ -28,16 +25,15 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.DialogButtonCallback;
-import piuk.blockchain.android.util.ViewUtils;
 
 
-public class ContactsActivity extends BaseAuthActivity implements ContactsViewModel.DataListener {
+public class ContactsListActivity extends BaseAuthActivity implements ContactsListViewModel.DataListener {
 
     public static final String EXTRA_METADATA_URI = "metadata_uri";
 
     private static final int REQUEST_PAIRING = 98;
     private ActivityContactsBinding binding;
-    private ContactsViewModel viewModel;
+    private ContactsListViewModel viewModel;
     private ContactsListAdapter contactsListAdapter;
     private MaterialProgressDialog materialProgressDialog;
 
@@ -45,56 +41,22 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contacts);
-        viewModel = new ContactsViewModel(this);
+        viewModel = new ContactsListViewModel(this);
 
         binding.toolbar.setTitle(R.string.contacts_title);
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        binding.fab.setOnClickListener(view -> startPairingActivity());
-
-        binding.buttonDisplayQr.setOnClickListener(view -> viewModel.onViewQrClicked());
+        binding.fab.setOnClickListener(view -> ContactInviteActivity.start(this));
 
         binding.buttonRetry.setOnClickListener(view -> viewModel.onViewReady());
 
         contactsListAdapter = new ContactsListAdapter(new ArrayList<>());
-        contactsListAdapter.setContactsClickListener(this::showDialogForContact);
+//        contactsListAdapter.setContactsClickListener(this::showDialogForContact);
         binding.layoutContent.setAdapter(contactsListAdapter);
         binding.layoutContent.setLayoutManager(new LinearLayoutManager(this));
 
         viewModel.onViewReady();
-    }
-
-    private void showDialogForContact(String mdid) {
-        ArrayList<String> options = new ArrayList<>();
-        options.add("Send money");
-        options.add("Request money");
-        options.add("Rename Contact");
-        options.add("Delete Contact");
-
-        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, options);
-
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setAdapter(arrayAdapter, (dialogInterface, i) -> {
-                    switch (i) {
-                        case 0:
-                            viewModel.onSendMoneyClicked(mdid);
-                            break;
-                        case 1:
-                            viewModel.onRequestMoneyClicked(mdid);
-                            break;
-                        case 2:
-                            viewModel.onRenameContactClicked(mdid);
-                            break;
-                        case 3:
-                            viewModel.onDeleteContactClicked(mdid);
-                            break;
-                    }
-                })
-                .setPositiveButton(android.R.string.cancel, null)
-                .create()
-                .show();
     }
 
     @Override
@@ -135,33 +97,9 @@ public class ContactsActivity extends BaseAuthActivity implements ContactsViewMo
      * Static method to assist with launching this activity
      */
     public static void start(Context context, @Nullable Bundle extras) {
-        Intent starter = new Intent(context, ContactsActivity.class);
+        Intent starter = new Intent(context, ContactsListActivity.class);
         if (extras != null) starter.putExtras(extras);
         context.startActivity(starter);
-    }
-
-    private void startPairingActivity() {
-        AppCompatEditText editText = new AppCompatEditText(this);
-        editText.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
-        editText.setHint(R.string.contacts_name_field_hint);
-
-        final String[] name = new String[1];
-
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.contacts_add_contact_title)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(this, editText))
-                .setPositiveButton(R.string.contacts_add_button, (dialogInterface, i) -> {
-                    name[0] = editText.getText().toString().trim();
-                    if (name[0].isEmpty()) {
-                        ToastCustom.makeText(this, getString(R.string.contacts_name_cannot_be_empty), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                    } else {
-                        Intent intent = new Intent(this, ContactPairingMethodActivity.class);
-                        intent.putExtra(ContactPairingMethodActivity.INTENT_KEY_CONTACT_NAME, name[0]);
-                        startActivityForResult(intent, REQUEST_PAIRING);
-                    }
-                })
-                .create()
-                .show();
     }
 
     @Override

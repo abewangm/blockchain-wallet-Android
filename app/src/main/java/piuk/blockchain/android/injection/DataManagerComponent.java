@@ -7,11 +7,11 @@ import piuk.blockchain.android.ui.auth.PasswordRequiredViewModel;
 import piuk.blockchain.android.ui.auth.PinEntryViewModel;
 import piuk.blockchain.android.ui.backup.ConfirmFundsTransferViewModel;
 import piuk.blockchain.android.ui.balance.BalanceViewModel;
+import piuk.blockchain.android.ui.contacts.ContactsListViewModel;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialogViewModel;
 import piuk.blockchain.android.ui.home.MainViewModel;
 import piuk.blockchain.android.ui.launcher.LauncherViewModel;
 import piuk.blockchain.android.ui.contacts.ContactPairingMethodViewModel;
-import piuk.blockchain.android.ui.contacts.ContactsViewModel;
 import piuk.blockchain.android.ui.pairing.ManualPairingViewModel;
 import piuk.blockchain.android.ui.pairing.PairingViewModel;
 import piuk.blockchain.android.ui.receive.ReceiveQrViewModel;
@@ -65,7 +65,7 @@ public interface DataManagerComponent {
 
     void inject(ReceiveQrViewModel receiveQrViewModel);
 
-    void inject(ContactsViewModel contactsViewModel);
+    void inject(ContactsListViewModel contactsListViewModel);
 
     void inject(ContactPairingMethodViewModel contactPairingMethodViewModel);
 

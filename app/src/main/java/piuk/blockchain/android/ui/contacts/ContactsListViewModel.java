@@ -1,9 +1,7 @@
 package piuk.blockchain.android.ui.contacts;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
 import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.Contact;
@@ -20,15 +18,12 @@ import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.services.ContactsService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
-import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
 
 @SuppressWarnings("WeakerAccess")
-public class ContactsViewModel extends BaseViewModel {
+public class ContactsListViewModel extends BaseViewModel {
 
-    private static final String TAG = ContactsViewModel.class.getSimpleName();
-    private static final int DIMENSION_QR_CODE = 600;
+    private static final String TAG = ContactsListViewModel.class.getSimpleName();
 
     private DataListener dataListener;
     @Inject QrCodeDataManager qrCodeDataManager;
@@ -41,21 +36,15 @@ public class ContactsViewModel extends BaseViewModel {
 
         void onContactsLoaded(@NonNull List<ContactsListItem> contacts);
 
-        void showQrCode(@NonNull Bitmap bitmap);
-
-        void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void setUiState(@ContactsActivity.UiState int uiState);
+        void setUiState(@ContactsListActivity.UiState int uiState);
 
         void showProgressDialog();
 
         void dismissProgressDialog();
 
-        void showAddContactConfirmation(String name, DialogButtonCallback dialogButtonCallback);
-
     }
 
-    ContactsViewModel(DataListener dataListener) {
+    ContactsListViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
     }
@@ -66,7 +55,7 @@ public class ContactsViewModel extends BaseViewModel {
         // Subscribe to notification events
         subscribeToNotifications();
 
-        dataListener.setUiState(ContactsActivity.LOADING);
+        dataListener.setUiState(ContactsListActivity.LOADING);
         compositeDisposable.add(
                 contactsDataManager.fetchContacts()
                         .andThen(contactsDataManager.getContactList())
@@ -74,7 +63,7 @@ public class ContactsViewModel extends BaseViewModel {
                                 this::handleContactListUpdate,
                                 throwable -> {
                                     Log.e(TAG, "onViewReady: ", throwable);
-                                    dataListener.setUiState(ContactsActivity.FAILURE);
+                                    dataListener.setUiState(ContactsListActivity.FAILURE);
                                 }));
 
         // TODO: 16/11/2016 Move me to my own function. I will likely need to be called from system-wide broadcasts
@@ -190,10 +179,10 @@ public class ContactsViewModel extends BaseViewModel {
         }
 
         if (!list.isEmpty()) {
-            dataListener.setUiState(ContactsActivity.CONTENT);
+            dataListener.setUiState(ContactsListActivity.CONTENT);
             dataListener.onContactsLoaded(list);
         } else {
-            dataListener.setUiState(ContactsActivity.EMPTY);
+            dataListener.setUiState(ContactsListActivity.EMPTY);
         }
     }
 

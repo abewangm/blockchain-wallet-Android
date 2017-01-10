@@ -543,6 +543,7 @@
     <string name="shortcut_receive_qr_short">Show Receive QR</string>
     <string name="shortcut_receive_qr_long">View QR code for receive address</string>
     <string name="shortcut_receive_qr_error">Sorry, there was an error generating the QR code</string>
+    <string name="shortcut_settings_summary">Enable this option to reveal a receive address when you long-press on the app icon in the launcher, making receiving bitcoin even faster.</string>
 
     <!-- CONTACTS -->
     <string name="contacts_title">Contacts</string>
@@ -565,7 +566,14 @@
     <string name="contacts_share_invitation">Share invitation</string>
     <string name="contacts_add_are_you_sure">Are you sure you wish to add %1$s as a trusted contact?</string>
     <string name="shortcut_settings_enable">Launcher Shortcuts</string>
-    <string name="shortcut_settings_summary">Enable this option to reveal a receive address when you long-press on the app icon in the launcher, making receiving bitcoin even faster.</string>
+    <string name="contacts_invite_someone">Invite someone</string>
+    <string name="contacts_being_invited">Accept invite</string>
+    <string name="contacts_who_are_you_inviting_header">Who are you inviting to connect?</string>
+    <string name="contacts_how_are_you_known_header">What name does %1$s know you by?</string>
+    <string name="contacts_sharing_method_header">How would you like to share this invite?</string>
+    <string name="contacts_field_error_empty">Cannot be empty</string>
+    <string name="contacts_share_qr">Via QR code (in-person)</string>
+    <string name="contacts_share_link">Using a link</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>
@@ -575,5 +583,8 @@
     <!-- SURVEY PROMPT -->
     <string name="survey_message">Would you like to fill out a short survey to help improve your wallet experience?\n\nWe value your feedback!</string>
     <string name="survey_positive_button">Take survey</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

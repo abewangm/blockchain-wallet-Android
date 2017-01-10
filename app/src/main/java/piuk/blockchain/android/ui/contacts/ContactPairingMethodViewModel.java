@@ -16,8 +16,6 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 
-import static piuk.blockchain.android.ui.contacts.ContactPairingMethodActivity.INTENT_KEY_CONTACT_NAME;
-
 public class ContactPairingMethodViewModel extends BaseViewModel {
 
     private DataListener dataListener;
@@ -44,11 +42,7 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        Intent pageIntent = dataListener.getPageIntent();
-        if (pageIntent != null && pageIntent.hasExtra(INTENT_KEY_CONTACT_NAME)) {
-            // Don't need contact name in all flows to this page
-            contactName = pageIntent.getStringExtra(INTENT_KEY_CONTACT_NAME);
-        }
+        // No-op
     }
 
     void handleScanInput(@NonNull String extra) {

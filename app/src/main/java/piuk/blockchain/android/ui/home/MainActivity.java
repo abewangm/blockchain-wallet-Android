@@ -43,7 +43,7 @@ import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
-import piuk.blockchain.android.ui.contacts.ContactsActivity;
+import piuk.blockchain.android.ui.contacts.ContactsListActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
@@ -60,7 +60,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-import static piuk.blockchain.android.ui.contacts.ContactsActivity.EXTRA_METADATA_URI;
+import static piuk.blockchain.android.ui.contacts.ContactsListActivity.EXTRA_METADATA_URI;
 import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
 
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.Communicator,
@@ -307,7 +307,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 startActivity(new Intent(MainActivity.this, AccountActivity.class));
                 break;
             case R.id.nav_contacts:
-                ContactsActivity.start(this, null);
+                ContactsListActivity.start(this, null);
                 break;
             case R.id.nav_upgrade:
                 startActivity(new Intent(MainActivity.this, UpgradeWalletActivity.class));
@@ -331,6 +331,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 break;
         }
         binding.drawerLayout.closeDrawers();
+    }
+
+    // TODO: 10/01/2017 Call me at somepoint
+    private void changeContactsIndicatorVisibility(@ViewUtils.Visibility int visibility) {
+        binding.nvView.getMenu()
+                .findItem(R.id.nav_contacts)
+                .getActionView()
+                .findViewById(R.id.menu_icon_count)
+                .setVisibility(visibility);
     }
 
     @Override
@@ -541,7 +550,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     public void onStartContactsActivity(String data) {
         Bundle bundle = new Bundle();
         bundle.putString(EXTRA_METADATA_URI, data);
-        ContactsActivity.start(this, bundle);
+        ContactsListActivity.start(this, bundle);
     }
 
     @Override
