@@ -552,7 +552,6 @@
     <string name="contact_choose_pairing_method">Choose the paring method you wish to use to add a trusted contact:</string>
     <string name="contacts_send_link">Send link</string>
     <string name="contacts_use_nfc">Use NFC</string>
-    <string name="contacts_view_my_qr_code">View My QR Code</string>
     <string name="contacts_no_contacts_found">No contacts found</string>
     <string name="contacts_delete_contact_failed">Deleting contact failed, please try again</string>
     <string name="contacts_add_contact_failed">Adding contact failed, please try again</string>
@@ -574,6 +573,9 @@
     <string name="contacts_field_error_empty">Cannot be empty</string>
     <string name="contacts_share_qr">Via QR code (in-person)</string>
     <string name="contacts_share_link">Using a link</string>
+    <string name="contacts_scan_qr">Scan a QR code</string>
+    <string name="contacts_sent_link">Someone sent me a link</string>
+    <string name="contacts_accept_invite_title">Accept Invite</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>

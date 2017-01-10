@@ -3,16 +3,12 @@ package piuk.blockchain.android.ui.contacts;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
-import android.widget.ImageView;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -23,8 +19,6 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactsBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
-import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.util.DialogButtonCallback;
 
 
 public class ContactsListActivity extends BaseAuthActivity implements ContactsListViewModel.DataListener {
@@ -52,6 +46,7 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         binding.buttonRetry.setOnClickListener(view -> viewModel.onViewReady());
 
         contactsListAdapter = new ContactsListAdapter(new ArrayList<>());
+        // TODO: 10/01/2017 Go to user detail page
 //        contactsListAdapter.setContactsClickListener(this::showDialogForContact);
         binding.layoutContent.setAdapter(contactsListAdapter);
         binding.layoutContent.setLayoutManager(new LinearLayoutManager(this));
@@ -62,29 +57,6 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
     @Override
     public void onContactsLoaded(@NonNull List<ContactsListItem> contacts) {
         contactsListAdapter.onContactsUpdated(contacts);
-    }
-
-    @Override
-    public void showQrCode(@NonNull Bitmap bitmap) {
-        ImageView imageView = new ImageView(this);
-        imageView.setImageBitmap(bitmap);
-
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setView(imageView)
-                .setPositiveButton(android.R.string.ok, null)
-                .create()
-                .show();
-    }
-
-    @Override
-    public void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
-        ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
-    }
-
-    @Override
-    public Intent getPageIntent() {
-        return getIntent();
     }
 
     @Override
@@ -100,17 +72,6 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         Intent starter = new Intent(context, ContactsListActivity.class);
         if (extras != null) starter.putExtras(extras);
         context.startActivity(starter);
-    }
-
-    @Override
-    public void showAddContactConfirmation(String name, DialogButtonCallback dialogButtonCallback) {
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.contacts_add_contact_title)
-                .setMessage(String.format(getString(R.string.contacts_add_are_you_sure), name))
-                .setPositiveButton(R.string.contacts_add_button, (dialogInterface, i) -> dialogButtonCallback.onPositiveClicked())
-                .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> dialogButtonCallback.onNegativeClicked())
-                .create()
-                .show();
     }
 
     @Override

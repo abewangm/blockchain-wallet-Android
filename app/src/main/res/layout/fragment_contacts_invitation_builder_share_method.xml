@@ -23,6 +23,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginLeft="36dp"
+            android:layout_marginRight="36dp"
             android:layout_marginTop="36dp"
             android:text="@string/contacts_share_qr"
             app:theme="@style/ButtonBlue" />
@@ -32,6 +34,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginLeft="36dp"
+            android:layout_marginRight="36dp"
             android:layout_marginTop="16dp"
             android:text="@string/contacts_share_link"
             app:theme="@style/ButtonBlue" />
