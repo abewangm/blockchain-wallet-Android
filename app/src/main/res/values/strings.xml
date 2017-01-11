@@ -569,6 +569,7 @@
     <string name="contacts_being_invited">Accept invite</string>
     <string name="contacts_who_are_you_inviting_header">Who are you inviting to connect?</string>
     <string name="contacts_how_are_you_known_header">What name does %1$s know you by?</string>
+    <string name="contacts_scan_instructions">%1$s should scan this QR code with their Blockchain Wallet mobile app.</string>
     <string name="contacts_sharing_method_header">How would you like to share this invite?</string>
     <string name="contacts_field_error_empty">Cannot be empty</string>
     <string name="contacts_share_qr">Via QR code (in-person)</string>

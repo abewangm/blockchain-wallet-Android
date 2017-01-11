@@ -13,24 +13,23 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.databinding.FragmentContactsInvitationBuilder2Binding;
+import piuk.blockchain.android.databinding.FragmentContactsInvitationBuilderSenderBinding;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-public class ContactsInvitationBuilderFragment2 extends Fragment {
+public class ContactsInvitationBuilderSenderFragment extends Fragment {
 
     private static final String KEY_BUNDLE_NAME = "bundle_name";
-    @Thunk FragmentContactsInvitationBuilder2Binding binding;
+    @Thunk FragmentContactsInvitationBuilderSenderBinding binding;
     private FragmentInteractionListener listener;
 
-    public ContactsInvitationBuilderFragment2() {
+    public ContactsInvitationBuilderSenderFragment() {
         // Required empty public constructor
     }
 
-    public static ContactsInvitationBuilderFragment2 newInstance(String name) {
-
+    public static ContactsInvitationBuilderSenderFragment newInstance(String name) {
         Bundle args = new Bundle();
         args.putString(KEY_BUNDLE_NAME, name);
-        ContactsInvitationBuilderFragment2 fragment = new ContactsInvitationBuilderFragment2();
+        ContactsInvitationBuilderSenderFragment fragment = new ContactsInvitationBuilderSenderFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -40,7 +39,7 @@ public class ContactsInvitationBuilderFragment2 extends Fragment {
                              Bundle savedInstanceState) {
 
         binding = DataBindingUtil.inflate(
-                inflater, R.layout.fragment_contacts_invitation_builder_2, container, false);
+                inflater, R.layout.fragment_contacts_invitation_builder_sender, container, false);
 
         return binding.getRoot();
     }
@@ -57,7 +56,7 @@ public class ContactsInvitationBuilderFragment2 extends Fragment {
             if (binding.editTextName.getText().toString().isEmpty()) {
                 binding.inputLayoutName.setError(getString(R.string.contacts_field_error_empty));
             } else {
-                listener.onMyNameSubmitted(binding.editTextName.getText().toString());
+                listener.onSenderNameSubmitted(binding.editTextName.getText().toString());
             }
         });
 
@@ -98,7 +97,7 @@ public class ContactsInvitationBuilderFragment2 extends Fragment {
 
     interface FragmentInteractionListener {
 
-        void onMyNameSubmitted(String name);
+        void onSenderNameSubmitted(String name);
 
     }
 }

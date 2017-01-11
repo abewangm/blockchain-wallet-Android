@@ -12,15 +12,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.databinding.FragmentContactsInvitationBuilder1Binding;
+import piuk.blockchain.android.databinding.FragmentContactsInvitationBuilderRecipientBinding;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-public class ContactsInvitationBuilderFragment1 extends Fragment {
+public class ContactsInvitationBuilderRecipientFragment extends Fragment {
 
-    @Thunk FragmentContactsInvitationBuilder1Binding binding;
+    @Thunk FragmentContactsInvitationBuilderRecipientBinding binding;
     private FragmentInteractionListener listener;
 
-    public ContactsInvitationBuilderFragment1() {
+    public ContactsInvitationBuilderRecipientFragment() {
         // Required empty constructor
     }
 
@@ -29,7 +29,7 @@ public class ContactsInvitationBuilderFragment1 extends Fragment {
                              Bundle savedInstanceState) {
 
         binding = DataBindingUtil.inflate(
-                inflater, R.layout.fragment_contacts_invitation_builder_1, container, false);
+                inflater, R.layout.fragment_contacts_invitation_builder_recipient, container, false);
 
         return binding.getRoot();
     }
@@ -42,7 +42,7 @@ public class ContactsInvitationBuilderFragment1 extends Fragment {
             if (binding.editTextName.getText().toString().isEmpty()) {
                 binding.inputLayoutName.setError(getString(R.string.contacts_field_error_empty));
             } else {
-                listener.onInviteeNameSubmitted(binding.editTextName.getText().toString());
+                listener.onRecipientNameSubmitted(binding.editTextName.getText().toString());
             }
         });
 
@@ -83,7 +83,7 @@ public class ContactsInvitationBuilderFragment1 extends Fragment {
 
     interface FragmentInteractionListener {
 
-        void onInviteeNameSubmitted(String name);
+        void onRecipientNameSubmitted(String name);
 
     }
 }
