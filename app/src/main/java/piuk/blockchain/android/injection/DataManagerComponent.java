@@ -9,6 +9,7 @@ import piuk.blockchain.android.ui.backup.ConfirmFundsTransferViewModel;
 import piuk.blockchain.android.ui.balance.BalanceViewModel;
 import piuk.blockchain.android.ui.contacts.ContactsInvitationBuilderViewModel;
 import piuk.blockchain.android.ui.contacts.ContactsListViewModel;
+import piuk.blockchain.android.ui.contacts.ContactsQrViewModel;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialogViewModel;
 import piuk.blockchain.android.ui.home.MainViewModel;
 import piuk.blockchain.android.ui.launcher.LauncherViewModel;
@@ -73,4 +74,6 @@ public interface DataManagerComponent {
     void inject(SwipeToReceiveViewModel swipeToReceiveViewModel);
 
     void inject(ContactsInvitationBuilderViewModel contactsInvitationBuilderViewModel);
+
+    void inject(ContactsQrViewModel contactsQrViewModel);
 }

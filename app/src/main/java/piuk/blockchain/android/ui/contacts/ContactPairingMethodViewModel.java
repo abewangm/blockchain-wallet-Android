@@ -19,7 +19,6 @@ import piuk.blockchain.android.util.AppUtil;
 public class ContactPairingMethodViewModel extends BaseViewModel {
 
     private DataListener dataListener;
-    private String contactName;
     @Inject AppUtil appUtil;
     @Inject ContactsDataManager contactManager;
 

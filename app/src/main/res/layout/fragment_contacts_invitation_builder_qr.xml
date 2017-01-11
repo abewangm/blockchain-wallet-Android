@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -43,9 +44,10 @@
             android:id="@+id/textview_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/contacts_scan_instructions"
+            android:layout_marginTop="16dp"
             android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-            android:textColor="?android:attr/textColorSecondary" />
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="@string/contacts_scan_instructions" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/button_done"

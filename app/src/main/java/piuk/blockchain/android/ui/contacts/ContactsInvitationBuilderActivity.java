@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.contacts;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
@@ -67,7 +66,13 @@ public class ContactsInvitationBuilderActivity extends BaseAuthActivity
 
     @Override
     public void onQrCodeSelected() {
-        viewModel.onViewQrClicked();
+        viewModel.onQrCodeSelected();
+    }
+
+    @Override
+    public void onUriGenerated(String uri, String recipientName) {
+        ContactsInvitationBuilderQrFragment fragment = ContactsInvitationBuilderQrFragment.newInstance(uri, recipientName);
+        submitFragmentTransaction(fragment);
     }
 
     @Override
@@ -96,13 +101,6 @@ public class ContactsInvitationBuilderActivity extends BaseAuthActivity
     @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
-    }
-
-    @Override
-    public void onQrCodeLoaded(Bitmap bitmap, String nameOfRecipient) {
-        ContactsInvitationBuilderQrFragment fragment = ContactsInvitationBuilderQrFragment.newInstance(nameOfRecipient);
-        submitFragmentTransaction(fragment);
-        fragment.setQrCode(bitmap);
     }
 
     @Override
