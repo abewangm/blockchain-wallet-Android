@@ -65,9 +65,12 @@ public class ContactsInvitationBuilderViewModel extends BaseViewModel {
         compositeDisposable.add(
                 contactManager.createInvitation(sender, recipient)
                         .map(Contact::createURI)
+                        .doOnNext(uri -> dataListener.onUriGenerated(uri, nameOfRecipient))
+                        .flatMapCompletable(s -> contactManager.saveContacts())
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(
-                                uri -> dataListener.onUriGenerated(uri, nameOfRecipient),
+                                () -> {
+                                },
                                 throwable -> dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
     }
 
@@ -82,14 +85,17 @@ public class ContactsInvitationBuilderViewModel extends BaseViewModel {
         compositeDisposable.add(
                 contactManager.createInvitation(sender, recipient)
                         .map(Contact::createURI)
+                        .doOnNext(uri -> {
+                            Intent intent = new Intent();
+                            intent.setAction(Intent.ACTION_SEND);
+                            intent.putExtra(Intent.EXTRA_TEXT, uri);
+                            intent.setType("text/plain");
+                            dataListener.onLinkGenerated(intent);
+                        })
+                        .flatMapCompletable(s -> contactManager.saveContacts())
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(
-                                uri -> {
-                                    Intent intent = new Intent();
-                                    intent.setAction(Intent.ACTION_SEND);
-                                    intent.putExtra(Intent.EXTRA_TEXT, uri);
-                                    intent.setType("text/plain");
-                                    dataListener.onLinkGenerated(intent);
+                                () -> {
                                 },
                                 throwable -> dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
     }

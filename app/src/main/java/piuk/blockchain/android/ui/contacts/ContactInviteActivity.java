@@ -24,7 +24,8 @@ public class ContactInviteActivity extends BaseAuthActivity {
 
         binding.buttonInvite.setOnClickListener(v -> ContactsInvitationBuilderActivity.start(this));
 
-        binding.buttonAccept.setOnClickListener(v -> ContactsAcceptInviteActivity.start(this));
+        binding.buttonAccept.setOnClickListener(
+                v -> startActivityForResult(new Intent(this, ContactsAcceptInviteActivity.class), 437));
     }
 
     /**

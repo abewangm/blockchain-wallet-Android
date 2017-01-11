@@ -577,6 +577,7 @@
     <string name="contacts_scan_qr">Scan a QR code</string>
     <string name="contacts_sent_link">Someone sent me a link</string>
     <string name="contacts_accept_invite_title">Accept Invite</string>
+    <string name="contacts_sent_link_explanation">If someone sent you a link, simply tap on the link to accept.</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>

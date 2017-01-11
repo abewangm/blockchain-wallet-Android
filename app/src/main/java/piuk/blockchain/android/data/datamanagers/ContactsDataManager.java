@@ -170,7 +170,7 @@ public class ContactsDataManager {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Creates a new invite and associated invite ID for linking two users together
+     * Creates a new invite and associated invite ID for linking two users together.
      *
      * @param myDetails        My details that will be visible in invitation url
      * @param recipientDetails Recipient details - This will be added to my contacts list

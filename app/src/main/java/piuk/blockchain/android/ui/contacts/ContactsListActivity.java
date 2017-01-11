@@ -65,6 +65,11 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         return true;
     }
 
+    @Override
+    public Intent getPageIntent() {
+        return getIntent();
+    }
+
     /**
      * Static method to assist with launching this activity
      */
@@ -116,32 +121,34 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
 
     @Override
     public void setUiState(@UiState int uiState) {
+        // TODO: 11/01/2017 Changing the RecyclerView's visibility prevents it from displaying
+        // - must find out why. Already tried: postDelayed, runOnUiThread, invalidate RecyclerView,
+        // invalidate CoordinatorLayout ¯\_(ツ)_/¯
         switch (uiState) {
             case LOADING:
                 binding.layoutLoading.setVisibility(View.VISIBLE);
-                binding.layoutContent.setVisibility(View.GONE);
+//                binding.layoutContent.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.GONE);
                 binding.layoutEmpty.setVisibility(View.GONE);
                 break;
             case CONTENT:
                 binding.layoutLoading.setVisibility(View.GONE);
-                binding.layoutContent.setVisibility(View.VISIBLE);
+//                binding.layoutContent.setVisibility(View.VISIBLE);
                 binding.layoutFailure.setVisibility(View.GONE);
                 binding.layoutEmpty.setVisibility(View.GONE);
                 break;
             case FAILURE:
                 binding.layoutLoading.setVisibility(View.GONE);
-                binding.layoutContent.setVisibility(View.GONE);
+//                binding.layoutContent.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.VISIBLE);
                 binding.layoutEmpty.setVisibility(View.GONE);
                 break;
             case EMPTY:
                 binding.layoutLoading.setVisibility(View.GONE);
-                binding.layoutContent.setVisibility(View.GONE);
+//                binding.layoutContent.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.GONE);
                 binding.layoutEmpty.setVisibility(View.VISIBLE);
                 break;
-
         }
     }
 }

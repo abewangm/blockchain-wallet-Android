@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.contacts;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -14,7 +15,6 @@ import javax.inject.Inject;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
-import piuk.blockchain.android.data.services.ContactsService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -30,6 +30,8 @@ public class ContactsListViewModel extends BaseViewModel {
     @Inject PrefsUtil prefsUtil;
 
     interface DataListener {
+
+        Intent getPageIntent();
 
         void onContactsLoaded(@NonNull List<ContactsListItem> contacts);
 
@@ -114,14 +116,6 @@ public class ContactsListViewModel extends BaseViewModel {
         // Download response from getPaymentRequestResponses(...)
     }
 
-    void onRequestMoneyClicked(String mdid) {
-
-    }
-
-    void onRenameContactClicked(String mdid) {
-
-    }
-
     void onDeleteContactClicked(String mdid) {
         dataListener.showProgressDialog();
 //        compositeDisposable.add(
@@ -137,36 +131,6 @@ public class ContactsListViewModel extends BaseViewModel {
     }
 
     // TODO: 16/11/2016
-
-    /**
-     * This will need to subscribe to the notification service somehow and listen for when the
-     * recipient accepts their invitation. Once this is done, the dialog will need to be dismissed
-     * and the user will have to make a call to {@link ContactsService# putTrusted(String,
-     * String)} to add them as a contact themselves
-     */
-    void onViewQrClicked() {
-        dataListener.showProgressDialog();
-
-//        compositeDisposable.add(
-//                // TODO: 05/12/2016 Meant to pass in contact here - is that the current user?
-//                contactManager.createInvitation(null)
-//                        .flatMap(share -> getMetaDataUriString(share.getId()))
-//                        .flatMap(uri -> qrCodeDataManager.generateQrCode(uri, DIMENSION_QR_CODE))
-//                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-//                        .subscribe(
-//                                bitmap -> dataListener.showQrCode(bitmap),
-//                                throwable -> dataListener.onShowToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
-    }
-//
-//    private Observable<String> getMetaDataUriString(String invitationId) {
-//        MetaDataUri uri = new MetaDataUri.Builder()
-//                .setFrom("TEST USER")
-//                .setInviteId(invitationId)
-//                .setUriType(MetaDataUri.UriType.INVITE)
-//                .create();
-//
-//        return Observable.just(uri.encode().toString());
-//    }
 
     private void handleContactListUpdate(List<Contact> contacts) {
         ArrayList<ContactsListItem> list = new ArrayList<>();

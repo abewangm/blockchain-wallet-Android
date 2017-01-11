@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.contacts;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
@@ -10,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactsAcceptInviteBinding;
@@ -19,15 +19,17 @@ import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.PermissionUtil;
 
 
-public class ContactsAcceptInviteActivity extends BaseAuthActivity {
+public class ContactsAcceptInviteActivity extends BaseAuthActivity implements ContactPairingMethodViewModel.DataListener {
 
     public static final int SCAN_URI = 2007;
 
     private ActivityContactsAcceptInviteBinding binding;
+    private ContactPairingMethodViewModel viewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        viewModel = new ContactPairingMethodViewModel(this);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contacts_accept_invite);
 
         binding.toolbar.toolbarGeneral.setTitle(R.string.contacts_accept_invite_title);
@@ -36,22 +38,18 @@ public class ContactsAcceptInviteActivity extends BaseAuthActivity {
 
         binding.buttonScanQr.setOnClickListener(v -> requestScanActivity());
 
-        binding.buttonSentLink.setOnClickListener(v -> {
-            // TODO: 10/01/2017 Dialog explaining what to do
-        });
+        binding.buttonSentLink.setOnClickListener(
+                v -> new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                        .setTitle(R.string.app_name)
+                        .setMessage(R.string.contacts_sent_link_explanation)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .create()
+                        .show());
+
+        viewModel.onViewReady();
     }
 
-    public static void start(Context context) {
-        Intent starter = new Intent(context, ContactsAcceptInviteActivity.class);
-        context.startActivity(starter);
-    }
-
-//  @Override
-    public void onShareIntentGenerated(Intent intent) {
-        startActivity(Intent.createChooser(intent, getString(R.string.contacts_share_invitation)));
-    }
-
-//    @Override
+    @Override
     public void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
@@ -64,7 +62,7 @@ public class ContactsAcceptInviteActivity extends BaseAuthActivity {
                 && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
 
             String extra = data.getStringExtra(CaptureActivity.SCAN_RESULT);
-//            if (extra != null) viewModel.handleScanInput(extra);
+            if (extra != null) viewModel.handleScanInput(extra);
 
         } else if (resultCode != RESULT_CANCELED && requestCode == SCAN_URI) {
             onShowToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
@@ -92,10 +90,16 @@ public class ContactsAcceptInviteActivity extends BaseAuthActivity {
         }
     }
 
-//    @Override
+    @Override
     public void finishActivityWithResult(int resultCode) {
         setResult(resultCode);
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        viewModel.destroy();
     }
 
     @Override
@@ -104,18 +108,13 @@ public class ContactsAcceptInviteActivity extends BaseAuthActivity {
         super.onBackPressed();
     }
 
-//    @Override
-    public Intent getPageIntent() {
-        return getIntent();
-    }
-
     private void startScanActivity() {
-//        if (!viewModel.isCameraOpen()) {
-//            Intent intent = new Intent(this, CaptureActivity.class);
-//            startActivityForResult(intent, SCAN_URI);
-//        } else {
-//            ToastCustom.makeText(this, getString(R.string.camera_unavailable), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-//        }
+        if (!viewModel.isCameraOpen()) {
+            Intent intent = new Intent(this, CaptureActivity.class);
+            startActivityForResult(intent, SCAN_URI);
+        } else {
+            ToastCustom.makeText(this, getString(R.string.camera_unavailable), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+        }
     }
 
     @Override

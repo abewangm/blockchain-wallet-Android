@@ -1,14 +1,12 @@
 package piuk.blockchain.android.ui.contacts;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
-import info.blockchain.wallet.contacts.data.Contact;
-
 import javax.inject.Inject;
 
+import io.reactivex.CompletableSource;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.injection.Injector;
@@ -24,13 +22,9 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
 
     interface DataListener {
 
-        Intent getPageIntent();
-
         void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
         void finishActivityWithResult(int resultCode);
-
-        void onShareIntentGenerated(Intent intent);
 
     }
 
@@ -45,50 +39,16 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
     }
 
     void handleScanInput(@NonNull String extra) {
-        // TODO: 15/11/2016 Input validation?
-
         compositeDisposable.add(
                 contactManager.acceptInvitation(extra)
+                        .flatMapCompletable(contact -> contactManager.addContact(contact))
+                        .andThen((CompletableSource) s -> contactManager.saveContacts())
                         .subscribe(
-                                success -> {
-                                    dataListener.onShowToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
+                                () -> {
+                                    dataListener.onShowToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
                                     dataListener.finishActivityWithResult(Activity.RESULT_OK);
-                                }, throwable -> dataListener.onShowToast(R.string.pairing_failed, ToastCustom.TYPE_ERROR)));
+                                }, throwable -> dataListener.onShowToast(R.string.invalid_qr, ToastCustom.TYPE_ERROR)));
     }
-
-    void onSendLinkClicked(Contact myDetails, Contact recipientDetails) {
-        compositeDisposable.add(
-                contactManager.createInvitation(myDetails, recipientDetails)
-                .subscribe(
-                        metaDataUri -> {
-                    Intent intent = new Intent();
-                    intent.setAction(Intent.ACTION_SEND);
-                            // FIXME java.lang.ClassNotFoundException: Didn't find class "org.apache.http.client.utils.URIBuilder" on path
-                    intent.putExtra(Intent.EXTRA_TEXT, metaDataUri.createURI());
-                    intent.setType("text/plain");
-                    dataListener.onShareIntentGenerated(intent);
-
-                }, throwable -> dataListener.onShowToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
-
-    }
-
-    void onNfcClicked() {
-        // TODO: 14/11/2016 Generate link and share via NFC
-        /**
-         * Although to be honest, using a URI for sharing will allow NFC use anyway, but it might
-         * be good to make the option explicit?
-         */
-    }
-
-//    private Observable<MetaDataUri> getUri(Contact contact) {
-//        return contactManager.createInvitation(contact)
-//                .map(invitation -> new MetaDataUri.Builder()
-//                        .setUriType(MetaDataUri.UriType.INVITE)
-//                        .setFrom("TEST USER")
-//                        .setInviteId(invitation.getMdid())
-//                        .create());
-//
-//    }
 
     boolean isCameraOpen() {
         return appUtil.isCameraOpen();
