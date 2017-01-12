@@ -47,7 +47,7 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
 
         contactsListAdapter = new ContactsListAdapter(new ArrayList<>());
         // TODO: 10/01/2017 Go to user detail page
-//        contactsListAdapter.setContactsClickListener(this::showDialogForContact);
+        contactsListAdapter.setContactsClickListener(mdid -> ContactDetailActivity.start(this, new Bundle()));
         binding.layoutContent.setAdapter(contactsListAdapter);
         binding.layoutContent.setLayoutManager(new LinearLayoutManager(this));
 

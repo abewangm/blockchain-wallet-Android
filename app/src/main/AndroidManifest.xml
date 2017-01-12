@@ -124,6 +124,9 @@
         <activity
             android:name=".ui.contacts.ContactsAcceptInviteActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".ui.contacts.ContactDetailActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <service
             android:name=".data.websocket.WebSocketService"

@@ -2,10 +2,9 @@ package piuk.blockchain.android.data.services;
 
 import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
-import info.blockchain.wallet.metadata.data.PaymentRequest;
-import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
@@ -170,54 +169,54 @@ public class ContactsService {
      * Sends a payment request to a user in the trusted contactsService list
      *
      * @param recipientMdid  The MDID of the message's recipient
-     * @param paymentRequest A PaymentRequest object containing information about the proposed
+     * @param paymentRequest A FacilitatedTransaction object containing information about the proposed
      *                       transaction
      */
     @RequiresAccessToken
-    public Completable sendPaymentRequest(String recipientMdid, PaymentRequest paymentRequest) {
+    public Completable sendPaymentRequest(String recipientMdid, FacilitatedTransaction paymentRequest) {
         return Completable.fromCallable(() -> {
             contacts.sendPaymentRequest(recipientMdid, paymentRequest);
             return Void.TYPE;
         });
     }
 
-    /**
-     * Accepts a payment request from a user and optionally adds a note to the transaction
-     *
-     * @param recipientMdid  The MDID of the message's recipient
-     * @param paymentRequest A PaymentRequest object containing information about the proposed
-     *                       transaction
-     * @param note           An optional note for the transaction
-     * @param receiveAddress The address which you wish to user to receive bitcoin
-     * @return A {@link Message} object
-     */
-    @RequiresAccessToken
-    public Observable<Message> acceptPaymentRequest(String recipientMdid, PaymentRequest paymentRequest, String note, String receiveAddress) {
-        return Observable.fromCallable(() -> contacts.acceptPaymentRequest(recipientMdid, paymentRequest, note, receiveAddress));
-    }
-
-    /**
-     * Returns a list of payment requests. Optionally, choose to only see requests that are
-     * processed
-     *
-     * @return A list of {@link PaymentRequest} objects
-     */
-    @RequiresAccessToken
-    public Observable<List<PaymentRequest>> getPaymentRequests() {
-        return Observable.fromCallable(() -> contacts.getPaymentRequests());
-    }
-
-    /**
-     * Returns a list of payment request responses, ie whether or not another user has paid you.
-     * Optionally, choose to only see requests that are processed
-     *
-     * @param onlyNew If true, returns only new payment requests
-     * @return A list of {@link PaymentRequestResponse} objects
-     */
-    @RequiresAccessToken
-    public Observable<List<PaymentRequestResponse>> getPaymentRequestResponses(boolean onlyNew) {
-        return Observable.fromCallable(() -> contacts.getPaymentRequestResponses(onlyNew));
-    }
+//    /**
+//     * Accepts a payment request from a user and optionally adds a note to the transaction
+//     *
+//     * @param recipientMdid  The MDID of the message's recipient
+//     * @param paymentRequest A PaymentRequest object containing information about the proposed
+//     *                       transaction
+//     * @param note           An optional note for the transaction
+//     * @param receiveAddress The address which you wish to user to receive bitcoin
+//     * @return A {@link Message} object
+//     */
+//    @RequiresAccessToken
+//    public Observable<Message> acceptPaymentRequest(String recipientMdid, PaymentRequest paymentRequest, String note, String receiveAddress) {
+//        return Observable.fromCallable(() -> contacts.acceptPaymentRequest(recipientMdid, paymentRequest, note, receiveAddress));
+//    }
+//
+//    /**
+//     * Returns a list of payment requests. Optionally, choose to only see requests that are
+//     * processed
+//     *
+//     * @return A list of {@link PaymentRequest} objects
+//     */
+//    @RequiresAccessToken
+//    public Observable<List<PaymentRequest>> getPaymentRequests() {
+//        return Observable.fromCallable(() -> contacts.getPaymentRequests());
+//    }
+//
+//    /**
+//     * Returns a list of payment request responses, ie whether or not another user has paid you.
+//     * Optionally, choose to only see requests that are processed
+//     *
+//     * @param onlyNew If true, returns only new payment requests
+//     * @return A list of {@link PaymentRequestResponse} objects
+//     */
+//    @RequiresAccessToken
+//    public Observable<List<PaymentRequestResponse>> getPaymentRequestResponses(boolean onlyNew) {
+//        return Observable.fromCallable(() -> contacts.getPaymentRequestResponses(onlyNew));
+//    }
 
     ///////////////////////////////////////////////////////////////////////////
     // XPUB AND MDID SPECIFIC

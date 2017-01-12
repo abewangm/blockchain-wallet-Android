@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.metadata.data.PaymentRequest;
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,9 +98,10 @@ public class ContactsListViewModel extends BaseViewModel {
         // Send payment request
         dataListener.showProgressDialog();
 
-        PaymentRequest paymentRequest = new PaymentRequest();
-        paymentRequest.setAmount(1_000_000L);
-        paymentRequest.setNote("I owe you 1,000,000 satoshi for something");
+        FacilitatedTransaction paymentRequest = new FacilitatedTransaction();
+        paymentRequest.setIntendedAmount(1_000_000L);
+        // No notes anymore, apparently
+//        paymentRequest.setNote("I owe you 1,000,000 satoshi for something");
 
 //        compositeDisposable.add(
 //                contactManager.sendPaymentRequest(mdid, paymentRequest)
