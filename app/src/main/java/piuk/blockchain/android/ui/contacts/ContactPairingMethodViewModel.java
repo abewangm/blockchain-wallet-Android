@@ -22,7 +22,7 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
 
     interface DataListener {
 
-        void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
+        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
         void finishActivityWithResult(int resultCode);
 
@@ -45,9 +45,9 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
                         .andThen((CompletableSource) s -> contactManager.saveContacts())
                         .subscribe(
                                 () -> {
-                                    dataListener.onShowToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
+                                    dataListener.showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
                                     dataListener.finishActivityWithResult(Activity.RESULT_OK);
-                                }, throwable -> dataListener.onShowToast(R.string.invalid_qr, ToastCustom.TYPE_ERROR)));
+                                }, throwable -> dataListener.showToast(R.string.invalid_qr, ToastCustom.TYPE_ERROR)));
     }
 
     boolean isCameraOpen() {

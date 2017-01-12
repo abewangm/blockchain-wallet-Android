@@ -67,6 +67,7 @@
         </LinearLayout>
 
         <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/textview_transaction_list_header"
             style="@style/ContactsHeader"
             android:text="@string/contacts_detail_transactions" />
 

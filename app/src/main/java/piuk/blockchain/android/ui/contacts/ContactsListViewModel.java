@@ -21,8 +21,6 @@ import piuk.blockchain.android.util.PrefsUtil;
 @SuppressWarnings("WeakerAccess")
 public class ContactsListViewModel extends BaseViewModel {
 
-    private static final String TAG = ContactsListViewModel.class.getSimpleName();
-
     private DataListener dataListener;
     @Inject QrCodeDataManager qrCodeDataManager;
     @Inject ContactsDataManager contactsDataManager;
@@ -61,7 +59,6 @@ public class ContactsListViewModel extends BaseViewModel {
                                 this::handleContactListUpdate,
                                 throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
 
-
         // TODO: 16/11/2016 Move me to my own function. I will likely need to be called from system-wide broadcasts
         // I'm only here for testing purposes
 //        compositeDisposable.add(
@@ -72,7 +69,7 @@ public class ContactsListViewModel extends BaseViewModel {
 //                                },
 //                                throwable -> {
 //                                    Log.e(TAG, "onViewReady: ", throwable);
-//                                    dataListener.onShowToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
+//                                    dataListener.showToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
 //                                }));
 
 //        Intent intent = dataListener.getPageIntent();
@@ -80,6 +77,18 @@ public class ContactsListViewModel extends BaseViewModel {
 //            MetaDataUri uriObject = MetaDataUri.decode(intent.getStringExtra(EXTRA_METADATA_URI));
 //            handleIncomingUri(uriObject);
 //        }
+    }
+
+    /**
+     * Get the latest version stored on disk
+     */
+    void requestUpdatedList() {
+        compositeDisposable.add(
+                contactsDataManager.getContactList()
+                        .toList()
+                        .subscribe(
+                                this::handleContactListUpdate,
+                                throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
     }
 
     private void subscribeToNotifications() {
@@ -106,26 +115,12 @@ public class ContactsListViewModel extends BaseViewModel {
 //                        .subscribe(
 //                                message -> Log.d(TAG, "onRequestMoneyClicked: " + message),
 //                                throwable -> {
-//                                    dataListener.onShowToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR);
+//                                    dataListener.showToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR);
 //                                    Log.e(TAG, "onRequestMoneyClicked: ", throwable);
 //                                }));
 
         // User should get back a notification with a payment request response
         // Download response from getPaymentRequestResponses(...)
-    }
-
-    void onDeleteContactClicked(String mdid) {
-        dataListener.showProgressDialog();
-//        compositeDisposable.add(
-//                contactManager.deleteTrusted(mdid)
-//                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-//                        .subscribe(success -> {
-//                            if (success) {
-//                                onViewReady();
-//                            } else {
-//                                dataListener.onShowToast(R.string.contacts_delete_contact_failed, ToastCustom.TYPE_ERROR);
-//                            }
-//                        }, throwable -> dataListener.onShowToast(R.string.contacts_delete_contact_failed, ToastCustom.TYPE_ERROR)));
     }
 
     // TODO: 16/11/2016
@@ -134,7 +129,7 @@ public class ContactsListViewModel extends BaseViewModel {
         ArrayList<ContactsListItem> list = new ArrayList<>();
 
         for (Contact contact : contacts) {
-            list.add(new ContactsListItem(contact.getMdid(), contact.getName(), "Trusted"));
+            list.add(new ContactsListItem(contact.getId(), contact.getName(), "Trusted"));
         }
 
         if (!list.isEmpty()) {
@@ -173,7 +168,7 @@ public class ContactsListViewModel extends BaseViewModel {
 //                        .flatMap(invitation -> contactManager.getContactList())
 //                        .subscribe(trusted -> {
 //                            handleContactListUpdate(trusted);
-//                            dataListener.onShowToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
-//                        }, throwable -> dataListener.onShowToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR)));
+//                            dataListener.showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
+//                        }, throwable -> dataListener.showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR)));
 //    }
 }

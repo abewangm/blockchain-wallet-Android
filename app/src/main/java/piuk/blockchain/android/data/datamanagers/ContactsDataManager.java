@@ -1,7 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
@@ -164,6 +163,17 @@ public class ContactsDataManager {
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
+    /**
+     * Removes a contact from the locally stored Contacts list. Does not save to server.
+     *
+     * @param contact The {@link Contact} to be stored
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable removeContact(Contact contact) {
+        return contactsService.removeContact(contact)
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // INVITATIONS
     ///////////////////////////////////////////////////////////////////////////
@@ -222,11 +232,10 @@ public class ContactsDataManager {
      * Sends a payment request to a user in the trusted contactsService list
      *
      * @param recipientMdid  The MDID of the message's recipient
-     * @param paymentRequest A FacilitatedTransaction object containing information about the proposed
-     *                       transaction
+     * @param satoshis The number of satoshis to be requested
      */
-    public Completable sendPaymentRequest(String recipientMdid, FacilitatedTransaction paymentRequest) throws Exception {
-        return callWithToken(() -> contactsService.sendPaymentRequest(recipientMdid, paymentRequest))
+    public Completable sendPaymentRequest(String recipientMdid, long satoshis) throws Exception {
+        return callWithToken(() -> contactsService.sendPaymentRequest(recipientMdid, satoshis))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -355,16 +364,16 @@ public class ContactsDataManager {
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
-    /**
-     * Decrypts a message from a specific user
-     *
-     * @param message The string to be decrypted
-     * @param mdid    The MDID of the user who sent the message
-     * @return An {@link Observable} containing the decrypted message
-     */
-    public Observable<Message> decryptMessageFrom(Message message, String mdid) {
-        return callWithToken(() -> contactsService.decryptMessageFrom(message, mdid))
-                .compose(RxUtil.applySchedulersToObservable());
-    }
+//    /**
+//     * Decrypts a message from a specific user
+//     *
+//     * @param message The string to be decrypted
+//     * @param mdid    The MDID of the user who sent the message
+//     * @return An {@link Observable} containing the decrypted message
+//     */
+//    public Observable<Message> decryptMessageFrom(Message message, String mdid) {
+//        return callWithToken(() -> contactsService.decryptMessageFrom(message, mdid))
+//                .compose(RxUtil.applySchedulersToObservable());
+//    }
 
 }

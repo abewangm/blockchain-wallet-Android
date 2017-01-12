@@ -1,10 +1,7 @@
 package piuk.blockchain.android.data.services;
 
-import android.util.Log;
-
 import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 
@@ -65,9 +62,7 @@ public class ContactsService {
      */
     public Completable fetchContacts() {
         return Completable.fromCallable(() -> {
-            Log.d("Fetch contacts", "fetchContacts: called");
             contacts.fetch();
-            Log.d("Fetch contacts", "fetchContacts: completed");
             return Void.TYPE;
         });
     }
@@ -113,6 +108,16 @@ public class ContactsService {
      */
     public Completable addContact(Contact contact) {
         return Completable.fromAction(() -> contacts.addContact(contact));
+    }
+
+    /**
+     * Removes a contact from the locally stored Contacts list. Does not save to server.
+     *
+     * @param contact The {@link Contact} to be stored
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable removeContact(Contact contact) {
+        return Completable.fromAction(() -> contacts.removeContact(contact));
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -173,13 +178,12 @@ public class ContactsService {
      * Sends a payment request to a user in the trusted contactsService list
      *
      * @param recipientMdid  The MDID of the message's recipient
-     * @param paymentRequest A FacilitatedTransaction object containing information about the proposed
-     *                       transaction
+     * @param satoshis the number of satoshis to be requested
      */
     @RequiresAccessToken
-    public Completable sendPaymentRequest(String recipientMdid, FacilitatedTransaction paymentRequest) {
+    public Completable sendPaymentRequest(String recipientMdid, long satoshis) {
         return Completable.fromCallable(() -> {
-            contacts.sendPaymentRequest(recipientMdid, paymentRequest);
+            contacts.sendRequestPaymentRequest(recipientMdid, satoshis);
             return Void.TYPE;
         });
     }
@@ -313,15 +317,15 @@ public class ContactsService {
         });
     }
 
-    /**
-     * Decrypts a message from a specific user
-     *
-     * @param message The string to be decrypted
-     * @param mdid    The MDID of the user who sent the message
-     * @return An {@link Observable} containing the decrypted message
-     */
-    @RequiresAccessToken
-    public Observable<Message> decryptMessageFrom(Message message, String mdid) {
-        return Observable.fromCallable(() -> contacts.decryptMessageFrom(message, mdid));
-    }
+//    /**
+//     * Decrypts a message from a specific user
+//     *
+//     * @param message The string to be decrypted
+//     * @param mdid    The MDID of the user who sent the message
+//     * @return An {@link Observable} containing the decrypted message
+//     */
+//    @RequiresAccessToken
+//    public Observable<Message> decryptMessageFrom(Message message, String mdid) {
+//        return Observable.fromCallable(() -> contacts.decryptMessageFrom(message, mdid));
+//    }
 }

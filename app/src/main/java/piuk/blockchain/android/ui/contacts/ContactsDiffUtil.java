@@ -27,8 +27,8 @@ public class ContactsDiffUtil extends DiffUtil.Callback {
 
     @Override
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-        return oldContacts.get(oldItemPosition).getMdid().equals(
-                newContacts.get(newItemPosition).getMdid());
+        return oldContacts.get(oldItemPosition).getId().equals(
+                newContacts.get(newItemPosition).getId());
     }
 
     @Override
@@ -38,7 +38,7 @@ public class ContactsDiffUtil extends DiffUtil.Callback {
 
         // Temporary, Nonnull annotations aren't applicable right now in testing
         //noinspection ConstantConditions
-        return (oldContact.getMdid() != null ? oldContact.getMdid() : "").equals(newContact.getMdid() != null ? newContact.getMdid() : "")
+        return (oldContact.getId() != null ? oldContact.getId() : "").equals(newContact.getId() != null ? newContact.getId() : "")
                 && (oldContact.getContactName() != null ? oldContact.getContactName() : "").equals(newContact.getContactName() != null ? newContact.getContactName() : "")
                 && (oldContact.getStatus() != null ? oldContact.getStatus() : "").equals(newContact.getStatus() != null ? newContact.getStatus() : "");
     }

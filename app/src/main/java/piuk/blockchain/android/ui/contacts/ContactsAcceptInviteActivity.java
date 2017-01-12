@@ -50,7 +50,7 @@ public class ContactsAcceptInviteActivity extends BaseAuthActivity implements Co
     }
 
     @Override
-    public void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
+    public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
 
@@ -65,7 +65,7 @@ public class ContactsAcceptInviteActivity extends BaseAuthActivity implements Co
             if (extra != null) viewModel.handleScanInput(extra);
 
         } else if (resultCode != RESULT_CANCELED && requestCode == SCAN_URI) {
-            onShowToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+            showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
         }
     }
 

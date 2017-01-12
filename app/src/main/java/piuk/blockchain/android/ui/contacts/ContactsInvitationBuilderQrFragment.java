@@ -63,7 +63,7 @@ public class ContactsInvitationBuilderQrFragment extends Fragment implements Con
 
     @Override
     public void updateDisplayMessage(String name) {
-        binding.textviewName.setText(String.format(getString(R.string.contacts_scan_instructions), name));
+        binding.textviewName.setText(getString(R.string.contacts_scan_instructions, name));
     }
 
     @Override

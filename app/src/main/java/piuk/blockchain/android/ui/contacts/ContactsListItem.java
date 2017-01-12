@@ -5,12 +5,12 @@ import android.support.annotation.Nullable;
 
 class ContactsListItem {
 
-    private String mdid;
+    private String id;
     private String contactName;
     private String status;
 
-    ContactsListItem(@NonNull String mdid, @NonNull String contactName, @NonNull String status) {
-        this.mdid = mdid;
+    ContactsListItem(@NonNull String id, @NonNull String contactName, @NonNull String status) {
+        this.id = id;
         this.contactName = contactName;
         this.status = status;
     }
@@ -21,8 +21,8 @@ class ContactsListItem {
     }
 
     @NonNull
-    String getMdid() {
-        return mdid;
+    String getId() {
+        return id;
     }
 
     @NonNull

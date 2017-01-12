@@ -39,7 +39,7 @@ class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.Conta
         holder.name.setText(listItem.getContactName());
         holder.status.setText(listItem.getStatus());
         holder.itemView.setOnClickListener(view -> {
-            if (contactsClickListener != null) contactsClickListener.onClick(listItem.getMdid());
+            if (contactsClickListener != null) contactsClickListener.onClick(listItem.getId());
         });
     }
 
@@ -73,7 +73,7 @@ class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.Conta
 
     interface ContactsClickListener {
 
-        void onClick(String mdid);
+        void onClick(String id);
 
     }
 }

@@ -24,6 +24,7 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 public class ContactsListActivity extends BaseAuthActivity implements ContactsListViewModel.DataListener {
 
     public static final String EXTRA_METADATA_URI = "metadata_uri";
+    public static final String KEY_BUNDLE_ID = "bundle_id";
 
     private static final int REQUEST_PAIRING = 98;
     private ActivityContactsBinding binding;
@@ -46,12 +47,21 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         binding.buttonRetry.setOnClickListener(view -> viewModel.onViewReady());
 
         contactsListAdapter = new ContactsListAdapter(new ArrayList<>());
-        // TODO: 10/01/2017 Go to user detail page
-        contactsListAdapter.setContactsClickListener(mdid -> ContactDetailActivity.start(this, new Bundle()));
+        contactsListAdapter.setContactsClickListener(id -> {
+            Bundle bundle = new Bundle();
+            bundle.putString(KEY_BUNDLE_ID, id);
+            ContactDetailActivity.start(this, bundle);
+        });
         binding.layoutContent.setAdapter(contactsListAdapter);
         binding.layoutContent.setLayoutManager(new LinearLayoutManager(this));
 
         viewModel.onViewReady();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        viewModel.requestUpdatedList();
     }
 
     @Override

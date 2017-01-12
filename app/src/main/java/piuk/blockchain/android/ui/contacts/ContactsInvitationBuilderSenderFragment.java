@@ -49,7 +49,7 @@ public class ContactsInvitationBuilderSenderFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         String name = getArguments().getString(KEY_BUNDLE_NAME);
-        binding.textviewName.setText(String.format(getString(R.string.contacts_how_are_you_known_header), name));
+        binding.textviewName.setText(getString(R.string.contacts_how_are_you_known_header, name));
 
 
         binding.buttonNext.setOnClickListener(v -> {
