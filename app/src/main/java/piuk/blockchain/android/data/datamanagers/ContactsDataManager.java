@@ -144,11 +144,11 @@ public class ContactsDataManager {
     }
 
     /**
-     * Returns a {@link List<Contact>} object containing a list of trusted users. List can be empty.
+     * Returns a stream of {@link Contact} objects, comprising a list of users. List can be empty.
      *
-     * @return A {@link List<Contact>} object
+     * @return A stream of {@link Contact} objects
      */
-    public Observable<List<Contact>> getContactList() {
+    public Observable<Contact> getContactList() {
         return contactsService.getContactList()
                 .compose(RxUtil.applySchedulersToObservable());
     }

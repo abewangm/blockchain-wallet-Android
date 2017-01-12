@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.List;
@@ -58,6 +59,7 @@ class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.Conta
         TextView name;
         TextView status;
         ImageView indicator;
+        ProgressBar progressBar;
 
         ContactsViewHolder(View itemView) {
             super(itemView);
@@ -65,6 +67,7 @@ class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.Conta
             name = (TextView) itemView.findViewById(R.id.contact_name);
             status = (TextView) itemView.findViewById(R.id.contact_status);
             indicator = (ImageView) itemView.findViewById(R.id.imageview_indicator);
+            progressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar);
         }
     }
 

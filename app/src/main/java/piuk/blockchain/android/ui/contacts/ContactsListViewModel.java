@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.contacts;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
@@ -50,7 +49,6 @@ public class ContactsListViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-
         // Subscribe to notification events
         subscribeToNotifications();
 
@@ -58,12 +56,11 @@ public class ContactsListViewModel extends BaseViewModel {
         compositeDisposable.add(
                 contactsDataManager.fetchContacts()
                         .andThen(contactsDataManager.getContactList())
+                        .toList()
                         .subscribe(
                                 this::handleContactListUpdate,
-                                throwable -> {
-                                    Log.e(TAG, "onViewReady: ", throwable);
-                                    dataListener.setUiState(ContactsListActivity.FAILURE);
-                                }));
+                                throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
+
 
         // TODO: 16/11/2016 Move me to my own function. I will likely need to be called from system-wide broadcasts
         // I'm only here for testing purposes

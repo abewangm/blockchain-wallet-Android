@@ -1,5 +1,7 @@
 package piuk.blockchain.android.data.services;
 
+import android.util.Log;
+
 import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
@@ -63,7 +65,9 @@ public class ContactsService {
      */
     public Completable fetchContacts() {
         return Completable.fromCallable(() -> {
+            Log.d("Fetch contacts", "fetchContacts: called");
             contacts.fetch();
+            Log.d("Fetch contacts", "fetchContacts: completed");
             return Void.TYPE;
         });
     }
@@ -93,12 +97,12 @@ public class ContactsService {
     }
 
     /**
-     * Returns a {@link List<Contact>} object containing a list of trusted users. List can be empty.
+     * Returns a stream of {@link Contact} objects, comprising a list of users. List can be empty.
      *
-     * @return A {@link List<Contact>} object
+     * @return A stream of {@link Contact} objects
      */
-    public Observable<List<Contact>> getContactList() {
-        return Observable.just(contacts.getContactList());
+    public Observable<Contact> getContactList() {
+        return Observable.defer(() -> Observable.fromIterable(contacts.getContactList()));
     }
 
     /**

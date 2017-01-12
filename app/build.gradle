@@ -143,7 +143,7 @@ dependencies {
     compile 'org.thoughtcrime.ssl.pinning:AndroidPinning:1.0.0'
     compile 'com.neovisionaries:nv-websocket-client:1.19'
     compile('com.google.zxing:core:3.3.0') { transitive = true }
-    compile 'com.github.mukeshsolanki:country-picker-android:1.1.6'
+    compile 'com.github.mukeshsolanki:country-picker-android:1.1.7'
     compile 'com.aurelhubert:ahbottomnavigation:2.0.2'
     // URL Builder
     compile "io.mikael:urlbuilder:2.0.8"

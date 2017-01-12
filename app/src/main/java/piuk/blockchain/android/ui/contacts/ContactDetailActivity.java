@@ -12,15 +12,15 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 
 public class ContactDetailActivity extends BaseAuthActivity {
 
-    ActivityContactDetailBinding binding;
+    private ActivityContactDetailBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contact_detail);
 
-        setSupportActionBar(binding.toolbar.toolbarGeneral);
         binding.toolbar.toolbarGeneral.setTitle("someone's name i guess");
+        setSupportActionBar(binding.toolbar.toolbarGeneral);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
