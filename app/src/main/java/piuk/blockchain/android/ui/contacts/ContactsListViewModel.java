@@ -2,24 +2,31 @@ package piuk.blockchain.android.ui.contacts;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
+import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.PrefsUtil;
+
+import static piuk.blockchain.android.ui.contacts.ContactsListActivity.EXTRA_METADATA_URI;
 
 @SuppressWarnings("WeakerAccess")
 public class ContactsListViewModel extends BaseViewModel {
+
+    private static final String TAG = ContactsListViewModel.class.getSimpleName();
 
     private DataListener dataListener;
     @Inject QrCodeDataManager qrCodeDataManager;
@@ -33,6 +40,8 @@ public class ContactsListViewModel extends BaseViewModel {
         void onContactsLoaded(@NonNull List<ContactsListItem> contacts);
 
         void setUiState(@ContactsListActivity.UiState int uiState);
+
+        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
         void showProgressDialog();
 
@@ -77,6 +86,12 @@ public class ContactsListViewModel extends BaseViewModel {
 //            MetaDataUri uriObject = MetaDataUri.decode(intent.getStringExtra(EXTRA_METADATA_URI));
 //            handleIncomingUri(uriObject);
 //        }
+
+        Intent intent = dataListener.getPageIntent();
+        if (intent != null && intent.hasExtra(EXTRA_METADATA_URI)) {
+            String data = intent.getStringExtra(EXTRA_METADATA_URI);
+            handleLink(data);
+        }
     }
 
     /**
@@ -94,36 +109,12 @@ public class ContactsListViewModel extends BaseViewModel {
     private void subscribeToNotifications() {
         FcmCallbackService.getNotificationSubject().subscribe(
                 notificationPayload -> {
+                    Log.d(TAG, "subscribeToNotifications: ");
                     // TODO: 02/12/2016 Filter specific events that are relevant to this page
                 }, throwable -> {
-                    // TODO: 02/12/2016
+                    Log.e(TAG, "subscribeToNotifications: ", throwable);
                 });
     }
-
-    void onSendMoneyClicked(String mdid) {
-        // Send payment request
-        dataListener.showProgressDialog();
-
-        FacilitatedTransaction paymentRequest = new FacilitatedTransaction();
-        paymentRequest.setIntendedAmount(1_000_000L);
-        // No notes anymore, apparently
-//        paymentRequest.setNote("I owe you 1,000,000 satoshi for something");
-
-//        compositeDisposable.add(
-//                contactManager.sendPaymentRequest(mdid, paymentRequest)
-//                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-//                        .subscribe(
-//                                message -> Log.d(TAG, "onRequestMoneyClicked: " + message),
-//                                throwable -> {
-//                                    dataListener.showToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR);
-//                                    Log.e(TAG, "onRequestMoneyClicked: ", throwable);
-//                                }));
-
-        // User should get back a notification with a payment request response
-        // Download response from getPaymentRequestResponses(...)
-    }
-
-    // TODO: 16/11/2016
 
     private void handleContactListUpdate(List<Contact> contacts) {
         ArrayList<ContactsListItem> list = new ArrayList<>();
@@ -136,24 +127,29 @@ public class ContactsListViewModel extends BaseViewModel {
             dataListener.setUiState(ContactsListActivity.CONTENT);
             dataListener.onContactsLoaded(list);
         } else {
+            dataListener.onContactsLoaded(new ArrayList<>());
             dataListener.setUiState(ContactsListActivity.EMPTY);
         }
     }
 
-//    private void handleIncomingUri(MetaDataUri metaDataUri) {
-//        String name = metaDataUri.getFrom();
-//        dataListener.showAddContactConfirmation(name, new DialogButtonCallback() {
-//            @Override
-//            public void onPositiveClicked() {
-//                addUser(metaDataUri);
-//            }
-//
-//            @Override
-//            public void onNegativeClicked() {
-//                // Ignore
-//            }
-//        });
-//    }
+    private void handleLink(String data) {
+        dataListener.showProgressDialog();
+
+        compositeDisposable.add(
+                contactsDataManager.acceptInvitation(data)
+                        .flatMapCompletable(contact -> contactsDataManager.addContact(contact))
+                        .andThen(contactsDataManager.saveContacts())
+                        .andThen(contactsDataManager.getContactList())
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .toList()
+                        .subscribe(
+                                contacts -> {
+                                    handleContactListUpdate(contacts);
+                                    dataListener.showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_GENERAL);
+                                }, throwable -> dataListener.showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR)));
+
+    }
+
 //
 //    @Thunk
 //    void addUser(MetaDataUri metaDataUri) {

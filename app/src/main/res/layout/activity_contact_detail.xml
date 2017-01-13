@@ -75,7 +75,21 @@
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:visibility="gone"
             tools:listitem="@layout/item_balance" />
+
+        <RelativeLayout
+            android:id="@+id/layout_no_transactions"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.AppCompatTextView
+                style="@style/ContactsDetail"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:text="@string/contacts_detail_transactions_empty" />
+
+        </RelativeLayout>
 
 
     </LinearLayout>

@@ -6,7 +6,6 @@ import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
 
-import io.reactivex.CompletableSource;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.injection.Injector;
@@ -42,7 +41,7 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
         compositeDisposable.add(
                 contactManager.acceptInvitation(extra)
                         .flatMapCompletable(contact -> contactManager.addContact(contact))
-                        .andThen((CompletableSource) s -> contactManager.saveContacts())
+                        .andThen(contactManager.saveContacts())
                         .subscribe(
                                 () -> {
                                     dataListener.showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);

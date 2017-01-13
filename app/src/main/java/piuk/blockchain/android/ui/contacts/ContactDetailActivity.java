@@ -14,6 +14,7 @@ import android.text.InputType;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactDetailBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ViewUtils;
 
@@ -21,6 +22,7 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
 
     private ActivityContactDetailBinding binding;
     private ContactDetailViewModel viewModel;
+    private MaterialProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +61,7 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
     public void showRenameDialog(String name) {
         AppCompatEditText editText = new AppCompatEditText(this);
         editText.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        editText.setHint(R.string.name);
         int maxLength = 128;
         InputFilter[] fArray = new InputFilter[1];
         fArray[0] = new InputFilter.LengthFilter(maxLength);
@@ -73,6 +76,22 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
+    }
+
+    @Override
+    public void showProgressDialog() {
+        progressDialog = new MaterialProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(R.string.please_wait);
+        progressDialog.show();
+    }
+
+    @Override
+    public void dismissProgressDialog() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
     }
 
     @Override

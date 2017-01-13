@@ -46,7 +46,7 @@
                 <data
                     android:host="blockchain.info"
                     android:pathPrefix="/invite"
-                    android:scheme="http" />
+                    android:scheme="https" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />

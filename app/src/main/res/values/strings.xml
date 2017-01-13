@@ -555,6 +555,7 @@
     <string name="contacts_no_contacts_found">No contacts found</string>
     <string name="contacts_delete_contact_success">Contact deleted</string>
     <string name="contacts_delete_contact_failed">Deleting contact failed, please try again</string>
+    <string name="contacts_not_found_error">Contact not found</string>
     <string name="contacts_add_contact_failed">Adding contact failed, please try again</string>
     <string name="contacts_add_contact_success">Contact added successfully</string>
     <string name="contacts_rename_invalid_name">Name invalid</string>
@@ -584,6 +585,7 @@
     <string name="contacts_sent_link_explanation">If someone sent you a link, simply tap on the link to accept.</string>
     <string name="contacts_detail_title">I want to:</string>
     <string name="contacts_detail_transactions">Transactions with  %1$s:</string>
+    <string name="contacts_detail_transactions_empty">No transactions found</string>
     <string name="contacts_rename">Rename contact</string>
     <string name="contacts_delete">Delete contact</string>
     <string name="contacts_send_bitcoin">Ask to send %1$s bitcoin</string>

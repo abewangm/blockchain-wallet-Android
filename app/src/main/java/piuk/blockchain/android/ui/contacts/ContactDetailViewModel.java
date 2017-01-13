@@ -34,6 +34,10 @@ public class ContactDetailViewModel extends BaseViewModel {
 
         void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
+        void showProgressDialog();
+
+        void dismissProgressDialog();
+
     }
 
     public ContactDetailViewModel(DataListener dataListener) {
@@ -50,25 +54,29 @@ public class ContactDetailViewModel extends BaseViewModel {
             compositeDisposable.add(
                     contactsDataManager.getContactList()
                             .filter(ContactsPredicates.filterById(id))
-                            .subscribe(contact -> {
-                                this.contact = contact;
-                                dataListener.updateContactName(contact.getName());
-                            }, throwable -> {
-                                // TODO: 12/01/2017 Show error, quit page
-                            }));
+                            .subscribe(
+                                    contact -> {
+                                        this.contact = contact;
+                                        dataListener.updateContactName(contact.getName());
+                                    }, throwable -> showErrorAndQuitPage()));
         } else {
-            // TODO: 12/01/2017 Show error, quit page
+            showErrorAndQuitPage();
         }
+    }
+
+    private void showErrorAndQuitPage() {
+        dataListener.showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
+        dataListener.finishPage();
     }
 
     void onDeleteContactClicked() {
         // TODO: 12/01/2017 Will need to remove contacts from shared metadata service too via mdid
 
-//        dataListener.showProgressDialog();
+        dataListener.showProgressDialog();
         compositeDisposable.add(
                 contactsDataManager.removeContact(contact)
                         .andThen(contactsDataManager.saveContacts())
-//                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(() -> {
                             // Quit page, show toast
                             dataListener.showToast(R.string.contacts_delete_contact_success, ToastCustom.TYPE_GENERAL);
@@ -87,9 +95,12 @@ public class ContactDetailViewModel extends BaseViewModel {
         } else if (name.isEmpty()) {
             dataListener.showToast(R.string.contacts_rename_invalid_name, ToastCustom.TYPE_ERROR);
         } else {
+            dataListener.showProgressDialog();
+
             contact.setName(name);
             compositeDisposable.add(
                     contactsDataManager.saveContacts()
+                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                             .subscribe(
                                     () -> {
                                         dataListener.updateContactName(name);

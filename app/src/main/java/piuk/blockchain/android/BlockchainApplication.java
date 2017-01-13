@@ -37,8 +37,8 @@ import retrofit2.Retrofit;
 
 public class BlockchainApplication extends Application implements FrameworkInterface {
 
+    public static final String RX_ERROR_TAG = "RxJava Error";
     @Thunk static final String TAG = BlockchainApplication.class.getSimpleName();
-    private static final String RX_ERROR_TAG = "RxJava Error";
 
     @Inject
     @Named("api")

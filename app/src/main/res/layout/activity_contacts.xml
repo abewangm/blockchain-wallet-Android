@@ -34,14 +34,6 @@
             </android.support.design.widget.CollapsingToolbarLayout>
         </android.support.design.widget.AppBarLayout>
 
-        <!-- LOADING LAYOUT -->
-        <ProgressBar
-            android:id="@+id/layout_loading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            tools:visibility="gone" />
-
         <!-- EMPTY LAYOUT -->
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/layout_empty"
@@ -52,12 +44,19 @@
             android:visibility="gone" />
 
         <!-- CONTENT LAYOUT -->
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/layout_content"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:listItem="@layout/item_contact" />
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/layout_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:listItem="@layout/item_contact" />
+
+        </android.support.v4.widget.SwipeRefreshLayout>
 
         <!-- FAILURE LAYOUT -->
         <RelativeLayout

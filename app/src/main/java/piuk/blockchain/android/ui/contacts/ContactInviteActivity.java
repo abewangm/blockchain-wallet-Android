@@ -11,6 +11,7 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 
 public class ContactInviteActivity extends BaseAuthActivity {
 
+    private static final int REQUEST_CODE_ACCEPT_INVITE = 437;
     private ActivityContactPairingMethodBinding binding;
 
     @Override
@@ -25,7 +26,14 @@ public class ContactInviteActivity extends BaseAuthActivity {
         binding.buttonInvite.setOnClickListener(v -> ContactsInvitationBuilderActivity.start(this));
 
         binding.buttonAccept.setOnClickListener(
-                v -> startActivityForResult(new Intent(this, ContactsAcceptInviteActivity.class), 437));
+                v -> startActivityForResult(new Intent(this, ContactsAcceptInviteActivity.class), REQUEST_CODE_ACCEPT_INVITE));
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_ACCEPT_INVITE) {
+            finish();
+        }
     }
 
     /**

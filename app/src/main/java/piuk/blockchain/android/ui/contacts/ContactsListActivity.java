@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 
@@ -19,6 +20,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactsBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 
 public class ContactsListActivity extends BaseAuthActivity implements ContactsListViewModel.DataListener {
@@ -30,7 +32,7 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
     private ActivityContactsBinding binding;
     private ContactsListViewModel viewModel;
     private ContactsListAdapter contactsListAdapter;
-    private MaterialProgressDialog materialProgressDialog;
+    private MaterialProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +44,13 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // Buttons
         binding.fab.setOnClickListener(view -> ContactInviteActivity.start(this));
-
         binding.buttonRetry.setOnClickListener(view -> viewModel.onViewReady());
-
+        // Swipe to refresh layout
+        binding.swipeRefreshLayout.setColorSchemeResources(R.color.blockchain_dark_blue);
+        binding.swipeRefreshLayout.setOnRefreshListener(() -> viewModel.onViewReady());
+        // Contacts list
         contactsListAdapter = new ContactsListAdapter(new ArrayList<>());
         contactsListAdapter.setContactsClickListener(id -> {
             Bundle bundle = new Bundle();
@@ -104,18 +109,23 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
     }
 
     @Override
+    public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
+        ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
     public void showProgressDialog() {
-        materialProgressDialog = new MaterialProgressDialog(this);
-        materialProgressDialog.setCancelable(false);
-        materialProgressDialog.setMessage(R.string.please_wait);
-        materialProgressDialog.show();
+        progressDialog = new MaterialProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(R.string.please_wait);
+        progressDialog.show();
     }
 
     @Override
     public void dismissProgressDialog() {
-        if (materialProgressDialog != null) {
-            materialProgressDialog.dismiss();
-            materialProgressDialog = null;
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
         }
     }
 
@@ -136,25 +146,25 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         // invalidate CoordinatorLayout ¯\_(ツ)_/¯
         switch (uiState) {
             case LOADING:
-                binding.layoutLoading.setVisibility(View.VISIBLE);
+                binding.swipeRefreshLayout.setRefreshing(true);
 //                binding.layoutContent.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.GONE);
                 binding.layoutEmpty.setVisibility(View.GONE);
                 break;
             case CONTENT:
-                binding.layoutLoading.setVisibility(View.GONE);
+                binding.swipeRefreshLayout.setRefreshing(false);
 //                binding.layoutContent.setVisibility(View.VISIBLE);
                 binding.layoutFailure.setVisibility(View.GONE);
                 binding.layoutEmpty.setVisibility(View.GONE);
                 break;
             case FAILURE:
-                binding.layoutLoading.setVisibility(View.GONE);
+                binding.swipeRefreshLayout.setRefreshing(false);
 //                binding.layoutContent.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.VISIBLE);
                 binding.layoutEmpty.setVisibility(View.GONE);
                 break;
             case EMPTY:
-                binding.layoutLoading.setVisibility(View.GONE);
+                binding.swipeRefreshLayout.setRefreshing(false);
 //                binding.layoutContent.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.GONE);
                 binding.layoutEmpty.setVisibility(View.VISIBLE);
