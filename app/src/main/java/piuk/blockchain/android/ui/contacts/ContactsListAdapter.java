@@ -41,6 +41,12 @@ class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.Conta
         holder.itemView.setOnClickListener(view -> {
             if (contactsClickListener != null) contactsClickListener.onClick(listItem.getId());
         });
+
+        if (listItem.getStatus().equals(ContactsListItem.Status.PENDING)) {
+            holder.progressBar.setVisibility(View.VISIBLE);
+        } else {
+            holder.progressBar.setVisibility(View.GONE);
+        }
     }
 
     @Override

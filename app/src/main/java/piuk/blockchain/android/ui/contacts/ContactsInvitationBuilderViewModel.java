@@ -18,8 +18,9 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 public class ContactsInvitationBuilderViewModel extends BaseViewModel {
 
     private DataListener dataListener;
-    private String nameOfRecipient;
-    private String nameOfSender;
+    private Contact recipient;
+    private Contact sender;
+    private String uri;
     @Inject ContactsDataManager contactManager;
 
     interface DataListener {
@@ -47,56 +48,67 @@ public class ContactsInvitationBuilderViewModel extends BaseViewModel {
     }
 
     void setNameOfSender(String nameOfSender) {
-        this.nameOfSender = nameOfSender;
+        sender = new Contact();
+        sender.setName(nameOfSender);
     }
 
     void setNameOfRecipient(String nameOfRecipient) {
-        this.nameOfRecipient = nameOfRecipient;
+        recipient = new Contact();
+        recipient.setName(nameOfRecipient);
     }
 
     void onQrCodeSelected() {
-        dataListener.showProgressDialog();
+        if (uri == null) {
+            dataListener.showProgressDialog();
 
-        Contact sender = new Contact();
-        Contact recipient = new Contact();
-        sender.setName(nameOfSender);
-        recipient.setName(nameOfRecipient);
-
-        compositeDisposable.add(
-                contactManager.createInvitation(sender, recipient)
-                        .map(Contact::createURI)
-                        .doOnNext(uri -> dataListener.onUriGenerated(uri, nameOfRecipient))
-                        .flatMapCompletable(s -> contactManager.saveContacts())
-                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                        .subscribe(
-                                () -> {
-                                },
-                                throwable -> dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+            compositeDisposable.add(
+                    contactManager.createInvitation(sender, recipient)
+                            .map(Contact::createURI)
+                            .doOnNext(uri -> {
+                                this.uri = uri;
+                                dataListener.onUriGenerated(uri, recipient.getName());
+                            })
+                            .flatMapCompletable(s -> contactManager.addPendingContact(recipient))
+                            .andThen(contactManager.saveContacts())
+                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                            .subscribe(
+                                    () -> {
+                                    },
+                                    throwable -> dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+        } else {
+            // Prevents contact being added more than once, as well as unnecessary web calls
+            dataListener.onUriGenerated(uri, recipient.getName());
+        }
     }
 
     void onLinkClicked() {
-        dataListener.showProgressDialog();
+        if (uri == null) {
+            dataListener.showProgressDialog();
 
-        Contact sender = new Contact();
-        Contact recipient = new Contact();
-        sender.setName(nameOfSender);
-        recipient.setName(nameOfRecipient);
+            compositeDisposable.add(
+                    contactManager.createInvitation(sender, recipient)
+                            .map(Contact::createURI)
+                            .doOnNext(uri -> {
+                                this.uri = uri;
+                                generateIntent(uri);
+                            })
+                            .flatMapCompletable(s -> contactManager.addPendingContact(recipient))
+                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                            .subscribe(
+                                    () -> {
+                                    },
+                                    throwable -> dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+        } else {
+            // Prevents contact being added more than once, as well as unnecessary web calls
+            generateIntent(uri);
+        }
+    }
 
-        compositeDisposable.add(
-                contactManager.createInvitation(sender, recipient)
-                        .map(Contact::createURI)
-                        .doOnNext(uri -> {
-                            Intent intent = new Intent();
-                            intent.setAction(Intent.ACTION_SEND);
-                            intent.putExtra(Intent.EXTRA_TEXT, uri);
-                            intent.setType("text/plain");
-                            dataListener.onLinkGenerated(intent);
-                        })
-                        .flatMapCompletable(s -> contactManager.saveContacts())
-                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                        .subscribe(
-                                () -> {
-                                },
-                                throwable -> dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+    private void generateIntent(String uri) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_TEXT, uri);
+        intent.setType("text/plain");
+        dataListener.onLinkGenerated(intent);
     }
 }

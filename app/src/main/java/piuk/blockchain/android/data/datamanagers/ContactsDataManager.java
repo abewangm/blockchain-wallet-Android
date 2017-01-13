@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
-import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -15,15 +14,18 @@ import io.reactivex.Observable;
 import io.reactivex.functions.Function;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.ContactsService;
+import piuk.blockchain.android.ui.contacts.PendingContactsStore;
 
 @SuppressWarnings({"WeakerAccess", "AnonymousInnerClassMayBeStatic"})
 public class ContactsDataManager {
 
     private ContactsService contactsService;
+    private PendingContactsStore pendingContactsStore;
     private PayloadManager payloadManager;
 
-    public ContactsDataManager(ContactsService contactsService, PayloadManager payloadManager) {
+    public ContactsDataManager(ContactsService contactsService, PendingContactsStore pendingContactsStore, PayloadManager payloadManager) {
         this.contactsService = contactsService;
+        this.pendingContactsStore = pendingContactsStore;
         this.payloadManager = payloadManager;
     }
 
@@ -153,7 +155,7 @@ public class ContactsDataManager {
     }
 
     /**
-     * Inserts a contact into the locally stored Contacts list. Does not save to server.
+     * Inserts a contact into the locally stored Contacts list. Saves this list to server.
      *
      * @param contact The {@link Contact} to be stored
      * @return A {@link Completable} object, ie an asynchronous void operation
@@ -164,7 +166,7 @@ public class ContactsDataManager {
     }
 
     /**
-     * Removes a contact from the locally stored Contacts list. Does not save to server.
+     * Removes a contact from the locally stored Contacts list. Saves updated list to server.
      *
      * @param contact The {@link Contact} to be stored
      * @return A {@link Completable} object, ie an asynchronous void operation
@@ -179,11 +181,12 @@ public class ContactsDataManager {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Creates a new invite and associated invite ID for linking two users together.
+     * Creates a new invite and associated invite ID for linking two users together
      *
      * @param myDetails        My details that will be visible in invitation url
-     * @param recipientDetails Recipient details - This will be added to my contacts list
-     * @return A {@link Contact} object
+     * @param recipientDetails Recipient details
+     * @return A {@link Contact} object, which is an updated version of the mydetails object, ie
+     * it's the sender's own contact details
      */
     public Observable<Contact> createInvitation(Contact myDetails, Contact recipientDetails) {
         return callWithToken(() -> contactsService.createInvitation(myDetails, recipientDetails))
@@ -194,7 +197,7 @@ public class ContactsDataManager {
      * Accepts an invitation from another user
      *
      * @param invitationUrl An invitation url
-     * @return An {@link Invitation} object
+     * @return A {@link Contact} object representing the other user
      */
     public Observable<Contact> acceptInvitation(String invitationUrl) {
         return callWithToken(() -> contactsService.acceptInvitation(invitationUrl))
@@ -228,16 +231,16 @@ public class ContactsDataManager {
     // PAYMENT REQUESTS
     ///////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Sends a payment request to a user in the trusted contactsService list
-     *
-     * @param recipientMdid  The MDID of the message's recipient
-     * @param satoshis The number of satoshis to be requested
-     */
-    public Completable sendPaymentRequest(String recipientMdid, long satoshis) throws Exception {
-        return callWithToken(() -> contactsService.sendPaymentRequest(recipientMdid, satoshis))
-                .compose(RxUtil.applySchedulersToCompletable());
-    }
+//    /**
+//     * Sends a payment request to a user in the trusted contactsService list
+//     *
+//     * @param recipientMdid The MDID of the message's recipient
+//     * @param satoshis      The number of satoshis to be requested
+//     */
+//    public Completable sendPaymentRequest(String recipientMdid, long satoshis) throws Exception {
+//        return callWithToken(() -> contactsService.sendPaymentRequest(recipientMdid, satoshis))
+//                .compose(RxUtil.applySchedulersToCompletable());
+//    }
 
 //    /**
 //     * Accepts a payment request from a user and optionally adds a note to the transaction
@@ -303,27 +306,27 @@ public class ContactsDataManager {
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
-    /**
-     * Adds a user's MDID to the trusted list in Shared Metadata
-     *
-     * @param mdid The user's MDID
-     * @return An {@link Observable} wrapping a boolean, representing a successful save
-     */
-    public Observable<Boolean> addTrusted(String mdid) {
-        return callWithToken(() -> contactsService.addTrusted(mdid))
-                .compose(RxUtil.applySchedulersToObservable());
-    }
-
-    /**
-     * Removes a user's MDID from the trusted list in Shared Metadata
-     *
-     * @param mdid The user's MDID
-     * @return An {@link Observable} wrapping a boolean, representing a successful deletion
-     */
-    public Observable<Boolean> deleteTrusted(String mdid) {
-        return callWithToken(() -> contactsService.deleteTrusted(mdid))
-                .compose(RxUtil.applySchedulersToObservable());
-    }
+//    /**
+//     * Adds a user's MDID to the trusted list in Shared Metadata
+//     *
+//     * @param mdid The user's MDID
+//     * @return An {@link Observable} wrapping a boolean, representing a successful save
+//     */
+//    public Observable<Boolean> addTrusted(String mdid) {
+//        return callWithToken(() -> contactsService.addTrusted(mdid))
+//                .compose(RxUtil.applySchedulersToObservable());
+//    }
+//
+//    /**
+//     * Removes a user's MDID from the trusted list in Shared Metadata
+//     *
+//     * @param mdid The user's MDID
+//     * @return An {@link Observable} wrapping a boolean, representing a successful deletion
+//     */
+//    public Observable<Boolean> deleteTrusted(String mdid) {
+//        return callWithToken(() -> contactsService.deleteTrusted(mdid))
+//                .compose(RxUtil.applySchedulersToObservable());
+//    }
 
     ///////////////////////////////////////////////////////////////////////////
     // MESSAGES
@@ -375,5 +378,39 @@ public class ContactsDataManager {
 //        return callWithToken(() -> contactsService.decryptMessageFrom(message, mdid))
 //                .compose(RxUtil.applySchedulersToObservable());
 //    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PENDING CONTACTS
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Adds a {@link Contact} to the list of pending contacts
+     *
+     * @param contact The contact to be added to the list
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable addPendingContact(Contact contact) {
+        return Completable.fromAction(() -> pendingContactsStore.insertObjectIntoList(contact));
+    }
+
+    /**
+     * Removes a {@link Contact} from the list of pending contacts
+     *
+     * @param contact The contact to be removed from the list
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable removePendingContact(Contact contact) {
+        return Completable.fromAction(() -> pendingContactsStore.removeObjectFromList(contact));
+    }
+
+    /**
+     * Returns a stream of pending contacts, ie contacts which have been added but not yet
+     * confirmed. This data is only stored locally - it will be wiped once the app restarts.
+     *
+     * @return An {@link Observable<Contact>} as a stream of objects
+     */
+    public Observable<Contact> getPendingContactList() {
+        return Observable.defer(() -> Observable.fromIterable(pendingContactsStore.getList()));
+    }
 
 }

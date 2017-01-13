@@ -40,7 +40,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
     }
 
-    public ContactDetailViewModel(DataListener dataListener) {
+    ContactDetailViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
     }

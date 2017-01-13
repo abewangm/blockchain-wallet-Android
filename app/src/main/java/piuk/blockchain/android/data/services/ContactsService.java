@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.services;
 
 import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 
 import org.bitcoinj.crypto.DeterministicKey;
@@ -97,11 +96,11 @@ public class ContactsService {
      * @return A stream of {@link Contact} objects
      */
     public Observable<Contact> getContactList() {
-        return Observable.defer(() -> Observable.fromIterable(contacts.getContactList()));
+        return Observable.defer(() -> Observable.fromIterable(contacts.getContactList().values()));
     }
 
     /**
-     * Inserts a contact into the locally stored Contacts list. Does not save to server.
+     * Inserts a contact into the locally stored Contacts list. Saves this list to server.
      *
      * @param contact The {@link Contact} to be stored
      * @return A {@link Completable} object, ie an asynchronous void operation
@@ -111,10 +110,7 @@ public class ContactsService {
     }
 
     /**
-     * Removes a contact from the locally stored Contacts list. Does not save to server.
-     *
-     * @param contact The {@link Contact} to be stored
-     * @return A {@link Completable} object, ie an asynchronous void operation
+     * Removes a contact from the locally stored Contacts list. Saves updated list to server
      */
     public Completable removeContact(Contact contact) {
         return Completable.fromAction(() -> contacts.removeContact(contact));
@@ -128,8 +124,9 @@ public class ContactsService {
      * Creates a new invite and associated invite ID for linking two users together
      *
      * @param myDetails        My details that will be visible in invitation url
-     * @param recipientDetails Recipient details - This will be added to my contacts list
-     * @return An {@link Invitation} object
+     * @param recipientDetails Recipient details
+     * @return A {@link Contact} object, which is an updated version of the mydetails object, ie
+     * it's the sender's own contact details
      */
     @RequiresAccessToken
     public Observable<Contact> createInvitation(Contact myDetails, Contact recipientDetails) {
@@ -140,7 +137,7 @@ public class ContactsService {
      * Accepts an invitation from another user
      *
      * @param url An invitation url
-     * @return An {@link Invitation} object
+     * @return A {@link Contact} object containing the other user
      */
     @RequiresAccessToken
     public Observable<Contact> acceptInvitation(String url) {
@@ -174,19 +171,22 @@ public class ContactsService {
     // PAYMENT REQUEST SPECIFIC
     ///////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Sends a payment request to a user in the trusted contactsService list
-     *
-     * @param recipientMdid  The MDID of the message's recipient
-     * @param satoshis the number of satoshis to be requested
-     */
-    @RequiresAccessToken
-    public Completable sendPaymentRequest(String recipientMdid, long satoshis) {
-        return Completable.fromCallable(() -> {
-            contacts.sendRequestPaymentRequest(recipientMdid, satoshis);
-            return Void.TYPE;
-        });
-    }
+    // TODO: 13/01/2017 This is changing a lot currently, ignore until necessary
+
+//    /**
+//     * Sends a payment request to a user in the trusted contactsService list
+//     *
+//     * @param recipientMdid The MDID of the message's recipient
+//     * @param satoshis      the number of satoshis to be requested
+//     */
+//    @RequiresAccessToken
+//    public Completable sendPaymentRequest(String recipientMdid, long satoshis) {
+//        return Completable.fromCallable(() -> {
+//            contacts.sendRequestPaymentRequest(recipientMdid, satoshis);
+//            contacts.sendPaymentRequest();
+//            return Void.TYPE;
+//        });
+//    }
 
 //    /**
 //     * Accepts a payment request from a user and optionally adds a note to the transaction
@@ -253,27 +253,28 @@ public class ContactsService {
         });
     }
 
-    /**
-     * Adds a user's MDID to the trusted list in Shared Metadata
-     *
-     * @param mdid The user's MDID
-     * @return An {@link Observable} wrapping a boolean, representing a successful save
-     */
-    @RequiresAccessToken
-    public Observable<Boolean> addTrusted(String mdid) {
-        return Observable.fromCallable(() -> contacts.addTrusted(mdid));
-    }
-
-    /**
-     * Removes a user's MDID from the trusted list in Shared Metadata
-     *
-     * @param mdid The user's MDID
-     * @return An {@link Observable} wrapping a boolean, representing a successful deletion
-     */
-    @RequiresAccessToken
-    public Observable<Boolean> deleteTrusted(String mdid) {
-        return Observable.fromCallable(() -> contacts.deleteTrusted(mdid));
-    }
+    // TODO: 13/01/2017 These don't seem to be relevant anymore...
+//    /**
+//     * Adds a user's MDID to the trusted list in Shared Metadata
+//     *
+//     * @param mdid The user's MDID
+//     * @return An {@link Observable} wrapping a boolean, representing a successful save
+//     */
+//    @RequiresAccessToken
+//    public Observable<Boolean> addTrusted(String mdid) {
+//        return Observable.fromCallable(() -> contacts.addContact(mdid));
+//    }
+//
+//    /**
+//     * Removes a user's MDID from the trusted list in Shared Metadata
+//     *
+//     * @param mdid The user's MDID
+//     * @return An {@link Observable} wrapping a boolean, representing a successful deletion
+//     */
+//    @RequiresAccessToken
+//    public Observable<Boolean> deleteTrusted(String mdid) {
+//        return Observable.fromCallable(() -> contacts.deleteTrusted(mdid));
+//    }
 
     ///////////////////////////////////////////////////////////////////////////
     // MESSAGES SPECIFIC

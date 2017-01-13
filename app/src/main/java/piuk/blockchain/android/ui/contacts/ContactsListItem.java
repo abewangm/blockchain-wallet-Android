@@ -29,4 +29,12 @@ class ContactsListItem {
     public String getStatus() {
         return status;
     }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class Status {
+
+        public static final String PENDING = "pending";
+        public static final String ACCEPTED = "accepted";
+
+    }
 }

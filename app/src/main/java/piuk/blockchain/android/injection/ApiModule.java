@@ -20,6 +20,7 @@ import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.services.ContactsService;
 import piuk.blockchain.android.data.services.NotificationService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
+import piuk.blockchain.android.ui.contacts.PendingContactsStore;
 import piuk.blockchain.android.util.PrefsUtil;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -47,6 +48,12 @@ public class ApiModule {
 
     @Provides
     @Singleton
+    protected PendingContactsStore providePendingContactsStore() {
+        return new PendingContactsStore();
+    }
+
+    @Provides
+    @Singleton
     protected NotificationTokenManager provideNotificationTokenManager(AccessState accessState,
                                                                        PayloadManager payloadManager,
                                                                        PrefsUtil prefsUtil) {
@@ -57,8 +64,9 @@ public class ApiModule {
 
     @Provides
     @Singleton
-    protected ContactsDataManager provideContactsManager(PayloadManager payloadManager) {
-        return new ContactsDataManager(new ContactsService(new Contacts()), payloadManager);
+    protected ContactsDataManager provideContactsManager(PendingContactsStore pendingContactsStore,
+                                                         PayloadManager payloadManager) {
+        return new ContactsDataManager(new ContactsService(new Contacts()), pendingContactsStore, payloadManager);
     }
 
     @Provides

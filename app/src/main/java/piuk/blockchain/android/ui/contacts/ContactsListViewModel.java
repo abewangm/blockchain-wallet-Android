@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
@@ -59,33 +60,18 @@ public class ContactsListViewModel extends BaseViewModel {
         // Subscribe to notification events
         subscribeToNotifications();
 
+        // TODO: 13/01/2017 Separate getting actual contacts and pending contacts
+        // When pending contacts are present, start polling for readInvitationSent(contact)
+        // I know it's horrible ¯\_(ツ)_/¯
+
         dataListener.setUiState(ContactsListActivity.LOADING);
         compositeDisposable.add(
                 contactsDataManager.fetchContacts()
-                        .andThen(contactsDataManager.getContactList())
+                        .andThen(getAllContacts())
                         .toList()
                         .subscribe(
                                 this::handleContactListUpdate,
                                 throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
-
-        // TODO: 16/11/2016 Move me to my own function. I will likely need to be called from system-wide broadcasts
-        // I'm only here for testing purposes
-//        compositeDisposable.add(
-//                contactManager.getPaymentRequests(true)
-//                        .subscribe(
-//                                messages -> {
-//                                    Log.d(TAG, "onViewReady: " + messages);
-//                                },
-//                                throwable -> {
-//                                    Log.e(TAG, "onViewReady: ", throwable);
-//                                    dataListener.showToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
-//                                }));
-
-//        Intent intent = dataListener.getPageIntent();
-//        if (intent != null && intent.hasExtra(EXTRA_METADATA_URI)) {
-//            MetaDataUri uriObject = MetaDataUri.decode(intent.getStringExtra(EXTRA_METADATA_URI));
-//            handleIncomingUri(uriObject);
-//        }
 
         Intent intent = dataListener.getPageIntent();
         if (intent != null && intent.hasExtra(EXTRA_METADATA_URI)) {
@@ -94,12 +80,16 @@ public class ContactsListViewModel extends BaseViewModel {
         }
     }
 
+    private Observable<Contact> getAllContacts() {
+        return Observable.merge(contactsDataManager.getContactList(), contactsDataManager.getPendingContactList());
+    }
+
     /**
      * Get the latest version stored on disk
      */
     void requestUpdatedList() {
         compositeDisposable.add(
-                contactsDataManager.getContactList()
+                getAllContacts()
                         .toList()
                         .subscribe(
                                 this::handleContactListUpdate,
@@ -120,7 +110,7 @@ public class ContactsListViewModel extends BaseViewModel {
         ArrayList<ContactsListItem> list = new ArrayList<>();
 
         for (Contact contact : contacts) {
-            list.add(new ContactsListItem(contact.getId(), contact.getName(), "Trusted"));
+            list.add(new ContactsListItem(contact.getId(), contact.getName(), ContactsListItem.Status.PENDING));
         }
 
         if (!list.isEmpty()) {

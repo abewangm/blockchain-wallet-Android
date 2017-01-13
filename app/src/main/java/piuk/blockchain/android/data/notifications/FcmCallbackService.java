@@ -7,6 +7,9 @@ import android.util.Log;
 
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
+import piuk.blockchain.android.R;
+import piuk.blockchain.android.ui.contacts.ContactsListActivity;
+import piuk.blockchain.android.util.NotificationsUtil;
 
 public class FcmCallbackService extends FirebaseMessagingService {
 
@@ -41,12 +44,14 @@ public class FcmCallbackService extends FirebaseMessagingService {
 
 
             // Emit notification
-//            new NotificationsUtil(getApplicationContext()).setNotification(
-//                    remoteMessage.getNotification().getTitle(),
-//                    remoteMessage.getNotification().getBody(),
-//                    remoteMessage.getNotification().getTag(),
-//                    remoteMessage.getNotification().getIcon());
-//            etc
+            new NotificationsUtil(getApplicationContext()).setNotification(
+                    remoteMessage.getNotification().getTitle(),
+                    remoteMessage.getNotification().getBody(),
+                    remoteMessage.getNotification().getTag(),
+                    R.drawable.ic_notification_transparent,
+                    R.drawable.ic_launcher,
+                    ContactsListActivity.class,
+                    1337);
         }
     }
 

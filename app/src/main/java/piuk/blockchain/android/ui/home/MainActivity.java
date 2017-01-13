@@ -86,6 +86,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     private AppUtil appUtil;
     private long backPressed;
     private boolean returningResult = false;
+    private Toolbar toolbar;
 
     @SuppressLint("NewApi")
     @Override
@@ -99,6 +100,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
         mainViewModel.onViewReady();
 
+        final int[] count = {0};
+
         binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -108,6 +111,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             @Override
             public void onDrawerOpened(View drawerView) {
                 drawerIsOpen = true;
+                // TODO: 13/01/2017 Remove me
+                if (count[0] % 2 == 0) {
+                    changeContactsIndicatorVisibility(View.VISIBLE);
+                } else {
+                    changeContactsIndicatorVisibility(View.INVISIBLE);
+                }
+                count[0]++;
             }
 
             @Override
@@ -120,6 +130,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 // No-op
             }
         });
+
+        // Set up toolbar
+        toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.vector_menu));
+        toolbar.setTitle("");
+        setSupportActionBar(toolbar);
+        ViewUtils.setElevation(toolbar, 0F);
 
         // Create items
         AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.blockchain_pearl_white);
@@ -221,6 +238,20 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void changeContactsIndicatorVisibility(@ViewUtils.Visibility int visibility) {
+        binding.navigationView.getMenu()
+                .findItem(R.id.nav_contacts)
+                .getActionView()
+                .findViewById(R.id.menu_icon_count)
+                .setVisibility(visibility);
+
+        if (visibility == View.VISIBLE) {
+            toolbar.setNavigationIcon(ContextCompat.getDrawable(getActivity(), R.drawable.vector_menu_indicator));
+        } else {
+            toolbar.setNavigationIcon(ContextCompat.getDrawable(getActivity(), R.drawable.vector_menu));
         }
     }
 
@@ -333,25 +364,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         binding.drawerLayout.closeDrawers();
     }
 
-    // TODO: 10/01/2017 Call me at somepoint
-    private void changeContactsIndicatorVisibility(@ViewUtils.Visibility int visibility) {
-        binding.nvView.getMenu()
-                .findItem(R.id.nav_contacts)
-                .getActionView()
-                .findViewById(R.id.menu_icon_count)
-                .setVisibility(visibility);
-    }
-
     @Override
     public void resetNavigationDrawer() {
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.ic_menu_white_24dp));
-        toolbar.setTitle("");
-        setSupportActionBar(toolbar);
-        ViewUtils.setElevation(toolbar, 0F);
-
-        MenuItem backUpMenuItem = binding.nvView.getMenu().findItem(R.id.nav_backup);
-        MenuItem upgradeMenuItem = binding.nvView.getMenu().findItem(R.id.nav_upgrade);
+        MenuItem backUpMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_backup);
+        MenuItem upgradeMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_upgrade);
 
         if (mainViewModel.getPayloadManager().isNotUpgraded()) {
             //Legacy
@@ -363,7 +379,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             backUpMenuItem.setVisible(true);
         }
 
-        MenuItem backUpView = binding.nvView.getMenu().findItem(R.id.nav_backup);
+        MenuItem backUpView = binding.navigationView.getMenu().findItem(R.id.nav_backup);
         Drawable drawable = backUpView.getIcon();
         drawable.mutate();
         if (mainViewModel.getPayloadManager().getPayload() != null &&
@@ -376,7 +392,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             drawable.setColorFilter(ContextCompat.getColor(this, R.color.alert_green), PorterDuff.Mode.SRC_ATOP);
         }
 
-        binding.nvView.setNavigationItemSelectedListener(
+        binding.navigationView.setNavigationItemSelectedListener(
                 menuItem -> {
                     selectDrawerItem(menuItem);
                     return true;
