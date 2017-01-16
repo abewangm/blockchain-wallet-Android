@@ -35,6 +35,8 @@ public class ContactsInvitationBuilderViewModel extends BaseViewModel {
 
         void onUriGenerated(String uri, String recipientName);
 
+        void finishPage();
+
     }
 
     ContactsInvitationBuilderViewModel(DataListener dataListener) {
@@ -94,6 +96,23 @@ public class ContactsInvitationBuilderViewModel extends BaseViewModel {
         } else {
             // Prevents contact being added more than once, as well as unnecessary web calls
             generateIntent(uri);
+        }
+    }
+
+    // TODO: 16/01/2017 Maybe this should happen silently? It's a stopgap for now because the notification
+    // service still isn't working at all
+    void onDoneSelected() {
+        if (uri == null) {
+            dataListener.finishPage();
+        } else {
+            // Check status of sent invitation
+            dataListener.showProgressDialog();
+            compositeDisposable.add(
+                    contactManager.readInvitationSent(recipient)
+                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                            .subscribe(
+                                    success -> dataListener.finishPage(),
+                                    throwable -> dataListener.finishPage()));
         }
     }
 

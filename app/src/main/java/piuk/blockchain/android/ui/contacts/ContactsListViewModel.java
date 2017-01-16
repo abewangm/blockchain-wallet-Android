@@ -75,6 +75,15 @@ public class ContactsListViewModel extends BaseViewModel {
         }
     }
 
+    void refreshList() {
+        compositeDisposable.add(
+                contactsDataManager.getContactList()
+                        .toList()
+                        .subscribe(
+                                this::handleContactListUpdate,
+                                throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
+    }
+
     private void subscribeToNotifications() {
         FcmCallbackService.getNotificationSubject().subscribe(
                 notificationPayload -> {
@@ -86,11 +95,23 @@ public class ContactsListViewModel extends BaseViewModel {
     }
 
     private void handleContactListUpdate(List<Contact> contacts) {
-        ArrayList<ContactsListItem> list = new ArrayList<>();
+        List<ContactsListItem> list = new ArrayList<>();
+        List<Contact> pending = new ArrayList<>();
 
         for (Contact contact : contacts) {
-            list.add(new ContactsListItem(contact.getId(), contact.getName(), ContactsListItem.Status.PENDING));
+            list.add(new ContactsListItem(
+                    contact.getId(),
+                    contact.getName(),
+                    contact.getMdid() != null && !contact.getMdid().isEmpty()
+                            ? ContactsListItem.Status.TRUSTED
+                            : ContactsListItem.Status.PENDING));
+
+            if (contact.getMdid() == null || contact.getMdid().isEmpty()) {
+                pending.add(contact);
+            }
         }
+
+        checkStatusOfPendingContacts(pending);
 
         if (!list.isEmpty()) {
             dataListener.setUiState(ContactsListActivity.CONTENT);
@@ -98,6 +119,19 @@ public class ContactsListViewModel extends BaseViewModel {
         } else {
             dataListener.onContactsLoaded(new ArrayList<>());
             dataListener.setUiState(ContactsListActivity.EMPTY);
+        }
+    }
+
+    private void checkStatusOfPendingContacts(List<Contact> pending) {
+        for (int i = 0; i < pending.size(); i++) {
+            final Contact contact = pending.get(i);
+            compositeDisposable.add(
+                    contactsDataManager.readInvitationSent(contact)
+                            .subscribe(
+                                    success -> refreshList(),
+                                    throwable -> {
+                                        // Doesn't particularly matter, don't inform user
+                                    }));
         }
     }
 

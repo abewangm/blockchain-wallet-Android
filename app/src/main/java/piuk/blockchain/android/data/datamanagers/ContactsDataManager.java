@@ -40,11 +40,11 @@ public class ContactsDataManager {
                 .flatMapCompletable(metadataNodeFactory -> contactsService.initContactsService(
                         metadataNodeFactory.getMetadataNode(),
                         metadataNodeFactory.getSharedMetadataNode()))
-                .andThen(
-                        registerMdid(
+                .andThen(registerMdid(
                                 payloadManager.getPayload().getGuid(),
                                 payloadManager.getPayload().getSharedKey(),
                                 payloadManager.getMasterKey()))
+                .andThen(publishXpub())
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 

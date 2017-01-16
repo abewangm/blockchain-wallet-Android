@@ -33,8 +33,9 @@ class ContactsListItem {
     @SuppressWarnings("WeakerAccess")
     public static class Status {
 
-        public static final String PENDING = "pending";
-        public static final String ACCEPTED = "accepted";
+        public static final String PENDING = "Pending";
+        public static final String ACCEPTED = "Accepted";
+        public static final String TRUSTED = "Trusted";
 
     }
 }

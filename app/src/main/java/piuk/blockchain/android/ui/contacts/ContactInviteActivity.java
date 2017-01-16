@@ -31,9 +31,8 @@ public class ContactInviteActivity extends BaseAuthActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_ACCEPT_INVITE) {
-            finish();
-        }
+        // Close parent activity on result regardless of success
+        finish();
     }
 
     /**

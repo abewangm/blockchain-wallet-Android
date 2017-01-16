@@ -110,6 +110,11 @@ public class ContactsInvitationBuilderActivity extends BaseAuthActivity
 
     @Override
     public void onDoneSelected() {
+        viewModel.onDoneSelected();
+    }
+
+    @Override
+    public void finishPage() {
         Intent intent = new Intent(this, ContactsListActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);

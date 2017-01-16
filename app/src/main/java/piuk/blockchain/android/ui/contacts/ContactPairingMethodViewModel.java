@@ -44,7 +44,7 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
                                 contact -> {
                                     dataListener.showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
                                     dataListener.finishActivityWithResult(Activity.RESULT_OK);
-                                }, throwable -> dataListener.showToast(R.string.invalid_qr, ToastCustom.TYPE_ERROR)));
+                                }, throwable -> dataListener.showToast(R.string.contacts_invalid_qr, ToastCustom.TYPE_ERROR)));
     }
 
     boolean isCameraOpen() {
