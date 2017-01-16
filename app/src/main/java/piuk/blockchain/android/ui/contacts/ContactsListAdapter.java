@@ -12,14 +12,18 @@ import android.widget.TextView;
 import java.util.List;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.util.StringUtils;
+import piuk.blockchain.android.util.TimeUtil;
 
 class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.ContactsViewHolder> {
 
     private List<ContactsListItem> contacts;
+    private StringUtils stringUtils;
     private ContactsClickListener contactsClickListener;
 
-    ContactsListAdapter(List<ContactsListItem> contacts) {
+    ContactsListAdapter(List<ContactsListItem> contacts, StringUtils stringUtils) {
         this.contacts = contacts;
+        this.stringUtils = stringUtils;
     }
 
     void setContactsClickListener(ContactsClickListener contactsClickListener) {
@@ -37,15 +41,33 @@ class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.Conta
         ContactsListItem listItem = contacts.get(position);
 
         holder.name.setText(listItem.getContactName());
-        holder.status.setText(listItem.getStatus());
         holder.itemView.setOnClickListener(view -> {
             if (contactsClickListener != null) contactsClickListener.onClick(listItem.getId());
         });
 
         if (listItem.getStatus().equals(ContactsListItem.Status.PENDING)) {
             holder.progressBar.setVisibility(View.VISIBLE);
+            holder.indicator.setVisibility(View.GONE);
         } else {
             holder.progressBar.setVisibility(View.GONE);
+            // TODO: 16/01/2017 Set this sensibly
+            holder.indicator.setVisibility(View.VISIBLE);
+        }
+
+        switch (listItem.getStatus()) {
+            case ContactsListItem.Status.PENDING:
+                holder.status.setText(stringUtils.getString(R.string.contacts_request_sent));
+                break;
+            case ContactsListItem.Status.TRUSTED:
+                if (TimeUtil.getIfTimeElapsed(listItem.getInviteTime(), TimeUtil.HOURS_24)) {
+                    holder.status.setText(stringUtils.getString(R.string.contacts_request_trusted));
+                } else {
+                    holder.status.setText(stringUtils.getString(R.string.contacts_request_just_added));
+                }
+                break;
+            default:
+                holder.status.setText("");
+                break;
         }
     }
 

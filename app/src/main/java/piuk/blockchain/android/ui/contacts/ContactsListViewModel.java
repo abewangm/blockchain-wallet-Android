@@ -104,7 +104,8 @@ public class ContactsListViewModel extends BaseViewModel {
                     contact.getName(),
                     contact.getMdid() != null && !contact.getMdid().isEmpty()
                             ? ContactsListItem.Status.TRUSTED
-                            : ContactsListItem.Status.PENDING));
+                            : ContactsListItem.Status.PENDING,
+                    contact.getCreated()));
 
             if (contact.getMdid() == null || contact.getMdid().isEmpty()) {
                 pending.add(contact);

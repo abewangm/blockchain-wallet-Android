@@ -81,10 +81,6 @@ public class NotificationTokenManager {
      * Resets Instance ID and revokes all tokens. Clears stored token if successful
      */
     public Completable revokeAccessToken() {
-        Payload payload = payloadManager.getPayload();
-        String guid = payload.getGuid();
-        String sharedKey = payload.getSharedKey();
-
         return Completable.fromCallable(() -> {
             FirebaseInstanceId.getInstance().deleteInstanceId();
             return Void.TYPE;

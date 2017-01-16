@@ -21,6 +21,7 @@ import piuk.blockchain.android.databinding.ActivityContactsBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.StringUtils;
 
 
 public class ContactsListActivity extends BaseAuthActivity implements ContactsListViewModel.DataListener {
@@ -51,7 +52,7 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         binding.swipeRefreshLayout.setColorSchemeResources(R.color.blockchain_dark_blue);
         binding.swipeRefreshLayout.setOnRefreshListener(() -> viewModel.onViewReady());
         // Contacts list
-        contactsListAdapter = new ContactsListAdapter(new ArrayList<>());
+        contactsListAdapter = new ContactsListAdapter(new ArrayList<>(), new StringUtils(this));
         contactsListAdapter.setContactsClickListener(id -> {
             Bundle bundle = new Bundle();
             bundle.putString(KEY_BUNDLE_ID, id);

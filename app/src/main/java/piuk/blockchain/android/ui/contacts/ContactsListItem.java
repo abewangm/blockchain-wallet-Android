@@ -8,11 +8,13 @@ class ContactsListItem {
     private String id;
     private String contactName;
     private String status;
+    private long inviteTime;
 
-    ContactsListItem(@NonNull String id, @NonNull String contactName, @NonNull String status) {
+    ContactsListItem(@NonNull String id, @NonNull String contactName, @NonNull String status, long inviteTime) {
         this.id = id;
         this.contactName = contactName;
         this.status = status;
+        this.inviteTime = inviteTime;
     }
 
     @Nullable
@@ -28,6 +30,10 @@ class ContactsListItem {
     @NonNull
     public String getStatus() {
         return status;
+    }
+
+    public long getInviteTime() {
+        return inviteTime;
     }
 
     @SuppressWarnings("WeakerAccess")

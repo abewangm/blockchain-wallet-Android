@@ -591,6 +591,9 @@
     <string name="contacts_send_bitcoin">Ask to send %1$s bitcoin</string>
     <string name="contacts_request_bitcoin">Request bitcoin from %1$s</string>
     <string name="contacts_invalid_qr">Invalid QR code</string>
+    <string name="contacts_request_sent">Contact request sent</string>
+    <string name="contacts_request_just_added">Just added</string>
+    <string name="contacts_request_trusted">Trusted</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>
