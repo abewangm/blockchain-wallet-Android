@@ -327,7 +327,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         }
 
         //If we have multiple accounts/addresses we will show dropdown in toolbar, otherwise we will only display a static text
-        dataListener.onRefreshAccounts();
+        if (dataListener != null) dataListener.onRefreshAccounts();
     }
 
     public PayloadManager getPayloadManager() {
@@ -344,7 +344,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);//the current selected item in dropdown (Account or Legacy Address)
 
         //If current selected item gets edited by another platform object might become null
-        if (object == null) {
+        if (object == null && dataListener !=null) {
             dataListener.onAccountSizeChange();
             object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);
         }
@@ -373,7 +373,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         String balanceTotal = getBalanceString(isBTC, btc_balance);
 
         setBalance(balanceTotal);
-        dataListener.onRefreshBalanceAndTransactions();
+        if (dataListener != null) dataListener.onRefreshBalanceAndTransactions();
     }
 
     @NonNull

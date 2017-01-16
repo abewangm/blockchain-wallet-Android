@@ -51,6 +51,10 @@ import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
+import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.customviews.CustomKeypad;
+import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
@@ -91,7 +95,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
+            if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
                 ((AddressAdapter) binding.accounts.spinner.getAdapter()).updateData(viewModel.getAddressList(false));
                 ((AddressAdapter) binding.spDestination.getAdapter()).updateData(viewModel.getAddressList(true));
             }
