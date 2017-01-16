@@ -40,10 +40,8 @@ public class ContactPairingMethodViewModel extends BaseViewModel {
     void handleScanInput(@NonNull String extra) {
         compositeDisposable.add(
                 contactManager.acceptInvitation(extra)
-                        .flatMapCompletable(contact -> contactManager.addContact(contact))
-                        .andThen(contactManager.saveContacts())
                         .subscribe(
-                                () -> {
+                                contact -> {
                                     dataListener.showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
                                     dataListener.finishActivityWithResult(Activity.RESULT_OK);
                                 }, throwable -> dataListener.showToast(R.string.invalid_qr, ToastCustom.TYPE_ERROR)));

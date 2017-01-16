@@ -72,14 +72,19 @@ public class NotificationTokenManager {
     /**
      * Removes the stored token from Shared Preferences
      */
-    public void clearStoredToken() {
+    private void clearStoredToken() {
         prefsUtil.removeValue(PrefsUtil.KEY_FIREBASE_TOKEN);
     }
 
+    // TODO: 16/01/2017 Call me on logout?
     /**
-     * Resets Instance ID and revokes all tokens. Clears stored token if successful.
+     * Resets Instance ID and revokes all tokens. Clears stored token if successful
      */
     public Completable revokeAccessToken() {
+        Payload payload = payloadManager.getPayload();
+        String guid = payload.getGuid();
+        String sharedKey = payload.getSharedKey();
+
         return Completable.fromCallable(() -> {
             FirebaseInstanceId.getInstance().deleteInstanceId();
             return Void.TYPE;

@@ -57,16 +57,14 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
             bundle.putString(KEY_BUNDLE_ID, id);
             ContactDetailActivity.start(this, bundle);
         });
-        binding.layoutContent.setAdapter(contactsListAdapter);
-        binding.layoutContent.setLayoutManager(new LinearLayoutManager(this));
-
-        viewModel.onViewReady();
+        binding.recyclerviewContacts.setAdapter(contactsListAdapter);
+        binding.recyclerviewContacts.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.requestUpdatedList();
+        viewModel.onViewReady();
     }
 
     @Override
@@ -141,31 +139,24 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
 
     @Override
     public void setUiState(@UiState int uiState) {
-        // TODO: 11/01/2017 Changing the RecyclerView's visibility prevents it from displaying
-        // - must find out why. Already tried: postDelayed, runOnUiThread, invalidate RecyclerView,
-        // invalidate CoordinatorLayout ¯\_(ツ)_/¯
         switch (uiState) {
             case LOADING:
                 binding.swipeRefreshLayout.setRefreshing(true);
-//                binding.layoutContent.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.GONE);
                 binding.layoutEmpty.setVisibility(View.GONE);
                 break;
             case CONTENT:
                 binding.swipeRefreshLayout.setRefreshing(false);
-//                binding.layoutContent.setVisibility(View.VISIBLE);
                 binding.layoutFailure.setVisibility(View.GONE);
                 binding.layoutEmpty.setVisibility(View.GONE);
                 break;
             case FAILURE:
                 binding.swipeRefreshLayout.setRefreshing(false);
-//                binding.layoutContent.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.VISIBLE);
                 binding.layoutEmpty.setVisibility(View.GONE);
                 break;
             case EMPTY:
                 binding.swipeRefreshLayout.setRefreshing(false);
-//                binding.layoutContent.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.GONE);
                 binding.layoutEmpty.setVisibility(View.VISIBLE);
                 break;

@@ -5,6 +5,8 @@ import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.payload.PayloadManager;
 
+import org.bitcoinj.core.ECKey;
+
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -12,20 +14,18 @@ import javax.annotation.Nullable;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.ContactsService;
-import piuk.blockchain.android.ui.contacts.PendingContactsStore;
 
 @SuppressWarnings({"WeakerAccess", "AnonymousInnerClassMayBeStatic"})
 public class ContactsDataManager {
 
     private ContactsService contactsService;
-    private PendingContactsStore pendingContactsStore;
     private PayloadManager payloadManager;
 
-    public ContactsDataManager(ContactsService contactsService, PendingContactsStore pendingContactsStore, PayloadManager payloadManager) {
+    public ContactsDataManager(ContactsService contactsService, PayloadManager payloadManager) {
         this.contactsService = contactsService;
-        this.pendingContactsStore = pendingContactsStore;
         this.payloadManager = payloadManager;
     }
 
@@ -40,6 +40,11 @@ public class ContactsDataManager {
                 .flatMapCompletable(metadataNodeFactory -> contactsService.initContactsService(
                         metadataNodeFactory.getMetadataNode(),
                         metadataNodeFactory.getSharedMetadataNode()))
+                .andThen(
+                        registerMdid(
+                                payloadManager.getPayload().getGuid(),
+                                payloadManager.getPayload().getSharedKey(),
+                                payloadManager.getMasterKey()))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -52,6 +57,38 @@ public class ContactsDataManager {
                     secondPassword);
             return payloadManager.getMetadataNodeFactory();
         });
+    }
+
+    /**
+     * Registers the user's MDID with the metadata service
+     *
+     * @param guid      The user's GUID
+     * @param sharedKey The user's shared key
+     * @param node      The user's wallet's master key
+     * @return A {@link Completable}, ie an Observable type object specifically for methods
+     * returning void.
+     */
+    public Completable registerMdid(String guid, String sharedKey, ECKey node) {
+        return Completable.fromCallable(() -> {
+            payloadManager.registerMdid(guid, sharedKey, node);
+            return Void.TYPE;
+        }).subscribeOn(Schedulers.io());
+    }
+
+    /**
+     * Unregisters the user's MDID with the metadata service
+     *
+     * @param guid      The user's GUID
+     * @param sharedKey The user's shared key
+     * @param node      The user's wallet's master key
+     * @return A {@link Completable}, ie an Observable type object specifically for methods
+     * returning void.
+     */
+    public Completable unregisterMdid(String guid, String sharedKey, ECKey node) {
+        return Completable.fromCallable(() -> {
+            payloadManager.unregisterMdid(guid, sharedKey, node);
+            return Void.TYPE;
+        }).subscribeOn(Schedulers.io());
     }
 
     /**
@@ -378,39 +415,5 @@ public class ContactsDataManager {
 //        return callWithToken(() -> contactsService.decryptMessageFrom(message, mdid))
 //                .compose(RxUtil.applySchedulersToObservable());
 //    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // PENDING CONTACTS
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Adds a {@link Contact} to the list of pending contacts
-     *
-     * @param contact The contact to be added to the list
-     * @return A {@link Completable} object, ie an asynchronous void operation
-     */
-    public Completable addPendingContact(Contact contact) {
-        return Completable.fromAction(() -> pendingContactsStore.insertObjectIntoList(contact));
-    }
-
-    /**
-     * Removes a {@link Contact} from the list of pending contacts
-     *
-     * @param contact The contact to be removed from the list
-     * @return A {@link Completable} object, ie an asynchronous void operation
-     */
-    public Completable removePendingContact(Contact contact) {
-        return Completable.fromAction(() -> pendingContactsStore.removeObjectFromList(contact));
-    }
-
-    /**
-     * Returns a stream of pending contacts, ie contacts which have been added but not yet
-     * confirmed. This data is only stored locally - it will be wiped once the app restarts.
-     *
-     * @return An {@link Observable<Contact>} as a stream of objects
-     */
-    public Observable<Contact> getPendingContactList() {
-        return Observable.defer(() -> Observable.fromIterable(pendingContactsStore.getList()));
-    }
 
 }

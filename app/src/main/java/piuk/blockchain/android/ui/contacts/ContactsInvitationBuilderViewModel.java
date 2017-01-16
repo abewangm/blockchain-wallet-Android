@@ -64,15 +64,11 @@ public class ContactsInvitationBuilderViewModel extends BaseViewModel {
             compositeDisposable.add(
                     contactManager.createInvitation(sender, recipient)
                             .map(Contact::createURI)
-                            .doOnNext(uri -> {
-                                this.uri = uri;
-                                dataListener.onUriGenerated(uri, recipient.getName());
-                            })
-                            .flatMapCompletable(s -> contactManager.addPendingContact(recipient))
-                            .andThen(contactManager.saveContacts())
                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                             .subscribe(
-                                    () -> {
+                                    uri -> {
+                                        this.uri = uri;
+                                        dataListener.onUriGenerated(uri, recipient.getName());
                                     },
                                     throwable -> dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
         } else {
@@ -88,14 +84,11 @@ public class ContactsInvitationBuilderViewModel extends BaseViewModel {
             compositeDisposable.add(
                     contactManager.createInvitation(sender, recipient)
                             .map(Contact::createURI)
-                            .doOnNext(uri -> {
-                                this.uri = uri;
-                                generateIntent(uri);
-                            })
-                            .flatMapCompletable(s -> contactManager.addPendingContact(recipient))
                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                             .subscribe(
-                                    () -> {
+                                    uri -> {
+                                        this.uri = uri;
+                                        generateIntent(uri);
                                     },
                                     throwable -> dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
         } else {

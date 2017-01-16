@@ -129,14 +129,15 @@ public class MainViewModel extends BaseViewModel {
                             } else {
                                 compositeDisposable.add(
                                         contactsDataManager.getMessages(true)
-                                        .subscribe(
-                                                messages -> {
-                                                    // TODO: 19/12/2016 Notify the UI that a message has been received
-                                                    Log.d(TAG, "registerNodeForMetaDataService: " + messages);
-                                                }, throwable -> {
-                                                    Log.e(TAG, "registerNodeForMetaDataService: ", throwable);
-                                                }
-                                        ));
+                                                .subscribe(
+                                                        messages -> {
+                                                            if (!messages.isEmpty())
+                                                                dataListener.showEmailVerificationDialog("MESSAGES HAVE BEEN RECEIVED!");
+                                                            // TODO: 19/12/2016 Notify the UI that a message has been received
+                                                            Log.d(TAG, "registerNodeForMetaDataService: " + messages);
+                                                        }, throwable -> {
+                                                            Log.e(TAG, "registerNodeForMetaDataService: ", throwable);
+                                                        }));
                             }
                             // TODO: 01/12/2016 Should probably inform the user here if coming from URI click
                         }, throwable -> Log.wtf(TAG, "registerNodeForMetaDataService: ", throwable)));

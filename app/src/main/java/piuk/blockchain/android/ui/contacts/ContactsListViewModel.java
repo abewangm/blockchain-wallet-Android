@@ -12,7 +12,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
@@ -60,14 +59,10 @@ public class ContactsListViewModel extends BaseViewModel {
         // Subscribe to notification events
         subscribeToNotifications();
 
-        // TODO: 13/01/2017 Separate getting actual contacts and pending contacts
-        // When pending contacts are present, start polling for readInvitationSent(contact)
-        // I know it's horrible ¯\_(ツ)_/¯
-
         dataListener.setUiState(ContactsListActivity.LOADING);
         compositeDisposable.add(
                 contactsDataManager.fetchContacts()
-                        .andThen(getAllContacts())
+                        .andThen(contactsDataManager.getContactList())
                         .toList()
                         .subscribe(
                                 this::handleContactListUpdate,
@@ -78,22 +73,6 @@ public class ContactsListViewModel extends BaseViewModel {
             String data = intent.getStringExtra(EXTRA_METADATA_URI);
             handleLink(data);
         }
-    }
-
-    private Observable<Contact> getAllContacts() {
-        return Observable.merge(contactsDataManager.getContactList(), contactsDataManager.getPendingContactList());
-    }
-
-    /**
-     * Get the latest version stored on disk
-     */
-    void requestUpdatedList() {
-        compositeDisposable.add(
-                getAllContacts()
-                        .toList()
-                        .subscribe(
-                                this::handleContactListUpdate,
-                                throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
     }
 
     private void subscribeToNotifications() {
@@ -127,9 +106,7 @@ public class ContactsListViewModel extends BaseViewModel {
 
         compositeDisposable.add(
                 contactsDataManager.acceptInvitation(data)
-                        .flatMapCompletable(contact -> contactsDataManager.addContact(contact))
-                        .andThen(contactsDataManager.saveContacts())
-                        .andThen(contactsDataManager.getContactList())
+                        .flatMap(contact -> contactsDataManager.getContactList())
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .toList()
                         .subscribe(
@@ -139,22 +116,4 @@ public class ContactsListViewModel extends BaseViewModel {
                                 }, throwable -> dataListener.showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR)));
 
     }
-
-//
-//    @Thunk
-//    void addUser(MetaDataUri metaDataUri) {
-//        String name = metaDataUri.getFrom();
-//        String inviteId = metaDataUri.getInviteId();
-//
-//        dataListener.showProgressDialog();
-//
-//        compositeDisposable.add(
-//                contactManager.acceptInvitation(inviteId)
-//                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-//                        .flatMap(invitation -> contactManager.getContactList())
-//                        .subscribe(trusted -> {
-//                            handleContactListUpdate(trusted);
-//                            dataListener.showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
-//                        }, throwable -> dataListener.showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR)));
-//    }
 }

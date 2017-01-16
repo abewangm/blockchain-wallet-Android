@@ -75,7 +75,6 @@ public class ContactDetailViewModel extends BaseViewModel {
         dataListener.showProgressDialog();
         compositeDisposable.add(
                 contactsDataManager.removeContact(contact)
-                        .andThen(contactsDataManager.saveContacts())
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(() -> {
                             // Quit page, show toast
