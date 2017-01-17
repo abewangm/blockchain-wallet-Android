@@ -10,6 +10,7 @@ import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import org.json.JSONArray;
@@ -186,7 +187,7 @@ class WebSocketHandler {
             subHashSet.clear();
 
             connection = new WebSocketFactory()
-                    .createSocket("wss://ws.blockchain.info/inv")
+                    .createSocket(PersistentUrls.getInstance().getCurrentWebsocketUrl())
                     .addHeader("Origin", "https://blockchain.info")
                     .setPingInterval(PING_INTERVAL)
                     .addListener(new WebSocketAdapter() {

@@ -72,7 +72,7 @@ public class BackupWalletWordListFragment extends Fragment {
                 binding.previousWordAction.setVisibility(View.GONE);
             }
 
-            if (currentWordIndex < mnemonic.length) {
+            if (currentWordIndex < mnemonic.length - 1) {
 
                 animExitToLeft.setAnimationListener(new Animation.AnimationListener() {
                     @Override
@@ -95,8 +95,9 @@ public class BackupWalletWordListFragment extends Fragment {
 
                 binding.cardLayout.startAnimation(animExitToLeft);
 
-                currentWordIndex++;
             }
+
+            currentWordIndex++;
 
             if (currentWordIndex == mnemonic.length) {
 

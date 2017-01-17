@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import info.blockchain.wallet.payload.PayloadManager;
 

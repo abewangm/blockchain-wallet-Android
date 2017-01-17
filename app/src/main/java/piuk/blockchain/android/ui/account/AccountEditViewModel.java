@@ -584,7 +584,7 @@ public class AccountEditViewModel extends BaseViewModel {
     private void setLegacyAddressKey(ECKey key, LegacyAddress address, boolean watchOnly) throws Exception {
         // If double encrypted, save encrypted in payload
         if (!payloadManager.getPayload().isDoubleEncrypted()) {
-            address.setEncryptedKey(key.getPrivKeyBytes());
+            address.setEncryptedKeyBytes(key.getPrivKeyBytes());
             address.setWatchOnly(watchOnly);
         } else {
             String encryptedKey = Base58.encode(key.getPrivKeyBytes());

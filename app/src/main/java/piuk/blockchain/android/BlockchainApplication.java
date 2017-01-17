@@ -11,7 +11,12 @@ import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
+import info.blockchain.BlockchainFramework;
+import info.blockchain.FrameworkInterface;
 import info.blockchain.api.PinStore;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import io.reactivex.plugins.RxJavaPlugins;
 import piuk.blockchain.android.data.access.AccessState;
@@ -19,18 +24,27 @@ import piuk.blockchain.android.data.connectivity.ConnectivityManager;
 import piuk.blockchain.android.data.services.PinStoreService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.ApplicationLifeCycle;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
+import retrofit2.Retrofit;
 
 /**
  * Created by adambennett on 04/08/2016.
  */
 
-public class BlockchainApplication extends Application {
+public class BlockchainApplication extends Application implements FrameworkInterface {
 
     @Thunk static final String TAG = BlockchainApplication.class.getSimpleName();
     private static final String RX_ERROR_TAG = "RxJava Error";
+
+    @Inject
+    @Named("api")
+    protected Retrofit retrofitApi;
+    @Inject
+    @Named("server")
+    protected Retrofit retrofitServer;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -44,22 +58,56 @@ public class BlockchainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        // Init objects first
         Injector.getInstance().init(this);
+        // Inject into Application
+        Injector.getInstance().getAppComponent().inject(this);
+        // Pass objects to JAR
+        BlockchainFramework.init(this);
 
         new LoggingExceptionHandler();
 
         RxJavaPlugins.setErrorHandler(throwable -> Log.e(RX_ERROR_TAG, throwable.getMessage(), throwable));
 
+        AppUtil appUtil = new AppUtil(this);
+
         AccessState.getInstance().initAccessState(this,
                 new PrefsUtil(this),
                 new PinStoreService(new PinStore()),
-                new AppUtil(this));
+                appUtil);
+
+        // Apply PRNG fixes on app start if needed
+        appUtil.applyPRNGFixes();
 
         ConnectivityManager.getInstance().registerNetworkListener(this);
 
         checkSecurityProviderAndPatchIfNeeded();
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+
+        ApplicationLifeCycle.getInstance().addListener(new ApplicationLifeCycle.LifeCycleListener() {
+            @Override
+            public void onBecameForeground() {
+                // Ensure that PRNG fixes are always current for the session
+                appUtil.applyPRNGFixes();
+            }
+
+            @Override
+            public void onBecameBackground() {
+                // No-op
+            }
+        });
+    }
+
+    // Pass instances to JAR Framework
+    @Override
+    public Retrofit getRetrofitApiInstance() {
+        return retrofitApi;
+    }
+
+    @Override
+    public Retrofit getRetrofitServerInstance() {
+        return retrofitServer;
     }
 
     /**

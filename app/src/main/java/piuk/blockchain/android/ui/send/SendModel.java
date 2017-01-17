@@ -16,7 +16,7 @@ public class SendModel extends BaseObservable {
 
     //Views
     private String destinationAddress;
-    private String maxAviable;
+    private String maxAvailableString;
     private int maxAvailableVisibility;
     private int maxAvailableProgressVisibility;
     private int maxAvailableColor;
@@ -61,13 +61,13 @@ public class SendModel extends BaseObservable {
     }
 
     @Bindable
-    public String getMaxAviable() {
-        return maxAviable;
+    public String getMaxAvailable() {
+        return maxAvailableString;
     }
 
-    public void setMaxAviable(String maxAviable) {
-        this.maxAviable = maxAviable;
-        notifyPropertyChanged(BR.maxAviable);
+    public void setMaxAvailable(String maxAvailable) {
+        maxAvailableString = maxAvailable;
+        notifyPropertyChanged(BR.maxAvailable);
     }
 
     @Bindable
@@ -76,7 +76,7 @@ public class SendModel extends BaseObservable {
     }
 
     public void setMaxAvailableVisibility(int visibility) {
-        this.maxAvailableVisibility = visibility;
+        maxAvailableVisibility = visibility;
         notifyPropertyChanged(BR.maxAvailableVisibility);
     }
 
@@ -86,7 +86,7 @@ public class SendModel extends BaseObservable {
     }
 
     public void setMaxAvailableProgressVisibility(int visibility) {
-        this.maxAvailableProgressVisibility = visibility;
+        maxAvailableProgressVisibility = visibility;
         notifyPropertyChanged(BR.maxAvailableProgressVisibility);
     }
 

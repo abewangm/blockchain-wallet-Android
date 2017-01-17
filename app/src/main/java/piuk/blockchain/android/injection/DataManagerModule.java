@@ -31,6 +31,7 @@ import piuk.blockchain.android.data.services.WalletPayloadService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.ui.transactions.TransactionHelper;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
@@ -126,5 +127,13 @@ public class DataManagerModule {
                 new UnspentService(new Unspent()),
                 new PaymentService(new Payment()),
                 payloadManager);
+    }
+
+    @Provides
+    @ViewModelScope
+    protected SwipeToReceiveHelper swipeToReceiveHelper(PayloadManager
+                                                                payloadManager, MultiAddrFactory
+                                                                multiAddrFactory, PrefsUtil prefsUtil) {
+        return new SwipeToReceiveHelper(payloadManager, multiAddrFactory, prefsUtil);
     }
 }

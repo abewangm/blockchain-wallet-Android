@@ -8,7 +8,7 @@ import android.support.annotation.StringRes;
 import android.support.annotation.UiThread;
 import android.support.annotation.VisibleForTesting;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ImageView;
 
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
@@ -19,6 +19,8 @@ import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
+
+import org.spongycastle.crypto.InvalidCipherTextException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +46,7 @@ import piuk.blockchain.android.util.annotations.Thunk;
 import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_EMAIL;
 import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_PASSWORD;
 import static piuk.blockchain.android.ui.auth.LandingActivity.KEY_INTENT_RECOVERING_FUNDS;
-import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATING_PIN_FOR_RESULT;
+import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 
 @SuppressWarnings("WeakerAccess")
 public class PinEntryViewModel extends BaseViewModel {
@@ -75,7 +77,7 @@ public class PinEntryViewModel extends BaseViewModel {
 
         Intent getPageIntent();
 
-        TextView[] getPinBoxArray();
+        ImageView[] getPinBoxArray();
 
         void showProgressDialog(@StringRes int messageId, @Nullable String suffix);
 
@@ -121,6 +123,7 @@ public class PinEntryViewModel extends BaseViewModel {
     @Override
     public void onViewReady() {
         mSSLVerifyUtil.validateSSL();
+        mAppUtil.applyPRNGFixes();
 
         if (mDataListener.getPageIntent() != null) {
             Bundle extras = mDataListener.getPageIntent().getExtras();
@@ -181,8 +184,8 @@ public class PinEntryViewModel extends BaseViewModel {
 
     public void loginWithDecryptedPin(CharSequenceX pincode) {
         mCanShowFingerprintDialog = false;
-        for (View view : mDataListener.getPinBoxArray()) {
-            view.setBackgroundResource(R.drawable.rounded_view_dark_blue);
+        for (ImageView view : mDataListener.getPinBoxArray()) {
+            view.setImageResource(R.drawable.rounded_view_dark_blue);
         }
         validatePIN(pincode.toString());
     }
@@ -193,18 +196,18 @@ public class PinEntryViewModel extends BaseViewModel {
             mUserEnteredPin = mUserEnteredPin.substring(0, mUserEnteredPin.length() - 1);
 
             // Clear last box
-            mDataListener.getPinBoxArray()[mUserEnteredPin.length()].setBackgroundResource(R.drawable.rounded_view_blue_white_border);
+            mDataListener.getPinBoxArray()[mUserEnteredPin.length()].setImageResource(R.drawable.rounded_view_blue_white_border);
         }
     }
 
-    public void padClicked(View view) {
+    public void onPadClicked(String string) {
         if (mUserEnteredPin.length() == PIN_LENGTH) {
             return;
         }
 
         // Append tapped #
-        mUserEnteredPin = mUserEnteredPin + view.getTag().toString().substring(0, 1);
-        mDataListener.getPinBoxArray()[mUserEnteredPin.length() - 1].setBackgroundResource(R.drawable.rounded_view_dark_blue);
+        mUserEnteredPin = mUserEnteredPin + string;
+        mDataListener.getPinBoxArray()[mUserEnteredPin.length() - 1].setImageResource(R.drawable.rounded_view_dark_blue);
 
         // Perform appropriate action if PIN_LENGTH has been reached
         if (mUserEnteredPin.length() == PIN_LENGTH) {
@@ -329,8 +332,18 @@ public class PinEntryViewModel extends BaseViewModel {
                                 mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
                                 mAppUtil.restartApp();
 
+                            } else if (throwable instanceof InvalidCipherTextException) {
+                                // Password changed on web, needs re-pairing
+                                mDataListener.showToast(R.string.password_changed_explanation, ToastCustom.TYPE_ERROR);
+                                mAccessState.setPIN(null);
+                                mAppUtil.clearCredentialsAndRestart();
+
                             } else if (throwable instanceof AccountLockedException) {
-                                mDataListener.showAccountLockedDialog();
+                                    mDataListener.showAccountLockedDialog();
+
+                            } else {
+                                mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                                mAppUtil.clearCredentialsAndRestart();
                             }
 
                         }));
@@ -441,8 +454,8 @@ public class PinEntryViewModel extends BaseViewModel {
         mPrefsUtil.setValue(PrefsUtil.KEY_PIN_FAILS, ++fails);
         showErrorToast(R.string.invalid_pin);
         mUserEnteredPin = "";
-        for (TextView textView : mDataListener.getPinBoxArray()) {
-            textView.setBackgroundResource(R.drawable.rounded_view_blue_white_border);
+        for (ImageView textView : mDataListener.getPinBoxArray()) {
+            textView.setImageResource(R.drawable.rounded_view_blue_white_border);
         }
         mDataListener.setTitleVisibility(View.VISIBLE);
         mDataListener.setTitleString(R.string.pin_entry);
@@ -481,6 +494,7 @@ public class PinEntryViewModel extends BaseViewModel {
     }
 
     private void createWallet() {
+        mAppUtil.applyPRNGFixes();
         compositeDisposable.add(
                 mAuthDataManager.createHdWallet(mPassword.toString(), mStringUtils.getString(R.string.default_wallet_name))
                         .doAfterTerminate(() -> mDataListener.dismissProgressDialog())

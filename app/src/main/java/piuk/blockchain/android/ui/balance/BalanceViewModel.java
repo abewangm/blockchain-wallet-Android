@@ -35,7 +35,6 @@ import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.ViewModel;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
-import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
 @SuppressWarnings("WeakerAccess")
@@ -50,7 +49,6 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
     private List<Tx> transactionList;
-    private OSUtil osUtil;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected PayloadManager payloadManager;
     @Inject protected TransactionListDataManager transactionListDataManager;
@@ -91,7 +89,6 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         activeAccountAndAddressList = new ArrayList<>();
         activeAccountAndAddressBiMap = HashBiMap.create();
         transactionList = new ArrayList<>();
-        osUtil = new OSUtil(context);
         compositeDisposable = new CompositeDisposable();
     }
 
@@ -120,7 +117,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
                                                         getSettingsApi()
                                                                 .compose(RxUtil.applySchedulersToObservable())
                                                                 .subscribe(settings -> {
-                                                                    if (!settings.isSmsVerified()) {
+                                                                    if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
                                                                         // Show dialog for 2FA, store date of dialog launch
                                                                         if (getTimeOfLastSecurityPrompt() == 0L
                                                                                 || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
@@ -397,14 +394,5 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
 
     public String getDisplayUnits() {
         return (String) getMonetaryUtil().getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
-    }
-
-    public void startWebSocketService() {
-        if (!osUtil.isServiceRunning(piuk.blockchain.android.data.websocket.WebSocketService.class)) {
-            context.startService(new Intent(context, piuk.blockchain.android.data.websocket.WebSocketService.class));
-        } else {
-            context.stopService(new Intent(context, piuk.blockchain.android.data.websocket.WebSocketService.class));
-            context.startService(new Intent(context, piuk.blockchain.android.data.websocket.WebSocketService.class));
-        }
     }
 }

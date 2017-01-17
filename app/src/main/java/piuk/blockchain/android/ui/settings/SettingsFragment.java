@@ -49,6 +49,7 @@ import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -59,9 +60,9 @@ import piuk.blockchain.android.util.annotations.Thunk;
 import static android.app.Activity.RESULT_OK;
 import static piuk.blockchain.android.R.string.email;
 import static piuk.blockchain.android.R.string.success;
-import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATED_PIN;
-import static piuk.blockchain.android.ui.auth.PinEntryActivity.KEY_VALIDATING_PIN_FOR_RESULT;
-import static piuk.blockchain.android.ui.auth.PinEntryActivity.REQUEST_CODE_VALIDATE_PIN;
+import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATED_PIN;
+import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
+import static piuk.blockchain.android.ui.auth.PinEntryFragment.REQUEST_CODE_VALIDATE_PIN;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceClickListener, SettingsViewModel.DataListener {
 
@@ -88,6 +89,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     private Preference passwordHint1Pref;
     private SwitchPreferenceCompat torPref;
     private SwitchPreferenceCompat launcherShortcutPrefs;
+    private SwitchPreferenceCompat swipeToReceivePrefs;
 
     @Thunk SettingsViewModel viewModel;
     private int pwStrength = 0;
@@ -96,7 +98,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
+            if (intent.getAction().equals(BalanceFragment.ACTION_INTENT)) {
                 viewModel.onViewReady();
             }
         }
@@ -164,6 +166,18 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         launcherShortcutPrefs.setOnPreferenceChangeListener((preference, newValue) -> {
             if (!((Boolean) newValue) && AndroidUtils.is25orHigher()) {
                 getActivity().getSystemService(ShortcutManager.class).removeAllDynamicShortcuts();
+            }
+            return true;
+        });
+
+        swipeToReceivePrefs = (SwitchPreferenceCompat) findPreference("swipe_to_receive_enabled");
+        swipeToReceivePrefs.setOnPreferenceClickListener(this);
+        swipeToReceivePrefs.setOnPreferenceChangeListener((preference, newValue) -> {
+            if (!((Boolean) newValue)) {
+                // Clear stored addresses
+                PrefsUtil prefsUtil = new PrefsUtil(getContext());
+                prefsUtil.removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ACCOUNT_NAME);
+                prefsUtil.removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ADDRESSES);
             }
             return true;
         });
@@ -441,6 +455,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 showDialogTorEnable();
                 break;
             case "receive_shortcuts_enabled":
+                break;
+            case "swipe_to_receive_enabled":
                 break;
             case "about":
                 DialogFragment aboutDialog = new AboutDialog();

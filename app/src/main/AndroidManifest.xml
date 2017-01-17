@@ -109,15 +109,6 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-            android:name=".ui.send.SendActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-
-        <activity
-            android:name=".ui.receive.ReceiveActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-
-        <activity
             android:name=".ui.receive.ReceiveQrActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.ReceiveQrWindow" />
