@@ -1,6 +1,9 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+import info.blockchain.wallet.contacts.data.PaymentRequest;
+import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -192,6 +195,17 @@ public class ContactsDataManager {
     }
 
     /**
+     * Returns a stream of {@link Contact} objects, comprising of a list of users with {@link
+     * FacilitatedTransaction} objects that need responding to.
+     *
+     * @return A stream of {@link Contact} objects
+     */
+    public Observable<Contact> getContactsWithUnreadPaymentRequests() {
+        return callWithToken(() -> contactsService.getContactsWithUnreadPaymentRequests())
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
      * Inserts a contact into the locally stored Contacts list. Saves this list to server.
      *
      * @param contact The {@link Contact} to be stored
@@ -268,54 +282,58 @@ public class ContactsDataManager {
     // PAYMENT REQUESTS
     ///////////////////////////////////////////////////////////////////////////
 
-//    /**
-//     * Sends a payment request to a user in the trusted contactsService list
-//     *
-//     * @param recipientMdid The MDID of the message's recipient
-//     * @param satoshis      The number of satoshis to be requested
-//     */
-//    public Completable sendPaymentRequest(String recipientMdid, long satoshis) throws Exception {
-//        return callWithToken(() -> contactsService.sendPaymentRequest(recipientMdid, satoshis))
-//                .compose(RxUtil.applySchedulersToCompletable());
-//    }
+    /**
+     * Sends a new payment request without the need to ask for a receive address from the recipient.
+     *
+     * @param mdid                   The recipient's MDID
+     * @param request                A {@link PaymentRequest} object containing the request details,
+     *                               ie the amount and an optional note
+     * @param facilitatedTransaction A {@link FacilitatedTransaction} object
+     * @return A {@link Completable} object
+     */
+    public Completable sendPaymentRequest(String mdid, PaymentRequest request, FacilitatedTransaction facilitatedTransaction) {
+        return callWithToken(() -> contactsService.sendPaymentRequest(mdid, request, facilitatedTransaction))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
 
-//    /**
-//     * Accepts a payment request from a user and optionally adds a note to the transaction
-//     *
-//     * @param recipientMdid  The MDID of the message's recipient
-//     * @param paymentRequest A PaymentRequest object containing information about the proposed
-//     *                       transaction
-//     * @param note           An optional note for the transaction
-//     * @param receiveAddress The address which you wish to user to receive bitcoin
-//     * @return A {@link Message} object
-//     */
-//    public Observable<Message> acceptPaymentRequest(String recipientMdid, PaymentRequest paymentRequest, String note, String receiveAddress) {
-//        return callWithToken(() -> contactsService.acceptPaymentRequest(recipientMdid, paymentRequest, note, receiveAddress))
-//                .compose(RxUtil.applySchedulersToObservable());
-//    }
-//
-//    /**
-//     * Returns a list of payment requests. Optionally, choose to only see requests that are
-//     * processed
-//     *
-//     * @return A list of {@link PaymentRequest} objects
-//     */
-//    public Observable<List<PaymentRequest>> getPaymentRequests() {
-//        return callWithToken(() -> contactsService.getPaymentRequests())
-//                .compose(RxUtil.applySchedulersToObservable());
-//    }
-//
-//    /**
-//     * Returns a list of payment request responses, ie whether or not another user has paid you.
-//     * Optionally, choose to only see requests that are processed
-//     *
-//     * @param onlyNew If true, returns only new payment requests
-//     * @return A list of {@link PaymentRequestResponse} objects
-//     */
-//    public Observable<List<PaymentRequestResponse>> getPaymentRequestResponses(boolean onlyNew) {
-//        return callWithToken(() -> contactsService.getPaymentRequestResponses(onlyNew)
-//                .compose(RxUtil.applySchedulersToObservable()));
-//    }
+    /**
+     * Sends a new payment request. Asks recipient to send a bitcoin address for receipt.
+     *
+     * @param mdid    The recipient's MDID
+     * @param request A {@link PaymentRequest} object containing the request details, ie the amount
+     *                and an optional note
+     * @return A {@link Completable} object
+     */
+    public Completable sendPaymentRequest(String mdid, RequestForPaymentRequest request) {
+        return callWithToken(() -> contactsService.sendPaymentRequest(mdid, request))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Sends a response to a payment request.
+     *
+     * @param mdid            The recipient's MDID
+     * @param paymentRequest  A {@link PaymentRequest} object
+     * @param facilitatedTxId The ID of the {@link FacilitatedTransaction}
+     * @return A {@link Completable} object
+     */
+    public Completable sendPaymentRequestResponse(String mdid, PaymentRequest paymentRequest, String facilitatedTxId) {
+        return callWithToken(() -> contactsService.sendPaymentRequestResponse(mdid, paymentRequest, facilitatedTxId))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Sends notification that a transaction has been processed.
+     *
+     * @param mdid            The recipient's MDID
+     * @param txHash          The transaction hash
+     * @param facilitatedTxId The ID of the {@link FacilitatedTransaction}
+     * @return A {@link Completable} object
+     */
+    public Completable sendPaymentBroadcasted(String mdid, String txHash, String facilitatedTxId) {
+        return callWithToken(() -> contactsService.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // XPUB AND MDID HANDLING
@@ -342,28 +360,6 @@ public class ContactsDataManager {
         return contactsService.publishXpub()
                 .compose(RxUtil.applySchedulersToCompletable());
     }
-
-//    /**
-//     * Adds a user's MDID to the trusted list in Shared Metadata
-//     *
-//     * @param mdid The user's MDID
-//     * @return An {@link Observable} wrapping a boolean, representing a successful save
-//     */
-//    public Observable<Boolean> addTrusted(String mdid) {
-//        return callWithToken(() -> contactsService.addTrusted(mdid))
-//                .compose(RxUtil.applySchedulersToObservable());
-//    }
-//
-//    /**
-//     * Removes a user's MDID from the trusted list in Shared Metadata
-//     *
-//     * @param mdid The user's MDID
-//     * @return An {@link Observable} wrapping a boolean, representing a successful deletion
-//     */
-//    public Observable<Boolean> deleteTrusted(String mdid) {
-//        return callWithToken(() -> contactsService.deleteTrusted(mdid))
-//                .compose(RxUtil.applySchedulersToObservable());
-//    }
 
     ///////////////////////////////////////////////////////////////////////////
     // MESSAGES
@@ -403,17 +399,5 @@ public class ContactsDataManager {
         return callWithToken(() -> contactsService.markMessageAsRead(messageId, markAsRead))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
-
-//    /**
-//     * Decrypts a message from a specific user
-//     *
-//     * @param message The string to be decrypted
-//     * @param mdid    The MDID of the user who sent the message
-//     * @return An {@link Observable} containing the decrypted message
-//     */
-//    public Observable<Message> decryptMessageFrom(Message message, String mdid) {
-//        return callWithToken(() -> contactsService.decryptMessageFrom(message, mdid))
-//                .compose(RxUtil.applySchedulersToObservable());
-//    }
 
 }
