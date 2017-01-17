@@ -549,7 +549,7 @@
     <string name="contacts_title">Contacts</string>
     <string name="contacts_loading_failed">Loading contacts failed, please try again</string>
     <string name="contacts_pairing_method_title">Add Contact</string>
-    <string name="contact_choose_pairing_method">Choose the paring method you wish to use to add a trusted contact:</string>
+    <string name="contacts_choose_pairing_method">Choose the paring method you wish to use to add a trusted contact:</string>
     <string name="contacts_send_link">Send link</string>
     <string name="contacts_use_nfc">Use NFC</string>
     <string name="contacts_no_contacts_found">No contacts found</string>
@@ -584,7 +584,7 @@
     <string name="contacts_accept_invite_title">Accept Invite</string>
     <string name="contacts_sent_link_explanation">If someone sent you a link, simply tap on the link to accept.</string>
     <string name="contacts_detail_title">I want to:</string>
-    <string name="contacts_detail_transactions">Transactions with  %1$s:</string>
+    <string name="contacts_detail_transactions">Transactions with %1$s:</string>
     <string name="contacts_detail_transactions_empty">No transactions found</string>
     <string name="contacts_rename">Rename contact</string>
     <string name="contacts_delete">Delete contact</string>
@@ -594,6 +594,12 @@
     <string name="contacts_request_sent">Contact request sent</string>
     <string name="contacts_request_just_added">Just added</string>
     <string name="contacts_request_trusted">Trusted</string>
+    <string name="contacts_delete_message">Are you sure you want to delete this contact? You will not lose any bitcoin by deleting this contact.</string>
+    <string name="contacts_payment_request_title">Payment request</string>
+    <string name="contacts_payment_request_send">Why would you like to send %1$s bitcoin? This will be shared with %1$s.</string>
+    <string name="contacts_payment_request_receive">Why would you like %1$s to send you bitcoin? This will be shared with %1$s.</string>
+    <string name="contacts_payment_request_send_hint">Tapas lunch</string>
+    <string name="contacts_payment_request_receive_hint">For drinks Friday</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>

@@ -8,14 +8,22 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.LinearLayoutManager;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.view.View;
+
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactDetailBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.ViewUtils;
 
 public class ContactDetailActivity extends BaseAuthActivity implements ContactDetailViewModel.DataListener {
@@ -23,6 +31,7 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
     private ActivityContactDetailBinding binding;
     private ContactDetailViewModel viewModel;
     private MaterialProgressDialog progressDialog;
+    private ContactTransactionAdapter transactionAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +47,10 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
         binding.buttonRename.setOnClickListener(v -> viewModel.onRenameContactClicked());
         binding.buttonSend.setOnClickListener(v -> viewModel.onSendMoneyClicked());
         binding.buttonRequest.setOnClickListener(v -> viewModel.onRequestMoneyClicked());
+
+        transactionAdapter = new ContactTransactionAdapter(new ArrayList<>(), new StringUtils(this));
+        binding.recyclerView.setAdapter(transactionAdapter);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         viewModel.onViewReady();
     }
@@ -79,6 +92,34 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
     }
 
     @Override
+    public void showDeleteUserDialog() {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.contacts_delete)
+                .setMessage(R.string.contacts_delete_message)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.onDeleteContactConfirmed())
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void onTransactionsUpdated(List<FacilitatedTransaction> transactions) {
+        transactionAdapter.onTransactionsUpdated(transactions);
+        if (!transactions.isEmpty()) {
+            binding.recyclerView.setVisibility(View.VISIBLE);
+            binding.layoutNoTransactions.setVisibility(View.GONE);
+        } else {
+            binding.recyclerView.setVisibility(View.GONE);
+            binding.layoutNoTransactions.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void startPaymentRequestActivity(ContactPaymentRequestActivity.PaymentRequestType paymentRequestType, String contactId) {
+        ContactPaymentRequestActivity.start(this, paymentRequestType, contactId);
+    }
+
+    @Override
     public void showProgressDialog() {
         progressDialog = new MaterialProgressDialog(this);
         progressDialog.setCancelable(false);
@@ -115,6 +156,5 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
         onBackPressed();
         return super.onSupportNavigateUp();
     }
-
 
 }

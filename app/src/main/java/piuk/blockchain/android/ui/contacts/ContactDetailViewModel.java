@@ -4,6 +4,11 @@ import android.content.Intent;
 import android.support.annotation.StringRes;
 
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -38,6 +43,12 @@ public class ContactDetailViewModel extends BaseViewModel {
 
         void dismissProgressDialog();
 
+        void showDeleteUserDialog();
+
+        void onTransactionsUpdated(List<FacilitatedTransaction> transactions);
+
+        void startPaymentRequestActivity(ContactPaymentRequestActivity.PaymentRequestType paymentRequestType, String contactId);
+
     }
 
     ContactDetailViewModel(DataListener dataListener) {
@@ -58,6 +69,8 @@ public class ContactDetailViewModel extends BaseViewModel {
                                     contact -> {
                                         this.contact = contact;
                                         dataListener.updateContactName(contact.getName());
+                                        dataListener.onTransactionsUpdated(contact.getFacilitatedTransaction() != null
+                                                ? new ArrayList<>(contact.getFacilitatedTransaction().values()) : Collections.emptyList());
                                     }, throwable -> showErrorAndQuitPage()));
         } else {
             showErrorAndQuitPage();
@@ -70,8 +83,10 @@ public class ContactDetailViewModel extends BaseViewModel {
     }
 
     void onDeleteContactClicked() {
-        // TODO: 12/01/2017 Will need to remove contacts from shared metadata service too via mdid
+        dataListener.showDeleteUserDialog();
+    }
 
+    void onDeleteContactConfirmed() {
         dataListener.showProgressDialog();
         compositeDisposable.add(
                 contactsDataManager.removeContact(contact)
@@ -110,10 +125,13 @@ public class ContactDetailViewModel extends BaseViewModel {
     }
 
     void onSendMoneyClicked() {
-        // Stub
+        dataListener.startPaymentRequestActivity(
+                ContactPaymentRequestActivity.PaymentRequestType.SEND, contact.getId());
     }
 
     void onRequestMoneyClicked() {
-        // Stub
+        dataListener.startPaymentRequestActivity(
+                ContactPaymentRequestActivity.PaymentRequestType.REQUEST, contact.getId());
     }
+
 }

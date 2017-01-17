@@ -18,7 +18,7 @@ import piuk.blockchain.android.util.TimeUtil;
 class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.ContactsViewHolder> {
 
     private List<ContactsListItem> contacts;
-    private StringUtils stringUtils;
+    private final StringUtils stringUtils;
     private ContactsClickListener contactsClickListener;
 
     ContactsListAdapter(List<ContactsListItem> contacts, StringUtils stringUtils) {

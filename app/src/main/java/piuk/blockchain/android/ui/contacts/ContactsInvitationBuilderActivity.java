@@ -124,8 +124,7 @@ public class ContactsInvitationBuilderActivity extends BaseAuthActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-        transaction
-                .replace(R.id.content_frame, fragment)
+        transaction.replace(R.id.content_frame, fragment)
                 .commit();
     }
 
