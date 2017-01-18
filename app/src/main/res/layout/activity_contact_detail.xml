@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="piuk.blockchain.android.ui.contacts.ContactDetailActivity">
 
@@ -19,16 +18,18 @@
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/button_send"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:text="@string/contacts_send_bitcoin"
-            app:theme="@style/ButtonBlue" />
+            android:theme="@style/ButtonBlue" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/button_request"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
@@ -36,7 +37,7 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:text="@string/contacts_request_bitcoin"
-            app:theme="@style/ButtonBlue" />
+            android:theme="@style/ButtonBlue" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -45,6 +46,7 @@
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/button_rename"
+                style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -52,10 +54,11 @@
                 android:layout_marginRight="16dp"
                 android:layout_weight="1"
                 android:text="@string/contacts_rename"
-                app:theme="@style/ButtonBlue" />
+                android:theme="@style/ButtonBlue" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/button_delete"
+                style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -63,7 +66,7 @@
                 android:layout_marginRight="16dp"
                 android:layout_weight="1"
                 android:text="@string/contacts_delete"
-                app:theme="@style/ButtonBlue" />
+                android:theme="@style/ButtonBlue" />
         </LinearLayout>
 
         <android.support.v7.widget.AppCompatTextView

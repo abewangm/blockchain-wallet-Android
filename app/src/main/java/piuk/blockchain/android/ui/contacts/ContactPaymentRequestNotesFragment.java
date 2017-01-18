@@ -26,7 +26,6 @@ public class ContactPaymentRequestNotesFragment extends Fragment {
     }
 
     public static ContactPaymentRequestNotesFragment newInstance(PaymentRequestType requestType, String contactName) {
-
         Bundle args = new Bundle();
         args.putSerializable(KEY_BUNDLE_REQUEST_TYPE, requestType);
         args.putString(KEY_BUNDLE_CONTACT_NAME, contactName);
@@ -56,10 +55,10 @@ public class ContactPaymentRequestNotesFragment extends Fragment {
         if (paymentRequestType != null) {
             if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
                 binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_send, contactName));
-                binding.inputLayoutNote.setHint(getString(R.string.contacts_payment_request_receive_hint));
+                binding.editTextNote.setHint(getString(R.string.contacts_payment_request_receive_hint));
             } else {
                 binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_receive, contactName));
-                binding.inputLayoutNote.setHint(getString(R.string.contacts_payment_request_send_hint));
+                binding.editTextNote.setHint(getString(R.string.contacts_payment_request_send_hint));
             }
         } else {
             throw new AssertionError("Contact name and PaymentRequestType must be passed to fragment");

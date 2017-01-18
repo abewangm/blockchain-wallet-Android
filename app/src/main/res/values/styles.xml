@@ -119,22 +119,26 @@
         <item name="android:gravity">center_vertical|right</item>
     </style>
 
-    <style name="ButtonGreen" parent="Widget.AppCompat.Button">
+    <style name="ButtonGreen" parent="ThemeOverlay.AppCompat.Dark">
         <item name="colorButtonNormal">@color/blockchain_receive_green</item>
+        <item name="colorAccent">@color/blockchain_receive_green</item>
     </style>
 
-    <style name="ButtonBlue" parent="Widget.AppCompat.Button">
+    <style name="ButtonBlue" parent="ThemeOverlay.AppCompat.Dark">
         <item name="colorButtonNormal">@color/blockchain_blue</item>
+        <item name="colorAccent">@color/blockchain_blue</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="ButtonRed" parent="Widget.AppCompat.Button">
+    <style name="ButtonRed" parent="ThemeOverlay.AppCompat.Dark">
         <item name="colorButtonNormal">@color/blockchain_send_red</item>
+        <item name="colorAccent">@color/blockchain_send_red</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="ButtonWhite" parent="Widget.AppCompat.Button">
+    <style name="ButtonWhite" parent="ThemeOverlay.AppCompat.Dark">
         <item name="colorButtonNormal">@color/blockchain_pearl_white</item>
+        <item name="colorAccent">@color/blockchain_pearl_white</item>
         <item name="android:textColor">@color/black</item>
     </style>
 

@@ -103,6 +103,12 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
     }
 
     @Override
+    public void disablePayments() {
+        binding.buttonRequest.setEnabled(false);
+        binding.buttonSend.setEnabled(false);
+    }
+
+    @Override
     public void onTransactionsUpdated(List<FacilitatedTransaction> transactions) {
         transactionAdapter.onTransactionsUpdated(transactions);
         if (!transactions.isEmpty()) {

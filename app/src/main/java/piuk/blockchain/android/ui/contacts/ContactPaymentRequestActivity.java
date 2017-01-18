@@ -8,13 +8,13 @@ import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactPaymentRequestBinding;
+import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
-public class ContactPaymentRequestActivity extends AppCompatActivity implements
+public class ContactPaymentRequestActivity extends BaseAuthActivity implements
         ContactsPaymentRequestViewModel.DataListener,
         ContactPaymentRequestNotesFragment.FragmentInteractionListener {
 
@@ -49,7 +49,7 @@ public class ContactPaymentRequestActivity extends AppCompatActivity implements
     public void contactLoaded(String name) {
         submitFragmentTransaction(
                 ContactPaymentRequestNotesFragment.newInstance(
-                        PaymentRequestType.fromString(getIntent().getStringExtra(KEY_EXTRA_REQUEST_TYPE)),
+                        (PaymentRequestType) getIntent().getSerializableExtra(KEY_EXTRA_REQUEST_TYPE),
                         name));
     }
 
@@ -82,6 +82,12 @@ public class ContactPaymentRequestActivity extends AppCompatActivity implements
         starter.putExtra(KEY_EXTRA_REQUEST_TYPE, requestType);
         starter.putExtra(KEY_EXTRA_CONTACT_ID, contactId);
         context.startActivity(starter);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
     }
 
     @Override

@@ -13,8 +13,8 @@
         android:paddingTop="@dimen/activity_vertical_margin">
 
         <android.support.v7.widget.AppCompatTextView
-            style="@style/ContactsHeader"
             android:id="@+id/textview_explanation"
+            style="@style/ContactsHeader"
             android:padding="0dp"
             tools:text="@string/contacts_payment_request_send" />
 
@@ -23,13 +23,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="@string/contacts_payment_request_send_hint"
-            app:hintAnimationEnabled="false">
+            app:hintAnimationEnabled="false"
+            app:hintEnabled="false">
 
-            <android.support.v7.widget.AppCompatEditText
+            <android.support.design.widget.TextInputEditText
                 android:id="@+id/edit_text_note"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:hint="@string/contacts_payment_request_send_hint"
                 android:inputType="textCapSentences|textAutoComplete"
                 android:maxLength="128" />
 
@@ -37,12 +38,13 @@
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/button_next"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="56dp"
             android:text="@string/next"
-            app:theme="@style/ButtonBlue" />
+            android:theme="@style/ButtonBlue" />
 
     </LinearLayout>
 </layout>

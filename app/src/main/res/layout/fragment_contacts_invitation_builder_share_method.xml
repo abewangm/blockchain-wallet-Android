@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,6 +17,7 @@
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/button_qr"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -25,10 +25,11 @@
             android:layout_marginRight="36dp"
             android:layout_marginTop="36dp"
             android:text="@string/contacts_share_qr"
-            app:theme="@style/ButtonBlue" />
+            android:theme="@style/ButtonBlue" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/button_link"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -36,16 +37,17 @@
             android:layout_marginRight="36dp"
             android:layout_marginTop="16dp"
             android:text="@string/contacts_share_link"
-            app:theme="@style/ButtonBlue" />
+            android:theme="@style/ButtonBlue" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/button_done"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="56dp"
             android:text="@string/done"
-            app:theme="@style/ButtonBlue" />
+            android:theme="@style/ButtonBlue" />
 
     </LinearLayout>
 </layout>

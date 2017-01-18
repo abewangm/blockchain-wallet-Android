@@ -129,9 +129,9 @@ public class ContactsListViewModel extends BaseViewModel {
             compositeDisposable.add(
                     contactsDataManager.readInvitationSent(contact)
                             .subscribe(
-                                    success -> refreshList(),
+                                    success -> {
+                                    },
                                     throwable -> {
-                                        // Doesn't particularly matter, don't inform user
                                     }));
         }
     }

@@ -45,6 +45,8 @@ public class ContactDetailViewModel extends BaseViewModel {
 
         void showDeleteUserDialog();
 
+        void disablePayments();
+
         void onTransactionsUpdated(List<FacilitatedTransaction> transactions);
 
         void startPaymentRequestActivity(ContactPaymentRequestActivity.PaymentRequestType paymentRequestType, String contactId);
@@ -71,6 +73,9 @@ public class ContactDetailViewModel extends BaseViewModel {
                                         dataListener.updateContactName(contact.getName());
                                         dataListener.onTransactionsUpdated(contact.getFacilitatedTransaction() != null
                                                 ? new ArrayList<>(contact.getFacilitatedTransaction().values()) : Collections.emptyList());
+                                        if (contact.getMdid() == null || contact.getMdid().isEmpty()) {
+                                            dataListener.disablePayments();
+                                        }
                                     }, throwable -> showErrorAndQuitPage()));
         } else {
             showErrorAndQuitPage();
