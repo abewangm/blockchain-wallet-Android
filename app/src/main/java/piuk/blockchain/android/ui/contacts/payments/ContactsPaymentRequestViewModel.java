@@ -83,7 +83,6 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
         this.note = note;
     }
 
-    // TODO: 18/01/2017 Need to allow account choosing
     void onAmountSet(long satoshis) {
         if (satoshis < 0) {
             dataListener.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR);

@@ -13,11 +13,11 @@ import java.util.List;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.contacts.ContactsPredicates;
+import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
-import piuk.blockchain.android.data.contacts.ContactsPredicates;
-import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_ID;
@@ -73,8 +73,15 @@ public class ContactDetailViewModel extends BaseViewModel {
                                     contact -> {
                                         this.contact = contact;
                                         dataListener.updateContactName(contact.getName());
-                                        dataListener.onTransactionsUpdated(contact.getFacilitatedTransaction() != null
-                                                ? new ArrayList<>(contact.getFacilitatedTransaction().values()) : Collections.emptyList());
+
+                                        List<FacilitatedTransaction> list =
+                                                contact.getFacilitatedTransaction() != null
+                                                        ? new ArrayList<>(contact.getFacilitatedTransaction().values())
+                                                        : Collections.emptyList();
+
+                                        // Invert to show most recent first
+                                        Collections.reverse(list);
+                                        dataListener.onTransactionsUpdated(list);
                                         if (contact.getMdid() == null || contact.getMdid().isEmpty()) {
                                             dataListener.disablePayments();
                                         }

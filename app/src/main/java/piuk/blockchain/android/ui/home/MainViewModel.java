@@ -20,6 +20,7 @@ import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -133,7 +134,15 @@ public class MainViewModel extends BaseViewModel {
                             } else {
                                 compositeDisposable.add(
                                         contactsDataManager.fetchContacts()
-                                                .andThen(contactsDataManager.getMessages(true))
+                                                .andThen(contactsDataManager.getContactList())
+                                                .toList()
+                                                .flatMapObservable(contacts -> {
+                                                    if (!contacts.isEmpty()) {
+                                                        return contactsDataManager.getMessages(true);
+                                                    } else {
+                                                        return Observable.just(Collections.emptyList());
+                                                    }
+                                                })
                                                 .subscribe(
                                                         messages -> dataListener.setMessagesVisibility(messages.isEmpty() ? View.INVISIBLE : View.VISIBLE),
                                                         throwable -> Log.e(TAG, "registerNodeForMetaDataService: ", throwable)));

@@ -38,7 +38,7 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
         FacilitatedTransaction transaction = facilitatedTransactions.get(position);
 
         holder.title.setText(String.valueOf(transaction.getIntended_amount()));
-        holder.subtitle.setText(transaction.getState());
+        holder.subtitle.setText(transaction.getRole() + ": " + transaction.getState());
 
     }
 
@@ -59,7 +59,7 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
         TextView title;
         TextView subtitle;
 
-        public TransactionViewHolder(View itemView) {
+        TransactionViewHolder(View itemView) {
             super(itemView);
             indicator = (ImageView) itemView.findViewById(R.id.imageview_indicator);
             title = (TextView) itemView.findViewById(R.id.transaction_title);

@@ -128,8 +128,10 @@ public class ContactsListViewModel extends BaseViewModel {
                     contactsDataManager.readInvitationSent(contact)
                             .subscribe(
                                     success -> {
+                                        // No-op
                                     },
                                     throwable -> {
+                                        // No-op
                                     }));
         }
     }
