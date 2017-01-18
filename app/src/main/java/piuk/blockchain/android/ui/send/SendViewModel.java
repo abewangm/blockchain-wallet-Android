@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 
 import info.blockchain.api.DynamicFee;
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.api.Unspent;
 import info.blockchain.util.FeeUtil;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -1314,12 +1315,13 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void setTempLegacyAddressPrivateKey(LegacyAddress legacyAddress, ECKey key) {
-        if (key != null && key.hasPrivKey() && legacyAddress.getAddress().equals(key.toAddress(MainNetParams.get()).toString())) {
+        if (key != null && key.hasPrivKey() && legacyAddress.getAddress().equals(key.toAddress(
+            PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
 
             //Create copy, otherwise pass by ref will override private key in wallet payload
             LegacyAddress tempLegacyAddress = new LegacyAddress();
             tempLegacyAddress.setEncryptedKeyBytes(key.getPrivKeyBytes());
-            tempLegacyAddress.setAddress(key.toAddress(MainNetParams.get()).toString());
+            tempLegacyAddress.setAddress(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
             tempLegacyAddress.setLabel(legacyAddress.getLabel());
             tempLegacyAddress.setWatchOnly(true);
             sendModel.pendingTransaction.sendingObject.accountObject = tempLegacyAddress;
@@ -1337,7 +1339,7 @@ public class SendViewModel extends BaseViewModel {
             Looper.prepare();
 
             try {
-                BIP38PrivateKey bip38 = new BIP38PrivateKey(MainNetParams.get(), scanData);
+                BIP38PrivateKey bip38 = new BIP38PrivateKey(PersistentUrls.getInstance().getCurrentNetworkParams(), scanData);
                 final ECKey key = bip38.decrypt(pw);
 
                 LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;

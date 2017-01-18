@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.payload.LegacyAddress;
@@ -184,7 +185,7 @@ public class AccountViewModel extends BaseViewModel {
     void importBip38Address(String data, CharSequenceX password) {
         dataListener.showProgressDialog(R.string.please_wait);
         try {
-            BIP38PrivateKey bip38 = new BIP38PrivateKey(MainNetParams.get(), data);
+            BIP38PrivateKey bip38 = new BIP38PrivateKey(PersistentUrls.getInstance().getCurrentNetworkParams(), data);
             ECKey key = bip38.decrypt(password.toString());
 
             handlePrivateKey(key, doubleEncryptionPassword);
@@ -278,18 +279,18 @@ public class AccountViewModel extends BaseViewModel {
     @VisibleForTesting
     void handlePrivateKey(ECKey key, @Nullable CharSequenceX secondPassword) {
         if (key != null && key.hasPrivKey()
-                && payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(MainNetParams.get()).toString())) {
+                && payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
 
             // A private key to an existing address has been scanned
             setPrivateECKey(key, secondPassword);
 
         } else if (key != null && key.hasPrivKey()
-                && !payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(MainNetParams.get()).toString())) {
+                && !payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
             LegacyAddress legacyAddress =
                     new LegacyAddress(
                             null,
                             System.currentTimeMillis() / 1000L,
-                            key.toAddress(MainNetParams.get()).toString(),
+                            key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString(),
                             "",
                             0L,
                             "android",
