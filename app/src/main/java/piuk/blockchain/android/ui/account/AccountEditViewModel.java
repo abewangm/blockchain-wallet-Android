@@ -618,7 +618,7 @@ public class AccountEditViewModel extends BaseViewModel {
                     "android",
                     BuildConfig.VERSION_NAME);
 
-            setLegacyAddressKey(key, legacyAddress, true);
+            setLegacyAddressKey(key, legacyAddress, false);
             remoteSaveUnmatchedPrivateKey(legacyAddress);
 
             dataListener.privateKeyImportMismatch();
