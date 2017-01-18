@@ -100,8 +100,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
         mainViewModel.onViewReady();
 
-        final int[] count = {0};
-
         binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -111,13 +109,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             @Override
             public void onDrawerOpened(View drawerView) {
                 drawerIsOpen = true;
-                // TODO: 13/01/2017 Remove me
-                if (count[0] % 2 == 0) {
-                    changeContactsIndicatorVisibility(View.VISIBLE);
-                } else {
-                    changeContactsIndicatorVisibility(View.INVISIBLE);
-                }
-                count[0]++;
             }
 
             @Override
@@ -241,7 +232,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         }
     }
 
-    private void changeContactsIndicatorVisibility(@ViewUtils.Visibility int visibility) {
+    @Override
+    public void setMessagesVisibility(@ViewUtils.Visibility int visibility) {
         binding.navigationView.getMenu()
                 .findItem(R.id.nav_contacts)
                 .getActionView()

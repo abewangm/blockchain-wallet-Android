@@ -138,7 +138,7 @@ public class ContactPaymentRequestAmountFragment extends Fragment implements Con
                 (PaymentRequestType) getArguments().getSerializable(KEY_BUNDLE_REQUEST_TYPE);
 
         if (paymentRequestType != null && contactName != null) {
-            if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
+            if (paymentRequestType.equals(PaymentRequestType.SEND)) {
                 binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_send_amount, contactName));
             } else {
                 binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_receive_amount, contactName));

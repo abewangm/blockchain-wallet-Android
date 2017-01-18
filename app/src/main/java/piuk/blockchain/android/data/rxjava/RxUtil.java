@@ -1,14 +1,11 @@
 package piuk.blockchain.android.data.rxjava;
 
-import android.util.Log;
-
 import io.reactivex.CompletableTransformer;
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-import piuk.blockchain.android.BlockchainApplication;
 
 /**
  * Created by adambennett on 12/08/2016.
@@ -25,7 +22,7 @@ public final class RxUtil {
     public static <T> ObservableTransformer<T, T> applySchedulersToObservable() {
         return observable -> observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(throwable -> Log.e(BlockchainApplication.RX_ERROR_TAG, "OnErrorCalled: ", throwable));
+                .doOnError(Throwable::printStackTrace);
     }
 
     /**
@@ -35,7 +32,7 @@ public final class RxUtil {
     public static CompletableTransformer applySchedulersToCompletable() {
         return observable -> observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(throwable -> Log.e(BlockchainApplication.RX_ERROR_TAG, "OnErrorCalled: ", throwable));
+                .doOnError(Throwable::printStackTrace);
     }
 
     /**

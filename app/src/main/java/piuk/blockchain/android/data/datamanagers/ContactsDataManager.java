@@ -291,21 +291,21 @@ public class ContactsDataManager {
      * @param facilitatedTransaction A {@link FacilitatedTransaction} object
      * @return A {@link Completable} object
      */
-    public Completable sendPaymentRequest(String mdid, PaymentRequest request, FacilitatedTransaction facilitatedTransaction) {
-        return callWithToken(() -> contactsService.sendPaymentRequest(mdid, request, facilitatedTransaction))
+    public Completable requestSendPayment(String mdid, PaymentRequest request, FacilitatedTransaction facilitatedTransaction) {
+        return callWithToken(() -> contactsService.requestSendPayment(mdid, request, facilitatedTransaction))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
-     * Sends a new payment request. Asks recipient to send a bitcoin address for receipt.
+     * Requests that another user sends the current user bitcoin
      *
      * @param mdid    The recipient's MDID
      * @param request A {@link PaymentRequest} object containing the request details, ie the amount
      *                and an optional note
      * @return A {@link Completable} object
      */
-    public Completable sendPaymentRequest(String mdid, RequestForPaymentRequest request) {
-        return callWithToken(() -> contactsService.sendPaymentRequest(mdid, request))
+    public Completable requestReceivePayment(String mdid, RequestForPaymentRequest request) {
+        return callWithToken(() -> contactsService.requestReceivePayment(mdid, request))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 

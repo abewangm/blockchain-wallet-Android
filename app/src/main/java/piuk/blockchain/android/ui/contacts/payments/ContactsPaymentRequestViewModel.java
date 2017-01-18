@@ -3,16 +3,21 @@ package piuk.blockchain.android.ui.contacts.payments;
 import android.support.annotation.StringRes;
 
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+import info.blockchain.wallet.contacts.data.PaymentRequest;
+import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
+import info.blockchain.wallet.payload.PayloadManager;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.contacts.ContactsPredicates;
+import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
-import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
 
@@ -21,10 +26,10 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     private Contact recipient;
-    private MonetaryUtil monetaryUtil;
-    private int btcUnitType;
+    private String note;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PrefsUtil prefsUtil;
+    @Inject PayloadManager payloadManager;
 
     interface DataListener {
 
@@ -34,11 +39,25 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
 
         void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
+        void showProgressDialog();
+
+        void dismissProgressDialog();
+
+        PaymentRequestType getPaymentRequestType();
+
+        void showSendSuccessfulDialog(String name);
+
+        void showRequestSuccessfulDialog();
     }
 
     ContactsPaymentRequestViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
+    }
+
+    @Override
+    public void onViewReady() {
+        // No-op
     }
 
     void loadContact(String contactId) {
@@ -61,17 +80,46 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
     }
 
     void onNoteSet(String note) {
-        // TODO: 17/01/2017 Add this to a FacilitatedTransaction object? Just store it in memory and handle later?
-        // ¯\_(ツ)_/¯
+        this.note = note;
     }
 
+    // TODO: 18/01/2017 Need to allow account choosing
     void onAmountSet(long satoshis) {
-        // TODO: 17/01/2017 See above
+        if (satoshis < 0) {
+            dataListener.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR);
+        } else {
+            dataListener.showProgressDialog();
+
+            if (dataListener.getPaymentRequestType().equals(PaymentRequestType.SEND)) {
+
+                PaymentRequest request = new PaymentRequest(satoshis, note);
+                FacilitatedTransaction facilitatedTransaction = new FacilitatedTransaction();
+                facilitatedTransaction.setIntended_amount(satoshis);
+                int defaultAccount = payloadManager.getPayload().getHdWallet().getDefaultIndex();
+
+                compositeDisposable.add(
+                        getNextReceiveAddress(defaultAccount)
+                                .doOnNext(facilitatedTransaction::setAddress)
+                                .flatMapCompletable(s -> contactsDataManager.requestSendPayment(recipient.getMdid(), request, facilitatedTransaction))
+                                .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                                .subscribe(
+                                        () -> dataListener.showSendSuccessfulDialog(recipient.getName()),
+                                        throwable -> dataListener.showToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR)));
+            } else {
+                RequestForPaymentRequest request = new RequestForPaymentRequest(satoshis, note);
+
+                compositeDisposable.add(
+                        contactsDataManager.requestReceivePayment(recipient.getMdid(), request)
+                                .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                                .subscribe(
+                                        () -> dataListener.showRequestSuccessfulDialog(),
+                                        throwable -> dataListener.showToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR)));
+            }
+        }
     }
 
-    @Override
-    public void onViewReady() {
-        // No-op
+    private Observable<String> getNextReceiveAddress(int defaultIndex) {
+        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
     }
 
 }

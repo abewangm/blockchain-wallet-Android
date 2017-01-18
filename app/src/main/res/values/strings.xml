@@ -563,6 +563,7 @@
     <string name="contacts_rename_success">Contact renamed successfully</string>
     <string name="contacts_error_getting_messages">Error getting messages</string>
     <string name="contacts_error_sending_payment_request">There was an error sending your payment request, please try again</string>
+    <string name="contacts_success_sending_payment_request">Payment request sent</string>
     <string name="contacts_add_contact_title">Add contact</string>
     <string name="contacts_name_cannot_be_empty">Invalid name</string>
     <string name="contacts_name_field_hint">Name</string>
@@ -602,8 +603,10 @@
     <string name="contacts_payment_request_receive_hint">For drinks Friday</string>
     <string name="contacts_payment_request_note_hint">Note</string>
     <string name="contacts_payment_request_send_amount">How much do you want to send to %1$s?</string>
-    <string name="contacts_payment_request_receive_amount">How much do you want %1$s to send you? \nThis is just a suggestion: the actual amount may differ.</string>
+    <string name="contacts_payment_request_receive_amount">How much do you want %1$s to send you? \n\nThis is just a suggestion: the actual amount may differ.</string>
     <string name="contacts_payment_request_amount_hint">Amount</string>
+    <string name="contacts_payment_success_waiting_title">Waiting for %1$s to accept</string>
+    <string name="contacts_payment_success_waiting_message">Your contact has been notified that you would like to send them Bitcoin. When they accept, we will notify you and you can complete the transaction.</string>
 
 
     <!-- SWIPE TO RECEIVE -->

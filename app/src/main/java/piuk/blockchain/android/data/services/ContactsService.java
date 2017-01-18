@@ -196,7 +196,7 @@ public class ContactsService {
      * @return A {@link Completable} object
      */
     @RequiresAccessToken
-    public Completable sendPaymentRequest(String mdid, PaymentRequest request, FacilitatedTransaction facilitatedTransaction) {
+    public Completable requestSendPayment(String mdid, PaymentRequest request, FacilitatedTransaction facilitatedTransaction) {
         return Completable.fromCallable(() -> {
             contacts.sendPaymentRequest(mdid, request, facilitatedTransaction);
             return Void.TYPE;
@@ -204,7 +204,7 @@ public class ContactsService {
     }
 
     /**
-     * Sends a new payment request. Asks recipient to send a bitcoin address for receipt.
+     * Requests that another user sends the current user bitcoin
      *
      * @param mdid    The recipient's MDID
      * @param request A {@link PaymentRequest} object containing the request details, ie the amount
@@ -212,7 +212,7 @@ public class ContactsService {
      * @return A {@link Completable} object
      */
     @RequiresAccessToken
-    public Completable sendPaymentRequest(String mdid, RequestForPaymentRequest request) {
+    public Completable requestReceivePayment(String mdid, RequestForPaymentRequest request) {
         return Completable.fromCallable(() -> {
             contacts.sendRequestForPaymentRequest(mdid, request);
             return Void.TYPE;

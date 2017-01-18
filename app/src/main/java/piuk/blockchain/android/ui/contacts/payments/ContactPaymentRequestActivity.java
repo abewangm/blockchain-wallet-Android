@@ -8,11 +8,14 @@ import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.ActivityContactPaymentRequestBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 public class ContactPaymentRequestActivity extends BaseAuthActivity implements
@@ -25,6 +28,7 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
 
     private ActivityContactPaymentRequestBinding binding;
     private ContactsPaymentRequestViewModel viewModel;
+    private MaterialProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +55,20 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
     public void contactLoaded() {
         submitFragmentTransaction(
                 ContactPaymentRequestNotesFragment.newInstance(
-                        (PaymentRequestType) getIntent().getSerializableExtra(KEY_EXTRA_REQUEST_TYPE),
+                        getPaymentRequestType(),
                         viewModel.getContactName()));
     }
 
     @Override
+    public PaymentRequestType getPaymentRequestType() {
+        return (PaymentRequestType) getIntent().getSerializableExtra(KEY_EXTRA_REQUEST_TYPE);
+    }
+
+    @Override
     public void finishPage() {
-        finish();
+        Intent intent = new Intent(this, ContactsListActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
     @Override
@@ -69,6 +80,25 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
     @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
+    public void showSendSuccessfulDialog(String name) {
+        name = getString(R.string.contacts_payment_success_waiting_title, name);
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(name)
+                .setMessage(R.string.contacts_payment_success_waiting_message)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> finishPage())
+                .show();
+    }
+
+    @Override
+    public void showRequestSuccessfulDialog() {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(getString(R.string.contacts_payment_success_waiting_title))
+                .setMessage(R.string.contacts_payment_success_waiting_message)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> finishPage())
+                .show();
     }
 
     private void submitFragmentTransaction(Fragment fragment) {
@@ -97,13 +127,29 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
         viewModel.onNoteSet(note);
         submitFragmentTransaction(
                 ContactPaymentRequestAmountFragment.newInstance(
-                        (PaymentRequestType) getIntent().getSerializableExtra(KEY_EXTRA_REQUEST_TYPE),
+                        getPaymentRequestType(),
                         viewModel.getContactName()));
     }
 
     @Override
     public void onFinishSelected(long satoshis) {
         viewModel.onAmountSet(satoshis);
+    }
+
+    @Override
+    public void showProgressDialog() {
+        progressDialog = new MaterialProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(R.string.please_wait);
+        progressDialog.show();
+    }
+
+    @Override
+    public void dismissProgressDialog() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
     }
 
 }

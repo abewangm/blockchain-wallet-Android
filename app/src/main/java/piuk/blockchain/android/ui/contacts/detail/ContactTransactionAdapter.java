@@ -37,7 +37,7 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
     public void onBindViewHolder(TransactionViewHolder holder, int position) {
         FacilitatedTransaction transaction = facilitatedTransactions.get(position);
 
-        holder.title.setText((int) transaction.getIntended_amount());
+        holder.title.setText(String.valueOf(transaction.getIntended_amount()));
         holder.subtitle.setText(transaction.getState());
 
     }

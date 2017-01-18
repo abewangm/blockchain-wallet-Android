@@ -14,9 +14,9 @@ import piuk.blockchain.android.util.PrefsUtil;
 public class ContactRequestAmountViewModel extends BaseViewModel {
 
     private DataListener dataListener;
-    @Inject PrefsUtil prefsUtil;
     private ReceiveCurrencyHelper currencyHelper;
     private long satoshis;
+    @Inject PrefsUtil prefsUtil;
 
     interface DataListener {
 

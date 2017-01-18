@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 
 import info.blockchain.api.Balance;
 import info.blockchain.api.DynamicFee;
@@ -40,6 +41,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
+import piuk.blockchain.android.util.ViewUtils;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
@@ -84,6 +86,8 @@ public class MainViewModel extends BaseViewModel {
         void clearAllDynamicShortcuts();
 
         void showSurveyPrompt();
+
+        void setMessagesVisibility(@ViewUtils.Visibility int visibility);
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -128,16 +132,11 @@ public class MainViewModel extends BaseViewModel {
                                 dataListener.onStartContactsActivity(finalUri);
                             } else {
                                 compositeDisposable.add(
-                                        contactsDataManager.getMessages(true)
+                                        contactsDataManager.fetchContacts()
+                                                .andThen(contactsDataManager.getMessages(true))
                                                 .subscribe(
-                                                        messages -> {
-                                                            if (!messages.isEmpty())
-                                                                dataListener.showEmailVerificationDialog("MESSAGES HAVE BEEN RECEIVED!");
-                                                            // TODO: 19/12/2016 Notify the UI that a message has been received
-                                                            Log.d(TAG, "registerNodeForMetaDataService: " + messages);
-                                                        }, throwable -> {
-                                                            Log.e(TAG, "registerNodeForMetaDataService: ", throwable);
-                                                        }));
+                                                        messages -> dataListener.setMessagesVisibility(messages.isEmpty() ? View.INVISIBLE : View.VISIBLE),
+                                                        throwable -> Log.e(TAG, "registerNodeForMetaDataService: ", throwable)));
                             }
                             // TODO: 01/12/2016 Should probably inform the user here if coming from URI click
                         }, throwable -> Log.wtf(TAG, "registerNodeForMetaDataService: ", throwable)));
