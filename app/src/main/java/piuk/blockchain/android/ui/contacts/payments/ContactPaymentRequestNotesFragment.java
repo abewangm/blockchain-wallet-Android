@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.contacts;
+package piuk.blockchain.android.ui.contacts.payments;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
@@ -10,15 +10,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.databinding.FragmentContactPaymentRequestBinding;
-import piuk.blockchain.android.ui.contacts.ContactPaymentRequestActivity.PaymentRequestType;
+import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.databinding.FragmentContactPaymentRequestNotesBinding;
 
 public class ContactPaymentRequestNotesFragment extends Fragment {
 
     public static final String KEY_BUNDLE_REQUEST_TYPE = "request_type";
     public static final String KEY_BUNDLE_CONTACT_NAME = "contact_name";
 
-    private FragmentContactPaymentRequestBinding binding;
+    private FragmentContactPaymentRequestNotesBinding binding;
     private FragmentInteractionListener listener;
 
     public ContactPaymentRequestNotesFragment() {
@@ -39,7 +39,7 @@ public class ContactPaymentRequestNotesFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         binding = DataBindingUtil.inflate(
-                inflater, R.layout.fragment_contact_payment_request, container, false);
+                inflater, R.layout.fragment_contact_payment_request_notes, container, false);
 
         return binding.getRoot();
     }
@@ -54,17 +54,34 @@ public class ContactPaymentRequestNotesFragment extends Fragment {
 
         if (paymentRequestType != null) {
             if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
-                binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_send, contactName));
-                binding.editTextNote.setHint(getString(R.string.contacts_payment_request_receive_hint));
+                binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_send_note, contactName));
             } else {
-                binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_receive, contactName));
-                binding.editTextNote.setHint(getString(R.string.contacts_payment_request_send_hint));
+                binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_receive_note, contactName));
             }
+
+            setHint(paymentRequestType);
+
+            binding.editTextNote.setOnFocusChangeListener((v, hasFocus) -> {
+                if (hasFocus) {
+                    binding.inputLayoutNote.setHint(getString(R.string.contacts_payment_request_note_hint));
+                } else {
+                    setHint(paymentRequestType);
+                }
+            });
+
         } else {
             throw new AssertionError("Contact name and PaymentRequestType must be passed to fragment");
         }
 
         binding.buttonNext.setOnClickListener(v -> listener.onNextSelected(binding.editTextNote.getText().toString()));
+    }
+
+    private void setHint(PaymentRequestType paymentRequestType) {
+        if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
+            binding.inputLayoutNote.setHint(getString(R.string.contacts_payment_request_receive_hint));
+        } else {
+            binding.inputLayoutNote.setHint(getString(R.string.contacts_payment_request_send_hint));
+        }
     }
 
     @Override

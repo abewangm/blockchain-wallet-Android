@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.contacts;
+package piuk.blockchain.android.ui.contacts.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

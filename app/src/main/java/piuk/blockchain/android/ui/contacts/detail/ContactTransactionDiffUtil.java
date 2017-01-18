@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.contacts;
+package piuk.blockchain.android.ui.contacts.detail;
 
 import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;

@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
-        tools:context="piuk.blockchain.android.ui.contacts.ContactPaymentRequestActivity">
+        tools:context="piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestActivity">
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
@@ -25,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:layout="@layout/fragment_contact_payment_request" />
+            tools:layout="@layout/fragment_contact_payment_request_notes" />
 
     </android.support.design.widget.CoordinatorLayout>
 </layout>

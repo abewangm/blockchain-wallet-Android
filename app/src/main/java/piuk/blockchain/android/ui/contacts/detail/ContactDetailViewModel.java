@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.contacts;
+package piuk.blockchain.android.ui.contacts.detail;
 
 import android.content.Intent;
 import android.support.annotation.StringRes;
@@ -16,9 +16,11 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.data.contacts.ContactsPredicates;
+import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
-import static piuk.blockchain.android.ui.contacts.ContactsListActivity.KEY_BUNDLE_ID;
+import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_ID;
 
 
 public class ContactDetailViewModel extends BaseViewModel {
@@ -49,7 +51,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
         void onTransactionsUpdated(List<FacilitatedTransaction> transactions);
 
-        void startPaymentRequestActivity(ContactPaymentRequestActivity.PaymentRequestType paymentRequestType, String contactId);
+        void startPaymentRequestActivity(PaymentRequestType paymentRequestType, String contactId);
 
     }
 
@@ -130,13 +132,11 @@ public class ContactDetailViewModel extends BaseViewModel {
     }
 
     void onSendMoneyClicked() {
-        dataListener.startPaymentRequestActivity(
-                ContactPaymentRequestActivity.PaymentRequestType.SEND, contact.getId());
+        dataListener.startPaymentRequestActivity(PaymentRequestType.SEND, contact.getId());
     }
 
     void onRequestMoneyClicked() {
-        dataListener.startPaymentRequestActivity(
-                ContactPaymentRequestActivity.PaymentRequestType.REQUEST, contact.getId());
+        dataListener.startPaymentRequestActivity(PaymentRequestType.REQUEST, contact.getId());
     }
 
 }

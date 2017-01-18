@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.contacts;
+package piuk.blockchain.android.ui.contacts.pairing;
 
 import android.Manifest;
 import android.content.Intent;

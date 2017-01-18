@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.contacts;
+package piuk.blockchain.android.ui.contacts.list;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -20,8 +20,6 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.PrefsUtil;
-
-import static piuk.blockchain.android.ui.contacts.ContactsListActivity.EXTRA_METADATA_URI;
 
 @SuppressWarnings("WeakerAccess")
 public class ContactsListViewModel extends BaseViewModel {
@@ -69,8 +67,8 @@ public class ContactsListViewModel extends BaseViewModel {
                                 throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
 
         Intent intent = dataListener.getPageIntent();
-        if (intent != null && intent.hasExtra(EXTRA_METADATA_URI)) {
-            String data = intent.getStringExtra(EXTRA_METADATA_URI);
+        if (intent != null && intent.hasExtra(ContactsListActivity.EXTRA_METADATA_URI)) {
+            String data = intent.getStringExtra(ContactsListActivity.EXTRA_METADATA_URI);
             handleLink(data);
         }
     }

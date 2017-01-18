@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.contacts;
+package piuk.blockchain.android.ui.contacts.payments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,13 +10,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.ActivityContactPaymentRequestBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 public class ContactPaymentRequestActivity extends BaseAuthActivity implements
         ContactsPaymentRequestViewModel.DataListener,
-        ContactPaymentRequestNotesFragment.FragmentInteractionListener {
+        ContactPaymentRequestNotesFragment.FragmentInteractionListener,
+        ContactPaymentRequestAmountFragment.FragmentInteractionListener {
 
     private static final String KEY_EXTRA_REQUEST_TYPE = "extra_request_type";
     private static final String KEY_EXTRA_CONTACT_ID = "extra_contact_id";
@@ -46,11 +48,11 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void contactLoaded(String name) {
+    public void contactLoaded() {
         submitFragmentTransaction(
                 ContactPaymentRequestNotesFragment.newInstance(
                         (PaymentRequestType) getIntent().getSerializableExtra(KEY_EXTRA_REQUEST_TYPE),
-                        name));
+                        viewModel.getContactName()));
     }
 
     @Override
@@ -93,36 +95,15 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
     @Override
     public void onNextSelected(String note) {
         viewModel.onNoteSet(note);
-        // TODO: 17/01/2017 Load next fragment
+        submitFragmentTransaction(
+                ContactPaymentRequestAmountFragment.newInstance(
+                        (PaymentRequestType) getIntent().getSerializableExtra(KEY_EXTRA_REQUEST_TYPE),
+                        viewModel.getContactName()));
     }
 
-    /**
-     * Enumeration for Payment Requests
-     */
-    enum PaymentRequestType {
-        SEND("send"),
-        REQUEST("request");
-
-        private String name;
-
-        PaymentRequestType(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public static PaymentRequestType fromString(String string) {
-            if (string != null) {
-                for (PaymentRequestType type : PaymentRequestType.values()) {
-                    if (type.getName().equalsIgnoreCase(string)) {
-                        return type;
-                    }
-                }
-            }
-            return null;
-        }
+    @Override
+    public void onFinishSelected(long satoshis) {
+        viewModel.onAmountSet(satoshis);
     }
 
 }

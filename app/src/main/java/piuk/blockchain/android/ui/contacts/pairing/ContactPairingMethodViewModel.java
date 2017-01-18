@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.contacts;
+package piuk.blockchain.android.ui.contacts.pairing;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;

@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.contacts;
+package piuk.blockchain.android.ui.contacts.pairing;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -11,9 +11,6 @@ import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-
-import static piuk.blockchain.android.ui.contacts.ContactsInvitationBuilderQrFragment.KEY_BUNDLE_NAME;
-import static piuk.blockchain.android.ui.contacts.ContactsInvitationBuilderQrFragment.KEY_BUNDLE_URI;
 
 
 @SuppressWarnings("WeakerAccess")
@@ -45,9 +42,9 @@ public class ContactsQrViewModel extends BaseViewModel {
     public void onViewReady() {
         if (dataListener.getFragmentBundle() != null) {
 
-            String name = dataListener.getFragmentBundle().getString(KEY_BUNDLE_NAME);
+            String name = dataListener.getFragmentBundle().getString(ContactsInvitationBuilderQrFragment.KEY_BUNDLE_NAME);
             dataListener.updateDisplayMessage(name);
-            String uri = dataListener.getFragmentBundle().getString(KEY_BUNDLE_URI);
+            String uri = dataListener.getFragmentBundle().getString(ContactsInvitationBuilderQrFragment.KEY_BUNDLE_URI);
 
             compositeDisposable.add(
                     qrCodeDataManager.generateQrCode(uri, DIMENSION_QR_CODE)

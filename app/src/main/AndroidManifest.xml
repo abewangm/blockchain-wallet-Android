@@ -113,23 +113,23 @@
             android:name=".ui.transactions.TransactionDetailWebViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".ui.contacts.ContactsListActivity"
+            android:name=".ui.contacts.list.ContactsListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".ui.contacts.ContactInviteActivity"
+            android:name=".ui.contacts.pairing.ContactInviteActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".ui.contacts.ContactsInvitationBuilderActivity"
+            android:name=".ui.contacts.pairing.ContactsInvitationBuilderActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".ui.contacts.ContactsAcceptInviteActivity"
+            android:name=".ui.contacts.pairing.ContactsAcceptInviteActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".ui.contacts.ContactDetailActivity"
+            android:name=".ui.contacts.detail.ContactDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-            android:name=".ui.contacts.ContactPaymentRequestActivity"
+            android:name=".ui.contacts.payments.ContactPaymentRequestActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <service

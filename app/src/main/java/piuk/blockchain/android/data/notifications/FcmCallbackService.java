@@ -8,7 +8,7 @@ import android.util.Log;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.ui.contacts.ContactsListActivity;
+import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
 import piuk.blockchain.android.util.NotificationsUtil;
 
 public class FcmCallbackService extends FirebaseMessagingService {

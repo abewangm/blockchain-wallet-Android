@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context="piuk.blockchain.android.ui.contacts.ContactInviteActivity">
+        tools:context="piuk.blockchain.android.ui.contacts.pairing.ContactInviteActivity">
 
         <include
             android:id="@+id/toolbar"

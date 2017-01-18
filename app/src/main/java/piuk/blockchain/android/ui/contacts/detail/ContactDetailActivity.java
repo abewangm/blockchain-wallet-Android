@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.contacts;
+package piuk.blockchain.android.ui.contacts.detail;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +21,8 @@ import java.util.List;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactDetailBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestActivity;
+import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.StringUtils;
@@ -121,7 +123,7 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
     }
 
     @Override
-    public void startPaymentRequestActivity(ContactPaymentRequestActivity.PaymentRequestType paymentRequestType, String contactId) {
+    public void startPaymentRequestActivity(PaymentRequestType paymentRequestType, String contactId) {
         ContactPaymentRequestActivity.start(this, paymentRequestType, contactId);
     }
 
