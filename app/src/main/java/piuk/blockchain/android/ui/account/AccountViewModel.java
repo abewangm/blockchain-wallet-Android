@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
+import android.util.Log;
 import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
@@ -264,16 +265,17 @@ public class AccountViewModel extends BaseViewModel {
     }
 
     private void importNonBip38Address(String format, String data, @Nullable CharSequenceX secondPassword) {
-        dataListener.showProgressDialog(R.string.please_wait);
-        try {
-            ECKey key = privateKeyFactory.getKey(format, data);
 
-            handlePrivateKey(key, secondPassword);
-        } catch (Exception e) {
-            dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
-        } finally {
-            dataListener.dismissProgressDialog();
-        }
+        dataListener.showProgressDialog(R.string.please_wait);
+
+        compositeDisposable.add(
+            accountDataManager.getKeyFromImportedData(format, data)
+                .subscribe(key -> {
+                    handlePrivateKey(key, secondPassword);
+                    dataListener.dismissProgressDialog();
+                }, throwable -> { dataListener
+                    .showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
+                    dataListener.dismissProgressDialog();}));
     }
 
     @VisibleForTesting
