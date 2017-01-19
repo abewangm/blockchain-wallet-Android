@@ -3,5 +3,6 @@
     android:id="@+id/menu_icon_count"
     android:layout_width="10dp"
     android:layout_height="match_parent"
+    android:gravity="center"
     android:src="@drawable/rounded_view_dark_blue"
-    android:gravity="center" />
+    android:visibility="gone" />

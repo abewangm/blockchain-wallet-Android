@@ -606,8 +606,9 @@
     <string name="contacts_payment_request_receive_amount">How much do you want %1$s to send you? \n\nThis is just a suggestion: the actual amount may differ.</string>
     <string name="contacts_payment_request_amount_hint">Amount</string>
     <string name="contacts_payment_success_waiting_title">Waiting for %1$s to accept</string>
+    <string name="contacts_payment_success_request_sent_title">Request has been sent</string>
     <string name="contacts_payment_success_waiting_message">Your contact has been notified that you would like to send them Bitcoin. When they accept, we will notify you and you can complete the transaction.</string>
-
+    <string name="contact_send_request_button">Send request</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>

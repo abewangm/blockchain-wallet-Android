@@ -144,7 +144,15 @@ public class MainViewModel extends BaseViewModel {
                                                     }
                                                 })
                                                 .subscribe(
-                                                        messages -> dataListener.setMessagesVisibility(messages.isEmpty() ? View.INVISIBLE : View.VISIBLE),
+                                                        messages -> {
+                                                            dataListener.setMessagesVisibility(messages.isEmpty() ? View.INVISIBLE : View.VISIBLE);
+                                                            // Marks all messages as read for debugging purposes
+                                                            if (!messages.isEmpty()) {
+//                                                                for (Message m : ((List<Message>) messages)) {
+//                                                                    contactsDataManager.markMessageAsRead(m.getId(), true).subscribe(new IgnorableDefaultObserver<>());
+//                                                                }
+                                                            }
+                                                        },
                                                         throwable -> Log.e(TAG, "registerNodeForMetaDataService: ", throwable)));
                             }
                             // TODO: 01/12/2016 Should probably inform the user here if coming from URI click

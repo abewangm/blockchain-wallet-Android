@@ -40,20 +40,25 @@ class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.Conta
     public void onBindViewHolder(ContactsViewHolder holder, int position) {
         ContactsListItem listItem = contacts.get(position);
 
-        holder.name.setText(listItem.getContactName());
+        // Click listener
         holder.itemView.setOnClickListener(view -> {
             if (contactsClickListener != null) contactsClickListener.onClick(listItem.getId());
         });
 
+        // Name
+        holder.name.setText(listItem.getContactName());
+
+        // Progress bar for pending contacts
         if (listItem.getStatus().equals(ContactsListItem.Status.PENDING)) {
             holder.progressBar.setVisibility(View.VISIBLE);
-            holder.indicator.setVisibility(View.GONE);
         } else {
             holder.progressBar.setVisibility(View.GONE);
-            // TODO: 16/01/2017 Set this sensibly
-            holder.indicator.setVisibility(View.VISIBLE);
         }
 
+        // Notification indicator
+        holder.indicator.setVisibility(listItem.requiresResponse() ? View.VISIBLE : View.GONE);
+
+        // Status field
         switch (listItem.getStatus()) {
             case ContactsListItem.Status.PENDING:
                 holder.status.setText(stringUtils.getString(R.string.contacts_request_sent));

@@ -84,9 +84,8 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
 
     @Override
     public void showSendSuccessfulDialog(String name) {
-        name = getString(R.string.contacts_payment_success_waiting_title, name);
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(name)
+                .setTitle(getString(R.string.contacts_payment_success_waiting_title, name))
                 .setMessage(R.string.contacts_payment_success_waiting_message)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> finishPage())
                 .show();
@@ -95,7 +94,7 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
     @Override
     public void showRequestSuccessfulDialog() {
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(getString(R.string.contacts_payment_success_waiting_title))
+                .setTitle(R.string.contacts_payment_success_request_sent_title)
                 .setMessage(R.string.contacts_payment_success_waiting_message)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> finishPage())
                 .show();

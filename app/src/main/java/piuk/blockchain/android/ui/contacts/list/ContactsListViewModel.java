@@ -73,52 +73,53 @@ public class ContactsListViewModel extends BaseViewModel {
         }
     }
 
-    void refreshList() {
-        compositeDisposable.add(
-                contactsDataManager.getContactList()
-                        .toList()
-                        .subscribe(
-                                this::handleContactListUpdate,
-                                throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
-    }
-
-    private void subscribeToNotifications() {
-        FcmCallbackService.getNotificationSubject().subscribe(
-                notificationPayload -> {
-                    Log.d(TAG, "subscribeToNotifications: ");
-                    // TODO: 02/12/2016 Filter specific events that are relevant to this page
-                }, throwable -> {
-                    Log.e(TAG, "subscribeToNotifications: ", throwable);
-                });
-    }
-
+    // TODO: 19/01/2017 This is pretty gross and I'm certain it can be Rx-ified in the future
     private void handleContactListUpdate(List<Contact> contacts) {
         List<ContactsListItem> list = new ArrayList<>();
         List<Contact> pending = new ArrayList<>();
 
-        for (Contact contact : contacts) {
-            list.add(new ContactsListItem(
-                    contact.getId(),
-                    contact.getName(),
-                    contact.getMdid() != null && !contact.getMdid().isEmpty()
-                            ? ContactsListItem.Status.TRUSTED
-                            : ContactsListItem.Status.PENDING,
-                    contact.getCreated()));
+        compositeDisposable.add(
+                contactsDataManager.getContactsWithUnreadPaymentRequests()
+                        .toList()
+                        .subscribe(actionRequired -> {
+                            for (Contact contact : contacts) {
+                                list.add(new ContactsListItem(
+                                        contact.getId(),
+                                        contact.getName(),
+                                        contact.getMdid() != null && !contact.getMdid().isEmpty()
+                                                ? ContactsListItem.Status.TRUSTED
+                                                : ContactsListItem.Status.PENDING,
+                                        contact.getCreated(),
+                                        isInList(actionRequired, contact)));
 
-            if (contact.getMdid() == null || contact.getMdid().isEmpty()) {
-                pending.add(contact);
+                                if (contact.getMdid() == null || contact.getMdid().isEmpty()) {
+                                    pending.add(contact);
+                                }
+                            }
+
+                            checkStatusOfPendingContacts(pending);
+
+                            if (!list.isEmpty()) {
+                                dataListener.setUiState(ContactsListActivity.CONTENT);
+                                dataListener.onContactsLoaded(list);
+                            } else {
+                                dataListener.onContactsLoaded(new ArrayList<>());
+                                dataListener.setUiState(ContactsListActivity.EMPTY);
+                            }
+
+                        }, throwable -> {
+                            dataListener.onContactsLoaded(new ArrayList<>());
+                            dataListener.setUiState(ContactsListActivity.FAILURE);
+                        }));
+    }
+
+    private boolean isInList(List<Contact> contacts, Contact toBeFound) {
+        for (Contact contact: contacts) {
+            if (contact.getId().equals(toBeFound.getId())) {
+                return true;
             }
         }
-
-        checkStatusOfPendingContacts(pending);
-
-        if (!list.isEmpty()) {
-            dataListener.setUiState(ContactsListActivity.CONTENT);
-            dataListener.onContactsLoaded(list);
-        } else {
-            dataListener.onContactsLoaded(new ArrayList<>());
-            dataListener.setUiState(ContactsListActivity.EMPTY);
-        }
+        return false;
     }
 
     private void checkStatusOfPendingContacts(List<Contact> pending) {
@@ -134,6 +135,29 @@ public class ContactsListViewModel extends BaseViewModel {
                                         // No-op
                                     }));
         }
+    }
+
+    /**
+     * Loads the latest version of the list in memory
+     */
+    void refreshList() {
+        compositeDisposable.add(
+                contactsDataManager.getContactList()
+                        .toList()
+                        .subscribe(
+                                this::handleContactListUpdate,
+                                throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
+    }
+
+    private void subscribeToNotifications() {
+        compositeDisposable.add(
+                FcmCallbackService.getNotificationSubject().subscribe(
+                        notificationPayload -> {
+                            Log.d(TAG, "subscribeToNotifications: ");
+                            // TODO: 02/12/2016 Filter specific events that are relevant to this page
+                        }, throwable -> {
+                            Log.e(TAG, "subscribeToNotifications: ", throwable);
+                        }));
     }
 
     private void handleLink(String data) {

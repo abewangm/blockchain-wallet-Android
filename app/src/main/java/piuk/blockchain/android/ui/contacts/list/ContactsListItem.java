@@ -9,12 +9,19 @@ class ContactsListItem {
     private String contactName;
     private String status;
     private long inviteTime;
+    private boolean requiresResponse;
 
-    ContactsListItem(@NonNull String id, @NonNull String contactName, @NonNull String status, long inviteTime) {
+    ContactsListItem(@NonNull String id,
+                     @NonNull String contactName,
+                     @NonNull String status,
+                     long inviteTime,
+                     boolean requiresResponse) {
+
         this.id = id;
         this.contactName = contactName;
         this.status = status;
         this.inviteTime = inviteTime;
+        this.requiresResponse = requiresResponse;
     }
 
     @Nullable
@@ -34,6 +41,10 @@ class ContactsListItem {
 
     public long getInviteTime() {
         return inviteTime;
+    }
+
+    public boolean requiresResponse() {
+        return requiresResponse;
     }
 
     @SuppressWarnings("WeakerAccess")
