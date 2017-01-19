@@ -609,6 +609,10 @@
     <string name="contacts_payment_success_request_sent_title">Request has been sent</string>
     <string name="contacts_payment_success_waiting_message">Your contact has been notified that you would like to send them Bitcoin. When they accept, we will notify you and you can complete the transaction.</string>
     <string name="contact_send_request_button">Send request</string>
+    <string name="contacts_transaction_not_found_error">Transaction not found</string>
+    <string name="contacts_address_sent_success">Address sent successfully</string>
+    <string name="contacts_address_sent_failed">Sending address failed</string>
+    <string name="contacts_choose_account_message">Choose where you wish to receive your funds.</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>

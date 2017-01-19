@@ -21,6 +21,7 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
 
     private List<FacilitatedTransaction> facilitatedTransactions;
     private final StringUtils stringUtils;
+    private TransactionClickListener listener;
 
     ContactTransactionAdapter(ArrayList<FacilitatedTransaction> facilitatedTransactions, StringUtils stringUtils) {
         this.facilitatedTransactions = facilitatedTransactions;
@@ -37,9 +38,30 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
     public void onBindViewHolder(TransactionViewHolder holder, int position) {
         FacilitatedTransaction transaction = facilitatedTransactions.get(position);
 
+        // Click listener
+        holder.itemView.setOnClickListener(view -> {
+            if (listener != null) listener.onClick(transaction.getId());
+        });
+
         holder.title.setText(String.valueOf(transaction.getIntended_amount()));
         holder.subtitle.setText(transaction.getRole() + ": " + transaction.getState());
 
+        if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+            holder.indicator.setVisibility(View.VISIBLE);
+
+        } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+                && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+            holder.indicator.setVisibility(View.VISIBLE);
+
+        } else {
+            holder.indicator.setVisibility(View.GONE);
+        }
+
+    }
+
+    void setClickListener(TransactionClickListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -65,5 +87,11 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
             title = (TextView) itemView.findViewById(R.id.transaction_title);
             subtitle = (TextView) itemView.findViewById(R.id.transaction_subtitle);
         }
+    }
+
+    interface TransactionClickListener {
+
+        void onClick(String id);
+
     }
 }

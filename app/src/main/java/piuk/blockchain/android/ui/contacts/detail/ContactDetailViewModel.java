@@ -5,6 +5,9 @@ import android.support.annotation.StringRes;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+import info.blockchain.wallet.contacts.data.PaymentRequest;
+import info.blockchain.wallet.payload.Account;
+import info.blockchain.wallet.payload.PayloadManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +15,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
@@ -27,6 +31,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     @Inject ContactsDataManager contactsDataManager;
+    @Inject PayloadManager payloadManager;
     private Contact contact;
 
     interface DataListener {
@@ -52,6 +57,10 @@ public class ContactDetailViewModel extends BaseViewModel {
         void onTransactionsUpdated(List<FacilitatedTransaction> transactions);
 
         void startPaymentRequestActivity(PaymentRequestType paymentRequestType, String contactId);
+
+        void showAccountChoiceDialog(List<String> accounts, String fctxId);
+
+        void initiatePayment(String uri, Contact recipient);
 
     }
 
@@ -144,6 +153,60 @@ public class ContactDetailViewModel extends BaseViewModel {
 
     void onRequestMoneyClicked() {
         dataListener.startPaymentRequestActivity(PaymentRequestType.REQUEST, contact.getId());
+    }
+
+    void onTransactionClicked(String id) {
+        FacilitatedTransaction transaction = contact.getFacilitatedTransaction().get(id);
+
+        if (transaction == null) {
+            dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
+        } else {
+            // Figure out how to handle each transaction type
+            if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+                if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+                    List<String> accountNames = new ArrayList<>();
+                    //noinspection Convert2streamapi
+                    for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
+                        accountNames.add(account.getLabel());
+                    }
+                    dataListener.showAccountChoiceDialog(accountNames, id);
+
+                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
+                    // TODO: 19/01/2017 Show transaction detail?
+                }
+
+            } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)
+                    && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+                dataListener.initiatePayment(transaction.toBitcoinURI(), contact);
+
+            }
+            // TODO: 19/01/2017 Other possible states - some will be merely informative dialogs
+
+        }
+
+    }
+
+    void onAccountChosen(int accountPosition, String fctxId) {
+        dataListener.showProgressDialog();
+        FacilitatedTransaction transaction = contact.getFacilitatedTransaction().get(fctxId);
+
+        PaymentRequest paymentRequest = new PaymentRequest();
+        paymentRequest.setIntended_amount(transaction.getIntended_amount());
+        paymentRequest.setId(fctxId);
+
+        compositeDisposable.add(
+                getNextReceiveAddress(accountPosition)
+                        .doOnNext(paymentRequest::setAddress)
+                        .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .subscribe(
+                                () -> dataListener.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK),
+                                throwable -> dataListener.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
+
+    }
+
+    private Observable<String> getNextReceiveAddress(int defaultIndex) {
+        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
     }
 
 }

@@ -8,21 +8,28 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 
+import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.ActivityContactDetailBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestActivity;
-import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.StringUtils;
@@ -51,6 +58,8 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
         binding.buttonRequest.setOnClickListener(v -> viewModel.onRequestMoneyClicked());
 
         transactionAdapter = new ContactTransactionAdapter(new ArrayList<>(), new StringUtils(this));
+        transactionAdapter.setClickListener(id -> viewModel.onTransactionClicked(id));
+
         binding.recyclerView.setAdapter(transactionAdapter);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -141,6 +150,45 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
             progressDialog.dismiss();
             progressDialog = null;
         }
+    }
+
+    @Override
+    public void showAccountChoiceDialog(List<String> accounts, String fctxId) {
+        AppCompatSpinner spinner = new AppCompatSpinner(this);
+        spinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, accounts));
+        final int[] selection = {0};
+        //noinspection AnonymousInnerClassMayBeStatic
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selection[0] = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        FrameLayout frameLayout = new FrameLayout(this);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        int marginInPixels = (int) ViewUtils.convertDpToPixel(20, this);
+        params.setMargins(marginInPixels, 0, marginInPixels, 0);
+        frameLayout.addView(spinner, params);
+
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_choose_account_message)
+                .setView(frameLayout)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.onAccountChosen(selection[0], fctxId))
+                .create()
+                .show();
+    }
+
+    @Override
+    public void initiatePayment(String uri, Contact contact) {
+        Log.d("Lol", "initiatePayment: " + uri);
     }
 
     @Override
