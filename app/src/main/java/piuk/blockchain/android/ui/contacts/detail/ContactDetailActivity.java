@@ -12,14 +12,12 @@ import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 
-import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 
 import java.util.ArrayList;
@@ -30,12 +28,14 @@ import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.ActivityContactDetailBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestActivity;
+import piuk.blockchain.android.ui.contacts.payments.SendDialogFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.ViewUtils;
 
-public class ContactDetailActivity extends BaseAuthActivity implements ContactDetailViewModel.DataListener {
+public class ContactDetailActivity extends BaseAuthActivity implements ContactDetailViewModel.DataListener,
+        SendDialogFragment.FragmentInteractionListener {
 
     private ActivityContactDetailBinding binding;
     private ContactDetailViewModel viewModel;
@@ -187,8 +187,9 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
     }
 
     @Override
-    public void initiatePayment(String uri, Contact contact) {
-        Log.d("Lol", "initiatePayment: " + uri);
+    public void initiatePayment(String uri, String contactId) {
+        SendDialogFragment fragment = SendDialogFragment.newInstance(uri, contactId);
+        fragment.show(getSupportFragmentManager(), SendDialogFragment.TAG);
     }
 
     @Override
@@ -213,4 +214,13 @@ public class ContactDetailActivity extends BaseAuthActivity implements ContactDe
         return super.onSupportNavigateUp();
     }
 
+    @Override
+    public void onPaymentSuccessful() {
+        // TODO: 19/01/2017 Refresh UI
+    }
+
+    @Override
+    public void onPaymentDialogDismissed() {
+        // TODO: 19/01/2017 ¯\_(ツ)_/¯
+    }
 }

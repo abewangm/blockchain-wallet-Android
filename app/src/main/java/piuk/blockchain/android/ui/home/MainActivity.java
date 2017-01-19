@@ -498,18 +498,20 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void showSurveyPrompt() {
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.survey_message)
-                .setPositiveButton(R.string.survey_positive_button, (dialog, which) -> {
-                    String url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV";
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse(url));
-                    startActivity(intent);
-                })
-                .setNegativeButton(R.string.polite_no, null)
-                .create()
-                .show();
+        if (!isFinishing()) {
+            new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.app_name)
+                    .setMessage(R.string.survey_message)
+                    .setPositiveButton(R.string.survey_positive_button, (dialog, which) -> {
+                        String url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV";
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(url));
+                        startActivity(intent);
+                    })
+                    .setNegativeButton(R.string.polite_no, null)
+                    .create()
+                    .show();
+        }
     }
 
     @Override
@@ -531,7 +533,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                             startSingleActivity(c);
                         });
 
-        builder.create().show();
+        if (!isFinishing()) {
+            builder.create().show();
+        }
     }
 
     @Override

@@ -60,7 +60,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
         void showAccountChoiceDialog(List<String> accounts, String fctxId);
 
-        void initiatePayment(String uri, Contact recipient);
+        void initiatePayment(String uri, String recipientId);
 
     }
 
@@ -177,7 +177,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
             } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)
                     && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-                dataListener.initiatePayment(transaction.toBitcoinURI(), contact);
+                dataListener.initiatePayment(transaction.toBitcoinURI(), contact.getId());
 
             }
             // TODO: 19/01/2017 Other possible states - some will be merely informative dialogs

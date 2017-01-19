@@ -71,7 +71,6 @@ class EnvironmentSwitcher {
                             break;
                     }
                 })
-
                 .setPositiveButton("Select", (dialog, id) -> {
                     debugSettings.changeEnvironment(
                             selectedEnvironment[0] != null ? selectedEnvironment[0] : PersistentUrls.Environment.PRODUCTION);
@@ -81,6 +80,8 @@ class EnvironmentSwitcher {
                             "Environment set to " + debugSettings.getCurrentEnvironment().getName(),
                             ToastCustom.LENGTH_SHORT,
                             ToastCustom.TYPE_OK);
+
+                    resetAllTimers();
                 })
                 .setNegativeButton("Reset Timers", (dialogInterface, i) -> resetAllTimers())
                 .create()
