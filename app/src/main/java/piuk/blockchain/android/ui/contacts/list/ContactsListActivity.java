@@ -19,8 +19,8 @@ import java.util.List;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactsBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
-import piuk.blockchain.android.ui.contacts.pairing.ContactInviteActivity;
 import piuk.blockchain.android.ui.contacts.detail.ContactDetailActivity;
+import piuk.blockchain.android.ui.contacts.pairing.ContactInviteActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.StringUtils;
@@ -29,7 +29,7 @@ import piuk.blockchain.android.util.StringUtils;
 public class ContactsListActivity extends BaseAuthActivity implements ContactsListViewModel.DataListener {
 
     public static final String EXTRA_METADATA_URI = "metadata_uri";
-    public static final String KEY_BUNDLE_ID = "bundle_id";
+    public static final String KEY_BUNDLE_CONTACT_ID = "contact_id";
 
     private static final int REQUEST_PAIRING = 98;
     private ActivityContactsBinding binding;
@@ -57,7 +57,7 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         contactsListAdapter = new ContactsListAdapter(new ArrayList<>(), new StringUtils(this));
         contactsListAdapter.setContactsClickListener(id -> {
             Bundle bundle = new Bundle();
-            bundle.putString(KEY_BUNDLE_ID, id);
+            bundle.putString(KEY_BUNDLE_CONTACT_ID, id);
             ContactDetailActivity.start(this, bundle);
         });
         binding.recyclerviewContacts.setAdapter(contactsListAdapter);

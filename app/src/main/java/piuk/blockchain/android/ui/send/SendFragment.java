@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -157,9 +158,12 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.send_bitcoin);
 
-            ViewUtils.setElevation(
-                    getActivity().findViewById(R.id.appbar_layout),
-                    ViewUtils.convertDpToPixel(5F, getContext()));
+            AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.appbar_layout);
+            if (appBarLayout != null) {
+                ViewUtils.setElevation(
+                        getActivity().findViewById(R.id.appbar_layout),
+                        ViewUtils.convertDpToPixel(5F, getContext()));
+            }
         } else {
             finishPage();
         }
@@ -175,7 +179,9 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         MenuItem menuItem = menu.findItem(R.id.action_qr_main);
-        menuItem.setVisible(false);
+        if (menuItem != null) {
+            menuItem.setVisible(false);
+        }
     }
 
     @Override

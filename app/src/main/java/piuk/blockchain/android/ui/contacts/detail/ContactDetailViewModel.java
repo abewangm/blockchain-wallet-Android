@@ -1,6 +1,6 @@
 package piuk.blockchain.android.ui.contacts.detail;
 
-import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.StringRes;
 
 import info.blockchain.wallet.contacts.data.Contact;
@@ -24,7 +24,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
-import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_ID;
+import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID;
 
 
 public class ContactDetailViewModel extends BaseViewModel {
@@ -36,7 +36,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
     interface DataListener {
 
-        Intent getPageIntent();
+        Bundle getPageBundle();
 
         void updateContactName(String name);
 
@@ -71,9 +71,9 @@ public class ContactDetailViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        Intent pageIntent = dataListener.getPageIntent();
-        if (pageIntent != null && pageIntent.hasExtra(KEY_BUNDLE_ID)) {
-            String id = pageIntent.getStringExtra(KEY_BUNDLE_ID);
+        Bundle bundle = dataListener.getPageBundle();
+        if (bundle != null && bundle.getString(KEY_BUNDLE_CONTACT_ID) != null) {
+            String id = bundle.getString(KEY_BUNDLE_CONTACT_ID);
 
             compositeDisposable.add(
                     contactsDataManager.getContactList()
