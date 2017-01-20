@@ -199,8 +199,8 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
     }
 
     @Override
-    public void initiatePayment(String uri, String contactId) {
-        if (listener != null) listener.onPaymentInitiated(uri, contactId);
+    public void initiatePayment(String uri, String contactId, boolean isBTC, int defaultIndex) {
+        if (listener != null) listener.onPaymentInitiated(uri, contactId, isBTC, defaultIndex);
     }
 
     @Override
@@ -238,6 +238,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
 
         void onFinishPageCalled();
 
-        void onPaymentInitiated(String uri, String contactId);
+        void onPaymentInitiated(String uri, String contactId, boolean isBtc, int defaultIndex);
+
     }
 }

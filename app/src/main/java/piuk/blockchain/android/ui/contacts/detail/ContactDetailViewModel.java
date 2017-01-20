@@ -23,8 +23,11 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.PrefsUtil;
 
+import static piuk.blockchain.android.ui.balance.BalanceFragment.SHOW_BTC;
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID;
+import static piuk.blockchain.android.ui.send.SendViewModel.SHOW_FIAT;
 
 
 public class ContactDetailViewModel extends BaseViewModel {
@@ -32,6 +35,7 @@ public class ContactDetailViewModel extends BaseViewModel {
     private DataListener dataListener;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadManager payloadManager;
+    @Inject PrefsUtil prefsUtil;
     private Contact contact;
 
     interface DataListener {
@@ -60,7 +64,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
         void showAccountChoiceDialog(List<String> accounts, String fctxId);
 
-        void initiatePayment(String uri, String recipientId);
+        void initiatePayment(String uri, String recipientId, boolean isBTC, int defaultIndex);
 
     }
 
@@ -177,8 +181,14 @@ public class ContactDetailViewModel extends BaseViewModel {
 
             } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)
                     && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-                dataListener.initiatePayment(transaction.toBitcoinURI(), contact.getId());
 
+                int balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+                boolean isBTC = balanceDisplayState != SHOW_FIAT;
+                dataListener.initiatePayment(
+                        transaction.toBitcoinURI(),
+                        contact.getId(),
+                        isBTC,
+                        payloadManager.getPayload().getHdWallet().getDefaultIndex());
             }
             // TODO: 19/01/2017 Other possible states - some will be merely informative dialogs
 

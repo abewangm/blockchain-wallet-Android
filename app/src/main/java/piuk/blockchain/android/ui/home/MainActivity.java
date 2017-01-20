@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -593,7 +594,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         mainViewModel.checkIfShouldShowSurvey();
     }
 
-    public void startSendFragment(String scanData) {
+    public void startSendFragment(@Nullable String scanData) {
         boolean isBTC;
         int selectedAccountPosition;
         try {
@@ -605,7 +606,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             selectedAccountPosition = -1;
         }
 
-        SendFragment sendFragment = SendFragment.newInstance(scanData, isBTC, selectedAccountPosition);
+        SendFragment sendFragment = SendFragment.newInstance(scanData, null, isBTC, selectedAccountPosition);
         startFragmentWithAnimation(sendFragment);
     }
 
@@ -657,5 +658,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     @Override
     public void onReceiveFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
+    }
+
+    @Override
+    public void onSendPaymentSuccessful(String transactionHash) {
+        // No-op, this callback is used elsewhere
     }
 }

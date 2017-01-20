@@ -13,11 +13,13 @@ import android.support.v7.widget.Toolbar;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactDetailBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.send.SendFragment;
 
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID;
 
 public class ContactDetailActivity extends BaseAuthActivity implements
-        ContactDetailFragment.OnFragmentInteractionListener {
+        ContactDetailFragment.OnFragmentInteractionListener,
+        SendFragment.OnSendFragmentInteractionListener {
 
     private ActivityContactDetailBinding binding;
 
@@ -70,7 +72,23 @@ public class ContactDetailActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void onPaymentInitiated(String uri, String contactId) {
+    public void onPaymentInitiated(String uri, String contactId, boolean isBtc, int defaultIndex) {
+        SendFragment sendFragment = SendFragment.newInstance(uri, contactId, isBtc, defaultIndex);
+        submitFragmentTransaction(sendFragment);
+    }
 
+    @Override
+    public void onSendFragmentClose() {
+        // No-op
+    }
+
+    @Override
+    public void onSendFragmentStart() {
+        // No-op
+    }
+
+    @Override
+    public void onSendPaymentSuccessful(String transactionHash) {
+        // TODO: 20/01/2017 Update the UI, broadcast payment to shared metadata service
     }
 }

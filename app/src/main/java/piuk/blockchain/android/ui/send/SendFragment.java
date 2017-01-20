@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
@@ -69,6 +70,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     private static final String ARG_SCAN_DATA = "scan_data";
     private static final String ARG_IS_BTC = "is_btc";
     private static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
+    private static final String ARG_CONTACT_ID = "contact_id";
     private static final int SCAN_URI = 2007;
     private static final int SCAN_PRIVX = 2008;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
@@ -82,6 +84,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     private TextWatcher fiatTextWatcher;
 
     private String scanData;
+    private String contactId;
     private boolean isBtc;
     private int selectedAccountPosition = -1;
     private long backPressed;
@@ -100,10 +103,14 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         // Required empty public constructor
     }
 
-    public static SendFragment newInstance(String scanData, boolean isBtc, int selectedAccountPosition) {
+    public static SendFragment newInstance(@Nullable String scanData,
+                                           @Nullable String contactId,
+                                           boolean isBtc,
+                                           int selectedAccountPosition) {
         SendFragment fragment = new SendFragment();
         Bundle args = new Bundle();
         args.putString(ARG_SCAN_DATA, scanData);
+        args.putString(ARG_CONTACT_ID, contactId);
         args.putBoolean(ARG_IS_BTC, isBtc);
         args.putInt(ARG_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
         fragment.setArguments(args);
@@ -114,6 +121,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (getArguments() != null) {
             scanData = getArguments().getString(ARG_SCAN_DATA);
+            contactId = getArguments().getString(ARG_CONTACT_ID);
             isBtc = getArguments().getBoolean(ARG_IS_BTC, true);
             selectedAccountPosition = getArguments().getInt(ARG_SELECTED_ACCOUNT_POSITION);
         }
@@ -931,5 +939,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         void onSendFragmentClose();
 
         void onSendFragmentStart();
+
+        void onSendPaymentSuccessful(String transactionHash);
     }
 }

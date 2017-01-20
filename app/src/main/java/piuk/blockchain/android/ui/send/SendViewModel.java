@@ -51,6 +51,7 @@ import javax.inject.Inject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.payload.PayloadBridge;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
@@ -69,7 +70,10 @@ import piuk.blockchain.android.util.annotations.Thunk;
 @SuppressWarnings("WeakerAccess")
 public class SendViewModel extends BaseViewModel {
 
-    private final String TAG = getClass().getSimpleName();
+    private static final String TAG = SendViewModel.class.getSimpleName();
+
+    public static final int SHOW_BTC = 1;
+    public static final int SHOW_FIAT = 2;
 
     @Thunk DataListener dataListener;
     private Context context;
@@ -80,18 +84,58 @@ public class SendViewModel extends BaseViewModel {
 
     private Thread unspentApiThread;
 
-    private final static int SHOW_BTC = 1;
-    private final static int SHOW_FIAT = 2;
-
     @Inject PrefsUtil prefsUtil;
     @Inject WalletAccountHelper walletAccountHelper;
     @Inject SSLVerifyUtil sslVerifyUtil;
     @Inject PrivateKeyFactory privateKeyFactory;
     @Inject PayloadManager payloadManager;
     @Inject StringUtils stringUtils;
+    @Inject ContactsDataManager contactsDataManager;
+
+    interface DataListener {
+
+        void onHideSendingAddressField();
+
+        void onHideReceivingAddressField();
+
+        void onRemoveBtcTextChangeListener();
+
+        void onRemoveFiatTextChangeListener();
+
+        void onAddBtcTextChangeListener();
+
+        void onAddFiatTextChangeListener();
+
+        void onUpdateBtcAmount(String amount);
+
+        void onUpdateFiatAmount(String amount);
+
+        void onUpdateBtcUnit(String unit);
+
+        void onUpdateFiatUnit(String unit);
+
+        void onSetSpendAllAmount(String textFromSatoshis);
+
+        void onShowInvalidAmount();
+
+        void onShowSpendFromWatchOnly(String address);
+
+        void onShowPaymentDetails(PaymentConfirmationDetails confirmationDetails);
+
+        void onShowReceiveToWatchOnlyWarning(String address);
+
+        void onShowAlterFee(String absoluteFeeSuggested, String body, int positiveAction, int negativeAction);
+
+        void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
+
+        void onShowTransactionSuccess();
+
+        void onShowBIP38PassphrasePrompt(String scanData);
+
+        void finishPage();
+    }
 
     SendViewModel(Context context, DataListener dataListener) {
-
         Injector.getInstance().getDataManagerComponent().inject(this);
 
         int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
@@ -145,49 +189,6 @@ public class SendViewModel extends BaseViewModel {
 
     String getDefaultSeparator() {
         return sendModel.defaultSeparator;
-    }
-
-    public interface DataListener {
-
-        void onHideSendingAddressField();
-
-        void onHideReceivingAddressField();
-
-        void onRemoveBtcTextChangeListener();
-
-        void onRemoveFiatTextChangeListener();
-
-        void onAddBtcTextChangeListener();
-
-        void onAddFiatTextChangeListener();
-
-        void onUpdateBtcAmount(String amount);
-
-        void onUpdateFiatAmount(String amount);
-
-        void onUpdateBtcUnit(String unit);
-
-        void onUpdateFiatUnit(String unit);
-
-        void onSetSpendAllAmount(String textFromSatoshis);
-
-        void onShowInvalidAmount();
-
-        void onShowSpendFromWatchOnly(String address);
-
-        void onShowPaymentDetails(PaymentConfirmationDetails confirmationDetails);
-
-        void onShowReceiveToWatchOnlyWarning(String address);
-
-        void onShowAlterFee(String absoluteFeeSuggested, String body, int positiveAction, int negativeAction);
-
-        void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void onShowTransactionSuccess();
-
-        void onShowBIP38PassphrasePrompt(String scanData);
-
-        void finishPage();
     }
 
     int getDefaultAccount() {
