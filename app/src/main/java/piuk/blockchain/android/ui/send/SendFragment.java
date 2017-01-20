@@ -50,6 +50,7 @@ import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
@@ -67,10 +68,11 @@ import static android.databinding.DataBindingUtil.inflate;
 
 public class SendFragment extends Fragment implements SendViewModel.DataListener, CustomKeypadCallback {
 
-    private static final String ARG_SCAN_DATA = "scan_data";
-    private static final String ARG_IS_BTC = "is_btc";
-    private static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
-    private static final String ARG_CONTACT_ID = "contact_id";
+    public static final String ARG_SCAN_DATA = "scan_data";
+    public static final String ARG_IS_BTC = "is_btc";
+    public static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
+    public static final String ARG_CONTACT_ID = "contact_id";
+
     private static final int SCAN_URI = 2007;
     private static final int SCAN_PRIVX = 2008;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
@@ -82,8 +84,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     private CustomKeypad customKeypad;
     private TextWatcher btcTextWatcher;
     private TextWatcher fiatTextWatcher;
+    private MaterialProgressDialog progressDialog;
 
-    private String scanData;
     private String contactId;
     private boolean isBtc;
     private int selectedAccountPosition = -1;
@@ -120,7 +122,6 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (getArguments() != null) {
-            scanData = getArguments().getString(ARG_SCAN_DATA);
             contactId = getArguments().getString(ARG_CONTACT_ID);
             isBtc = getArguments().getBoolean(ARG_IS_BTC, true);
             selectedAccountPosition = getArguments().getInt(ARG_SELECTED_ACCOUNT_POSITION);
@@ -138,11 +139,24 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
         setupViews();
 
-        if (scanData != null) viewModel.handleIncomingQRScan(scanData);
-
         setHasOptionsMenu(true);
 
+        viewModel.onViewReady();
+
         return binding.getRoot();
+    }
+
+    @Override
+    public void onNameLoaded(String name) {
+        binding.destination.setText(name);
+        binding.destination.setOnClickListener(null);
+        binding.destination.setEnabled(false);
+        binding.spDestination.setVisibility(View.GONE);
+    }
+
+    @Override
+    public Bundle getFragmentBundle() {
+        return getArguments();
     }
 
     @Override
@@ -186,7 +200,11 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        MenuItem menuItem = menu.findItem(R.id.action_qr_main);
+        // Fragment QR Button, don't show if coming from Contacts
+        final MenuItem qrMenu = menu.findItem(R.id.action_qr);
+        qrMenu.setVisible(contactId == null);
+        // Main activity QR button
+        final MenuItem menuItem = menu.findItem(R.id.action_qr_main);
         if (menuItem != null) {
             menuItem.setVisible(false);
         }
@@ -285,8 +303,10 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     @Override
     public void onKeypadClose() {
-        // Show bottom nav
-        ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+        // Show bottom nav if applicable
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+        }
         // Resize activity back to initial state
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -298,8 +318,10 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     @Override
     public void onKeypadOpen() {
-        // Hide bottom nav
-        ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
+        // Hide bottom nav if applicable
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
+        }
     }
 
     @Override
@@ -661,8 +683,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                         startScanActivity(SCAN_PRIVX);
                     }
 
-                }).setNegativeButton(android.R.string.cancel, null).show();
-
+                })
+                .setNegativeButton(android.R.string.cancel, null).show();
     }
 
     private void setBtcTextWatcher() {
@@ -902,6 +924,22 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                 mp1.release();
             });
             mp.start();
+        }
+    }
+
+    @Override
+    public void showProgressDialog() {
+        progressDialog = new MaterialProgressDialog(getActivity());
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(R.string.please_wait);
+        progressDialog.show();
+    }
+
+    @Override
+    public void dismissProgressDialog() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
         }
     }
 

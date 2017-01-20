@@ -359,6 +359,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void resetNavigationDrawer() {
+        // Called onResume from BalanceFragment
+        toolbar.setTitle("");
         MenuItem backUpMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_backup);
         MenuItem upgradeMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_upgrade);
 

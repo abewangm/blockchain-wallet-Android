@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.send;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -51,6 +52,7 @@ import javax.inject.Inject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.payload.PayloadBridge;
 import piuk.blockchain.android.injection.Injector;
@@ -67,6 +69,11 @@ import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+import static piuk.blockchain.android.ui.send.SendFragment.ARG_CONTACT_ID;
+import static piuk.blockchain.android.ui.send.SendFragment.ARG_IS_BTC;
+import static piuk.blockchain.android.ui.send.SendFragment.ARG_SCAN_DATA;
+import static piuk.blockchain.android.ui.send.SendFragment.ARG_SELECTED_ACCOUNT_POSITION;
+
 @SuppressWarnings("WeakerAccess")
 public class SendViewModel extends BaseViewModel {
 
@@ -81,6 +88,10 @@ public class SendViewModel extends BaseViewModel {
     private MonetaryUtil monetaryUtil;
     private Payment payment;
     public SendModel sendModel;
+    private String scanData;
+    private String contactId;
+    private boolean isBtc;
+    private int selectedAccountPosition = -1;
 
     private Thread unspentApiThread;
 
@@ -93,6 +104,8 @@ public class SendViewModel extends BaseViewModel {
     @Inject ContactsDataManager contactsDataManager;
 
     interface DataListener {
+
+        Bundle getFragmentBundle();
 
         void onHideSendingAddressField();
 
@@ -133,6 +146,12 @@ public class SendViewModel extends BaseViewModel {
         void onShowBIP38PassphrasePrompt(String scanData);
 
         void finishPage();
+
+        void onNameLoaded(String name);
+
+        void showProgressDialog();
+
+        void dismissProgressDialog();
     }
 
     SendViewModel(Context context, DataListener dataListener) {
@@ -177,7 +196,25 @@ public class SendViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        // No-op
+        if (dataListener.getFragmentBundle() != null) {
+            scanData = dataListener.getFragmentBundle().getString(ARG_SCAN_DATA);
+            contactId = dataListener.getFragmentBundle().getString(ARG_CONTACT_ID);
+            isBtc = dataListener.getFragmentBundle().getBoolean(ARG_IS_BTC, true);
+            selectedAccountPosition = dataListener.getFragmentBundle().getInt(ARG_SELECTED_ACCOUNT_POSITION);
+
+            if (contactId != null) {
+                compositeDisposable.add(
+                        contactsDataManager.getContactList()
+                        .filter(ContactsPredicates.filterById(contactId))
+                        .subscribe(
+                                contact -> dataListener.onNameLoaded(contact.getName()),
+                                throwable -> dataListener.finishPage()));
+            }
+
+            if (scanData != null) {
+                handleIncomingQRScan(scanData);
+            }
+        }
     }
 
     @Override
