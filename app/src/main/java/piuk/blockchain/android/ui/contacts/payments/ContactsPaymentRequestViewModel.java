@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.contacts.payments;
 import android.support.annotation.StringRes;
 
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -89,25 +88,26 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
         } else {
             dataListener.showProgressDialog();
 
-            if (dataListener.getPaymentRequestType().equals(PaymentRequestType.SEND)) {
+            if (dataListener.getPaymentRequestType().equals(PaymentRequestType.REQUEST)) {
 
-                PaymentRequest request = new PaymentRequest(satoshis, note);
-                FacilitatedTransaction facilitatedTransaction = new FacilitatedTransaction();
-                facilitatedTransaction.setIntended_amount(satoshis);
+                PaymentRequest paymentRequest = new PaymentRequest(satoshis, note);
+                // TODO: 23/01/2017 Show account selection dialog
                 int defaultAccount = payloadManager.getPayload().getHdWallet().getDefaultIndex();
 
                 compositeDisposable.add(
                         getNextReceiveAddress(defaultAccount)
-                                .doOnNext(facilitatedTransaction::setAddress)
-                                .flatMapCompletable(s -> contactsDataManager.requestSendPayment(recipient.getMdid(), request, facilitatedTransaction))
+                                .doOnNext(paymentRequest::setAddress)
+                                // Request that the other person sends payment
+                                .flatMapCompletable(s -> contactsDataManager.requestSendPayment(recipient.getMdid(), paymentRequest))
                                 .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                                 .subscribe(
                                         () -> dataListener.showSendSuccessfulDialog(recipient.getName()),
                                         throwable -> dataListener.showToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR)));
+
             } else {
                 RequestForPaymentRequest request = new RequestForPaymentRequest(satoshis, note);
-
                 compositeDisposable.add(
+                        // Request that the other person receives payment
                         contactsDataManager.requestReceivePayment(recipient.getMdid(), request)
                                 .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                                 .subscribe(

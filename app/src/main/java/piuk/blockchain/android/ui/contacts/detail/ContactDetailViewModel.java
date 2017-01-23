@@ -66,6 +66,11 @@ public class ContactDetailViewModel extends BaseViewModel {
 
         void initiatePayment(String uri, String recipientId, boolean isBTC, int defaultIndex);
 
+        void showWaitingForPaymentDialog();
+
+        void showWaitingForAddressDialog();
+
+        void showTransactionDetail(String txHash);
     }
 
     ContactDetailViewModel(DataListener dataListener) {
@@ -88,9 +93,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                                         dataListener.updateContactName(contact.getName());
 
                                         List<FacilitatedTransaction> list =
-                                                contact.getFacilitatedTransaction() != null
-                                                        ? new ArrayList<>(contact.getFacilitatedTransaction().values())
-                                                        : Collections.emptyList();
+                                                new ArrayList<>(contact.getFacilitatedTransaction().values());
 
                                         // Invert to show most recent first
                                         Collections.reverse(list);
@@ -165,9 +168,10 @@ public class ContactDetailViewModel extends BaseViewModel {
         if (transaction == null) {
             dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
         } else {
-            // Figure out how to handle each transaction type
+            // RPR Receiver
             if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
                 if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+
                     List<String> accountNames = new ArrayList<>();
                     //noinspection Convert2streamapi
                     for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
@@ -175,25 +179,60 @@ public class ContactDetailViewModel extends BaseViewModel {
                     }
                     dataListener.showAccountChoiceDialog(accountNames, id);
 
-                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
-                    // TODO: 19/01/2017 Show transaction detail?
+                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+
+                    int balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+                    boolean isBTC = balanceDisplayState != SHOW_FIAT;
+                    dataListener.initiatePayment(
+                            transaction.toBitcoinURI(),
+                            contact.getId(),
+                            isBTC,
+                            payloadManager.getPayload().getHdWallet().getDefaultIndex());
+
+                    // RPR Initiator
+                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+                    if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+                        dataListener.showWaitingForAddressDialog();
+
+                    } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+                        dataListener.showWaitingForPaymentDialog();
+                    }
+
+                    // PR Receiver
+                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+                    if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+
+                        List<String> accountNames = new ArrayList<>();
+                        //noinspection Convert2streamapi
+                        for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
+                            accountNames.add(account.getLabel());
+                        }
+                        dataListener.showAccountChoiceDialog(accountNames, id);
+
+                    } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+
+                        int balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+                        boolean isBTC = balanceDisplayState != SHOW_FIAT;
+                        dataListener.initiatePayment(
+                                transaction.toBitcoinURI(),
+                                contact.getId(),
+                                isBTC,
+                                payloadManager.getPayload().getHdWallet().getDefaultIndex());
+                    }
+
+                    // PR Initiator
+                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
+                    if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+                        dataListener.showWaitingForAddressDialog();
+
+                    } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+                        dataListener.showWaitingForPaymentDialog();
+                    }
                 }
-
-            } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)
-                    && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-
-                int balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-                boolean isBTC = balanceDisplayState != SHOW_FIAT;
-                dataListener.initiatePayment(
-                        transaction.toBitcoinURI(),
-                        contact.getId(),
-                        isBTC,
-                        payloadManager.getPayload().getHdWallet().getDefaultIndex());
+            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
+                dataListener.showTransactionDetail(transaction.getTx_hash());
             }
-            // TODO: 19/01/2017 Other possible states - some will be merely informative dialogs
-
         }
-
     }
 
     void onAccountChosen(int accountPosition, String fctxId) {

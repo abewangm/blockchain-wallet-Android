@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.send;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -424,6 +425,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         // Set drop down width equal to clickable view
         binding.accounts.spinner.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 
+            @SuppressLint("ObsoleteSdkInt")
             @Override
             public void onGlobalLayout() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -476,6 +478,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         // Set drop down width equal to clickable view
         binding.spDestination.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 
+            @SuppressLint("ObsoleteSdkInt")
             @Override
             public void onGlobalLayout() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -563,38 +566,37 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     @Override
-    public void onShowTransactionSuccess() {
-        getActivity().runOnUiThread(() -> {
-            playAudio();
-            LocalBroadcastManager.getInstance(getActivity()).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
+    public void onShowTransactionSuccess(String hash) {
+        if (listener != null) listener.onSendPaymentSuccessful(hash);
+        playAudio();
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
 
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-            LayoutInflater inflater = getActivity().getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.modal_transaction_success, null);
-            transactionSuccessDialog = dialogBuilder.setView(dialogView)
-                    .setPositiveButton(getString(R.string.done), null)
-                    .create();
-            transactionSuccessDialog.setTitle(R.string.transaction_submitted);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.modal_transaction_success, null);
+        transactionSuccessDialog = dialogBuilder.setView(dialogView)
+                .setPositiveButton(getString(R.string.done), null)
+                .create();
+        transactionSuccessDialog.setTitle(R.string.transaction_submitted);
 
-            AppRate appRate = new AppRate(getActivity())
-                    .setMinTransactionsUntilPrompt(3)
-                    .incrementTransactionCount();
+        AppRate appRate = new AppRate(getActivity())
+                .setMinTransactionsUntilPrompt(3)
+                .incrementTransactionCount();
 
-            // If should show app rate, success dialog shows first and launches
-            // rate dialog on dismiss. Dismissing rate dialog then closes the page. This will
-            // happen if the user chooses to rate the app - they'll return to the main page.
-            if (appRate.shouldShowDialog()) {
-                AlertDialog ratingDialog = appRate.getRateDialog();
-                ratingDialog.setOnDismissListener(d -> finishPage());
-                transactionSuccessDialog.show();
-                transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
-            } else {
-                transactionSuccessDialog.show();
-                transactionSuccessDialog.setOnDismissListener(dialogInterface -> finishPage());
-            }
+        // If should show app rate, success dialog shows first and launches
+        // rate dialog on dismiss. Dismissing rate dialog then closes the page. This will
+        // happen if the user chooses to rate the app - they'll return to the main page.
+        if (appRate.shouldShowDialog()) {
+            AlertDialog ratingDialog = appRate.getRateDialog();
+            ratingDialog.setOnDismissListener(d -> finishPage());
+            transactionSuccessDialog.show();
+            transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
+        } else {
+            transactionSuccessDialog.show();
+            transactionSuccessDialog.setOnDismissListener(dialogInterface -> finishPage());
+        }
 
-            dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
-        });
+        dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
     }
 
     private final Handler dialogHandler = new Handler();

@@ -46,18 +46,23 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
         holder.title.setText(String.valueOf(transaction.getIntended_amount()));
         holder.subtitle.setText(transaction.getRole() + ": " + transaction.getState());
 
-        if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+        if (transaction.getState() != null
+                && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+                && transaction.getRole() != null
+                && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
+                || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
             holder.indicator.setVisibility(View.VISIBLE);
 
-        } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+        } else if (transaction.getState() != null
+                && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                && transaction.getRole() != null
+                && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
+                || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
             holder.indicator.setVisibility(View.VISIBLE);
 
         } else {
             holder.indicator.setVisibility(View.GONE);
         }
-
     }
 
     void setClickListener(TransactionClickListener listener) {

@@ -189,26 +189,25 @@ public class ContactsService {
     /**
      * Sends a new payment request without the need to ask for a receive address from the recipient.
      *
-     * @param mdid                   The recipient's MDID
-     * @param request                A {@link PaymentRequest} object containing the request details,
-     *                               ie the amount and an optional note
-     * @param facilitatedTransaction A {@link FacilitatedTransaction} object
+     * @param mdid    The recipient's MDID
+     * @param request A {@link PaymentRequest} object containing the request details, ie the amount
+     *                and an optional note
      * @return A {@link Completable} object
      */
     @RequiresAccessToken
-    public Completable requestSendPayment(String mdid, PaymentRequest request, FacilitatedTransaction facilitatedTransaction) {
+    public Completable requestSendPayment(String mdid, PaymentRequest request) {
         return Completable.fromCallable(() -> {
-            contacts.sendPaymentRequest(mdid, request, facilitatedTransaction);
+            contacts.sendPaymentRequest(mdid, request);
             return Void.TYPE;
         });
     }
 
     /**
-     * Requests that another user sends the current user bitcoin
+     * Requests that another user receive bitcoin from current user
      *
      * @param mdid    The recipient's MDID
      * @param request A {@link PaymentRequest} object containing the request details, ie the amount
-     *                and an optional note
+     *                and an optional note, the receive address
      * @return A {@link Completable} object
      */
     @RequiresAccessToken

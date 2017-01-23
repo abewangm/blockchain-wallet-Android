@@ -18,6 +18,7 @@ import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
+import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
@@ -131,9 +132,15 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected SwipeToReceiveHelper swipeToReceiveHelper(PayloadManager
+    protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager
                                                                 payloadManager, MultiAddrFactory
                                                                 multiAddrFactory, PrefsUtil prefsUtil) {
         return new SwipeToReceiveHelper(payloadManager, multiAddrFactory, prefsUtil);
+    }
+
+    @Provides
+    @ViewModelScope
+    protected SendDataManager provideSendDatamanager() {
+        return new SendDataManager(new PaymentService(new Payment()));
     }
 }

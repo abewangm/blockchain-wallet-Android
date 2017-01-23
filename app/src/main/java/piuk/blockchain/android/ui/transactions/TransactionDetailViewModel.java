@@ -55,8 +55,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private double mBtcExchangeRate;
     private String mFiatType;
 
-    @VisibleForTesting
-    Tx mTransaction;
+    @VisibleForTesting Tx mTransaction;
 
     public interface DataListener {
 

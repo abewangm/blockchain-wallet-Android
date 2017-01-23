@@ -199,6 +199,31 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
     }
 
     @Override
+    public void showWaitingForPaymentDialog() {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_waiting_for_payment_message)
+                .setPositiveButton(android.R.string.ok, null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showWaitingForAddressDialog() {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_waiting_for_address_message)
+                .setPositiveButton(android.R.string.ok, null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showTransactionDetail(String txHash) {
+        if (listener != null) listener.onShowTransactionDetailCalled(txHash);
+    }
+
+    @Override
     public void initiatePayment(String uri, String contactId, boolean isBTC, int defaultIndex) {
         if (listener != null) listener.onPaymentInitiated(uri, contactId, isBTC, defaultIndex);
     }
@@ -239,6 +264,8 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
         void onFinishPageCalled();
 
         void onPaymentInitiated(String uri, String contactId, boolean isBtc, int defaultIndex);
+
+        void onShowTransactionDetailCalled(String hash);
 
     }
 }

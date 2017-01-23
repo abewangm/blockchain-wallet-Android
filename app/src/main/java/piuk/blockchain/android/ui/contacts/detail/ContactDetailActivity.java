@@ -79,7 +79,9 @@ public class ContactDetailActivity extends BaseAuthActivity implements
 
     @Override
     public void onSendFragmentClose() {
-        // No-op
+        submitFragmentTransaction(
+                ContactDetailFragment.newInstance(
+                        getIntent().getStringExtra(KEY_BUNDLE_CONTACT_ID)));
     }
 
     @Override
@@ -90,5 +92,10 @@ public class ContactDetailActivity extends BaseAuthActivity implements
     @Override
     public void onSendPaymentSuccessful(String transactionHash) {
         // TODO: 20/01/2017 Update the UI, broadcast payment to shared metadata service
+    }
+
+    @Override
+    public void onShowTransactionDetailCalled(String hash) {
+        // TODO: 23/01/2017 Update the transaction list to work by hash
     }
 }

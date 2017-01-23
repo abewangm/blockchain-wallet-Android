@@ -613,6 +613,8 @@
     <string name="contacts_address_sent_success">Address sent successfully</string>
     <string name="contacts_address_sent_failed">Sending address failed</string>
     <string name="contacts_choose_account_message">Choose where you wish to receive your funds.</string>
+    <string name="contacts_waiting_for_address_message">Your contact has been informed that you wish to send them bitcoin and that you require an address from them. We will notify you when they have sent an address!</string>
+    <string name="contacts_waiting_for_payment_message">Your contact has been informed that you wish to receive bitcoin from them and has been sent an address. We will notify you when they have sent you bitcoin!</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>

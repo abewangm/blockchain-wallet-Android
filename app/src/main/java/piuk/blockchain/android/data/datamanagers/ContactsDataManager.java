@@ -283,25 +283,24 @@ public class ContactsDataManager {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Sends a new payment request without the need to ask for a receive address from the recipient.
+     * Requests that another user sends you a payment
      *
      * @param mdid                   The recipient's MDID
      * @param request                A {@link PaymentRequest} object containing the request details,
      *                               ie the amount and an optional note
-     * @param facilitatedTransaction A {@link FacilitatedTransaction} object
      * @return A {@link Completable} object
      */
-    public Completable requestSendPayment(String mdid, PaymentRequest request, FacilitatedTransaction facilitatedTransaction) {
-        return callWithToken(() -> contactsService.requestSendPayment(mdid, request, facilitatedTransaction))
+    public Completable requestSendPayment(String mdid, PaymentRequest request) {
+        return callWithToken(() -> contactsService.requestSendPayment(mdid, request))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
-     * Requests that another user sends the current user bitcoin
+     * Requests that another user receive bitcoin from current user
      *
      * @param mdid    The recipient's MDID
      * @param request A {@link PaymentRequest} object containing the request details, ie the amount
-     *                and an optional note
+     *                and an optional note, the receive address
      * @return A {@link Completable} object
      */
     public Completable requestReceivePayment(String mdid, RequestForPaymentRequest request) {

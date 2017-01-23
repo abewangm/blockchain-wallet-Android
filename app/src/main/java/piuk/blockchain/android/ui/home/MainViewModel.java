@@ -148,7 +148,7 @@ public class MainViewModel extends BaseViewModel {
                                                             dataListener.setMessagesVisibility(messages.isEmpty() ? View.INVISIBLE : View.VISIBLE);
                                                             // Marks all messages as read for debugging purposes
                                                             if (!messages.isEmpty()) {
-//                                                                for (Message m : ((List<Message>) messages)) {
+//                                                                for (Message m : (List<Message>) messages) {
 //                                                                    contactsDataManager.markMessageAsRead(m.getId(), true).subscribe(new IgnorableDefaultObserver<>());
 //                                                                }
                                                             }
