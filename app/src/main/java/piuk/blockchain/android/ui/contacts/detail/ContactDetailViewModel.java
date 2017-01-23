@@ -10,7 +10,6 @@ import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -91,13 +90,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                                     contact -> {
                                         this.contact = contact;
                                         dataListener.updateContactName(contact.getName());
-
-                                        List<FacilitatedTransaction> list =
-                                                new ArrayList<>(contact.getFacilitatedTransaction().values());
-
-                                        // Invert to show most recent first
-                                        Collections.reverse(list);
-                                        dataListener.onTransactionsUpdated(list);
+                                        dataListener.onTransactionsUpdated(new ArrayList<>(contact.getFacilitatedTransaction().values()));
                                         if (contact.getMdid() == null || contact.getMdid().isEmpty()) {
                                             dataListener.disablePayments();
                                         }
@@ -188,51 +181,54 @@ public class ContactDetailViewModel extends BaseViewModel {
                             contact.getId(),
                             isBTC,
                             payloadManager.getPayload().getHdWallet().getDefaultIndex());
-
-                    // RPR Initiator
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
-                    if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-                        dataListener.showWaitingForAddressDialog();
-
-                    } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-                        dataListener.showWaitingForPaymentDialog();
-                    }
-
-                    // PR Receiver
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-                    if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-
-                        List<String> accountNames = new ArrayList<>();
-                        //noinspection Convert2streamapi
-                        for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
-                            accountNames.add(account.getLabel());
-                        }
-                        dataListener.showAccountChoiceDialog(accountNames, id);
-
-                    } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-
-                        int balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-                        boolean isBTC = balanceDisplayState != SHOW_FIAT;
-                        dataListener.initiatePayment(
-                                transaction.toBitcoinURI(),
-                                contact.getId(),
-                                isBTC,
-                                payloadManager.getPayload().getHdWallet().getDefaultIndex());
-                    }
-
-                    // PR Initiator
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
-                    if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-                        dataListener.showWaitingForAddressDialog();
-
-                    } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-                        dataListener.showWaitingForPaymentDialog();
-                    }
                 }
+
+                // RPR Initiator
+            } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+                if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+                    dataListener.showWaitingForAddressDialog();
+
+                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+                    dataListener.showWaitingForPaymentDialog();
+                }
+
+                // PR Receiver
+            } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+                if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+
+                    List<String> accountNames = new ArrayList<>();
+                    //noinspection Convert2streamapi
+                    for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
+                        accountNames.add(account.getLabel());
+                    }
+                    dataListener.showAccountChoiceDialog(accountNames, id);
+
+                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+
+                    int balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+                    boolean isBTC = balanceDisplayState != SHOW_FIAT;
+                    dataListener.initiatePayment(
+                            transaction.toBitcoinURI(),
+                            contact.getId(),
+                            isBTC,
+                            payloadManager.getPayload().getHdWallet().getDefaultIndex());
+                }
+
+                // PR Initiator
+            } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
+                if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+                    dataListener.showWaitingForAddressDialog();
+
+                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+                    dataListener.showWaitingForPaymentDialog();
+                }
+
+                // Payment sent, show detail regardless of role
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
                 dataListener.showTransactionDetail(transaction.getTx_hash());
             }
         }
+
     }
 
     void onAccountChosen(int accountPosition, String fctxId) {

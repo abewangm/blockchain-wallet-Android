@@ -44,7 +44,7 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
         });
 
         holder.title.setText(String.valueOf(transaction.getIntended_amount()));
-        holder.subtitle.setText(transaction.getRole() + ": " + transaction.getState());
+        holder.subtitle.setText(transaction.getState());
 
         if (transaction.getState() != null
                 && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
