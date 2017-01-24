@@ -10,6 +10,8 @@ import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -17,6 +19,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
+import piuk.blockchain.android.data.contacts.FctxDateComparator;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.injection.Injector;
@@ -84,25 +87,32 @@ public class ContactDetailViewModel extends BaseViewModel {
             String id = bundle.getString(KEY_BUNDLE_CONTACT_ID);
 
             compositeDisposable.add(
+                    // Get contacts list
                     contactsDataManager.getContactList()
+                            // Find current contact
                             .filter(ContactsPredicates.filterById(id))
+                            // Update UI
+                            .doOnNext(contact -> {
+                                this.contact = contact;
+                                dataListener.updateContactName(contact.getName());
+
+                                sortAndUpdateTransactions(contact.getFacilitatedTransaction().values());
+                                if (contact.getMdid() == null || contact.getMdid().isEmpty()) {
+                                    dataListener.disablePayments();
+                                }
+                            })
+                            // Contact not found, quit page
+                            .doOnError(throwable -> showErrorAndQuitPage())
+                            // Update contacts in case of new FacilitatedTransactions
+                            .flatMapCompletable(contact -> contactsDataManager.fetchContacts())
                             .subscribe(
-                                    contact -> {
-                                        this.contact = contact;
-                                        dataListener.updateContactName(contact.getName());
-                                        dataListener.onTransactionsUpdated(new ArrayList<>(contact.getFacilitatedTransaction().values()));
-                                        if (contact.getMdid() == null || contact.getMdid().isEmpty()) {
-                                            dataListener.disablePayments();
-                                        }
-                                    }, throwable -> showErrorAndQuitPage()));
+                                    // Update with FacilitatedTransactions, UI handles diff
+                                    () -> sortAndUpdateTransactions(contact.getFacilitatedTransaction().values()),
+                                    // Show error if updating contacts failed
+                                    throwable -> dataListener.showToast(R.string.contacts_digesting_messages_failed, ToastCustom.TYPE_ERROR)));
         } else {
             showErrorAndQuitPage();
         }
-    }
-
-    private void showErrorAndQuitPage() {
-        dataListener.showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
-        dataListener.finishPage();
     }
 
     void onDeleteContactClicked() {
@@ -161,71 +171,49 @@ public class ContactDetailViewModel extends BaseViewModel {
         if (transaction == null) {
             dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
         } else {
-            // RPR Receiver
-            if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-                if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
 
-                    List<String> accountNames = new ArrayList<>();
-                    //noinspection Convert2streamapi
-                    for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
-                        accountNames.add(account.getLabel());
-                    }
-                    dataListener.showAccountChoiceDialog(accountNames, id);
+            // Payment request sent, waiting for address from recipient
+            if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)
+                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR))) {
 
-                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+                dataListener.showWaitingForAddressDialog();
 
-                    int balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-                    boolean isBTC = balanceDisplayState != SHOW_FIAT;
-                    dataListener.initiatePayment(
-                            transaction.toBitcoinURI(),
-                            contact.getId(),
-                            isBTC,
-                            payloadManager.getPayload().getHdWallet().getDefaultIndex());
-                }
+                // Payment request sent, waiting for payment
+            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)
+                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR))) {
 
-                // RPR Initiator
-            } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
-                if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-                    dataListener.showWaitingForAddressDialog();
-
-                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-                    dataListener.showWaitingForPaymentDialog();
-                }
-
-                // PR Receiver
-            } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-                if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-
-                    List<String> accountNames = new ArrayList<>();
-                    //noinspection Convert2streamapi
-                    for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
-                        accountNames.add(account.getLabel());
-                    }
-                    dataListener.showAccountChoiceDialog(accountNames, id);
-
-                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-
-                    int balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-                    boolean isBTC = balanceDisplayState != SHOW_FIAT;
-                    dataListener.initiatePayment(
-                            transaction.toBitcoinURI(),
-                            contact.getId(),
-                            isBTC,
-                            payloadManager.getPayload().getHdWallet().getDefaultIndex());
-                }
-
-                // PR Initiator
-            } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
-                if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-                    dataListener.showWaitingForAddressDialog();
-
-                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-                    dataListener.showWaitingForPaymentDialog();
-                }
+                dataListener.showWaitingForPaymentDialog();
 
                 // Payment sent, show detail regardless of role
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
                 dataListener.showTransactionDetail(transaction.getTx_hash());
+
+                // Received payment request, need to send address to sender
+            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)
+                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER))) {
+
+                List<String> accountNames = new ArrayList<>();
+                //noinspection Convert2streamapi
+                for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
+                    accountNames.add(account.getLabel());
+                }
+                dataListener.showAccountChoiceDialog(accountNames, id);
+
+                // Waiting for payment
+            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)
+                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER))) {
+
+                int balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+                boolean isBTC = balanceDisplayState != SHOW_FIAT;
+                dataListener.initiatePayment(
+                        transaction.toBitcoinURI(),
+                        contact.getId(),
+                        isBTC,
+                        payloadManager.getPayload().getHdWallet().getDefaultIndex());
             }
         }
 
@@ -245,13 +233,28 @@ public class ContactDetailViewModel extends BaseViewModel {
                         .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(
-                                () -> dataListener.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK),
+                                () -> {
+                                    dataListener.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK);
+                                    onViewReady();
+                                },
                                 throwable -> dataListener.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
 
     }
 
     private Observable<String> getNextReceiveAddress(int defaultIndex) {
         return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
+    }
+
+    private void sortAndUpdateTransactions(Collection<FacilitatedTransaction> values) {
+        ArrayList<FacilitatedTransaction> facilitatedTransactions = new ArrayList<>(values);
+        Collections.sort(facilitatedTransactions, new FctxDateComparator());
+
+        dataListener.onTransactionsUpdated(facilitatedTransactions);
+    }
+
+    private void showErrorAndQuitPage() {
+        dataListener.showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
+        dataListener.finishPage();
     }
 
 }
