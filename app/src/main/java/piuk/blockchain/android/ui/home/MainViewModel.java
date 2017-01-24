@@ -31,6 +31,7 @@ import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
@@ -58,6 +59,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected PayloadManager payloadManager;
     @Inject protected ContactsDataManager contactsDataManager;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
+    @Inject protected NotificationTokenManager notificationTokenManager;
 
     public interface DataListener {
         void onRooted();
@@ -157,6 +159,8 @@ public class MainViewModel extends BaseViewModel {
                             }
                             // TODO: 01/12/2016 Should probably inform the user here if coming from URI click
                         }, throwable -> Log.wtf(TAG, "registerNodeForMetaDataService: ", throwable)));
+
+        notificationTokenManager.resendNotificationToken();
     }
 
     public void storeSwipeReceiveAddresses() {

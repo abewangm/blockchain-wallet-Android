@@ -73,6 +73,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     public static final String ARG_IS_BTC = "is_btc";
     public static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     public static final String ARG_CONTACT_ID = "contact_id";
+    public static final String ARG_CONTACT_MDID = "contact_mdid";
+    public static final String ARG_FCTX_ID = "fctx_id";
 
     private static final int SCAN_URI = 2007;
     private static final int SCAN_PRIVX = 2008;
@@ -108,12 +110,28 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     public static SendFragment newInstance(@Nullable String scanData,
                                            @Nullable String contactId,
+                                           @Nullable String mdid,
+                                           @Nullable String fctxId,
                                            boolean isBtc,
                                            int selectedAccountPosition) {
         SendFragment fragment = new SendFragment();
         Bundle args = new Bundle();
         args.putString(ARG_SCAN_DATA, scanData);
         args.putString(ARG_CONTACT_ID, contactId);
+        args.putString(ARG_CONTACT_MDID, mdid);
+        args.putString(ARG_FCTX_ID, fctxId);
+        args.putBoolean(ARG_IS_BTC, isBtc);
+        args.putInt(ARG_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static SendFragment newInstance(@Nullable String scanData,
+                                           boolean isBtc,
+                                           int selectedAccountPosition) {
+        SendFragment fragment = new SendFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_SCAN_DATA, scanData);
         args.putBoolean(ARG_IS_BTC, isBtc);
         args.putInt(ARG_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
         fragment.setArguments(args);
@@ -566,8 +584,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     @Override
-    public void onShowTransactionSuccess(String hash) {
-        if (listener != null) listener.onSendPaymentSuccessful(hash);
+    public void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId) {
         playAudio();
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
 
@@ -588,15 +605,24 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         // happen if the user chooses to rate the app - they'll return to the main page.
         if (appRate.shouldShowDialog()) {
             AlertDialog ratingDialog = appRate.getRateDialog();
-            ratingDialog.setOnDismissListener(d -> finishPage());
+            ratingDialog.setOnDismissListener(d -> {
+                finishAndNotifySuccess(mdid, hash, fctxId);
+            });
             transactionSuccessDialog.show();
             transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
         } else {
             transactionSuccessDialog.show();
-            transactionSuccessDialog.setOnDismissListener(dialogInterface -> finishPage());
+            transactionSuccessDialog.setOnDismissListener(dialogInterface -> {
+                finishAndNotifySuccess(mdid, hash, fctxId);
+            });
         }
 
         dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
+    }
+
+    private void finishAndNotifySuccess(@Nullable String mdid, String hash, @Nullable String fctxId) {
+        if (listener != null) listener.onSendPaymentSuccessful(mdid, hash, fctxId);
+        finishPage();
     }
 
     private final Handler dialogHandler = new Handler();
@@ -980,6 +1006,6 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
         void onSendFragmentStart();
 
-        void onSendPaymentSuccessful(String transactionHash);
+        void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId);
     }
 }

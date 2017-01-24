@@ -32,7 +32,7 @@ public class ApiInterceptor implements Interceptor {
             requestLog = "\n" + requestLog + "\n" + requestBodyToString(request.body());
         }
 
-        Log.d(TAG, "Request:" + "\n" + requestLog);
+        Log.v(TAG, "Request:" + "\n" + requestLog);
 
         Response response = chain.proceed(request);
         long endTime = System.nanoTime();
@@ -46,9 +46,9 @@ public class ApiInterceptor implements Interceptor {
 
         String bodyString = response.body().string();
         if (response.code() == 200) {
-            Log.d(TAG, "Response:" + "\n" + responseLog + "\n" + bodyString);
+            Log.v(TAG, "Response: " + response.code() + "\n" + responseLog + "\n" + bodyString);
         } else {
-            Log.e(TAG, "Response:" + "\n" + responseLog + "\n" + bodyString);
+            Log.e(TAG, "Response: " + response.code() + "\n" + responseLog + "\n" + bodyString);
         }
 
         return response.newBuilder()

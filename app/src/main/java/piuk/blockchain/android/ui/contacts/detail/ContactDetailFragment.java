@@ -34,12 +34,12 @@ import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.ViewUtils;
 
 
-public class ContactDetailFragment extends Fragment implements ContactDetailViewModel.DataListener {
+public class ContactDetailFragment extends Fragment implements ContactDetailFragmentViewModel.DataListener {
 
     private static final String KEY_BUNDLE_CONTACT_ID = "contact_id";
 
     private FragmentContactDetailBinding binding;
-    private ContactDetailViewModel viewModel;
+    private ContactDetailFragmentViewModel viewModel;
     private MaterialProgressDialog progressDialog;
     private ContactTransactionAdapter transactionAdapter;
     private OnFragmentInteractionListener listener;
@@ -67,7 +67,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ContactDetailViewModel(this);
+        viewModel = new ContactDetailFragmentViewModel(this);
 
         binding.buttonDelete.setOnClickListener(v -> viewModel.onDeleteContactClicked());
         binding.buttonRename.setOnClickListener(v -> viewModel.onRenameContactClicked());
@@ -224,8 +224,8 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
     }
 
     @Override
-    public void initiatePayment(String uri, String contactId, boolean isBTC, int defaultIndex) {
-        if (listener != null) listener.onPaymentInitiated(uri, contactId, isBTC, defaultIndex);
+    public void initiatePayment(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex) {
+        if (listener != null) listener.onPaymentInitiated(uri, recipientId, mdid, fctxId, isBtc, defaultIndex);
     }
 
     @Override
@@ -263,7 +263,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
 
         void onFinishPageCalled();
 
-        void onPaymentInitiated(String uri, String contactId, boolean isBtc, int defaultIndex);
+        void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex);
 
         void onShowTransactionDetailCalled(String hash);
 

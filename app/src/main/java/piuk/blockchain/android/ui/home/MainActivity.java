@@ -608,7 +608,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             selectedAccountPosition = -1;
         }
 
-        SendFragment sendFragment = SendFragment.newInstance(scanData, null, isBTC, selectedAccountPosition);
+        SendFragment sendFragment = SendFragment.newInstance(scanData, isBTC, selectedAccountPosition);
         startFragmentWithAnimation(sendFragment);
     }
 
@@ -663,7 +663,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     }
 
     @Override
-    public void onSendPaymentSuccessful(String transactionHash) {
+    public void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId) {
         // No-op, this callback is used elsewhere
     }
 }

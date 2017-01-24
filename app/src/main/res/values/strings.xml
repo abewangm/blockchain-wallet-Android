@@ -616,6 +616,9 @@
     <string name="contacts_waiting_for_address_message">Your contact has been informed that you wish to send them bitcoin and that you require an address from them. We will notify you when they have sent an address!</string>
     <string name="contacts_waiting_for_payment_message">Your contact has been informed that you wish to receive bitcoin from them and has been sent an address. We will notify you when they have sent you bitcoin!</string>
     <string name="contacts_digesting_messages_failed">Checking messages failed, please try again</string>
+    <string name="contacts_broadcasting_payment">We\'re just informing your contact that you\'ve sent them some bitcoin, please wait.</string>
+    <string name="contacts_payment_sent_success">Payment sent! We\'ve notified your contact to let them know that you\'ve completed the transaction.</string>
+    <string name="contacts_payment_sent_failed_message">There was an error notifying your contact that you have sent them a payment. Please check your connection and try again.</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>

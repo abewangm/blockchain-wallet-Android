@@ -32,7 +32,8 @@ import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_
 import static piuk.blockchain.android.ui.send.SendViewModel.SHOW_FIAT;
 
 
-public class ContactDetailViewModel extends BaseViewModel {
+@SuppressWarnings("WeakerAccess")
+public class ContactDetailFragmentViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     @Inject ContactsDataManager contactsDataManager;
@@ -66,7 +67,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
         void showAccountChoiceDialog(List<String> accounts, String fctxId);
 
-        void initiatePayment(String uri, String recipientId, boolean isBTC, int defaultIndex);
+        void initiatePayment(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex);
 
         void showWaitingForPaymentDialog();
 
@@ -75,7 +76,7 @@ public class ContactDetailViewModel extends BaseViewModel {
         void showTransactionDetail(String txHash);
     }
 
-    ContactDetailViewModel(DataListener dataListener) {
+    ContactDetailFragmentViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
     }
@@ -212,6 +213,8 @@ public class ContactDetailViewModel extends BaseViewModel {
                 dataListener.initiatePayment(
                         transaction.toBitcoinURI(),
                         contact.getId(),
+                        contact.getMdid(),
+                        transaction.getId(),
                         isBTC,
                         payloadManager.getPayload().getHdWallet().getDefaultIndex());
             }

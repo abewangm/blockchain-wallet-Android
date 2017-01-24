@@ -4,6 +4,9 @@ import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 
 import java.util.Comparator;
 
+/**
+ * Compares {@link FacilitatedTransaction} objects and sorts them in ascending order of date created
+ */
 public class FctxDateComparator implements Comparator<FacilitatedTransaction> {
 
     @Override

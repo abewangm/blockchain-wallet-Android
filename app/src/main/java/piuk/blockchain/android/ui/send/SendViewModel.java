@@ -73,6 +73,8 @@ import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 import static piuk.blockchain.android.ui.send.SendFragment.ARG_CONTACT_ID;
+import static piuk.blockchain.android.ui.send.SendFragment.ARG_CONTACT_MDID;
+import static piuk.blockchain.android.ui.send.SendFragment.ARG_FCTX_ID;
 import static piuk.blockchain.android.ui.send.SendFragment.ARG_IS_BTC;
 import static piuk.blockchain.android.ui.send.SendFragment.ARG_SCAN_DATA;
 import static piuk.blockchain.android.ui.send.SendFragment.ARG_SELECTED_ACCOUNT_POSITION;
@@ -91,8 +93,9 @@ public class SendViewModel extends BaseViewModel {
     private MonetaryUtil monetaryUtil;
     private Payment payment;
     public SendModel sendModel;
-    private String scanData;
-    private String contactId;
+    @Nullable private String contactMdid;
+    @Nullable private String fctxId;
+    // TODO: 24/01/2017 Use these instead of passing them from the UI
     private boolean isBtc;
     private int selectedAccountPosition = -1;
 
@@ -145,7 +148,7 @@ public class SendViewModel extends BaseViewModel {
 
         void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
-        void onShowTransactionSuccess(String hash);
+        void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId);
 
         void onShowBIP38PassphrasePrompt(String scanData);
 
@@ -189,20 +192,17 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private boolean getBtcDisplayState() {
-        boolean isBTC = true;
         int BALANCE_DISPLAY_STATE = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-        if (BALANCE_DISPLAY_STATE == SHOW_FIAT) {
-            isBTC = false;
-        }
-
-        return isBTC;
+        return BALANCE_DISPLAY_STATE != SHOW_FIAT;
     }
 
     @Override
     public void onViewReady() {
         if (dataListener.getFragmentBundle() != null) {
-            scanData = dataListener.getFragmentBundle().getString(ARG_SCAN_DATA);
-            contactId = dataListener.getFragmentBundle().getString(ARG_CONTACT_ID);
+            final String scanData = dataListener.getFragmentBundle().getString(ARG_SCAN_DATA);
+            final String contactId = dataListener.getFragmentBundle().getString(ARG_CONTACT_ID);
+            contactMdid = dataListener.getFragmentBundle().getString(ARG_CONTACT_MDID);
+            fctxId = dataListener.getFragmentBundle().getString(ARG_FCTX_ID);
             isBtc = dataListener.getFragmentBundle().getBoolean(ARG_IS_BTC, true);
             selectedAccountPosition = dataListener.getFragmentBundle().getInt(ARG_SELECTED_ACCOUNT_POSITION);
 
@@ -233,7 +233,6 @@ public class SendViewModel extends BaseViewModel {
     }
 
     int getDefaultAccount() {
-
         int result = 0;
         if (payloadManager.getPayload().isUpgraded()) {
             result = payloadManager.getPayload().getHdWallet().getDefaultIndex();
@@ -1164,8 +1163,7 @@ public class SendViewModel extends BaseViewModel {
                                 }, throwable -> dataListener.onShowToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)));
     }
 
-    @Thunk
-    void handleSuccessfulPayment(String hash) {
+    private void handleSuccessfulPayment(String hash) {
         if (sendModel.pendingTransaction.isHD()) {
             // increment change address counter
             ((Account) sendModel.pendingTransaction.sendingObject.accountObject).incChange();
@@ -1173,11 +1171,10 @@ public class SendViewModel extends BaseViewModel {
 
         updateInternalBalances();
         PayloadBridge.getInstance().remoteSaveThread(null);
-        dataListener.onShowTransactionSuccess(hash);
+        dataListener.onShowTransactionSuccess(contactMdid, hash, fctxId);
     }
 
-    @Thunk
-    void clearUnspentResponseCache() {
+    private void clearUnspentResponseCache() {
         DefaultAccountUnspentCache.getInstance().destroy();
 
         if (sendModel.pendingTransaction.isHD()) {

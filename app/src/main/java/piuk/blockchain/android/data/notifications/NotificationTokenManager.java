@@ -69,13 +69,6 @@ public class NotificationTokenManager {
                 : FirebaseInstanceId.getInstance().getToken();
     }
 
-    /**
-     * Removes the stored token from Shared Preferences
-     */
-    private void clearStoredToken() {
-        prefsUtil.removeValue(PrefsUtil.KEY_FIREBASE_TOKEN);
-    }
-
     // TODO: 16/01/2017 Call me on logout?
     /**
      * Resets Instance ID and revokes all tokens. Clears stored token if successful
@@ -88,6 +81,17 @@ public class NotificationTokenManager {
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
+    /**
+     * Re-sends the notification token. The token is only ever generated on app installation, so it
+     * may be preferable to store the token and resend it on startup rather than have an app end up
+     * in a state where it may not have registered with the right endpoint or similar.
+     */
+    public void resendNotificationToken() {
+        if (getFirebaseToken() != null) {
+            sendFirebaseToken(getFirebaseToken());
+        }
+    }
+
     private void sendFirebaseToken(String refreshedToken) {
         Payload payload = payloadManager.getPayload();
         String guid = payload.getGuid();
@@ -96,6 +100,13 @@ public class NotificationTokenManager {
         // TODO: 09/11/2016 Decide what to do if sending fails, perhaps retry?
         notificationService.sendNotificationToken(refreshedToken, guid, sharedKey)
                 .subscribe(() -> Log.d(TAG, "sendFirebaseToken: success"), Throwable::printStackTrace);
+    }
+
+    /**
+     * Removes the stored token from Shared Preferences
+     */
+    private void clearStoredToken() {
+        prefsUtil.removeValue(PrefsUtil.KEY_FIREBASE_TOKEN);
     }
 
 }

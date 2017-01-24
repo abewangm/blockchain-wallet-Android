@@ -39,14 +39,19 @@ public class ContactsDataManager {
      * @return A {@link Completable} object
      */
     public Completable initContactsService(@Nullable String secondPassword) {
+
         return getNodeFactory(secondPassword)
-                .flatMapCompletable(metadataNodeFactory -> contactsService.initContactsService(
-                        metadataNodeFactory.getMetadataNode(),
-                        metadataNodeFactory.getSharedMetadataNode()))
-                .andThen(registerMdid(
-                                payloadManager.getPayload().getGuid(),
-                                payloadManager.getPayload().getSharedKey(),
-                                payloadManager.getMasterKey()))
+                .flatMapCompletable(
+                        metadataNodeFactory -> contactsService.initContactsService(
+                                metadataNodeFactory.getMetadataNode(),
+                                metadataNodeFactory.getSharedMetadataNode()))
+                .andThen(getNodeFactory(secondPassword))
+                .flatMapCompletable(
+                        metadataNodeFactory ->
+                                registerMdid(
+                                        payloadManager.getPayload().getGuid(),
+                                        payloadManager.getPayload().getSharedKey(),
+                                        metadataNodeFactory.getSharedMetadataNode()))
                 .andThen(publishXpub())
                 .compose(RxUtil.applySchedulersToCompletable());
     }
@@ -67,7 +72,7 @@ public class ContactsDataManager {
      *
      * @param guid      The user's GUID
      * @param sharedKey The user's shared key
-     * @param node      The user's wallet's master key
+     * @param node      The user's SharedMetadata node
      * @return A {@link Completable}, ie an Observable type object specifically for methods
      * returning void.
      */
@@ -285,9 +290,9 @@ public class ContactsDataManager {
     /**
      * Requests that another user sends you a payment
      *
-     * @param mdid                   The recipient's MDID
-     * @param request                A {@link PaymentRequest} object containing the request details,
-     *                               ie the amount and an optional note
+     * @param mdid    The recipient's MDID
+     * @param request A {@link PaymentRequest} object containing the request details, ie the amount
+     *                and an optional note
      * @return A {@link Completable} object
      */
     public Completable requestSendPayment(String mdid, PaymentRequest request) {
