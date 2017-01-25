@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Nastavení</string>
 
-    <string name="all_accounts">Vše</string>
+    <string name="all_accounts">Všechny peněženky</string>
 
     <string name="please_wait">Čekejte, prosím</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">Vaše heslo nikdy nesdílíme na našich serverech, což znamená, že pokud heslo zapomenete, nemůžeme ho obnovit. Nezapomeňte si zapsat frázi pro obnovení, pomocí které si můžete peněženku v případě zapomenutého hesla obnovit.</string>
     <string name="verify_email_notice">Na Vaši e-mailovou adresu jsme odeslali ověřovací odkaz. Kliknutím na ověřovací odkaz ověříte svoji e-mailovou adresu.</string>
     <string name="email_notifications">E-mailová upozornění</string>
-    <string name="email_notifications_summary">Povolte upozornění, která Vám budeme zasílat e-mailem při každém přijetí bitcoinů. Pouze označené a importované adresy jsou oprávněné spouštět upozornění.</string>
+    <string name="email_notifications_summary">Buďte informováni, pokud vám někdo pošle bitcoiny.</string>
     <string name="current_password">Aktuální heslo</string>
     <string name="new_password">Nové heslo</string>
     <string name="sms_verified">Mobilní číslo ověřeno</string>
@@ -412,4 +412,58 @@
     <string name="go_back">Přejít zpět</string>
     <string name="accept_higher_fee">Přijmout vyšší poplatek</string>
     <string name="large_tx_high_fee_warning">„Tato transakce vyžaduje vyšší poplatek za drobné částky, které mají být vráceny.“</string>
+
+    <string name="transactions">Transakce</string>
+    <string name="invalid_password_too_short">Zadejte prosím více než 3 znaky</string>
+    <string name="change_pin_new_matches_current">Svůj současný PIN nemůžete použít jako nový PIN</string>
+    <string name="account_locked_title">Účet je uzamčen</string>
+    <string name="account_locked_message">Váš účet byl z bezpečnostních důvodů dočasně uzamčen. Podívejte se prosím na svůj e-mail, kde najdete více informací, a zkuste to později znovu.</string>
+    <string name="licenses">Licence</string>
+    <string name="email_chooser">Poslat e-mail…</string>
+    <string name="password_changed_explanation">Vaše heslo bylo změněno, spárujte prosím znovu svou peněženku</string>
+    <string name="sms">SMS</string>
+    <string name="google_authenticator">Ověřovač Google</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">Nejprve prosím v nastavení zabezpečení zakažte dvoufaktorové ověření pomocí SMS.</string>
+    <string name="settings_field_cant_be_empty">Pole nemůže být prázdné.</string>
+    <string name="settings_error_updating">Chyba aktualizace nastavení, zkuste to prosím znovu</string>
+    <string name="request_write_storage_permission">Je vyžadován zápis na externí úložiště.</string>
+    <string name="verify_sms_failed">Neplatný kód, zkuste to prosím znovu</string>
+    <string name="enable_fingerprint">Odemknout otiskem prstu</string>
+
+    <string name="transaction_detail_coinbase">Žádné vstupy (nově generované mince)</string>
+    <string name="transaction_detail_double_spend">Může nastat riziko dvojnásobné útraty.</string>
+    <string name="security_centre_add_email_title">E-mailová adresa</string>
+    <string name="security_centre_add_email_message">Přidejte a ověřte svou e-mailovou adresu, abyste dostávali upozornění, zabránili podezřelým činnostem a obnovili ID své peněženky, pokud ho zapomenete.</string>
+    <string name="security_centre_add_email_positive_button">Přidat</string>
+
+    <string name="fingerprint_prompt">Použijte otisk prstu k rychlejšímu přístupu ke své peněžence.\n\nChcete-li pokračovat, pak potvrďte otisk prstu</string>
+    <string name="fingerprint_description">Chcete-li pokračovat, pak potvrďte otisk prstu</string>
+    <string name="fingerprint_hint">Snímač dotyku</string>
+    <string name="fingerprint_login_title">Přihlášení otiskem prstu</string>
+    <string name="fingerprint_not_recognized">Otisk prstu nerozeznán Zkusit znovu</string>
+    <string name="fingerprint_success">Otisk prstu rozeznán</string>
+    <string name="fingerprint_use_pin">Použít PIN</string>
+    <string name="fingerprint_disable_message">Opravdu chcete zakázat přihlášení otiskem prstu?</string>
+    <string name="fingerprint_no_fingerprints_added">Na tomto zařízení nebyly ještě zaregistrovány žádné otisky prstu. Chcete nyní zaregistrovat otisk prstu?</string>
+    <string name="fingerprint_key_invalidated_description">Buď se změnily otisky prstu uložené na tomto zařízení, nebo byl zakázán strážce klíčů</string>
+    <string name="fingerprint_key_invalidated_brief">Klíče zneplatněny, vyžadován kód PIN</string>
+    <string name="fingerprint_fatal_error_register_description">Během posledních 30 minut bylo příliš mnoho neúspěšných pokusů. Zkuste prosím instalaci později znovu.</string>
+    <string name="fingerprint_fatal_error_authenticate_description">Bylo příliš mnoho neúspěšných pokusů. Přihlaste se prosím místo toho pomocí svého PINu.</string>
+    <string name="fingerprint_fatal_error_brief">Neočekávaná chyba</string>
+
+    <string name="shortcut_receive_copy_short">Kopírovat adresu</string>
+    <string name="shortcut_receive_copy_long">Zkopírovat adresu do jiné aplikace</string>
+    <string name="shortcut_receive_qr_short">Zobrazit QR pro přijetí</string>
+    <string name="shortcut_receive_qr_long">Zobrazit kód QR pro přijímací adresu</string>
+    <string name="shortcut_receive_qr_error">Litujeme, během generování kódu QR nastala chyba</string>
+    <string name="shortcut_settings_enable">Zástupci spouštění</string>
+    <string name="shortcut_settings_summary">Povolte tuto možnost, abyste odkryli přijímací adresu, když ve spouštěči dlouze stisknete ikonu aplikace. Díky tomu budete přijímat bitcoiny ještě rychleji.</string>
+
+    <string name="swipe_receive_hint">Potažením přijmout</string>
+    <string name="swipe_receive_preference_summary">Povolením této možnosti zjistíte přijímací adresu, pokud přejedete prstem doleva na obrazovce PINu. Díky tomu budete přijímat bitcoiny ještě rychleji. Postupně se načte pět adres, poté bude pro zobrazení nových adres vyžadováno přihlášení.</string>
+    <string name="swipe_receive_no_addresses">Nyní nelze načíst další adresy. Přihlaste se do aplikace, abyste načetli další.</string>
+
+    <string name="survey_message">Chcete vyplnit krátký dotazník, abyste pomohli zlepšit svůj zážitek z peněženky?\n\nVážíme si vaší zpětné vazby!</string>
+    <string name="survey_positive_button">Vyplnit dotazník</string>
 </resources>

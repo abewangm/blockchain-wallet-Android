@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain </string>
     <string name="action_settings">Ayarlar</string>
 
-    <string name="all_accounts">Tümü</string>
+    <string name="all_accounts">Tüm Cüzdanlar</string>
 
     <string name="please_wait">Lütfen bekleyin</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">Şifreniz sunucularımızla asla paylaşılmaz, bu sebeple şifrenizi unuttuğunuz zaman sıfırlamanıza yardımcı olamıyoruz.  Şifrenin kaybolması durumunda cüzdanınıza erişimi sıfırlamak için kurtarma ifadenizi not ettiğinizden emin olun.</string>
     <string name="verify_email_notice">E-posta adresinize bir doğrulama bağlantısı gönderdik. E-posta adresinizi doğrulamak için lütfen gönderilen doğrulama bağlantısına tıklayın.</string>
     <string name="email_notifications">E-posta Bildirimleri</string>
-    <string name="email_notifications_summary">Her bitcoin aldığınızda bir e-posta almak için bildirimleri etkinleştirin. Sadece etiketli ve alınan adresler tetikleyici bildirimler almak için geçerlidir.</string>
+    <string name="email_notifications_summary">Bitcoin aldığınzda bildirim alın.</string>
     <string name="current_password">Mevcut Şifre</string>
     <string name="new_password">Yeni Şifre</string>
     <string name="sms_verified">Cep telefonu numarası doğrulandı</string>
@@ -412,4 +412,59 @@
     <string name="go_back">Geri git</string>
     <string name="accept_higher_fee">Daha yüksek ücreti kabul et</string>
     <string name="large_tx_high_fee_warning">"Bu işlem, küçük miktarda para üstü iadesi sebebiyle toz tüketimi için daha yüksek bir ücret gerektirir."</string>
+
+    <string name="transactions">İşlemler</string>
+    <string name="invalid_password_too_short">Lütfen 3 karakterden fazla girmeyin</string>
+    <string name="change_pin_new_matches_current">Mevcut PIN kodunuzu yeni PIN kodunuz olarak giremezsiniz</string>
+    <string name="account_locked_title">Hesap kilitlendi</string>
+    <string name="account_locked_message">Hesabınız ihtiyati olarak geçici şekilde kilitlenmiştir Lütfen daha fazla bilgi için e-postanızı kontrol edin ve daha sonra tekrar deneyin.</string>
+    <string name="licenses">Lisanslar</string>
+    <string name="email_chooser">E-posta gönder...</string>
+    <string name="password_changed_explanation">Şifreniz değiştirildi, lütfen cüzdanınızı onarın</string>
+    <string name="sms">SMS</string>
+    <string name="google_authenticator">Google Kimlik Denetleyici</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">Lütfen ilk olarak güvenlik ayarlarından 2-aşamalı Doğrulamayı devre dışı bırakın.</string>
+    <string name="settings_field_cant_be_empty">Alan boş kalamaz.</string>
+    <string name="settings_error_updating">Ayarlar güncellenirken hata oluştu, lütfen tekrar deneyin</string>
+    <string name="request_write_storage_permission">Yazılı harici depolama gerekli.</string>
+    <string name="verify_sms_failed">Kod geçersiz, lütfen tekrar deneyin</string>
+    <string name="enable_fingerprint">Parmak İzinin Kilidi Açıldı</string>
+
+    <string name="transaction_detail_coinbase">Giriş Yok (Yeni Oluşturulmuş Paralar)</string>
+    <string name="transaction_detail_double_spend">Çift harcama riski altında olabilir.</string>
+    <string name="security_centre_add_email_title">E-posta Adresi</string>
+    <string name="security_centre_add_email_message">Bildirim almak, şüpheli aktiviteyi engellemek ve Cüzdan Kimliğinizi unutmanız halinde kurtarmak için e-posta adresinizi girin ve doğrulayın.</string>
+    <string name="security_centre_add_email_positive_button">Ekle</string>
+
+    <string name="fingerprint_prompt">Cüzdanınıza daha hızlı ve kolay bir erişim için parmak izinizi kullanın.\n\nDevam etmek için parmak izini onaylayın</string>
+    <string name="fingerprint_description">Devam etmek için parmak izini onaylayın</string>
+    <string name="fingerprint_hint">Dokunma algılayıcı</string>
+    <string name="fingerprint_login_title">Parmak iziyle oturum açma</string>
+    <string name="fingerprint_not_recognized">Parmak izi tanınmadı Tekrar dene</string>
+    <string name="fingerprint_success">Parmak izi tanındı</string>
+    <string name="fingerprint_use_pin">PIN kodu kullan</string>
+    <string name="fingerprint_disable_message">Parmak iziyle oturum açmayı devre dışı bırakmak istediğinizden emin misiniz?</string>
+    <string name="fingerprint_no_fingerprints_added">Bu cihaza henüz parmak izi kaydedilmedi. Şimdi bir parmak izi kaydetmek ister misiniz?</string>
+    <string name="fingerprint_key_invalidated_description">Ya bu cihazda saklanan parmak izleri değiştirilmiş ya da tuş kilidi devre dışı bırakılmış</string>
+    <string name="fingerprint_key_invalidated_brief">Tuşlar geçersiz bırakılmış, PIN kodu gerekli</string>
+    <string name="fingerprint_fatal_error_register_description">Son 30 dakika içinde çok fazla başarısız girişim oldu. Lütfen daha sonra yeniden kurmayı deneyin.</string>
+    <string name="fingerprint_fatal_error_authenticate_description">Çok fazla başarısız girişim oldu. Lütfen bunun yerine PIN kodu kullanarak oturum açın</string>
+    <string name="fingerprint_fatal_error_brief">Beklenmedik hata</string>
+
+    <string name="shortcut_receive_copy_short">Adresi Kopyala</string>
+    <string name="shortcut_receive_copy_long">Alıcı adresini başka bir uygulamaya kopyalayın</string>
+    <string name="shortcut_receive_qr_short">Alıcı QR Kodunu Göster</string>
+    <string name="shortcut_receive_qr_long">Alıcı adresi için QR kodunu görüntüle</string>
+    <string name="shortcut_receive_qr_error">Üzgünüz, QR kodu oluşturulurken bir hata oluştu</string>
+    <string name="shortcut_settings_enable">Başlatıcı Kısayolları</string>
+    <string name="shortcut_settings_summary">Başlatıcıda uygulama simgesine uzun basarak bitcoin almayı daha da hızlandırmak için bir alıcı adresi göstermek için bu seçeneği etkinleştirin.</string>
+
+    <string name="swipe_receive_hint">Almak için kaydırın</string>
+    <string name="swipe_receive_preference_summary">Bitcoin almayı daha da hızlandırmak için PIN ekranına sola dokunduğunuzda alıcı adresi almak için bu seçeneği etkinleştirin. Yeni adresleri göstermek için oturum açmanın gerekli olacağı beş adres sıralı şekilde yüklenecektir.</string>
+    <string name="swipe_receive_no_addresses">Şu an daha fazla adres yüklenemiyor. Daha fazla yüklemek için uygulamada oturum açın.</string>
+
+    <string name="survey_message">Cüzdan deneyiminizi geliştirmemize yardımcı olmak için kısa bir anket doldurmak ister misiniz?\n\nGeri bildiriminize değer veriyoruz!</string>
+    <string name="survey_positive_button">Ankete katılın</string>
+
 </resources>

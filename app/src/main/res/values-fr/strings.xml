@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Paramètres</string>
 
-    <string name="all_accounts">Tout</string>
+    <string name="all_accounts">Tous les portefeuilles</string>
 
     <string name="please_wait">Veuillez patienter</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">Votre mot de passe n\'est jamais partagé avec nos serveurs, ce qui signifie que nous ne pouvons pas vous aider à le réinitialiser si vous l\'oubliez. Assurez-vous d\’écrire votre phrase de récupération grâce à laquelle vous pouvez récupérer l\'accès à votre portefeuille en cas de perte de votre mot de passe.</string>
     <string name="verify_email_notice">Nous avons envoyé un lien de vérification à votre adresse e-mail. Cliquez sur le lien de vérification pour vérifier votre adresse e-mail.</string>
     <string name="email_notifications">Notifications par e-mail</string>
-    <string name="email_notifications_summary">Activez les notifications pour recevoir un e-mail à chaque fois que vous recevez des bitcoins. Seules les adresses libellées et les adresses importées peuvent déclencher des notifications.</string>
+    <string name="email_notifications_summary">Soyez notifié quand vous recevez des bitcoin.</string>
     <string name="current_password">Mot de passe actuel</string>
     <string name="new_password">Nouveau mot de passe</string>
     <string name="sms_verified">Numéro de téléphone portable vérifié</string>
@@ -412,4 +412,58 @@
     <string name="go_back">Retour</string>
     <string name="accept_higher_fee">Accepter des frais plus élevés</string>
     <string name="large_tx_high_fee_warning">« Le montant des modifications à rembourser étant faible, cette transaction requière des frais plus élevés pour la consommation de montants inférieurs au montant minimal accepté par le réseau bitcoin. »</string>
+
+    <string name="transactions">Transactions</string>
+    <string name="invalid_password_too_short">Veuillez entrer plus de 3 caractères</string>
+    <string name="change_pin_new_matches_current">Vous ne pouvez pas utilisez votre PIN actuel comme nouveau PIN</string>
+    <string name="account_locked_title">Compte bloqué</string>
+    <string name="account_locked_message">Votre compte a été temporairement bloqué par mesure de précaution. Veuillez consulter votre boîte e-mail pour plus d\'informations et réessayer un peu plus tard.</string>
+    <string name="licenses">Licences</string>
+    <string name="email_chooser">Envoyer un e-mail…</string>
+    <string name="password_changed_explanation">Votre mot de passe a été modifié, veuillez lier votre portefeuille à nouveau.</string>
+    <string name="sms">SMS</string>
+    <string name="google_authenticator">Google Anthenticator</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">Veuillez d\'abord désactiver la vérification à deux étapes par SMS dans les paramètres de sécurité.</string>
+    <string name="settings_field_cant_be_empty">Ce champ ne peut être laissé vide.</string>
+    <string name="settings_error_updating">Erreur dans la mise à jour des paramètres, veuillez essayer de nouveau.</string>
+    <string name="request_write_storage_permission">Écriture requise sur le dispositif de stockage externe.</string>
+    <string name="verify_sms_failed">Code invalide, veuillez essayer à nouveau</string>
+    <string name="enable_fingerprint">Déverrouillage à empreinte digitale</string>
+
+    <string name="transaction_detail_coinbase">Aucune émission (Pièces récemment créées)</string>
+    <string name="transaction_detail_double_spend">Risque potentiel de double dépense.</string>
+    <string name="security_centre_add_email_title">Adresse e-mail</string>
+    <string name="security_centre_add_email_message">Ajoutez et vérifiez votre adresse e-mail pour recevoir des alertes, prévenir les activités suspectes et récupérer votre identifiant de portefeuille si vous l\'avez oublié.</string>
+    <string name="security_centre_add_email_positive_button">Ajouter</string>
+
+    <string name="fingerprint_prompt">Utilisez votre empreinte pour accéder plus rapidement et plus facilement à votre portefeuille.\n\nConfirmez votre empreinte pour continuer</string>
+    <string name="fingerprint_description">Confirmez votre empreinte pour continuer</string>
+    <string name="fingerprint_hint">Capteur d\'empreinte</string>
+    <string name="fingerprint_login_title">Se connecter à l\'aide de l\'empreinte digitale</string>
+    <string name="fingerprint_not_recognized">L\'empreinte digitale n\'est pas reconnue. Réessayez</string>
+    <string name="fingerprint_success">Empreinte digitale</string>
+    <string name="fingerprint_use_pin">Utiliser le PIN</string>
+    <string name="fingerprint_disable_message">Êtes-vous sûr de vouloir désactiver la connexion à l\'aide de l\'empreinte digitale ?</string>
+    <string name="fingerprint_no_fingerprints_added">Aucune empreinte digitale n\'a encore été enregistrée sur cet appareil. Souhaitez-vous enregistrer votre empreinte maintenant ?</string>
+    <string name="fingerprint_key_invalidated_description">Soit les empreintes digitales conservées sur cet appareil ont été modifiées ou le protège-clavier a été verrouillé</string>
+    <string name="fingerprint_key_invalidated_brief">Les clés invalidées, code PIN est requis</string>
+    <string name="fingerprint_fatal_error_register_description">Il y a eu de trop nombreuses tentatives infructueuses au cours des 30 dernières minutes. Veuillez procéder à une nouvelle installation plus tard.</string>
+    <string name="fingerprint_fatal_error_authenticate_description">Il y a eu de trop nombreuses tentatives infructueuses. Veuillez plutôt vous connecter à l\'aide de votre PIN.</string>
+    <string name="fingerprint_fatal_error_brief">Erreur inattendue</string>
+
+    <string name="shortcut_receive_copy_short">Copier l’adresse</string>
+    <string name="shortcut_receive_copy_long">Copier l\'adresse reçu à partir d\'une autre appli</string>
+    <string name="shortcut_receive_qr_short">Afficher le QR reçu</string>
+    <string name="shortcut_receive_qr_long">Voir le code QR pour recevoir l\'adresse</string>
+    <string name="shortcut_receive_qr_error">Désolé, une erreur est survenue lors de la génération du code QR</string>
+    <string name="shortcut_settings_enable">Raccourcis du lanceur</string>
+    <string name="shortcut_settings_summary">Activez cette option pour révéler une adresse de destinataire lorsque vous appuyez longuement sur l\'icône de l\'application sur le lanceur, ainsi vous recevrez le bitcoin plus rapidement.</string>
+
+    <string name="swipe_receive_hint">Faire glisser pour recevoir</string>
+    <string name="swipe_receive_preference_summary">Activez cette option si vous souhaitez voir l\'adresse du destinataire lorsque vous faites glisser votre doigt à gauche de l\'écran du PIN. Cela vous permet des recevoir des bitcoin encore plus rapidement. Cinq adresses seront chargées consécutivement, après quoi vous devrez vous connecter pour afficher les nouvelles adresses.</string>
+    <string name="swipe_receive_no_addresses">Aucune adresse supplémentaire ne peut être chargée actuellement. Connectez-vous à l\'appli pour charger plus d\'adresses.</string>
+
+    <string name="survey_message">Souhaitez-vous répondre à un court questionnaire pour améliorer votre expérience de portefeuille ? \n\nVos commentaires sont les bienvenus !</string>
+    <string name="survey_positive_button">Répondre au questionnaire</string>
 </resources>
