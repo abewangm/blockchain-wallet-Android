@@ -30,6 +30,8 @@ import piuk.blockchain.android.databinding.FragmentContactDetailBinding;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.ViewUtils;
 
@@ -74,7 +76,13 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
         binding.buttonSend.setOnClickListener(v -> viewModel.onSendMoneyClicked());
         binding.buttonRequest.setOnClickListener(v -> viewModel.onRequestMoneyClicked());
 
-        transactionAdapter = new ContactTransactionAdapter(new ArrayList<>(), new StringUtils(getActivity()));
+        String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
+
+        transactionAdapter = new ContactTransactionAdapter(new ArrayList<>(),
+                new StringUtils(getActivity()),
+                viewModel.getPrefsUtil(),
+                lastPrice);
         transactionAdapter.setClickListener(id -> viewModel.onTransactionClicked(id));
 
         binding.recyclerView.setAdapter(transactionAdapter);
@@ -225,7 +233,8 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
 
     @Override
     public void initiatePayment(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex) {
-        if (listener != null) listener.onPaymentInitiated(uri, recipientId, mdid, fctxId, isBtc, defaultIndex);
+        if (listener != null)
+            listener.onPaymentInitiated(uri, recipientId, mdid, fctxId, isBtc, defaultIndex);
     }
 
     @Override

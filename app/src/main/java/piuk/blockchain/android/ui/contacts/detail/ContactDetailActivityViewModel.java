@@ -2,6 +2,8 @@ package piuk.blockchain.android.ui.contacts.detail;
 
 import android.support.annotation.StringRes;
 
+import info.blockchain.wallet.exceptions.MismatchValueException;
+
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
@@ -26,6 +28,8 @@ public class ContactDetailActivityViewModel extends BaseViewModel {
         void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
         void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId);
+
+        void dismissPaymentPage();
     }
 
     ContactDetailActivityViewModel(DataListener dataListener) {
@@ -43,8 +47,20 @@ public class ContactDetailActivityViewModel extends BaseViewModel {
 
         compositeDisposable.add(
                 contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
-                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                        .subscribe(() -> dataListener.onShowToast(R.string.contacts_payment_sent_success, ToastCustom.TYPE_OK),
-                                throwable -> dataListener.showBroadcastFailedDialog(mdid, txHash, facilitatedTxId)));
+                        .doAfterTerminate(() -> {
+                            dataListener.dismissPaymentPage();
+                            dataListener.dismissProgressDialog();
+                        })
+                        .subscribe(
+                                () -> dataListener.onShowToast(R.string.contacts_payment_sent_success, ToastCustom.TYPE_OK),
+                                throwable -> {
+                                    if (throwable instanceof MismatchValueException) {
+                                        // Show warning that amount wasn't enough
+                                        // TODO: 24/01/2017 Implement me
+                                        dataListener.onShowToast(R.string.not_sane_error, ToastCustom.TYPE_OK);
+                                    } else {
+                                        dataListener.showBroadcastFailedDialog(mdid, txHash, facilitatedTxId);
+                                    }
+                                }));
     }
 }

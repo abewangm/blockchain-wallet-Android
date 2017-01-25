@@ -460,6 +460,7 @@ public class SendViewModel extends BaseViewModel {
         if (!btcAddress.equals("")) {
             sendModel.setDestinationAddress(btcAddress);
             sendModel.pendingTransaction.receivingObject = null;
+            sendModel.pendingTransaction.receivingAddress = btcAddress;
         }
         if (btcAmount != null && !btcAmount.equals("")) {
             dataListener.onRemoveBtcTextChangeListener();
@@ -850,9 +851,7 @@ public class SendViewModel extends BaseViewModel {
         }
 
         if (bypassFeeCheck || isFeeAdequate()) {
-
             if (isValidSpend(sendModel.pendingTransaction)) {
-
                 LegacyAddress legacyAddress = null;
 
                 if (!sendModel.pendingTransaction.isHD()) {

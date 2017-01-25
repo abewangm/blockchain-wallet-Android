@@ -116,6 +116,10 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
         }
     }
 
+    PrefsUtil getPrefsUtil() {
+        return prefsUtil;
+    }
+
     void onDeleteContactClicked() {
         dataListener.showDeleteUserDialog();
     }

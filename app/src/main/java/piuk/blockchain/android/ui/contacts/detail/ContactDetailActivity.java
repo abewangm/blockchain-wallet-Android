@@ -19,7 +19,9 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.SendFragment;
+import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID;
 
 public class ContactDetailActivity extends BaseAuthActivity implements
@@ -155,8 +157,15 @@ public class ContactDetailActivity extends BaseAuthActivity implements
     }
 
     @Override
+    public void dismissPaymentPage() {
+        onBackPressed();
+    }
+
+    @Override
     public void onShowTransactionDetailCalled(String hash) {
-        // TODO: 23/01/2017 Update the transaction list to work by hash
+        Bundle bundle = new Bundle();
+        bundle.putString(KEY_TRANSACTION_HASH, hash);
+        TransactionDetailActivity.start(this, bundle);
     }
 
     @Override

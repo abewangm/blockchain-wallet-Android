@@ -2,6 +2,8 @@ package piuk.blockchain.android.ui.contacts.detail;
 
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
+import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.util.MonetaryUtil;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
+
+import static piuk.blockchain.android.ui.balance.BalanceFragment.SHOW_BTC;
+import static piuk.blockchain.android.ui.send.SendViewModel.SHOW_FIAT;
 
 class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionAdapter.TransactionViewHolder> {
 
@@ -22,10 +29,25 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
     private List<FacilitatedTransaction> facilitatedTransactions;
     private final StringUtils stringUtils;
     private TransactionClickListener listener;
+    private final MonetaryUtil monetaryUtil;
+    private PrefsUtil prefsUtil;
+    private double lastPrice;
+    private boolean isBtc;
+    private final String fiatString;
 
-    ContactTransactionAdapter(ArrayList<FacilitatedTransaction> facilitatedTransactions, StringUtils stringUtils) {
+    ContactTransactionAdapter(ArrayList<FacilitatedTransaction> facilitatedTransactions,
+                              StringUtils stringUtils,
+                              PrefsUtil prefsUtil,
+                              double lastPrice) {
+
         this.facilitatedTransactions = facilitatedTransactions;
         this.stringUtils = stringUtils;
+        monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
+        this.prefsUtil = prefsUtil;
+        this.lastPrice = lastPrice;
+        int balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+        isBtc = balanceDisplayState != SHOW_FIAT;
+        fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
     }
 
     @Override
@@ -43,8 +65,9 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
             if (listener != null) listener.onClick(transaction.getId());
         });
 
-        holder.title.setText(String.valueOf(transaction.getIntended_amount()));
+        // TODO: 25/01/2017 Temporary until all states are accounted for
         holder.subtitle.setText(transaction.getState());
+        holder.indicator.setVisibility(View.GONE);
 
         if (transaction.getState() != null
                 && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
@@ -52,6 +75,7 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
                 && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
                 || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
             holder.indicator.setVisibility(View.VISIBLE);
+            holder.subtitle.setText(stringUtils.getString(R.string.contacts_waiting_for_address_title));
 
         } else if (transaction.getState() != null
                 && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
@@ -59,10 +83,37 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
                 && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
                 || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
             holder.indicator.setVisibility(View.VISIBLE);
+            holder.subtitle.setText(stringUtils.getString(R.string.contacts_waiting_for_payment_title));
 
-        } else {
-            holder.indicator.setVisibility(View.GONE);
+        } else if (transaction.getState() != null
+                && transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
+            if (transaction.getRole() != null
+                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
+                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
+
+                holder.subtitle.setText(stringUtils.getString(R.string.SENT));
+            } else {
+                holder.subtitle.setText(stringUtils.getString(R.string.RECEIVED));
+            }
         }
+
+        double btcBalance = transaction.getIntended_amount() / 1e8;
+        double fiatBalance = lastPrice * btcBalance;
+
+        Spannable spannable;
+        if (isBtc) {
+            spannable = Spannable.Factory.getInstance().newSpannable(
+                    monetaryUtil.getDisplayAmountWithFormatting(Math.abs(transaction.getIntended_amount())) + " " + getDisplayUnits());
+            spannable.setSpan(
+                    new RelativeSizeSpan(0.67f), spannable.length() - getDisplayUnits().length(), spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        } else {
+            spannable = Spannable.Factory.getInstance().newSpannable(
+                    monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatBalance)) + " " + fiatString);
+            spannable.setSpan(
+                    new RelativeSizeSpan(0.67f), spannable.length() - 3, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        holder.title.setText(spannable);
     }
 
     void setClickListener(TransactionClickListener listener) {
@@ -78,6 +129,10 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new ContactTransactionDiffUtil(facilitatedTransactions, transactions));
         facilitatedTransactions = transactions;
         diffResult.dispatchUpdatesTo(this);
+    }
+
+    private String getDisplayUnits() {
+        return (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
     }
 
     static class TransactionViewHolder extends RecyclerView.ViewHolder {
