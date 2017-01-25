@@ -18,7 +18,7 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 public class ContactsInvitationBuilderSenderFragment extends Fragment {
 
-    private static final String KEY_BUNDLE_NAME = "bundle_name";
+    private static final String ARGUMENT_NAME = "name";
     @Thunk FragmentContactsInvitationBuilderSenderBinding binding;
     private FragmentInteractionListener listener;
 
@@ -28,7 +28,7 @@ public class ContactsInvitationBuilderSenderFragment extends Fragment {
 
     public static ContactsInvitationBuilderSenderFragment newInstance(String name) {
         Bundle args = new Bundle();
-        args.putString(KEY_BUNDLE_NAME, name);
+        args.putString(ARGUMENT_NAME, name);
         ContactsInvitationBuilderSenderFragment fragment = new ContactsInvitationBuilderSenderFragment();
         fragment.setArguments(args);
         return fragment;
@@ -48,7 +48,7 @@ public class ContactsInvitationBuilderSenderFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        String name = getArguments().getString(KEY_BUNDLE_NAME);
+        String name = getArguments().getString(ARGUMENT_NAME);
         binding.textviewName.setText(getString(R.string.contacts_how_are_you_known_header, name));
 
 

@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.contacts.detail;
 
+import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
@@ -68,6 +69,7 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
         // TODO: 25/01/2017 Temporary until all states are accounted for
         holder.subtitle.setText(transaction.getState());
         holder.indicator.setVisibility(View.GONE);
+        holder.title.setTextColor(ContextCompat.getColor(holder.title.getContext(), R.color.black));
 
         if (transaction.getState() != null
                 && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
@@ -78,12 +80,14 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
             holder.subtitle.setText(stringUtils.getString(R.string.contacts_waiting_for_address_title));
 
         } else if (transaction.getState() != null
-                && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                && transaction.getRole() != null
-                && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
-                || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
-            holder.indicator.setVisibility(View.VISIBLE);
+                && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
             holder.subtitle.setText(stringUtils.getString(R.string.contacts_waiting_for_payment_title));
+
+            if (transaction.getRole() != null
+                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
+                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
+                holder.indicator.setVisibility(View.VISIBLE);
+            }
 
         } else if (transaction.getState() != null
                 && transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
@@ -92,8 +96,14 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
                     || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
 
                 holder.subtitle.setText(stringUtils.getString(R.string.SENT));
+                holder.subtitle.setTextColor(ContextCompat.getColor(
+                        holder.title.getContext(),
+                        R.color.blockchain_send_red));
             } else {
                 holder.subtitle.setText(stringUtils.getString(R.string.RECEIVED));
+                holder.subtitle.setTextColor(ContextCompat.getColor(
+                        holder.title.getContext(),
+                        R.color.blockchain_receive_green));
             }
         }
 

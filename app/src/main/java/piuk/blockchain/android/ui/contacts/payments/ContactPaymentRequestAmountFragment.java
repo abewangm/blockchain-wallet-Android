@@ -28,8 +28,8 @@ import piuk.blockchain.android.util.annotations.Thunk;
 public class ContactPaymentRequestAmountFragment extends Fragment implements ContactRequestAmountViewModel.DataListener {
 
     private static final String TAG = ContactPaymentRequestAmountFragment.class.getSimpleName();
-    private static final String KEY_BUNDLE_REQUEST_TYPE = "request_type";
-    private static final String KEY_BUNDLE_CONTACT_NAME = "contact_name";
+    private static final String ARGUMENT_REQUEST_TYPE = "request_type";
+    private static final String ARGUMENT_CONTACT_NAME = "contact_name";
 
     @Thunk FragmentContactPaymentRequestAmountBinding binding;
     @Thunk ContactRequestAmountViewModel viewModel;
@@ -38,8 +38,8 @@ public class ContactPaymentRequestAmountFragment extends Fragment implements Con
 
     public static ContactPaymentRequestAmountFragment newInstance(PaymentRequestType requestType, String contactName) {
         Bundle args = new Bundle();
-        args.putSerializable(KEY_BUNDLE_REQUEST_TYPE, requestType);
-        args.putString(KEY_BUNDLE_CONTACT_NAME, contactName);
+        args.putSerializable(ARGUMENT_REQUEST_TYPE, requestType);
+        args.putString(ARGUMENT_CONTACT_NAME, contactName);
         ContactPaymentRequestAmountFragment fragment = new ContactPaymentRequestAmountFragment();
         fragment.setArguments(args);
         return fragment;
@@ -133,9 +133,9 @@ public class ContactPaymentRequestAmountFragment extends Fragment implements Con
 
         viewModel = new ContactRequestAmountViewModel(this, Locale.getDefault());
 
-        String contactName = getArguments().getString(KEY_BUNDLE_CONTACT_NAME);
+        String contactName = getArguments().getString(ARGUMENT_CONTACT_NAME);
         PaymentRequestType paymentRequestType =
-                (PaymentRequestType) getArguments().getSerializable(KEY_BUNDLE_REQUEST_TYPE);
+                (PaymentRequestType) getArguments().getSerializable(ARGUMENT_REQUEST_TYPE);
 
         if (paymentRequestType != null && contactName != null) {
             if (paymentRequestType.equals(PaymentRequestType.SEND)) {

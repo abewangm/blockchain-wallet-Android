@@ -3,7 +3,10 @@ package piuk.blockchain.android.data.notifications;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
+
+import java.util.Map;
 
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
@@ -23,31 +26,19 @@ public class FcmCallbackService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        Log.d(TAG, "onMessageReceived: " + remoteMessage);
-
-        Log.d(TAG, "From: " + remoteMessage.getFrom());
 
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
 
             // Parse data, emit events
-            notificationSubject.onNext(new NotificationPayload());
+            NotificationPayload payload = new NotificationPayload(remoteMessage.getData());
+            notificationSubject.onNext(payload);
 
-        }
-
-        // Check if message contains a notification payload.
-        if (remoteMessage.getNotification() != null) {
-            RemoteMessage.Notification notification = remoteMessage.getNotification();
-
-            Log.d(TAG, "Message Notification Body: " + notification.getBody());
-
-
-            // Emit notification
             new NotificationsUtil(getApplicationContext()).setNotification(
-                    remoteMessage.getNotification().getTitle(),
-                    remoteMessage.getNotification().getBody(),
-                    remoteMessage.getNotification().getTag(),
+                    payload.getTitle(),
+                    payload.getBody(),
+                    payload.getBody(),
                     R.drawable.ic_notification_transparent,
                     R.drawable.ic_launcher,
                     ContactsListActivity.class,
@@ -62,9 +53,28 @@ public class FcmCallbackService extends FirebaseMessagingService {
     @SuppressWarnings("WeakerAccess")
     public static class NotificationPayload {
 
-        // lol i dunno because nothing is working right now
-        String payload;
+        private String title;
+        private String body;
 
+        public NotificationPayload(Map<String, String> map) {
+            if (map.containsKey("title")) {
+                title = map.get("title");
+            }
+
+            if (map.containsValue("body")) {
+                body = map.get("body");
+            }
+        }
+
+        @Nullable
+        public String getTitle() {
+            return title;
+        }
+
+        @Nullable
+        public String getBody() {
+            return body;
+        }
     }
 
 }

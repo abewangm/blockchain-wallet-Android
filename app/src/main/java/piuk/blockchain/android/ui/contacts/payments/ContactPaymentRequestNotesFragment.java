@@ -15,8 +15,8 @@ import piuk.blockchain.android.databinding.FragmentContactPaymentRequestNotesBin
 
 public class ContactPaymentRequestNotesFragment extends Fragment {
 
-    public static final String KEY_BUNDLE_REQUEST_TYPE = "request_type";
-    public static final String KEY_BUNDLE_CONTACT_NAME = "contact_name";
+    public static final String ARGUMENT_REQUEST_TYPE = "request_type";
+    public static final String ARGUMENT_CONTACT_NAME = "contact_name";
 
     private FragmentContactPaymentRequestNotesBinding binding;
     private FragmentInteractionListener listener;
@@ -27,8 +27,8 @@ public class ContactPaymentRequestNotesFragment extends Fragment {
 
     public static ContactPaymentRequestNotesFragment newInstance(PaymentRequestType requestType, String contactName) {
         Bundle args = new Bundle();
-        args.putSerializable(KEY_BUNDLE_REQUEST_TYPE, requestType);
-        args.putString(KEY_BUNDLE_CONTACT_NAME, contactName);
+        args.putSerializable(ARGUMENT_REQUEST_TYPE, requestType);
+        args.putString(ARGUMENT_CONTACT_NAME, contactName);
         ContactPaymentRequestNotesFragment fragment = new ContactPaymentRequestNotesFragment();
         fragment.setArguments(args);
         return fragment;
@@ -48,12 +48,12 @@ public class ContactPaymentRequestNotesFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        String contactName = getArguments().getString(KEY_BUNDLE_CONTACT_NAME);
+        String contactName = getArguments().getString(ARGUMENT_CONTACT_NAME);
         PaymentRequestType paymentRequestType =
-                (PaymentRequestType) getArguments().getSerializable(KEY_BUNDLE_REQUEST_TYPE);
+                (PaymentRequestType) getArguments().getSerializable(ARGUMENT_REQUEST_TYPE);
 
         if (paymentRequestType != null) {
-            if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
+            if (paymentRequestType.equals(PaymentRequestType.SEND)) {
                 binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_send_note, contactName));
             } else {
                 binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_receive_note, contactName));

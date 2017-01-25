@@ -29,6 +29,12 @@
         <!-- Only exists to prevent issues with pre-21 devices, see values-v21 -->
     </style>
 
+    <style name="NoDisplay" parent="@android:style/Theme.NoDisplay">
+        <item name="colorPrimary">@color/blockchain_blue</item>
+        <item name="colorPrimaryDark">@color/blockchain_dark_blue</item>
+        <item name="colorAccent">@color/blockchain_blue</item>
+    </style>
+
     <style name="AppTheme.ReceiveQrWindow">
         <item name="android:windowIsFloating">true</item>
         <item name="android:colorBackgroundCacheHint">@null</item>

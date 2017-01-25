@@ -16,6 +16,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
+import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -114,7 +115,7 @@ public class ContactsListViewModel extends BaseViewModel {
     }
 
     private boolean isInList(List<Contact> contacts, Contact toBeFound) {
-        for (Contact contact: contacts) {
+        for (Contact contact : contacts) {
             if (contact.getId().equals(toBeFound.getId())) {
                 return true;
             }
@@ -151,13 +152,11 @@ public class ContactsListViewModel extends BaseViewModel {
 
     private void subscribeToNotifications() {
         compositeDisposable.add(
-                FcmCallbackService.getNotificationSubject().subscribe(
-                        notificationPayload -> {
-                            Log.d(TAG, "subscribeToNotifications: ");
-                            // TODO: 02/12/2016 Filter specific events that are relevant to this page
-                        }, throwable -> {
-                            Log.e(TAG, "subscribeToNotifications: ", throwable);
-                        }));
+                FcmCallbackService.getNotificationSubject()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(
+                                notificationPayload -> onViewReady(),
+                                throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
     }
 
     private void handleLink(String data) {

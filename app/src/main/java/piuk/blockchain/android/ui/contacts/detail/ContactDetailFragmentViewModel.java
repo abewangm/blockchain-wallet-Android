@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.contacts.detail;
 
 import android.os.Bundle;
 import android.support.annotation.StringRes;
+import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
@@ -22,6 +23,8 @@ import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.FctxDateComparator;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.notifications.FcmCallbackService;
+import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -34,6 +37,8 @@ import static piuk.blockchain.android.ui.send.SendViewModel.SHOW_FIAT;
 
 @SuppressWarnings("WeakerAccess")
 public class ContactDetailFragmentViewModel extends BaseViewModel {
+
+    private static final String TAG = ContactDetailFragmentViewModel.class.getSimpleName();
 
     private DataListener dataListener;
     @Inject ContactsDataManager contactsDataManager;
@@ -83,6 +88,8 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
+        subscribeToNotifications();
+
         Bundle bundle = dataListener.getPageBundle();
         if (bundle != null && bundle.getString(KEY_BUNDLE_CONTACT_ID) != null) {
             String id = bundle.getString(KEY_BUNDLE_CONTACT_ID);
@@ -114,6 +121,15 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
         } else {
             showErrorAndQuitPage();
         }
+    }
+
+    private void subscribeToNotifications() {
+        compositeDisposable.add(
+                FcmCallbackService.getNotificationSubject()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(
+                                notificationPayload -> onViewReady(),
+                                throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
     }
 
     PrefsUtil getPrefsUtil() {

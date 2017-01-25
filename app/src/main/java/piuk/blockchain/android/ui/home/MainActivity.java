@@ -179,6 +179,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         super.onResume();
         appUtil.deleteQR();
         mainViewModel.storeSwipeReceiveAddresses();
+        mainViewModel.checkForMessages();
         resetNavigationDrawer();
 
         if (AndroidUtils.is25orHigher() && mainViewModel.areLauncherShortcutsEnabled()) {
@@ -518,8 +519,19 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     }
 
     @Override
-    public void onConnectivityFail() {
+    public void showContactsRegistrationFailure() {
+        if (!isFinishing()) {
+            new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.app_name)
+                    .setMessage(R.string.contacts_register_nodes_failure)
+                    .setPositiveButton(R.string.retry, (dialog, which) -> mainViewModel.checkForMessages())
+                    .create()
+                    .show();
+        }
+    }
 
+    @Override
+    public void onConnectivityFail() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogStyle);
         final String message = getString(R.string.check_connectivity_exit);
         builder.setMessage(message)

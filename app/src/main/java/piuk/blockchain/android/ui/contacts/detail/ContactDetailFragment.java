@@ -38,7 +38,7 @@ import piuk.blockchain.android.util.ViewUtils;
 
 public class ContactDetailFragment extends Fragment implements ContactDetailFragmentViewModel.DataListener {
 
-    private static final String KEY_BUNDLE_CONTACT_ID = "contact_id";
+    private static final String ARGUMENT_CONTACT_ID = "contact_id";
 
     private FragmentContactDetailBinding binding;
     private ContactDetailFragmentViewModel viewModel;
@@ -53,7 +53,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
     public static ContactDetailFragment newInstance(String contactId) {
         ContactDetailFragment fragment = new ContactDetailFragment();
         Bundle args = new Bundle();
-        args.putString(KEY_BUNDLE_CONTACT_ID, contactId);
+        args.putString(ARGUMENT_CONTACT_ID, contactId);
         fragment.setArguments(args);
         return fragment;
     }

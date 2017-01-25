@@ -45,7 +45,7 @@ public class ContactDetailActivity extends BaseAuthActivity implements
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (getIntent() != null && getIntent().hasExtra(KEY_BUNDLE_CONTACT_ID)) {
-            submitReplaceFragmentTransaction(
+            submitFragmentTransaction(
                     ContactDetailFragment.newInstance(
                             getIntent().getStringExtra(KEY_BUNDLE_CONTACT_ID)));
         } else {
@@ -56,25 +56,11 @@ public class ContactDetailActivity extends BaseAuthActivity implements
         viewModel.onViewReady();
     }
 
-    /**
-     * Replaces the current fragment
-     */
-    private void submitReplaceFragmentTransaction(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-        transaction.replace(R.id.content_frame, fragment)
-                .commit();
-    }
-
-    /**
-     * Adds fragment over the top of the current fragment
-     */
     private void submitFragmentTransaction(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-        transaction.add(R.id.content_frame, fragment)
+        transaction.replace(R.id.content_frame, fragment)
                 .commit();
     }
 
@@ -110,9 +96,9 @@ public class ContactDetailActivity extends BaseAuthActivity implements
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragmentById = fragmentManager.findFragmentById(R.id.content_frame);
         if (fragmentById != null && fragmentById instanceof SendFragment) {
-            fragmentManager.beginTransaction()
-                    .remove(fragmentById)
-                    .commit();
+            submitFragmentTransaction(
+                    ContactDetailFragment.newInstance(
+                            getIntent().getStringExtra(KEY_BUNDLE_CONTACT_ID)));
         } else {
             super.onBackPressed();
         }
@@ -142,6 +128,16 @@ public class ContactDetailActivity extends BaseAuthActivity implements
                 .setPositiveButton(R.string.retry, (dialog, which) ->
                         viewModel.broadcastPaymentSuccess(mdid, txHash, facilitatedTxId))
                 .setCancelable(false)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showPaymentMismatchDialog(@StringRes int message) {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
                 .create()
                 .show();
     }

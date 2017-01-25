@@ -11,9 +11,9 @@ public class FctxDateComparator implements Comparator<FacilitatedTransaction> {
 
     @Override
     public int compare(FacilitatedTransaction transaction1, FacilitatedTransaction transaction2) {
-        final int before = -1;
+        final int before = 1;
         final int equal = 0;
-        final int after = 1;
+        final int after = -1;
 
         if (transaction1.getCreated() < transaction2.getCreated()) {
             return before;

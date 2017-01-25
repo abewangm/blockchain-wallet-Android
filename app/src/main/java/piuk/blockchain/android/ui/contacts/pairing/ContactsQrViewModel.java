@@ -42,9 +42,9 @@ public class ContactsQrViewModel extends BaseViewModel {
     public void onViewReady() {
         if (dataListener.getFragmentBundle() != null) {
 
-            String name = dataListener.getFragmentBundle().getString(ContactsInvitationBuilderQrFragment.KEY_BUNDLE_NAME);
+            String name = dataListener.getFragmentBundle().getString(ContactsInvitationBuilderQrFragment.ARGUMENT_NAME);
             dataListener.updateDisplayMessage(name);
-            String uri = dataListener.getFragmentBundle().getString(ContactsInvitationBuilderQrFragment.KEY_BUNDLE_URI);
+            String uri = dataListener.getFragmentBundle().getString(ContactsInvitationBuilderQrFragment.ARGUMENT_URI);
 
             compositeDisposable.add(
                     qrCodeDataManager.generateQrCode(uri, DIMENSION_QR_CODE)

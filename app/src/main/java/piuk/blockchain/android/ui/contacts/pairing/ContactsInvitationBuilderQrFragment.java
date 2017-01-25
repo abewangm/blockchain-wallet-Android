@@ -17,8 +17,8 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 public class ContactsInvitationBuilderQrFragment extends Fragment implements ContactsQrViewModel.DataListener {
 
-    public static final String KEY_BUNDLE_URI = "bundle_uri";
-    public static final String KEY_BUNDLE_NAME = "bundle_name";
+    public static final String ARGUMENT_URI = "uri";
+    public static final String ARGUMENT_NAME = "name";
     private FragmentContactsInvitationBuilderQrBinding binding;
     private FragmentInteractionListener listener;
     private ContactsQrViewModel viewModel;
@@ -29,8 +29,8 @@ public class ContactsInvitationBuilderQrFragment extends Fragment implements Con
 
     public static ContactsInvitationBuilderQrFragment newInstance(String uri, String name) {
         Bundle args = new Bundle();
-        args.putString(KEY_BUNDLE_URI, uri);
-        args.putString(KEY_BUNDLE_NAME, name);
+        args.putString(ARGUMENT_URI, uri);
+        args.putString(ARGUMENT_NAME, name);
         ContactsInvitationBuilderQrFragment fragment = new ContactsInvitationBuilderQrFragment();
         fragment.setArguments(args);
         return fragment;

@@ -31,6 +31,7 @@ import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketService;
@@ -91,6 +92,8 @@ public class MainViewModel extends BaseViewModel {
         void showSurveyPrompt();
 
         void setMessagesVisibility(@ViewUtils.Visibility int visibility);
+
+        void showContactsRegistrationFailure();
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -107,13 +110,19 @@ public class MainViewModel extends BaseViewModel {
         checkIfShouldShowEmailVerification();
         startWebSocketService();
         registerNodeForMetaDataService();
+        subscribeToNotifications();
+    }
+
+    private void subscribeToNotifications() {
+        compositeDisposable.add(
+                FcmCallbackService.getNotificationSubject()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(
+                                notificationPayload -> checkForMessages(),
+                                throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
     }
 
     private void registerNodeForMetaDataService() {
-        // TODO: 28/11/2016 How to handle this if it fails?
-        // Might be best to delegate this function to a different manager that
-        // can retry the call at a later date
-
         // TODO: 19/12/2016 Handle second password. Could maybe prompt them on login to enter their
         // password to check for new messages
 
@@ -134,33 +143,31 @@ public class MainViewModel extends BaseViewModel {
                             if (finalUri != null) {
                                 dataListener.onStartContactsActivity(finalUri);
                             } else {
-                                compositeDisposable.add(
-                                        contactsDataManager.fetchContacts()
-                                                .andThen(contactsDataManager.getContactList())
-                                                .toList()
-                                                .flatMapObservable(contacts -> {
-                                                    if (!contacts.isEmpty()) {
-                                                        return contactsDataManager.getMessages(true);
-                                                    } else {
-                                                        return Observable.just(Collections.emptyList());
-                                                    }
-                                                })
-                                                .subscribe(
-                                                        messages -> {
-                                                            dataListener.setMessagesVisibility(messages.isEmpty() ? View.INVISIBLE : View.VISIBLE);
-                                                            // Marks all messages as read for debugging purposes
-                                                            if (!messages.isEmpty()) {
-//                                                                for (Message m : (List<Message>) messages) {
-//                                                                    contactsDataManager.markMessageAsRead(m.getId(), true).subscribe(new IgnorableDefaultObserver<>());
-//                                                                }
-                                                            }
-                                                        },
-                                                        throwable -> Log.e(TAG, "registerNodeForMetaDataService: ", throwable)));
+                                checkForMessages();
                             }
-                            // TODO: 01/12/2016 Should probably inform the user here if coming from URI click
-                        }, throwable -> Log.wtf(TAG, "registerNodeForMetaDataService: ", throwable)));
+                        }, throwable -> {
+                            dataListener.showContactsRegistrationFailure();
+                            Log.wtf(TAG, "registerNodeForMetaDataService: ", throwable);
+                        }));
 
         notificationTokenManager.resendNotificationToken();
+    }
+
+    void checkForMessages() {
+        compositeDisposable.add(
+                contactsDataManager.fetchContacts()
+                        .andThen(contactsDataManager.getContactList())
+                        .toList()
+                        .flatMapObservable(contacts -> {
+                            if (!contacts.isEmpty()) {
+                                return contactsDataManager.getMessages(true);
+                            } else {
+                                return Observable.just(Collections.emptyList());
+                            }
+                        })
+                        .subscribe(
+                                messages -> dataListener.setMessagesVisibility(messages.isEmpty() ? View.INVISIBLE : View.VISIBLE),
+                                throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
     }
 
     public void storeSwipeReceiveAddresses() {

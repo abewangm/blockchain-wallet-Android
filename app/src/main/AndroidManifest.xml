@@ -91,7 +91,7 @@
             android:name=".ui.auth.LogoutActivity"
             android:excludeFromRecents="true"
             android:noHistory="true"
-            android:theme="@android:style/Theme.NoDisplay" />
+            android:theme="@style/NoDisplay" />
         <activity
             android:name=".ui.auth.PasswordRequiredActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
