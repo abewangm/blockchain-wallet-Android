@@ -17,7 +17,6 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactDetailBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
-import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 
@@ -96,9 +95,13 @@ public class ContactDetailActivity extends BaseAuthActivity implements
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragmentById = fragmentManager.findFragmentById(R.id.content_frame);
         if (fragmentById != null && fragmentById instanceof SendFragment) {
-            submitFragmentTransaction(
-                    ContactDetailFragment.newInstance(
-                            getIntent().getStringExtra(KEY_BUNDLE_CONTACT_ID)));
+            if (((SendFragment) fragmentById).isKeyboardVisible()) {
+                ((SendFragment) fragmentById).onBackPressed();
+            } else {
+                submitFragmentTransaction(
+                        ContactDetailFragment.newInstance(
+                                getIntent().getStringExtra(KEY_BUNDLE_CONTACT_ID)));
+            }
         } else {
             super.onBackPressed();
         }
@@ -121,12 +124,12 @@ public class ContactDetailActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId) {
+    public void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_payment_sent_failed_message)
                 .setPositiveButton(R.string.retry, (dialog, which) ->
-                        viewModel.broadcastPaymentSuccess(mdid, txHash, facilitatedTxId))
+                        viewModel.broadcastPaymentSuccess(mdid, txHash, facilitatedTxId, transactionValue))
                 .setCancelable(false)
                 .create()
                 .show();
@@ -143,13 +146,18 @@ public class ContactDetailActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
-        ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    public void showBroadcastSuccessDialog() {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_payment_sent_success)
+                .setPositiveButton(android.R.string.ok, null)
+                .create()
+                .show();
     }
 
     @Override
-    public void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId) {
-        viewModel.broadcastPaymentSuccess(mdid, transactionHash, fctxId);
+    public void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue) {
+        viewModel.broadcastPaymentSuccess(mdid, transactionHash, fctxId, transactionValue);
     }
 
     @Override

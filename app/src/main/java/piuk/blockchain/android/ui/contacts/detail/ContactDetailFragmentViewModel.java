@@ -219,7 +219,9 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
                 List<String> accountNames = new ArrayList<>();
                 //noinspection Convert2streamapi
                 for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
-                    accountNames.add(account.getLabel());
+                    if (!account.isArchived()) {
+                        accountNames.add(account.getLabel());
+                    }
                 }
                 dataListener.showAccountChoiceDialog(accountNames, id);
 
@@ -251,7 +253,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
         paymentRequest.setId(fctxId);
 
         compositeDisposable.add(
-                getNextReceiveAddress(accountPosition)
+                getNextReceiveAddress(getCorrectedAccountIndex(accountPosition))
                         .doOnNext(paymentRequest::setAddress)
                         .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
@@ -271,6 +273,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
     private void sortAndUpdateTransactions(Collection<FacilitatedTransaction> values) {
         ArrayList<FacilitatedTransaction> facilitatedTransactions = new ArrayList<>(values);
         Collections.sort(facilitatedTransactions, new FctxDateComparator());
+        Collections.reverse(facilitatedTransactions);
 
         dataListener.onTransactionsUpdated(facilitatedTransactions);
     }
@@ -278,6 +281,21 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
     private void showErrorAndQuitPage() {
         dataListener.showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
         dataListener.finishPage();
+    }
+
+    private int getCorrectedAccountIndex(int accountIndex) {
+        // Filter accounts by active
+        List<Account> activeAccounts = new ArrayList<>();
+        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        for (int i = 0; i < accounts.size(); i++) {
+            Account account = accounts.get(i);
+            if (!account.isArchived()) {
+                activeAccounts.add(account);
+            }
+        }
+
+        // Find corrected position
+        return payloadManager.getPayload().getHdWallet().getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
 }

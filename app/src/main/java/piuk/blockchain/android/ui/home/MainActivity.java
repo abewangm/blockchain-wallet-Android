@@ -574,10 +574,14 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     }
 
     @Override
-    public void onStartContactsActivity(String data) {
-        Bundle bundle = new Bundle();
-        bundle.putString(EXTRA_METADATA_URI, data);
-        ContactsListActivity.start(this, bundle);
+    public void onStartContactsActivity(@Nullable String data) {
+        if (data != null) {
+            Bundle bundle = new Bundle();
+            bundle.putString(EXTRA_METADATA_URI, data);
+            ContactsListActivity.start(this, bundle);
+        } else {
+            ContactsListActivity.start(this, null);
+        }
     }
 
     @Override
@@ -675,7 +679,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     }
 
     @Override
-    public void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId) {
+    public void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue) {
         // No-op, this callback is used elsewhere
     }
 }

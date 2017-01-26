@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.home;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 
@@ -73,7 +74,7 @@ public class MainViewModel extends BaseViewModel {
 
         void onScanInput(String strUri);
 
-        void onStartContactsActivity(String data);
+        void onStartContactsActivity(@Nullable String data);
 
         void onStartBalanceFragment();
 
@@ -127,21 +128,30 @@ public class MainViewModel extends BaseViewModel {
         // password to check for new messages
 
         String uri = null;
+        boolean fromNotification = false;
 
         if (prefs.getValue(PrefsUtil.KEY_METADATA_URI, "").length() > 0) {
             uri = prefs.getValue(PrefsUtil.KEY_METADATA_URI, "");
             prefs.removeValue(PrefsUtil.KEY_METADATA_URI);
         }
 
-        final String finalUri = uri;
-        if (finalUri != null) dataListener.showProgressDialog();
+        if (prefs.getValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION, false)) {
+            prefs.removeValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION);
+            fromNotification = true;
+        }
 
+        final String finalUri = uri;
+        if (finalUri != null || fromNotification) dataListener.showProgressDialog();
+
+        final boolean finalFromNotification = fromNotification;
         compositeDisposable.add(
                 contactsDataManager.initContactsService(null)
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(() -> {
                             if (finalUri != null) {
                                 dataListener.onStartContactsActivity(finalUri);
+                            } else if (finalFromNotification) {
+                                dataListener.onStartContactsActivity(null);
                             } else {
                                 checkForMessages();
                             }

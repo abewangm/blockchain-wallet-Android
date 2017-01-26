@@ -69,12 +69,12 @@ import static android.databinding.DataBindingUtil.inflate;
 
 public class SendFragment extends Fragment implements SendViewModel.DataListener, CustomKeypadCallback {
 
-    public static final String ARG_SCAN_DATA = "scan_data";
-    public static final String ARG_IS_BTC = "is_btc";
-    public static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
-    public static final String ARG_CONTACT_ID = "contact_id";
-    public static final String ARG_CONTACT_MDID = "contact_mdid";
-    public static final String ARG_FCTX_ID = "fctx_id";
+    public static final String ARGUMENT_SCAN_DATA = "scan_data";
+    public static final String ARGUMENT_IS_BTC = "is_btc";
+    public static final String ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position";
+    public static final String ARGUMENT_CONTACT_ID = "contact_id";
+    public static final String ARGUMENT_CONTACT_MDID = "contact_mdid";
+    public static final String ARGUMENT_FCTX_ID = "fctx_id";
 
     private static final int SCAN_URI = 2007;
     private static final int SCAN_PRIVX = 2008;
@@ -116,12 +116,12 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                                            int selectedAccountPosition) {
         SendFragment fragment = new SendFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_SCAN_DATA, scanData);
-        args.putString(ARG_CONTACT_ID, contactId);
-        args.putString(ARG_CONTACT_MDID, mdid);
-        args.putString(ARG_FCTX_ID, fctxId);
-        args.putBoolean(ARG_IS_BTC, isBtc);
-        args.putInt(ARG_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
+        args.putString(ARGUMENT_SCAN_DATA, scanData);
+        args.putString(ARGUMENT_CONTACT_ID, contactId);
+        args.putString(ARGUMENT_CONTACT_MDID, mdid);
+        args.putString(ARGUMENT_FCTX_ID, fctxId);
+        args.putBoolean(ARGUMENT_IS_BTC, isBtc);
+        args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
         fragment.setArguments(args);
         return fragment;
     }
@@ -131,9 +131,9 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                                            int selectedAccountPosition) {
         SendFragment fragment = new SendFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_SCAN_DATA, scanData);
-        args.putBoolean(ARG_IS_BTC, isBtc);
-        args.putInt(ARG_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
+        args.putString(ARGUMENT_SCAN_DATA, scanData);
+        args.putBoolean(ARGUMENT_IS_BTC, isBtc);
+        args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
         fragment.setArguments(args);
         return fragment;
     }
@@ -141,9 +141,9 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (getArguments() != null) {
-            contactId = getArguments().getString(ARG_CONTACT_ID);
-            isBtc = getArguments().getBoolean(ARG_IS_BTC, true);
-            selectedAccountPosition = getArguments().getInt(ARG_SELECTED_ACCOUNT_POSITION);
+            contactId = getArguments().getString(ARGUMENT_CONTACT_ID);
+            isBtc = getArguments().getBoolean(ARGUMENT_IS_BTC, true);
+            selectedAccountPosition = getArguments().getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION);
         }
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_send, container, false);
@@ -280,8 +280,12 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         }
     }
 
+    public boolean isKeyboardVisible() {
+        return customKeypad.isVisible();
+    }
+
     public void onBackPressed() {
-        if (customKeypad.isVisible()) {
+        if (isKeyboardVisible()) {
             closeKeypad();
         } else {
             handleBackPressed();
@@ -584,7 +588,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     @Override
-    public void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId) {
+    public void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue) {
         playAudio();
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
 
@@ -605,23 +609,19 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         // happen if the user chooses to rate the app - they'll return to the main page.
         if (appRate.shouldShowDialog()) {
             AlertDialog ratingDialog = appRate.getRateDialog();
-            ratingDialog.setOnDismissListener(d -> {
-                finishAndNotifySuccess(mdid, hash, fctxId);
-            });
+            ratingDialog.setOnDismissListener(d -> finishAndNotifySuccess(mdid, hash, fctxId, transactionValue));
             transactionSuccessDialog.show();
             transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
         } else {
             transactionSuccessDialog.show();
-            transactionSuccessDialog.setOnDismissListener(dialogInterface -> {
-                finishAndNotifySuccess(mdid, hash, fctxId);
-            });
+            transactionSuccessDialog.setOnDismissListener(dialogInterface -> finishAndNotifySuccess(mdid, hash, fctxId, transactionValue));
         }
 
         dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
     }
 
-    private void finishAndNotifySuccess(@Nullable String mdid, String hash, @Nullable String fctxId) {
-        if (listener != null) listener.onSendPaymentSuccessful(mdid, hash, fctxId);
+    private void finishAndNotifySuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue) {
+        if (listener != null) listener.onSendPaymentSuccessful(mdid, hash, fctxId, transactionValue);
         finishPage();
     }
 
@@ -1006,6 +1006,6 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
         void onSendFragmentStart();
 
-        void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId);
+        void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue);
     }
 }

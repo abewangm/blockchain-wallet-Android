@@ -622,8 +622,8 @@
     <string name="contacts_waiting_for_payment_title">Waiting for payment</string>
     <string name="contacts_waiting_for_address_title">Waiting for address</string>
     <string name="contacts_register_nodes_failure">We couldn\'t connect you to the contacts service. Please retry to enable full functionality.</string>
-    <string name="contacts_too_much_sent">Looks like you sent more bitcoin than was requested. You can request some back from your contact if you wish.</string>
-    <string name="contacts_too_little_sent">Looks like you sent less bitcoin than was requested. That\'s okay, but your contact may request another payment from you.</string>
+    <string name="contacts_too_much_sent">Looks like you sent more bitcoin than was requested. You can request some back from your contact if you wish. We have not marked the payment as complete.</string>
+    <string name="contacts_too_little_sent">Looks like you sent less bitcoin than was requested. Your contact will still receive the bitcoin you sent, but we have not marked the payment as complete.</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>

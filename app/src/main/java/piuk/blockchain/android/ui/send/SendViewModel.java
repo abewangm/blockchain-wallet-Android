@@ -72,12 +72,12 @@ import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-import static piuk.blockchain.android.ui.send.SendFragment.ARG_CONTACT_ID;
-import static piuk.blockchain.android.ui.send.SendFragment.ARG_CONTACT_MDID;
-import static piuk.blockchain.android.ui.send.SendFragment.ARG_FCTX_ID;
-import static piuk.blockchain.android.ui.send.SendFragment.ARG_IS_BTC;
-import static piuk.blockchain.android.ui.send.SendFragment.ARG_SCAN_DATA;
-import static piuk.blockchain.android.ui.send.SendFragment.ARG_SELECTED_ACCOUNT_POSITION;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_ID;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_MDID;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_FCTX_ID;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_IS_BTC;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SCAN_DATA;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SELECTED_ACCOUNT_POSITION;
 
 @SuppressWarnings("WeakerAccess")
 public class SendViewModel extends BaseViewModel {
@@ -148,7 +148,7 @@ public class SendViewModel extends BaseViewModel {
 
         void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
-        void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId);
+        void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue);
 
         void onShowBIP38PassphrasePrompt(String scanData);
 
@@ -199,12 +199,12 @@ public class SendViewModel extends BaseViewModel {
     @Override
     public void onViewReady() {
         if (dataListener.getFragmentBundle() != null) {
-            final String scanData = dataListener.getFragmentBundle().getString(ARG_SCAN_DATA);
-            final String contactId = dataListener.getFragmentBundle().getString(ARG_CONTACT_ID);
-            contactMdid = dataListener.getFragmentBundle().getString(ARG_CONTACT_MDID);
-            fctxId = dataListener.getFragmentBundle().getString(ARG_FCTX_ID);
-            isBtc = dataListener.getFragmentBundle().getBoolean(ARG_IS_BTC, true);
-            selectedAccountPosition = dataListener.getFragmentBundle().getInt(ARG_SELECTED_ACCOUNT_POSITION);
+            final String scanData = dataListener.getFragmentBundle().getString(ARGUMENT_SCAN_DATA);
+            final String contactId = dataListener.getFragmentBundle().getString(ARGUMENT_CONTACT_ID);
+            contactMdid = dataListener.getFragmentBundle().getString(ARGUMENT_CONTACT_MDID);
+            fctxId = dataListener.getFragmentBundle().getString(ARGUMENT_FCTX_ID);
+            isBtc = dataListener.getFragmentBundle().getBoolean(ARGUMENT_IS_BTC, true);
+            selectedAccountPosition = dataListener.getFragmentBundle().getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION);
 
             if (contactId != null) {
                 compositeDisposable.add(
@@ -1170,7 +1170,7 @@ public class SendViewModel extends BaseViewModel {
 
         updateInternalBalances();
         PayloadBridge.getInstance().remoteSaveThread(null);
-        dataListener.onShowTransactionSuccess(contactMdid, hash, fctxId);
+        dataListener.onShowTransactionSuccess(contactMdid, hash, fctxId, sendModel.pendingTransaction.bigIntAmount.longValue());
     }
 
     private void clearUnspentResponseCache() {

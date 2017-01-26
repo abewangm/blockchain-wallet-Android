@@ -131,8 +131,8 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void onFinishSelected(long satoshis) {
-        viewModel.onAmountSet(satoshis);
+    public void onFinishSelected(long satoshis, int accountPosition) {
+        viewModel.onAmountSet(satoshis, accountPosition);
     }
 
     @Override

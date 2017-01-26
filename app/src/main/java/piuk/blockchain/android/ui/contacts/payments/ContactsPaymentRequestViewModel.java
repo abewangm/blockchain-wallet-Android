@@ -32,6 +32,8 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
 
     interface DataListener {
 
+        PaymentRequestType getPaymentRequestType();
+
         void finishPage();
 
         void contactLoaded();
@@ -41,8 +43,6 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
         void showProgressDialog();
 
         void dismissProgressDialog();
-
-        PaymentRequestType getPaymentRequestType();
 
         void showSendSuccessfulDialog(String name);
 
@@ -82,7 +82,7 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
         this.note = note;
     }
 
-    void onAmountSet(long satoshis) {
+    void onAmountSet(long satoshis, int accountPosition) {
         if (satoshis < 0) {
             dataListener.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR);
         } else {
@@ -91,11 +91,9 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
             if (dataListener.getPaymentRequestType().equals(PaymentRequestType.REQUEST)) {
 
                 PaymentRequest paymentRequest = new PaymentRequest(satoshis, note);
-                // TODO: 23/01/2017 Show account selection dialog
-                int defaultAccount = payloadManager.getPayload().getHdWallet().getDefaultIndex();
 
                 compositeDisposable.add(
-                        getNextReceiveAddress(defaultAccount)
+                        getNextReceiveAddress(accountPosition)
                                 .doOnNext(paymentRequest::setAddress)
                                 // Request that the other person sends payment
                                 .flatMapCompletable(s -> contactsDataManager.requestSendPayment(recipient.getMdid(), paymentRequest))

@@ -39,7 +39,6 @@ public class ContactsDataManager {
      * @return A {@link Completable} object
      */
     public Completable initContactsService(@Nullable String secondPassword) {
-
         return getNodeFactory(secondPassword)
                 .flatMapCompletable(
                         metadataNodeFactory -> contactsService.initContactsService(
@@ -337,21 +336,6 @@ public class ContactsDataManager {
     public Completable sendPaymentBroadcasted(String mdid, String txHash, String facilitatedTxId) {
         return callWithToken(() -> contactsService.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId))
                 .compose(RxUtil.applySchedulersToCompletable());
-    }
-
-    /**
-     * Compares a broadcasted payment with the expected payment value.Returns an int which
-     * represents whether the sender of the transaction sent too much, too little or the correct
-     * amount of bitcoin. Can call onError with an IOException if the network is down, for instance
-     *
-     * @param facilitatedTransaction A {@link FacilitatedTransaction} object
-     * @param txHash                 The hash of the transaction
-     * @return Returns -1 if too little bitcoin was sent, 1 if too much was sent and 0 if the value
-     * was correct
-     */
-    public Observable<Integer> checkPaymentValue(FacilitatedTransaction facilitatedTransaction, String txHash) {
-        return contactsService.checkPaymentValue(facilitatedTransaction, txHash)
-                .compose(RxUtil.applySchedulersToObservable());
     }
 
     ///////////////////////////////////////////////////////////////////////////

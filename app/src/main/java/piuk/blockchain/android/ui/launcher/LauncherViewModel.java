@@ -15,6 +15,8 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
+import static piuk.blockchain.android.data.notifications.FcmCallbackService.EXTRA_CONTACTS_SERVICE;
+
 /**
  * Created by adambennett on 09/08/2016.
  */
@@ -56,19 +58,24 @@ public class LauncherViewModel extends BaseViewModel {
     @Override
     public void onViewReady() {
         // Store incoming URI if needed
-        String action = mDataListener.getPageIntent().getAction();
-        String scheme = mDataListener.getPageIntent().getScheme();
-        String intentData = mDataListener.getPageIntent().getDataString();
+        Intent intent = mDataListener.getPageIntent();
+        String action = intent.getAction();
+        String scheme = intent.getScheme();
+        String intentData = intent.getDataString();
         if (action != null && Intent.ACTION_VIEW.equals(action) && scheme != null && scheme.equals("bitcoin")) {
-            mPrefsUtil.setValue(PrefsUtil.KEY_SCHEME_URL, mDataListener.getPageIntent().getData().toString());
+            mPrefsUtil.setValue(PrefsUtil.KEY_SCHEME_URL, intent.getData().toString());
         }
 
         if (action != null && Intent.ACTION_VIEW.equals(action) && intentData != null && intentData.contains("blockchain")) {
             mPrefsUtil.setValue(PrefsUtil.KEY_METADATA_URI, intentData);
         }
 
+        if (intent.hasExtra(EXTRA_CONTACTS_SERVICE)) {
+            mPrefsUtil.setValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION, true);
+        }
+
         boolean isPinValidated = false;
-        Bundle extras = mDataListener.getPageIntent().getExtras();
+        Bundle extras = intent.getExtras();
         if (extras != null && extras.containsKey(INTENT_EXTRA_VERIFIED)) {
             isPinValidated = extras.getBoolean(INTENT_EXTRA_VERIFIED);
         }

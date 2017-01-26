@@ -12,11 +12,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Locale;
 
 import piuk.blockchain.android.R;
@@ -140,8 +143,24 @@ public class ContactPaymentRequestAmountFragment extends Fragment implements Con
         if (paymentRequestType != null && contactName != null) {
             if (paymentRequestType.equals(PaymentRequestType.SEND)) {
                 binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_send_amount, contactName));
+                binding.layoutReceiveAccount.setVisibility(View.GONE);
             } else {
                 binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_receive_amount, contactName));
+
+                List<String> accounts = viewModel.getAccountsList();
+                binding.spinnerAccount.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, accounts));
+                //noinspection AnonymousInnerClassMayBeStatic
+                binding.spinnerAccount.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        viewModel.setAccountPosition(position);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        // No-op
+                    }
+                });
             }
         } else {
             throw new AssertionError("Contact name and PaymentRequestType must be passed to fragment");
@@ -154,7 +173,7 @@ public class ContactPaymentRequestAmountFragment extends Fragment implements Con
             } else if (btc.equals("0") || btc.equals("0.00")) {
                 binding.inputLayoutAmountBtc.setError(getString(R.string.invalid_amount));
             } else {
-                listener.onFinishSelected(viewModel.getAmountInSatoshis());
+                listener.onFinishSelected(viewModel.getAmountInSatoshis(), viewModel.getAccountPosition());
             }
 
             String fiat = binding.editTextAmountFiat.getText().toString();
@@ -257,7 +276,7 @@ public class ContactPaymentRequestAmountFragment extends Fragment implements Con
 
     interface FragmentInteractionListener {
 
-        void onFinishSelected(long satoshis);
+        void onFinishSelected(long satoshis, int accountPosition);
 
     }
 }
