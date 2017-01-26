@@ -41,7 +41,7 @@ public class ContactDetailActivityViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-
+        // No-op
     }
 
     void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
@@ -86,4 +86,5 @@ public class ContactDetailActivityViewModel extends BaseViewModel {
                                     // Not sure if it's worth notifying people at this point? Dialogs are advisory anyway.
                                 }));
     }
+
 }

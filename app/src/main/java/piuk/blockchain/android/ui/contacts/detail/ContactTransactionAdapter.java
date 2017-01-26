@@ -66,18 +66,18 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
             if (listener != null) listener.onClick(transaction.getId());
         });
 
-        // TODO: 25/01/2017 Temporary until all states are accounted for
-        holder.subtitle.setText(transaction.getState());
         holder.indicator.setVisibility(View.GONE);
         holder.title.setTextColor(ContextCompat.getColor(holder.title.getContext(), R.color.black));
 
         if (transaction.getState() != null
-                && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                && transaction.getRole() != null
-                && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
-                || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
-            holder.indicator.setVisibility(View.VISIBLE);
+                && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
             holder.subtitle.setText(stringUtils.getString(R.string.contacts_waiting_for_address_title));
+
+            if (transaction.getRole() != null
+                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
+                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
+                holder.indicator.setVisibility(View.VISIBLE);
+            }
 
         } else if (transaction.getState() != null
                 && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
