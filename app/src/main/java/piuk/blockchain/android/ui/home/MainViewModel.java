@@ -12,6 +12,7 @@ import info.blockchain.api.DynamicFee;
 import info.blockchain.api.ExchangeTicker;
 import info.blockchain.api.Settings;
 import info.blockchain.api.Unspent;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -26,6 +27,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
@@ -144,8 +146,26 @@ public class MainViewModel extends BaseViewModel {
         if (finalUri != null || fromNotification) dataListener.showProgressDialog();
 
         final boolean finalFromNotification = fromNotification;
+
         compositeDisposable.add(
-                contactsDataManager.initContactsService(null)
+                contactsDataManager.loadNodes()
+                        .flatMap(loaded -> {
+                            if (loaded) {
+                                return contactsDataManager.getMetadataNodeFactory();
+                            } else {
+                                if (!payloadManager.getPayload().isDoubleEncrypted()) {
+                                    return contactsDataManager.generateNodes(null)
+                                            .andThen(contactsDataManager.getMetadataNodeFactory());
+                                } else {
+                                    throw new InvalidCredentialsException("Payload is double encrypted");
+                                }
+                            }
+                        })
+                        .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
+                                metadataNodeFactory.getMetadataNode(),
+                                metadataNodeFactory.getSharedMetadataNode()))
+                        .andThen(contactsDataManager.registerMdid())
+                        .andThen(contactsDataManager.publishXpub())
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(() -> {
                             if (finalUri != null) {
@@ -156,8 +176,12 @@ public class MainViewModel extends BaseViewModel {
                                 checkForMessages();
                             }
                         }, throwable -> {
-                            dataListener.showContactsRegistrationFailure();
-                            Log.wtf(TAG, "registerNodeForMetaDataService: ", throwable);
+                            //noinspection StatementWithEmptyBody
+                            if (throwable instanceof InvalidCredentialsException) {
+                                // Double encrypted and not previously set up, ignore error
+                            } else {
+                                dataListener.showContactsRegistrationFailure();
+                            }
                         }));
 
         notificationTokenManager.resendNotificationToken();
@@ -165,7 +189,15 @@ public class MainViewModel extends BaseViewModel {
 
     void checkForMessages() {
         compositeDisposable.add(
-                contactsDataManager.fetchContacts()
+                contactsDataManager.loadNodes()
+                        .flatMapCompletable(
+                                success -> {
+                                    if (success) {
+                                        return contactsDataManager.fetchContacts();
+                                    } else {
+                                        return Completable.error(new Throwable("Nodes not loaded"));
+                                    }
+                                })
                         .andThen(contactsDataManager.getContactList())
                         .toList()
                         .flatMapObservable(contacts -> {

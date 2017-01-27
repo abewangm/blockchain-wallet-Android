@@ -2,10 +2,13 @@ package piuk.blockchain.android.ui.contacts.list;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.payload.PayloadManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +33,7 @@ public class ContactsListViewModel extends BaseViewModel {
     private DataListener dataListener;
     @Inject QrCodeDataManager qrCodeDataManager;
     @Inject ContactsDataManager contactsDataManager;
+    @Inject PayloadManager payloadManager;
     @Inject PrefsUtil prefsUtil;
 
     interface DataListener {
@@ -46,6 +50,8 @@ public class ContactsListViewModel extends BaseViewModel {
 
         void dismissProgressDialog();
 
+        void showSecondPasswordDialog();
+
     }
 
     ContactsListViewModel(DataListener dataListener) {
@@ -60,18 +66,62 @@ public class ContactsListViewModel extends BaseViewModel {
 
         dataListener.setUiState(ContactsListActivity.LOADING);
         compositeDisposable.add(
-                contactsDataManager.fetchContacts()
-                        .andThen(contactsDataManager.getContactList())
-                        .toList()
+                contactsDataManager.loadNodes()
                         .subscribe(
-                                this::handleContactListUpdate,
-                                throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
+                                success -> {
+                                    if (success) {
+                                        loadContacts();
+                                    } else {
+                                        // Not set up, most likely has a second password enabled
+                                        if (payloadManager.getPayload().isDoubleEncrypted()) {
+                                            dataListener.showSecondPasswordDialog();
+                                            dataListener.setUiState(ContactsListActivity.FAILURE);
+                                        } else {
+                                            initContactsService(null);
+                                        }
+                                    }
+                                }, throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
+
+        loadContacts();
 
         Intent intent = dataListener.getPageIntent();
         if (intent != null && intent.hasExtra(ContactsListActivity.EXTRA_METADATA_URI)) {
             String data = intent.getStringExtra(ContactsListActivity.EXTRA_METADATA_URI);
             handleLink(data);
         }
+    }
+
+    void initContactsService(@Nullable String secondPassword) {
+        dataListener.setUiState(ContactsListActivity.LOADING);
+        compositeDisposable.add(
+                contactsDataManager.generateNodes(secondPassword)
+                        .andThen(contactsDataManager.getMetadataNodeFactory())
+                        .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
+                                metadataNodeFactory.getMetadataNode(),
+                                metadataNodeFactory.getSharedMetadataNode()))
+                        .andThen(contactsDataManager.registerMdid())
+                        .andThen(contactsDataManager.publishXpub())
+                        .subscribe(
+                                this::onViewReady,
+                                throwable -> {
+                                    dataListener.setUiState(ContactsListActivity.FAILURE);
+                                    if (throwable instanceof DecryptionException) {
+                                        dataListener.showToast(R.string.password_mismatch_error, ToastCustom.TYPE_ERROR);
+                                    } else {
+                                        dataListener.showToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
+                                    }
+                                }));
+    }
+
+    private void loadContacts() {
+        dataListener.setUiState(ContactsListActivity.LOADING);
+        compositeDisposable.add(
+                contactsDataManager.fetchContacts()
+                        .andThen(contactsDataManager.getContactList())
+                        .toList()
+                        .subscribe(
+                                this::handleContactListUpdate,
+                                throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
     }
 
     // TODO: 19/01/2017 This is pretty gross and I'm certain it can be Rx-ified in the future
@@ -136,18 +186,6 @@ public class ContactsListViewModel extends BaseViewModel {
                                         // No-op
                                     }));
         }
-    }
-
-    /**
-     * Loads the latest version of the list in memory
-     */
-    void refreshList() {
-        compositeDisposable.add(
-                contactsDataManager.getContactList()
-                        .toList()
-                        .subscribe(
-                                this::handleContactListUpdate,
-                                throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
     }
 
     private void subscribeToNotifications() {

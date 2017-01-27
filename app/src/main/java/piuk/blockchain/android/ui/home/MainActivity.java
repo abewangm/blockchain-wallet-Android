@@ -179,7 +179,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         super.onResume();
         appUtil.deleteQR();
         mainViewModel.storeSwipeReceiveAddresses();
-        mainViewModel.checkForMessages();
         resetNavigationDrawer();
 
         if (AndroidUtils.is25orHigher() && mainViewModel.areLauncherShortcutsEnabled()) {

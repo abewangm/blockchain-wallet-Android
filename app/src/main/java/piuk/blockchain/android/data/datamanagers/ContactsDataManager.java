@@ -1,5 +1,7 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import android.support.annotation.Nullable;
+
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
@@ -8,19 +10,35 @@ import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.payload.PayloadManager;
 
-import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
 
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.ContactsService;
 
+/**
+ * A manager for handling all Metadata/Shared Metadata/Contacts based operations. Using this class
+ * requires careful initialisation, which should be done as follows:
+ *
+ * 1) Load the metadata nodes from the metadata service using {@link this#loadNodes()}. This will
+ * return false if the nodes cannot be found.
+ *
+ * 2) Generate nodes if necessary. If step 1 returns false, the nodes must be generated using {@link
+ * this#generateNodes(String)}. In theory, this means that the nodes only need to be generated once,
+ * and thus users with a second password only need to be prompted to enter their password once.
+ *
+ * 3) Init the Contacts Service using {@link this#initContactsService(DeterministicKey,
+ * DeterministicKey)}, passing in the appropriate nodes loaded by {@link this#loadNodes()}.
+ *
+ * 4) Register the user's derived MDID with the Shared Metadata service using {@link
+ * this#registerMdid()}.
+ *
+ * 5) Finally, publish the user's XPub to the Shared Metadata service via {@link this#publishXpub()}
+ */
 @SuppressWarnings({"WeakerAccess", "AnonymousInnerClassMayBeStatic"})
 public class ContactsDataManager {
 
@@ -33,73 +51,89 @@ public class ContactsDataManager {
     }
 
     /**
-     * Initialises the Contacts service
+     * Loads previously saved nodes from the Metadata service. If none are found, the {@link
+     * Observable} returns false.
      *
-     * @param secondPassword The user's second password, if applicable
-     * @return A {@link Completable} object
+     * @return An {@link Observable} object wrapping a boolean value, representing successfully
+     * loaded nodes
      */
-    public Completable initContactsService(@Nullable String secondPassword) {
-        return getNodeFactory(secondPassword)
-                .flatMapCompletable(
-                        metadataNodeFactory -> contactsService.initContactsService(
-                                metadataNodeFactory.getMetadataNode(),
-                                metadataNodeFactory.getSharedMetadataNode()))
-                .andThen(getNodeFactory(secondPassword))
-                .flatMapCompletable(
-                        metadataNodeFactory ->
-                                registerMdid(
-                                        payloadManager.getPayload().getGuid(),
-                                        payloadManager.getPayload().getSharedKey(),
-                                        metadataNodeFactory.getSharedMetadataNode()))
-                .andThen(publishXpub())
+    public Observable<Boolean> loadNodes() {
+        return Observable.fromCallable(() -> payloadManager.loadNodes(
+                payloadManager.getPayload().getGuid(),
+                payloadManager.getPayload().getSharedKey(),
+                payloadManager.getTempPassword().toString()))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Generates the metadata and shared metadata nodes if necessary.
+     *
+     * @param secondPassword An optional second password.
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable generateNodes(@Nullable String secondPassword) {
+        return Completable.fromCallable(() -> {
+            payloadManager.generateNodes(secondPassword);
+            return Void.TYPE;
+        }).compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Initialises the Contacts service.
+     *
+     * @param metadataNode       A {@link DeterministicKey} representing the Metadata Node
+     * @param sharedMetadataNode A {@link DeterministicKey} representing the Shared Metadata node
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable initContactsService(DeterministicKey metadataNode, DeterministicKey sharedMetadataNode) {
+        return contactsService.initContactsService(metadataNode, sharedMetadataNode)
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
-    private Observable<MetadataNodeFactory> getNodeFactory(String secondPassword) {
-        return Observable.fromCallable(() -> {
-            payloadManager.loadNodes(
+    /**
+     * Returns a {@link MetadataNodeFactory} object which allows you to access the {@link
+     * DeterministicKey} objects needed to initialise the Contacts service.
+     *
+     * @return An {@link Observable} wrapping a {@link MetadataNodeFactory}
+     */
+    public Observable<MetadataNodeFactory> getMetadataNodeFactory() {
+        return Observable.just(payloadManager.getMetadataNodeFactory());
+    }
+
+    /**
+     * Registers the user's MDID with the metadata service.
+     *
+     * @return A {@link Completable}, ie an Observable type object specifically for methods
+     * returning void.
+     */
+    public Completable registerMdid() {
+        return Completable.fromCallable(() -> {
+            payloadManager.registerMdid(
                     payloadManager.getPayload().getGuid(),
                     payloadManager.getPayload().getSharedKey(),
-                    payloadManager.getTempPassword().toString(),
-                    secondPassword);
-            return payloadManager.getMetadataNodeFactory();
-        });
+                    payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
+            return Void.TYPE;
+        }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
-     * Registers the user's MDID with the metadata service
+     * Unregisters the user's MDID from the metadata service.
      *
-     * @param guid      The user's GUID
-     * @param sharedKey The user's shared key
-     * @param node      The user's SharedMetadata node
      * @return A {@link Completable}, ie an Observable type object specifically for methods
      * returning void.
      */
-    public Completable registerMdid(String guid, String sharedKey, ECKey node) {
+    public Completable unregisterMdid() {
         return Completable.fromCallable(() -> {
-            payloadManager.registerMdid(guid, sharedKey, node);
+            payloadManager.unregisterMdid(
+                    payloadManager.getPayload().getGuid(),
+                    payloadManager.getPayload().getSharedKey(),
+                    payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
             return Void.TYPE;
-        }).subscribeOn(Schedulers.io());
+        }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
-     * Unregisters the user's MDID with the metadata service
-     *
-     * @param guid      The user's GUID
-     * @param sharedKey The user's shared key
-     * @param node      The user's wallet's master key
-     * @return A {@link Completable}, ie an Observable type object specifically for methods
-     * returning void.
-     */
-    public Completable unregisterMdid(String guid, String sharedKey, ECKey node) {
-        return Completable.fromCallable(() -> {
-            payloadManager.unregisterMdid(guid, sharedKey, node);
-            return Void.TYPE;
-        }).subscribeOn(Schedulers.io());
-    }
-
-    /**
-     * Invalidates the access token for re-authing
+     * Invalidates the access token for re-authing, if needed.
      */
     private Completable invalidate() {
         return contactsService.invalidate()

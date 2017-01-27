@@ -8,8 +8,12 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.InputType;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -24,6 +28,7 @@ import piuk.blockchain.android.ui.contacts.pairing.ContactInviteActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.StringUtils;
+import piuk.blockchain.android.util.ViewUtils;
 
 
 public class ContactsListActivity extends BaseAuthActivity implements ContactsListViewModel.DataListener {
@@ -112,6 +117,22 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
     @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
+    public void showSecondPasswordDialog() {
+        AppCompatEditText editText = new AppCompatEditText(this);
+        editText.setHint(R.string.password);
+        editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        FrameLayout frameLayout = ViewUtils.getAlertDialogEditTextLayout(this, editText);
+
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_second_password_prompt)
+                .setView(frameLayout)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.initContactsService(editText.getText().toString()))
+                .create()
+                .show();
     }
 
     @Override
