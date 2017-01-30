@@ -33,7 +33,6 @@ import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.WebUtil;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.Wallet.ExceededMaxTransactionSize;
 import org.bitcoinj.crypto.BIP38PrivateKey;
 import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
@@ -560,6 +559,11 @@ public class SendViewModel extends BaseViewModel {
             JSONObject unspentResponse = null;
             try {
                 unspentResponse = getUnspentApiResponse(address);
+
+                if(context == null){
+                    return;
+                }
+
             } catch (Exception e) {
                 Log.w(TAG, "Thread deliberately interrupted", e);
                 return;

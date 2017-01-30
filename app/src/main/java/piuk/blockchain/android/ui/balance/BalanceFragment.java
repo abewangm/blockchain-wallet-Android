@@ -80,7 +80,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(ACTION_INTENT) && getActivity() != null) {
                 binding.swipeContainer.setRefreshing(true);
-                viewModel.updateAccountList();
+                viewModel.updateAccountList(getContext());
                 viewModel.updateBalanceAndTransactionList(intent, accountSpinner.getSelectedItemPosition(), isBTC);
                 transactionAdapter.onTransactionsUpdated(viewModel.getTransactionList());
                 binding.swipeContainer.setRefreshing(false);
@@ -153,7 +153,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
         isBTC = balanceDisplayState != SHOW_FIAT;
 
-        viewModel.updateAccountList();
+        viewModel.updateAccountList(getContext());
         viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
 
         binding.rvTransactions.clearOnScrollListeners();
@@ -299,7 +299,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         });
 
         accountSpinner = binding.accountsSpinner;
-        viewModel.updateAccountList();
+        viewModel.updateAccountList(getContext());
 
         String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         accountsAdapter = new BalanceHeaderAdapter(
@@ -394,7 +394,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                     @Override
                     protected void onPostExecute(Void aVoid) {
                         super.onPostExecute(aVoid);
-                        viewModel.updateAccountList();
+                        viewModel.updateAccountList(getContext());
                         viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
                         binding.swipeContainer.setRefreshing(false);
                     }
