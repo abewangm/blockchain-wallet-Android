@@ -83,7 +83,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     private AlertDialog mRootedDialog;
     private AppUtil appUtil;
     private long backPressed;
-    private boolean returningResult = false;
 
     @SuppressLint("NewApi")
     @Override
@@ -180,11 +179,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         }
 
         binding.bottomNavigation.restoreBottomNavigation(false);
-        // Reset state of the bottom nav bar, but not if returning from a scan
-        if (!returningResult) {
-            runOnUiThread(() -> binding.bottomNavigation.setCurrentItem(1));
-        }
-        returningResult = false;
     }
 
     @Override
@@ -236,15 +230,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         if (resultCode == RESULT_OK && requestCode == SCAN_URI
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
             String strResult = data.getStringExtra(CaptureActivity.SCAN_RESULT);
-
             doScanInput(strResult, EventLogHandler.URL_EVENT_TX_INPUT_FROM_QR);
 
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_BACKUP) {
             resetNavigationDrawer();
         } else {
-            if (data != null) {
-                returningResult = true;
-            }
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -367,6 +357,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                     selectDrawerItem(menuItem);
                     return true;
                 });
+
+        // Set selected appropriately.
+        if (getCurrentFragment() instanceof BalanceFragment) {
+            binding.bottomNavigation.setCurrentItem(1);
+        } else if (getCurrentFragment() instanceof SendFragment) {
+            binding.bottomNavigation.setCurrentItem(0);
+        } else if (getCurrentFragment() instanceof ReceiveFragment) {
+            binding.bottomNavigation.setCurrentItem(2);
+        }
     }
 
     private void startMerchantActivity() {
@@ -402,8 +401,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        returningResult = true;
-
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startScanActivity();
