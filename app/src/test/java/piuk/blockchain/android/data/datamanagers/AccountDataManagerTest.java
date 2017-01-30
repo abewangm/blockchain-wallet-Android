@@ -102,40 +102,10 @@ public class AccountDataManagerTest extends RxTest {
     @Test
     public void setPrivateKeySuccessNoDoubleEncryption() throws Exception {
         // Arrange
-        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
-        //noinspection SuspiciousMethodCalls
-        when(mockPayload.getLegacyAddressStringList().indexOf(any())).thenReturn(0);
-        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-        when(mockPayload.getLegacyAddressList().get(anyInt())).thenReturn(mock(LegacyAddress.class));
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        when(payloadManager.savePayloadToServer()).thenReturn(true);
         ECKey mockECKey = mock(ECKey.class);
-        when(mockECKey.toAddress(any(NetworkParameters.class))).thenReturn(mock(Address.class));
+        when(payloadManager.setKeyForLegacyAddress(any(ECKey.class), any(CharSequenceX.class))).thenReturn(true);
         // Act
         TestObserver<Boolean> observer = subject.setPrivateKey(mockECKey, null).test();
-        // Assert
-        observer.assertNoErrors();
-        observer.assertComplete();
-        assertEquals(true, observer.values().get(0).booleanValue());
-    }
-
-    @Test
-    public void setPrivateKeySuccessWithDoubleEncryption() throws Exception {
-        // Arrange
-        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
-        //noinspection SuspiciousMethodCalls
-        when(mockPayload.getLegacyAddressStringList().indexOf(any())).thenReturn(0);
-        when(mockPayload.isDoubleEncrypted()).thenReturn(true);
-        when(mockPayload.getLegacyAddressList().get(anyInt())).thenReturn(mock(LegacyAddress.class));
-        when(mockPayload.getSharedKey()).thenReturn("shared key");
-        when(mockPayload.getOptions().getIterations()).thenReturn(10);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        when(payloadManager.savePayloadToServer()).thenReturn(true);
-        ECKey mockECKey = mock(ECKey.class);
-        when(mockECKey.toAddress(any(NetworkParameters.class))).thenReturn(mock(Address.class));
-        when(mockECKey.getPrivKeyBytes()).thenReturn(new byte[0]);
-        // Act
-        TestObserver<Boolean> observer = subject.setPrivateKey(mockECKey, new CharSequenceX("password")).test();
         // Assert
         observer.assertNoErrors();
         observer.assertComplete();

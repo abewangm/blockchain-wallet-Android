@@ -29,8 +29,8 @@ import info.blockchain.wallet.send.SendCoins;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
-
 import info.blockchain.wallet.util.WebUtil;
+
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
@@ -310,7 +310,7 @@ public class SendViewModel extends BaseViewModel {
                 max_len = 2;
                 break;
             case MonetaryUtil.MILLI_BTC:
-                max_len = 4;
+                max_len = 5;
                 break;
             default:
                 max_len = 8;

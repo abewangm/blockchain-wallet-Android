@@ -49,6 +49,7 @@ public class TransactionListDataManager {
      * @param object Either a {@link Account} or a {@link LegacyAddress}
      */
     public void generateTransactionList(Object object) {
+        transactionListStore.clearList();
         if (object instanceof Account) {
             // V3
             transactionListStore.insertTransactions(getV3Transactions((Account) object));

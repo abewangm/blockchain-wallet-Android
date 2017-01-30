@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -19,6 +20,8 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import info.blockchain.wallet.payload.PayloadManager;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.websocket.WebSocketService;
@@ -30,7 +33,9 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
+import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
+import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
@@ -423,6 +428,18 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         if (progress != null && progress.isShowing()) {
             progress.dismiss();
             progress = null;
+        }
+    }
+
+    @Override
+    public void updateAppShortcuts() {
+        if (AndroidUtils.is25orHigher() && viewModel.areLauncherShortcutsEnabled()) {
+            LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(
+                    this,
+                    PayloadManager.getInstance(),
+                    getSystemService(ShortcutManager.class));
+
+            launcherShortcutHelper.generateReceiveShortcuts();
         }
     }
 }
