@@ -7,7 +7,7 @@
     <string name="app_name">Rangkaian Blok</string>
     <string name="action_settings">Pengaturan</string>
 
-    <string name="all_accounts">Semua</string>
+    <string name="all_accounts">Semua Dompet</string>
 
     <string name="please_wait">Harap tunggu</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">Kata kata sandi Anda tidak pernah dibagikan dengan server kami, yang berarti kita tidak bisa mengatur ulang kata sandi jika Anda lupa. Pastikan Anda menuliskan frasa pemulihan Anda yang dapat mengembalikan akses ke dompet Anda jika kata sandi hilang.</string>
     <string name="verify_email_notice">Kami telah mengirim link verifikasi ke alamat email Anda. Klik tautan verifikasi untuk memverifikasi alamat surel Anda.</string>
     <string name="email_notifications">Pemberitahuan Surel</string>
-    <string name="email_notifications_summary">Aktifkan pemberitahuan untuk menerima surel setiap kali Anda menerima bitcoins. Hanya alamat yang berlabel dan alamat yang diimpor yang memenuhi syarat untuk memicu pemberitahuan.</string>
+    <string name="email_notifications_summary">Dapatkan pemberitahuan ketika Anda menerima bitcoin.</string>
     <string name="current_password">Kata Sandi Terkini</string>
     <string name="new_password">Kata Sandi Baru</string>
     <string name="sms_verified">Nomor ponsel terverifikasi</string>
@@ -412,4 +412,58 @@
     <string name="go_back">Kembali</string>
     <string name="accept_higher_fee">Terima biaya yang lebih tinggi</string>
     <string name="large_tx_high_fee_warning">"Transaksi ini membutuhkan biaya yang lebih tinggi untuk recehan karena jumlah kecil dari kembalian untuk dikembalikan."</string>
+
+    <string name="transactions">Transaksi</string>
+    <string name="invalid_password_too_short">Silakan masukkan lebih dari 3 karakter</string>
+    <string name="change_pin_new_matches_current">Anda tidak dapat menggunakan PIN Anda saat ini sebagai PIN baru Anda</string>
+    <string name="account_locked_title">Akun terkunci</string>
+    <string name="account_locked_message">Akun Anda telah dikunci sementara sebagai pencegahan. Silahkan cek surel Anda untuk informasi lebih lanjut dan coba lagi nanti.</string>
+    <string name="licenses">Surat izin</string>
+    <string name="email_chooser">Kirim surel...</string>
+    <string name="password_changed_explanation">Kata sandi Anda telah diubah, silakan memasangkan kembali dompet Anda</string>
+    <string name="sms">SMS</string>
+    <string name="google_authenticator">Google Authenticator</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">Mohon nonaktifkan 2-step Verification melalui SMS dalam pengaturan keamanan pertama kali.</string>
+    <string name="settings_field_cant_be_empty">Bidang tidak dapat kosong.</string>
+    <string name="settings_error_updating">Kesalahan memperbarui pengaturan, silakan coba lagi</string>
+    <string name="request_write_storage_permission">Penulisan penyimpanan eksternal diperlukan.</string>
+    <string name="verify_sms_failed">Kode yang tidak valid, silakan coba lagi</string>
+    <string name="enable_fingerprint">Sidik Jari Dibuka</string>
+
+    <string name="transaction_detail_coinbase">Tidak ada Input (Koin Baru Dihasilkan)</string>
+    <string name="transaction_detail_double_spend">Mungkin berisiko untuk pembelanjaan ganda.</string>
+    <string name="security_centre_add_email_title">Alamat Surel</string>
+    <string name="security_centre_add_email_message">Tambahkan dan verifikasi alamat surel Anda untuk menerima pemberitahuan, mencegah aktivitas yang mencurigakan, dan memulihkan ID Dompet jika lupa.</string>
+    <string name="security_centre_add_email_positive_button">Tambahkan</string>
+
+    <string name="fingerprint_prompt">Gunakan sidik jari Anda untuk akses yang lebih cepat, lebih mudah untuk dompet Anda.\n\nKonfirmasi sidik jari untuk melanjutkan</string>
+    <string name="fingerprint_description">Konfirmasi sidik jari untuk melanjutkan</string>
+    <string name="fingerprint_hint">Sentuh sensor</string>
+    <string name="fingerprint_login_title">Sidik jari masuk</string>
+    <string name="fingerprint_not_recognized">Sidik jari tidak diakui. Coba lagi</string>
+    <string name="fingerprint_success">Sidik jari diakui.</string>
+    <string name="fingerprint_use_pin">Gunakan PIN</string>
+    <string name="fingerprint_disable_message">Apakah Anda yakin ingin menonaktifkan masuk dengan sidik jari?</string>
+    <string name="fingerprint_no_fingerprints_added">Tidak ada sidik jari yang terdaftar untuk perangkat ini. Apakah Anda ingin mendaftarkan sidik jari sekarang?</string>
+    <string name="fingerprint_key_invalidated_description">Entah sidik jari yang tersimpan di perangkat ini telah berubah atau pengaman tombol telah dinonaktifkan</string>
+    <string name="fingerprint_key_invalidated_brief">Kunci tidak valid, kode PIN diperlukan</string>
+    <string name="fingerprint_fatal_error_register_description">Ada terlalu banyak upaya gagal dalam 30 menit terakhir. Silakan mencoba pengaturan lagi nanti.</string>
+    <string name="fingerprint_fatal_error_authenticate_description">Ada terlalu banyak upaya gagal. Silakan masuk menggunakan PIN Anda sebagai gantinya.</string>
+    <string name="fingerprint_fatal_error_brief">Kesalahan tak terduga</string>
+
+    <string name="shortcut_receive_copy_short">Salin Alamat</string>
+    <string name="shortcut_receive_copy_long">Salin terima alamat ke aplikasi lain</string>
+    <string name="shortcut_receive_qr_short">Tampilkan Terima QR</string>
+    <string name="shortcut_receive_qr_long">Lihat QR code untuk menerima alamat</string>
+    <string name="shortcut_receive_qr_error">Maaf, ada kesalahan menghasilkan kode QR</string>
+    <string name="shortcut_settings_enable">Jalan Pintas Peluncur</string>
+    <string name="shortcut_settings_summary">Aktifkan opsi ini untuk mengungkapkan alamat terima ketika Anda menekan lama pada ikon aplikasi di peluncur, membuat menerima bitcoin lebih cepat.</string>
+
+    <string name="swipe_receive_hint">Geser untuk menerima</string>
+    <string name="swipe_receive_preference_summary">Aktifkan opsi ini untuk mengungkapkan alamat penerima bila Anda mengusap layar PIN ke kiri, yang membuat penerimaan bitcoin menjadi lebih cepat. Lima alamat akan dimuat secara berturut-turut, yang setelahnya login diperlukan untuk menampilkan alamat baru.</string>
+    <string name="swipe_receive_no_addresses">Tidak ada lagi alamat yang dapat dimuat sekarang. Masuk ke aplikasi untuk memuat lebih banyak.</string>
+
+    <string name="survey_message">Apakah Anda ingin mengisi survei singkat untuk membantu meningkatkan pengalaman dompet Anda?\n\nKami menghargai tanggapan Anda!</string>
+    <string name="survey_positive_button">Ikut survei</string>
 </resources>

@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Instellingen</string>
 
-    <string name="all_accounts">Alle</string>
+    <string name="all_accounts">Alle Portemonnees</string>
 
     <string name="please_wait">Even geduld a.u.b.</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">Uw wachtwoord wordt nooit gedeeld met onze servers, wat betekent dat we u niet kunnen helpen om uw wachtwoord te resetten als u het bent vergeten. Zorg ervoor dat u uw herstelregel opschrijft zodat de toegang tot uw portemonnee kan worden hersteld wanneer u uw wachtwoord kwijt bent.</string>
     <string name="verify_email_notice">We hebben een verificatielink naar uw e-mailadres gestuurd. Klik op de verificatielink om uw e-mailadres te verifiëren.</string>
     <string name="email_notifications">E-mailmeldingen</string>
-    <string name="email_notifications_summary">Schakel de meldingen in om een e-mail te ontvangen wanneer u Bitcoins ontvangt. Alleen gelabelde adressen en ingevoerde adressen komen in aanmerking om meldingen te activeren.</string>
+    <string name="email_notifications_summary">Krijg een melding wanneer u Bitcoins ontvangt.</string>
     <string name="current_password">Huidig wachtwoord</string>
     <string name="new_password">Nieuw wachtwoord</string>
     <string name="sms_verified">Mobiel telefoonnummer geverifieerd</string>
@@ -412,4 +412,58 @@
     <string name="go_back">Ga terug</string>
     <string name="accept_higher_fee">Hoger tarief accepteren</string>
     <string name="large_tx_high_fee_warning">"Deze transactie vereist een hoger tarief voor dustconsumptie ten gevolg van de kleine hoeveelheid wisselgeld die kan worden teruggegeven."</string>
+
+    <string name="transactions">Transacties</string>
+    <string name="invalid_password_too_short">Voer meer dan 3 karakters in</string>
+    <string name="change_pin_new_matches_current">U kunt uw huidige PIN niet gebruiken als nieuwe PIN</string>
+    <string name="account_locked_title">Account geblokkeerd</string>
+    <string name="account_locked_message">Uw account werd tijdelijk geblokkeerd uit voorzorg.  Controleer uw e-mail voor meer informatie en probeer later opnieuw.</string>
+    <string name="licenses">Licenties</string>
+    <string name="email_chooser">Verzend e-mail…</string>
+    <string name="password_changed_explanation">Uw wachtwoord werd gewijzigd, koppel uw portemonnee opnieuw</string>
+    <string name="sms">Sms</string>
+    <string name="google_authenticator">Google Authenticator</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">Schakel eerst 2-staps verificatie in de beveiligingsinstellingen uit via SMS.</string>
+    <string name="settings_field_cant_be_empty">Veld mag niet leeg zijn.</string>
+    <string name="settings_error_updating">Fout tijdens bijwerken gegevens, probeer opnieuw</string>
+    <string name="request_write_storage_permission">Schrijven op externe opslag is vereist.</string>
+    <string name="verify_sms_failed">Code ongeldig, probeer opnieuw</string>
+    <string name="enable_fingerprint">Vingerafdruk Deblokkering</string>
+
+    <string name="transaction_detail_coinbase">Geen inputs (nieuw gegenereerde munten)</string>
+    <string name="transaction_detail_double_spend">Kan risico lopen voor dubbele uitgave.</string>
+    <string name="security_centre_add_email_title">E-mailadres</string>
+    <string name="security_centre_add_email_message">Voeg je e-mailadres toe en controleer het om waarschuwingen te ontvangen, verdachte activiteiten te voorkomen, en je Portemonnee-ID te herstellen wanneer je dit vergeten bent.</string>
+    <string name="security_centre_add_email_positive_button">Toevoegen</string>
+
+    <string name="fingerprint_prompt">Gebruik uw vingerafdruk voor snellere en eenvoudigere toegang tot uw portemonnee.\n\nBevestig vingerafdruk om verder te gaan</string>
+    <string name="fingerprint_description">Bevestig vingerafdruk om verder te gaan</string>
+    <string name="fingerprint_hint">Aanraaksensor</string>
+    <string name="fingerprint_login_title">Aanmelden met vingerafdruk</string>
+    <string name="fingerprint_not_recognized">Vingerafdruk niet herkend. Probeer het opnieuw</string>
+    <string name="fingerprint_success">Vingerafdruk herkend</string>
+    <string name="fingerprint_use_pin">Gebruik PIN</string>
+    <string name="fingerprint_disable_message">Bent u zeker dat u aanmelding met vingerafdruk wilt uitschakelen?</string>
+    <string name="fingerprint_no_fingerprints_added">Er werden nog geen vingerafdrukken geregistreerd op dit apparaat. Wilt u nu een vingerafdruk registreren?</string>
+    <string name="fingerprint_key_invalidated_description">Ofwel werden de op dit apparaat bewaarde vingerafdrukken gewijzigd, of de toetsenblokkering is uitgeschakeld</string>
+    <string name="fingerprint_key_invalidated_brief">Toetsen ongeldig, PIN-code vereist</string>
+    <string name="fingerprint_fatal_error_register_description">Er waren te veel mislukte pogingen tijdens de afgelopen 30 minuten. Probeer setup later opnieuw.</string>
+    <string name="fingerprint_fatal_error_authenticate_description">Er waren te veel mislukte pogingen. Meld u aan met behulp van uw PIN.</string>
+    <string name="fingerprint_fatal_error_brief">Onverwachte fout</string>
+
+    <string name="shortcut_receive_copy_short">Adres kopiëren</string>
+    <string name="shortcut_receive_copy_long">Kopieer ontvangadres naar een andere app</string>
+    <string name="shortcut_receive_qr_short">Toon Ontvangen QR</string>
+    <string name="shortcut_receive_qr_long">Toon QR-code voor ontvangstadres</string>
+    <string name="shortcut_receive_qr_error">Sorry, er trad een fout op bij het genereren van de QR-code</string>
+    <string name="shortcut_settings_enable">Snelkoppelingen Startservice</string>
+    <string name="shortcut_settings_summary">Schakel deze optie in om een ontvangadres te tonen wanneer u het app-icoon in de startservice lang ingedrukt houdt, waardoor u nog sneller Bitcoins kunt ontvangen.</string>
+
+    <string name="swipe_receive_hint">Veeg om te ontvangen</string>
+    <string name="swipe_receive_preference_summary">Schakel deze optie in om een ontvangadres te tonen wanneer u naar links veegt op het PIN-scherm, waardoor u nog sneller Bitcoins kunt ontvangen. Er zullen achtereenvolgens vijf adressen worden geladen, waarna het nodig is om u aan te melden om nieuwe adressen te tonen.</string>
+    <string name="swipe_receive_no_addresses">Er kunnen op dit moment geen adressen meer geladen worden. Meld u aan bij de app om meer adressen te laden.</string>
+
+    <string name="survey_message">Wilt u een korte enquête invullen om te helpen uw ervaring met de portefeuille te verbeteren\n\nWe stellen uw feedback op prijs!</string>
+    <string name="survey_positive_button">Enquête invullen</string>
 </resources>

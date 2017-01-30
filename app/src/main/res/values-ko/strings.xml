@@ -9,7 +9,7 @@
     <string name="app_name">블록체인</string>
     <string name="action_settings">설정</string>
 
-    <string name="all_accounts">모두</string>
+    <string name="all_accounts">모든 지갑</string>
 
     <string name="please_wait">기다리세요</string>
 
@@ -130,7 +130,6 @@
 
     <string name="support">지원</string>
     <string name="rate_us">우리에 대한 평가</string>
-    <string name="email_chooser">이메일 보내기..</string>
     <string name="about">블록체인 지갑 %1$s\n©%2$s Blockchain.info</string>
     <string name="merchant_download">무료 상인(Merchant) 앱</string>
     <string name="feedback">피드백 보내기</string>
@@ -503,7 +502,7 @@
     <string name="wallet_recovery_phrase">지갑 복구 구절</string>
     <string name="verify_email_notice">귀하 이메일 주소로 확인 링크를 보냈습니다. 귀하 이메일 주소 확인을 위해 확인 링크를 클릭하세요</string>
     <string name="email_notifications">이메일 통보</string>
-    <string name="email_notifications_summary">비트코인을 받을 때마다 이메일을 받으려면 통보를 사용하세요. 라벨이 있는 주소와 가져온 주소만 통보를 작동 시킬 수 있습니다.</string>
+    <string name="email_notifications_summary">비트코인을 받으면 알림 받기</string>
     <string name="current_password">현 암호</string>
     <string name="new_password">새 암호</string>
     <string name="sms_verified">휴대 장치 번호 확인됨</string>
@@ -544,4 +543,57 @@
     <string name="go_back">뒤로 가기</string>
     <string name="accept_higher_fee">높은 수수료 승인</string>
     <string name="large_tx_high_fee_warning">"이 거래는 작은 거스름 돈 반환으로 인한 아주 작은 금액 (dust amount) 소비를 위해 높은 수수료가 필요합니다."</string>
+
+    <string name="transactions">거래</string>
+    <string name="invalid_password_too_short">3 자 이상 입력하세요</string>
+    <string name="change_pin_new_matches_current">현재 비밀 번호는 새 비밀 번호로 쓸 수 없음</string>
+    <string name="account_locked_title">계정 잠김</string>
+    <string name="account_locked_message">귀하 계정을 사전 주의 조치로 일시 잠구었습니다. 이메일로 보낸 추가 정보를 보고 나중에 다시 해 보세요.</string>
+    <string name="licenses">라이선스</string>
+    <string name="email_chooser">이메일 보내기...</string>
+    <string name="password_changed_explanation">암호가 바뀌었으니 지갑 페어링을 다시 하세요</string>
+    <string name="sms">문자</string>
+    <string name="google_authenticator">구글 인증 도구</string>
+    <string name="yubikey">유비키 (Yubikey)</string>
+    <string name="disable_2fa_first">먼저 보안 설정에서 문자 2 단계 인증 사용을 해제하세요</string>
+    <string name="settings_field_cant_be_empty">필드가 없으면 안 됩니다</string>
+    <string name="settings_error_updating">설정 업데이트 오류, 다시 해 보세요</string>
+    <string name="request_write_storage_permission">외부 저장 쓰기 필요</string>
+    <string name="verify_sms_failed">코드가 유효하지 않으니 다시 해보세요</string>
+    <string name="enable_fingerprint">지문 잠금 풀기</string>
+    <string name="transaction_detail_coinbase">입력 없음 (새로 생성된 코인)</string>
+    <string name="transaction_detail_double_spend">두 배 지출은 위험할 수 있음</string>
+    <string name="security_centre_add_email_title">이메일 주소</string>
+    <string name="security_centre_add_email_message">경고를 받고, 의심스러운 행동을 예방하고, 잊어버린 지갑 아이디를 회복하기 위해 이메일 주소를 추가하고 확인하세요</string>
+    <string name="security_centre_add_email_positive_button">추가</string>
+
+    <string name="fingerprint_prompt">더 빠르고 쉬운 지갑 접근을 위해 지문을 쓰세요.\n\n 계속하려면 지문을 확인하세요 </string>
+    <string name="fingerprint_description">계속하려면 지문을 확인하세요</string>
+    <string name="fingerprint_hint">센서를 터치하세요</string>
+    <string name="fingerprint_login_title">지문 로그인</string>
+    <string name="fingerprint_not_recognized">지문 인식 안됨 다시 해 보세요</string>
+    <string name="fingerprint_success">지문 인식됨</string>
+    <string name="fingerprint_use_pin">비밀번호를 쓰세요</string>
+    <string name="fingerprint_disable_message">지문 로그인 사용 해제가 확실합니까?</string>
+    <string name="fingerprint_no_fingerprints_added">이 장치에는 아직 지문 등록이 안되어 있습니다. 지금 지문을 등록하겠습니까?</string>
+    <string name="fingerprint_key_invalidated_description">이 장치에 저장된 지문이 변경되었거나 키가드 사용이 해제되었습니다</string>
+    <string name="fingerprint_key_invalidated_brief">키가 무효화 되었으므로 비밀번호 코드가 필요함</string>
+    <string name="fingerprint_fatal_error_register_description">지난 30 분 동안 실패한 시도가 너무 많음 나중에 설정을 다시 해 주세요 </string>
+    <string name="fingerprint_fatal_error_authenticate_description">실패한 시도가 너무 많음 대신 비밀 번호로 로그인 하세요</string>
+    <string name="fingerprint_fatal_error_brief">예상 못한 오류</string>
+
+    <string name="shortcut_receive_copy_short">주소 복사</string>
+    <string name="shortcut_receive_copy_long">받는 주소를 다른 앱으로 복사</string>
+    <string name="shortcut_receive_qr_short">받기 QR 보이기</string>
+    <string name="shortcut_receive_qr_long">받는 주소 QR 코드 보기</string>
+    <string name="shortcut_receive_qr_error">미안합니다, QR 코드 생성에 오류가 있었습니다</string>
+    <string name="shortcut_settings_enable">런쳐 바로 가기</string>
+    <string name="shortcut_settings_summary">런쳐 앱 아이콘을 길게 눌러 받는 주소가 보이게 해서 비트코인 받기를 더 빠르게 하려면 이 옵션 사용 설정을 하세요</string>
+
+    <string name="swipe_receive_hint">스와이프 해서 받기</string>
+    <string name="swipe_receive_preference_summary">비밀 번호 화면에서 왼쪽으로 스와이프 해서 수령 주소를 볼 수 있어 비트코인 받기가 더 빠르게 하려면 이 옵션 사용 설정을 하세요. 다섯 개 주소가 연속적으로 로딩 된 후 새 주소를 보여주기 위해 로그인이 필요합니다.</string>
+    <string name="swipe_receive_no_addresses">지금은 주소를 더 로딩 할 수 없음 더 로딩 하려면 앱에 로그인 하세요</string>
+
+    <string name="survey_message">지갑 사용 체험 개선을 위한 짧은 설문에 응해 주시겠습니까?\n\n피드백 감사합니다!</string>
+    <string name="survey_positive_button">설문 조사 응하기</string>
 </resources>

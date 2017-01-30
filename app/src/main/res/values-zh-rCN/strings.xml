@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain</string>
     <string name="action_settings">设置</string>
 
-    <string name="all_accounts">全部</string>
+    <string name="all_accounts">所有钱包</string>
 
     <string name="please_wait">请稍候</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">您的密码不会在我们的服务器上共享，这意味着如果您忘记了密码，我们将无法帮助您重置。请记录下您的恢复密语，这将帮助您在丢失密码的情况下恢复钱包的访问权限。</string>
     <string name="verify_email_notice">我们已向您的电子邮件地址发送了验证连接。单击此验证连接，验证您的电子邮件地址。</string>
     <string name="email_notifications">电子邮件通知</string>
-    <string name="email_notifications_summary">启用通知功能，在接收比特币时收到电子邮件通知。只有标签地址和导入地址才可以触发提醒通知。</string>
+    <string name="email_notifications_summary">收到比特币时接收通知。</string>
     <string name="current_password">当前密码</string>
     <string name="new_password">新密码</string>
     <string name="sms_verified">手机号码已验证</string>
@@ -412,4 +412,58 @@
     <string name="go_back">返回</string>
     <string name="accept_higher_fee">接受更高的费用</string>
     <string name="large_tx_high_fee_warning">“该交易要求更高的费用用于因为返回少量变化而造成的微额量消费”。</string>
+
+    <string name="transactions">交易</string>
+    <string name="invalid_password_too_short">请输入3个以上的字符</string>
+    <string name="change_pin_new_matches_current">您不能使用当前的 PIN 码作为您的新 PIN 码</string>
+    <string name="account_locked_title">帐户已被锁定</string>
+    <string name="account_locked_message">作为预防措施，您的帐户被暂时锁定。请检查您的邮箱获取更多信息，并且稍后重试。</string>
+    <string name="licenses">许可证</string>
+    <string name="email_chooser">发送电子邮件…</string>
+    <string name="password_changed_explanation">您的密码已更改，请重新配对您的钱包</string>
+    <string name="sms">短信</string>
+    <string name="google_authenticator">Google 身份验证器</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">请先通过安全设置中的短信启用禁用两步验证方式。</string>
+    <string name="settings_field_cant_be_empty">字段不能为空。</string>
+    <string name="settings_error_updating">更新设置出错，请重试</string>
+    <string name="request_write_storage_permission">需要写入外部存储器。</string>
+    <string name="verify_sms_failed">代码无效，请重试</string>
+    <string name="enable_fingerprint">指纹解锁</string>
+
+    <string name="transaction_detail_coinbase">无输入（新生成的币）</string>
+    <string name="transaction_detail_double_spend">可能会存在双重花费的风险。</string>
+    <string name="security_centre_add_email_title">电子邮件地址</string>
+    <string name="security_centre_add_email_message">添加并验证您的邮箱地址以接收提醒、防止可疑活动，以及在忘记时取回您的钱包ID。</string>
+    <string name="security_centre_add_email_positive_button">添加</string>
+
+    <string name="fingerprint_prompt">使用您的指纹更加快速轻松地访问您的钱包。\n\n确认指纹以继续</string>
+    <string name="fingerprint_description">确认指纹以继续</string>
+    <string name="fingerprint_hint">触摸式感应器</string>
+    <string name="fingerprint_login_title">指纹登录</string>
+    <string name="fingerprint_not_recognized">指纹未被识别。重试</string>
+    <string name="fingerprint_success">指纹被识别</string>
+    <string name="fingerprint_use_pin">使用 PIN 码</string>
+    <string name="fingerprint_disable_message">您确定要禁用指纹登录吗？</string>
+    <string name="fingerprint_no_fingerprints_added">尚无指纹注册该设备。您要马上注册一个指纹吗？</string>
+    <string name="fingerprint_key_invalidated_description">更改了存储在该设备上的指纹或者键盘锁被禁用</string>
+    <string name="fingerprint_key_invalidated_brief">密钥无效，需要 PIN 码</string>
+    <string name="fingerprint_fatal_error_register_description">过去30分钟内有过多次失败尝试。请稍后重新尝试设置。</string>
+    <string name="fingerprint_fatal_error_authenticate_description">有过多次失败尝试。请转而使用您的 PIN 登录。</string>
+    <string name="fingerprint_fatal_error_brief">意外错误</string>
+
+    <string name="shortcut_receive_copy_short">复制地址</string>
+    <string name="shortcut_receive_copy_long">复制收件地址至另一个应用</string>
+    <string name="shortcut_receive_qr_short">显示接收 QR</string>
+    <string name="shortcut_receive_qr_long">查看 QR 码获取接收地址</string>
+    <string name="shortcut_receive_qr_error">抱歉，生成 QR 码时出现了错误</string>
+    <string name="shortcut_settings_enable">快捷启动</string>
+    <string name="shortcut_settings_summary">启用该选项以在您长按启动程序上的应用图标时显示一个接收地址，从而甚至更加快速地接收比特币。</string>
+
+    <string name="swipe_receive_hint">滑动以接收</string>
+    <string name="swipe_receive_preference_summary">启用该选项以在 PIN 码屏幕上向左滑动时显示接收地址，使得比特币的接收甚至更加快速。将连续载入5个地址，而后需要登录以显示新地址。</string>
+    <string name="swipe_receive_no_addresses">目前不能载入更多地址。登录应用以载入更多。</string>
+
+    <string name="survey_message">您想要填写一份简单的问卷调查以帮助改进您的钱包体验吗？\n\n我们非常重视您的反馈意见！</string>
+    <string name="survey_positive_button">接受调查</string>
 </resources>

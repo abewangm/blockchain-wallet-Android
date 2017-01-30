@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Ustawienia</string>
 
-    <string name="all_accounts">Wszystkie</string>
+    <string name="all_accounts">Wszystkie portfele</string>
 
     <string name="please_wait">Proszę czekać</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">Twoje hasło nie jest przechowywane na naszych serwerach, co znaczy, że nie będziemy mogli Ci pomóc w jego zresetowaniu gdy go zapomnisz.  Zapisz sobie swój zwrot do odzyskiwania hasła, dzięki któremu możesz odzyskać dostęp do swojego portfela w razie zagubienia hasła.</string>
     <string name="verify_email_notice">Wysłaliśmy link weryfikacyjny pod Twój adres e-mail. Kliknij link weryfikacyjny, by zweryfikować swój adres e-mail.</string>
     <string name="email_notifications">Powiadomienia e-mail</string>
-    <string name="email_notifications_summary">Włącz powiadomienia, by otrzymywać e-maile zawsze, gdy otrzymujesz bitcoiny.  Tylko adresy z etykietą i adresy importowane mogą wysyłać powiadomienia.</string>
+    <string name="email_notifications_summary">Otrzymuj powiadomienie, gdy otrzymasz bitcoiny.</string>
     <string name="current_password">Obecne hasło</string>
     <string name="new_password">Nowe hasło</string>
     <string name="sms_verified">Numer telefonu komórkowego zweryfikowany</string>
@@ -412,4 +412,58 @@
     <string name="go_back">Wróć</string>
     <string name="accept_higher_fee">Zaakceptuj wyższą opłatę</string>
     <string name="large_tx_high_fee_warning">"Ta transakcja wymaga wyższej opłaty dla konsumpcji "kurzu" z powodu małej kwoty reszty."</string>
+
+    <string name="transactions">Transakcje</string>
+    <string name="invalid_password_too_short">Wprowadź więcej niż 3 znaki</string>
+    <string name="change_pin_new_matches_current">Nie możesz użyć aktualnego kodu PIN jako nowego kodu PIN</string>
+    <string name="account_locked_title">Konto zablokowane</string>
+    <string name="account_locked_message">Twoje konto zostało tymczasowo zablokowane w ramach środków ostrożności. Przeczytaj wiadomość e-mail, aby uzyskać więcej informacji i spróbuj ponownie później.</string>
+    <string name="licenses">Licencje</string>
+    <string name="email_chooser">Wyślij e-mail...</string>
+    <string name="password_changed_explanation">Twoje hasło zostało zmienione, sparuj ponownie swój portfel</string>
+    <string name="sms">SMS</string>
+    <string name="google_authenticator">Google Authenticator</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">Najpierw wyłącz uwierzytelnianie dwustopniowe za pomocą SMS-a w ustawieniach bezpieczeństwa.</string>
+    <string name="settings_field_cant_be_empty">Pole nie może być puste.</string>
+    <string name="settings_error_updating">Błąd aktualizacji ustawień, spróbuj ponownie</string>
+    <string name="request_write_storage_permission">Wymagane jest zewnętrzne urządzenie zapisu.</string>
+    <string name="verify_sms_failed">Błędny kod, spróbuj ponownie</string>
+    <string name="enable_fingerprint">Odblokowanie odciskiem palca</string>
+
+    <string name="transaction_detail_coinbase">Brak wkładów (nowo wygenerowane monety)</string>
+    <string name="transaction_detail_double_spend">Zachodzi ryzyko podwójnego naliczenia.</string>
+    <string name="security_centre_add_email_title">Adres e-mail</string>
+    <string name="security_centre_add_email_message">Dodaj i zweryfikuj swój adres e-mail, aby otrzymywać alerty, zapobiegać podejrzanym działaniom oraz odzyskać swój Wallet ID, jeśli go zapomnisz.</string>
+    <string name="security_centre_add_email_positive_button">Dodaj</string>
+
+    <string name="fingerprint_prompt">Używaj odcisku palca, aby uzyskiwać dostęp do portfela szybciej i łatwiej.\n\nPotwierdź odcisk palca, aby kontynuować</string>
+    <string name="fingerprint_description">Potwierdź odcisk palca, aby kontynuować</string>
+    <string name="fingerprint_hint">Czujnik dotyku</string>
+    <string name="fingerprint_login_title">Logowanie z odciskiem palca</string>
+    <string name="fingerprint_not_recognized">Nie rozpoznano odcisku palca Spróbuj ponownie</string>
+    <string name="fingerprint_success">Rozpoznano odcisk palca</string>
+    <string name="fingerprint_use_pin">Użyj kodu PIN</string>
+    <string name="fingerprint_disable_message">Czy na pewno chcesz wyłączyć logowanie z odciskiem palca?</string>
+    <string name="fingerprint_no_fingerprints_added">Z tym urządzeniem nie powiązano jeszcze odcisków palca. Czy chcesz teraz zarejestrować odcisk palca?</string>
+    <string name="fingerprint_key_invalidated_description">Albo odciski palca przechowywane na tym urządzeniu uległy zmianie, albo wyłączono blokadę klawiatury</string>
+    <string name="fingerprint_key_invalidated_brief">Unieważniono klucze, kod PIN wymagany</string>
+    <string name="fingerprint_fatal_error_register_description">W ciągu ostatnich 30 minut podjęto zbyt dużo nieudanych prób. Spróbuj dokonać konfiguracji później.</string>
+    <string name="fingerprint_fatal_error_authenticate_description">Podjęto zbyt dużo nieudanych prób. Zamiast tego zaloguj się, używając kodu PIN.</string>
+    <string name="fingerprint_fatal_error_brief">Nieoczekiwany błąd</string>
+
+    <string name="shortcut_receive_copy_short">Kopiuj adres</string>
+    <string name="shortcut_receive_copy_long">Kopiuj adres odbioru do innej aplikacji</string>
+    <string name="shortcut_receive_qr_short">Pokaż QR Odbioru</string>
+    <string name="shortcut_receive_qr_long">Wyświetl kod QR dla adresu odbioru</string>
+    <string name="shortcut_receive_qr_error">Przepraszamy, podczas generowania kodu QR wystąpił błąd</string>
+    <string name="shortcut_settings_enable">Skróty do programu uruchamiającego</string>
+    <string name="shortcut_settings_summary">Włącz tę opcję, aby odkryć adres odbioru, wybierając i przytrzymując ikonę aplikacji w programie uruchamiającym, co przyspieszy otrzymywanie bitcoinów.</string>
+
+    <string name="swipe_receive_hint">Przesuń, aby otrzymać</string>
+    <string name="swipe_receive_preference_summary">Włącz tę opcję, aby odkryć adres odbioru, przesuwając w lewo na ekranie kodu PIN, co przyspieszy otrzymywanie bitcoinów. Pięć adresów zostanie kolejno załadowanych, po czym wymagane będzie zalogowanie, aby wyświetlić nowe adresy.</string>
+    <string name="swipe_receive_no_addresses">W tej chwili nie można załadować więcej adresów. Zaloguj się do aplikacji, aby załadować więcej.</string>
+
+    <string name="survey_message">Czy chcesz wypełnić krótką ankietę mającą na celu poprawę komfortu korzystania z portfela?\n\nTwoja opinia jest dla nas bardzo ważna!</string>
+    <string name="survey_positive_button">Wypełnij ankietę</string>
 </resources>

@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Einstellungen</string>
 
-    <string name="all_accounts">Alle</string>
+    <string name="all_accounts">Alle Wallets</string>
 
     <string name="please_wait">Bitte warten</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">Ihr Passwort wird unseren Servern niemals mitgeteilt, weshalb wir Ihnen bei der Rücksetzung Ihres Passwortes - sollten Sie dieses vergessen - nicht behilflich sein können. Denken Sie daran, Ihr Wiederherstellungspasswort, das Ihnen im Falle eines Passwortverlustes einen erneuten Zugriff auf Ihre Wallet ermöglicht, aufzuschreiben.</string>
     <string name="verify_email_notice">Wir haben an Ihre E-Mail-Adresse einen Verifizierungslink gesandt. Zur Verifizierung Ihrer E-Mail-Adresse klicken Sie bitte auf den entsprechenden Link.</string>
     <string name="email_notifications">E-Mail-Benachrichtigungen</string>
-    <string name="email_notifications_summary">Aktivieren Sie Benachrichtigungen, wenn Sie bei jedem Empfang von Bitcoins per E-Mail benachrichtigt werden möchten. Nur Adressen mit Beschreibungen und importierte Adressen sind zur Auslösung von Benachrichtigungen zulässig.</string>
+    <string name="email_notifications_summary">Erhalten Sie beim Empfang von Bitcoin eine Benachrichtigung.</string>
     <string name="current_password">Aktuelles Passwort</string>
     <string name="new_password">Neues Passwort</string>
     <string name="sms_verified">Handynummer wurde verifiziert</string>
@@ -412,4 +412,58 @@
     <string name="go_back">Zurück</string>
     <string name="accept_higher_fee">Höhere Gebühr akzeptieren</string>
     <string name="large_tx_high_fee_warning">„Da der zurückzugebene Wechselbetrag klein ist, erfordert diese Transaktion eine höhere Gebühr für Kleinstsummenkonsum.“</string>
+
+    <string name="transactions">Transaktionen</string>
+    <string name="invalid_password_too_short">Bitte geben Sie mehr als 3 Buchstaben ein</string>
+    <string name="change_pin_new_matches_current">Ihre derzeitige PIN kann nicht als neue PIN verwendet werden</string>
+    <string name="account_locked_title">Konto gesperrt</string>
+    <string name="account_locked_message">Als Vorsichtsmaßnahme wurde Ihr Konto zeitweise gesperrt. Bitte überprüfen Sie zur weiteren Information Ihre E-Mails und versuchen Sie es später erneut.</string>
+    <string name="licenses">Lizenzen</string>
+    <string name="email_chooser">E-Mail senden …</string>
+    <string name="password_changed_explanation">Ihr Passwort wurde geändert. Bitte verknüpfen Sie Ihre Wallet erneut.</string>
+    <string name="sms">SMS</string>
+    <string name="google_authenticator">Google-Authenticator</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">Bitte deaktivieren Sie zuerst in den Sicherheitseinstellungen die 2-Schritt-Verifizierung per SMS.</string>
+    <string name="settings_field_cant_be_empty">Das Feld muss ausgefüllt werden.</string>
+    <string name="settings_error_updating">Fehler beim Aktualisieren der Einstellungen. Bitte erneut versuchen</string>
+    <string name="request_write_storage_permission">Schreibfunktion für externen Speicher ist erforderlich.</string>
+    <string name="verify_sms_failed">Ungültiger Code. Bitte erneut versuchen</string>
+    <string name="enable_fingerprint">Fingerabdruck entsperren</string>
+
+    <string name="transaction_detail_coinbase">Keine Eingänge (neu generierte Bitcoins)</string>
+    <string name="transaction_detail_double_spend">Birgt eventuell die Gefahr einer doppelten Ausgabe.</string>
+    <string name="security_centre_add_email_title">E-Mail-Adresse</string>
+    <string name="security_centre_add_email_message">Zum Erhalt von Benachrichtigungen, Schutz vor verdächtigen Aktivitäten und zur Wiederherstellung der Wallet-ID im Falle eines Vergessens geben Sie Ihre E-Mail-Adresse an und verifizieren diese.</string>
+    <string name="security_centre_add_email_positive_button">Hinzufügen</string>
+
+    <string name="fingerprint_prompt">Verwenden Sie Ihren Fingerabdruck für einen schnelleren und leichteren Zugriff auf Ihre Wallet.\n\nBestätigen Sie Ihren Fingerabdruck, um fortzufahren</string>
+    <string name="fingerprint_description">Bestätigen Sie Ihren Fingerabdruck, um fortzufahren</string>
+    <string name="fingerprint_hint">Touch-Sensor</string>
+    <string name="fingerprint_login_title">Anmeldung per Fingerabdruck</string>
+    <string name="fingerprint_not_recognized">Fingerabdruck wurde nicht anerkannt. Erneut versuchen</string>
+    <string name="fingerprint_success">Fingerabdruck wurde anerkannt</string>
+    <string name="fingerprint_use_pin">PIN verwenden</string>
+    <string name="fingerprint_disable_message">Sind Sie sicher, dass Sie die Anmeldung per Fingerabdruck deaktivieren möchten?</string>
+    <string name="fingerprint_no_fingerprints_added">Auf diesem Gerät wurden noch keine Fingerabdrücke registriert. Möchten Sie jetzt einen Fingerabdruck registrieren lassen?</string>
+    <string name="fingerprint_key_invalidated_description">Entweder wurden die auf diesem Gerät gespeicherten Fingerabdrücke geändert oder der Schlüsselschutz ist nicht mehr aktiviert</string>
+    <string name="fingerprint_key_invalidated_brief">Schlüssel wurden annulliert. PIN-Code ist erforderlich</string>
+    <string name="fingerprint_fatal_error_register_description">In den letzten 30 Minuten wurden zu viele fehlgeschlagene Versuche unternommen. Bitte versuchen Sie, die Einrichtung später nochmals vorzunehmen.</string>
+    <string name="fingerprint_fatal_error_authenticate_description">Es wurden zu viele fehlgeschlagene Versuche unternommen. Bitte verwenden Sie zur Anmeldung stattdessen Ihre PIN.</string>
+    <string name="fingerprint_fatal_error_brief">Unerwarteter Fehler</string>
+
+    <string name="shortcut_receive_copy_short">Adresse kopieren</string>
+    <string name="shortcut_receive_copy_long">Empfangsadresse in eine andere App kopieren</string>
+    <string name="shortcut_receive_qr_short">Empfangs-QR anzeigen</string>
+    <string name="shortcut_receive_qr_long">QR-Code für Empfangsadresse ansehen</string>
+    <string name="shortcut_receive_qr_error">Leider ist bei der Generierung des QR-Codes ein Fehler aufgetreten</string>
+    <string name="shortcut_settings_enable">Startkürzel</string>
+    <string name="shortcut_settings_summary">Zur Anzeige einer Empfangsadresse bei längerem Druck auf das App-Symbol im Startbereich muss diese Option aktiviert werden. So können Sie Bitcoin noch schneller empfangen.</string>
+
+    <string name="swipe_receive_hint">Zum Empfang wischen</string>
+    <string name="swipe_receive_preference_summary">Durch die Aktivierung dieser Option bekommen Sie eine Empfangsadresse angezeigt, wenn Sie auf dem PIN-Bildschirm nach links wischen. So lässt sich Bitcoin noch schneller empfangen. Es werden fünf Adressen hintereinander geladen. Danach ist zur Anzeige neuer Adressen eine Anmeldung erforderlich.</string>
+    <string name="swipe_receive_no_addresses">Derzeit können keine weiteren Adresse geladen werden. Zum Laden zusätzlicher Adressen melden Sie sich bei der App an.</string>
+
+    <string name="survey_message">Würden Sie bitte eine kurze Umfrage beantworten und so dazu beitragen, all das, was mit Ihrer Wallet zu tun hat, noch zu verbessern?\n\nWir wissen Ihr Feedback zu schätzen!</string>
+    <string name="survey_positive_button">Umfrage beantworten</string>
 </resources>

@@ -7,7 +7,7 @@
     <string name="app_name">ブロックチェーン</string>
     <string name="action_settings">設定</string>
 
-    <string name="all_accounts">全て</string>
+    <string name="all_accounts">すべてのウォレット</string>
 
     <string name="please_wait">お待ちください</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">あなたのパスワードが当社サーバーに共有されることはありません。よって、パスワードを忘れた場合でも当社がリセットを行うことはできません。パスワードを紛失した場合にアクセスを復元するためのリカバリーフレーズを書き留めておいてください。</string>
     <string name="verify_email_notice">メールアドレスに認証リンクが送信されました。認証リンクをクリックしてメールアドレスを認証してください。</string>
     <string name="email_notifications">メール通知</string>
-    <string name="email_notifications_summary">ビットコインを受信する度に送信されるメールでの通知を有効にする。ラベル付けされたアドレスのみが通知をトリガーできます。</string>
+    <string name="email_notifications_summary">ビットコインを受信する際に通知を受ける。</string>
     <string name="current_password">現在のパスワード</string>
     <string name="new_password">新規パスワード</string>
     <string name="sms_verified">携帯電話番号が認証されました。</string>
@@ -412,4 +412,58 @@
     <string name="go_back">戻る</string>
     <string name="accept_higher_fee">より高額な費用に同意する</string>
     <string name="large_tx_high_fee_warning">"この取引では少額の釣り銭金額が払い戻されるため、ダスト消費により高額な手数料が必要です。"</string>
+
+    <string name="transactions">取引</string>
+    <string name="invalid_password_too_short">3文字以上入力してください</string>
+    <string name="change_pin_new_matches_current">新規PINに以前のPINを使うことはできません</string>
+    <string name="account_locked_title">アカウントがロックされています</string>
+    <string name="account_locked_message">予防策としてアカウントが一時的にロックされています。メールで詳細情報を確認し、後で再試行してください。</string>
+    <string name="licenses">ライセンス</string>
+    <string name="email_chooser">メールを送信…</string>
+    <string name="password_changed_explanation">パスワードが変更されました。ウォレットを再度ペアリングしてください</string>
+    <string name="sms">SMS</string>
+    <string name="google_authenticator">Google認証システム</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">まずセキュリティ設定からSMSで2段階認証を無効にしてください。</string>
+    <string name="settings_field_cant_be_empty">入力は必須です</string>
+    <string name="settings_error_updating">設定の更新にエラーが発生しました。再試行してください</string>
+    <string name="request_write_storage_permission">外部記憶装置を書き込む必要があります。</string>
+    <string name="verify_sms_failed">コードが無効です。再試行してください</string>
+    <string name="enable_fingerprint">指紋アンロック</string>
+
+    <string name="transaction_detail_coinbase">入力なし（新しく生成されたコイン）</string>
+    <string name="transaction_detail_double_spend">二重支出のリスクがあるかもしれません。</string>
+    <string name="security_centre_add_email_title">メールアドレス</string>
+    <string name="security_centre_add_email_message">メールアドレスを追加・認証すると通知を受け取り、怪しいアクティビティを予防し、ウォレットIDを忘れた場合も復元できます。</string>
+    <string name="security_centre_add_email_positive_button">追加</string>
+
+    <string name="fingerprint_prompt">指紋を使用してウォレットに高速、簡単にアクセスしましょう。\n\n指紋を確認して続行</string>
+    <string name="fingerprint_description">続行するには指紋を確認してください</string>
+    <string name="fingerprint_hint">タッチセンサー</string>
+    <string name="fingerprint_login_title">指紋ログイン</string>
+    <string name="fingerprint_not_recognized">指紋が認識されていません。再試行してください</string>
+    <string name="fingerprint_success">指紋が認識されました</string>
+    <string name="fingerprint_use_pin">PINを使用</string>
+    <string name="fingerprint_disable_message">本当に指紋ログインを無効にしますか？</string>
+    <string name="fingerprint_no_fingerprints_added">このデバイスには指紋が登録されていません。今すぐ指紋を登録しますか？</string>
+    <string name="fingerprint_key_invalidated_description">このデバイスに保存されている指紋が変更されたか、キーガードが無効になっています</string>
+    <string name="fingerprint_key_invalidated_brief">キーが無効になっているためPINコードが必要です</string>
+    <string name="fingerprint_fatal_error_register_description">過去30分間に失敗した試行回数が多すぎます。後でまたセットアップを行ってください。</string>
+    <string name="fingerprint_fatal_error_authenticate_description">失敗した試行回数が多すぎます。PINを使用してログインしてください。</string>
+    <string name="fingerprint_fatal_error_brief">不明なエラー</string>
+
+    <string name="shortcut_receive_copy_short">アドレスをコピー</string>
+    <string name="shortcut_receive_copy_long">受信アドレスを別のアプリにコピーする</string>
+    <string name="shortcut_receive_qr_short">受信QRを表示する</string>
+    <string name="shortcut_receive_qr_long">受信アドレスのQRコードを表示する</string>
+    <string name="shortcut_receive_qr_error">申し訳ありませんがQRコードの生成中にエラーが発生しました</string>
+    <string name="shortcut_settings_enable">ラウンチャーショートカット</string>
+    <string name="shortcut_settings_summary">ランチャーのアプリアイコンを長押ししてこのオプションを有効にすると、ビットコインをさらに速く受信することができる受信アドレスが表示されます。</string>
+
+    <string name="swipe_receive_hint">スワイプして受信</string>
+    <string name="swipe_receive_preference_summary">このオプションを有効にするとPIN画面で左にスワイプするだけで受信アドレスが表示され、ビットコインの受信がさらに高速になります。5つのアドレスが連続してロードされ、その後新規アドレスを表示するにはログインが必要となります。</string>
+    <string name="swipe_receive_no_addresses">現在さらにアドレスを読み込むことはできません。アプリにログインするとさらに読み込むことができます。</string>
+
+    <string name="survey_message">ウォレットの使用法を改善するための簡単なアンケートへのご回答をお願いします。\n\n皆様のご意見は大変重要です！</string>
+    <string name="survey_positive_button">アンケートを受ける</string>
 </resources>
