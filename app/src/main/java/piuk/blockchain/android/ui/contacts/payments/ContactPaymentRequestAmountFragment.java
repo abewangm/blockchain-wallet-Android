@@ -140,14 +140,23 @@ public class ContactPaymentRequestAmountFragment extends Fragment implements Con
         PaymentRequestType paymentRequestType =
                 (PaymentRequestType) getArguments().getSerializable(ARGUMENT_REQUEST_TYPE);
 
-        if (paymentRequestType != null && contactName != null) {
-            if (paymentRequestType.equals(PaymentRequestType.SEND)) {
-                binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_send_amount, contactName));
-                binding.layoutReceiveAccount.setVisibility(View.GONE);
-            } else {
-                binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_receive_amount, contactName));
+        if (paymentRequestType == null || contactName == null) {
+            throw new AssertionError("Contact name and PaymentRequestType must be passed to fragment");
+        }
 
-                List<String> accounts = viewModel.getAccountsList();
+        if (paymentRequestType.equals(PaymentRequestType.SEND)) {
+            binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_send_amount, contactName));
+            binding.layoutReceiveAccount.setVisibility(View.GONE);
+        } else {
+            binding.textviewExplanation.setText(getString(R.string.contacts_payment_request_receive_amount, contactName));
+
+            List<String> accounts = viewModel.getAccountsList();
+            if (accounts.size() == 1) {
+                // Hide account selection if only one account exists
+                binding.layoutReceiveAccount.setVisibility(View.GONE);
+                viewModel.setAccountPosition(0);
+            } else {
+                // Show dropdown for account selection
                 binding.spinnerAccount.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, accounts));
                 //noinspection AnonymousInnerClassMayBeStatic
                 binding.spinnerAccount.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -162,8 +171,6 @@ public class ContactPaymentRequestAmountFragment extends Fragment implements Con
                     }
                 });
             }
-        } else {
-            throw new AssertionError("Contact name and PaymentRequestType must be passed to fragment");
         }
 
         binding.buttonNext.setOnClickListener(v -> {

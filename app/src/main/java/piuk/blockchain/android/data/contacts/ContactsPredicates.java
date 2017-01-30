@@ -4,8 +4,6 @@ import info.blockchain.wallet.contacts.data.Contact;
 
 import io.reactivex.functions.Predicate;
 
-import static android.R.attr.id;
-
 public final class ContactsPredicates {
 
     public static Predicate<Contact> filterById(String id) {
@@ -16,10 +14,8 @@ public final class ContactsPredicates {
         return contact -> contact.getMdid() != null && contact.getMdid().equals(mdid);
     }
 
-
     public static Predicate<Contact> filterPending() {
         return contact -> contact.getMdid() == null || contact.getMdid().isEmpty();
     }
-
 
 }

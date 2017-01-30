@@ -79,6 +79,8 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
         void showWaitingForAddressDialog();
 
         void showTransactionDetail(String txHash);
+
+        void showSendAddressDialog(String fctxId);
     }
 
     ContactDetailFragmentViewModel(DataListener dataListener) {
@@ -223,7 +225,13 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
                         accountNames.add(account.getLabel());
                     }
                 }
-                dataListener.showAccountChoiceDialog(accountNames, id);
+                if (accountNames.size() == 1) {
+                    // Only one account, ask if you want to send an address
+                    dataListener.showSendAddressDialog(id);
+                } else {
+                    // Show dialog allowing user to select which account they want to use
+                    dataListener.showAccountChoiceDialog(accountNames, id);
+                }
 
                 // Waiting for payment
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
