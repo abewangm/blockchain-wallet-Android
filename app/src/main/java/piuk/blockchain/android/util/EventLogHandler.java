@@ -49,7 +49,7 @@ public class EventLogHandler {
     }
 
     public void logAddressInputEvent(String flag) {
-        logEvent(URL_EVENT_TX_INPUT_FROM_QR + flag);
+        logEvent(flag);
     }
 
     private String getBoolean(boolean active) {
