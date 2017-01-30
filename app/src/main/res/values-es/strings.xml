@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Configuración</string>
 
-    <string name="all_accounts">Todos</string>
+    <string name="all_accounts">Todas las billeteras</string>
 
     <string name="please_wait">Espera</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">Tu contraseña nunca es compartida con nuestros servidores, lo que significa que no podemos ayudarte a restablecerla si la olvidas. Asegúrate de anotar tu frase de recuperación para restaurar el acceso a tu monedero en caso de que pierdas tu contraseña.</string>
     <string name="verify_email_notice">Hemos enviado un enlace de verificación a tu dirección de correo electrónico. Haz clic en el enlace de verificación para verificar tu dirección de correo electrónico.</string>
     <string name="email_notifications">Notificaciones por correo electrónico</string>
-    <string name="email_notifications_summary">Habilita las notificaciones para recibir un correo electrónico cada vez que recibas Bitcoin. Solo las direcciones con etiqueta y las direcciones importadas pueden activar notificaciones.</string>
+    <string name="email_notifications_summary">Reciba una notificación cuando reciba bitcoins.</string>
     <string name="current_password">Contraseña actual</string>
     <string name="new_password">Nueva contraseña</string>
     <string name="sms_verified">Número de teléfono celular verificado</string>
@@ -412,4 +412,58 @@
     <string name="go_back">Volver</string>
     <string name="accept_higher_fee">Aceptar la comisión más alta</string>
     <string name="large_tx_high_fee_warning">"Esta transacción requiere una comisión más alta para el consumo 'polvo', debido al bajo monto del cambio a devolver."</string>
+
+    <string name="transactions">Transacciones</string>
+    <string name="invalid_password_too_short">Por favor, ingrese más de 3 caracteres</string>
+    <string name="change_pin_new_matches_current">No puede usar su PIN actual como PIN nuevo</string>
+    <string name="account_locked_title">Cuenta bloqueada</string>
+    <string name="account_locked_message">Su cuenta se bloqueó temporalmente como medida de precaución. Por favor, verifique su correo electrónico para obtener más información e intente de nuevo más tarde.</string>
+    <string name="licenses">Licencias</string>
+    <string name="email_chooser">Enviar correo electrónico...</string>
+    <string name="password_changed_explanation">Su cuenta se cambió, por favor vuelva a emparejar su billetera</string>
+    <string name="sms">Mensaje de texto</string>
+    <string name="google_authenticator">Verificador de Google</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">Por favor, primero deshabilite la verificación de dos pasos mediante mensajes de texto en los ajustes de seguridad.</string>
+    <string name="settings_field_cant_be_empty">El campo no puede estar vacío.</string>
+    <string name="settings_error_updating">Ocurrió un error al actualizar las configuraciones, por favor intente de nuevo</string>
+    <string name="request_write_storage_permission">Se requiere permiso para escribir en el almacenamiento externo.</string>
+    <string name="verify_sms_failed">Código inválido, por favor intente de nuevo</string>
+    <string name="enable_fingerprint">Desbloqueo por huella digital</string>
+
+    <string name="transaction_detail_coinbase">Sin ingresos (monedas nuevas generadas)</string>
+    <string name="transaction_detail_double_spend">Podría estar en riesgo de incurrir en un gasto doble</string>
+    <string name="security_centre_add_email_title">Dirección de correo electrónico</string>
+    <string name="security_centre_add_email_message">Añada y verifique su dirección de correo electrónico para recibir alertas, evitar actividad sospechosa y recuperar el Id. de su billetera si lo olvida.</string>
+    <string name="security_centre_add_email_positive_button">Añadir</string>
+
+    <string name="fingerprint_prompt">Utilice su huella digital para tener un acceso más rápido y fácil a su billetera.\n\nConfirme su huella digital para continuar.</string>
+    <string name="fingerprint_description">Confirme su huella digital para continuar</string>
+    <string name="fingerprint_hint">Toque el sensor</string>
+    <string name="fingerprint_login_title">Inicio de sesión por huella digital</string>
+    <string name="fingerprint_not_recognized">Huella digital no reconocida. Vuelva a intentarlo</string>
+    <string name="fingerprint_success">Huella digital reconocida</string>
+    <string name="fingerprint_use_pin">Usar PIN</string>
+    <string name="fingerprint_disable_message">¿Está seguro que desea deshabilitar el inicio de sesión por huella digital?</string>
+    <string name="fingerprint_no_fingerprints_added">No hay huellas digitales registradas en este dispositivo todavía. ¿Quieres registrar una huella digital ahora?</string>
+    <string name="fingerprint_key_invalidated_description">Se cambiaron las huellas digitales almacenadas en este dispositivo o el contenedor de claves se deshabilitó</string>
+    <string name="fingerprint_key_invalidated_brief">Llaves inválidas, se requiere de un código PIN.</string>
+    <string name="fingerprint_fatal_error_register_description">Hubo demasiados intentos fallidos en los últimos 30 minutos. Por favor, intente la instalación otra vez más tarde.</string>
+    <string name="fingerprint_fatal_error_authenticate_description">Hubo demasiados intentos fallidos. Por favor, inicie sesión utilizando su PIN.</string>
+    <string name="fingerprint_fatal_error_brief">Error inesperado</string>
+
+    <string name="shortcut_receive_copy_short">Copiar dirección</string>
+    <string name="shortcut_receive_copy_long">Copiar la dirección de recepción a otra aplicación</string>
+    <string name="shortcut_receive_qr_short">Mostrar QR de recepción</string>
+    <string name="shortcut_receive_qr_long">Ver código QR para la dirección de recepción</string>
+    <string name="shortcut_receive_qr_error">Lo sentimos, hubo un error al generar el código QR</string>
+    <string name="shortcut_settings_enable">Accesos directos del lanzador</string>
+    <string name="shortcut_settings_summary">Habilite esta opción para mostrar una dirección de recepción cuando mentiene presionado el ícono de la aplicación en el lanzador, haciendo que recibir bitcoins sea más rápido.</string>
+
+    <string name="swipe_receive_hint">Deslice para recibir</string>
+    <string name="swipe_receive_preference_summary">Habilite esta opción para mostrar una dirección de recepción cuando deslice a la izquierda en la pantalla PIN, haciendo que recibir bitcoins sea aún más rápido. Se cargarán cinco direcciones de forma consecutiva, después de lo cual será necesario ingresar para mostrar las nuevas direcciones.</string>
+    <string name="swipe_receive_no_addresses">No se pueden cargar más direcciones ahora mismo. Inicie sesión en la aplicación para cargar más.</string>
+
+    <string name="survey_message">¿Le gustaría completar una corta encuesta para ayudarnos a mejorar su experiencia con la billetera?\n\n¡Valoramos sus comentarios!</string>
+    <string name="survey_positive_button">Realizar encuesta</string>
 </resources>

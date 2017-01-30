@@ -319,12 +319,27 @@ public class AccountViewModelTest {
     @Test
     public void onAddressScannedNonBip38() throws Exception {
         // Arrange
-
+        when(accountDataManager.getKeyFromImportedData(anyString(), anyString())).thenReturn(Observable.just(mock(ECKey.class)));
         // Act
         subject.onAddressScanned("L1FQxC7wmmRNNe2YFPNXscPq3kaheiA4T7SnTr7vYSBW7Jw1A7PD");
         // Assert
+        verify(accountDataManager).getKeyFromImportedData(anyString(), anyString());
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
+    }
+
+    @Test
+    public void onAddressScannedNonBip38Failure() throws Exception {
+        // Arrange
+        when(accountDataManager.getKeyFromImportedData(anyString(), anyString())).thenReturn(Observable.error(new Throwable()));
+        // Act
+        subject.onAddressScanned("L1FQxC7wmmRNNe2YFPNXscPq3kaheiA4T7SnTr7vYSBW7Jw1A7PD");
+        // Assert
+        verify(accountDataManager).getKeyFromImportedData(anyString(), anyString());
+        verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
     }
 
     @Test

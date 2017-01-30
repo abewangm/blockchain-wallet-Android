@@ -6,16 +6,14 @@ apply from: 'environment.gradle'
 android {
     compileSdkVersion 25
     buildToolsVersion '25.0.2'
-
     dexOptions {
         javaMaxHeapSize "3g"
     }
-
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 25
-        versionCode 235
-        versionName "6.2.0"
+        versionCode 236
+        versionName "6.2.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
@@ -30,7 +28,6 @@ android {
         buildConfigField "String", "STAGING_WEBSOCKET", stagingWebsocket
         buildConfigField "String", "TESTNET_WEBSOCKET", testnetWebsocket
     }
-
     buildTypes {
         release {
             debuggable false
@@ -61,7 +58,6 @@ android {
             buildConfigField "boolean", "DOGFOOD", "true"
         }
     }
-
     productFlavors {
         prod {
             // For release and testing on <API21 devices
@@ -73,12 +69,10 @@ android {
             minSdkVersion 21
         }
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     lintOptions {
         checkReleaseBuilds true
         abortOnError false
@@ -89,11 +83,9 @@ android {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
     }
-
     dataBinding {
         enabled = true
     }
-
     // Always show the result of every unit test, even if it passes.
     testOptions.unitTests.all {
         testLogging {
@@ -134,7 +126,6 @@ dependencies {
     compile "com.android.support:support-v13:$supportVersion"
     compile "com.android.support:preference-v7:$supportVersion"
     compile "com.android.support:preference-v14:$supportVersion"
-
     // Enable crash reporting only for release version
     releaseCompile "com.google.firebase:firebase-crash:$googleServicesVersion"
     compile "com.google.firebase:firebase-messaging:$googleServicesVersion"
@@ -167,7 +158,6 @@ dependencies {
     annotationProcessor 'com.google.guava:guava:20.0'
     // Fingerprint authentication
     compile 'com.mtramin:rxfingerprint:2.0.1'
-
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile "org.mockito:mockito-core:$mockitoVersion"
@@ -180,7 +170,6 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
         exclude group: 'javax.inject', module: 'support-annotations'
     }
-
     // Unit Tests
     testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"

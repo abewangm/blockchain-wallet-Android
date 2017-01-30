@@ -161,12 +161,6 @@ public class BackupWalletWordListFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        currentWordIndex = 0;
-    }
-
-    @Override
     public void onDestroyView() {
         super.onDestroyView();
         View view = getActivity().getCurrentFocus();

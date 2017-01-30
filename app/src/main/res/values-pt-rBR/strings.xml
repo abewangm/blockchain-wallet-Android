@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Configurações</string>
 
-    <string name="all_accounts">Todos</string>
+    <string name="all_accounts">Todas as Carteiras</string>
 
     <string name="please_wait">Por favor, aguarde</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">Sua senha nunca é compartilhada com os nossos servidores. Por isso, nós não poderemos ajudá-lo a redefinir a senha se você esquecê-la. Certifique-se de anotar sua Frase de Recuperação, que restaura o acesso a sua carteira em caso de perda da senha.</string>
     <string name="verify_email_notice">Enviamos ao seu e-mail um link de verificação. Clique no link de verificação para confirmar o seu endereço de e-mail.</string>
     <string name="email_notifications">Notificações por e-mail</string>
-    <string name="email_notifications_summary">Ative as notificações para receber um e-mail sempre que receber bitcoins. Apenas endereços etiquetados e importados podem gerar notificações.</string>
+    <string name="email_notifications_summary">Seja notificado ao receber bitcoin.</string>
     <string name="current_password">Senha atual</string>
     <string name="new_password">Nova senha</string>
     <string name="sms_verified">Número de celular verificado</string>
@@ -412,4 +412,58 @@
     <string name="go_back">Voltar</string>
     <string name="accept_higher_fee">Aceitar taxa mais alta</string>
     <string name="large_tx_high_fee_warning">"Esta transação requer uma taxa mais alta para gasto residual devido ao baixo valor de troco a ser devolvido."</string>
+
+    <string name="transactions">Transações</string>
+    <string name="invalid_password_too_short">Favor inserir mais de 3 caracteres</string>
+    <string name="change_pin_new_matches_current">Você não pode usar seu PIN atual como seu novo PIN</string>
+    <string name="account_locked_title">Conta bloqueada</string>
+    <string name="account_locked_message">Sua conta foi bloqueada temporariamente por precaução. Por favor, verifique seu e-mail para mais informações e tente novamente mais tarde.</string>
+    <string name="licenses">Licenças</string>
+    <string name="email_chooser">Enviar e-mail…</string>
+    <string name="password_changed_explanation">Sua senha foi alterada. Por favor, emparelhe sua carteira novamente.</string>
+    <string name="sms">SMS</string>
+    <string name="google_authenticator">Google Authenticator</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">Por favor, desabilite primeiro a verificação em 2 etapas via SMS, nas configurações de segurança.</string>
+    <string name="settings_field_cant_be_empty">O campo não pode estar vazio.</string>
+    <string name="settings_error_updating">Erro ao atualizar configurações. Por favor, tente novamente.</string>
+    <string name="request_write_storage_permission">Armazenamento externo de gravação é necessário.</string>
+    <string name="verify_sms_failed">Código inválido. Por favor, tente novamente.</string>
+    <string name="enable_fingerprint">Desbloqueio por Impressão Digital</string>
+
+    <string name="transaction_detail_coinbase">Nenhuma Entrada (Moedas Recém-Geradas)</string>
+    <string name="transaction_detail_double_spend">Pode ter o risco de pagar em dobro.</string>
+    <string name="security_centre_add_email_title">Endereço de E-mail</string>
+    <string name="security_centre_add_email_message">Adicione e verifique seu endereço de e-mail para receber alertas, prevenir atividades suspeitas e recuperar a ID de sua Carteira, caso a esqueça.</string>
+    <string name="security_centre_add_email_positive_button">Adicionar</string>
+
+    <string name="fingerprint_prompt">Use sua impressão digital para acessar sua carteira com mais rapidez e facilidade.\n\nConfirme a impressão digital para continuar</string>
+    <string name="fingerprint_description">Confirme a impressão digital para continuar</string>
+    <string name="fingerprint_hint">Sensor de toque</string>
+    <string name="fingerprint_login_title">Login por impressão digital</string>
+    <string name="fingerprint_not_recognized">Impressão digital não reconhecida. Repetir</string>
+    <string name="fingerprint_success">Impressão digital reconhecida</string>
+    <string name="fingerprint_use_pin">Usar PIN</string>
+    <string name="fingerprint_disable_message">Tem certeza de que deseja desabilitar o login por impressão digital?</string>
+    <string name="fingerprint_no_fingerprints_added">Nenhuma impressão digital foi registrada neste dispositivo ainda. Deseja registrar uma impressão digital agora?</string>
+    <string name="fingerprint_key_invalidated_description">As impressões digitais armazenadas neste dispositivo mudaram ou o protetor de teclado foi desabilitado</string>
+    <string name="fingerprint_key_invalidated_brief">Teclas invalidadas, código PIN necessário</string>
+    <string name="fingerprint_fatal_error_register_description">Houve muitas tentativas falhas nos últimos 30 minutos. Por favor, tente configurar novamente mais tarde.</string>
+    <string name="fingerprint_fatal_error_authenticate_description">Houve muitas tentativas falhas. Por favor, efetue login usando seu PIN em vez disso.</string>
+    <string name="fingerprint_fatal_error_brief">Erro inesperado</string>
+
+    <string name="shortcut_receive_copy_short">Copiar Endereço</string>
+    <string name="shortcut_receive_copy_long">Copiar endereço de entrega para outro app</string>
+    <string name="shortcut_receive_qr_short">Exibir QR de Entrega</string>
+    <string name="shortcut_receive_qr_long">Ver código QR para o endereço de entrega</string>
+    <string name="shortcut_receive_qr_error">Desculpe, mas houve um erro ao gerar o código QR</string>
+    <string name="shortcut_settings_enable">Atalhos no Inicializador</string>
+    <string name="shortcut_settings_summary">Habilite essa opção para revelar um endereço de entrega ao dar um toque longo no ícone do app no inicializador, agilizando ainda mais o recebimento de bitcoin.</string>
+
+    <string name="swipe_receive_hint">Deslize para receber</string>
+    <string name="swipe_receive_preference_summary">Habilite essa opção para revelar um endereço de entrega ao deslizar a tela do PIN para a esquerda, agilizando ainda mais o recebimento de bitcoin. Cinco endereços serão carregados consecutivamente, depois dos quais será necessário efetuar login para exibir novos endereços.</string>
+    <string name="swipe_receive_no_addresses">Nenhum outro endereço pode ser carregado no momento. Efetue login no app para carregar mais.</string>
+
+    <string name="survey_message">Gostaria de preencher esta pequena pesquisa para ajudar a melhorar a experiência com a sua carteira?\n\nValorizamos a sua opinião!</string>
+    <string name="survey_positive_button">Responder à pesquisa</string>
 </resources>

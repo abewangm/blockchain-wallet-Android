@@ -56,6 +56,7 @@ import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
@@ -86,7 +87,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     private MaterialProgressDialog materialProgressDialog;
     private AppUtil appUtil;
     private long backPressed;
-    private boolean returningResult = false;
     private Toolbar toolbar;
 
     @SuppressLint("NewApi")
@@ -153,7 +153,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                         if (!(getCurrentFragment() instanceof SendFragment)) {
                             // This is a bit of a hack to allow the selection of the correct button
                             // On the bottom nav bar, but without starting the fragment again
-                            startSendFragment(null);
+                            startSendFragment(null, null);
                         }
                         break;
                     case 1:
@@ -191,11 +191,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         }
 
         binding.bottomNavigation.restoreBottomNavigation(false);
-        // Reset state of the bottom nav bar, but not if returning from a scan
-        if (!returningResult) {
-            runOnUiThread(() -> binding.bottomNavigation.setCurrentItem(1));
-        }
-        returningResult = false;
     }
 
     @Override
@@ -262,15 +257,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         if (resultCode == RESULT_OK && requestCode == SCAN_URI
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
             String strResult = data.getStringExtra(CaptureActivity.SCAN_RESULT);
-
-            doScanInput(strResult);
+            doScanInput(strResult, EventLogHandler.URL_EVENT_TX_INPUT_FROM_QR);
 
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_BACKUP) {
             resetNavigationDrawer();
         } else {
-            if (data != null) {
-                returningResult = true;
-            }
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -317,8 +308,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         }
     }
 
-    private void doScanInput(String strResult) {
-        startSendFragment(strResult);
+    private void doScanInput(String strResult, String scanRoute) {
+        startSendFragment(strResult, scanRoute);
     }
 
     public void selectDrawerItem(MenuItem menuItem) {
@@ -392,6 +383,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                     selectDrawerItem(menuItem);
                     return true;
                 });
+
+        // Set selected appropriately.
+        if (getCurrentFragment() instanceof BalanceFragment) {
+            binding.bottomNavigation.setCurrentItem(1);
+        } else if (getCurrentFragment() instanceof SendFragment) {
+            binding.bottomNavigation.setCurrentItem(0);
+        } else if (getCurrentFragment() instanceof ReceiveFragment) {
+            binding.bottomNavigation.setCurrentItem(2);
+        }
     }
 
     private void startMerchantActivity() {
@@ -427,8 +427,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        returningResult = true;
-
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startScanActivity();
@@ -601,7 +599,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void onScanInput(String strUri) {
-        doScanInput(strUri);
+        doScanInput(strUri, EventLogHandler.URL_EVENT_TX_INPUT_FROM_URI);
     }
 
     @Override
@@ -611,19 +609,19 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         mainViewModel.checkIfShouldShowSurvey();
     }
 
-    public void startSendFragment(@Nullable String scanData) {
+    public void startSendFragment(@Nullable String scanData, String scanRoute) {
         boolean isBTC;
         int selectedAccountPosition;
         try {
             isBTC = ((BalanceFragment) getCurrentFragment()).getIsBTC();
             selectedAccountPosition = ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
-        } catch (ClassCastException e) {
+        } catch (Exception e) {
             Log.e(TAG, "startSendFragment: ", e);
             isBTC = true;
             selectedAccountPosition = -1;
         }
 
-        SendFragment sendFragment = SendFragment.newInstance(scanData, isBTC, selectedAccountPosition);
+        SendFragment sendFragment = SendFragment.newInstance(scanData, isBTC, scanRoute, selectedAccountPosition);
         startFragmentWithAnimation(sendFragment);
     }
 

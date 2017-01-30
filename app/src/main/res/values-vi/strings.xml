@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Cài đặt</string>
 
-    <string name="all_accounts">Tất cả</string>
+    <string name="all_accounts">Tất cả Ví</string>
 
     <string name="please_wait">Vui lòng chờ</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">Mật khẩu của bạn không bao giờ được chia sẻ với các máy chủ của chúng tôi, điều đó có nghĩa chúng tôi không thể hỗ trợ bạn thiết lập lại mật khẩu nếu bạn quên. Hãy chắc chắn bạn ghi lại nhóm từ khôi phục để có thể khôi phục truy cập ví trong trường hợp mất mật khẩu.</string>
     <string name="verify_email_notice">Chúng tôi đã gửi đến địa chỉ email của một bạn liên kết xác minh. Nhấn vào liên kết xác minh để xác minh địa chỉ email của bạn.</string>
     <string name="email_notifications">Thông báo Email</string>
-    <string name="email_notifications_summary">Bật thông báo để nhận email mỗi khi bạn nhận bitcoin. Chỉ những địa chỉ được dán nhãn và được nhập mới đủ điều kiện nhận thông báo.</string>
+    <string name="email_notifications_summary">Nhận thông báo khi bạn nhận bitcoin.</string>
     <string name="current_password">Mật khẩu hiện tại</string>
     <string name="new_password">Mật khẩu mới</string>
     <string name="sms_verified">Số điện thoại đã xác minh</string>
@@ -412,4 +412,58 @@
     <string name="go_back">Trở lại</string>
     <string name="accept_higher_fee">Chấp nhận phí cao hơn</string>
     <string name="large_tx_high_fee_warning">"Giao dịch này yêu cầu phí cao hơn vì thực hiện giao dịch với số tiền quá nhỏ."</string>
+
+    <string name="transactions">Giao dịch</string>
+    <string name="invalid_password_too_short">Vui lòng nhập nhiều hơn 3 ký tự</string>
+    <string name="change_pin_new_matches_current">Bạn không thể sử dụng mã PIN hiện tại làm mã PIN mới</string>
+    <string name="account_locked_title">Tài khoản bị khóa</string>
+    <string name="account_locked_message">Tài khoản của bạn tạm thời bị khóa như là một biện pháp phòng ngừa. Vui lòng kiểm tra email của bạn để biết thêm thông tin và thử lại sau.</string>
+    <string name="licenses">Giấy phép</string>
+    <string name="email_chooser">Gửi e-mail…</string>
+    <string name="password_changed_explanation">Mật khẩu của bạn đã được thay đổi, hãy sửa lại ví của mình</string>
+    <string name="sms">Tin nhắn SMS</string>
+    <string name="google_authenticator">Google Authenticator</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">Vui lòng tắt Xác minh 2 bước qua tin nhắn SMS trong cài đặt bảo mật trước.</string>
+    <string name="settings_field_cant_be_empty">Trường này không được để trống.</string>
+    <string name="settings_error_updating">Lỗi cập nhật cài đặt, vui lòng thử lại</string>
+    <string name="request_write_storage_permission">Yêu cầu ghi vào bộ nhớ ngoài.</string>
+    <string name="verify_sms_failed">Mã không hợp lệ, vui lòng thử lại</string>
+    <string name="enable_fingerprint">Mở khóa Vân tay</string>
+
+    <string name="transaction_detail_coinbase">Không có Đầu vào (Xu mới tạo)</string>
+    <string name="transaction_detail_double_spend">Chi tiêu gấp đôi có thể gặp nguy hiểm</string>
+    <string name="security_centre_add_email_title">Địa chỉ Email</string>
+    <string name="security_centre_add_email_message">Thêm và xác minh địa chỉ email của bạn để nhận cảnh báo, ngăn chặn các hành động đáng ngờ và khôi phục ID Ví nếu bạn quên.</string>
+    <string name="security_centre_add_email_positive_button">Thêm</string>
+
+    <string name="fingerprint_prompt">Thêm dấu vân tay của bạn để truy cập ví nhanh và dễ dàng hơn.\n\nXác nhận dấu vân tay để tiếp tục</string>
+    <string name="fingerprint_description">Xác nhận dấu vân tay để tiếp tục</string>
+    <string name="fingerprint_hint">Cảm biến chạm</string>
+    <string name="fingerprint_login_title">Đăng nhập bằng dấu vân tay</string>
+    <string name="fingerprint_not_recognized">Không nhận diện được dấu vân tay. Thử lại</string>
+    <string name="fingerprint_success">Đã nhận diện được dấu vân tay</string>
+    <string name="fingerprint_use_pin">Sử dụng mã PIN</string>
+    <string name="fingerprint_disable_message">Bạn có chắc muốn tắt đăng nhập bằng vân tay?</string>
+    <string name="fingerprint_no_fingerprints_added">Thiết bị này chưa đăng ký dấu vân tay. Bạn có muốn đăng ký dấu vân tay ngay bây giờ?</string>
+    <string name="fingerprint_key_invalidated_description">Hoặc là dấu vân tay trên thiết bị nãy đã thay đổi, hoặc là khóa bàn phím đã bị tắt</string>
+    <string name="fingerprint_key_invalidated_brief">Bàn phím bị vô hiệu hóa, vui lòng nhập mã PIN</string>
+    <string name="fingerprint_fatal_error_register_description">Có quá nhiều lần đăng nhập thất bại trong 30 phút vừa qua. Vui lòng thử thiết lập lại sau.</string>
+    <string name="fingerprint_fatal_error_authenticate_description">Có quá nhiều lần đăng nhập thất bại. Vui lòng đăng nhập bằng mã PIN của bạn.</string>
+    <string name="fingerprint_fatal_error_brief">Lỗi không mong muốn</string>
+
+    <string name="shortcut_receive_copy_short">Sao chép địa chỉ</string>
+    <string name="shortcut_receive_copy_long">Sao chép địa nhận đến một ứng dụng khác</string>
+    <string name="shortcut_receive_qr_short">Hiển thị mã QR nhận được</string>
+    <string name="shortcut_receive_qr_long">Xem mã QR cho địa chỉ nhận</string>
+    <string name="shortcut_receive_qr_error">Rất tiếc, có lỗi khi tạo mã QR</string>
+    <string name="shortcut_settings_enable">Đường dẫn Launcher</string>
+    <string name="shortcut_settings_summary">Kích hoạt tùy chọn này để hiện địa chỉ nhận khi bạn nhấn giữ lâu biểu tượng ứng dụng trong launcher, giúp nhận bitcoin thậm chí nhanh hơn.</string>
+
+    <string name="swipe_receive_hint">Vuốt để nhận</string>
+    <string name="swipe_receive_preference_summary">Bật tùy chọn này để hiện địa chỉ nhận khi bạn trượt qua trái trên màn hình mã PIN, giúp việc nhận bitcoin thậm chí còn nhanh hơn. Năm địa chỉ này sẽ được tải liên tục, sau đó cần đăng nhập để hiện các địa chỉ mới.</string>
+    <string name="swipe_receive_no_addresses">Không có địa chỉ có thể tải bây giờ. Đăng nhập vào ứng dụng để tải thêm.</string>
+
+    <string name="survey_message">Bạn có muốn thực hiện một bài khảo sát ngắn để giúp cải thiện trải nghiệm sử dụng ví của mình?\n\nChúng tôi đánh giá cao phản hồi của bạn!</string>
+    <string name="survey_positive_button">Thực hiện khảo sát</string>
 </resources>

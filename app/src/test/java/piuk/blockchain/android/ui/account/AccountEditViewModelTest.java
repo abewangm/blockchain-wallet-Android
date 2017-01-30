@@ -46,6 +46,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -78,6 +79,7 @@ public class AccountEditViewModelTest {
     @Mock MultiAddrFactory multiAddrFactory;
     @Mock ExchangeRateFactory exchangeRateFactory;
     @Mock AccountEditModel accountEditModel;
+    @Mock SwipeToReceiveHelper swipeToReceiveHelper;
 
     @Before
     public void setUp() throws Exception {
@@ -413,6 +415,8 @@ public class AccountEditViewModelTest {
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
         verify(activity).setActivityResult(anyInt());
+        verify(activity).updateAppShortcuts();
+        verify(swipeToReceiveHelper).updateAndStoreAddresses();
     }
 
     @Test
@@ -813,6 +817,11 @@ public class AccountEditViewModelTest {
         @Override
         protected AccountEditDataManager provideAccountEditDataManager(PayloadManager payloadManager) {
             return accountEditDataManager;
+        }
+
+        @Override
+        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory, PrefsUtil prefsUtil) {
+            return swipeToReceiveHelper;
         }
     }
 }

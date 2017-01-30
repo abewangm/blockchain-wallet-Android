@@ -1,5 +1,7 @@
 package piuk.blockchain.android.ui.send;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
@@ -11,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 
 import info.blockchain.api.DynamicFee;
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.api.Unspent;
 import info.blockchain.util.FeeUtil;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -27,11 +30,11 @@ import info.blockchain.wallet.send.SendCoins;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
+import info.blockchain.wallet.util.WebUtil;
 
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
-import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
@@ -65,6 +68,7 @@ import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
+import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -77,6 +81,7 @@ import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_MDID
 import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_FCTX_ID;
 import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_IS_BTC;
 import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SCAN_DATA;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE;
 import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SELECTED_ACCOUNT_POSITION;
 
 @SuppressWarnings("WeakerAccess")
@@ -95,6 +100,7 @@ public class SendViewModel extends BaseViewModel {
     public SendModel sendModel;
     @Nullable private String contactMdid;
     @Nullable private String fctxId;
+    private String metricInputFlag;
     // TODO: 24/01/2017 Use these instead of passing them from the UI
     private boolean isBtc;
     private int selectedAccountPosition = -1;
@@ -109,6 +115,7 @@ public class SendViewModel extends BaseViewModel {
     @Inject StringUtils stringUtils;
     @Inject ContactsDataManager contactsDataManager;
     @Inject SendDataManager sendDataManager;
+    @Inject MultiAddrFactory multiAddrFactory;
 
     interface DataListener {
 
@@ -204,6 +211,7 @@ public class SendViewModel extends BaseViewModel {
             contactMdid = dataListener.getFragmentBundle().getString(ARGUMENT_CONTACT_MDID);
             fctxId = dataListener.getFragmentBundle().getString(ARGUMENT_FCTX_ID);
             isBtc = dataListener.getFragmentBundle().getBoolean(ARGUMENT_IS_BTC, true);
+            metricInputFlag = dataListener.getFragmentBundle().getString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE);
             selectedAccountPosition = dataListener.getFragmentBundle().getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION);
 
             if (contactId != null) {
@@ -216,7 +224,7 @@ public class SendViewModel extends BaseViewModel {
             }
 
             if (scanData != null) {
-                handleIncomingQRScan(scanData);
+                handleIncomingQRScan(scanData, metricInputFlag);
             }
         }
     }
@@ -268,7 +276,8 @@ public class SendViewModel extends BaseViewModel {
 
         if (result.size() == 1) {
             //Only a single account/address available in wallet
-            dataListener.onHideSendingAddressField();
+            if (dataListener != null)
+                dataListener.onHideSendingAddressField();
             calculateTransactionAmounts(result.get(0), null, null, null);
         }
 
@@ -279,7 +288,8 @@ public class SendViewModel extends BaseViewModel {
 
         if (result.size() == 1) {
             //Only a single account/address available in wallet and no addressBook entries
-            dataListener.onHideReceivingAddressField();
+            if (dataListener != null)
+                dataListener.onHideReceivingAddressField();
         }
 
         return result;
@@ -308,8 +318,10 @@ public class SendViewModel extends BaseViewModel {
             lamount = (BigDecimal.valueOf(undenominatedAmount).multiply(BigDecimal.valueOf(100000000)).longValue());
 
             if (BigInteger.valueOf(lamount).compareTo(BigInteger.valueOf(2100000000000000L)) == 1) {
-                dataListener.onShowInvalidAmount();
-                dataListener.onUpdateBtcAmount("");
+                if (dataListener != null) {
+                    dataListener.onShowInvalidAmount();
+                    dataListener.onUpdateBtcAmount("");
+                }
                 return true;
             }
         } catch (NumberFormatException nfe) {
@@ -328,7 +340,8 @@ public class SendViewModel extends BaseViewModel {
             return;
         }
 
-        dataListener.onRemoveBtcTextChangeListener();
+        if (dataListener != null)
+            dataListener.onRemoveBtcTextChangeListener();
 
         int max_len;
         NumberFormat btcFormat = NumberFormat.getInstance(Locale.getDefault());
@@ -337,7 +350,7 @@ public class SendViewModel extends BaseViewModel {
                 max_len = 2;
                 break;
             case MonetaryUtil.MILLI_BTC:
-                max_len = 4;
+                max_len = 5;
                 break;
             default:
                 max_len = 8;
@@ -352,7 +365,8 @@ public class SendViewModel extends BaseViewModel {
                 if (dec.length() > 0) {
                     dec = dec.substring(1);
                     if (dec.length() > max_len) {
-                        dataListener.onUpdateBtcAmount(btcAmountText.substring(0, btcAmountText.length() - 1));
+                        if (dataListener != null)
+                            dataListener.onUpdateBtcAmount(btcAmountText.substring(0, btcAmountText.length() - 1));
                     }
                 }
             }
@@ -360,7 +374,8 @@ public class SendViewModel extends BaseViewModel {
             // No-op
         }
 
-        dataListener.onAddBtcTextChangeListener();
+        if (dataListener != null)
+            dataListener.onAddBtcTextChangeListener();
 
         if (sendModel.textChangeAllowed) {
             sendModel.textChangeAllowed = false;
@@ -374,7 +389,8 @@ public class SendViewModel extends BaseViewModel {
             }
 
             double fiat_amount = sendModel.exchangeRate * btc_amount;
-            dataListener.onUpdateFiatAmount(monetaryUtil.getFiatFormat(sendModel.fiatUnit).format(fiat_amount));
+            if (dataListener != null)
+                dataListener.onUpdateFiatAmount(monetaryUtil.getFiatFormat(sendModel.fiatUnit).format(fiat_amount));
 
             sendModel.textChangeAllowed = true;
         }
@@ -386,7 +402,7 @@ public class SendViewModel extends BaseViewModel {
      * @param fiatAmountText (any currency)
      */
     void afterFiatTextChanged(String fiatAmountText) {
-        dataListener.onRemoveFiatTextChangeListener();
+        if (dataListener != null) dataListener.onRemoveFiatTextChangeListener();
 
         int max_len = 2;
         NumberFormat fiatFormat = NumberFormat.getInstance(Locale.getDefault());
@@ -399,7 +415,8 @@ public class SendViewModel extends BaseViewModel {
                 if (dec.length() > 0) {
                     dec = dec.substring(1);
                     if (dec.length() > max_len) {
-                        dataListener.onUpdateFiatAmount(fiatAmountText.substring(0, fiatAmountText.length() - 1));
+                        if (dataListener != null)
+                            dataListener.onUpdateFiatAmount(fiatAmountText.substring(0, fiatAmountText.length() - 1));
                     }
                 }
             }
@@ -407,7 +424,8 @@ public class SendViewModel extends BaseViewModel {
             // No-op
         }
 
-        dataListener.onAddFiatTextChangeListener();
+        if (dataListener != null)
+            dataListener.onAddFiatTextChangeListener();
 
         if (sendModel.textChangeAllowed) {
             sendModel.textChangeAllowed = false;
@@ -420,7 +438,8 @@ public class SendViewModel extends BaseViewModel {
                 fiat_amount = 0.0;
             }
             double btc_amount = fiat_amount / sendModel.exchangeRate;
-            dataListener.onUpdateBtcAmount(monetaryUtil.getBTCFormat().format(monetaryUtil.getDenominatedAmount(btc_amount)));
+            if (dataListener != null)
+                dataListener.onUpdateBtcAmount(monetaryUtil.getBTCFormat().format(monetaryUtil.getDenominatedAmount(btc_amount)));
             sendModel.textChangeAllowed = true;
         }
     }
@@ -428,7 +447,10 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Handle incoming scan data or bitcoin links
      */
-    void handleIncomingQRScan(String scanData) {
+    void handleIncomingQRScan(String scanData, String scanRoute) {
+
+        metricInputFlag = scanRoute;
+
         scanData = scanData.trim();
 
         String btcAddress;
@@ -453,7 +475,8 @@ public class SendViewModel extends BaseViewModel {
             }
 
         } else {
-            dataListener.onShowToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
+            if (dataListener != null)
+                dataListener.onShowToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
             return;
         }
 
@@ -463,35 +486,37 @@ public class SendViewModel extends BaseViewModel {
             sendModel.pendingTransaction.receivingAddress = btcAddress;
         }
         if (btcAmount != null && !btcAmount.equals("")) {
-            dataListener.onRemoveBtcTextChangeListener();
-            dataListener.onRemoveFiatTextChangeListener();
+            if (dataListener != null) {
+                dataListener.onRemoveBtcTextChangeListener();
+                dataListener.onRemoveFiatTextChangeListener();
 
-            dataListener.onUpdateBtcAmount(btcAmount);
+                dataListener.onUpdateBtcAmount(btcAmount);
 
-            double btc_amount;
+                double btc_amount;
 
-            try {
-                NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
-                Number btcNumber = numberFormat.parse(btcAmount);
-                btc_amount = monetaryUtil.getUndenominatedAmount(btcNumber.doubleValue());
-            } catch (NumberFormatException | ParseException e) {
-                btc_amount = 0.0;
+                try {
+                    NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
+                    Number btcNumber = numberFormat.parse(btcAmount);
+                    btc_amount = monetaryUtil.getUndenominatedAmount(btcNumber.doubleValue());
+                } catch (NumberFormatException | ParseException e) {
+                    btc_amount = 0.0;
+                }
+
+                sendModel.exchangeRate = ExchangeRateFactory.getInstance().getLastPrice(sendModel.fiatUnit);
+
+                double fiat_amount = sendModel.exchangeRate * btc_amount;
+
+                dataListener.onUpdateFiatAmount(monetaryUtil.getFiatFormat(sendModel.fiatUnit).format(fiat_amount));
+
+                //QR scan comes in as BTC - set current btc unit
+                prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
+
+                dataListener.onUpdateBtcUnit(sendModel.btcUnit);
+                dataListener.onUpdateFiatUnit(sendModel.fiatUnit);
+
+                dataListener.onAddBtcTextChangeListener();
+                dataListener.onAddFiatTextChangeListener();
             }
-
-            sendModel.exchangeRate = ExchangeRateFactory.getInstance().getLastPrice(sendModel.fiatUnit);
-
-            double fiat_amount = sendModel.exchangeRate * btc_amount;
-
-            dataListener.onUpdateFiatAmount(monetaryUtil.getFiatFormat(sendModel.fiatUnit).format(fiat_amount));
-
-            //QR scan comes in as BTC - set current btc unit
-            prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
-
-            dataListener.onUpdateBtcUnit(sendModel.btcUnit);
-            dataListener.onUpdateFiatUnit(sendModel.fiatUnit);
-
-            dataListener.onAddBtcTextChangeListener();
-            dataListener.onAddFiatTextChangeListener();
         }
     }
 
@@ -569,6 +594,11 @@ public class SendViewModel extends BaseViewModel {
             JSONObject unspentResponse = null;
             try {
                 unspentResponse = getUnspentApiResponse(address);
+
+                if(context == null){
+                    return;
+                }
+
             } catch (Exception e) {
                 Log.w(TAG, "Thread deliberately interrupted", e);
                 return;
@@ -616,7 +646,8 @@ public class SendViewModel extends BaseViewModel {
             return spendableCoins.getAbsoluteFee();
         } else {
             // App is likely in low memory environment, leave page gracefully
-            dataListener.finishPage();
+            if (dataListener != null)
+                dataListener.finishPage();
             return null;
         }
     }
@@ -631,7 +662,8 @@ public class SendViewModel extends BaseViewModel {
 
         if (spendAll) {
             amountToSend = BigInteger.valueOf(balanceAfterFee);
-            dataListener.onSetSpendAllAmount(getTextFromSatoshis(balanceAfterFee));
+            if (dataListener != null)
+                dataListener.onSetSpendAllAmount(getTextFromSatoshis(balanceAfterFee));
         }
 
         validateCustomFee(amountToSend.add(customFee), sweepBundle.getSweepAmount());
@@ -660,7 +692,8 @@ public class SendViewModel extends BaseViewModel {
 
             if (spendAll) {
                 amountToSend = BigInteger.valueOf(balanceAfterFee);
-                dataListener.onSetSpendAllAmount(getTextFromSatoshis(balanceAfterFee));
+                if (dataListener != null)
+                    dataListener.onSetSpendAllAmount(getTextFromSatoshis(balanceAfterFee));
             }
 
             BigInteger feePerKb = sendModel.suggestedFee.defaultFeePerKb;
@@ -678,7 +711,8 @@ public class SendViewModel extends BaseViewModel {
             }
         } else {
             // App is likely in low memory environment, leave page gracefully
-            dataListener.finishPage();
+            if (dataListener != null)
+                dataListener.finishPage();
         }
     }
 
@@ -711,7 +745,7 @@ public class SendViewModel extends BaseViewModel {
             sendModel.setMaxAvailable(stringUtils.getString(R.string.max_available) + " " + btcAmountFormatted + " " + sendModel.btcUnit);
         }
 
-        if (balanceAfterFee <= 0) {
+        if (balanceAfterFee <= 0 && context != null) {
             sendModel.setMaxAvailable(stringUtils.getString(R.string.insufficient_funds));
             sendModel.setMaxAvailableColor(ContextCompat.getColor(context, R.color.blockchain_send_red));
         } else {
@@ -845,6 +879,7 @@ public class SendViewModel extends BaseViewModel {
      * //TODO could be improved Sanity checks before prompting confirmation
      */
     void sendClicked(boolean bypassFeeCheck, String address) {
+        checkClipboardPaste(address);
         if (FormatsUtil.getInstance().isValidBitcoinAddress(address)) {
             //Receiving address manual or scanned input
             sendModel.pendingTransaction.receivingAddress = address;
@@ -860,7 +895,8 @@ public class SendViewModel extends BaseViewModel {
 
                 if (legacyAddress != null && legacyAddress.isWatchOnly() &&
                         (legacyAddress.getEncryptedKey() == null || legacyAddress.getEncryptedKey().isEmpty())) {
-                    dataListener.onShowSpendFromWatchOnly(((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject).getAddress());
+                    if (dataListener != null)
+                        dataListener.onShowSpendFromWatchOnly(((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject).getAddress());
 
                 } else if ((legacyAddress != null && legacyAddress.isWatchOnly()) || sendModel.verifiedSecondPassword != null) {
                     confirmPayment();
@@ -893,7 +929,8 @@ public class SendViewModel extends BaseViewModel {
                 && !FeeUtil.isAdequateFee(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(),
                 2,//assume change
                 sendModel.pendingTransaction.bigIntFee)) {
-            dataListener.onShowToast(R.string.insufficient_fee, ToastCustom.TYPE_ERROR);
+            if (dataListener != null)
+                dataListener.onShowToast(R.string.insufficient_fee, ToastCustom.TYPE_ERROR);
             return false;
         }
 
@@ -906,11 +943,12 @@ public class SendViewModel extends BaseViewModel {
                         monetaryUtil.getDisplayAmount(sendModel.pendingTransaction.bigIntFee.longValue()) + " " + sendModel.btcUnit,
                         monetaryUtil.getDisplayAmount(sendModel.absoluteSuggestedFeeEstimates[0].longValue()) + " " + sendModel.btcUnit);
 
-                dataListener.onShowAlterFee(
-                        getTextFromSatoshis(sendModel.absoluteSuggestedFeeEstimates[0].longValue()),
-                        message,
-                        R.string.lower_fee,
-                        R.string.keep_high_fee);
+                if (dataListener != null)
+                    dataListener.onShowAlterFee(
+                            getTextFromSatoshis(sendModel.absoluteSuggestedFeeEstimates[0].longValue()),
+                            message,
+                            R.string.lower_fee,
+                            R.string.keep_high_fee);
 
                 return false;
             }
@@ -922,11 +960,12 @@ public class SendViewModel extends BaseViewModel {
                         monetaryUtil.getDisplayAmount(sendModel.pendingTransaction.bigIntFee.longValue()) + " " + sendModel.btcUnit,
                         monetaryUtil.getDisplayAmount(sendModel.absoluteSuggestedFeeEstimates[5].longValue()) + " " + sendModel.btcUnit);
 
-                dataListener.onShowAlterFee(
-                        getTextFromSatoshis(sendModel.absoluteSuggestedFeeEstimates[5].longValue()),
-                        message,
-                        R.string.raise_fee,
-                        R.string.keep_low_fee);
+                if (dataListener != null)
+                    dataListener.onShowAlterFee(
+                            getTextFromSatoshis(sendModel.absoluteSuggestedFeeEstimates[5].longValue()),
+                            message,
+                            R.string.raise_fee,
+                            R.string.keep_low_fee);
 
                 return false;
             }
@@ -973,7 +1012,7 @@ public class SendViewModel extends BaseViewModel {
         details.isLargeTransaction = isLargeTransaction();
         details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.getConsumedAmount().compareTo(BigInteger.ZERO) == 1;
 
-        dataListener.onShowPaymentDetails(details);
+        if (dataListener != null) dataListener.onShowPaymentDetails(details);
     }
 
     /**
@@ -995,18 +1034,18 @@ public class SendViewModel extends BaseViewModel {
     private boolean isValidSpend(PendingTransaction pendingTransaction) {
         //Validate amount
         if (!isValidAmount(pendingTransaction.bigIntAmount)) {
-            dataListener.onShowInvalidAmount();
+            if (dataListener != null) dataListener.onShowInvalidAmount();
             return false;
         }
 
         //Validate sufficient funds
         if (pendingTransaction.unspentOutputBundle == null || pendingTransaction.unspentOutputBundle.getSpendableOutputs() == null) {
-            dataListener.onShowToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR);
+            if (dataListener != null) dataListener.onShowToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR);
             return false;
         }
 
         if (sendModel.maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
-            dataListener.onShowToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
+            if (dataListener != null) dataListener.onShowToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
             sendModel.setCustomFeeColor(R.color.blockchain_send_red);
             return false;
         } else {
@@ -1015,30 +1054,30 @@ public class SendViewModel extends BaseViewModel {
 
         //Validate addresses
         if (pendingTransaction.receivingAddress == null || !FormatsUtil.getInstance().isValidBitcoinAddress(pendingTransaction.receivingAddress)) {
-            dataListener.onShowToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
+            if (dataListener != null) dataListener.onShowToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
             return false;
         }
 
         //Validate send and receive not same addresses
         if (pendingTransaction.sendingObject == pendingTransaction.receivingObject) {
-            dataListener.onShowToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
+            if (dataListener != null) dataListener.onShowToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
             return false;
         }
 
         if (pendingTransaction.unspentOutputBundle == null) {
-            dataListener.onShowToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR);
+            if (dataListener != null) dataListener.onShowToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR);
             return false;
         }
 
         if (pendingTransaction.unspentOutputBundle.getSpendableOutputs().size() == 0) {
-            dataListener.onShowToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
+            if (dataListener != null) dataListener.onShowToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
             return false;
         }
 
 
         if (sendModel.pendingTransaction.receivingObject != null
                 && sendModel.pendingTransaction.receivingObject.accountObject == sendModel.pendingTransaction.sendingObject.accountObject) {
-            dataListener.onShowToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
+            if (dataListener != null) dataListener.onShowToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
             return false;
         }
 
@@ -1054,6 +1093,8 @@ public class SendViewModel extends BaseViewModel {
      * customizes address
      */
     void setReceivingAddress(@Nullable ItemAccount selectedItem) {
+        metricInputFlag = null;
+
         sendModel.pendingTransaction.receivingObject = selectedItem;
         if (selectedItem != null) {
             if (selectedItem.accountObject instanceof Account) {
@@ -1072,14 +1113,17 @@ public class SendViewModel extends BaseViewModel {
 
                 if (legacyAddress.isWatchOnly())
                     if (legacyAddress.isWatchOnly() && prefsUtil.getValue("WARN_WATCH_ONLY_SPEND", true)) {
-                        dataListener.onShowReceiveToWatchOnlyWarning(legacyAddress.getAddress());
+                        if (dataListener != null)
+                            dataListener.onShowReceiveToWatchOnlyWarning(legacyAddress.getAddress());
                     }
             } else {
-
                 //Address book
                 AddressBookEntry addressBook = ((AddressBookEntry) selectedItem.accountObject);
                 sendModel.pendingTransaction.receivingAddress = addressBook.getAddress();
             }
+
+            metricInputFlag = EventLogHandler.URL_EVENT_TX_INPUT_FROM_DROPDOWN;
+
         } else {
             sendModel.pendingTransaction.receivingAddress = "";
         }
@@ -1097,7 +1141,8 @@ public class SendViewModel extends BaseViewModel {
 
         // Test that amount does not exceed btc limit
         if (bAmount.compareTo(BigInteger.valueOf(2100000000000000L)) == 1) {
-            dataListener.onUpdateBtcAmount("0");
+            if (dataListener != null)
+                dataListener.onUpdateBtcAmount("0");
             return false;
         }
 
@@ -1170,7 +1215,26 @@ public class SendViewModel extends BaseViewModel {
 
         updateInternalBalances();
         PayloadBridge.getInstance().remoteSaveThread(null);
-        dataListener.onShowTransactionSuccess(contactMdid, hash, fctxId, sendModel.pendingTransaction.bigIntAmount.longValue());
+        if (dataListener != null) {
+            dataListener.onShowTransactionSuccess(contactMdid, hash, fctxId, sendModel.pendingTransaction.bigIntAmount.longValue());
+        }
+
+        logAddressInputMetric();
+    }
+
+    private void logAddressInputMetric() {
+        EventLogHandler handler = new EventLogHandler(prefsUtil, WebUtil.getInstance());
+        if (metricInputFlag != null) handler.logAddressInputEvent(metricInputFlag);
+    }
+
+    private void checkClipboardPaste(String address) {
+        ClipboardManager clipMan = (ClipboardManager)context.getSystemService(context.CLIPBOARD_SERVICE);
+        ClipData clip = clipMan.getPrimaryClip();
+        if (clip != null && clip.getItemCount() > 0) {
+            if(clip.getItemAt(0).coerceToText(context).toString().equals(address)) {
+                metricInputFlag = EventLogHandler.URL_EVENT_TX_INPUT_FROM_PASTE;
+            }
+        }
     }
 
     private void clearUnspentResponseCache() {
@@ -1192,18 +1256,18 @@ public class SendViewModel extends BaseViewModel {
         BigInteger totalSent = sendModel.pendingTransaction.bigIntAmount.add(sendModel.pendingTransaction.bigIntFee);
         if (sendModel.pendingTransaction.isHD()) {
             Account account = (Account) sendModel.pendingTransaction.sendingObject.accountObject;
-            long updatedBalance = MultiAddrFactory.getInstance().getXpubBalance() - totalSent.longValue();
+            long updatedBalance = multiAddrFactory.getXpubBalance() - totalSent.longValue();
 
             // Set total balance
-            MultiAddrFactory.getInstance().setXpubBalance(updatedBalance);
+            multiAddrFactory.setXpubBalance(updatedBalance);
 
             // Set individual xpub balance
-            MultiAddrFactory.getInstance().setXpubAmount(
+            multiAddrFactory.setXpubAmount(
                     account.getXpub(),
-                    MultiAddrFactory.getInstance().getXpubAmounts().get(account.getXpub()) - totalSent.longValue());
+                    multiAddrFactory.getXpubAmounts().get(account.getXpub()) - totalSent.longValue());
 
         } else {
-            MultiAddrFactory.getInstance().setLegacyBalance(MultiAddrFactory.getInstance().getLegacyBalance() - totalSent.longValue());
+            multiAddrFactory.setLegacyBalance(multiAddrFactory.getLegacyBalance() - totalSent.longValue());
         }
     }
 
@@ -1215,10 +1279,12 @@ public class SendViewModel extends BaseViewModel {
                     spendFromWatchOnlyNonBIP38(format, scanData);
                 } else {
                     //BIP38 needs passphrase
-                    dataListener.onShowBIP38PassphrasePrompt(scanData);
+                    if (dataListener != null)
+                        dataListener.onShowBIP38PassphrasePrompt(scanData);
                 }
             } else {
-                dataListener.onShowToast(R.string.privkey_error, ToastCustom.TYPE_ERROR);
+                if (dataListener != null)
+                    dataListener.onShowToast(R.string.privkey_error, ToastCustom.TYPE_ERROR);
             }
 
         } catch (Exception e) {
@@ -1233,7 +1299,8 @@ public class SendViewModel extends BaseViewModel {
             setTempLegacyAddressPrivateKey(legacyAddress, key);
 
         } catch (Exception e) {
-            dataListener.onShowToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
+            if (dataListener != null)
+                dataListener.onShowToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
             Log.e(TAG, "spendFromWatchOnlyNonBIP38: ", e);
         }
     }
@@ -1250,25 +1317,27 @@ public class SendViewModel extends BaseViewModel {
 
     private Observable<ECKey> getEcKeyFromBip38(String password, String scanData) {
         return Observable.fromCallable(() -> {
-            BIP38PrivateKey bip38 = new BIP38PrivateKey(MainNetParams.get(), scanData);
+            BIP38PrivateKey bip38 = new BIP38PrivateKey(PersistentUrls.getInstance().getCurrentNetworkParams(), scanData);
             return bip38.decrypt(password);
         });
     }
 
     private void setTempLegacyAddressPrivateKey(LegacyAddress legacyAddress, ECKey key) {
-        if (key != null && key.hasPrivKey() && legacyAddress.getAddress().equals(key.toAddress(MainNetParams.get()).toString())) {
+        if (key != null && key.hasPrivKey() && legacyAddress.getAddress().equals(key.toAddress(
+            PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
 
             //Create copy, otherwise pass by ref will override private key in wallet payload
             LegacyAddress tempLegacyAddress = new LegacyAddress();
             tempLegacyAddress.setEncryptedKeyBytes(key.getPrivKeyBytes());
-            tempLegacyAddress.setAddress(key.toAddress(MainNetParams.get()).toString());
+            tempLegacyAddress.setAddress(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
             tempLegacyAddress.setLabel(legacyAddress.getLabel());
             tempLegacyAddress.setWatchOnly(true);
             sendModel.pendingTransaction.sendingObject.accountObject = tempLegacyAddress;
 
             confirmPayment();
         } else {
-            dataListener.onShowToast(R.string.invalid_private_key, ToastCustom.TYPE_ERROR);
+            if (dataListener != null)
+                dataListener.onShowToast(R.string.invalid_private_key, ToastCustom.TYPE_ERROR);
         }
     }
 

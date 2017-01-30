@@ -57,6 +57,7 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PermissionUtil;
@@ -75,6 +76,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     public static final String ARGUMENT_CONTACT_ID = "contact_id";
     public static final String ARGUMENT_CONTACT_MDID = "contact_mdid";
     public static final String ARGUMENT_FCTX_ID = "fctx_id";
+    public static final String ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE = "address_input_route";
 
     private static final int SCAN_URI = 2007;
     private static final int SCAN_PRIVX = 2008;
@@ -97,7 +99,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
+            if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
                 ((AddressAdapter) binding.accounts.spinner.getAdapter()).updateData(viewModel.getAddressList(false));
                 ((AddressAdapter) binding.spDestination.getAdapter()).updateData(viewModel.getAddressList(true));
             }
@@ -112,6 +114,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                                            @Nullable String contactId,
                                            @Nullable String mdid,
                                            @Nullable String fctxId,
+                                           String scanRoute,
                                            boolean isBtc,
                                            int selectedAccountPosition) {
         SendFragment fragment = new SendFragment();
@@ -121,6 +124,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         args.putString(ARGUMENT_CONTACT_MDID, mdid);
         args.putString(ARGUMENT_FCTX_ID, fctxId);
         args.putBoolean(ARGUMENT_IS_BTC, isBtc);
+        args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute);
         args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
         fragment.setArguments(args);
         return fragment;
@@ -128,11 +132,13 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     public static SendFragment newInstance(@Nullable String scanData,
                                            boolean isBtc,
+                                           String scanRoute,
                                            int selectedAccountPosition) {
         SendFragment fragment = new SendFragment();
         Bundle args = new Bundle();
         args.putString(ARGUMENT_SCAN_DATA, scanData);
         args.putBoolean(ARGUMENT_IS_BTC, isBtc);
+        args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute);
         args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
         fragment.setArguments(args);
         return fragment;
@@ -272,7 +278,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         if (resultCode == Activity.RESULT_OK && requestCode == SCAN_URI
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
 
-            viewModel.handleIncomingQRScan(data.getStringExtra(CaptureActivity.SCAN_RESULT));
+            viewModel.handleIncomingQRScan(data.getStringExtra(CaptureActivity.SCAN_RESULT),
+                EventLogHandler.URL_EVENT_TX_INPUT_FROM_QR);
 
         } else if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
             final String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);

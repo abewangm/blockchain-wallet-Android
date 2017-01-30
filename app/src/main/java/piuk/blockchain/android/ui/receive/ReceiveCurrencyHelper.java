@@ -115,7 +115,7 @@ public class ReceiveCurrencyHelper {
                 maxLength = 2;
                 break;
             case MonetaryUtil.MILLI_BTC:
-                maxLength = 4;
+                maxLength = 5;
                 break;
             default:
                 maxLength = 8;

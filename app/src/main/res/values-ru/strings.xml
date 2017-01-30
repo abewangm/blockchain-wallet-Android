@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Настройки</string>
 
-    <string name="all_accounts">Все</string>
+    <string name="all_accounts">Все кошельки</string>
 
     <string name="please_wait">Подождите</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">Ваш пароль не хранится на наших серверах. Это означает, что мы не сможем восстановить пароль, если вы забыли его. Обязательно запишите свою фразу для восстановления, которая поможет восстановить доступ к вашему кошельку в случае потери пароля.</string>
     <string name="verify_email_notice">Мы отправили на ваш адрес электронной почты ссылку для подтверждения. Нажмите на ссылку для подтверждения своего адреса электронной почты.</string>
     <string name="email_notifications">Уведомления по электронной почте</string>
-    <string name="email_notifications_summary">Активируйте уведомления, чтобы получать электронные сообщения, когда вы получаете bitcoins. Включение уведомлений разрешено только для маркированных и импортированных адресов.</string>
+    <string name="email_notifications_summary">Получать уведомления о получении биткоинов.</string>
     <string name="current_password">Действующий пароль</string>
     <string name="new_password">Новый пароль</string>
     <string name="sms_verified">Номер мобильного телефона проверен</string>
@@ -412,4 +412,58 @@
     <string name="go_back">Назад</string>
     <string name="accept_higher_fee">Принять более высокую комиссию</string>
     <string name="large_tx_high_fee_warning">"Эта транзакция требует более высокой комиссии за поглощение незначительных сумм в связи с малым количеством выдаваемой сдачи."</string>
+
+    <string name="transactions">Транзакции</string>
+    <string name="invalid_password_too_short">Нужно ввести более 3 символов</string>
+    <string name="change_pin_new_matches_current">Нельзя использовать текущий PIN как новый PIN</string>
+    <string name="account_locked_title">Аккаунт заблокирован</string>
+    <string name="account_locked_message">Ваш аккаунт временно заблокирован в качестве меры предосторожности. Смотрите дополнительную информацию в сообщении электронной почты и повторите попытку позже.</string>
+    <string name="licenses">Лицензии</string>
+    <string name="email_chooser">Отправить эл. письмо…</string>
+    <string name="password_changed_explanation">Ваш пароль изменен, выполните повторное сопряжение вашего кошелька</string>
+    <string name="sms">SMS</string>
+    <string name="google_authenticator">Аутентификатор Google</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">Сначала отключите двухшаговую верификацию по SMS в списке настроек безопасности.</string>
+    <string name="settings_field_cant_be_empty">Поле не может быть пустым.</string>
+    <string name="settings_error_updating">Ошибка при обновлении настроек. Повторите попытку</string>
+    <string name="request_write_storage_permission">Необходимо хранение на внешнем записывающем устройстве.</string>
+    <string name="verify_sms_failed">Код недействительный. Повторите попытку</string>
+    <string name="enable_fingerprint">Разблокировка отпечатками пальцев</string>
+
+    <string name="transaction_detail_coinbase">Нет вводов (вновь сгенерированные койны)</string>
+    <string name="transaction_detail_double_spend">Есть риск двойного расходования.</string>
+    <string name="security_centre_add_email_title">Адрес эл. почты</string>
+    <string name="security_centre_add_email_message">Добавьте и подтвердите свой адрес эл. почты для получения предупреждений, предотвращения подозрительной активности и восстановления ID вашего кошелька, если вы его забудете.</string>
+    <string name="security_centre_add_email_positive_button">Добавить</string>
+
+    <string name="fingerprint_prompt">Используйте свой отпечаток пальца для более быстрого и легкого доступа к кошельку.\n\nЧтобы продолжить, подтвердите отпечаток пальца</string>
+    <string name="fingerprint_description">Подтвердите отпечаток пальца, чтобы продолжить</string>
+    <string name="fingerprint_hint">Датчик касания</string>
+    <string name="fingerprint_login_title">Вход по отпечатку пальца</string>
+    <string name="fingerprint_not_recognized">Отпечаток пальца не распознан. Повторить</string>
+    <string name="fingerprint_success">Отпечаток пальца распознан</string>
+    <string name="fingerprint_use_pin">Используйте PIN</string>
+    <string name="fingerprint_disable_message">Вы уверены, что хотите отключить вход по отпечатку пальца?</string>
+    <string name="fingerprint_no_fingerprints_added">Для этого устройства отпечатки пальцев пока не были зарегистрированы. Вы хотите зарегистрировать отпечаток пальца?</string>
+    <string name="fingerprint_key_invalidated_description">Либо изменились отпечатки пальцев, хранящиеся на этом устройстве, либо отключена блокировка клавиатуры</string>
+    <string name="fingerprint_key_invalidated_brief">Ключи признаны недействительными, требуется PIN-код</string>
+    <string name="fingerprint_fatal_error_register_description">За последние 30 минут было слишком много неудачных попыток. Попробуйте выполнить настройку позже.</string>
+    <string name="fingerprint_fatal_error_authenticate_description">Превышен лимит неудачных попыток. Вместо этого выполните вход с использованием PIN-кода.</string>
+    <string name="fingerprint_fatal_error_brief">Неожиданная ошибка</string>
+
+    <string name="shortcut_receive_copy_short">Cкопировать адрес</string>
+    <string name="shortcut_receive_copy_long">Скопировать адрес получения в другое приложение</string>
+    <string name="shortcut_receive_qr_short">Показать QR получения </string>
+    <string name="shortcut_receive_qr_long">Смотреть QR-код для адреса получения</string>
+    <string name="shortcut_receive_qr_error">К сожалению, при генерации QR-кода произошла ошибка</string>
+    <string name="shortcut_settings_enable">Ярлыки средства запуска</string>
+    <string name="shortcut_settings_summary">Включите этот параметр, чтобы открыть адрес получения при долгом нажатии на значок приложения в средстве запуска. Так получение биткойнов станет еще быстрее.</string>
+
+    <string name="swipe_receive_hint">Для получения проведите по экрану</string>
+    <string name="swipe_receive_preference_summary">Включите этот параметр, чтобы открыть адрес получения, когда проводите по экрану PIN-кода влево. Так получение биткойнов станет еще быстрее. Будут последовательно загружены пять адресов, после чего необходимо выполнить вход в систему, чтобы были показаны новые адреса.</string>
+    <string name="swipe_receive_no_addresses">В данный момент нельзя загрузить больше адресов. Чтобы загрузить больше, войдите в приложение.</string>
+
+    <string name="survey_message">Не могли бы вы принять участие в небольшом опросе, чтобы помочь нам улучшить ваш опыт взаимодействия с кошельком?\n\nМы ценим ваше мнение!</string>
+    <string name="survey_positive_button">Принять участие в опросе</string>
 </resources>

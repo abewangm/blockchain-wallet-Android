@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.payload.LegacyAddress;
@@ -15,7 +16,6 @@ import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
-import org.bitcoinj.params.MainNetParams;
 
 import javax.inject.Inject;
 
@@ -184,7 +184,7 @@ public class AccountViewModel extends BaseViewModel {
     void importBip38Address(String data, CharSequenceX password) {
         dataListener.showProgressDialog(R.string.please_wait);
         try {
-            BIP38PrivateKey bip38 = new BIP38PrivateKey(MainNetParams.get(), data);
+            BIP38PrivateKey bip38 = new BIP38PrivateKey(PersistentUrls.getInstance().getCurrentNetworkParams(), data);
             ECKey key = bip38.decrypt(password.toString());
 
             handlePrivateKey(key, doubleEncryptionPassword);
@@ -264,32 +264,32 @@ public class AccountViewModel extends BaseViewModel {
 
     private void importNonBip38Address(String format, String data, @Nullable CharSequenceX secondPassword) {
         dataListener.showProgressDialog(R.string.please_wait);
-        try {
-            ECKey key = privateKeyFactory.getKey(format, data);
 
-            handlePrivateKey(key, secondPassword);
-        } catch (Exception e) {
-            dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
-        } finally {
-            dataListener.dismissProgressDialog();
-        }
+        compositeDisposable.add(
+            accountDataManager.getKeyFromImportedData(format, data)
+                .subscribe(key -> {
+                    handlePrivateKey(key, secondPassword);
+                    dataListener.dismissProgressDialog();
+                }, throwable -> { dataListener
+                    .showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
+                    dataListener.dismissProgressDialog();}));
     }
 
     @VisibleForTesting
     void handlePrivateKey(ECKey key, @Nullable CharSequenceX secondPassword) {
         if (key != null && key.hasPrivKey()
-                && payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(MainNetParams.get()).toString())) {
+                && payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
 
             // A private key to an existing address has been scanned
             setPrivateECKey(key, secondPassword);
 
         } else if (key != null && key.hasPrivKey()
-                && !payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(MainNetParams.get()).toString())) {
+                && !payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
             LegacyAddress legacyAddress =
                     new LegacyAddress(
                             null,
                             System.currentTimeMillis() / 1000L,
-                            key.toAddress(MainNetParams.get()).toString(),
+                            key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString(),
                             "",
                             0L,
                             "android",

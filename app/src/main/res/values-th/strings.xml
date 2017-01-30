@@ -7,7 +7,7 @@
     <string name="app_name">Blockchain</string>
     <string name="action_settings">การตั้งค่า</string>
 
-    <string name="all_accounts">ทั้งหมด</string>
+    <string name="all_accounts">กระเป๋าเงินทั้งหมด</string>
 
     <string name="please_wait">โปรดรอ</string>
 
@@ -374,7 +374,7 @@
     <string name="change_password_summary">รหัสผ่านของคุณไม่ได้รับการแบ่งปันกับเซิร์ฟเวอร์ของเรา ซึ่งหมายความว่าเราไม่สามารถช่วยรีเซ็ตรหัสผ่านของคุณได้หากคุณลืมมัน ตรวจสอบให้แน่ใจว่าคุณได้จดวลีเพื่อการกู้คืนของคุณแล้ว เพื่อใช้กู้คืนการเข้าถึงกระเป๋าเงินของคุณในกรณีที่รหัสผ่านสูญหาย</string>
     <string name="verify_email_notice">เราได้ส่งลิงก์ยืนยันไปยังที่อยู่อีเมลของคุณแล้ว คลิกที่ลิงก์ยืนยันเพื่อยืนยันที่อยู่อีเมลของคุณ</string>
     <string name="email_notifications">การแจ้งเตือนอีเมล</string>
-    <string name="email_notifications_summary">เปิดการแจ้งเตือนเพื่อรับอีเมลในทุกครั้งที่คุณได้รับ bitcoin มีเพียงที่อยู่ที่ได้รับการทำเครื่องหมายและที่อยู่ที่นำเข้าเท่านั้นที่มีสิทธิ์ที่จะกระตุ้นการแจ้งเตือนได้</string>
+    <string name="email_notifications_summary">รับการแจ้งเตือนเมื่อคุณได้รับบิตคอยน์</string>
     <string name="current_password">รหัสผ่านปัจจุบัน</string>
     <string name="new_password">รหัสผ่านใหม่</string>
     <string name="sms_verified">ยืนยันหมายเลขโทรศัพท์มือถือแล้ว</string>
@@ -412,4 +412,59 @@
     <string name="go_back">กลับ</string>
     <string name="accept_higher_fee">รับค่าธรรมเนียมที่สูงขึ้น</string>
     <string name="large_tx_high_fee_warning">"ธุรกรรมนี้ต้องการค่าธรรมเนียมที่สูงขึ้นสำหรับการใช้ดัส เนื่องจากจะมีการคืนเงินทอนเล็กน้อย"</string>
+
+
+    <string name="transactions">ธุรกรรม</string>
+    <string name="invalid_password_too_short">โปรดกรอกมากกว่า 3 ตัวอักษร</string>
+    <string name="change_pin_new_matches_current">คุณไม่สามารถใช้ PIN ปัจจุบันของคุณเป็น PIN ใหม่ได้</string>
+    <string name="account_locked_title">บัญชีถูกล็อก</string>
+    <string name="account_locked_message">บัญชีของคุณถูกล็อกชั่วคราวเพื่อเป็นการเตือน โปรดตรวจสอบอีเมลของคุณเพื่อรับข้อมูลเพิ่มเติมและลองอีกครั้งในภายหลัง</string>
+    <string name="licenses">ใบอนุญาต</string>
+    <string name="email_chooser">ส่งอีเมล...</string>
+    <string name="password_changed_explanation">มีการเปลี่ยนรหัสผ่านของคุณ โปรดจับคู่กระเป๋าเงินของคุณอีกครั้ง</string>
+    <string name="sms">SMS</string>
+    <string name="google_authenticator">Google Authenticator</string>
+    <string name="yubikey">Yubikey</string>
+    <string name="disable_2fa_first">โปรดปิดการยืนยัน 2 ขั้นตอนผ่านทาง SMS ในการตั้งค่าความปลอดภัยก่อน</string>
+    <string name="settings_field_cant_be_empty">ห้ามช่องนี้ว่าง</string>
+    <string name="settings_error_updating">ข้อผิดพลาดในการอัปเดตการตั้งค่า โปรดลองอีกครั้ง</string>
+    <string name="request_write_storage_permission">จำเป็นต้องมีพื้นที่เขียนภายนอก</string>
+    <string name="verify_sms_failed">รหัสไม่ถูกต้อง โปรดลองอีกครั้ง</string>
+    <string name="enable_fingerprint">ปลดล็อกด้วยลายนิ้วมือ</string>
+
+    <string name="transaction_detail_coinbase">ไม่มีสิ่งใดเข้ามา (เหรียญที่สร้างขึ้นใหม่)</string>
+    <string name="transaction_detail_double_spend">อาจมีความเสี่ยงต่อการใช้เงินสองครั้ง</string>
+    <string name="security_centre_add_email_title">ที่อยู่อีเมล</string>
+    <string name="security_centre_add_email_message">เพิ่มและยืนยันที่อยู่อีเมลของคุณเพื่อรับการเตือน ป้องกันกิจกรรมที่น่าสงสัยและกู้คืน ID กระเป๋าเงินของคุณหากลืม</string>
+    <string name="security_centre_add_email_positive_button">เพิ่ม</string>
+
+    <string name="fingerprint_prompt">ใช้ลายนิ้วมือของคุณเพื่อเข้าถึงกระเป๋าเงินของคุณได้เร็วขึ้นและง่ายขึ้น\n\nยืนยันลายนิ้วมือเพื่อดำเนินการต่อ</string>
+    <string name="fingerprint_description">ยืนยันลายนิ้วมือเพื่อดำเนินการต่อ</string>
+    <string name="fingerprint_hint">เซนเซอร์การสัมผัส</string>
+    <string name="fingerprint_login_title">ล็อกอินด้วยลายนิ้วมือ</string>
+    <string name="fingerprint_not_recognized">ไม่ทราบลายนิ้วมือ ลองอีกครั้ง</string>
+    <string name="fingerprint_success">ทราบลายนิ้วมือแล้ว</string>
+    <string name="fingerprint_use_pin">ใช้ PIN</string>
+    <string name="fingerprint_disable_message">คุณแน่ใจหรือไม่ที่จะปิดใช้งานการล็อกอินด้วยลายนิ้วมือ?</string>
+    <string name="fingerprint_no_fingerprints_added">ยังไม่มีการลงทะเบียนลายนิ้วมือกับอุปกรณ์นี้ คุณต้องการลงทะเบียนลายนิ้วมือหรือไม่?</string>
+    <string name="fingerprint_key_invalidated_description">อาจมีการเปลี่ยนลายนิ้วมือที่เก็บในอุปกรณ์นี้หรือมีการปิดใช้งานเครื่องมือควบคุมคีย์</string>
+    <string name="fingerprint_key_invalidated_brief">คีย์ไม่ถูกต้อง จำเป็นต้องกรอกรหัส PIN</string>
+    <string name="fingerprint_fatal_error_register_description">มีความพยายามที่ล้มเหลวในจำนวนที่มากเกินไปใน 30 นาทีที่ผ่านมา โปรดลองตั้งค่าอีกครั้งในภายหลัง</string>
+    <string name="fingerprint_fatal_error_authenticate_description">มีความพยายามที่ล้มเหลวในจำนวนที่มากเกินไป โปรดล็อกอินโดยใช้ PIN ของคุณแทน</string>
+    <string name="fingerprint_fatal_error_brief">ข้อผิดพลาดที่ไม่ทราบ</string>
+
+    <string name="shortcut_receive_copy_short">คัดลอกที่อยู่</string>
+    <string name="shortcut_receive_copy_long">คัดลอกที่อยู่การรับไปยังแอปอื่น</string>
+    <string name="shortcut_receive_qr_short">แสดง QR การรับ</string>
+    <string name="shortcut_receive_qr_long">ชมรหัส QR สำหรับที่อยู่การรับ</string>
+    <string name="shortcut_receive_qr_error">ขออภัย มีข้อผิดพลาดในการสร้างรหัส QR</string>
+    <string name="shortcut_settings_enable">ทางลัดตัวเปิด</string>
+    <string name="shortcut_settings_summary">เปิดตัวเลือกนี้เพื่อชมที่อยู่การรับเมื่อคุณกดไอคอนแอปนาน ๆ ในตัวเปิด ซึ่งจะทำให้การรับ bitcoin รวดเร็วยิ่งขึ้น</string>
+
+    <string name="swipe_receive_hint">ปัดนิ้วเพื่อรับ</string>
+    <string name="swipe_receive_preference_summary">เปิดการใช้งานตัวเลือกนี้เพื่อเปิดเผยที่อยู่สำหรับที่อยู่สำหรับการรับเมื่อคุณปัดนิ้วไปทางซ้ายบนหน้าจอ PIN ทำให้การรับ bitcoin รวดเร็วยิ่งขึ้น ห้าที่อยู่ซึ่งจะได้รับการโหลดอย่างต่อเนื่องติดต่อกัน หลังจากนั้นจะจำเป็นต้องล็อกอินเพื่อแสดงที่อยู่ใหม่</string>
+    <string name="swipe_receive_no_addresses">ไม่สามารถโหลดที่อยู่มากกว่านี้ได้ในตอนนี้ ล็อกอินไปยังแอปเพื่อโหลดเพิ่ม</string>
+
+    <string name="survey_message">คุณต้องการกรอกแบบสำรวจสั้น ๆ เพื่อช่วยปรับปรุงประสบการณ์การใช้กระเป๋าเงินของเราหรือไม่?\n\nเราเห็นคุณค่าของคำแนะนำติชมของคุณ!</string>
+    <string name="survey_positive_button">ทำแบบสำรวจ</string>
 </resources>

@@ -47,6 +47,7 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.ui.send.SendModel;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.ui.zxing.Contents;
 import piuk.blockchain.android.ui.zxing.encode.QRCodeEncoder;
@@ -67,6 +68,7 @@ public class AccountEditViewModel extends BaseViewModel {
     @Inject protected MultiAddrFactory multiAddrFactory;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
     @Inject protected PrivateKeyFactory privateKeyFactory;
+    @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
 
     // Visible for data binding
     public AccountEditModel accountModel;
@@ -112,6 +114,8 @@ public class AccountEditViewModel extends BaseViewModel {
         void dismissProgressDialog();
 
         void sendBroadcast(String key, String data);
+
+        void updateAppShortcuts();
     }
 
     AccountEditViewModel(AccountEditModel accountModel, DataListener dataListener) {
@@ -204,6 +208,10 @@ public class AccountEditViewModel extends BaseViewModel {
                 }
             }
         }
+    }
+
+    public boolean areLauncherShortcutsEnabled() {
+        return prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true);
     }
 
     private void setDefault(boolean isDefault) {
@@ -496,6 +504,8 @@ public class AccountEditViewModel extends BaseViewModel {
                         .subscribe(success -> {
                             if (success) {
                                 setDefault(isDefault(account));
+                                updateSwipeToReceiveAddresses();
+                                dataListener.updateAppShortcuts();
                                 dataListener.setActivityResult(Activity.RESULT_OK);
                             } else {
                                 revertDefaultAndShowError(revertDefault);
@@ -503,6 +513,10 @@ public class AccountEditViewModel extends BaseViewModel {
                         }, throwable -> {
                             revertDefaultAndShowError(revertDefault);
                         }));
+    }
+
+    private void updateSwipeToReceiveAddresses() {
+        swipeToReceiveHelper.updateAndStoreAddresses();
     }
 
     private void revertDefaultAndShowError(int revertDefault) {
@@ -618,7 +632,7 @@ public class AccountEditViewModel extends BaseViewModel {
                     "android",
                     BuildConfig.VERSION_NAME);
 
-            setLegacyAddressKey(key, legacyAddress, true);
+            setLegacyAddressKey(key, legacyAddress, false);
             remoteSaveUnmatchedPrivateKey(legacyAddress);
 
             dataListener.privateKeyImportMismatch();
