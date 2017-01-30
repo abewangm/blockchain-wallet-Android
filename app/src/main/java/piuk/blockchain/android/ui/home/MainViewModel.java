@@ -3,13 +3,16 @@ package piuk.blockchain.android.ui.home;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.View;
 
 import info.blockchain.api.Balance;
 import info.blockchain.api.DynamicFee;
 import info.blockchain.api.ExchangeTicker;
 import info.blockchain.api.Settings;
 import info.blockchain.api.Unspent;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -19,16 +22,20 @@ import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.notifications.FcmCallbackService;
+import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
@@ -40,6 +47,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
+import piuk.blockchain.android.util.ViewUtils;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
@@ -55,6 +63,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected PayloadManager payloadManager;
     @Inject protected ContactsDataManager contactsDataManager;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
+    @Inject protected NotificationTokenManager notificationTokenManager;
 
     public interface DataListener {
         void onRooted();
@@ -67,7 +76,7 @@ public class MainViewModel extends BaseViewModel {
 
         void onScanInput(String strUri);
 
-        void onStartContactsActivity(String data);
+        void onStartContactsActivity(@Nullable String data);
 
         void onStartBalanceFragment();
 
@@ -84,6 +93,10 @@ public class MainViewModel extends BaseViewModel {
         void clearAllDynamicShortcuts();
 
         void showSurveyPrompt();
+
+        void setMessagesVisibility(@ViewUtils.Visibility int visibility);
+
+        void showContactsRegistrationFailure();
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -100,46 +113,103 @@ public class MainViewModel extends BaseViewModel {
         checkIfShouldShowEmailVerification();
         startWebSocketService();
         registerNodeForMetaDataService();
+        subscribeToNotifications();
+    }
+
+    private void subscribeToNotifications() {
+        compositeDisposable.add(
+                FcmCallbackService.getNotificationSubject()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(
+                                notificationPayload -> checkForMessages(),
+                                throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
     }
 
     private void registerNodeForMetaDataService() {
-        // TODO: 28/11/2016 How to handle this if it fails?
-        // Might be best to delegate this function to a different manager that
-        // can retry the call at a later date
-
         // TODO: 19/12/2016 Handle second password. Could maybe prompt them on login to enter their
         // password to check for new messages
 
         String uri = null;
+        boolean fromNotification = false;
 
         if (prefs.getValue(PrefsUtil.KEY_METADATA_URI, "").length() > 0) {
             uri = prefs.getValue(PrefsUtil.KEY_METADATA_URI, "");
             prefs.removeValue(PrefsUtil.KEY_METADATA_URI);
         }
 
+        if (prefs.getValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION, false)) {
+            prefs.removeValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION);
+            fromNotification = true;
+        }
+
         final String finalUri = uri;
-        if (finalUri != null) dataListener.showProgressDialog();
+        if (finalUri != null || fromNotification) dataListener.showProgressDialog();
+
+        final boolean finalFromNotification = fromNotification;
 
         compositeDisposable.add(
-                contactsDataManager.initContactsService(null)
+                contactsDataManager.loadNodes()
+                        .flatMap(loaded -> {
+                            if (loaded) {
+                                return contactsDataManager.getMetadataNodeFactory();
+                            } else {
+                                if (!payloadManager.getPayload().isDoubleEncrypted()) {
+                                    return contactsDataManager.generateNodes(null)
+                                            .andThen(contactsDataManager.getMetadataNodeFactory());
+                                } else {
+                                    throw new InvalidCredentialsException("Payload is double encrypted");
+                                }
+                            }
+                        })
+                        .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
+                                metadataNodeFactory.getMetadataNode(),
+                                metadataNodeFactory.getSharedMetadataNode()))
+                        .andThen(contactsDataManager.registerMdid())
+                        .andThen(contactsDataManager.publishXpub())
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(() -> {
                             if (finalUri != null) {
                                 dataListener.onStartContactsActivity(finalUri);
+                            } else if (finalFromNotification) {
+                                dataListener.onStartContactsActivity(null);
                             } else {
-                                compositeDisposable.add(
-                                        contactsDataManager.getMessages(true)
-                                        .subscribe(
-                                                messages -> {
-                                                    // TODO: 19/12/2016 Notify the UI that a message has been received
-                                                    Log.d(TAG, "registerNodeForMetaDataService: " + messages);
-                                                }, throwable -> {
-                                                    Log.e(TAG, "registerNodeForMetaDataService: ", throwable);
-                                                }
-                                        ));
+                                checkForMessages();
                             }
-                            // TODO: 01/12/2016 Should probably inform the user here if coming from URI click
-                        }, throwable -> Log.wtf(TAG, "registerNodeForMetaDataService: ", throwable)));
+                        }, throwable -> {
+                            //noinspection StatementWithEmptyBody
+                            if (throwable instanceof InvalidCredentialsException) {
+                                // Double encrypted and not previously set up, ignore error
+                            } else {
+                                dataListener.showContactsRegistrationFailure();
+                            }
+                        }));
+
+        notificationTokenManager.resendNotificationToken();
+    }
+
+    void checkForMessages() {
+        compositeDisposable.add(
+                contactsDataManager.loadNodes()
+                        .flatMapCompletable(
+                                success -> {
+                                    if (success) {
+                                        return contactsDataManager.fetchContacts();
+                                    } else {
+                                        return Completable.error(new Throwable("Nodes not loaded"));
+                                    }
+                                })
+                        .andThen(contactsDataManager.getContactList())
+                        .toList()
+                        .flatMapObservable(contacts -> {
+                            if (!contacts.isEmpty()) {
+                                return contactsDataManager.getMessages(true);
+                            } else {
+                                return Observable.just(Collections.emptyList());
+                            }
+                        })
+                        .subscribe(
+                                messages -> dataListener.setMessagesVisibility(messages.isEmpty() ? View.INVISIBLE : View.VISIBLE),
+                                throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
     }
 
     public void storeSwipeReceiveAddresses() {

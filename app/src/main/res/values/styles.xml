@@ -29,6 +29,12 @@
         <!-- Only exists to prevent issues with pre-21 devices, see values-v21 -->
     </style>
 
+    <style name="NoDisplay" parent="@android:style/Theme.NoDisplay">
+        <item name="colorPrimary">@color/blockchain_blue</item>
+        <item name="colorPrimaryDark">@color/blockchain_dark_blue</item>
+        <item name="colorAccent">@color/blockchain_blue</item>
+    </style>
+
     <style name="AppTheme.ReceiveQrWindow">
         <item name="android:windowIsFloating">true</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
@@ -119,22 +125,26 @@
         <item name="android:gravity">center_vertical|right</item>
     </style>
 
-    <style name="ButtonGreen" parent="Widget.AppCompat.Button">
+    <style name="ButtonGreen" parent="ThemeOverlay.AppCompat.Dark">
         <item name="colorButtonNormal">@color/blockchain_receive_green</item>
+        <item name="colorAccent">@color/blockchain_receive_green</item>
     </style>
 
-    <style name="ButtonBlue" parent="Widget.AppCompat.Button">
+    <style name="ButtonBlue" parent="ThemeOverlay.AppCompat.Dark">
         <item name="colorButtonNormal">@color/blockchain_blue</item>
+        <item name="colorAccent">@color/blockchain_blue</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="ButtonRed" parent="Widget.AppCompat.Button">
+    <style name="ButtonRed" parent="ThemeOverlay.AppCompat.Dark">
         <item name="colorButtonNormal">@color/blockchain_send_red</item>
+        <item name="colorAccent">@color/blockchain_send_red</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="ButtonWhite" parent="Widget.AppCompat.Button">
+    <style name="ButtonWhite" parent="ThemeOverlay.AppCompat.Dark">
         <item name="colorButtonNormal">@color/blockchain_pearl_white</item>
+        <item name="colorAccent">@color/blockchain_pearl_white</item>
         <item name="android:textColor">@color/black</item>
     </style>
 
@@ -223,6 +233,22 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:baselineAligned">false</item>
         <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="ContactsHeader">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Material.Subhead</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="ContactsDetail">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Material.Body1</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
 </resources>

@@ -19,10 +19,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/confirm_details"
-                    android:padding="16dp"
-                    android:gravity="center"
                     android:layout_centerInParent="true"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:text="@string/confirm_details"
                     android:textColor="@color/primary_text_default_material_light"
                     android:textSize="24sp" />
 
@@ -30,21 +30,21 @@
                     android:id="@+id/confirm_cancel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
                     android:layout_alignParentRight="true"
-                    android:tint="@color/blockchain_send_red"
-                    android:src="@drawable/ic_clear_white_24dp" />
+                    android:padding="8dp"
+                    android:src="@drawable/ic_clear_white_24dp"
+                    android:tint="@color/blockchain_send_red" />
 
             </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center_horizontal"
+                android:layout_marginBottom="16dp"
                 android:layout_marginLeft="24dp"
                 android:layout_marginRight="24dp"
-                android:layout_marginBottom="16dp">
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/confirm_from_label"
@@ -59,46 +59,46 @@
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:layout_margin="16dp"
-                    android:tint="@color/blockchain_blue"
-                    android:src="@drawable/ic_arrow_downward_black_24dp" />
+                    android:src="@drawable/ic_arrow_downward_black_24dp"
+                    android:tint="@color/blockchain_blue" />
 
                 <TextView
                     android:id="@+id/confirm_to_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp"
                     android:gravity="center"
+                    android:textSize="16sp"
                     tools:text="Account 2" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
                     android:layout_marginBottom="4dp"
+                    android:layout_marginTop="32dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:gravity="right" />
 
                     <TextView
                         android:id="@+id/confirm_amount_btc_unit"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:gravity="right"
                         tools:text="BTC" />
 
                     <TextView
                         android:id="@+id/confirm_amount_fiat_unit"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:paddingRight="8dp"
+                        android:layout_weight="1"
                         android:gravity="right"
+                        android:paddingRight="8dp"
                         tools:text="USD" />
 
                 </LinearLayout>
@@ -106,39 +106,39 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
                     android:layout_marginBottom="4dp"
+                    android:layout_marginTop="4dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="@string/amount"
+                        android:layout_weight="1"
                         android:alpha="0.7"
-                        android:textSize="14sp"
-                        android:gravity="left" />
+                        android:gravity="left"
+                        android:text="@string/amount"
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/confirm_amount_btc"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:alpha="0.7"
-                        android:textSize="14sp"
                         android:gravity="right"
+                        android:textSize="14sp"
                         tools:text="0.00011" />
 
                     <TextView
                         android:id="@+id/confirm_amount_fiat"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:paddingRight="8dp"
+                        android:layout_weight="1"
                         android:alpha="0.7"
-                        android:textSize="14sp"
                         android:gravity="right"
+                        android:paddingRight="8dp"
+                        android:textSize="14sp"
                         tools:text="0.90" />
 
                 </LinearLayout>
@@ -146,32 +146,32 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
                     android:layout_marginBottom="4dp"
+                    android:layout_marginTop="4dp"
                     android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:alpha="0.7"
-                        android:textSize="14sp"
+                        android:gravity="left"
                         android:text="@string/fee"
-                        android:gravity="left" />
+                        android:textSize="14sp" />
 
                     <LinearLayout
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:gravity="right"
-                        android:orientation="vertical"
-                        android:layout_height="wrap_content">
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/confirm_fee_btc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="14sp"
                             android:alpha="0.7"
+                            android:textSize="14sp"
                             tools:text="0.0001" />
 
                         <TextView
@@ -179,36 +179,36 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical|right"
+                            android:text="@string/customize"
                             android:textColor="@color/blockchain_blue"
-                            android:textSize="14sp"
-                            android:text="@string/customize" />
+                            android:textSize="14sp" />
 
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:gravity="right"
-                        android:orientation="vertical"
-                        android:layout_height="wrap_content">
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/confirm_fee_fiat"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:alpha="0.7"
                             android:paddingRight="8dp"
                             android:textSize="14sp"
-                            android:alpha="0.7"
                             tools:text="0.84" />
 
                         <ImageView
                             android:id="@+id/iv_fee_info"
-                            android:visibility="invisible"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:layout_marginRight="8dp"
+                            android:src="@drawable/ic_help_outline_white_24dp"
                             android:tint="@color/blockchain_blue"
-                            android:src="@drawable/ic_help_outline_white_24dp" />
+                            android:visibility="invisible" />
 
                     </LinearLayout>
 
@@ -218,42 +218,42 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp"
                     android:background="@color/blockchain_grey" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
                     android:layout_marginBottom="4dp"
+                    android:layout_marginTop="4dp"
                     android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="left"
                         android:text="@string/total"
-                        android:textSize="14sp"
-                        android:gravity="left" />
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/confirm_total_btc"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:textSize="14sp"
+                        android:layout_weight="1"
                         android:gravity="right"
+                        android:textSize="14sp"
                         tools:text="0.00021" />
 
                     <TextView
                         android:id="@+id/confirm_total_fiat"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="right"
                         android:paddingRight="8dp"
                         android:textSize="14sp"
-                        android:gravity="right"
                         tools:text="1.74" />
 
                 </LinearLayout>
@@ -261,17 +261,18 @@
             </LinearLayout>
 
             <android.support.v7.widget.AppCompatButton
-                android:theme="@style/ButtonGreen"
                 android:id="@+id/confirm_send"
+                style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
                 android:layout_marginLeft="24dp"
                 android:layout_marginRight="24dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginTop="16dp"
                 android:gravity="center"
+                android:text="@string/SEND"
                 android:textColor="@color/white"
-                android:text="@string/SEND" />
+                android:theme="@style/ButtonGreen" />
 
         </LinearLayout>
     </ScrollView>

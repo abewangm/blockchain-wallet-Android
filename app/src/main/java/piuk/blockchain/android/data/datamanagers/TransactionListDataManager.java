@@ -95,10 +95,11 @@ public class TransactionListDataManager {
     }
 
     /**
-     * Returns a subject that lets ViewModels subscribe to changes in the transaction list - specifically
-     * this subject will return the transaction list when it's first updated and then call onCompleted()
+     * Returns a subject that lets ViewModels subscribe to changes in the transaction list -
+     * specifically this subject will return the transaction list when it's first updated and then
+     * call onCompleted()
      *
-     * @return  The list of transactions after initial sync
+     * @return The list of transactions after initial sync
      */
     public Subject<List<Tx>> getListUpdateSubject() {
         return listUpdateSubject;
@@ -156,6 +157,30 @@ public class TransactionListDataManager {
      */
     public Observable<Transaction> getTransactionFromHash(String transactionHash) {
         return transactionDetails.getTransactionDetailsFromHash(transactionHash);
+    }
+
+    /**
+     * Get a specific {@link Tx} from a hash
+     *
+     * @param transactionHash The hash of the Tx to be returned
+     * @return An Observable object wrapping a Tx. Will call onError if not found with a
+     * NullPointerException
+     */
+    public Observable<Tx> getTxFromHash(String transactionHash) {
+        return Observable.create(emitter -> {
+            //noinspection Convert2streamapi
+            for (Tx tx : getTransactionList()) {
+                if (tx.getHash().equals(transactionHash)) {
+                    if (!emitter.isDisposed()) {
+                        emitter.onNext(tx);
+                        emitter.onComplete();
+                    }
+                    return;
+                }
+            }
+
+            if (!emitter.isDisposed()) emitter.onError(new NullPointerException("Tx not found"));
+        });
     }
 
     /**

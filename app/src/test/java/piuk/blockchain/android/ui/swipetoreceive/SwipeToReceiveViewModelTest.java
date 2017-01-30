@@ -114,7 +114,7 @@ public class SwipeToReceiveViewModelTest {
         }
 
         @Override
-        protected SwipeToReceiveHelper swipeToReceiveHelper(PayloadManager payloadManager,
+        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager,
                                                             MultiAddrFactory multiAddrFactory,
                                                             PrefsUtil prefsUtil) {
             return swipeToReceiveHelper;

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="piuk.blockchain.android.ui.contacts.detail.ContactDetailActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.AppCompatTextView
+            style="@style/ContactsHeader"
+            android:text="@string/contacts_detail_title" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/button_send"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:text="@string/contacts_send_bitcoin"
+            android:theme="@style/ButtonBlue" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/button_request"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_margin="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:text="@string/contacts_request_bitcoin"
+            android:theme="@style/ButtonBlue" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/button_rename"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_weight="1"
+                android:text="@string/contacts_rename"
+                android:theme="@style/ButtonBlue" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/button_delete"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_weight="1"
+                android:text="@string/contacts_delete"
+                android:theme="@style/ButtonBlue" />
+        </LinearLayout>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/textview_transaction_list_header"
+            style="@style/ContactsHeader"
+            android:text="@string/contacts_detail_transactions" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            tools:listitem="@layout/item_balance" />
+
+        <RelativeLayout
+            android:id="@+id/layout_no_transactions"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.AppCompatTextView
+                style="@style/ContactsDetail"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:text="@string/contacts_detail_transactions_empty" />
+
+        </RelativeLayout>
+    </LinearLayout>
+</layout>

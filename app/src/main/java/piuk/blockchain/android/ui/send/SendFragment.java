@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.send;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -14,7 +15,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -48,6 +51,7 @@ import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
@@ -65,9 +69,13 @@ import static android.databinding.DataBindingUtil.inflate;
 
 public class SendFragment extends Fragment implements SendViewModel.DataListener, CustomKeypadCallback {
 
-    private static final String ARG_SCAN_DATA = "scan_data";
-    private static final String ARG_IS_BTC = "is_btc";
-    private static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
+    public static final String ARGUMENT_SCAN_DATA = "scan_data";
+    public static final String ARGUMENT_IS_BTC = "is_btc";
+    public static final String ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position";
+    public static final String ARGUMENT_CONTACT_ID = "contact_id";
+    public static final String ARGUMENT_CONTACT_MDID = "contact_mdid";
+    public static final String ARGUMENT_FCTX_ID = "fctx_id";
+
     private static final int SCAN_URI = 2007;
     private static final int SCAN_PRIVX = 2008;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
@@ -79,8 +87,9 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     private CustomKeypad customKeypad;
     private TextWatcher btcTextWatcher;
     private TextWatcher fiatTextWatcher;
+    private MaterialProgressDialog progressDialog;
 
-    private String scanData;
+    private String contactId;
     private boolean isBtc;
     private int selectedAccountPosition = -1;
     private long backPressed;
@@ -99,12 +108,32 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         // Required empty public constructor
     }
 
-    public static SendFragment newInstance(String scanData, boolean isBtc, int selectedAccountPosition) {
+    public static SendFragment newInstance(@Nullable String scanData,
+                                           @Nullable String contactId,
+                                           @Nullable String mdid,
+                                           @Nullable String fctxId,
+                                           boolean isBtc,
+                                           int selectedAccountPosition) {
         SendFragment fragment = new SendFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_SCAN_DATA, scanData);
-        args.putBoolean(ARG_IS_BTC, isBtc);
-        args.putInt(ARG_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
+        args.putString(ARGUMENT_SCAN_DATA, scanData);
+        args.putString(ARGUMENT_CONTACT_ID, contactId);
+        args.putString(ARGUMENT_CONTACT_MDID, mdid);
+        args.putString(ARGUMENT_FCTX_ID, fctxId);
+        args.putBoolean(ARGUMENT_IS_BTC, isBtc);
+        args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static SendFragment newInstance(@Nullable String scanData,
+                                           boolean isBtc,
+                                           int selectedAccountPosition) {
+        SendFragment fragment = new SendFragment();
+        Bundle args = new Bundle();
+        args.putString(ARGUMENT_SCAN_DATA, scanData);
+        args.putBoolean(ARGUMENT_IS_BTC, isBtc);
+        args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
         fragment.setArguments(args);
         return fragment;
     }
@@ -112,9 +141,9 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (getArguments() != null) {
-            scanData = getArguments().getString(ARG_SCAN_DATA);
-            isBtc = getArguments().getBoolean(ARG_IS_BTC, true);
-            selectedAccountPosition = getArguments().getInt(ARG_SELECTED_ACCOUNT_POSITION);
+            contactId = getArguments().getString(ARGUMENT_CONTACT_ID);
+            isBtc = getArguments().getBoolean(ARGUMENT_IS_BTC, true);
+            selectedAccountPosition = getArguments().getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION);
         }
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_send, container, false);
@@ -129,11 +158,24 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
         setupViews();
 
-        if (scanData != null) viewModel.handleIncomingQRScan(scanData);
-
         setHasOptionsMenu(true);
 
+        viewModel.onViewReady();
+
         return binding.getRoot();
+    }
+
+    @Override
+    public void onNameLoaded(String name) {
+        binding.destination.setText(name);
+        binding.destination.setOnClickListener(null);
+        binding.destination.setEnabled(false);
+        binding.spDestination.setVisibility(View.GONE);
+    }
+
+    @Override
+    public Bundle getFragmentBundle() {
+        return getArguments();
     }
 
     @Override
@@ -157,9 +199,12 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.send_bitcoin);
 
-            ViewUtils.setElevation(
-                    getActivity().findViewById(R.id.appbar_layout),
-                    ViewUtils.convertDpToPixel(5F, getContext()));
+            AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.appbar_layout);
+            if (appBarLayout != null) {
+                ViewUtils.setElevation(
+                        getActivity().findViewById(R.id.appbar_layout),
+                        ViewUtils.convertDpToPixel(5F, getContext()));
+            }
         } else {
             finishPage();
         }
@@ -174,8 +219,14 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        MenuItem menuItem = menu.findItem(R.id.action_qr_main);
-        menuItem.setVisible(false);
+        // Fragment QR Button, don't show if coming from Contacts
+        final MenuItem qrMenu = menu.findItem(R.id.action_qr);
+        qrMenu.setVisible(contactId == null);
+        // Main activity QR button
+        final MenuItem menuItem = menu.findItem(R.id.action_qr_main);
+        if (menuItem != null) {
+            menuItem.setVisible(false);
+        }
     }
 
     @Override
@@ -229,8 +280,12 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         }
     }
 
+    public boolean isKeyboardVisible() {
+        return customKeypad.isVisible();
+    }
+
     public void onBackPressed() {
-        if (customKeypad.isVisible()) {
+        if (isKeyboardVisible()) {
             closeKeypad();
         } else {
             handleBackPressed();
@@ -271,8 +326,10 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     @Override
     public void onKeypadClose() {
-        // Show bottom nav
-        ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+        // Show bottom nav if applicable
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+        }
         // Resize activity back to initial state
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -284,8 +341,10 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     @Override
     public void onKeypadOpen() {
-        // Hide bottom nav
-        ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
+        // Hide bottom nav if applicable
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
+        }
     }
 
     @Override
@@ -388,6 +447,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         // Set drop down width equal to clickable view
         binding.accounts.spinner.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 
+            @SuppressLint("ObsoleteSdkInt")
             @Override
             public void onGlobalLayout() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -440,6 +500,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         // Set drop down width equal to clickable view
         binding.spDestination.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 
+            @SuppressLint("ObsoleteSdkInt")
             @Override
             public void onGlobalLayout() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -527,38 +588,41 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     @Override
-    public void onShowTransactionSuccess() {
-        getActivity().runOnUiThread(() -> {
-            playAudio();
-            LocalBroadcastManager.getInstance(getActivity()).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
+    public void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue) {
+        playAudio();
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
 
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-            LayoutInflater inflater = getActivity().getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.modal_transaction_success, null);
-            transactionSuccessDialog = dialogBuilder.setView(dialogView)
-                    .setPositiveButton(getString(R.string.done), null)
-                    .create();
-            transactionSuccessDialog.setTitle(R.string.transaction_submitted);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.modal_transaction_success, null);
+        transactionSuccessDialog = dialogBuilder.setView(dialogView)
+                .setPositiveButton(getString(R.string.done), null)
+                .create();
+        transactionSuccessDialog.setTitle(R.string.transaction_submitted);
 
-            AppRate appRate = new AppRate(getActivity())
-                    .setMinTransactionsUntilPrompt(3)
-                    .incrementTransactionCount();
+        AppRate appRate = new AppRate(getActivity())
+                .setMinTransactionsUntilPrompt(3)
+                .incrementTransactionCount();
 
-            // If should show app rate, success dialog shows first and launches
-            // rate dialog on dismiss. Dismissing rate dialog then closes the page. This will
-            // happen if the user chooses to rate the app - they'll return to the main page.
-            if (appRate.shouldShowDialog()) {
-                AlertDialog ratingDialog = appRate.getRateDialog();
-                ratingDialog.setOnDismissListener(d -> finishPage());
-                transactionSuccessDialog.show();
-                transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
-            } else {
-                transactionSuccessDialog.show();
-                transactionSuccessDialog.setOnDismissListener(dialogInterface -> finishPage());
-            }
+        // If should show app rate, success dialog shows first and launches
+        // rate dialog on dismiss. Dismissing rate dialog then closes the page. This will
+        // happen if the user chooses to rate the app - they'll return to the main page.
+        if (appRate.shouldShowDialog()) {
+            AlertDialog ratingDialog = appRate.getRateDialog();
+            ratingDialog.setOnDismissListener(d -> finishAndNotifySuccess(mdid, hash, fctxId, transactionValue));
+            transactionSuccessDialog.show();
+            transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
+        } else {
+            transactionSuccessDialog.show();
+            transactionSuccessDialog.setOnDismissListener(dialogInterface -> finishAndNotifySuccess(mdid, hash, fctxId, transactionValue));
+        }
 
-            dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
-        });
+        dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
+    }
+
+    private void finishAndNotifySuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue) {
+        if (listener != null) listener.onSendPaymentSuccessful(mdid, hash, fctxId, transactionValue);
+        finishPage();
     }
 
     private final Handler dialogHandler = new Handler();
@@ -647,8 +711,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                         startScanActivity(SCAN_PRIVX);
                     }
 
-                }).setNegativeButton(android.R.string.cancel, null).show();
-
+                })
+                .setNegativeButton(android.R.string.cancel, null).show();
     }
 
     private void setBtcTextWatcher() {
@@ -892,6 +956,22 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     @Override
+    public void showProgressDialog() {
+        progressDialog = new MaterialProgressDialog(getActivity());
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(R.string.please_wait);
+        progressDialog.show();
+    }
+
+    @Override
+    public void dismissProgressDialog() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+    }
+
+    @Override
     public void finishPage() {
         if (listener != null) {
             listener.onSendFragmentClose();
@@ -925,5 +1005,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         void onSendFragmentClose();
 
         void onSendFragmentStart();
+
+        void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue);
     }
 }

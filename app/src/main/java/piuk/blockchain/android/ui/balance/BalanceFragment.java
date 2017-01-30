@@ -56,7 +56,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     public static final String ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH";
     public static final String KEY_TRANSACTION_LIST_POSITION = "transaction_list_position";
-    private static final int SHOW_BTC = 1;
+    public static final String KEY_TRANSACTION_HASH = "transaction_hash";
+    public static final int SHOW_BTC = 1;
     private static final int SHOW_FIAT = 2;
     private int balanceDisplayState = SHOW_BTC;
     public int balanceBarHeight;
@@ -418,9 +419,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Thunk
     void goToTransactionDetail(int position) {
-        Intent intent = new Intent(getActivity(), TransactionDetailActivity.class);
-        intent.putExtra(KEY_TRANSACTION_LIST_POSITION, position);
-        startActivity(intent);
+        Bundle bundle = new Bundle();
+        bundle.putInt(KEY_TRANSACTION_LIST_POSITION, position);
+        TransactionDetailActivity.start(getActivity(), bundle);
     }
 
     @Override

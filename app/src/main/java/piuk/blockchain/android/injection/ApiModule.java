@@ -29,6 +29,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
  * Created by adambennett on 08/08/2016.
  */
 
+@SuppressWarnings("WeakerAccess")
 @Module
 public class ApiModule {
 

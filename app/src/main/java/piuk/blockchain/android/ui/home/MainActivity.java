@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -43,7 +44,7 @@ import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
-import piuk.blockchain.android.ui.contacts.ContactsActivity;
+import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
@@ -60,7 +61,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-import static piuk.blockchain.android.ui.contacts.ContactsActivity.EXTRA_METADATA_URI;
+import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
 import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
 
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.Communicator,
@@ -86,6 +87,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     private AppUtil appUtil;
     private long backPressed;
     private boolean returningResult = false;
+    private Toolbar toolbar;
 
     @SuppressLint("NewApi")
     @Override
@@ -120,6 +122,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 // No-op
             }
         });
+
+        // Set up toolbar
+        toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.vector_menu));
+        toolbar.setTitle("");
+        setSupportActionBar(toolbar);
+        ViewUtils.setElevation(toolbar, 0F);
 
         // Create items
         AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.blockchain_pearl_white);
@@ -224,6 +233,21 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         }
     }
 
+    @Override
+    public void setMessagesVisibility(@ViewUtils.Visibility int visibility) {
+        binding.navigationView.getMenu()
+                .findItem(R.id.nav_contacts)
+                .getActionView()
+                .findViewById(R.id.menu_icon_count)
+                .setVisibility(visibility);
+
+        if (visibility == View.VISIBLE) {
+            toolbar.setNavigationIcon(ContextCompat.getDrawable(getActivity(), R.drawable.vector_menu_indicator));
+        } else {
+            toolbar.setNavigationIcon(ContextCompat.getDrawable(getActivity(), R.drawable.vector_menu));
+        }
+    }
+
     @Thunk
     Fragment getCurrentFragment() {
         return getSupportFragmentManager().findFragmentById(R.id.content_frame);
@@ -307,7 +331,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 startActivity(new Intent(MainActivity.this, AccountActivity.class));
                 break;
             case R.id.nav_contacts:
-                ContactsActivity.start(this, null);
+                ContactsListActivity.start(this, null);
                 break;
             case R.id.nav_upgrade:
                 startActivity(new Intent(MainActivity.this, UpgradeWalletActivity.class));
@@ -335,14 +359,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void resetNavigationDrawer() {
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.ic_menu_white_24dp));
+        // Called onResume from BalanceFragment
         toolbar.setTitle("");
-        setSupportActionBar(toolbar);
-        ViewUtils.setElevation(toolbar, 0F);
-
-        MenuItem backUpMenuItem = binding.nvView.getMenu().findItem(R.id.nav_backup);
-        MenuItem upgradeMenuItem = binding.nvView.getMenu().findItem(R.id.nav_upgrade);
+        MenuItem backUpMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_backup);
+        MenuItem upgradeMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_upgrade);
 
         if (mainViewModel.getPayloadManager().isNotUpgraded()) {
             //Legacy
@@ -354,7 +374,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             backUpMenuItem.setVisible(true);
         }
 
-        MenuItem backUpView = binding.nvView.getMenu().findItem(R.id.nav_backup);
+        MenuItem backUpView = binding.navigationView.getMenu().findItem(R.id.nav_backup);
         Drawable drawable = backUpView.getIcon();
         drawable.mutate();
         if (mainViewModel.getPayloadManager().getPayload() != null &&
@@ -367,7 +387,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             drawable.setColorFilter(ContextCompat.getColor(this, R.color.alert_green), PorterDuff.Mode.SRC_ATOP);
         }
 
-        binding.nvView.setNavigationItemSelectedListener(
+        binding.navigationView.setNavigationItemSelectedListener(
                 menuItem -> {
                     selectDrawerItem(menuItem);
                     return true;
@@ -481,23 +501,36 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void showSurveyPrompt() {
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.survey_message)
-                .setPositiveButton(R.string.survey_positive_button, (dialog, which) -> {
-                    String url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV";
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse(url));
-                    startActivity(intent);
-                })
-                .setNegativeButton(R.string.polite_no, null)
-                .create()
-                .show();
+        if (!isFinishing()) {
+            new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.app_name)
+                    .setMessage(R.string.survey_message)
+                    .setPositiveButton(R.string.survey_positive_button, (dialog, which) -> {
+                        String url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV";
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(url));
+                        startActivity(intent);
+                    })
+                    .setNegativeButton(R.string.polite_no, null)
+                    .create()
+                    .show();
+        }
+    }
+
+    @Override
+    public void showContactsRegistrationFailure() {
+        if (!isFinishing()) {
+            new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.app_name)
+                    .setMessage(R.string.contacts_register_nodes_failure)
+                    .setPositiveButton(R.string.retry, (dialog, which) -> mainViewModel.checkForMessages())
+                    .create()
+                    .show();
+        }
     }
 
     @Override
     public void onConnectivityFail() {
-
         final AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogStyle);
         final String message = getString(R.string.check_connectivity_exit);
         builder.setMessage(message)
@@ -514,7 +547,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                             startSingleActivity(c);
                         });
 
-        builder.create().show();
+        if (!isFinishing()) {
+            builder.create().show();
+        }
     }
 
     @Override
@@ -538,10 +573,14 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     }
 
     @Override
-    public void onStartContactsActivity(String data) {
-        Bundle bundle = new Bundle();
-        bundle.putString(EXTRA_METADATA_URI, data);
-        ContactsActivity.start(this, bundle);
+    public void onStartContactsActivity(@Nullable String data) {
+        if (data != null) {
+            Bundle bundle = new Bundle();
+            bundle.putString(EXTRA_METADATA_URI, data);
+            ContactsListActivity.start(this, bundle);
+        } else {
+            ContactsListActivity.start(this, null);
+        }
     }
 
     @Override
@@ -572,7 +611,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         mainViewModel.checkIfShouldShowSurvey();
     }
 
-    public void startSendFragment(String scanData) {
+    public void startSendFragment(@Nullable String scanData) {
         boolean isBTC;
         int selectedAccountPosition;
         try {
@@ -636,5 +675,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     @Override
     public void onReceiveFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
+    }
+
+    @Override
+    public void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue) {
+        // No-op, this callback is used elsewhere
     }
 }

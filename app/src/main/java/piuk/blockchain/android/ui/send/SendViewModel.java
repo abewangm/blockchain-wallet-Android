@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.send;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -48,10 +49,15 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.contacts.ContactsPredicates;
+import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.payload.PayloadBridge;
+import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
@@ -66,10 +72,20 @@ import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_ID;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_MDID;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_FCTX_ID;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_IS_BTC;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SCAN_DATA;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SELECTED_ACCOUNT_POSITION;
+
 @SuppressWarnings("WeakerAccess")
 public class SendViewModel extends BaseViewModel {
 
-    private final String TAG = getClass().getSimpleName();
+    private static final String TAG = SendViewModel.class.getSimpleName();
+
+    public static final int SHOW_BTC = 1;
+    public static final int SHOW_FIAT = 2;
 
     @Thunk DataListener dataListener;
     private Context context;
@@ -77,11 +93,13 @@ public class SendViewModel extends BaseViewModel {
     private MonetaryUtil monetaryUtil;
     private Payment payment;
     public SendModel sendModel;
+    @Nullable private String contactMdid;
+    @Nullable private String fctxId;
+    // TODO: 24/01/2017 Use these instead of passing them from the UI
+    private boolean isBtc;
+    private int selectedAccountPosition = -1;
 
     private Thread unspentApiThread;
-
-    private final static int SHOW_BTC = 1;
-    private final static int SHOW_FIAT = 2;
 
     @Inject PrefsUtil prefsUtil;
     @Inject WalletAccountHelper walletAccountHelper;
@@ -89,65 +107,12 @@ public class SendViewModel extends BaseViewModel {
     @Inject PrivateKeyFactory privateKeyFactory;
     @Inject PayloadManager payloadManager;
     @Inject StringUtils stringUtils;
+    @Inject ContactsDataManager contactsDataManager;
+    @Inject SendDataManager sendDataManager;
 
-    SendViewModel(Context context, DataListener dataListener) {
+    interface DataListener {
 
-        Injector.getInstance().getDataManagerComponent().inject(this);
-
-        int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
-        String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double exchangeRate = ExchangeRateFactory.getInstance().getLastPrice(fiatUnit);
-
-        this.context = context;
-        this.dataListener = dataListener;
-        monetaryUtil = new MonetaryUtil(btcUnit);
-        payment = new Payment();
-
-        sendModel = new SendModel();
-        sendModel.pendingTransaction = new PendingTransaction();
-        sendModel.btcUnit = monetaryUtil.getBTCUnit(btcUnit);
-        sendModel.fiatUnit = fiatUnit;
-        sendModel.btcUniti = btcUnit;
-        sendModel.isBTC = getBtcDisplayState();
-        sendModel.defaultSeparator = getDefaultDecimalSeparator();
-        sendModel.exchangeRate = exchangeRate;
-        sendModel.unspentApiResponse = new HashMap<>();
-        sendModel.btcExchange = ExchangeRateFactory.getInstance().getLastPrice(sendModel.fiatUnit);
-
-        dataListener.onUpdateBtcUnit(sendModel.btcUnit);
-        dataListener.onUpdateFiatUnit(sendModel.fiatUnit);
-        getSuggestedFee();
-
-        sslVerifyUtil.validateSSL();
-    }
-
-    private boolean getBtcDisplayState() {
-        boolean isBTC = true;
-        int BALANCE_DISPLAY_STATE = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-        if (BALANCE_DISPLAY_STATE == SHOW_FIAT) {
-            isBTC = false;
-        }
-
-        return isBTC;
-    }
-
-    @Override
-    public void onViewReady() {
-        // No-op
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        context = null;
-        dataListener = null;
-    }
-
-    String getDefaultSeparator() {
-        return sendModel.defaultSeparator;
-    }
-
-    public interface DataListener {
+        Bundle getFragmentBundle();
 
         void onHideSendingAddressField();
 
@@ -183,15 +148,91 @@ public class SendViewModel extends BaseViewModel {
 
         void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
-        void onShowTransactionSuccess();
+        void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue);
 
         void onShowBIP38PassphrasePrompt(String scanData);
 
         void finishPage();
+
+        void onNameLoaded(String name);
+
+        void showProgressDialog();
+
+        void dismissProgressDialog();
+    }
+
+    SendViewModel(Context context, DataListener dataListener) {
+        Injector.getInstance().getDataManagerComponent().inject(this);
+
+        int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
+        String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        double exchangeRate = ExchangeRateFactory.getInstance().getLastPrice(fiatUnit);
+
+        this.context = context;
+        this.dataListener = dataListener;
+        monetaryUtil = new MonetaryUtil(btcUnit);
+        payment = new Payment();
+
+        sendModel = new SendModel();
+        sendModel.pendingTransaction = new PendingTransaction();
+        sendModel.btcUnit = monetaryUtil.getBTCUnit(btcUnit);
+        sendModel.fiatUnit = fiatUnit;
+        sendModel.btcUniti = btcUnit;
+        sendModel.isBTC = getBtcDisplayState();
+        sendModel.defaultSeparator = getDefaultDecimalSeparator();
+        sendModel.exchangeRate = exchangeRate;
+        sendModel.unspentApiResponse = new HashMap<>();
+        sendModel.btcExchange = ExchangeRateFactory.getInstance().getLastPrice(sendModel.fiatUnit);
+
+        dataListener.onUpdateBtcUnit(sendModel.btcUnit);
+        dataListener.onUpdateFiatUnit(sendModel.fiatUnit);
+        getSuggestedFee();
+
+        sslVerifyUtil.validateSSL();
+    }
+
+    private boolean getBtcDisplayState() {
+        int BALANCE_DISPLAY_STATE = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+        return BALANCE_DISPLAY_STATE != SHOW_FIAT;
+    }
+
+    @Override
+    public void onViewReady() {
+        if (dataListener.getFragmentBundle() != null) {
+            final String scanData = dataListener.getFragmentBundle().getString(ARGUMENT_SCAN_DATA);
+            final String contactId = dataListener.getFragmentBundle().getString(ARGUMENT_CONTACT_ID);
+            contactMdid = dataListener.getFragmentBundle().getString(ARGUMENT_CONTACT_MDID);
+            fctxId = dataListener.getFragmentBundle().getString(ARGUMENT_FCTX_ID);
+            isBtc = dataListener.getFragmentBundle().getBoolean(ARGUMENT_IS_BTC, true);
+            selectedAccountPosition = dataListener.getFragmentBundle().getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION);
+
+            if (contactId != null) {
+                compositeDisposable.add(
+                        contactsDataManager.getContactList()
+                                .filter(ContactsPredicates.filterById(contactId))
+                                .subscribe(
+                                        contact -> dataListener.onNameLoaded(contact.getName()),
+                                        throwable -> dataListener.finishPage()));
+            }
+
+            if (scanData != null) {
+                handleIncomingQRScan(scanData);
+            }
+        }
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        context = null;
+        dataListener = null;
+    }
+
+    String getDefaultSeparator() {
+        return sendModel.defaultSeparator;
     }
 
     int getDefaultAccount() {
-
         int result = 0;
         if (payloadManager.getPayload().isUpgraded()) {
             result = payloadManager.getPayload().getHdWallet().getDefaultIndex();
@@ -221,7 +262,6 @@ public class SendViewModel extends BaseViewModel {
      * @return List of account details (balance, label, tag, account/address/address_book object)
      */
     List<ItemAccount> getAddressList(boolean includeAddressBookEntries) {
-
         ArrayList<ItemAccount> result = new ArrayList<ItemAccount>() {{
             addAll(walletAccountHelper.getAccountItems(sendModel.isBTC));
         }};
@@ -284,7 +324,6 @@ public class SendViewModel extends BaseViewModel {
      * @param btcAmountText (btc, mbtc or bits)
      */
     void afterBtcTextChanged(String btcAmountText) {
-
         if (isExceedingMaximumBTCAmount(btcAmountText)) {
             return;
         }
@@ -347,7 +386,6 @@ public class SendViewModel extends BaseViewModel {
      * @param fiatAmountText (any currency)
      */
     void afterFiatTextChanged(String fiatAmountText) {
-
         dataListener.onRemoveFiatTextChangeListener();
 
         int max_len = 2;
@@ -391,7 +429,6 @@ public class SendViewModel extends BaseViewModel {
      * Handle incoming scan data or bitcoin links
      */
     void handleIncomingQRScan(String scanData) {
-
         scanData = scanData.trim();
 
         String btcAddress;
@@ -423,6 +460,7 @@ public class SendViewModel extends BaseViewModel {
         if (!btcAddress.equals("")) {
             sendModel.setDestinationAddress(btcAddress);
             sendModel.pendingTransaction.receivingObject = null;
+            sendModel.pendingTransaction.receivingAddress = btcAddress;
         }
         if (btcAmount != null && !btcAmount.equals("")) {
             dataListener.onRemoveBtcTextChangeListener();
@@ -461,25 +499,21 @@ public class SendViewModel extends BaseViewModel {
      * Get cached dynamic fee from Bci dynamic fee API
      */
     private void getSuggestedFee() {
-
-        //Get cached fee
+        // Get cached fee
         sendModel.suggestedFee = DynamicFeeCache.getInstance().getSuggestedFee();
 
-        //Refresh cache
-        new Thread(() -> {
+        // Refresh fee cache
+        compositeDisposable.add(
+                getSuggestedFeeObservable()
+                        .doAfterTerminate(() -> sendModel.suggestedFee = DynamicFeeCache.getInstance().getSuggestedFee())
+                        .subscribe(
+                                suggestedFee -> DynamicFeeCache.getInstance().setSuggestedFee(suggestedFee),
+                                throwable -> DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDefaultFee())));
+    }
 
-            SuggestedFee suggestedFee;
-            try {
-                suggestedFee = new DynamicFee().getDynamicFee();
-
-            } catch (Exception e) {
-                Log.e(TAG, "getSuggestedFee: ", e);
-                suggestedFee = new DynamicFee().getDefaultFee();
-            }
-            DynamicFeeCache.getInstance().setSuggestedFee(suggestedFee);
-
-            sendModel.suggestedFee = DynamicFeeCache.getInstance().getSuggestedFee();
-        }).start();
+    private Observable<SuggestedFee> getSuggestedFeeObservable() {
+        return Observable.fromCallable(() -> new DynamicFee().getDynamicFee())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -591,7 +625,6 @@ public class SendViewModel extends BaseViewModel {
      * Payment will use customized fee
      */
     private void customFeePayment(final UnspentOutputs coins, BigInteger amountToSend, BigInteger customFee, boolean spendAll) {
-
         SweepBundle sweepBundle = payment.getSweepBundle(coins, BigInteger.ZERO);
         long balanceAfterFee = sweepBundle.getSweepAmount().longValue() - customFee.longValue();
         updateMaxAvailable(balanceAfterFee);
@@ -695,7 +728,6 @@ public class SendViewModel extends BaseViewModel {
         BigInteger[] absoluteFeeSuggestedEstimates = new BigInteger[estimates.size()];
 
         for (int i = 0; i < absoluteFeeSuggestedEstimates.length; i++) {
-
             BigInteger feePerKb = estimates.get(i).fee;
             SpendableUnspentOutputs unspentOutputBundle = payment.getSpendableCoins(coins, amountToSend, feePerKb);
 
@@ -749,7 +781,6 @@ public class SendViewModel extends BaseViewModel {
      * @return satoshis
      */
     private BigInteger getSatoshisFromText(String text) {
-
         if (text == null || text.isEmpty()) return BigInteger.ZERO;
 
         //Format string to parsable double
@@ -772,7 +803,6 @@ public class SendViewModel extends BaseViewModel {
      * @return btc, mbtc or bits relative to what is set in monetaryUtil
      */
     private String getTextFromSatoshis(long satoshis) {
-
         String displayAmount = monetaryUtil.getDisplayAmount(satoshis);
         displayAmount = displayAmount.replace(".", sendModel.defaultSeparator);
         return displayAmount;
@@ -782,7 +812,6 @@ public class SendViewModel extends BaseViewModel {
      * Updates text displaying what block tx will be included in
      */
     private String updateEstimateConfirmationTime(BigInteger amountToSend, long fee, UnspentOutputs coins) {
-
         sendModel.absoluteSuggestedFeeEstimates = getEstimatedBlocks(amountToSend, sendModel.suggestedFee.estimateList, coins);
 
         String likelyToConfirmMessage = context.getText(R.string.estimate_confirm_block_count).toString();
@@ -816,16 +845,13 @@ public class SendViewModel extends BaseViewModel {
      * //TODO could be improved Sanity checks before prompting confirmation
      */
     void sendClicked(boolean bypassFeeCheck, String address) {
-
         if (FormatsUtil.getInstance().isValidBitcoinAddress(address)) {
             //Receiving address manual or scanned input
             sendModel.pendingTransaction.receivingAddress = address;
         }
 
         if (bypassFeeCheck || isFeeAdequate()) {
-
             if (isValidSpend(sendModel.pendingTransaction)) {
-
                 LegacyAddress legacyAddress = null;
 
                 if (!sendModel.pendingTransaction.isHD()) {
@@ -862,7 +888,6 @@ public class SendViewModel extends BaseViewModel {
      * customized fee is too small or too large.
      */
     private boolean isFeeAdequate() {
-
         //Push tx endpoint only accepts > 10000 per kb fees
         if (sendModel.pendingTransaction.unspentOutputBundle != null && sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs() != null
                 && !FeeUtil.isAdequateFee(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(),
@@ -916,7 +941,6 @@ public class SendViewModel extends BaseViewModel {
      */
     @Thunk
     void confirmPayment() {
-
         PendingTransaction pendingTransaction = sendModel.pendingTransaction;
 
         PaymentConfirmationDetails details = new PaymentConfirmationDetails();
@@ -957,7 +981,6 @@ public class SendViewModel extends BaseViewModel {
      * total
      */
     boolean isLargeTransaction() {
-
         int txSize = FeeUtil.estimatedSize(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = sendModel.absoluteSuggestedFee.doubleValue() / sendModel.pendingTransaction.bigIntAmount.doubleValue() * 100.0;
 
@@ -970,7 +993,6 @@ public class SendViewModel extends BaseViewModel {
      * Various checks on validity of transaction details
      */
     private boolean isValidSpend(PendingTransaction pendingTransaction) {
-
         //Validate amount
         if (!isValidAmount(pendingTransaction.bigIntAmount)) {
             dataListener.onShowInvalidAmount();
@@ -1032,22 +1054,18 @@ public class SendViewModel extends BaseViewModel {
      * customizes address
      */
     void setReceivingAddress(@Nullable ItemAccount selectedItem) {
-
         sendModel.pendingTransaction.receivingObject = selectedItem;
-
         if (selectedItem != null) {
             if (selectedItem.accountObject instanceof Account) {
-
                 //V3
                 Account account = ((Account) selectedItem.accountObject);
                 try {
                     sendModel.pendingTransaction.receivingAddress = payloadManager.getNextReceiveAddress(account.getRealIdx());
                 } catch (AddressFormatException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "setReceivingAddress: ", e);
                 }
 
             } else if (selectedItem.accountObject instanceof LegacyAddress) {
-
                 //V2
                 LegacyAddress legacyAddress = ((LegacyAddress) selectedItem.accountObject);
                 sendModel.pendingTransaction.receivingAddress = legacyAddress.getAddress();
@@ -1068,94 +1086,83 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private boolean isValidAmount(BigInteger bAmount) {
-
         if (bAmount == null) {
             return false;
         }
 
-        //Test that amount is more than dust
+        // Test that amount is more than dust
         if (bAmount.compareTo(SendCoins.bDust) == -1) {
             return false;
         }
 
-        //Test that amount does not exceed btc limit
+        // Test that amount does not exceed btc limit
         if (bAmount.compareTo(BigInteger.valueOf(2100000000000000L)) == 1) {
             dataListener.onUpdateBtcAmount("0");
             return false;
         }
 
-        //Test that amount is not zero
+        // Test that amount is not zero
         return bAmount.compareTo(BigInteger.ZERO) >= 0;
-
     }
 
     /**
      * Executes transaction //TODO implement transaction queue for when transaction fails
      */
     public void submitPayment(AlertDialog alertDialog) {
+        String changeAddress;
+        List<ECKey> keys = new ArrayList<>();
+        Account account;
+        LegacyAddress legacyAddress;
+        try {
+            if (sendModel.pendingTransaction.isHD()) {
+                account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);
+                changeAddress = payloadManager.getNextChangeAddress(account.getRealIdx());
 
-        new Thread(() -> {
-            try {
+                keys.addAll(payloadManager.getHDKeys(sendModel.verifiedSecondPassword, account, sendModel.pendingTransaction.unspentOutputBundle));
 
-                String changeAddress;
-                Account account = null;
-                LegacyAddress legacyAddress = null;
-                List<ECKey> keys = new ArrayList<>();
+            } else {
+                legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
+                changeAddress = legacyAddress.getAddress();
 
-                if (sendModel.pendingTransaction.isHD()) {
-                    account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);
-                    changeAddress = payloadManager.getNextChangeAddress(account.getRealIdx());
-
-                    keys.addAll(payloadManager.getHDKeys(sendModel.verifiedSecondPassword, account, sendModel.pendingTransaction.unspentOutputBundle));
-
+                if (!legacyAddress.isWatchOnly() && payloadManager.getPayload().isDoubleEncrypted()) {
+                    ECKey walletKey = legacyAddress.getECKey(new CharSequenceX(sendModel.verifiedSecondPassword));
+                    keys.add(walletKey);
                 } else {
-                    legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
-                    changeAddress = legacyAddress.getAddress();
-
-                    if (!legacyAddress.isWatchOnly() && payloadManager.getPayload().isDoubleEncrypted()) {
-                        ECKey walletKey = legacyAddress.getECKey(new CharSequenceX(sendModel.verifiedSecondPassword));
-                        keys.add(walletKey);
-                    } else {
-                        ECKey walletKey = legacyAddress.getECKey();
-                        keys.add(walletKey);
-                    }
+                    ECKey walletKey = legacyAddress.getECKey();
+                    keys.add(walletKey);
                 }
+            }
 
-                payment.submitPayment(
+        } catch (Exception e) {
+            Log.e(TAG, "submitPayment: ", e);
+            dataListener.dismissProgressDialog();
+            dataListener.onShowToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR);
+            return;
+        }
+
+        dataListener.showProgressDialog();
+
+        compositeDisposable.add(
+                sendDataManager.submitPayment(
                         sendModel.pendingTransaction.unspentOutputBundle,
                         keys,
                         sendModel.pendingTransaction.receivingAddress,
                         changeAddress,
                         sendModel.pendingTransaction.bigIntFee,
-                        sendModel.pendingTransaction.bigIntAmount,
-                        new Payment.SubmitPaymentListener() {
-                            @Override
-                            public void onSuccess(String s) {
+                        sendModel.pendingTransaction.bigIntAmount)
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .subscribe(
+                                hash -> {
+                                    clearUnspentResponseCache();
 
-                                clearUnspentResponseCache();
+                                    if (alertDialog != null && alertDialog.isShowing())
+                                        alertDialog.dismiss();
 
-                                if (alertDialog != null && alertDialog.isShowing())
-                                    alertDialog.dismiss();
-
-                                handleSuccessfulPayment();
-                            }
-
-                            @Override
-                            public void onFail(String s) {
-                                dataListener.onShowToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR);
-                            }
-                        });
-
-            } catch (Exception e) {
-                Log.e(TAG, "submitPayment: ", e);
-                dataListener.onShowToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR);
-            }
-        }).start();
-
+                                    handleSuccessfulPayment(hash);
+                                }, throwable -> dataListener.onShowToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)));
     }
 
-    @Thunk
-    void handleSuccessfulPayment() {
+    private void handleSuccessfulPayment(String hash) {
         if (sendModel.pendingTransaction.isHD()) {
             // increment change address counter
             ((Account) sendModel.pendingTransaction.sendingObject.accountObject).incChange();
@@ -1163,12 +1170,10 @@ public class SendViewModel extends BaseViewModel {
 
         updateInternalBalances();
         PayloadBridge.getInstance().remoteSaveThread(null);
-        dataListener.onShowTransactionSuccess();
+        dataListener.onShowTransactionSuccess(contactMdid, hash, fctxId, sendModel.pendingTransaction.bigIntAmount.longValue());
     }
 
-    @Thunk
-    void clearUnspentResponseCache() {
-
+    private void clearUnspentResponseCache() {
         DefaultAccountUnspentCache.getInstance().destroy();
 
         if (sendModel.pendingTransaction.isHD()) {
@@ -1183,21 +1188,16 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Update balance immediately after spend - until refresh from server
      */
-    private void updateInternalBalances() { 
-
+    private void updateInternalBalances() {
         BigInteger totalSent = sendModel.pendingTransaction.bigIntAmount.add(sendModel.pendingTransaction.bigIntFee);
-
         if (sendModel.pendingTransaction.isHD()) {
-
             Account account = (Account) sendModel.pendingTransaction.sendingObject.accountObject;
-
-
             long updatedBalance = MultiAddrFactory.getInstance().getXpubBalance() - totalSent.longValue();
 
-            //Set total balance
+            // Set total balance
             MultiAddrFactory.getInstance().setXpubBalance(updatedBalance);
 
-            //Set individual xpub balance
+            // Set individual xpub balance
             MultiAddrFactory.getInstance().setXpubAmount(
                     account.getXpub(),
                     MultiAddrFactory.getInstance().getXpubAmounts().get(account.getXpub()) - totalSent.longValue());
@@ -1227,7 +1227,6 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void spendFromWatchOnlyNonBIP38(final String format, final String scanData) {
-
         try {
             ECKey key = privateKeyFactory.getKey(format, scanData);
             LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
@@ -1237,6 +1236,23 @@ public class SendViewModel extends BaseViewModel {
             dataListener.onShowToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
             Log.e(TAG, "spendFromWatchOnlyNonBIP38: ", e);
         }
+    }
+
+    void spendFromWatchOnlyBIP38(String pw, String scanData) {
+        compositeDisposable.add(
+                getEcKeyFromBip38(pw, scanData)
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(ecKey -> {
+                            LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
+                            setTempLegacyAddressPrivateKey(legacyAddress, ecKey);
+                        }, throwable -> dataListener.onShowToast(R.string.bip38_error, ToastCustom.TYPE_ERROR)));
+    }
+
+    private Observable<ECKey> getEcKeyFromBip38(String password, String scanData) {
+        return Observable.fromCallable(() -> {
+            BIP38PrivateKey bip38 = new BIP38PrivateKey(MainNetParams.get(), scanData);
+            return bip38.decrypt(password);
+        });
     }
 
     private void setTempLegacyAddressPrivateKey(LegacyAddress legacyAddress, ECKey key) {
@@ -1254,27 +1270,6 @@ public class SendViewModel extends BaseViewModel {
         } else {
             dataListener.onShowToast(R.string.invalid_private_key, ToastCustom.TYPE_ERROR);
         }
-    }
-
-    void spendFromWatchOnlyBIP38(String pw, String scanData) {
-        new Thread(() -> {
-
-            Looper.prepare();
-
-            try {
-                BIP38PrivateKey bip38 = new BIP38PrivateKey(MainNetParams.get(), scanData);
-                final ECKey key = bip38.decrypt(pw);
-
-                LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
-                setTempLegacyAddressPrivateKey(legacyAddress, key);
-
-            } catch (Exception e) {
-                dataListener.onShowToast(R.string.bip38_error, ToastCustom.TYPE_ERROR);
-            }
-
-            Looper.loop();
-
-        }).start();
     }
 
     void setWatchOnlySpendWarning(boolean enabled) {

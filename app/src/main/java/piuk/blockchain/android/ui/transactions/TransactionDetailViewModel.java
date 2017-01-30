@@ -36,6 +36,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
 @SuppressWarnings("WeakerAccess")
@@ -55,8 +56,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private double mBtcExchangeRate;
     private String mFiatType;
 
-    @VisibleForTesting
-    Tx mTransaction;
+    @VisibleForTesting Tx mTransaction;
 
     public interface DataListener {
 
@@ -103,16 +103,22 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        if (mDataListener.getPageIntent() != null
-                && mDataListener.getPageIntent().hasExtra(KEY_TRANSACTION_LIST_POSITION)) {
+        Intent pageIntent = mDataListener.getPageIntent();
+        if (pageIntent != null && pageIntent.hasExtra(KEY_TRANSACTION_LIST_POSITION)) {
 
-            int transactionPosition = mDataListener.getPageIntent().getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1);
+            int transactionPosition = pageIntent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1);
             if (transactionPosition == -1) {
                 mDataListener.pageFinish();
             } else {
                 mTransaction = mTransactionListDataManager.getTransactionList().get(transactionPosition);
                 updateUiFromTransaction(mTransaction);
             }
+        } else if (pageIntent != null && pageIntent.hasExtra(KEY_TRANSACTION_HASH)) {
+            compositeDisposable.add(
+                    mTransactionListDataManager.getTxFromHash(pageIntent.getStringExtra(KEY_TRANSACTION_HASH))
+                            .subscribe(
+                                    this::updateUiFromTransaction,
+                                    throwable -> mDataListener.pageFinish()));
         } else {
             mDataListener.pageFinish();
         }

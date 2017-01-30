@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.transactions;
 
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -71,6 +72,12 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
         });
 
         mViewModel.onViewReady();
+    }
+
+    public static void start(Context context, Bundle args) {
+        Intent starter = new Intent(context, TransactionDetailActivity.class);
+        starter.putExtras(args);
+        context.startActivity(starter);
     }
 
     @Override

@@ -1,11 +1,11 @@
-package piuk.blockchain.android.ui.contacts;
+package piuk.blockchain.android.ui.contacts.list;
 
 import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 
 import java.util.List;
 
-public class ContactsDiffUtil extends DiffUtil.Callback {
+class ContactsDiffUtil extends DiffUtil.Callback {
 
     private List<ContactsListItem> oldContacts;
     private List<ContactsListItem> newContacts;
@@ -27,8 +27,8 @@ public class ContactsDiffUtil extends DiffUtil.Callback {
 
     @Override
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-        return oldContacts.get(oldItemPosition).getMdid().equals(
-                newContacts.get(newItemPosition).getMdid());
+        return oldContacts.get(oldItemPosition).getId().equals(
+                newContacts.get(newItemPosition).getId());
     }
 
     @Override
@@ -36,11 +36,12 @@ public class ContactsDiffUtil extends DiffUtil.Callback {
         ContactsListItem oldContact = oldContacts.get(oldItemPosition);
         ContactsListItem newContact = newContacts.get(newItemPosition);
 
-        // Temporary, Nonnull annotations aren't applicable right now in testing
-        //noinspection ConstantConditions
-        return (oldContact.getMdid() != null ? oldContact.getMdid() : "").equals(newContact.getMdid() != null ? newContact.getMdid() : "")
-                && (oldContact.getContactName() != null ? oldContact.getContactName() : "").equals(newContact.getContactName() != null ? newContact.getContactName() : "")
-                && (oldContact.getStatus() != null ? oldContact.getStatus() : "").equals(newContact.getStatus() != null ? newContact.getStatus() : "");
+        return oldContact.getId().equals(newContact.getId())
+                && (oldContact.getContactName() != null ? oldContact.getContactName() : "")
+                .equals(newContact.getContactName() != null ? newContact.getContactName() : "")
+                && oldContact.getStatus().equals(newContact.getStatus())
+                && oldContact.getInviteTime() == newContact.getInviteTime()
+                && oldContact.requiresResponse() == newContact.requiresResponse();
     }
 
     @Nullable

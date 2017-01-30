@@ -46,7 +46,7 @@
                 <data
                     android:host="blockchain.info"
                     android:pathPrefix="/invite"
-                    android:scheme="http" />
+                    android:scheme="https" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -91,7 +91,7 @@
             android:name=".ui.auth.LogoutActivity"
             android:excludeFromRecents="true"
             android:noHistory="true"
-            android:theme="@android:style/Theme.NoDisplay" />
+            android:theme="@style/NoDisplay" />
         <activity
             android:name=".ui.auth.PasswordRequiredActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
@@ -113,11 +113,23 @@
             android:name=".ui.transactions.TransactionDetailWebViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".ui.contacts.ContactsActivity"
+            android:name=".ui.contacts.list.ContactsListActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".ui.contacts.pairing.ContactInviteActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".ui.contacts.pairing.ContactsInvitationBuilderActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".ui.contacts.pairing.ContactsAcceptInviteActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".ui.contacts.detail.ContactDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-            android:name=".ui.contacts.ContactPairingMethodActivity"
+            android:name=".ui.contacts.payments.ContactPaymentRequestActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <service
@@ -135,8 +147,10 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notification_transparent" />
-        <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming
-             notification message. -->
+        <!--
+             Set color used with incoming notification messages. This is used when no color is set for the incoming
+             notification message.
+        -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/white" />

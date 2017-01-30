@@ -1,65 +1,56 @@
-package piuk.blockchain.android.ui.contacts;
+package piuk.blockchain.android.ui.contacts.pairing;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
-
-import info.blockchain.wallet.contacts.data.Contact;
+import android.support.v7.app.AlertDialog;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.databinding.ActivityContactPairingMethodBinding;
+import piuk.blockchain.android.databinding.ActivityContactsAcceptInviteBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.PermissionUtil;
 
-public class ContactPairingMethodActivity extends BaseAuthActivity implements ContactPairingMethodViewModel.DataListener {
+
+public class ContactsAcceptInviteActivity extends BaseAuthActivity implements ContactPairingMethodViewModel.DataListener {
 
     public static final int SCAN_URI = 2007;
-    public static final String INTENT_KEY_CONTACT_NAME = "key_contact_name";
 
-    private ActivityContactPairingMethodBinding binding;
+    private ActivityContactsAcceptInviteBinding binding;
     private ContactPairingMethodViewModel viewModel;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_contact_pairing_method);
         viewModel = new ContactPairingMethodViewModel(this);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_contacts_accept_invite);
 
-        binding.toolbar.toolbarGeneral.setTitle(R.string.contacts_pairing_method_title);
+        binding.toolbar.toolbarGeneral.setTitle(R.string.contacts_accept_invite_title);
         setSupportActionBar(binding.toolbar.toolbarGeneral);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        binding.buttonQrCode.setOnClickListener(view -> requestScanActivity());
+        binding.buttonScanQr.setOnClickListener(v -> requestScanActivity());
 
-        // TODO: 15/12/2016 prompt for details
-        Contact myDetails = new Contact();
-        myDetails.setName("James");
-        myDetails.setSurname("Moore");
+        binding.buttonSentLink.setOnClickListener(
+                v -> new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                        .setTitle(R.string.app_name)
+                        .setMessage(R.string.contacts_sent_link_explanation)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .create()
+                        .show());
 
-        Contact recipientDetails = new Contact();
-        recipientDetails.setName("Jack");
-        recipientDetails.setSurname("Jones");
-
-        binding.buttonSendLink.setOnClickListener(view -> viewModel.onSendLinkClicked(myDetails, recipientDetails));
-
-        binding.buttonNfc.setOnClickListener(view -> viewModel.onNfcClicked());
+        viewModel.onViewReady();
     }
 
     @Override
-    public void onShareIntentGenerated(Intent intent) {
-        startActivity(Intent.createChooser(intent, getString(R.string.contacts_share_invitation)));
-    }
-
-    @Override
-    public void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
+    public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
 
@@ -74,7 +65,7 @@ public class ContactPairingMethodActivity extends BaseAuthActivity implements Co
             if (extra != null) viewModel.handleScanInput(extra);
 
         } else if (resultCode != RESULT_CANCELED && requestCode == SCAN_URI) {
-            onShowToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+            showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
         }
     }
 
@@ -106,14 +97,15 @@ public class ContactPairingMethodActivity extends BaseAuthActivity implements Co
     }
 
     @Override
-    public void onBackPressed() {
-        setResult(RESULT_CANCELED);
-        super.onBackPressed();
+    protected void onDestroy() {
+        super.onDestroy();
+        viewModel.destroy();
     }
 
     @Override
-    public Intent getPageIntent() {
-        return getIntent();
+    public void onBackPressed() {
+        setResult(RESULT_CANCELED);
+        super.onBackPressed();
     }
 
     private void startScanActivity() {
@@ -125,23 +117,9 @@ public class ContactPairingMethodActivity extends BaseAuthActivity implements Co
         }
     }
 
-    /**
-     * Static method to assist with launching this activity
-     */
-    public static void start(Context context) {
-        Intent starter = new Intent(context, ContactPairingMethodActivity.class);
-        context.startActivity(starter);
-    }
-
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        viewModel.destroy();
     }
 }

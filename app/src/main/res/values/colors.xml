@@ -13,6 +13,23 @@
     <color name="blockchain_navigation_bar">#FF000000</color>
     <color name="textColorPrimary">@color/primary_text_default_material_light</color>
 
+    <!-- Generated with Material Design palette generator -->
+    <!-- See https://material.io/guidelines/style/color.html#color-color-palette for usage-->
+    <color name="blockchain_blue_50">#e4f1f8</color>
+    <color name="blockchain_blue_100">#bbdcee</color>
+    <color name="blockchain_blue_200">#8dc5e3</color>
+    <color name="blockchain_blue_300">#5fadd8</color>
+    <color name="blockchain_blue_400">#3d9ccf</color>
+    <color name="blockchain_blue_500">#1b8ac7</color>
+    <color name="blockchain_blue_600">#1882c1</color>
+    <color name="blockchain_blue_700">#1477ba</color>
+    <color name="blockchain_blue_800">#106db3</color>
+    <color name="blockchain_blue_900">#085aa6</color>
+    <color name="blockchain_blue_A100">#d2e7ff</color>
+    <color name="blockchain_blue_A200">#9fccff</color>
+    <color name="blockchain_blue_A400">#6cb1ff</color>
+    <color name="blockchain_blue_A700">#52a4ff</color>
+
     <color name="blockchain_red_50">#80e27e82</color>
     <color name="blockchain_green_50">#8085b45b</color>
     <color name="blockchain_transfer_blue_50">#805bacd0</color>

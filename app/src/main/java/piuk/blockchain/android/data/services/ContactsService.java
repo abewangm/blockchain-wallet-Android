@@ -2,10 +2,10 @@ package piuk.blockchain.android.data.services;
 
 import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.metadata.data.Invitation;
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+import info.blockchain.wallet.contacts.data.PaymentRequest;
+import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.metadata.data.Message;
-import info.blockchain.wallet.metadata.data.PaymentRequest;
-import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
@@ -94,22 +94,40 @@ public class ContactsService {
     }
 
     /**
-     * Returns a {@link List<Contact>} object containing a list of trusted users. List can be empty.
+     * Returns a stream of {@link Contact} objects, comprising a list of users. List can be empty.
      *
-     * @return A {@link List<Contact>} object
+     * @return A stream of {@link Contact} objects
      */
-    public Observable<List<Contact>> getContactList() {
-        return Observable.just(contacts.getContactList());
+    public Observable<Contact> getContactList() {
+        return Observable.defer(() -> Observable.fromIterable(contacts.getContactList().values()));
     }
 
     /**
-     * Inserts a contact into the locally stored Contacts list. Does not save to server.
+     * Returns a stream of {@link Contact} objects, comprising of a list of users with {@link
+     * FacilitatedTransaction} objects that need responding to.
+     *
+     * @return A stream of {@link Contact} objects
+     */
+    @RequiresAccessToken
+    public Observable<Contact> getContactsWithUnreadPaymentRequests() {
+        return Observable.defer(() -> Observable.fromIterable(contacts.digestUnreadPaymentRequests()));
+    }
+
+    /**
+     * Inserts a contact into the locally stored Contacts list. Saves this list to server.
      *
      * @param contact The {@link Contact} to be stored
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
     public Completable addContact(Contact contact) {
         return Completable.fromAction(() -> contacts.addContact(contact));
+    }
+
+    /**
+     * Removes a contact from the locally stored Contacts list. Saves updated list to server
+     */
+    public Completable removeContact(Contact contact) {
+        return Completable.fromAction(() -> contacts.removeContact(contact));
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -120,8 +138,9 @@ public class ContactsService {
      * Creates a new invite and associated invite ID for linking two users together
      *
      * @param myDetails        My details that will be visible in invitation url
-     * @param recipientDetails Recipient details - This will be added to my contacts list
-     * @return An {@link Invitation} object
+     * @param recipientDetails Recipient details
+     * @return A {@link Contact} object, which is an updated version of the mydetails object, ie
+     * it's the sender's own contact details
      */
     @RequiresAccessToken
     public Observable<Contact> createInvitation(Contact myDetails, Contact recipientDetails) {
@@ -132,7 +151,7 @@ public class ContactsService {
      * Accepts an invitation from another user
      *
      * @param url An invitation url
-     * @return An {@link Invitation} object
+     * @return A {@link Contact} object containing the other user
      */
     @RequiresAccessToken
     public Observable<Contact> acceptInvitation(String url) {
@@ -166,57 +185,69 @@ public class ContactsService {
     // PAYMENT REQUEST SPECIFIC
     ///////////////////////////////////////////////////////////////////////////
 
+
     /**
-     * Sends a payment request to a user in the trusted contactsService list
+     * Sends a new payment request without the need to ask for a receive address from the recipient.
      *
-     * @param recipientMdid  The MDID of the message's recipient
-     * @param paymentRequest A PaymentRequest object containing information about the proposed
-     *                       transaction
+     * @param mdid    The recipient's MDID
+     * @param request A {@link PaymentRequest} object containing the request details, ie the amount
+     *                and an optional note
+     * @return A {@link Completable} object
      */
     @RequiresAccessToken
-    public Completable sendPaymentRequest(String recipientMdid, PaymentRequest paymentRequest) {
+    public Completable requestSendPayment(String mdid, PaymentRequest request) {
         return Completable.fromCallable(() -> {
-            contacts.sendPaymentRequest(recipientMdid, paymentRequest);
+            contacts.sendPaymentRequest(mdid, request);
             return Void.TYPE;
         });
     }
 
     /**
-     * Accepts a payment request from a user and optionally adds a note to the transaction
+     * Requests that another user receive bitcoin from current user
      *
-     * @param recipientMdid  The MDID of the message's recipient
-     * @param paymentRequest A PaymentRequest object containing information about the proposed
-     *                       transaction
-     * @param note           An optional note for the transaction
-     * @param receiveAddress The address which you wish to user to receive bitcoin
-     * @return A {@link Message} object
+     * @param mdid    The recipient's MDID
+     * @param request A {@link PaymentRequest} object containing the request details, ie the amount
+     *                and an optional note, the receive address
+     * @return A {@link Completable} object
      */
     @RequiresAccessToken
-    public Observable<Message> acceptPaymentRequest(String recipientMdid, PaymentRequest paymentRequest, String note, String receiveAddress) {
-        return Observable.fromCallable(() -> contacts.acceptPaymentRequest(recipientMdid, paymentRequest, note, receiveAddress));
+    public Completable requestReceivePayment(String mdid, RequestForPaymentRequest request) {
+        return Completable.fromCallable(() -> {
+            contacts.sendRequestForPaymentRequest(mdid, request);
+            return Void.TYPE;
+        });
     }
 
     /**
-     * Returns a list of payment requests. Optionally, choose to only see requests that are
-     * processed
+     * Sends a response to a payment request.
      *
-     * @return A list of {@link PaymentRequest} objects
+     * @param mdid            The recipient's MDID
+     * @param paymentRequest  A {@link PaymentRequest} object
+     * @param facilitatedTxId The ID of the {@link FacilitatedTransaction}
+     * @return A {@link Completable} object
      */
     @RequiresAccessToken
-    public Observable<List<PaymentRequest>> getPaymentRequests() {
-        return Observable.fromCallable(() -> contacts.getPaymentRequests());
+    public Completable sendPaymentRequestResponse(String mdid, PaymentRequest paymentRequest, String facilitatedTxId) {
+        return Completable.fromCallable(() -> {
+            contacts.sendPaymentRequest(mdid, paymentRequest, facilitatedTxId);
+            return Void.TYPE;
+        });
     }
 
     /**
-     * Returns a list of payment request responses, ie whether or not another user has paid you.
-     * Optionally, choose to only see requests that are processed
+     * Sends notification that a transaction has been processed.
      *
-     * @param onlyNew If true, returns only new payment requests
-     * @return A list of {@link PaymentRequestResponse} objects
+     * @param mdid            The recipient's MDID
+     * @param txHash          The transaction hash
+     * @param facilitatedTxId The ID of the {@link FacilitatedTransaction}
+     * @return A {@link Completable} object
      */
     @RequiresAccessToken
-    public Observable<List<PaymentRequestResponse>> getPaymentRequestResponses(boolean onlyNew) {
-        return Observable.fromCallable(() -> contacts.getPaymentRequestResponses(onlyNew));
+    public Completable sendPaymentBroadcasted(String mdid, String txHash, String facilitatedTxId) {
+        return Completable.fromCallable(() -> {
+            contacts.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId);
+            return Void.TYPE;
+        });
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -244,28 +275,6 @@ public class ContactsService {
             contacts.publishXpub();
             return Void.TYPE;
         });
-    }
-
-    /**
-     * Adds a user's MDID to the trusted list in Shared Metadata
-     *
-     * @param mdid The user's MDID
-     * @return An {@link Observable} wrapping a boolean, representing a successful save
-     */
-    @RequiresAccessToken
-    public Observable<Boolean> addTrusted(String mdid) {
-        return Observable.fromCallable(() -> contacts.addTrusted(mdid));
-    }
-
-    /**
-     * Removes a user's MDID from the trusted list in Shared Metadata
-     *
-     * @param mdid The user's MDID
-     * @return An {@link Observable} wrapping a boolean, representing a successful deletion
-     */
-    @RequiresAccessToken
-    public Observable<Boolean> deleteTrusted(String mdid) {
-        return Observable.fromCallable(() -> contacts.deleteTrusted(mdid));
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -310,15 +319,4 @@ public class ContactsService {
         });
     }
 
-    /**
-     * Decrypts a message from a specific user
-     *
-     * @param message The string to be decrypted
-     * @param mdid    The MDID of the user who sent the message
-     * @return An {@link Observable} containing the decrypted message
-     */
-    @RequiresAccessToken
-    public Observable<Message> decryptMessageFrom(Message message, String mdid) {
-        return Observable.fromCallable(() -> contacts.decryptMessageFrom(message, mdid));
-    }
 }

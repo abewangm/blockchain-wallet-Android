@@ -22,7 +22,7 @@ public class PaymentService {
     /**
      * Submits a payment to a specified address and returns the transaction hash if successful
      *
-     * @param unspentOutputBundle UXTO object
+     * @param unspentOutputBundle UTXO object
      * @param keys                A List of elliptic curve keys
      * @param toAddress           The address to send the funds to
      * @param changeAddress       A change address
@@ -49,7 +49,7 @@ public class PaymentService {
                         new SubmitPaymentListener(observableOnSubscribe));
             } catch (Exception e) {
                 if (observableOnSubscribe != null && !observableOnSubscribe.isDisposed()) {
-                    observableOnSubscribe.onError(new Throwable(e));
+                    observableOnSubscribe.onError(e);
                 }
             }
         });

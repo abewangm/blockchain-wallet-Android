@@ -21,7 +21,8 @@ public final class RxUtil {
      */
     public static <T> ObservableTransformer<T, T> applySchedulersToObservable() {
         return observable -> observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError(Throwable::printStackTrace);
     }
 
     /**
@@ -30,7 +31,8 @@ public final class RxUtil {
      */
     public static CompletableTransformer applySchedulersToCompletable() {
         return observable -> observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError(Throwable::printStackTrace);
     }
 
     /**

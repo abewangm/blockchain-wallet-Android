@@ -1,16 +1,18 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import android.support.annotation.Nullable;
+
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+import info.blockchain.wallet.contacts.data.PaymentRequest;
+import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
-import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
-import info.blockchain.wallet.metadata.data.PaymentRequest;
-import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 import info.blockchain.wallet.payload.PayloadManager;
 
-import java.util.List;
+import org.bitcoinj.crypto.DeterministicKey;
 
-import javax.annotation.Nullable;
+import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -18,6 +20,25 @@ import io.reactivex.functions.Function;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.ContactsService;
 
+/**
+ * A manager for handling all Metadata/Shared Metadata/Contacts based operations. Using this class
+ * requires careful initialisation, which should be done as follows:
+ *
+ * 1) Load the metadata nodes from the metadata service using {@link this#loadNodes()}. This will
+ * return false if the nodes cannot be found.
+ *
+ * 2) Generate nodes if necessary. If step 1 returns false, the nodes must be generated using {@link
+ * this#generateNodes(String)}. In theory, this means that the nodes only need to be generated once,
+ * and thus users with a second password only need to be prompted to enter their password once.
+ *
+ * 3) Init the Contacts Service using {@link this#initContactsService(DeterministicKey,
+ * DeterministicKey)}, passing in the appropriate nodes loaded by {@link this#loadNodes()}.
+ *
+ * 4) Register the user's derived MDID with the Shared Metadata service using {@link
+ * this#registerMdid()}.
+ *
+ * 5) Finally, publish the user's XPub to the Shared Metadata service via {@link this#publishXpub()}
+ */
 @SuppressWarnings({"WeakerAccess", "AnonymousInnerClassMayBeStatic"})
 public class ContactsDataManager {
 
@@ -30,32 +51,89 @@ public class ContactsDataManager {
     }
 
     /**
-     * Initialises the Contacts service
+     * Loads previously saved nodes from the Metadata service. If none are found, the {@link
+     * Observable} returns false.
      *
-     * @param secondPassword The user's second password, if applicable
-     * @return A {@link Completable} object
+     * @return An {@link Observable} object wrapping a boolean value, representing successfully
+     * loaded nodes
      */
-    public Completable initContactsService(@Nullable String secondPassword) {
-        return getNodeFactory(secondPassword)
-                .flatMapCompletable(metadataNodeFactory -> contactsService.initContactsService(
-                        metadataNodeFactory.getMetadataNode(),
-                        metadataNodeFactory.getSharedMetadataNode()))
-                .compose(RxUtil.applySchedulersToCompletable());
-    }
-
-    private Observable<MetadataNodeFactory> getNodeFactory(String secondPassword) {
-        return Observable.fromCallable(() -> {
-            payloadManager.loadNodes(
-                    payloadManager.getPayload().getGuid(),
-                    payloadManager.getPayload().getSharedKey(),
-                    payloadManager.getTempPassword().toString(),
-                    secondPassword);
-            return payloadManager.getMetadataNodeFactory();
-        });
+    public Observable<Boolean> loadNodes() {
+        return Observable.fromCallable(() -> payloadManager.loadNodes(
+                payloadManager.getPayload().getGuid(),
+                payloadManager.getPayload().getSharedKey(),
+                payloadManager.getTempPassword().toString()))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Invalidates the access token for re-authing
+     * Generates the metadata and shared metadata nodes if necessary.
+     *
+     * @param secondPassword An optional second password.
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable generateNodes(@Nullable String secondPassword) {
+        return Completable.fromCallable(() -> {
+            payloadManager.generateNodes(secondPassword);
+            return Void.TYPE;
+        }).compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Initialises the Contacts service.
+     *
+     * @param metadataNode       A {@link DeterministicKey} representing the Metadata Node
+     * @param sharedMetadataNode A {@link DeterministicKey} representing the Shared Metadata node
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable initContactsService(DeterministicKey metadataNode, DeterministicKey sharedMetadataNode) {
+        return contactsService.initContactsService(metadataNode, sharedMetadataNode)
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Returns a {@link MetadataNodeFactory} object which allows you to access the {@link
+     * DeterministicKey} objects needed to initialise the Contacts service.
+     *
+     * @return An {@link Observable} wrapping a {@link MetadataNodeFactory}
+     */
+    public Observable<MetadataNodeFactory> getMetadataNodeFactory() {
+        return Observable.just(payloadManager.getMetadataNodeFactory());
+    }
+
+    /**
+     * Registers the user's MDID with the metadata service.
+     *
+     * @return A {@link Completable}, ie an Observable type object specifically for methods
+     * returning void.
+     */
+    public Completable registerMdid() {
+        return Completable.fromCallable(() -> {
+            payloadManager.registerMdid(
+                    payloadManager.getPayload().getGuid(),
+                    payloadManager.getPayload().getSharedKey(),
+                    payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
+            return Void.TYPE;
+        }).compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Unregisters the user's MDID from the metadata service.
+     *
+     * @return A {@link Completable}, ie an Observable type object specifically for methods
+     * returning void.
+     */
+    public Completable unregisterMdid() {
+        return Completable.fromCallable(() -> {
+            payloadManager.unregisterMdid(
+                    payloadManager.getPayload().getGuid(),
+                    payloadManager.getPayload().getSharedKey(),
+                    payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
+            return Void.TYPE;
+        }).compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Invalidates the access token for re-authing, if needed.
      */
     private Completable invalidate() {
         return contactsService.invalidate()
@@ -145,23 +223,45 @@ public class ContactsDataManager {
     }
 
     /**
-     * Returns a {@link List<Contact>} object containing a list of trusted users. List can be empty.
+     * Returns a stream of {@link Contact} objects, comprising a list of users. List can be empty.
      *
-     * @return A {@link List<Contact>} object
+     * @return A stream of {@link Contact} objects
      */
-    public Observable<List<Contact>> getContactList() {
+    public Observable<Contact> getContactList() {
         return contactsService.getContactList()
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Inserts a contact into the locally stored Contacts list. Does not save to server.
+     * Returns a stream of {@link Contact} objects, comprising of a list of users with {@link
+     * FacilitatedTransaction} objects that need responding to.
+     *
+     * @return A stream of {@link Contact} objects
+     */
+    public Observable<Contact> getContactsWithUnreadPaymentRequests() {
+        return callWithToken(() -> contactsService.getContactsWithUnreadPaymentRequests())
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Inserts a contact into the locally stored Contacts list. Saves this list to server.
      *
      * @param contact The {@link Contact} to be stored
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
     public Completable addContact(Contact contact) {
         return contactsService.addContact(contact)
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Removes a contact from the locally stored Contacts list. Saves updated list to server.
+     *
+     * @param contact The {@link Contact} to be stored
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable removeContact(Contact contact) {
+        return contactsService.removeContact(contact)
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -173,8 +273,9 @@ public class ContactsDataManager {
      * Creates a new invite and associated invite ID for linking two users together
      *
      * @param myDetails        My details that will be visible in invitation url
-     * @param recipientDetails Recipient details - This will be added to my contacts list
-     * @return A {@link Contact} object
+     * @param recipientDetails Recipient details
+     * @return A {@link Contact} object, which is an updated version of the mydetails object, ie
+     * it's the sender's own contact details
      */
     public Observable<Contact> createInvitation(Contact myDetails, Contact recipientDetails) {
         return callWithToken(() -> contactsService.createInvitation(myDetails, recipientDetails))
@@ -185,7 +286,7 @@ public class ContactsDataManager {
      * Accepts an invitation from another user
      *
      * @param invitationUrl An invitation url
-     * @return An {@link Invitation} object
+     * @return A {@link Contact} object representing the other user
      */
     public Observable<Contact> acceptInvitation(String invitationUrl) {
         return callWithToken(() -> contactsService.acceptInvitation(invitationUrl))
@@ -220,53 +321,55 @@ public class ContactsDataManager {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Sends a payment request to a user in the trusted contactsService list
+     * Requests that another user sends you a payment
      *
-     * @param recipientMdid  The MDID of the message's recipient
-     * @param paymentRequest A PaymentRequest object containing information about the proposed
-     *                       transaction
+     * @param mdid    The recipient's MDID
+     * @param request A {@link PaymentRequest} object containing the request details, ie the amount
+     *                and an optional note
+     * @return A {@link Completable} object
      */
-    public Completable sendPaymentRequest(String recipientMdid, PaymentRequest paymentRequest) throws Exception {
-        return callWithToken(() -> contactsService.sendPaymentRequest(recipientMdid, paymentRequest))
+    public Completable requestSendPayment(String mdid, PaymentRequest request) {
+        return callWithToken(() -> contactsService.requestSendPayment(mdid, request))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
-     * Accepts a payment request from a user and optionally adds a note to the transaction
+     * Requests that another user receive bitcoin from current user
      *
-     * @param recipientMdid  The MDID of the message's recipient
-     * @param paymentRequest A PaymentRequest object containing information about the proposed
-     *                       transaction
-     * @param note           An optional note for the transaction
-     * @param receiveAddress The address which you wish to user to receive bitcoin
-     * @return A {@link Message} object
+     * @param mdid    The recipient's MDID
+     * @param request A {@link PaymentRequest} object containing the request details, ie the amount
+     *                and an optional note, the receive address
+     * @return A {@link Completable} object
      */
-    public Observable<Message> acceptPaymentRequest(String recipientMdid, PaymentRequest paymentRequest, String note, String receiveAddress) {
-        return callWithToken(() -> contactsService.acceptPaymentRequest(recipientMdid, paymentRequest, note, receiveAddress))
-                .compose(RxUtil.applySchedulersToObservable());
+    public Completable requestReceivePayment(String mdid, RequestForPaymentRequest request) {
+        return callWithToken(() -> contactsService.requestReceivePayment(mdid, request))
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
-     * Returns a list of payment requests. Optionally, choose to only see requests that are
-     * processed
+     * Sends a response to a payment request.
      *
-     * @return A list of {@link PaymentRequest} objects
+     * @param mdid            The recipient's MDID
+     * @param paymentRequest  A {@link PaymentRequest} object
+     * @param facilitatedTxId The ID of the {@link FacilitatedTransaction}
+     * @return A {@link Completable} object
      */
-    public Observable<List<PaymentRequest>> getPaymentRequests() {
-        return callWithToken(() -> contactsService.getPaymentRequests())
-                .compose(RxUtil.applySchedulersToObservable());
+    public Completable sendPaymentRequestResponse(String mdid, PaymentRequest paymentRequest, String facilitatedTxId) {
+        return callWithToken(() -> contactsService.sendPaymentRequestResponse(mdid, paymentRequest, facilitatedTxId))
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
-     * Returns a list of payment request responses, ie whether or not another user has paid you.
-     * Optionally, choose to only see requests that are processed
+     * Sends notification that a transaction has been processed.
      *
-     * @param onlyNew If true, returns only new payment requests
-     * @return A list of {@link PaymentRequestResponse} objects
+     * @param mdid            The recipient's MDID
+     * @param txHash          The transaction hash
+     * @param facilitatedTxId The ID of the {@link FacilitatedTransaction}
+     * @return A {@link Completable} object
      */
-    public Observable<List<PaymentRequestResponse>> getPaymentRequestResponses(boolean onlyNew) {
-        return callWithToken(() -> contactsService.getPaymentRequestResponses(onlyNew)
-                .compose(RxUtil.applySchedulersToObservable()));
+    public Completable sendPaymentBroadcasted(String mdid, String txHash, String facilitatedTxId) {
+        return callWithToken(() -> contactsService.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId))
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -293,28 +396,6 @@ public class ContactsDataManager {
     public Completable publishXpub() {
         return contactsService.publishXpub()
                 .compose(RxUtil.applySchedulersToCompletable());
-    }
-
-    /**
-     * Adds a user's MDID to the trusted list in Shared Metadata
-     *
-     * @param mdid The user's MDID
-     * @return An {@link Observable} wrapping a boolean, representing a successful save
-     */
-    public Observable<Boolean> addTrusted(String mdid) {
-        return callWithToken(() -> contactsService.addTrusted(mdid))
-                .compose(RxUtil.applySchedulersToObservable());
-    }
-
-    /**
-     * Removes a user's MDID from the trusted list in Shared Metadata
-     *
-     * @param mdid The user's MDID
-     * @return An {@link Observable} wrapping a boolean, representing a successful deletion
-     */
-    public Observable<Boolean> deleteTrusted(String mdid) {
-        return callWithToken(() -> contactsService.deleteTrusted(mdid))
-                .compose(RxUtil.applySchedulersToObservable());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -354,18 +435,6 @@ public class ContactsDataManager {
     public Completable markMessageAsRead(String messageId, boolean markAsRead) {
         return callWithToken(() -> contactsService.markMessageAsRead(messageId, markAsRead))
                 .compose(RxUtil.applySchedulersToCompletable());
-    }
-
-    /**
-     * Decrypts a message from a specific user
-     *
-     * @param message The string to be decrypted
-     * @param mdid    The MDID of the user who sent the message
-     * @return An {@link Observable} containing the decrypted message
-     */
-    public Observable<Message> decryptMessageFrom(Message message, String mdid) {
-        return callWithToken(() -> contactsService.decryptMessageFrom(message, mdid))
-                .compose(RxUtil.applySchedulersToObservable());
     }
 
 }

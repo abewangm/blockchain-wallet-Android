@@ -31,6 +31,10 @@ public abstract class ListStore<T> {
         data.add(object);
     }
 
+    public void removeObjectFromList(T object) {
+        data.remove(object);
+    }
+
     public void insertBulk(List<T> objects) {
         ListUtil.addAllIfNotNull(data, objects);
     }
