@@ -193,7 +193,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         return activeAccountAndAddressList;
     }
 
-    public void updateAccountList() {
+    public void updateAccountList(Context context) {
 
         //activeAccountAndAddressList is linked to Adapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
         activeAccountAndAddressList.clear();
