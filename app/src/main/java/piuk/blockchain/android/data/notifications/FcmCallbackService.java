@@ -6,17 +6,19 @@ import com.google.firebase.messaging.RemoteMessage;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+import javax.inject.Inject;
+
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.util.ApplicationLifeCycle;
@@ -28,9 +30,13 @@ public class FcmCallbackService extends FirebaseMessagingService {
 
     public static final String EXTRA_CONTACTS_SERVICE = "contacts_service";
     public static final Subject<NotificationPayload> notificationSubject = PublishSubject.create();
+    public static final int ID_BACKGROUND_NOTIFICATION = 1337;
+    public static final int ID_FOREGROUND_NOTIFICATION = 1338;
+
+    @Inject protected NotificationManager notificationManager;
 
     public FcmCallbackService() {
-        // No-op
+        Injector.getInstance().getAppComponent().inject(this);
     }
 
     @Override
@@ -64,9 +70,6 @@ public class FcmCallbackService extends FirebaseMessagingService {
      * appropriately.
      */
     private void sendBackgroundNotification(NotificationPayload payload) {
-        NotificationManager notificationManager =
-                (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-
         Intent notifyIntent = new Intent(getApplicationContext(), LauncherActivity.class);
         notifyIntent.putExtra(EXTRA_CONTACTS_SERVICE, true);
         PendingIntent intent =
@@ -91,21 +94,21 @@ public class FcmCallbackService extends FirebaseMessagingService {
                 .setOnlyAlertOnce(true)
                 .setDefaults(Notification.DEFAULT_LIGHTS);
 
-        notificationManager.notify(1337, builder.build());
+        notificationManager.notify(ID_BACKGROUND_NOTIFICATION, builder.build());
     }
 
     /**
      * Redirects the user to the {@link ContactsListActivity}
      */
     private void sendForegroundNotification(NotificationPayload payload) {
-        new NotificationsUtil(getApplicationContext()).setNotification(
+        new NotificationsUtil(getApplicationContext(), notificationManager).setNotification(
                 payload.getTitle(),
                 payload.getTitle(),
                 payload.getBody(),
                 R.drawable.ic_notification_transparent,
                 R.drawable.ic_launcher,
                 ContactsListActivity.class,
-                1337);
+                ID_FOREGROUND_NOTIFICATION);
     }
 
 }

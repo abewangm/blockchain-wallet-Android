@@ -99,8 +99,6 @@ public class ContactsInvitationBuilderViewModel extends BaseViewModel {
         }
     }
 
-    // TODO: 16/01/2017 Maybe this should happen silently? It's a stopgap for now because the notification
-    // service still isn't working at all
     void onDoneSelected() {
         if (uri == null) {
             dataListener.finishPage();

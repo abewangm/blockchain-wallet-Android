@@ -50,7 +50,7 @@ public class ContactsInvitationBuilderSenderFragment extends Fragment {
 
         String name = getArguments().getString(ARGUMENT_NAME);
         binding.textviewName.setText(getString(R.string.contacts_how_are_you_known_header, name));
-
+        binding.editTextName.requestFocus();
 
         binding.buttonNext.setOnClickListener(v -> {
             if (binding.editTextName.getText().toString().isEmpty()) {

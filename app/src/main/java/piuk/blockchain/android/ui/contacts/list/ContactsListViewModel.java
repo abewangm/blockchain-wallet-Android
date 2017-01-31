@@ -193,7 +193,9 @@ public class ContactsListViewModel extends BaseViewModel {
                 FcmCallbackService.getNotificationSubject()
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(
-                                notificationPayload -> onViewReady(),
+                                notificationPayload -> {
+//                                    onViewReady();
+                                },
                                 throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
     }
 

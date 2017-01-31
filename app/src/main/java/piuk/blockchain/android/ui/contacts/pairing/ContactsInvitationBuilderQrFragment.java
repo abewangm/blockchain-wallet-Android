@@ -51,7 +51,7 @@ public class ContactsInvitationBuilderQrFragment extends Fragment implements Con
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ContactsQrViewModel(this);
 
-        binding.buttonDone.setOnClickListener(v -> listener.onDoneSelected());
+        binding.buttonDone.setOnClickListener(v -> finishPage());
 
         viewModel.onViewReady();
     }
@@ -76,6 +76,11 @@ public class ContactsInvitationBuilderQrFragment extends Fragment implements Con
         binding.qrCode.setImageBitmap(bitmap);
         binding.qrCode.setVisibility(View.VISIBLE);
         binding.progressbar.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void finishPage() {
+        listener.onDoneSelected();
     }
 
     @Override

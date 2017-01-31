@@ -14,12 +14,12 @@ import piuk.blockchain.android.R;
 
 public class NotificationsUtil {
 
+    private Context context;
     private NotificationManager notificationManager;
-    private Context context = null;
 
-    public NotificationsUtil(Context context) {
+    public NotificationsUtil(Context context, NotificationManager notificationManager) {
         this.context = context;
-        notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        this.notificationManager = notificationManager;
     }
 
     public void setNotification(String title, String marquee, String text, int drawablePostLollipop, int drawablePreLollipop, Class cls, int id) {

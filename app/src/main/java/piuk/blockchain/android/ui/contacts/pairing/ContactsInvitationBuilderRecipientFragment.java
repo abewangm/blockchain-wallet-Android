@@ -38,6 +38,7 @@ public class ContactsInvitationBuilderRecipientFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        binding.editTextName.requestFocus();
         binding.buttonNext.setOnClickListener(v -> {
             if (binding.editTextName.getText().toString().isEmpty()) {
                 binding.inputLayoutName.setError(getString(R.string.contacts_field_error_empty));

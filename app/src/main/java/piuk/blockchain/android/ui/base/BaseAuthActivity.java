@@ -4,8 +4,11 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.view.WindowManager;
 
 import io.reactivex.disposables.CompositeDisposable;
@@ -15,11 +18,11 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.util.ApplicationLifeCycle;
 import piuk.blockchain.android.util.SSLVerifyUtil;
+import piuk.blockchain.android.util.ViewUtils;
 
 /**
  * A base Activity for all activities which need auth timeouts & screenshot prevention
  */
-
 public class BaseAuthActivity extends AppCompatActivity {
 
     private AlertDialog mAlertDialog;
@@ -89,6 +92,30 @@ public class BaseAuthActivity extends AppCompatActivity {
     }
 
     /**
+     * Displays a {@link Snackbar} on the current page with a clickable action.
+     *
+     * @param view          The root View of the current activity
+     * @param message       The message to be displayed
+     * @param length        The length of time for the Snackbar to be displayed
+     * @param action        The action to be displayed
+     * @param clickListener An OnClickListener to handle action callbacks
+     */
+    public void showSnackbar(View view, @StringRes int message, @ViewUtils.SnackbarLength int length, @StringRes int action, View.OnClickListener clickListener) {
+        makeSnackbar(view, message, length).setAction(action, clickListener).show();
+    }
+
+    /**
+     * Displays a {@link Snackbar} on the current page.
+     *
+     * @param view    The root View of the current activity
+     * @param message The message to be displayed
+     * @param length  The length of time for the Snackbar to be displayed
+     */
+    public void showSnackbar(View view, @StringRes int message, @ViewUtils.SnackbarLength int length) {
+        makeSnackbar(view, message, length).show();
+    }
+
+    /**
      * Starts the logout timer. Override in an activity if timeout is not needed.
      */
     protected void startLogoutTimer() {
@@ -104,6 +131,10 @@ public class BaseAuthActivity extends AppCompatActivity {
      */
     protected void disallowScreenshots() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+    }
+
+    private Snackbar makeSnackbar(View view, @StringRes int message, @ViewUtils.SnackbarLength int length) {
+        return Snackbar.make(view, message, length);
     }
 
     private void showAlertDialog(final String message, final boolean forceExit) {
