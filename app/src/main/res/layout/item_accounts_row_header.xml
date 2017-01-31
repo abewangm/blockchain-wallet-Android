@@ -8,8 +8,8 @@
         android:background="@color/blockchain_pearl_white"
         android:gravity="start">
 
-        <TextView
-            android:id="@+id/my_account_row_header"
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/header_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

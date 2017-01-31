@@ -19,7 +19,7 @@
             android:paddingTop="4dp"
             android:background="@color/blockchain_pearl_white"
             android:clipToPadding="false"
-            tools:listitem="@layout/activity_accounts_row" />
+            tools:listitem="@layout/item_accounts_row" />
 
     </LinearLayout>
 </layout>

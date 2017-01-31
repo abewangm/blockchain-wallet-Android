@@ -29,13 +29,13 @@ class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHolder> {
     @Override
     public AccountAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_accounts_row, parent, false);
 
         if (viewType == TYPE_IMPORTED_HEADER) {
-            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row_header, parent, false);
+            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_accounts_row_header, parent, false);
 
         } else if (viewType == TYPE_CREATE_NEW_WALLET_BUTTON || viewType == TYPE_IMPORT_ADDRESS_BUTTON) {
-            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row_buttons, parent, false);
+            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_accounts_row_buttons, parent, false);
         }
 
         return new ViewHolder(v);
@@ -155,7 +155,7 @@ class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHolder> {
             icon = (ImageView) view.findViewById(R.id.my_account_row_icon);
             amount = (TextView) view.findViewById(R.id.my_account_row_amount);
             tag = (TextView) view.findViewById(R.id.my_account_row_tag);
-            description = (TextView) view.findViewById(R.id.description);
+            description = (TextView) view.findViewById(R.id.textview_description);
         }
     }
 

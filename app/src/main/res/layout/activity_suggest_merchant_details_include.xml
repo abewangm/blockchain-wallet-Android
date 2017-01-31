@@ -23,7 +23,7 @@
                 android:textColor="@color/blockchain_grey" />
 
             <EditText
-                android:id="@+id/description"
+                android:id="@+id/textview_description"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

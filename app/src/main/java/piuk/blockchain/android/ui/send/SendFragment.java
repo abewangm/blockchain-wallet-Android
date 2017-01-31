@@ -42,6 +42,7 @@ import android.widget.RelativeLayout;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
+import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.AlertGenericWarningBinding;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentSendBinding;
@@ -49,6 +50,7 @@ import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
+import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -279,7 +281,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
 
             viewModel.handleIncomingQRScan(data.getStringExtra(CaptureActivity.SCAN_RESULT),
-                EventLogHandler.URL_EVENT_TX_INPUT_FROM_QR);
+                    EventLogHandler.URL_EVENT_TX_INPUT_FROM_QR);
 
         } else if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
             final String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);
@@ -504,40 +506,41 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                 fiat,
                 ExchangeRateFactory.getInstance().getLastPrice(fiat)));
 
-        // Set drop down width equal to clickable view
-        binding.spDestination.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        binding.destination.setOnClickListener(v -> AccountChooserActivity.startForResult(getActivity(), PaymentRequestType.SEND));
 
-            @SuppressLint("ObsoleteSdkInt")
-            @Override
-            public void onGlobalLayout() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    binding.spDestination.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                } else {
-                    //noinspection deprecation
-                    binding.spDestination.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                }
-
-                if (binding.accounts.spinner.getWidth() > 0)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        binding.spDestination.setDropDownWidth(binding.accounts.spinner.getWidth());
-                    }
-            }
-        });
-
-        binding.spDestination.setOnItemSelectedEvenIfUnchangedListener(
-                new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                        ItemAccount selectedItem = (ItemAccount) binding.spDestination.getSelectedItem();
-                        binding.destination.setText(selectedItem.label);
-                        viewModel.setReceivingAddress(selectedItem);
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                    }
-                }
-        );
+//        // Set drop down width equal to clickable view
+//        binding.spDestination.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//
+//            @SuppressLint("ObsoleteSdkInt")
+//            @Override
+//            public void onGlobalLayout() {
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+//                    binding.spDestination.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//                } else {
+//                    //noinspection deprecation
+//                    binding.spDestination.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+//                }
+//
+//                if (binding.accounts.spinner.getWidth() > 0)
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+//                        binding.spDestination.setDropDownWidth(binding.accounts.spinner.getWidth());
+//                    }
+//            }
+//        });
+//
+//        binding.spDestination.setOnItemSelectedEvenIfUnchangedListener(
+//                new AdapterView.OnItemSelectedListener() {
+//                    @Override
+//                    public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+//                        ItemAccount selectedItem = (ItemAccount) binding.spDestination.getSelectedItem();
+//                        binding.destination.setText(selectedItem.label);
+//                        viewModel.setReceivingAddress(selectedItem);
+//                    }
+//
+//                    @Override
+//                    public void onNothingSelected(AdapterView<?> parent) {
+//                    }
+//                });
     }
 
     @Override
@@ -628,7 +631,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     private void finishAndNotifySuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue) {
-        if (listener != null) listener.onSendPaymentSuccessful(mdid, hash, fctxId, transactionValue);
+        if (listener != null)
+            listener.onSendPaymentSuccessful(mdid, hash, fctxId, transactionValue);
         finishPage();
     }
 

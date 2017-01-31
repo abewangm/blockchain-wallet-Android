@@ -88,7 +88,7 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
         setTitle(R.string.suggest_merchant);
 
         edName = (EditText) findViewById(R.id.merchant_name);
-        edDescription = (EditText) findViewById(R.id.description);
+        edDescription = (EditText) findViewById(R.id.textview_description);
         edStreetAddress = (EditText) findViewById(R.id.street_address);
         edCity = (EditText) findViewById(R.id.city);
         edPostal = (EditText) findViewById(R.id.zip);

@@ -26,7 +26,6 @@ import static piuk.blockchain.android.ui.send.SendViewModel.SHOW_FIAT;
 
 class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionAdapter.TransactionViewHolder> {
 
-
     private List<FacilitatedTransaction> facilitatedTransactions;
     private final StringUtils stringUtils;
     private TransactionClickListener listener;
