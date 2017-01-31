@@ -76,14 +76,6 @@ public class ContactPaymentRequestNotesFragment extends Fragment {
         binding.buttonNext.setOnClickListener(v -> listener.onNextSelected(binding.editTextNote.getText().toString()));
     }
 
-    private void setHint(PaymentRequestType paymentRequestType) {
-        if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
-            binding.inputLayoutNote.setHint(getString(R.string.contacts_payment_request_receive_hint));
-        } else {
-            binding.inputLayoutNote.setHint(getString(R.string.contacts_payment_request_send_hint));
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -98,6 +90,14 @@ public class ContactPaymentRequestNotesFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         listener = null;
+    }
+
+    private void setHint(PaymentRequestType paymentRequestType) {
+        if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
+            binding.inputLayoutNote.setHint(getString(R.string.contacts_payment_request_receive_hint));
+        } else {
+            binding.inputLayoutNote.setHint(getString(R.string.contacts_payment_request_send_hint));
+        }
     }
 
     interface FragmentInteractionListener {

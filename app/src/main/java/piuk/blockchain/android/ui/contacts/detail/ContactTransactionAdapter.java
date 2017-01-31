@@ -71,7 +71,7 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
 
         if (transaction.getState() != null
                 && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-            holder.subtitle.setText(stringUtils.getString(R.string.contacts_waiting_for_address_title));
+            holder.title.setText(stringUtils.getString(R.string.contacts_waiting_for_address_title));
 
             if (transaction.getRole() != null
                     && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
@@ -81,7 +81,7 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
 
         } else if (transaction.getState() != null
                 && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-            holder.subtitle.setText(stringUtils.getString(R.string.contacts_waiting_for_payment_title));
+            holder.title.setText(stringUtils.getString(R.string.contacts_waiting_for_payment_title));
 
             if (transaction.getRole() != null
                     && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
@@ -95,17 +95,19 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
                     && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
                     || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
 
-                holder.subtitle.setText(stringUtils.getString(R.string.SENT));
-                holder.subtitle.setTextColor(ContextCompat.getColor(
+                holder.title.setText(stringUtils.getString(R.string.SENT));
+                holder.title.setTextColor(ContextCompat.getColor(
                         holder.title.getContext(),
                         R.color.blockchain_send_red));
             } else {
-                holder.subtitle.setText(stringUtils.getString(R.string.RECEIVED));
-                holder.subtitle.setTextColor(ContextCompat.getColor(
+                holder.title.setText(stringUtils.getString(R.string.RECEIVED));
+                holder.title.setTextColor(ContextCompat.getColor(
                         holder.title.getContext(),
                         R.color.blockchain_receive_green));
             }
         }
+
+        holder.subtitle.setText(transaction.getNote());
 
         double btcBalance = transaction.getIntended_amount() / 1e8;
         double fiatBalance = lastPrice * btcBalance;
@@ -123,7 +125,7 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
                     new RelativeSizeSpan(0.67f), spannable.length() - 3, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        holder.title.setText(spannable);
+        holder.title.setText(spannable + " " + holder.title.getText());
     }
 
     void setClickListener(TransactionClickListener listener) {

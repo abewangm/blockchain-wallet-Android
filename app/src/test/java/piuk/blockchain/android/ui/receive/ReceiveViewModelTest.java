@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.receive;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.content.Context;
 import android.graphics.Bitmap;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -40,6 +41,7 @@ import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
 
 import static junit.framework.Assert.assertNotNull;
@@ -55,6 +57,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.receive.ReceiveViewModel.KEY_WARN_WATCH_ONLY_SPEND;
 
+@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class ReceiveViewModelTest {
@@ -67,6 +70,7 @@ public class ReceiveViewModelTest {
     @Mock QrCodeDataManager mDataManager;
     @Mock ExchangeRateFactory mExchangeRateFactory;
     @Mock WalletAccountHelper mWalletAccountHelper;
+    @Mock SSLVerifyUtil mSslVerifyUtil;
     @Mock private ReceiveViewModel.DataListener mActivity;
 
     @Before
@@ -395,6 +399,11 @@ public class ReceiveViewModelTest {
         @Override
         protected PayloadManager providePayloadManager() {
             return mPayloadManager;
+        }
+
+        @Override
+        protected SSLVerifyUtil provideSSlVerifyUtil(Context context) {
+            return mSslVerifyUtil;
         }
     }
 

@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'kotlin-android'
 apply from: '../jacoco.gradle'
 apply from: 'environment.gradle'
 
@@ -105,16 +106,13 @@ android {
     }
 }
 
-ext {
-    supportVersion = '25.1.0'
-    googleServicesVersion = '10.0.1'
-    rxJavaVersion = '2.0.4'
-    rxAndroidVersion = '2.0.1'
-    daggerVersion = '2.8'
-    retrofitVersion = '2.1.0'
-    okHttpVersion = '3.5.0'
-    mockitoVersion = '1.9.5'
-    kotlinVersion = '1.0.6'
+// Ensure no Kotlin code is present in the production app... for now.
+afterEvaluate {
+    android.sourceSets.all { sourceSet ->
+        if (!sourceSet.name.startsWith("test")) {
+            sourceSet.kotlin.setSrcDirs([])
+        }
+    }
 }
 
 dependencies {
@@ -176,7 +174,7 @@ dependencies {
     testCompile 'org.json:json:20140107'
     testCompile "org.mockito:mockito-core:$mockitoVersion"
     testCompile 'org.hamcrest:hamcrest-junit:2.0.0.0'
-    testCompile('org.robolectric:robolectric:3.1.4') {
+    testCompile('org.robolectric:robolectric:3.2.2') {
         exclude group: 'com.google.guava'
         exclude group: 'com.google.protobuf'
     }
@@ -189,6 +187,7 @@ buildscript {
 
     dependencies {
         classpath 'me.tatarka:gradle-retrolambda:3.4.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
 

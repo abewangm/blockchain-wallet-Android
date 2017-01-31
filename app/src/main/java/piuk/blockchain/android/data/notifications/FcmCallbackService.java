@@ -9,12 +9,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-
-import java.util.Map;
 
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
@@ -79,7 +76,7 @@ public class FcmCallbackService extends FirebaseMessagingService {
                 .setSmallIcon(R.drawable.ic_notification_transparent)
                 .setColor(ContextCompat.getColor(getApplicationContext(), R.color.blockchain_blue))
                 .setContentTitle(payload.getTitle())
-                .setTicker(payload.getBody())
+                .setTicker(payload.getTitle())
                 .setContentText(payload.getBody())
                 .setContentIntent(intent)
                 .setWhen(System.currentTimeMillis())
@@ -88,6 +85,9 @@ public class FcmCallbackService extends FirebaseMessagingService {
                         + "/"
                         + R.raw.beep))
                 .setAutoCancel(true)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setVibrate(new long[0])
                 .setOnlyAlertOnce(true)
                 .setDefaults(Notification.DEFAULT_LIGHTS);
 
@@ -100,39 +100,12 @@ public class FcmCallbackService extends FirebaseMessagingService {
     private void sendForegroundNotification(NotificationPayload payload) {
         new NotificationsUtil(getApplicationContext()).setNotification(
                 payload.getTitle(),
-                payload.getBody(),
+                payload.getTitle(),
                 payload.getBody(),
                 R.drawable.ic_notification_transparent,
                 R.drawable.ic_launcher,
                 ContactsListActivity.class,
                 1337);
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public static class NotificationPayload {
-
-        private String title;
-        private String body;
-
-        public NotificationPayload(Map<String, String> map) {
-            if (map.containsKey("title")) {
-                title = map.get("title");
-            }
-
-            if (map.containsValue("body")) {
-                body = map.get("body");
-            }
-        }
-
-        @Nullable
-        public String getTitle() {
-            return title;
-        }
-
-        @Nullable
-        public String getBody() {
-            return body;
-        }
     }
 
 }

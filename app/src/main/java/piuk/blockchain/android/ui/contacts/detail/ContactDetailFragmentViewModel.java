@@ -24,6 +24,7 @@ import piuk.blockchain.android.data.contacts.FctxDateComparator;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
+import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -41,10 +42,10 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
     private static final String TAG = ContactDetailFragmentViewModel.class.getSimpleName();
 
     private DataListener dataListener;
+    private Contact contact;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadManager payloadManager;
     @Inject PrefsUtil prefsUtil;
-    private Contact contact;
 
     interface DataListener {
 
@@ -123,15 +124,6 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
         } else {
             showErrorAndQuitPage();
         }
-    }
-
-    private void subscribeToNotifications() {
-        compositeDisposable.add(
-                FcmCallbackService.getNotificationSubject()
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(
-                                notificationPayload -> onViewReady(),
-                                throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
     }
 
     PrefsUtil getPrefsUtil() {
@@ -272,6 +264,20 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
                                 },
                                 throwable -> dataListener.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
 
+    }
+
+    private void subscribeToNotifications() {
+        compositeDisposable.add(
+                FcmCallbackService.getNotificationSubject()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(
+                                notificationPayload -> {
+                                    if (notificationPayload.getType() != null
+                                            && notificationPayload.getType().equals(NotificationPayload.NotificationType.PAYMENT)) {
+                                        onViewReady();
+                                    }
+                                },
+                                throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
     }
 
     private Observable<String> getNextReceiveAddress(int defaultIndex) {

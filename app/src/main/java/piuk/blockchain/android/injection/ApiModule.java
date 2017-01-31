@@ -1,5 +1,7 @@
 package piuk.blockchain.android.injection;
 
+import android.content.Context;
+
 import info.blockchain.api.Notifications;
 import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.contacts.Contacts;
@@ -21,6 +23,7 @@ import piuk.blockchain.android.data.services.ContactsService;
 import piuk.blockchain.android.data.services.NotificationService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.SSLVerifyUtil;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -100,6 +103,12 @@ public class ApiModule {
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .build();
+    }
+
+    @Provides
+    @Singleton
+    protected SSLVerifyUtil provideSSlVerifyUtil(Context context) {
+        return new SSLVerifyUtil(context);
     }
 
 }

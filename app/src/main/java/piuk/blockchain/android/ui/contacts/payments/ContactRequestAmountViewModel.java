@@ -56,7 +56,7 @@ public class ContactRequestAmountViewModel extends BaseViewModel {
         return accountPosition;
     }
 
-    public void setAccountPosition(int accountPosition) {
+    void setAccountPosition(int accountPosition) {
         this.accountPosition = getCorrectedAccountIndex(accountPosition);
     }
 

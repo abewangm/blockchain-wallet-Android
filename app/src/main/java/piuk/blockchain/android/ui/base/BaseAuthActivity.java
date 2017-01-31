@@ -44,16 +44,16 @@ public class BaseAuthActivity extends AppCompatActivity {
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(sslEvent -> {
                                     switch (sslEvent) {
-                                        case ServerDown:
+                                        case SERVER_DOWN:
                                             showAlertDialog(getString(R.string.ssl_no_connection), false);
                                             break;
-                                        case PinningFail:
+                                        case PINNING_FAIL:
                                             showAlertDialog(getString(R.string.ssl_pinning_invalid), true);
                                             break;
-                                        case NoConnection:
+                                        case NO_CONNECTION:
                                             showAlertDialog(getString(R.string.ssl_no_connection), false);
                                             break;
-                                        case Success:
+                                        case SUCCESS:
                                             // No-op
                                         default:
                                             // No-op
