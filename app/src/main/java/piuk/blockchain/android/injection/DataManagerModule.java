@@ -3,6 +3,7 @@ package piuk.blockchain.android.injection;
 import android.content.Context;
 
 import info.blockchain.api.AddressInfo;
+import info.blockchain.api.DynamicFee;
 import info.blockchain.api.Settings;
 import info.blockchain.api.TransactionDetails;
 import info.blockchain.api.Unspent;
@@ -140,7 +141,7 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected SendDataManager provideSendDatamanager() {
-        return new SendDataManager(new PaymentService(new Payment()));
+    protected SendDataManager provideSendDataManager() {
+        return new SendDataManager(new PaymentService(new Payment()), new DynamicFee(), new Unspent());
     }
 }

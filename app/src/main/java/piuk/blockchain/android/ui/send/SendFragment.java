@@ -1,7 +1,8 @@
 package piuk.blockchain.android.ui.send;
 
+import com.google.gson.Gson;
+
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -33,11 +33,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+
+import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.payload.Account;
+import info.blockchain.wallet.payload.LegacyAddress;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
@@ -60,14 +62,13 @@ import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.EventLogHandler;
-import piuk.blockchain.android.util.ExchangeRateFactory;
-import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PermissionUtil;
-import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 import static android.databinding.DataBindingUtil.inflate;
+import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_ITEM;
+import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE;
 
 
 public class SendFragment extends Fragment implements SendViewModel.DataListener, CustomKeypadCallback {
@@ -93,8 +94,6 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     private TextWatcher fiatTextWatcher;
     private MaterialProgressDialog progressDialog;
 
-    private String contactId;
-    private boolean isBtc;
     private int selectedAccountPosition = -1;
     private long backPressed;
 
@@ -102,7 +101,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
-                ((AddressAdapter) binding.accounts.spinner.getAdapter()).updateData(viewModel.getAddressList(false));
+//                ((AddressAdapter) binding.accounts.spinner.getAdapter()).updateData(viewModel.getAddressList(false));
             }
         }
     };
@@ -148,8 +147,6 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (getArguments() != null) {
-            contactId = getArguments().getString(ARGUMENT_CONTACT_ID);
-            isBtc = getArguments().getBoolean(ARGUMENT_IS_BTC, true);
             selectedAccountPosition = getArguments().getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION);
         }
 
@@ -160,13 +157,9 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         setupToolbar();
-
         setCustomKeypad();
-
         setupViews();
-
         setHasOptionsMenu(true);
-
         viewModel.onViewReady();
 
         return binding.getRoot();
@@ -175,9 +168,6 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Override
     public void onNameLoaded(String name) {
         binding.destination.setText(name);
-        binding.destination.setOnClickListener(null);
-        binding.destination.setEnabled(false);
-//        binding.spDestination.setVisibility(View.GONE);
     }
 
     @Override
@@ -226,9 +216,6 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        // Fragment QR Button, don't show if coming from Contacts
-        final MenuItem qrMenu = menu.findItem(R.id.action_qr);
-        qrMenu.setVisible(contactId == null);
         // Main activity QR button
         final MenuItem menuItem = menu.findItem(R.id.action_qr_main);
         if (menuItem != null) {
@@ -250,12 +237,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                 customKeypad.setNumpadVisibility(View.GONE);
 
                 if (ConnectivityStatus.hasConnectivity(getActivity())) {
-                    ItemAccount selectedItem = (ItemAccount) binding.accounts.spinner.getSelectedItem();
-                    viewModel.setSendingAddress(selectedItem);
-                    viewModel.calculateTransactionAmounts(selectedItem,
-                            binding.amountRow.amountBtc.getText().toString(),
-                            binding.customFee.getText().toString(),
-                            () -> viewModel.sendClicked(false, binding.destination.getText().toString()));
+                    sendClicked(binding.customFee.getText().toString(), () -> viewModel.sendClicked(false, binding.destination.getText().toString()));
                 } else {
                     ToastCustom.makeText(getActivity(), getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                 }
@@ -274,6 +256,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK && requestCode == SCAN_URI
@@ -285,6 +268,57 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         } else if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
             final String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);
             viewModel.handleScannedDataForWatchOnlySpend(scanData);
+
+        } else if (resultCode == Activity.RESULT_OK
+                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE
+                && data != null) {
+
+            try {
+                Class type = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE));
+                Object object = new Gson().fromJson(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
+
+                if (object instanceof Contact) {
+                    viewModel.setContact(((Contact) object));
+                } else if (object instanceof Account) {
+                    Account account = ((Account) object);
+                    viewModel.setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account));
+                    binding.destination.setText(account.getLabel());
+                } else if (object instanceof LegacyAddress) {
+                    LegacyAddress legacyAddress = ((LegacyAddress) object);
+                    viewModel.setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress));
+                    binding.destination.setText(legacyAddress.getLabel());
+                }
+
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (resultCode == Activity.RESULT_OK
+                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND
+                && data != null) {
+
+            try {
+                Class type = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE));
+                Object object = new Gson().fromJson(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
+
+                ItemAccount chosenItem = null;
+                if (object instanceof Account) {
+                    Account account = ((Account) object);
+                    chosenItem = new ItemAccount(account.getLabel(), null, null, null, account);
+                } else if (object instanceof LegacyAddress) {
+                    LegacyAddress legacyAddress = ((LegacyAddress) object);
+                    chosenItem = new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress);
+                }
+
+                viewModel.setSendingAddress(chosenItem);
+                binding.from.setText(chosenItem.label);
+
+                viewModel.calculateTransactionAmounts(chosenItem,
+                        binding.amountRow.amountBtc.getText().toString(),
+                        binding.customFee.getText().toString(), null);
+
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -382,7 +416,6 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     private void setupViews() {
-
         setupDestinationView();
         setupSendFromView();
         setupReceiveToView();
@@ -412,7 +445,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
             @Override
             public void afterTextChanged(Editable customizedFee) {
-                ItemAccount selectedItem = (ItemAccount) binding.accounts.spinner.getSelectedItem();
+                ItemAccount selectedItem = viewModel.getSendingItemAccount();
                 viewModel.calculateTransactionAmounts(selectedItem,
                         binding.amountRow.amountBtc.getText().toString(),
                         customizedFee.toString(),
@@ -420,10 +453,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
             }
         });
 
-        binding.max.setOnClickListener(view -> {
-            ItemAccount selectedItem = (ItemAccount) binding.accounts.spinner.getSelectedItem();
-            viewModel.spendAllClicked(selectedItem, binding.customFee.getText().toString());
-        });
+        binding.max.setOnClickListener(view ->
+                viewModel.spendAllClicked(viewModel.getSendingItemAccount(), binding.customFee.getText().toString()));
     }
 
     private void setupDestinationView() {
@@ -440,61 +471,35 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     private void setupSendFromView() {
-
-        String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        binding.accounts.spinner.setAdapter(new AddressAdapter(
-                getContext(),
-                R.layout.spinner_item,
-                viewModel.getAddressList(false),
-                true,
-                isBtc,
-                new MonetaryUtil(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
-                fiat,
-                ExchangeRateFactory.getInstance().getLastPrice(fiat)));
-
-        // Set drop down width equal to clickable view
-        binding.accounts.spinner.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-
-            @SuppressLint("ObsoleteSdkInt")
-            @Override
-            public void onGlobalLayout() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    binding.accounts.spinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                } else {
-                    //noinspection deprecation
-                    binding.accounts.spinner.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                }
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    binding.accounts.spinner.setDropDownWidth(binding.accounts.spinner.getWidth());
-                }
-            }
-        });
-        binding.accounts.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                ItemAccount selectedItem = (ItemAccount) binding.accounts.spinner.getSelectedItem();
-                viewModel.setSendingAddress(selectedItem);
-                viewModel.calculateTransactionAmounts(selectedItem,
-                        binding.amountRow.amountBtc.getText().toString(),
-                        binding.customFee.getText().toString(), null);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
+        ItemAccount itemAccount;
         if (selectedAccountPosition != -1) {
-            binding.accounts.spinner.setSelection(selectedAccountPosition);
+            itemAccount = viewModel.getAddressList(false).get(selectedAccountPosition);
         } else {
-            binding.accounts.spinner.setSelection(viewModel.getDefaultAccount());
+            itemAccount = viewModel.getAddressList(false).get(viewModel.getDefaultAccount());
         }
+
+        viewModel.setSendingAddress(itemAccount);
+        viewModel.calculateTransactionAmounts(itemAccount,
+                binding.amountRow.amountBtc.getText().toString(),
+                binding.customFee.getText().toString(), null);
+        binding.from.setText(itemAccount.label);
+
+        binding.from.setOnClickListener(v ->
+                AccountChooserActivity.startForResult(this,
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND,
+                        PaymentRequestType.REQUEST));
+
+        binding.imageviewDropdownSend.setOnClickListener(v ->
+                AccountChooserActivity.startForResult(this,
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND,
+                        PaymentRequestType.REQUEST));
     }
 
     private void setupReceiveToView() {
-        binding.imageviewDropdown.setOnClickListener(v -> AccountChooserActivity.startForResult(getActivity(), PaymentRequestType.SEND));
+        binding.imageviewDropdownReceive.setOnClickListener(v ->
+                AccountChooserActivity.startForResult(this,
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE,
+                        PaymentRequestType.SEND));
     }
 
     @Override
@@ -504,7 +509,6 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     @Override
     public void onHideReceivingAddressField() {
-//        binding.spDestination.setVisibility(View.GONE);
         binding.destination.setHint(R.string.to_field_helper_no_dropdown);
     }
 
@@ -547,8 +551,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     @Override
     public void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
-        // TODO: 05/01/2017 Shouldn't have to explicitly run on UI thread, convert calling method to Rx and schedule appropriately
-        getActivity().runOnUiThread(() -> ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType));
+        ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
 
     @Override
@@ -602,23 +605,21 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     @Override
     public void onShowBIP38PassphrasePrompt(String scanData) {
-        getActivity().runOnUiThread(() -> {
-            final EditText password = new EditText(getActivity());
-            password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        final EditText password = new EditText(getActivity());
+        password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        password.setHint(R.string.password);
 
-            new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                    .setTitle(R.string.app_name)
-                    .setMessage(R.string.bip38_password_entry)
-                    .setView(password)
-                    .setCancelable(false)
-                    .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
-                            viewModel.spendFromWatchOnlyBIP38(password.getText().toString(), scanData))
-                    .setNegativeButton(android.R.string.cancel, null).show();
-        });
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.bip38_password_entry)
+                .setView(password)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
+                        viewModel.spendFromWatchOnlyBIP38(password.getText().toString(), scanData))
+                .setNegativeButton(android.R.string.cancel, null).show();
     }
 
     private void onShowLargeTransactionWarning(AlertDialog alertDialog) {
-
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
         AlertGenericWarningBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
                 R.layout.alert_generic_warning, null, false);
@@ -871,28 +872,24 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         dialogBinding.confirmKeep.setText(getResources().getString(negativeAction));
         dialogBinding.confirmKeep.setOnClickListener(v -> {
             if (alertDialogFee.isShowing()) alertDialogFee.cancel();
-
-            ItemAccount selectedItem = (ItemAccount) binding.accounts.spinner.getSelectedItem();
-            viewModel.setSendingAddress(selectedItem);
-            viewModel.calculateTransactionAmounts(selectedItem,
-                    binding.amountRow.amountBtc.getText().toString(),
-                    binding.customFee.getText().toString(),
-                    () -> viewModel.sendClicked(true, binding.destination.getText().toString()));
+            sendClicked(binding.customFee.getText().toString(), () -> viewModel.sendClicked(true, binding.destination.getText().toString()));
         });
 
         dialogBinding.confirmChange.setText(getResources().getString(positiveAction));
         dialogBinding.confirmChange.setOnClickListener(v -> {
             if (alertDialogFee.isShowing()) alertDialogFee.cancel();
-
-            ItemAccount selectedItem = (ItemAccount) binding.accounts.spinner.getSelectedItem();
-            viewModel.setSendingAddress(selectedItem);
-            viewModel.calculateTransactionAmounts(selectedItem,
-                    binding.amountRow.amountBtc.getText().toString(),
-                    absoluteFeeSuggested,
-                    () -> viewModel.sendClicked(true, binding.destination.getText().toString()));
-
+            sendClicked(absoluteFeeSuggested, () -> viewModel.sendClicked(true, binding.destination.getText().toString()));
         });
         alertDialogFee.show();
+    }
+
+    private void sendClicked(String customFeeText, SendViewModel.TransactionDataListener transactionDataListener) {
+        ItemAccount selectedItem = viewModel.getSendingItemAccount();
+        viewModel.setSendingAddress(selectedItem);
+        viewModel.calculateTransactionAmounts(selectedItem,
+                binding.amountRow.amountBtc.getText().toString(),
+                customFeeText,
+                transactionDataListener);
     }
 
     private void alertCustomSpend(String btcFee, String btcFeeUnit) {

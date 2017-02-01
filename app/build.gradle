@@ -156,6 +156,8 @@ dependencies {
     annotationProcessor 'com.google.guava:guava:20.0'
     // Fingerprint authentication
     compile 'com.mtramin:rxfingerprint:2.0.1'
+    // GSON
+    compile 'com.google.code.gson:gson:2.8.0'
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile "org.mockito:mockito-core:$mockitoVersion"

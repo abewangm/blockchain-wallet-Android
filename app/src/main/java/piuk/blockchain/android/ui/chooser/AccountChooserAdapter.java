@@ -123,6 +123,7 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
         ContactViewHolder(View itemView) {
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.contact_name);
+            itemView.findViewById(R.id.contact_status).setVisibility(View.GONE);
         }
     }
 
@@ -139,7 +140,6 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
             tag = (TextView) itemView.findViewById(R.id.my_account_row_tag);
             balance = (TextView) itemView.findViewById(R.id.my_account_row_amount);
             address = (TextView) itemView.findViewById(R.id.my_account_row_address);
-
         }
     }
 

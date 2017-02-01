@@ -37,25 +37,48 @@
                         android:id="@+id/from_row"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:gravity="center_vertical"
                         android:orientation="vertical"
                         android:paddingBottom="12dp"
-                        android:paddingLeft="16dp"
-                        android:paddingTop="16dp">
+                        android:paddingLeft="16dp">
 
                         <TextView
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="center|left"
+                            android:paddingTop="8dp"
                             android:text="@string/from"
                             android:textColor="@color/blockchain_grey" />
 
-                        <include
-                            android:id="@+id/accounts"
-                            layout="@layout/include_spinner_compat"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:layout_marginTop="8dp" />
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/from"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.9"
+                                android:background="@color/blockchain_pearl_white"
+                                android:paddingBottom="14dp"
+                                android:paddingTop="14dp"
+                                android:textColor="@color/black"
+                                android:textSize="16sp" />
+
+                            <ImageView
+                                android:id="@+id/imageview_dropdown_send"
+                                android:layout_width="58dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="6dp"
+                                android:layout_marginRight="2dp"
+                                android:layout_weight="0.1"
+                                android:background="?android:selectableItemBackgroundBorderless"
+                                android:divider="@null"
+                                android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
+                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -98,10 +121,11 @@
                                 android:textSize="16sp" />
 
                             <ImageView
-                                android:id="@+id/imageview_dropdown"
+                                android:id="@+id/imageview_dropdown_receive"
                                 android:layout_width="58dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="6dp"
                                 android:layout_marginRight="2dp"
                                 android:layout_weight="0.1"
                                 android:background="?android:selectableItemBackgroundBorderless"

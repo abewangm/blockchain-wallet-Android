@@ -14,8 +14,8 @@ import android.view.View;
 
 import info.blockchain.api.DynamicFee;
 import info.blockchain.api.PersistentUrls;
-import info.blockchain.api.Unspent;
 import info.blockchain.util.FeeUtil;
+import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.AddressBookEntry;
@@ -34,7 +34,6 @@ import info.blockchain.wallet.util.WebUtil;
 
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.crypto.BIP38PrivateKey;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
@@ -52,7 +51,6 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
@@ -60,7 +58,6 @@ import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.payload.PayloadBridge;
-import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
@@ -79,10 +76,8 @@ import piuk.blockchain.android.util.annotations.Thunk;
 import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_ID;
 import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_MDID;
 import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_FCTX_ID;
-import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_IS_BTC;
 import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SCAN_DATA;
 import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE;
-import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SELECTED_ACCOUNT_POSITION;
 
 @SuppressWarnings("WeakerAccess")
 public class SendViewModel extends BaseViewModel {
@@ -101,14 +96,12 @@ public class SendViewModel extends BaseViewModel {
     @Nullable private String contactMdid;
     @Nullable private String fctxId;
     private String metricInputFlag;
-    // TODO: 24/01/2017 Use these instead of passing them from the UI
-    private boolean isBtc;
-    private int selectedAccountPosition = -1;
 
     private Thread unspentApiThread;
 
     @Inject PrefsUtil prefsUtil;
     @Inject WalletAccountHelper walletAccountHelper;
+    @Inject ExchangeRateFactory exchangeRateFactory;
     @Inject SSLVerifyUtil sslVerifyUtil;
     @Inject PrivateKeyFactory privateKeyFactory;
     @Inject PayloadManager payloadManager;
@@ -173,7 +166,7 @@ public class SendViewModel extends BaseViewModel {
 
         int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double exchangeRate = ExchangeRateFactory.getInstance().getLastPrice(fiatUnit);
+        double exchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
 
         this.context = context;
         this.dataListener = dataListener;
@@ -189,7 +182,7 @@ public class SendViewModel extends BaseViewModel {
         sendModel.defaultSeparator = getDefaultDecimalSeparator();
         sendModel.exchangeRate = exchangeRate;
         sendModel.unspentApiResponse = new HashMap<>();
-        sendModel.btcExchange = ExchangeRateFactory.getInstance().getLastPrice(sendModel.fiatUnit);
+        sendModel.btcExchange = exchangeRateFactory.getLastPrice(sendModel.fiatUnit);
 
         dataListener.onUpdateBtcUnit(sendModel.btcUnit);
         dataListener.onUpdateFiatUnit(sendModel.fiatUnit);
@@ -210,9 +203,7 @@ public class SendViewModel extends BaseViewModel {
             final String contactId = dataListener.getFragmentBundle().getString(ARGUMENT_CONTACT_ID);
             contactMdid = dataListener.getFragmentBundle().getString(ARGUMENT_CONTACT_MDID);
             fctxId = dataListener.getFragmentBundle().getString(ARGUMENT_FCTX_ID);
-            isBtc = dataListener.getFragmentBundle().getBoolean(ARGUMENT_IS_BTC, true);
             metricInputFlag = dataListener.getFragmentBundle().getString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE);
-            selectedAccountPosition = dataListener.getFragmentBundle().getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION);
 
             if (contactId != null) {
                 compositeDisposable.add(
@@ -248,6 +239,15 @@ public class SendViewModel extends BaseViewModel {
         return Math.max(getCorrectedAccountIndex(result), 0);
     }
 
+    void setContact(@Nullable Contact contact) {
+        if (contact != null) {
+            contactMdid = contact.getMdid();
+            dataListener.onNameLoaded(contact.getName());
+        } else {
+            contactMdid = null;
+        }
+    }
+
     private int getCorrectedAccountIndex(int accountIndex) {
         // Filter accounts by active
         List<Account> activeAccounts = new ArrayList<>();
@@ -270,9 +270,8 @@ public class SendViewModel extends BaseViewModel {
      * @return List of account details (balance, label, tag, account/address/address_book object)
      */
     List<ItemAccount> getAddressList(boolean includeAddressBookEntries) {
-        ArrayList<ItemAccount> result = new ArrayList<ItemAccount>() {{
-            addAll(walletAccountHelper.getAccountItems(sendModel.isBTC));
-        }};
+        ArrayList<ItemAccount> result = new ArrayList<>();
+        result.addAll(walletAccountHelper.getAccountItems(sendModel.isBTC));
 
         if (result.size() == 1) {
             //Only a single account/address available in wallet
@@ -502,7 +501,7 @@ public class SendViewModel extends BaseViewModel {
                     btc_amount = 0.0;
                 }
 
-                sendModel.exchangeRate = ExchangeRateFactory.getInstance().getLastPrice(sendModel.fiatUnit);
+                sendModel.exchangeRate = exchangeRateFactory.getLastPrice(sendModel.fiatUnit);
 
                 double fiat_amount = sendModel.exchangeRate * btc_amount;
 
@@ -529,16 +528,11 @@ public class SendViewModel extends BaseViewModel {
 
         // Refresh fee cache
         compositeDisposable.add(
-                getSuggestedFeeObservable()
+                sendDataManager.getSuggestedFee()
                         .doAfterTerminate(() -> sendModel.suggestedFee = DynamicFeeCache.getInstance().getSuggestedFee())
                         .subscribe(
                                 suggestedFee -> DynamicFeeCache.getInstance().setSuggestedFee(suggestedFee),
                                 throwable -> DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDefaultFee())));
-    }
-
-    private Observable<SuggestedFee> getSuggestedFeeObservable() {
-        return Observable.fromCallable(() -> new DynamicFee().getDynamicFee())
-                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -595,7 +589,7 @@ public class SendViewModel extends BaseViewModel {
             try {
                 unspentResponse = getUnspentApiResponse(address);
 
-                if(context == null){
+                if (context == null) {
                     return;
                 }
 
@@ -779,33 +773,37 @@ public class SendViewModel extends BaseViewModel {
      *
      * TODO - can speed up by checking if multi_address balance > 0 before calling unspent_api
      */
-    private JSONObject getUnspentApiResponse(String address) throws Exception {
+    private JSONObject getUnspentApiResponse(String address) {
         if (sendModel.unspentApiResponse.containsKey(address)) {
             return sendModel.unspentApiResponse.get(address);
         } else {
-
-            JSONObject unspentResponse;
-
+            final JSONObject[] unspentResponse = new JSONObject[1];
             //Get cache if is default account
             DefaultAccountUnspentCache cache = DefaultAccountUnspentCache.getInstance();
             if (payloadManager.getPayload().getHdWallet() != null && address.equals(cache.getXpub())) {
-                unspentResponse = cache.getUnspentApiResponse();
+                unspentResponse[0] = cache.getUnspentApiResponse();
 
                 //Refresh default account cache
-                new Thread(() -> {
-                    try {
-                        cache.setUnspentApiResponse(address, new Unspent().getUnspentOutputs(address));
-                    } catch (Exception e) {
-                        Log.e(TAG, "getUnspentApiResponse: ", e);
-                    }
-                }).start();
+                compositeDisposable.add(
+                        sendDataManager.getUnspentOutputs(address)
+                                .subscribe(
+                                        jsonObject -> cache.setUnspentApiResponse(address, jsonObject),
+                                        throwable -> {
+                                            // No-op
+                                        }));
             } else {
-                unspentResponse = new Unspent().getUnspentOutputs(address);
+                compositeDisposable.add(
+                        sendDataManager.getUnspentOutputs(address)
+                                .subscribe(
+                                        jsonObject -> unspentResponse[0] = jsonObject,
+                                        throwable -> {
+                                            // No-op
+                                        }));
             }
 
-            sendModel.unspentApiResponse.put(address, unspentResponse);
+            sendModel.unspentApiResponse.put(address, unspentResponse[0]);
 
-            return unspentResponse;
+            return unspentResponse[0];
         }
     }
 
@@ -1040,12 +1038,14 @@ public class SendViewModel extends BaseViewModel {
 
         //Validate sufficient funds
         if (pendingTransaction.unspentOutputBundle == null || pendingTransaction.unspentOutputBundle.getSpendableOutputs() == null) {
-            if (dataListener != null) dataListener.onShowToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR);
+            if (dataListener != null)
+                dataListener.onShowToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR);
             return false;
         }
 
         if (sendModel.maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
-            if (dataListener != null) dataListener.onShowToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
+            if (dataListener != null)
+                dataListener.onShowToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
             sendModel.setCustomFeeColor(R.color.blockchain_send_red);
             return false;
         } else {
@@ -1054,30 +1054,35 @@ public class SendViewModel extends BaseViewModel {
 
         //Validate addresses
         if (pendingTransaction.receivingAddress == null || !FormatsUtil.getInstance().isValidBitcoinAddress(pendingTransaction.receivingAddress)) {
-            if (dataListener != null) dataListener.onShowToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
+            if (dataListener != null)
+                dataListener.onShowToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
             return false;
         }
 
         //Validate send and receive not same addresses
         if (pendingTransaction.sendingObject == pendingTransaction.receivingObject) {
-            if (dataListener != null) dataListener.onShowToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
+            if (dataListener != null)
+                dataListener.onShowToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
             return false;
         }
 
         if (pendingTransaction.unspentOutputBundle == null) {
-            if (dataListener != null) dataListener.onShowToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR);
+            if (dataListener != null)
+                dataListener.onShowToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR);
             return false;
         }
 
         if (pendingTransaction.unspentOutputBundle.getSpendableOutputs().size() == 0) {
-            if (dataListener != null) dataListener.onShowToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
+            if (dataListener != null)
+                dataListener.onShowToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
             return false;
         }
 
 
         if (sendModel.pendingTransaction.receivingObject != null
                 && sendModel.pendingTransaction.receivingObject.accountObject == sendModel.pendingTransaction.sendingObject.accountObject) {
-            if (dataListener != null) dataListener.onShowToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
+            if (dataListener != null)
+                dataListener.onShowToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
             return false;
         }
 
@@ -1086,6 +1091,10 @@ public class SendViewModel extends BaseViewModel {
 
     void setSendingAddress(ItemAccount selectedItem) {
         sendModel.pendingTransaction.sendingObject = selectedItem;
+    }
+
+    ItemAccount getSendingItemAccount() {
+        return sendModel.pendingTransaction.sendingObject;
     }
 
     /**
@@ -1228,10 +1237,10 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void checkClipboardPaste(String address) {
-        ClipboardManager clipMan = (ClipboardManager)context.getSystemService(context.CLIPBOARD_SERVICE);
+        ClipboardManager clipMan = (ClipboardManager) context.getSystemService(context.CLIPBOARD_SERVICE);
         ClipData clip = clipMan.getPrimaryClip();
         if (clip != null && clip.getItemCount() > 0) {
-            if(clip.getItemAt(0).coerceToText(context).toString().equals(address)) {
+            if (clip.getItemAt(0).coerceToText(context).toString().equals(address)) {
                 metricInputFlag = EventLogHandler.URL_EVENT_TX_INPUT_FROM_PASTE;
             }
         }
@@ -1307,24 +1316,16 @@ public class SendViewModel extends BaseViewModel {
 
     void spendFromWatchOnlyBIP38(String pw, String scanData) {
         compositeDisposable.add(
-                getEcKeyFromBip38(pw, scanData)
-                        .compose(RxUtil.applySchedulersToObservable())
+                sendDataManager.getEcKeyFromBip38(pw, scanData, PersistentUrls.getInstance().getCurrentNetworkParams())
                         .subscribe(ecKey -> {
                             LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
                             setTempLegacyAddressPrivateKey(legacyAddress, ecKey);
                         }, throwable -> dataListener.onShowToast(R.string.bip38_error, ToastCustom.TYPE_ERROR)));
     }
 
-    private Observable<ECKey> getEcKeyFromBip38(String password, String scanData) {
-        return Observable.fromCallable(() -> {
-            BIP38PrivateKey bip38 = new BIP38PrivateKey(PersistentUrls.getInstance().getCurrentNetworkParams(), scanData);
-            return bip38.decrypt(password);
-        });
-    }
-
     private void setTempLegacyAddressPrivateKey(LegacyAddress legacyAddress, ECKey key) {
         if (key != null && key.hasPrivKey() && legacyAddress.getAddress().equals(key.toAddress(
-            PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
+                PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
 
             //Create copy, otherwise pass by ref will override private key in wallet payload
             LegacyAddress tempLegacyAddress = new LegacyAddress();
@@ -1345,7 +1346,7 @@ public class SendViewModel extends BaseViewModel {
         prefsUtil.setValue("WARN_WATCH_ONLY_SPEND", enabled);
     }
 
-    public PrefsUtil getPrefsUtil() {
+    PrefsUtil getPrefsUtil() {
         return prefsUtil;
     }
 }

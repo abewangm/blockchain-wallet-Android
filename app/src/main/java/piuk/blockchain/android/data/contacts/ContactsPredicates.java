@@ -14,8 +14,12 @@ public final class ContactsPredicates {
         return contact -> contact.getMdid() != null && contact.getMdid().equals(mdid);
     }
 
-    public static Predicate<Contact> filterPending() {
+    public static Predicate<Contact> filterByPending() {
         return contact -> contact.getMdid() == null || contact.getMdid().isEmpty();
+    }
+
+    public static Predicate<Contact> filterByConfirmed() {
+        return contact -> contact.getMdid() != null && !contact.getMdid().isEmpty();
     }
 
 }
