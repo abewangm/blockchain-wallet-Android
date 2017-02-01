@@ -25,7 +25,6 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
 
     private ActivityAccountChooserBinding binding;
     private AccountChooserViewModel viewModel;
-    private PaymentRequestType paymentRequestType;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,7 +37,7 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
         if (!intent.hasExtra(EXTRA_REQUEST_TYPE) || intent.getSerializableExtra(EXTRA_REQUEST_TYPE) == null) {
             throw new AssertionError("Request type must be passed to AccountChooserActivity");
         } else {
-            paymentRequestType = (PaymentRequestType) intent.getSerializableExtra(EXTRA_REQUEST_TYPE);
+            final PaymentRequestType paymentRequestType = (PaymentRequestType) intent.getSerializableExtra(EXTRA_REQUEST_TYPE);
 
             if (paymentRequestType.equals(PaymentRequestType.SEND)) {
                 binding.toolbar.toolbarGeneral.setTitle(R.string.to);
@@ -51,11 +50,6 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
         }
 
         viewModel.onViewReady();
-    }
-
-    @Override
-    public PaymentRequestType getPaymentRequestType() {
-        return paymentRequestType;
     }
 
     @Override
@@ -85,4 +79,5 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
         super.onDestroy();
         viewModel.destroy();
     }
+
 }

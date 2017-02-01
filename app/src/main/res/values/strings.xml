@@ -149,6 +149,7 @@
     <string name="scan_not_recognized">Scan cannot be decoded</string>
 
     <string name="imported_addresses">Imported Addresses</string>
+    <string name="wallets">Wallets</string>
 
     <string name="remote_save_ok">Successfully saved</string>
     <string name="remote_save_ko">Save unsuccessful</string>

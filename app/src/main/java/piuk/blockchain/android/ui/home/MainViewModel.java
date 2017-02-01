@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.View;
 
 import info.blockchain.api.Balance;
 import info.blockchain.api.DynamicFee;
@@ -47,7 +46,6 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
-import piuk.blockchain.android.util.ViewUtils;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
@@ -94,7 +92,7 @@ public class MainViewModel extends BaseViewModel {
 
         void showSurveyPrompt();
 
-        void setMessagesVisibility(@ViewUtils.Visibility int visibility);
+        void setMessagesCount(int messageCount);
 
         void showContactsRegistrationFailure();
     }
@@ -208,7 +206,7 @@ public class MainViewModel extends BaseViewModel {
                             }
                         })
                         .subscribe(
-                                messages -> dataListener.setMessagesVisibility(messages.isEmpty() ? View.INVISIBLE : View.VISIBLE),
+                                messages -> dataListener.setMessagesCount(messages.size()),
                                 throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
     }
 

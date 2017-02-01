@@ -97,14 +97,16 @@
                                 android:textCursorDrawable="@null"
                                 android:textSize="16sp" />
 
-                            <piuk.blockchain.android.ui.customviews.ReselectSpinner
-                                android:id="@+id/sp_destination"
+                            <ImageView
+                                android:id="@+id/imageview_dropdown"
                                 android:layout_width="58dp"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginRight="2dp"
                                 android:layout_weight="0.1"
-                                android:background="?android:selectableItemBackground"
+                                android:background="?android:selectableItemBackgroundBorderless"
                                 android:divider="@null"
-                                android:dropDownSelector="?android:selectableItemBackground" />
+                                android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
                         </LinearLayout>
 
                     </LinearLayout>

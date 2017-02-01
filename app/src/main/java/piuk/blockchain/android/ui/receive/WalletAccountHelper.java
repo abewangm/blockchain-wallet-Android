@@ -44,15 +44,69 @@ public class WalletAccountHelper {
         addressBalanceHelper = new AddressBalanceHelper(monetaryUtil, multiAddrFactory);
     }
 
+    /**
+     * Returns a list of {@link ItemAccount} objects containing both HD accounts and {@link
+     * LegacyAddress} objects, eg from importing accounts.
+     *
+     * @param isBtc Whether or not you wish to have the ItemAccount objects returned with {@link
+     *              ItemAccount#displayBalance} showing BTC or fiat
+     * @return Returns a list of {@link ItemAccount} objects
+     */
     @NonNull
     public List<ItemAccount> getAccountItems(boolean isBtc) {
-
         List<ItemAccount> accountList = new ArrayList<>();
-
         // V3
         accountList.addAll(getHdAccounts(isBtc));
-
         // V2
+        accountList.addAll(getLegacyAddresses(isBtc));
+
+        return accountList;
+    }
+
+    /**
+     * Returns a list of {@link ItemAccount} objects containing only HD accounts.
+     *
+     * @param isBtc Whether or not you wish to have the ItemAccount objects returned with {@link
+     *              ItemAccount#displayBalance} showing BTC or fiat
+     * @return Returns a list of {@link ItemAccount} objects
+     */
+    @NonNull
+    public List<ItemAccount> getHdAccounts(boolean isBtc) {
+        List<ItemAccount> accountArrayList = new ArrayList<>();
+        if (payloadManager.getPayload().isUpgraded()) {
+
+            List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+            for (Account account : accounts) {
+
+                if (account.isArchived())
+                    // Skip archived account
+                    continue;
+
+                if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(account.getXpub())) {
+                    accountArrayList.add(new ItemAccount(
+                            account.getLabel(),
+                            addressBalanceHelper.getAccountBalance(account, isBtc, btcExchangeRate, fiatUnit, btcUnit),
+                            null,
+                            addressBalanceHelper.getAccountAbsoluteBalance(account),
+                            account));
+                }
+            }
+        }
+
+        return accountArrayList;
+    }
+
+    /**
+     * Returns a list of {@link ItemAccount} objects containing only {@link LegacyAddress} objects.
+     *
+     * @param isBtc Whether or not you wish to have the ItemAccount objects returned with {@link
+     *              ItemAccount#displayBalance} showing BTC or fiat
+     * @return Returns a list of {@link ItemAccount} objects
+     */
+    @NonNull
+    public List<ItemAccount> getLegacyAddresses(boolean isBtc) {
+        List<ItemAccount> accountList = new ArrayList<>();
+
         List<LegacyAddress> legacyAddresses = payloadManager.getPayload().getLegacyAddressList();
         for (LegacyAddress legacyAddress : legacyAddresses) {
 
@@ -84,32 +138,13 @@ public class WalletAccountHelper {
         return accountList;
     }
 
-    @NonNull
-    public List<ItemAccount> getHdAccounts(boolean isBtc) {
-        List<ItemAccount> accountArrayList = new ArrayList<>();
-        if (payloadManager.getPayload().isUpgraded()) {
-
-            List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
-            for (Account account : accounts) {
-
-                if (account.isArchived())
-                    // Skip archived account
-                    continue;
-
-                if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(account.getXpub())) {
-                    accountArrayList.add(new ItemAccount(
-                            account.getLabel(),
-                            addressBalanceHelper.getAccountBalance(account, isBtc, btcExchangeRate, fiatUnit, btcUnit),
-                            null,
-                            addressBalanceHelper.getAccountAbsoluteBalance(account),
-                            account));
-                }
-            }
-        }
-
-        return accountArrayList;
-    }
-
+    /**
+     * Returns a list of {@link ItemAccount} objects containing only {@link LegacyAddress} objects,
+     * specifically from the list of address book entries.
+     *
+     * @return Returns a list of {@link ItemAccount} objects
+     */
+    @Deprecated
     @NonNull
     public List<ItemAccount> getAddressBookEntries() {
         List<ItemAccount> itemAccountList = new ArrayList<>();

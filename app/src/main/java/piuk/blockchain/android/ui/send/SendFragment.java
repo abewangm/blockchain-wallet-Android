@@ -103,7 +103,6 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
                 ((AddressAdapter) binding.accounts.spinner.getAdapter()).updateData(viewModel.getAddressList(false));
-                ((AddressAdapter) binding.spDestination.getAdapter()).updateData(viewModel.getAddressList(true));
             }
         }
     };
@@ -178,7 +177,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         binding.destination.setText(name);
         binding.destination.setOnClickListener(null);
         binding.destination.setEnabled(false);
-        binding.spDestination.setVisibility(View.GONE);
+//        binding.spDestination.setVisibility(View.GONE);
     }
 
     @Override
@@ -495,52 +494,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     private void setupReceiveToView() {
-        String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        binding.spDestination.setAdapter(new AddressAdapter(
-                getContext(),
-                R.layout.spinner_item,
-                viewModel.getAddressList(true),
-                false,
-                isBtc,
-                new MonetaryUtil(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
-                fiat,
-                ExchangeRateFactory.getInstance().getLastPrice(fiat)));
-
-        binding.destination.setOnClickListener(v -> AccountChooserActivity.startForResult(getActivity(), PaymentRequestType.SEND));
-
-//        // Set drop down width equal to clickable view
-//        binding.spDestination.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-//
-//            @SuppressLint("ObsoleteSdkInt")
-//            @Override
-//            public void onGlobalLayout() {
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//                    binding.spDestination.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-//                } else {
-//                    //noinspection deprecation
-//                    binding.spDestination.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-//                }
-//
-//                if (binding.accounts.spinner.getWidth() > 0)
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//                        binding.spDestination.setDropDownWidth(binding.accounts.spinner.getWidth());
-//                    }
-//            }
-//        });
-//
-//        binding.spDestination.setOnItemSelectedEvenIfUnchangedListener(
-//                new AdapterView.OnItemSelectedListener() {
-//                    @Override
-//                    public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-//                        ItemAccount selectedItem = (ItemAccount) binding.spDestination.getSelectedItem();
-//                        binding.destination.setText(selectedItem.label);
-//                        viewModel.setReceivingAddress(selectedItem);
-//                    }
-//
-//                    @Override
-//                    public void onNothingSelected(AdapterView<?> parent) {
-//                    }
-//                });
+        binding.imageviewDropdown.setOnClickListener(v -> AccountChooserActivity.startForResult(getActivity(), PaymentRequestType.SEND));
     }
 
     @Override
@@ -550,7 +504,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     @Override
     public void onHideReceivingAddressField() {
-        binding.spDestination.setVisibility(View.GONE);
+//        binding.spDestination.setVisibility(View.GONE);
         binding.destination.setHint(R.string.to_field_helper_no_dropdown);
     }
 

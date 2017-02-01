@@ -13,7 +13,6 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.injection.Injector;
@@ -48,8 +47,6 @@ public class AccountChooserViewModel extends BaseViewModel {
 
     interface DataListener {
 
-        PaymentRequestType getPaymentRequestType();
-
         void updateUi(List<ItemAccount> items);
 
     }
@@ -66,7 +63,7 @@ public class AccountChooserViewModel extends BaseViewModel {
         isBtc = balanceDisplayState != SHOW_FIAT;
     }
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings({"ConstantConditions", "Convert2streamapi"})
     @Override
     public void onViewReady() {
         compositeDisposable.add(
@@ -82,7 +79,7 @@ public class AccountChooserViewModel extends BaseViewModel {
                         })
                         .flatMapObservable(contacts -> getAccountList())
                         .doOnNext(accounts -> {
-                            itemAccounts.add(new ItemAccount(null, null, null, null, null));
+                            itemAccounts.add(new ItemAccount(stringUtils.getString(R.string.wallets), null, null, null, null));
                             itemAccounts.addAll(accounts);
                         })
                         .flatMap(accounts -> getImportedList())
@@ -98,14 +95,13 @@ public class AccountChooserViewModel extends BaseViewModel {
 
     private Observable<List<ItemAccount>> getAccountList() {
         ArrayList<ItemAccount> result = new ArrayList<>();
-        result.addAll(walletAccountHelper.getAccountItems(isBtc));
+        result.addAll(walletAccountHelper.getHdAccounts(isBtc));
         return Observable.just(result);
     }
 
     private Observable<List<ItemAccount>> getImportedList() {
         ArrayList<ItemAccount> result = new ArrayList<>();
-        // Address Book (only included in receiving)
-        result.addAll(walletAccountHelper.getAddressBookEntries());
+        result.addAll(walletAccountHelper.getLegacyAddresses(isBtc));
         return Observable.just(result);
     }
 }

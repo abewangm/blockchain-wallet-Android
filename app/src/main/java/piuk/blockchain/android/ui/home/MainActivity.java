@@ -30,6 +30,7 @@ import android.view.View;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
+import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -190,7 +191,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             launcherShortcutHelper.generateReceiveShortcuts();
         }
 
-        binding.bottomNavigation.restoreBottomNavigation(false);
+        // STOPSHIP: 01/02/2017 Temporary for testing
+        setMessagesCount(3);
     }
 
     @Override
@@ -229,17 +231,22 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     }
 
     @Override
-    public void setMessagesVisibility(@ViewUtils.Visibility int visibility) {
+    public void setMessagesCount(int messageCount) {
         binding.navigationView.getMenu()
                 .findItem(R.id.nav_contacts)
                 .getActionView()
                 .findViewById(R.id.menu_icon_count)
-                .setVisibility(visibility);
+                .setVisibility(messageCount);
 
-        if (visibility == View.VISIBLE) {
-            toolbar.setNavigationIcon(ContextCompat.getDrawable(getActivity(), R.drawable.vector_menu_indicator));
+        if (messageCount > 0) {
+            AHNotification notification = new AHNotification.Builder()
+                    .setText(String.valueOf(messageCount))
+                    .setBackgroundColor(ContextCompat.getColor(this, R.color.alert_red))
+                    .setTextColor(ContextCompat.getColor(this, R.color.white))
+                    .build();
+            binding.bottomNavigation.setNotification(notification, 1);
         } else {
-            toolbar.setNavigationIcon(ContextCompat.getDrawable(getActivity(), R.drawable.vector_menu));
+            binding.bottomNavigation.setNotification(new AHNotification(), 1);
         }
     }
 
