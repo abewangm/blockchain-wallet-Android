@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.send;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
@@ -113,6 +111,8 @@ public class SendViewModel extends BaseViewModel {
     interface DataListener {
 
         Bundle getFragmentBundle();
+
+        @Nullable String getClipboardContents();
 
         void onHideSendingAddressField();
 
@@ -1237,12 +1237,9 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void checkClipboardPaste(String address) {
-        ClipboardManager clipMan = (ClipboardManager) context.getSystemService(context.CLIPBOARD_SERVICE);
-        ClipData clip = clipMan.getPrimaryClip();
-        if (clip != null && clip.getItemCount() > 0) {
-            if (clip.getItemAt(0).coerceToText(context).toString().equals(address)) {
+        String contents = dataListener.getClipboardContents();
+        if (contents != null && contents.equals(address)) {
                 metricInputFlag = EventLogHandler.URL_EVENT_TX_INPUT_FROM_PASTE;
-            }
         }
     }
 
@@ -1288,8 +1285,7 @@ public class SendViewModel extends BaseViewModel {
                     spendFromWatchOnlyNonBIP38(format, scanData);
                 } else {
                     //BIP38 needs passphrase
-                    if (dataListener != null)
-                        dataListener.onShowBIP38PassphrasePrompt(scanData);
+                    if (dataListener != null) dataListener.onShowBIP38PassphrasePrompt(scanData);
                 }
             } else {
                 if (dataListener != null)
@@ -1346,7 +1342,4 @@ public class SendViewModel extends BaseViewModel {
         prefsUtil.setValue("WARN_WATCH_ONLY_SPEND", enabled);
     }
 
-    PrefsUtil getPrefsUtil() {
-        return prefsUtil;
-    }
 }

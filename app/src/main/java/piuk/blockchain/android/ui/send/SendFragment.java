@@ -5,6 +5,8 @@ import com.google.gson.Gson;
 import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -269,6 +271,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
             final String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);
             viewModel.handleScannedDataForWatchOnlySpend(scanData);
 
+            // Set Receiving account
         } else if (resultCode == Activity.RESULT_OK
                 && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE
                 && data != null) {
@@ -292,6 +295,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
+            // Set Sending account
         } else if (resultCode == Activity.RESULT_OK
                 && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND
                 && data != null) {
@@ -620,32 +624,14 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     private void onShowLargeTransactionWarning(AlertDialog alertDialog) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-        AlertGenericWarningBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
-                R.layout.alert_generic_warning, null, false);
-        dialogBuilder.setView(dialogBinding.getRoot());
-
-        final AlertDialog alertDialogFee = dialogBuilder.create();
-        alertDialogFee.setCanceledOnTouchOutside(false);
-
-        dialogBinding.tvBody.setText(R.string.large_tx_warning);
-
-        dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialogFee.isShowing()) alertDialogFee.cancel();
-        });
-
-        dialogBinding.confirmKeep.setText(getResources().getString(R.string.go_back));
-        dialogBinding.confirmKeep.setOnClickListener(v -> {
-            alertDialogFee.dismiss();
-            alertDialog.dismiss();
-        });
-
-        dialogBinding.confirmChange.setText(getResources().getString(R.string.accept_higher_fee));
-        dialogBinding.confirmChange.setOnClickListener(v -> alertDialogFee.dismiss());
-
-        if (getActivity() != null && !getActivity().isFinishing()) {
-            alertDialogFee.show();
-        }
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setCancelable(false)
+                .setTitle(R.string.warning)
+                .setMessage(R.string.large_tx_warning)
+                .setNegativeButton(R.string.go_back, (dialog, which) -> alertDialog.dismiss())
+                .setPositiveButton(R.string.accept_higher_fee, null)
+                .create()
+                .show();
     }
 
     @Override
@@ -694,7 +680,6 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
         };
-
     }
 
     private void setFiatTextWatcher() {
@@ -710,7 +695,6 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
         };
-
     }
 
     void setKeyListener(Editable s, EditText editText) {
@@ -915,6 +899,17 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
             });
             mp.start();
         }
+    }
+
+    @Nullable
+    @Override
+    public String getClipboardContents() {
+        ClipboardManager clipMan = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = clipMan.getPrimaryClip();
+        if (clip != null && clip.getItemCount() > 0) {
+            return clip.getItemAt(0).coerceToText(getActivity()).toString();
+        }
+        return null;
     }
 
     @Override

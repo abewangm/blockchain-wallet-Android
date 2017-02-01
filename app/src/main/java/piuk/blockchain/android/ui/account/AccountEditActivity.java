@@ -26,7 +26,6 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.databinding.ActivityAccountEditBinding;
-import piuk.blockchain.android.databinding.AlertGenericWarningBinding;
 import piuk.blockchain.android.databinding.AlertShowExtendedPublicKeyBinding;
 import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -249,31 +248,14 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
     }
 
     private void onShowLargeTransactionWarning(AlertDialog alertDialog) {
-
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        AlertGenericWarningBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
-                R.layout.alert_generic_warning, null, false);
-        dialogBuilder.setView(dialogBinding.getRoot());
-
-        final AlertDialog alertDialogFee = dialogBuilder.create();
-        alertDialogFee.setCanceledOnTouchOutside(false);
-
-        dialogBinding.tvBody.setText(R.string.large_tx_warning);
-
-        dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialogFee.isShowing()) alertDialogFee.cancel();
-        });
-
-        dialogBinding.confirmKeep.setText(getResources().getString(R.string.go_back));
-        dialogBinding.confirmKeep.setOnClickListener(v -> {
-            alertDialogFee.dismiss();
-            alertDialog.dismiss();
-        });
-
-        dialogBinding.confirmChange.setText(getResources().getString(R.string.accept_higher_fee));
-        dialogBinding.confirmChange.setOnClickListener(v -> alertDialogFee.dismiss());
-
-        alertDialogFee.show();
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setCancelable(false)
+                .setTitle(R.string.warning)
+                .setMessage(R.string.large_tx_warning)
+                .setNegativeButton(R.string.go_back, (dialog, which) -> alertDialog.dismiss())
+                .setPositiveButton(R.string.accept_higher_fee, null)
+                .create()
+                .show();
     }
 
     @Override
