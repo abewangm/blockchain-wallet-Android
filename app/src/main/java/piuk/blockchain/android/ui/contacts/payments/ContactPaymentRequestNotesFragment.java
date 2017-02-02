@@ -100,7 +100,7 @@ public class ContactPaymentRequestNotesFragment extends Fragment {
         }
     }
 
-    interface FragmentInteractionListener {
+    public interface FragmentInteractionListener {
 
         void onNextSelected(String note);
 

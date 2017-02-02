@@ -38,6 +38,7 @@ import java.util.Arrays;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
 import piuk.blockchain.android.ui.account.AccountActivity;
 import piuk.blockchain.android.ui.auth.LandingActivity;
@@ -46,6 +47,7 @@ import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
+import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
@@ -69,7 +71,8 @@ import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_AD
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.Communicator,
         MainViewModel.DataListener,
         SendFragment.OnSendFragmentInteractionListener,
-        ReceiveFragment.OnReceiveFragmentInteractionListener {
+        ReceiveFragment.OnReceiveFragmentInteractionListener,
+        ContactPaymentRequestNotesFragment.FragmentInteractionListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -612,7 +615,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     @Override
     public void onStartBalanceFragment() {
         BalanceFragment fragment = new BalanceFragment();
-        startFragmentWithAnimation(fragment);
+        replaceFragmentWithAnimation(fragment);
         mainViewModel.checkIfShouldShowSurvey();
     }
 
@@ -629,7 +632,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         }
 
         SendFragment sendFragment = SendFragment.newInstance(scanData, isBTC, scanRoute, selectedAccountPosition);
-        startFragmentWithAnimation(sendFragment);
+        replaceFragmentWithAnimation(sendFragment);
     }
 
     public void startReceiveFragment() {
@@ -645,14 +648,20 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         }
 
         ReceiveFragment receiveFragment = ReceiveFragment.newInstance(isBTC, selectedAccountPosition);
-        startFragmentWithAnimation(receiveFragment);
+        replaceFragmentWithAnimation(receiveFragment);
     }
 
-    private void startFragmentWithAnimation(Fragment fragment) {
+    private void replaceFragmentWithAnimation(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
         transaction.replace(R.id.content_frame, fragment).commitAllowingStateLoss();
+    }
+
+    private void addFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.add(R.id.content_frame, fragment).commitAllowingStateLoss();
     }
 
     public AHBottomNavigation getBottomNavigationView() {
@@ -685,5 +694,16 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     @Override
     public void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue) {
         // No-op, this callback is used elsewhere
+    }
+
+    @Override
+    public void onTransactionNotesRequested(String contactName, PaymentRequestType paymentRequestType) {
+        addFragment(
+                ContactPaymentRequestNotesFragment.newInstance(paymentRequestType, contactName));
+    }
+
+    @Override
+    public void onNextSelected(String note) {
+        // TODO: 02/02/2017
     }
 }

@@ -14,6 +14,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.ActivityContactDetailBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -173,6 +174,7 @@ public class ContactDetailActivity extends BaseAuthActivity implements
         TransactionDetailActivity.start(this, bundle);
     }
 
+    // TODO: 02/02/2017 To be removed
     @Override
     public void onSendFragmentClose() {
         // No-op
@@ -183,4 +185,8 @@ public class ContactDetailActivity extends BaseAuthActivity implements
         // No-op
     }
 
+    @Override
+    public void onTransactionNotesRequested(String contactName, PaymentRequestType paymentRequestType) {
+        // No-op
+    }
 }

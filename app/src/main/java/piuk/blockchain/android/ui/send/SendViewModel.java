@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.send;
 
-import android.os.Bundle;
-import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
@@ -52,6 +50,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
+import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.payload.PayloadBridge;
@@ -84,7 +83,7 @@ public class SendViewModel extends BaseViewModel {
     public static final int SHOW_BTC = 1;
     public static final int SHOW_FIAT = 2;
 
-    @Thunk DataListener dataListener;
+    @Thunk SendContract.DataListener dataListener;
 
     private MonetaryUtil monetaryUtil;
     private Payment payment;
@@ -106,86 +105,14 @@ public class SendViewModel extends BaseViewModel {
     @Inject SendDataManager sendDataManager;
     @Inject MultiAddrFactory multiAddrFactory;
 
-    interface DataListener {
-
-        Bundle getFragmentBundle();
-
-        @Nullable
-        String getClipboardContents();
-
-        void onHideSendingAddressField();
-
-        void onHideReceivingAddressField();
-
-        void onRemoveBtcTextChangeListener();
-
-        void onRemoveFiatTextChangeListener();
-
-        void onAddBtcTextChangeListener();
-
-        void onAddFiatTextChangeListener();
-
-        void onUpdateBtcAmount(String amount);
-
-        void onUpdateFiatAmount(String amount);
-
-        void onUpdateBtcUnit(String unit);
-
-        void onUpdateFiatUnit(String unit);
-
-        void onSetSpendAllAmount(String textFromSatoshis);
-
-        void showInvalidAmount();
-
-        void onShowSpendFromWatchOnly(String address);
-
-        void onShowPaymentDetails(PaymentConfirmationDetails confirmationDetails);
-
-        void onShowReceiveToWatchOnlyWarning(String address);
-
-        void onShowAlterFee(String absoluteFeeSuggested, String body, int positiveAction, int negativeAction);
-
-        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue);
-
-        void onShowBIP38PassphrasePrompt(String scanData);
-
-        void finishPage();
-
-        void onNameLoaded(String name);
-
-        void showProgressDialog();
-
-        void dismissProgressDialog();
-
-        void setDestinationAddress(String btcAddress);
-
-        void setMaxAvailable(String max);
-
-        void setMaxAvailableColor(@ColorRes int color);
-
-        void setMaxAvailableVisible(boolean visible);
-
-        void setEstimate(String estimateText);
-
-        void setEstimateColor(@ColorRes int color);
-
-        void setCustomFeeColor(@ColorRes int color);
-
-        void setUnconfirmedFunds(String notice);
-
-        void showSecondPasswordDialog();
-    }
-
-    SendViewModel(DataListener dataListener) {
+    SendViewModel(SendContract.DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
+        this.dataListener = dataListener;
 
         int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         double exchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
 
-        this.dataListener = dataListener;
         monetaryUtil = new MonetaryUtil(btcUnit);
         payment = new Payment();
 
@@ -226,13 +153,30 @@ public class SendViewModel extends BaseViewModel {
                         contactsDataManager.getContactList()
                                 .filter(ContactsPredicates.filterById(contactId))
                                 .subscribe(
-                                        contact -> dataListener.onNameLoaded(contact.getName()),
+                                        contact -> dataListener.setContactName(contact.getName()),
                                         throwable -> dataListener.finishPage()));
             }
 
             if (scanData != null) {
                 handleIncomingQRScan(scanData, metricInputFlag);
             }
+        }
+    }
+
+    void onSendClicked(String customFee, String amount, boolean bypassFeeCheck, String address) {
+        if (contactMdid != null) {
+            if (isValidSpend(sendModel.pendingTransaction, true)) {
+                compositeDisposable.add(
+                        contactsDataManager.getContactList()
+                                .filter(ContactsPredicates.filterByMdid(contactMdid))
+                                .subscribe(
+                                        contact -> dataListener.navigateToAddNote(contact.getName(), PaymentRequestType.SEND),
+                                        throwable -> {
+                                            // No-op
+                                        }));
+            }
+        } else {
+            setupTransaction(customFee, amount, () -> sendClicked(bypassFeeCheck, address));
         }
     }
 
@@ -251,7 +195,7 @@ public class SendViewModel extends BaseViewModel {
     void setContact(@Nullable Contact contact) {
         if (contact != null) {
             contactMdid = contact.getMdid();
-            dataListener.onNameLoaded(contact.getName());
+            dataListener.setContactName(contact.getName());
         } else {
             contactMdid = null;
         }
@@ -284,7 +228,7 @@ public class SendViewModel extends BaseViewModel {
 
         if (result.size() == 1) {
             //Only a single account/address available in wallet
-            if (dataListener != null) dataListener.onHideSendingAddressField();
+            if (dataListener != null) dataListener.hideSendingAddressField();
             calculateTransactionAmounts(result.get(0), null, null, null);
         }
 
@@ -295,7 +239,7 @@ public class SendViewModel extends BaseViewModel {
 
         if (result.size() == 1) {
             //Only a single account/address available in wallet and no addressBook entries
-            if (dataListener != null) dataListener.onHideReceivingAddressField();
+            if (dataListener != null) dataListener.hideReceivingAddressField();
         }
 
         return result;
@@ -326,7 +270,7 @@ public class SendViewModel extends BaseViewModel {
             if (BigInteger.valueOf(lamount).compareTo(BigInteger.valueOf(2100000000000000L)) == 1) {
                 if (dataListener != null) {
                     dataListener.showInvalidAmount();
-                    dataListener.onUpdateBtcAmount("");
+                    dataListener.updateBtcAmount("");
                 }
                 return true;
             }
@@ -371,7 +315,7 @@ public class SendViewModel extends BaseViewModel {
                     dec = dec.substring(1);
                     if (dec.length() > maxLen) {
                         if (dataListener != null) {
-                            dataListener.onUpdateBtcAmount(btcAmountText.substring(0, btcAmountText.length() - 1));
+                            dataListener.updateBtcAmount(btcAmountText.substring(0, btcAmountText.length() - 1));
                         }
                     }
                 }
@@ -444,7 +388,7 @@ public class SendViewModel extends BaseViewModel {
             }
             double btcAmount = fiatAmount / sendModel.exchangeRate;
             if (dataListener != null) {
-                dataListener.onUpdateBtcAmount(monetaryUtil.getBTCFormat().format(monetaryUtil.getDenominatedAmount(btcAmount)));
+                dataListener.updateBtcAmount(monetaryUtil.getBTCFormat().format(monetaryUtil.getDenominatedAmount(btcAmount)));
             }
             sendModel.textChangeAllowed = true;
         }
@@ -492,7 +436,7 @@ public class SendViewModel extends BaseViewModel {
                 dataListener.onRemoveBtcTextChangeListener();
                 dataListener.onRemoveFiatTextChangeListener();
 
-                dataListener.onUpdateBtcAmount(btcAmount);
+                dataListener.updateBtcAmount(btcAmount);
 
                 double doubleBtcAmount;
 
@@ -667,8 +611,9 @@ public class SendViewModel extends BaseViewModel {
 
             if (spendAll) {
                 amountToSend = BigInteger.valueOf(balanceAfterFee);
-                if (dataListener != null)
+                if (dataListener != null) {
                     dataListener.onSetSpendAllAmount(getTextFromSatoshis(balanceAfterFee));
+                }
             }
 
             BigInteger feePerKb = sendModel.suggestedFee.defaultFeePerKb;
@@ -831,10 +776,18 @@ public class SendViewModel extends BaseViewModel {
         return estimateText;
     }
 
-    /**
-     * //TODO could be improved Sanity checks before prompting confirmation
-     */
-    void sendClicked(boolean bypassFeeCheck, String address) {
+    private void setupTransaction(String customFeeText,
+                                  String amount,
+                                  TransactionDataListener transactionDataListener) {
+        ItemAccount selectedItem = getSendingItemAccount();
+        setSendingAddress(selectedItem);
+        calculateTransactionAmounts(selectedItem,
+                amount,
+                customFeeText,
+                transactionDataListener);
+    }
+
+    private void sendClicked(boolean bypassFeeCheck, String address) {
         checkClipboardPaste(address);
         if (FormatsUtil.getInstance().isValidBitcoinAddress(address)) {
             //Receiving address manual or scanned input
@@ -842,7 +795,7 @@ public class SendViewModel extends BaseViewModel {
         }
 
         if (bypassFeeCheck || isFeeAdequate()) {
-            if (isValidSpend(sendModel.pendingTransaction)) {
+            if (isValidSpend(sendModel.pendingTransaction, false)) {
                 LegacyAddress legacyAddress = null;
 
                 if (!sendModel.pendingTransaction.isHD()) {
@@ -984,14 +937,14 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Various checks on validity of transaction details
      */
-    private boolean isValidSpend(PendingTransaction pendingTransaction) {
-        //Validate amount
+    private boolean isValidSpend(PendingTransaction pendingTransaction, boolean checkAmountsOnly) {
+        // Validate amount
         if (!isValidAmount(pendingTransaction.bigIntAmount)) {
             if (dataListener != null) dataListener.showInvalidAmount();
             return false;
         }
 
-        //Validate sufficient funds
+        // Validate sufficient funds
         if (pendingTransaction.unspentOutputBundle == null || pendingTransaction.unspentOutputBundle.getSpendableOutputs() == null) {
             showToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR);
             return false;
@@ -1005,18 +958,6 @@ public class SendViewModel extends BaseViewModel {
             dataListener.setCustomFeeColor(R.color.primary_text_default_material_light);
         }
 
-        //Validate addresses
-        if (pendingTransaction.receivingAddress == null || !FormatsUtil.getInstance().isValidBitcoinAddress(pendingTransaction.receivingAddress)) {
-            showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
-            return false;
-        }
-
-        //Validate send and receive not same addresses
-        if (pendingTransaction.sendingObject == pendingTransaction.receivingObject) {
-            showToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
-            return false;
-        }
-
         if (pendingTransaction.unspentOutputBundle == null) {
             showToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR);
             return false;
@@ -1027,11 +968,24 @@ public class SendViewModel extends BaseViewModel {
             return false;
         }
 
+        if (!checkAmountsOnly) {
+            // Validate addresses
+            if (pendingTransaction.receivingAddress == null || !FormatsUtil.getInstance().isValidBitcoinAddress(pendingTransaction.receivingAddress)) {
+                showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
+                return false;
+            }
 
-        if (sendModel.pendingTransaction.receivingObject != null
-                && sendModel.pendingTransaction.receivingObject.accountObject == sendModel.pendingTransaction.sendingObject.accountObject) {
-            showToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
-            return false;
+            // Validate send and receive not same addresses
+            if (pendingTransaction.sendingObject == pendingTransaction.receivingObject) {
+                showToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
+                return false;
+            }
+
+            if (sendModel.pendingTransaction.receivingObject != null
+                    && sendModel.pendingTransaction.receivingObject.accountObject == sendModel.pendingTransaction.sendingObject.accountObject) {
+                showToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
+                return false;
+            }
         }
 
         return true;
@@ -1098,7 +1052,7 @@ public class SendViewModel extends BaseViewModel {
 
         // Test that amount does not exceed btc limit
         if (bAmount.compareTo(BigInteger.valueOf(2100000000000000L)) == 1) {
-            if (dataListener != null) dataListener.onUpdateBtcAmount("0");
+            if (dataListener != null) dataListener.updateBtcAmount("0");
             return false;
         }
 
@@ -1109,7 +1063,7 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Executes transaction //TODO implement transaction queue for when transaction fails
      */
-    public void submitPayment(AlertDialog alertDialog) {
+    void submitPayment(AlertDialog alertDialog) {
         String changeAddress;
         List<ECKey> keys = new ArrayList<>();
         Account account;
