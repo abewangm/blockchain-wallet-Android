@@ -186,7 +186,7 @@ public class ContactDetailActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void onTransactionNotesRequested(String contactName, PaymentRequestType paymentRequestType) {
+    public void onTransactionNotesRequested(String contactName, PaymentRequestType paymentRequestType, long satoshis) {
         // No-op
     }
 }

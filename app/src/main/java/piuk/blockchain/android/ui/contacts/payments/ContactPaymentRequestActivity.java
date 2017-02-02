@@ -19,7 +19,6 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 public class ContactPaymentRequestActivity extends BaseAuthActivity implements
-        ContactsPaymentRequestViewModel.DataListener,
         ContactPaymentRequestNotesFragment.FragmentInteractionListener,
         ContactPaymentRequestAmountFragment.FragmentInteractionListener {
 
@@ -34,7 +33,7 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contact_payment_request);
-        viewModel = new ContactsPaymentRequestViewModel(this);
+//        viewModel = new ContactsPaymentRequestViewModel(this);
 
         binding.toolbar.toolbarGeneral.setTitle(R.string.contacts_payment_request_title);
         setSupportActionBar(binding.toolbar.toolbarGeneral);
@@ -48,23 +47,23 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
 
         viewModel.onViewReady();
 
-        viewModel.loadContact(getIntent().getStringExtra(KEY_EXTRA_CONTACT_ID));
+//        viewModel.loadContact(getIntent().getStringExtra(KEY_EXTRA_CONTACT_ID));
     }
 
-    @Override
+//    @Override
     public void contactLoaded() {
-        submitFragmentTransaction(
-                ContactPaymentRequestNotesFragment.newInstance(
-                        getPaymentRequestType(),
-                        viewModel.getContactName()));
+//        submitFragmentTransaction(
+//                ContactPaymentRequestNotesFragment.newInstance(
+//                        getPaymentRequestType(),
+//                        viewModel.getContactName()));
     }
 
-    @Override
+//    @Override
     public PaymentRequestType getPaymentRequestType() {
         return (PaymentRequestType) getIntent().getSerializableExtra(KEY_EXTRA_REQUEST_TYPE);
     }
 
-    @Override
+//    @Override
     public void finishPage() {
         Intent intent = new Intent(this, ContactsListActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -77,12 +76,12 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
         viewModel.destroy();
     }
 
-    @Override
+//    @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
 
-    @Override
+//    @Override
     public void showSendSuccessfulDialog(String name) {
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(getString(R.string.contacts_payment_success_waiting_title, name))
@@ -91,7 +90,7 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
                 .show();
     }
 
-    @Override
+//    @Override
     public void showRequestSuccessfulDialog() {
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.contacts_payment_success_request_sent_title)
@@ -122,33 +121,17 @@ public class ContactPaymentRequestActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void onNextSelected(String note) {
-        viewModel.onNoteSet(note);
-        submitFragmentTransaction(
-                ContactPaymentRequestAmountFragment.newInstance(
-                        getPaymentRequestType(),
-                        viewModel.getContactName()));
+    public void onPageFinished() {
+//        viewModel.onNoteSet(note);
+//        submitFragmentTransaction(
+//                ContactPaymentRequestAmountFragment.newInstance(
+//                        getPaymentRequestType(),
+//                        viewModel.getContactName()));
     }
 
     @Override
     public void onFinishSelected(long satoshis, int accountPosition) {
-        viewModel.onAmountSet(satoshis, accountPosition);
-    }
-
-    @Override
-    public void showProgressDialog() {
-        progressDialog = new MaterialProgressDialog(this);
-        progressDialog.setCancelable(false);
-        progressDialog.setMessage(R.string.please_wait);
-        progressDialog.show();
-    }
-
-    @Override
-    public void dismissProgressDialog() {
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-            progressDialog = null;
-        }
+//        viewModel.onAmountSet(satoshis, accountPosition);
     }
 
 }

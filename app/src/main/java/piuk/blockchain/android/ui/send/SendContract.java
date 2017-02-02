@@ -82,7 +82,7 @@ interface SendContract {
 
         void showSecondPasswordDialog();
 
-        void navigateToAddNote(String contactName, PaymentRequestType paymentRequestType);
+        void navigateToAddNote(String contactId, PaymentRequestType paymentRequestType, long satoshis);
     }
 
 }

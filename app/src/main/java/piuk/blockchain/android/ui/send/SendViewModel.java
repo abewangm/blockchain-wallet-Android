@@ -164,16 +164,18 @@ public class SendViewModel extends BaseViewModel {
     }
 
     void onSendClicked(String customFee, String amount, boolean bypassFeeCheck, String address) {
-        if (contactMdid != null) {
+        // Contact selected but no FacilitationTransaction to respond to
+        if (fctxId == null && contactMdid != null) {
             if (isValidSpend(sendModel.pendingTransaction, true)) {
                 compositeDisposable.add(
                         contactsDataManager.getContactList()
                                 .filter(ContactsPredicates.filterByMdid(contactMdid))
                                 .subscribe(
-                                        contact -> dataListener.navigateToAddNote(contact.getName(), PaymentRequestType.SEND),
-                                        throwable -> {
-                                            // No-op
-                                        }));
+                                        contact -> dataListener.navigateToAddNote(
+                                                contact.getId(),
+                                                PaymentRequestType.SEND,
+                                                sendModel.pendingTransaction.bigIntAmount.intValue()),
+                                        throwable -> showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR)));
             }
         } else {
             setupTransaction(customFee, amount, () -> sendClicked(bypassFeeCheck, address));

@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="56dp"
-            android:text="@string/next"
+            android:text="@string/SEND"
             android:theme="@style/ButtonBlue" />
 
     </LinearLayout>

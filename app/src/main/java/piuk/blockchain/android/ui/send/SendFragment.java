@@ -738,8 +738,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public void navigateToAddNote(String contactName, PaymentRequestType paymentRequestType) {
-        if (listener != null) listener.onTransactionNotesRequested(contactName, paymentRequestType);
+    public void navigateToAddNote(String contactId, PaymentRequestType paymentRequestType, long satoshis) {
+        if (listener != null) listener.onTransactionNotesRequested(contactId, paymentRequestType, satoshis);
     }
 
     private void setBtcTextWatcher() {
@@ -1013,6 +1013,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue);
 
-        void onTransactionNotesRequested(String contactName, PaymentRequestType paymentRequestType);
+        void onTransactionNotesRequested(String contactName, PaymentRequestType paymentRequestType, long satoshis);
     }
 }

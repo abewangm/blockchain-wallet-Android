@@ -286,6 +286,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             ((SendFragment) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
             ((ReceiveFragment) getCurrentFragment()).onBackPressed();
+        } else if (getCurrentFragment() instanceof ContactPaymentRequestNotesFragment) {
+            // Remove Notes fragment from stack
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction().remove(getCurrentFragment()).commit();
         } else {
             // Switch to balance fragment
             BalanceFragment fragment = new BalanceFragment();
@@ -697,13 +701,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     }
 
     @Override
-    public void onTransactionNotesRequested(String contactName, PaymentRequestType paymentRequestType) {
-        addFragment(
-                ContactPaymentRequestNotesFragment.newInstance(paymentRequestType, contactName));
+    public void onTransactionNotesRequested(String contactId, PaymentRequestType paymentRequestType, long satoshis) {
+        addFragment(ContactPaymentRequestNotesFragment.newInstance(paymentRequestType, contactId, satoshis));
     }
 
     @Override
-    public void onNextSelected(String note) {
-        // TODO: 02/02/2017
+    public void onPageFinished() {
+        onStartBalanceFragment();
     }
 }
