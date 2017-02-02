@@ -16,6 +16,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -23,6 +24,7 @@ import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -53,6 +55,7 @@ import piuk.blockchain.android.databinding.FragmentSendBinding;
 import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
+import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
@@ -98,6 +101,15 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     private int selectedAccountPosition = -1;
     private long backPressed;
+    private final Handler dialogHandler = new Handler();
+    private final Runnable dialogRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (transactionSuccessDialog != null && transactionSuccessDialog.isShowing()) {
+                transactionSuccessDialog.dismiss();
+            }
+        }
+    };
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -153,12 +165,10 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         }
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_send, container, false);
-        viewModel = new SendViewModel(getContext(), this);
-        binding.setViewModel(viewModel);
+        viewModel = new SendViewModel(this);
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        setupToolbar();
         setCustomKeypad();
         setupViews();
         setHasOptionsMenu(true);
@@ -180,6 +190,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     @Override
     public void onResume() {
         super.onResume();
+        setupToolbar();
         IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
 
@@ -195,8 +206,9 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     private void setupToolbar() {
-        if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.send_bitcoin);
+        ActionBar supportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (supportActionBar != null) {
+            supportActionBar.setTitle(R.string.send_bitcoin);
 
             AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.appbar_layout);
             if (appBarLayout != null) {
@@ -241,7 +253,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                 if (ConnectivityStatus.hasConnectivity(getActivity())) {
                     sendClicked(binding.customFee.getText().toString(), () -> viewModel.sendClicked(false, binding.destination.getText().toString()));
                 } else {
-                    ToastCustom.makeText(getActivity(), getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                    showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
                 }
                 return true;
             default:
@@ -254,7 +266,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
             Intent intent = new Intent(getActivity(), CaptureActivity.class);
             startActivityForResult(intent, code);
         } else {
-            ToastCustom.makeText(getActivity(), getString(R.string.camera_unavailable), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
         }
     }
 
@@ -350,7 +362,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     public void onExitConfirmToast() {
-        ToastCustom.makeText(getActivity(), getString(R.string.exit_confirm), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
+        showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL);
     }
 
     @Override
@@ -517,8 +529,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     @Override
-    public void onShowInvalidAmount() {
-        onShowToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR);
+    public void showInvalidAmount() {
+        showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR);
     }
 
     @Override
@@ -544,6 +556,52 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     @Override
+    public void setDestinationAddress(String btcAddress) {
+        binding.destination.setText(btcAddress);
+    }
+
+    @Override
+    public void setMaxAvailable(String max) {
+        binding.max.setText(max);
+    }
+
+    @Override
+    public void setEstimate(String estimate) {
+        binding.tvEstimate.setText(estimate);
+    }
+
+    @Override
+    public void setEstimateColor(@ColorRes int color) {
+        binding.tvEstimate.setTextColor(ContextCompat.getColor(getContext(), color));
+    }
+
+    @Override
+    public void setCustomFeeColor(@ColorRes int color) {
+        binding.customFee.setTextColor(ContextCompat.getColor(getContext(), color));
+    }
+
+    @Override
+    public void setUnconfirmedFunds(String warning) {
+        binding.unconfirmedFundsWarning.setText(warning);
+    }
+
+    @Override
+    public void setMaxAvailableVisible(boolean visible) {
+        if (visible) {
+            binding.max.setVisibility(View.VISIBLE);
+            binding.progressBarMaxAvailable.setVisibility(View.GONE);
+        } else {
+            binding.max.setVisibility(View.GONE);
+            binding.progressBarMaxAvailable.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void setMaxAvailableColor(@ColorRes int color) {
+        binding.max.setTextColor(ContextCompat.getColor(getContext(), color));
+    }
+
+    @Override
     public void onRemoveFiatTextChangeListener() {
         binding.amountRow.amountFiat.removeTextChangedListener(fiatTextWatcher);
     }
@@ -554,8 +612,23 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     @Override
-    public void onShowToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
+    public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
+    public void showSecondPasswordDialog() {
+        new SecondPasswordHandler(getContext()).validate(new SecondPasswordHandler.ResultListener() {
+            @Override
+            public void onNoSecondPassword() {
+                viewModel.onNoSecondPassword();
+            }
+
+            @Override
+            public void onSecondPasswordValidated(String validateSecondPassword) {
+                viewModel.onSecondPasswordValidated(validateSecondPassword);
+            }
+        });
     }
 
     @Override
@@ -592,20 +665,11 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
     }
 
     private void finishAndNotifySuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue) {
-        if (listener != null)
+        if (listener != null) {
             listener.onSendPaymentSuccessful(mdid, hash, fctxId, transactionValue);
+        }
         finishPage();
     }
-
-    private final Handler dialogHandler = new Handler();
-    private final Runnable dialogRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (transactionSuccessDialog != null && transactionSuccessDialog.isShowing()) {
-                transactionSuccessDialog.dismiss();
-            }
-        }
-    };
 
     @Override
     public void onShowBIP38PassphrasePrompt(String scanData) {
@@ -786,7 +850,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                 dialogBinding.confirmSend.setClickable(false);
                 viewModel.submitPayment(alertDialog);
             } else {
-                ToastCustom.makeText(getActivity(), getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
                 // Queue tx here
             }
         });

@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <data>
-
-        <variable
-            name="viewModel"
-            type="piuk.blockchain.android.ui.send.SendViewModel" />
-    </data>
-
     <RelativeLayout
         android:id="@+id/main_layout"
         android:layout_width="match_parent"
@@ -116,7 +109,6 @@
                                 android:hint="@string/to_field_helper"
                                 android:inputType="textNoSuggestions"
                                 android:lineSpacingMultiplier="0.8"
-                                android:text="@{viewModel.sendModel.destinationAddress}"
                                 android:textCursorDrawable="@null"
                                 android:textSize="16sp" />
 
@@ -146,10 +138,7 @@
                         android:layout_gravity="center_horizontal|center_vertical"
                         android:gravity="center_horizontal|center_vertical"
                         android:padding="16dp"
-                        android:text="@{viewModel.sendModel.maxAvailable}"
-                        android:textAlignment="gravity"
-                        android:textColor="@{viewModel.sendModel.maxAvailableColor}"
-                        android:visibility="@{viewModel.sendModel.maxAvailableVisibility}" />
+                        android:textAlignment="gravity" />
 
                     <include layout="@layout/divider_grey" />
 
@@ -161,8 +150,7 @@
                         android:layout_gravity="center"
                         android:gravity="center_horizontal|center_vertical"
                         android:paddingBottom="16dp"
-                        android:paddingTop="16dp"
-                        android:visibility="@{viewModel.sendModel.maxAvailableProgressVisibility}" />
+                        android:paddingTop="16dp" />
 
                 </LinearLayout>
 
@@ -204,8 +192,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="number|numberDecimal"
-                                android:maxLines="1"
-                                android:textColor="@{viewModel.sendModel.customFeeColor}" />
+                                android:maxLines="1" />
 
                         </android.support.design.widget.TextInputLayout>
 
@@ -221,9 +208,7 @@
                             android:id="@+id/tv_estimate"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:text="@{viewModel.sendModel.estimate}"
-                            android:textColor="@{viewModel.sendModel.estimateColor}" />
+                            android:gravity="center" />
 
                     </LinearLayout>
 
@@ -236,7 +221,6 @@
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
                     android:gravity="center"
-                    android:text="@{viewModel.sendModel.unconfirmedFunds}"
                     android:textColor="@color/blockchain_send_red" />
 
             </LinearLayout>
