@@ -12,6 +12,7 @@ import info.blockchain.wallet.payload.PayloadManager;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Completable;
@@ -435,6 +436,31 @@ public class ContactsDataManager {
     public Completable markMessageAsRead(String messageId, boolean markAsRead) {
         return callWithToken(() -> contactsService.markMessageAsRead(messageId, markAsRead))
                 .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // FACILITATED TRANSACTIONS
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Returns a stream of {@link FacilitatedTransaction} objects where the transaction is yet to
+     * be completed, ie the hash is empty.
+     *
+     * @return An {@link Observable} stream of {@link FacilitatedTransaction} objects
+     */
+    @SuppressWarnings("Convert2streamapi")
+    public Observable<FacilitatedTransaction> getUnfulfilledFacilitatedTransactions() {
+        ArrayList<FacilitatedTransaction> transactions = new ArrayList<>();
+        for (Contact contact : getContactList().toList().blockingGet()) {
+            for (FacilitatedTransaction transaction : contact.getFacilitatedTransaction().values()) {
+                // If hash is null, transaction has not been completed
+                if (transaction.getTx_hash() == null || transaction.getTx_hash().isEmpty()) {
+                    transactions.add(transaction);
+                }
+            }
+        }
+
+        return Observable.fromIterable(transactions);
     }
 
 }

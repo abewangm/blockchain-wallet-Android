@@ -24,8 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 
-import info.blockchain.wallet.transaction.Tx;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -322,10 +320,17 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
 
-        transactionAdapter = new BalanceListAdapter(viewModel.getTransactionList(), viewModel.getPrefsUtil(), viewModel.getMonetaryUtil(), dateUtil, lastPrice, isBTC);
+        transactionAdapter = new BalanceListAdapter(
+                viewModel.getTransactionList(),
+                viewModel.getPrefsUtil(),
+                viewModel.getMonetaryUtil(),
+                viewModel.stringUtils,
+                dateUtil,
+                lastPrice,
+                isBTC);
         transactionAdapter.setTxListClickListener(new BalanceListAdapter.TxListClickListener() {
             @Override
-            public void onRowClicked(int position) {
+            public void onTransactionClicked(int position) {
                 goToTransactionDetail(position);
             }
 
@@ -334,6 +339,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 isBTC = isBtc;
                 viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
                 viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBtc);
+            }
+
+            @Override
+            public void onFctxClicked(String fctxId) {
+                // TODO: 03/02/2017
             }
         });
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -411,7 +421,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void onRefreshBalanceAndTransactions() {
         // Notify adapter of change, let DiffUtil work out what needs changing
-        List<Tx> newTransactions = new ArrayList<>();
+        List<Object> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
         transactionAdapter.onTransactionsUpdated(newTransactions);
         binding.balanceLayout.post(() -> setToolbarOffset(0));

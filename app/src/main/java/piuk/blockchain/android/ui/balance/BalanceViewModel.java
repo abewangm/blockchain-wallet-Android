@@ -5,7 +5,6 @@ import com.google.common.collect.HashBiMap;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.api.Settings;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -23,8 +22,8 @@ import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
@@ -49,7 +48,7 @@ public class BalanceViewModel extends BaseViewModel {
     @Inject PayloadManager payloadManager;
     @Inject StringUtils stringUtils;
     @Inject TransactionListDataManager transactionListDataManager;
-    @VisibleForTesting CompositeDisposable compositeDisposable;
+    @Inject ContactsDataManager contactsDataManager;
 
     public interface DataListener {
 
@@ -79,7 +78,6 @@ public class BalanceViewModel extends BaseViewModel {
         activeAccountAndAddressList = new ArrayList<>();
         activeAccountAndAddressBiMap = HashBiMap.create();
         transactionList = new ArrayList<>();
-        compositeDisposable = new CompositeDisposable();
     }
 
     @Override
@@ -124,32 +122,7 @@ public class BalanceViewModel extends BaseViewModel {
         }
     }
 
-    public PrefsUtil getPrefsUtil() {
-        return prefsUtil;
-    }
-
-    /**
-     * Saves value of true to prevent users from seeing the backup prompt again
-     */
-    public void neverPromptBackup() {
-        prefsUtil.setValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER, true);
-    }
-
-    /**
-     * Saves value of true to prevent users from seeing the 2FA prompt again
-     */
-    public void neverPrompt2Fa() {
-        prefsUtil.setValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER, true);
-    }
-
-    public MonetaryUtil getMonetaryUtil() {
-        return new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
-    }
-
-    public List<ItemAccount> getActiveAccountAndAddressList() {
-        return activeAccountAndAddressList;
-    }
-
+    @SuppressWarnings("Convert2streamapi")
     public void updateAccountList() {
         //activeAccountAndAddressList is linked to Adapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
         activeAccountAndAddressList.clear();
@@ -182,7 +155,6 @@ public class BalanceViewModel extends BaseViewModel {
 
         //"All" - total balance
         if (activeAccounts.size() > 1 || activeLegacyAddresses.size() > 0) {
-
             if (payloadManager.getPayload().isUpgraded()) {
 
                 //Only V3 will display "All"
@@ -222,8 +194,8 @@ public class BalanceViewModel extends BaseViewModel {
         int accountIndex = 0;
         for (Account item : activeAccounts) {
 
-            if (item.getLabel().trim().length() == 0)
-                item.setLabel("Account: " + accountIndex);//Give unlabeled account a label
+            //Give unlabeled account a label
+            if (item.getLabel().trim().length() == 0) item.setLabel("Account: " + accountIndex);
             String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(item));
             activeAccountAndAddressList.add(new ItemAccount(
                     item.getLabel(),
@@ -238,7 +210,6 @@ public class BalanceViewModel extends BaseViewModel {
 
         //Add "Imported Addresses" or "Total Funds" to map
         if (payloadManager.getPayload().isUpgraded() && activeLegacyAddresses.size() > 0) {
-
             //Only V3 - Consolidate and add Legacy addresses to "Imported Addresses" at bottom of accounts spinner
             ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
                     payloadManager.getPayload().getLegacyAddressList(),
@@ -256,7 +227,6 @@ public class BalanceViewModel extends BaseViewModel {
 
         } else {
             for (LegacyAddress legacyAddress : activeLegacyAddresses) {
-
                 //If address has no label, we'll display address
                 String labelOrAddress = legacyAddress.getLabel() == null ||
                         legacyAddress.getLabel().trim().length() == 0 ?
@@ -283,12 +253,8 @@ public class BalanceViewModel extends BaseViewModel {
         if (dataListener != null) dataListener.onRefreshAccounts();
     }
 
-    public PayloadManager getPayloadManager() {
-        return payloadManager;
-    }
-
-    public List<Tx> getTransactionList() {
-        return transactionList;
+    public List<Object> getTransactionList() {
+        return new ArrayList<>(transactionList);
     }
 
     public void onTransactionListRefreshed() {
@@ -304,9 +270,7 @@ public class BalanceViewModel extends BaseViewModel {
                         }));
     }
 
-    //TODO refactor isBTC out
     public void updateBalanceAndTransactionList(Intent intent, int accountSpinnerPosition, boolean isBTC) {
-
         Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);//the current selected item in dropdown (Account or Legacy Address)
 
         //If current selected item gets edited by another platform object might become null
@@ -318,7 +282,7 @@ public class BalanceViewModel extends BaseViewModel {
         transactionListDataManager.clearTransactionList();
         transactionListDataManager.generateTransactionList(object);
         transactionList = transactionListDataManager.getTransactionList();
-        double btc_balance = transactionListDataManager.getBtcBalance(object);
+        double btcBalance = transactionListDataManager.getBtcBalance(object);
 
         // Returning from SendFragment the following will happen
         // After sending btc we create a "placeholder" tx until websocket handler refreshes list
@@ -336,7 +300,7 @@ public class BalanceViewModel extends BaseViewModel {
             if (transactionList.get(0).getHash().isEmpty()) transactionList.remove(0);
         }
 
-        String balanceTotal = getBalanceString(isBTC, btc_balance);
+        String balanceTotal = getBalanceString(isBTC, btcBalance);
 
         if (dataListener != null) {
             dataListener.updateBalance(balanceTotal);
@@ -344,24 +308,70 @@ public class BalanceViewModel extends BaseViewModel {
         }
     }
 
+    private void updateFacilitatedTransactions() {
+        compositeDisposable.add(
+                contactsDataManager.fetchContacts()
+                        .andThen(contactsDataManager.getUnfulfilledFacilitatedTransactions())
+                        .toList()
+                        .subscribe(
+                                transactions -> {
+                                    // TODO: 03/02/2017
+                                }, throwable -> {
+                                    // TODO: 03/02/2017
+                                }));
+    }
+
+    @NonNull
+    private String getBalanceString(boolean isBTC, double btcBalance) {
+        double fiatBalance;
+        String strFiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(strFiat);
+        fiatBalance = lastPrice * (btcBalance / 1e8);
+
+        String balanceTotal;
+        balanceTotal =
+                isBTC ? getMonetaryUtil().getDisplayAmountWithFormatting(btcBalance) + " " + getDisplayUnits()
+                        : getMonetaryUtil().getFiatFormat(strFiat).format(fiatBalance) + " " + strFiat;
+
+        return balanceTotal;
+    }
+
     public String getDisplayUnits() {
         return (String) getMonetaryUtil().getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
     }
 
-    @NonNull
-    private String getBalanceString(boolean isBTC, double btc_balance) {
-        double fiat_balance;//Update Balance
-        String strFiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double btc_fx = ExchangeRateFactory.getInstance().getLastPrice(strFiat);
-        fiat_balance = btc_fx * (btc_balance / 1e8);
+    /**
+     * Saves value of true to prevent users from seeing the backup prompt again
+     */
+    public void neverPromptBackup() {
+        prefsUtil.setValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER, true);
+    }
 
-        String balanceTotal;
-        if (isBTC) {
-            balanceTotal = (getMonetaryUtil().getDisplayAmountWithFormatting(btc_balance) + " " + getDisplayUnits());
-        } else {
-            balanceTotal = (getMonetaryUtil().getFiatFormat(strFiat).format(fiat_balance) + " " + strFiat);
-        }
-        return balanceTotal;
+    /**
+     * Saves value of true to prevent users from seeing the 2FA prompt again
+     */
+    public void neverPrompt2Fa() {
+        prefsUtil.setValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER, true);
+    }
+
+    public List<ItemAccount> getActiveAccountAndAddressList() {
+        return activeAccountAndAddressList;
+    }
+
+    public StringUtils getStringUtils() {
+        return stringUtils;
+    }
+
+    public PayloadManager getPayloadManager() {
+        return payloadManager;
+    }
+
+    public MonetaryUtil getMonetaryUtil() {
+        return new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
+    }
+
+    public PrefsUtil getPrefsUtil() {
+        return prefsUtil;
     }
 
     private boolean isBackedUp() {
@@ -400,4 +410,5 @@ public class BalanceViewModel extends BaseViewModel {
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }
+
 }
