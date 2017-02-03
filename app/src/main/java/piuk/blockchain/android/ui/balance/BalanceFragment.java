@@ -328,7 +328,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 dateUtil,
                 lastPrice,
                 isBTC);
-        transactionAdapter.setTxListClickListener(new BalanceListAdapter.TxListClickListener() {
+        transactionAdapter.setTxListClickListener(new BalanceListAdapter.BalanceListClickListener() {
             @Override
             public void onTransactionClicked(int position) {
                 goToTransactionDetail(position);
@@ -442,6 +442,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         }
 
         accountsAdapter.notifyBtcChanged(isBTC);
+        binding.rvTransactions.scrollToPosition(0);
+    }
+
+    public void updateFacilitatedTransactions() {
+        viewModel.updateFacilitatedTransactions();
     }
 
     @Override

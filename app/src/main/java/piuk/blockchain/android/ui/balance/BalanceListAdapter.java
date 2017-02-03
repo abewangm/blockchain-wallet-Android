@@ -1,8 +1,10 @@
 package piuk.blockchain.android.ui.balance;
 
 import android.graphics.Color;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
@@ -27,20 +29,20 @@ import piuk.blockchain.android.util.StringUtils;
 
 class BalanceListAdapter extends RecyclerView.Adapter {
 
-    private static final int ITEM_TYPE_HEADER = 0;
-    private static final int ITEM_TYPE_FCTX = 1;
-    private static final int ITEM_TYPE_TRANSACTION = 2;
+    private static final int VIEW_TYPE_HEADER = 0;
+    private static final int VIEW_TYPE_FCTX = 1;
+    private static final int VIEW_TYPE_TRANSACTION = 2;
 
-    private List<Object> transactions;
+    private List<Object> objects;
     private PrefsUtil prefsUtil;
     private MonetaryUtil monetaryUtil;
     private StringUtils stringUtils;
     private DateUtil dateUtil;
     private double btcExchangeRate;
     private boolean isBtc;
-    private TxListClickListener listClickListener;
+    private BalanceListClickListener listClickListener;
 
-    BalanceListAdapter(List<Object> transactions,
+    BalanceListAdapter(List<Object> objects,
                        PrefsUtil prefsUtil,
                        MonetaryUtil monetaryUtil,
                        StringUtils stringUtils,
@@ -48,7 +50,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
                        double btcExchangeRate,
                        boolean isBtc) {
 
-        this.transactions = transactions;
+        this.objects = objects;
         this.prefsUtil = prefsUtil;
         this.monetaryUtil = monetaryUtil;
         this.stringUtils = stringUtils;
@@ -60,10 +62,10 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
-            case ITEM_TYPE_HEADER:
+            case VIEW_TYPE_HEADER:
                 View header = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_accounts_row_header, parent, false);
                 return new HeaderViewHolder(header);
-            case ITEM_TYPE_FCTX:
+            case VIEW_TYPE_FCTX:
                 View fctxView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact_transactions, parent, false);
                 return new FctxViewHolder(fctxView);
             default:
@@ -75,10 +77,10 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         switch (getItemViewType(position)) {
-            case ITEM_TYPE_HEADER:
+            case VIEW_TYPE_HEADER:
                 bindHeaderView(holder, position);
                 break;
-            case ITEM_TYPE_FCTX:
+            case VIEW_TYPE_FCTX:
                 bindFctxView(holder, position);
                 break;
             default:
@@ -88,14 +90,14 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     }
 
     private void bindHeaderView(RecyclerView.ViewHolder holder, int position) {
-        HeaderViewHolder headerViewHolder = (HeaderViewHolder) holder;
-        final String header = (String) transactions.get(position);
+        final HeaderViewHolder headerViewHolder = (HeaderViewHolder) holder;
+        final String header = (String) objects.get(position);
         headerViewHolder.header.setText(header);
     }
 
     private void bindFctxView(RecyclerView.ViewHolder holder, int position) {
-        FctxViewHolder fctxViewHolder = (FctxViewHolder) holder;
-        final FacilitatedTransaction transaction = (FacilitatedTransaction) transactions.get(position);
+        final FctxViewHolder fctxViewHolder = (FctxViewHolder) holder;
+        final FacilitatedTransaction transaction = (FacilitatedTransaction) objects.get(position);
 
         // Click listener
         holder.itemView.setOnClickListener(view -> {
@@ -149,26 +151,17 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         double fiatBalance = btcExchangeRate * btcBalance;
 
         String fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        Spannable spannable;
-        if (isBtc) {
-            spannable = Spannable.Factory.getInstance().newSpannable(
-                    monetaryUtil.getDisplayAmountWithFormatting(Math.abs(transaction.getIntended_amount())) + " " + getDisplayUnits());
-            spannable.setSpan(
-                    new RelativeSizeSpan(0.67f), spannable.length() - getDisplayUnits().length(), spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        } else {
-            spannable = Spannable.Factory.getInstance().newSpannable(
-                    monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatBalance)) + " " + fiatString);
-            spannable.setSpan(
-                    new RelativeSizeSpan(0.67f), spannable.length() - 3, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
 
-        fctxViewHolder.title.setText(spannable + " " + fctxViewHolder.title.getText());
+        fctxViewHolder.title.setText(
+                getDisplaySpannable(transaction.getIntended_amount(), fiatBalance, fiatString)
+                        + " "
+                        + fctxViewHolder.title.getText());
     }
 
     private void bindTxView(RecyclerView.ViewHolder holder, int position) {
-        TxViewHolder txViewHolder = (TxViewHolder) holder;
+        final TxViewHolder txViewHolder = (TxViewHolder) holder;
+        final Tx tx = (Tx) objects.get(position);
         String fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        final Tx tx = (Tx) transactions.get(position);
         double btcBalance = tx.getAmount() / 1e8;
         double fiatBalance = btcExchangeRate * btcBalance;
 
@@ -176,68 +169,44 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         txViewHolder.timeSince.setText(dateUtil.formatted(tx.getTS()));
 
         String dirText = tx.getDirection();
-        if (dirText.equals(MultiAddrFactory.MOVED))
-            txViewHolder.direction.setText(txViewHolder.direction.getContext().getResources().getString(R.string.MOVED));
-        if (dirText.equals(MultiAddrFactory.RECEIVED))
-            txViewHolder.direction.setText(txViewHolder.direction.getContext().getResources().getString(R.string.RECEIVED));
-        if (dirText.equals(MultiAddrFactory.SENT))
-            txViewHolder.direction.setText(txViewHolder.direction.getContext().getResources().getString(R.string.SENT));
-
-        Spannable spannable;
-        if (isBtc) {
-            spannable = Spannable.Factory.getInstance().newSpannable(
-                    monetaryUtil.getDisplayAmountWithFormatting(Math.abs(tx.getAmount())) + " " + getDisplayUnits());
-            spannable.setSpan(
-                    new RelativeSizeSpan(0.67f), spannable.length() - getDisplayUnits().length(), spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        } else {
-            spannable = Spannable.Factory.getInstance().newSpannable(
-                    monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatBalance)) + " " + fiatString);
-            spannable.setSpan(
-                    new RelativeSizeSpan(0.67f), spannable.length() - 3, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        switch (dirText) {
+            case MultiAddrFactory.MOVED:
+                txViewHolder.direction.setText(txViewHolder.direction.getContext().getResources().getString(R.string.MOVED));
+                break;
+            case MultiAddrFactory.RECEIVED:
+                txViewHolder.direction.setText(txViewHolder.direction.getContext().getResources().getString(R.string.RECEIVED));
+                break;
+            case MultiAddrFactory.SENT:
+                txViewHolder.direction.setText(txViewHolder.direction.getContext().getResources().getString(R.string.SENT));
+                break;
         }
 
-        txViewHolder.result.setText(spannable);
+        txViewHolder.result.setText(getDisplaySpannable(tx.getAmount(), fiatBalance, fiatString));
 
-        int nbConfirmations = 3;
         if (tx.isMove()) {
             txViewHolder.result.setBackgroundResource(
-                    tx.getConfirmations() < nbConfirmations
-                            ? R.drawable.rounded_view_lighter_blue_50 : R.drawable.rounded_view_lighter_blue);
+                    getColorForConfirmations(tx, R.drawable.rounded_view_lighter_blue_50, R.drawable.rounded_view_lighter_blue));
 
             txViewHolder.direction.setTextColor(ContextCompat.getColor(txViewHolder.direction.getContext(),
-                    tx.getConfirmations() < nbConfirmations
-                            ? R.color.blockchain_transfer_blue_50 : R.color.blockchain_transfer_blue));
+                    getColorForConfirmations(tx, R.color.blockchain_transfer_blue_50, R.color.blockchain_transfer_blue)));
 
         } else if (btcBalance < 0.0) {
             txViewHolder.result.setBackgroundResource(
-                    tx.getConfirmations() < nbConfirmations
-                            ? R.drawable.rounded_view_red_50 : R.drawable.rounded_view_red);
+                    getColorForConfirmations(tx, R.drawable.rounded_view_red_50, R.drawable.rounded_view_red));
 
             txViewHolder.direction.setTextColor(ContextCompat.getColor(txViewHolder.direction.getContext(),
-                    tx.getConfirmations() < nbConfirmations
-                            ? R.color.blockchain_red_50 : R.color.blockchain_send_red));
+                    getColorForConfirmations(tx, R.color.blockchain_red_50, R.color.blockchain_send_red)));
 
         } else {
             txViewHolder.result.setBackgroundResource(
-                    tx.getConfirmations() < nbConfirmations
-                            ? R.drawable.rounded_view_green_50 : R.drawable.rounded_view_green);
+                    getColorForConfirmations(tx, R.drawable.rounded_view_green_50, R.drawable.rounded_view_green));
 
             txViewHolder.direction.setTextColor(ContextCompat.getColor(txViewHolder.direction.getContext(),
-                    tx.getConfirmations() < nbConfirmations
-                            ? R.color.blockchain_green_50 : R.color.blockchain_receive_green));
+                    getColorForConfirmations(tx, R.color.blockchain_green_50, R.color.blockchain_receive_green)));
         }
 
-        if (tx.isWatchOnly()) {
-            txViewHolder.watchOnly.setVisibility(View.VISIBLE);
-        } else {
-            txViewHolder.watchOnly.setVisibility(View.GONE);
-        }
-
-        if (tx.isDoubleSpend()) {
-            txViewHolder.doubleSpend.setVisibility(View.VISIBLE);
-        } else {
-            txViewHolder.doubleSpend.setVisibility(View.GONE);
-        }
+        txViewHolder.watchOnly.setVisibility(tx.isWatchOnly() ? View.VISIBLE : View.GONE);
+        txViewHolder.doubleSpend.setVisibility(tx.isDoubleSpend() ? View.VISIBLE : View.GONE);
 
         txViewHolder.result.setOnClickListener(v -> {
             onViewFormatUpdated(!isBtc);
@@ -245,43 +214,73 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         });
 
         txViewHolder.touchView.setOnClickListener(v -> {
-            if (listClickListener != null) listClickListener.onTransactionClicked(position);
+            if (listClickListener != null)
+                listClickListener.onTransactionClicked(getRealTxPosition(position));
         });
+    }
+
+    private Spannable getDisplaySpannable(double btcAmount, double fiatAmount, String fiatString) {
+        Spannable spannable;
+        if (isBtc) {
+            spannable = Spannable.Factory.getInstance().newSpannable(
+                    monetaryUtil.getDisplayAmountWithFormatting(Math.abs(btcAmount)) + " " + getDisplayUnits());
+            spannable.setSpan(
+                    new RelativeSizeSpan(0.67f), spannable.length() - getDisplayUnits().length(), spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        } else {
+            spannable = Spannable.Factory.getInstance().newSpannable(
+                    monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatAmount)) + " " + fiatString);
+            spannable.setSpan(
+                    new RelativeSizeSpan(0.67f), spannable.length() - 3, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        return spannable;
+    }
+
+    @Override
+    public int getItemCount() {
+        return objects != null ? objects.size() : 0;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (objects.get(position) instanceof String) {
+            return VIEW_TYPE_HEADER;
+        } else if (objects.get(position) instanceof FacilitatedTransaction) {
+            return VIEW_TYPE_FCTX;
+        } else if (objects.get(position) instanceof Tx) {
+            return VIEW_TYPE_TRANSACTION;
+        } else {
+            throw new IllegalArgumentException(
+                    "Object list contained unsupported item: " + objects.get(position));
+        }
+    }
+
+    private int getRealTxPosition(int position) {
+        int totalTransactions = 0;
+        for (Object object : objects) {
+            if (object instanceof Tx) {
+                totalTransactions++;
+            }
+        }
+
+        int diff = getItemCount() - totalTransactions;
+        return position - diff;
+    }
+
+    private int getColorForConfirmations(Tx tx, @DrawableRes int colorLight, @DrawableRes int colorDark) {
+        return tx.getConfirmations() < 3 ? colorLight : colorDark;
     }
 
     private String getDisplayUnits() {
         return (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
     }
 
-    @Override
-    public int getItemCount() {
-        return transactions != null ? transactions.size() : 0;
+    void onTransactionsUpdated(List<Object> objects) {
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new BalanceDiffUtil(this.objects, objects));
+        this.objects = objects;
+        diffResult.dispatchUpdatesTo(this);
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        if (transactions.get(position) instanceof String) {
-            return ITEM_TYPE_HEADER;
-        } else if (transactions.get(position) instanceof FacilitatedTransaction) {
-            return ITEM_TYPE_FCTX;
-        } else if (transactions.get(position) instanceof Tx) {
-            return ITEM_TYPE_TRANSACTION;
-        } else {
-            throw new IllegalArgumentException(
-                    "Object list contained unsupported item: " + transactions.get(position));
-        }
-    }
-
-    void onTransactionsUpdated(List<Object> transactions) {
-        this.transactions = transactions;
-        notifyDataSetChanged();
-        // TODO: 03/02/2017 This will be an absolute beast to fix
-//        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new BalanceDiffUtil(this.transactions, transactions));
-//        this.transactions = transactions;
-//        diffResult.dispatchUpdatesTo(this);
-    }
-
-    void setTxListClickListener(TxListClickListener listClickListener) {
+    void setTxListClickListener(BalanceListClickListener listClickListener) {
         this.listClickListener = listClickListener;
     }
 
@@ -298,7 +297,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
-    interface TxListClickListener {
+    interface BalanceListClickListener {
 
         void onTransactionClicked(int position);
 

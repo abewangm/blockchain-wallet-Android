@@ -193,9 +193,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
             launcherShortcutHelper.generateReceiveShortcuts();
         }
-
-        // STOPSHIP: 01/02/2017 Temporary for testing
-        setMessagesCount(3);
     }
 
     @Override
@@ -235,6 +232,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public void setMessagesCount(int messageCount) {
+        if (getCurrentFragment() instanceof BalanceFragment) {
+            ((BalanceFragment) getCurrentFragment()).updateFacilitatedTransactions();
+        }
         binding.navigationView.getMenu()
                 .findItem(R.id.nav_contacts)
                 .getActionView()
@@ -439,6 +439,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         startActivity(intent);
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {

@@ -121,6 +121,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
+                // STOPSHIP: 03/02/2017 I don't think this is necessary anymore, but check with team
 //                ((AddressAdapter) binding.accounts.spinner.getAdapter()).updateData(viewModel.getAddressList(false));
             }
         }

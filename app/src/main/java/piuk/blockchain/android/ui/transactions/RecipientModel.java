@@ -6,7 +6,7 @@ public class RecipientModel {
     private String mValue;
     private String mDisplayUnits;
 
-    public RecipientModel(String address, String value, String displayUnits) {
+    RecipientModel(String address, String value, String displayUnits) {
         mAddress = address;
         mValue = value;
         mDisplayUnits = displayUnits;

@@ -16,6 +16,7 @@ import info.blockchain.wallet.transaction.Tx;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -44,6 +45,7 @@ public class BalanceViewModel extends BaseViewModel {
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
     private List<Tx> transactionList;
+    private List<Object> displayList;
     @Inject PrefsUtil prefsUtil;
     @Inject PayloadManager payloadManager;
     @Inject StringUtils stringUtils;
@@ -78,6 +80,7 @@ public class BalanceViewModel extends BaseViewModel {
         activeAccountAndAddressList = new ArrayList<>();
         activeAccountAndAddressBiMap = HashBiMap.create();
         transactionList = new ArrayList<>();
+        displayList = new ArrayList<>();
     }
 
     @Override
@@ -254,7 +257,7 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     public List<Object> getTransactionList() {
-        return new ArrayList<>(transactionList);
+        return displayList;
     }
 
     public void onTransactionListRefreshed() {
@@ -300,6 +303,17 @@ public class BalanceViewModel extends BaseViewModel {
             if (transactionList.get(0).getHash().isEmpty()) transactionList.remove(0);
         }
 
+        // Remove current transactions but keep headers and pending transactions
+        Iterator iterator = displayList.iterator();
+        while (iterator.hasNext()) {
+            Object element = iterator.next();
+            if (element instanceof Tx) {
+                iterator.remove();
+            }
+        }
+
+        displayList.addAll(transactionList);
+
         String balanceTotal = getBalanceString(isBTC, btcBalance);
 
         if (dataListener != null) {
@@ -308,14 +322,19 @@ public class BalanceViewModel extends BaseViewModel {
         }
     }
 
-    private void updateFacilitatedTransactions() {
+    public void updateFacilitatedTransactions() {
         compositeDisposable.add(
                 contactsDataManager.fetchContacts()
                         .andThen(contactsDataManager.getUnfulfilledFacilitatedTransactions())
                         .toList()
                         .subscribe(
                                 transactions -> {
-                                    // TODO: 03/02/2017
+                                    if (!transactions.isEmpty()) {
+                                        displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction));
+                                        displayList.addAll(1, transactions);
+                                        displayList.add(transactions.size() + 1, stringUtils.getString(R.string.contacts_transaction_history));
+                                        dataListener.onRefreshBalanceAndTransactions();
+                                    }
                                 }, throwable -> {
                                     // TODO: 03/02/2017
                                 }));

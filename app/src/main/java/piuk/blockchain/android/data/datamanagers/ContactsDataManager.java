@@ -450,17 +450,21 @@ public class ContactsDataManager {
      */
     @SuppressWarnings("Convert2streamapi")
     public Observable<FacilitatedTransaction> getUnfulfilledFacilitatedTransactions() {
-        ArrayList<FacilitatedTransaction> transactions = new ArrayList<>();
-        for (Contact contact : getContactList().toList().blockingGet()) {
-            for (FacilitatedTransaction transaction : contact.getFacilitatedTransaction().values()) {
-                // If hash is null, transaction has not been completed
-                if (transaction.getTx_hash() == null || transaction.getTx_hash().isEmpty()) {
-                    transactions.add(transaction);
-                }
-            }
-        }
-
-        return Observable.fromIterable(transactions);
+        return getContactList()
+                .toList()
+                .toObservable()
+                .flatMap(contacts -> {
+                    ArrayList<FacilitatedTransaction> transactions = new ArrayList<>();
+                    for (Contact contact : contacts) {
+                        for (FacilitatedTransaction transaction : contact.getFacilitatedTransaction().values()) {
+                            // If hash is null, transaction has not been completed
+                            if (transaction.getTx_hash() == null || transaction.getTx_hash().isEmpty()) {
+                                transactions.add(transaction);
+                            }
+                        }
+                    }
+                    return Observable.fromIterable(transactions);
+                });
     }
 
 }
