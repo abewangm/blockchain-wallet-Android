@@ -10,7 +10,6 @@ import piuk.blockchain.android.ui.balance.BalanceViewModel;
 import piuk.blockchain.android.ui.chooser.AccountChooserViewModel;
 import piuk.blockchain.android.ui.contacts.detail.ContactDetailActivityViewModel;
 import piuk.blockchain.android.ui.contacts.detail.ContactDetailFragmentViewModel;
-import piuk.blockchain.android.ui.contacts.payments.ContactRequestAmountViewModel;
 import piuk.blockchain.android.ui.contacts.pairing.ContactsInvitationBuilderViewModel;
 import piuk.blockchain.android.ui.contacts.list.ContactsListViewModel;
 import piuk.blockchain.android.ui.contacts.payments.ContactsPaymentRequestViewModel;
@@ -85,8 +84,6 @@ public interface DataManagerComponent {
     void inject(ContactDetailFragmentViewModel contactDetailFragmentViewModel);
 
     void inject(ContactsPaymentRequestViewModel contactsPaymentRequestViewModel);
-
-    void inject(ContactRequestAmountViewModel contactRequestAmountViewModel);
 
     void inject(ContactDetailActivityViewModel contactDetailActivityViewModel);
 

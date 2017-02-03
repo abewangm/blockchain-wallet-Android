@@ -709,4 +709,5 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     public void onPageFinished() {
         onStartBalanceFragment();
     }
+
 }

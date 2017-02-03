@@ -27,7 +27,6 @@ import java.util.List;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.FragmentContactDetailBinding;
-import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -153,7 +152,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
 
     @Override
     public void startPaymentRequestActivity(PaymentRequestType paymentRequestType, String contactId) {
-        ContactPaymentRequestActivity.start(getActivity(), paymentRequestType, contactId);
+//        ContactPaymentRequestActivity.start(getActivity(), paymentRequestType, contactId);
     }
 
     @Override

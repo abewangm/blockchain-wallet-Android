@@ -25,11 +25,6 @@ public class SendModel {
      */
     public static final double LARGE_TX_PERCENTAGE = 1.0;
 
-    /**
-     * Decimal separator based on device locale
-     */
-    String defaultSeparator;
-    boolean textChangeAllowed = true;
     String btcUnit;
     int btcUniti;
     String fiatUnit;

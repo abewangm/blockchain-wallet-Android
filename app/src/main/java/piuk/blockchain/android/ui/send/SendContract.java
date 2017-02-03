@@ -22,27 +22,23 @@ interface SendContract {
 
         void hideReceivingAddressField();
 
-        void onRemoveBtcTextChangeListener();
-
-        void onRemoveFiatTextChangeListener();
-
-        void onAddBtcTextChangeListener();
-
-        void onAddFiatTextChangeListener();
-
         void updateBtcAmount(String amount);
 
         void onUpdateFiatAmount(String amount);
 
-        void onUpdateBtcUnit(String unit);
+        void updateBtcUnit(String unit);
 
-        void onUpdateFiatUnit(String unit);
+        void updateFiatUnit(String unit);
 
         void onSetSpendAllAmount(String textFromSatoshis);
 
         void showInvalidAmount();
 
         void onShowSpendFromWatchOnly(String address);
+
+        void updateBtcTextField(String text);
+
+        void updateFiatTextField(String text);
 
         void onShowPaymentDetails(PaymentConfirmationDetails confirmationDetails);
 

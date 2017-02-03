@@ -127,11 +127,6 @@
         <activity
             android:name=".ui.contacts.detail.ContactDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
-
-        <activity
-            android:name=".ui.contacts.payments.ContactPaymentRequestActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-
         <activity
             android:name=".ui.chooser.AccountChooserActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />

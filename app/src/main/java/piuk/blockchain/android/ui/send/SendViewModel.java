@@ -60,6 +60,7 @@ import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -86,11 +87,13 @@ public class SendViewModel extends BaseViewModel {
     @Thunk SendContract.DataListener dataListener;
 
     private MonetaryUtil monetaryUtil;
+    private ReceiveCurrencyHelper currencyHelper;
     private Payment payment;
     public SendModel sendModel;
     @Nullable private String contactMdid;
     @Nullable private String fctxId;
     private String metricInputFlag;
+    private Locale locale;
 
     private Disposable unspentApiDisposable;
 
@@ -105,30 +108,15 @@ public class SendViewModel extends BaseViewModel {
     @Inject SendDataManager sendDataManager;
     @Inject MultiAddrFactory multiAddrFactory;
 
-    SendViewModel(SendContract.DataListener dataListener) {
+    SendViewModel(SendContract.DataListener dataListener, Locale locale) {
         Injector.getInstance().getDataManagerComponent().inject(this);
+        this.locale = locale;
         this.dataListener = dataListener;
 
-        int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
-        String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double exchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
-
-        monetaryUtil = new MonetaryUtil(btcUnit);
         payment = new Payment();
-
         sendModel = new SendModel();
         sendModel.pendingTransaction = new PendingTransaction();
-        sendModel.btcUnit = monetaryUtil.getBTCUnit(btcUnit);
-        sendModel.fiatUnit = fiatUnit;
-        sendModel.btcUniti = btcUnit;
-        sendModel.isBTC = getBtcDisplayState();
-        sendModel.defaultSeparator = getDefaultDecimalSeparator();
-        sendModel.exchangeRate = exchangeRate;
         sendModel.unspentApiResponse = new HashMap<>();
-        sendModel.btcExchange = exchangeRateFactory.getLastPrice(sendModel.fiatUnit);
-
-        dataListener.onUpdateBtcUnit(sendModel.btcUnit);
-        dataListener.onUpdateFiatUnit(sendModel.fiatUnit);
         getSuggestedFee();
 
         sslVerifyUtil.validateSSL();
@@ -163,6 +151,25 @@ public class SendViewModel extends BaseViewModel {
         }
     }
 
+    void updateUI() {
+        int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
+        String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        double exchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
+
+        monetaryUtil = new MonetaryUtil(btcUnit);
+        currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, locale);
+
+        sendModel.btcUnit = monetaryUtil.getBTCUnit(btcUnit);
+        sendModel.fiatUnit = fiatUnit;
+        sendModel.btcUniti = btcUnit;
+        sendModel.isBTC = getBtcDisplayState();
+        sendModel.exchangeRate = exchangeRate;
+        sendModel.btcExchange = exchangeRateFactory.getLastPrice(sendModel.fiatUnit);
+
+        dataListener.updateBtcUnit(sendModel.btcUnit);
+        dataListener.updateFiatUnit(sendModel.fiatUnit);
+    }
+
     void onSendClicked(String customFee, String amount, boolean bypassFeeCheck, String address) {
         // Contact selected but no FacilitationTransaction to respond to
         if (fctxId == null && contactMdid != null) {
@@ -180,10 +187,6 @@ public class SendViewModel extends BaseViewModel {
         } else {
             setupTransaction(customFee, amount, () -> sendClicked(bypassFeeCheck, address));
         }
-    }
-
-    String getDefaultSeparator() {
-        return sendModel.defaultSeparator;
     }
 
     int getDefaultAccount() {
@@ -258,142 +261,23 @@ public class SendViewModel extends BaseViewModel {
         return Character.toString(symbols.getDecimalSeparator());
     }
 
-    /**
-     * Checks btc amount. Warns user when exceeding maximum and resets entered value field
-     */
-    private boolean isExceedingMaximumBTCAmount(String btc) {
-        long lamount;
-        try {
-            //Long is safe to use, but double can lead to ugly rounding issues..
-            Double btcDouble = Double.parseDouble(btc);
-            double undenominatedAmount = monetaryUtil.getUndenominatedAmount(btcDouble);
-            lamount = (BigDecimal.valueOf(undenominatedAmount).multiply(BigDecimal.valueOf(100000000)).longValue());
-
-            if (BigInteger.valueOf(lamount).compareTo(BigInteger.valueOf(2100000000000000L)) == 1) {
-                if (dataListener != null) {
-                    dataListener.showInvalidAmount();
-                    dataListener.updateBtcAmount("");
-                }
-                return true;
-            }
-        } catch (NumberFormatException nfe) {
-            return false;
-        }
-        return false;
+    void updateFiatTextField(String bitcoin) {
+        if (bitcoin.isEmpty()) bitcoin = "0";
+        double btcAmount = currencyHelper.getUndenominatedAmount(currencyHelper.getDoubleAmount(bitcoin));
+        double fiatAmount = currencyHelper.getLastPrice() * btcAmount;
+        dataListener.updateFiatTextField(currencyHelper.getFormattedFiatString(fiatAmount));
     }
 
-    /**
-     * Update fiat text field with converted btc amount
-     *
-     * @param btcAmountText (btc, mbtc or bits)
-     */
-    void afterBtcTextChanged(String btcAmountText) {
-        if (isExceedingMaximumBTCAmount(btcAmountText)) {
-            return;
-        }
-
-        if (dataListener != null) dataListener.onRemoveBtcTextChangeListener();
-
-        int maxLen;
-        NumberFormat btcFormat = NumberFormat.getInstance(Locale.getDefault());
-        switch (sendModel.btcUniti) {
-            case MonetaryUtil.MICRO_BTC:
-                maxLen = 2;
-                break;
-            case MonetaryUtil.MILLI_BTC:
-                maxLen = 5;
-                break;
-            default:
-                maxLen = 8;
-                break;
-        }
-        btcFormat.setMaximumFractionDigits(maxLen + 1);
-        btcFormat.setMinimumFractionDigits(0);
-
-        try {
-            if (btcAmountText.contains(sendModel.defaultSeparator)) {
-                String dec = btcAmountText.substring(btcAmountText.indexOf(sendModel.defaultSeparator));
-                if (dec.length() > 0) {
-                    dec = dec.substring(1);
-                    if (dec.length() > maxLen) {
-                        if (dataListener != null) {
-                            dataListener.updateBtcAmount(btcAmountText.substring(0, btcAmountText.length() - 1));
-                        }
-                    }
-                }
-            }
-        } catch (NumberFormatException nfe) {
-            // No-op
-        }
-
-        if (dataListener != null) dataListener.onAddBtcTextChangeListener();
-
-        if (sendModel.textChangeAllowed) {
-            sendModel.textChangeAllowed = false;
-
-            if (btcAmountText.isEmpty()) btcAmountText = "0";
-            double btcAmount;
-            try {
-                btcAmount = monetaryUtil.getUndenominatedAmount(NumberFormat.getInstance(Locale.getDefault()).parse(btcAmountText).doubleValue());
-            } catch (NumberFormatException | ParseException nfe) {
-                btcAmount = 0.0;
-            }
-
-            double fiatAmount = sendModel.exchangeRate * btcAmount;
-            if (dataListener != null) {
-                dataListener.onUpdateFiatAmount(monetaryUtil.getFiatFormat(sendModel.fiatUnit).format(fiatAmount));
-            }
-            sendModel.textChangeAllowed = true;
-        }
+    void updateBtcTextField(String fiat) {
+        if (fiat.isEmpty()) fiat = "0";
+        double fiatAmount = currencyHelper.getDoubleAmount(fiat);
+        double btcAmount = fiatAmount / currencyHelper.getLastPrice();
+        String amountString = currencyHelper.getFormattedBtcString(btcAmount);
+        dataListener.updateBtcTextField(amountString);
     }
 
-    /**
-     * Update btc text field with converted fiat amount
-     *
-     * @param fiatAmountText (any currency)
-     */
-    void afterFiatTextChanged(String fiatAmountText) {
-        if (dataListener != null) dataListener.onRemoveFiatTextChangeListener();
-
-        int maxLen = 2;
-        NumberFormat fiatFormat = NumberFormat.getInstance(Locale.getDefault());
-        fiatFormat.setMaximumFractionDigits(maxLen + 1);
-        fiatFormat.setMinimumFractionDigits(0);
-
-        try {
-            if (fiatAmountText.contains(sendModel.defaultSeparator)) {
-                String dec = fiatAmountText.substring(fiatAmountText.indexOf(sendModel.defaultSeparator));
-                if (dec.length() > 0) {
-                    dec = dec.substring(1);
-                    if (dec.length() > maxLen) {
-                        if (dataListener != null) {
-                            dataListener.onUpdateFiatAmount(fiatAmountText.substring(0, fiatAmountText.length() - 1));
-                        }
-                    }
-                }
-            }
-        } catch (NumberFormatException nfe) {
-            // No-op
-        }
-
-        if (dataListener != null) dataListener.onAddFiatTextChangeListener();
-
-        if (sendModel.textChangeAllowed) {
-            sendModel.textChangeAllowed = false;
-
-            if (fiatAmountText.isEmpty()) fiatAmountText = "0";
-            double fiatAmount;
-            try {
-                fiatAmount = NumberFormat.getInstance(Locale.getDefault()).parse(fiatAmountText).doubleValue();
-            } catch (NumberFormatException | ParseException e) {
-                fiatAmount = 0.0;
-            }
-            double btcAmount = fiatAmount / sendModel.exchangeRate;
-            if (dataListener != null) {
-                dataListener.updateBtcAmount(monetaryUtil.getBTCFormat().format(monetaryUtil.getDenominatedAmount(btcAmount)));
-            }
-            sendModel.textChangeAllowed = true;
-        }
+    public ReceiveCurrencyHelper getCurrencyHelper() {
+        return currencyHelper;
     }
 
     /**
@@ -435,9 +319,6 @@ public class SendViewModel extends BaseViewModel {
         }
         if (btcAmount != null && !btcAmount.equals("")) {
             if (dataListener != null) {
-                dataListener.onRemoveBtcTextChangeListener();
-                dataListener.onRemoveFiatTextChangeListener();
-
                 dataListener.updateBtcAmount(btcAmount);
 
                 double doubleBtcAmount;
@@ -459,11 +340,8 @@ public class SendViewModel extends BaseViewModel {
                 //QR scan comes in as BTC - set current btc unit
                 prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
 
-                dataListener.onUpdateBtcUnit(sendModel.btcUnit);
-                dataListener.onUpdateFiatUnit(sendModel.fiatUnit);
-
-                dataListener.onAddBtcTextChangeListener();
-                dataListener.onAddFiatTextChangeListener();
+                dataListener.updateBtcUnit(sendModel.btcUnit);
+                dataListener.updateFiatUnit(sendModel.fiatUnit);
             }
         }
     }
@@ -725,7 +603,7 @@ public class SendViewModel extends BaseViewModel {
         if (text == null || text.isEmpty()) return BigInteger.ZERO;
 
         //Format string to parsable double
-        String amountToSend = text.trim().replace(" ", "").replace(sendModel.defaultSeparator, ".");
+        String amountToSend = text.trim().replace(" ", "").replace(getDefaultDecimalSeparator(), ".");
 
         double amount;
         try {
@@ -745,7 +623,7 @@ public class SendViewModel extends BaseViewModel {
      */
     private String getTextFromSatoshis(long satoshis) {
         String displayAmount = monetaryUtil.getDisplayAmount(satoshis);
-        displayAmount = displayAmount.replace(".", sendModel.defaultSeparator);
+        displayAmount = displayAmount.replace(".", getDefaultDecimalSeparator());
         return displayAmount;
     }
 

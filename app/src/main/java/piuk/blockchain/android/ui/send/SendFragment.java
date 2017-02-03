@@ -31,6 +31,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,6 +45,11 @@ import android.widget.RelativeLayout;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
@@ -77,6 +83,8 @@ import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SE
 
 public class SendFragment extends Fragment implements SendContract.DataListener, CustomKeypadCallback {
 
+    private static final String TAG = SendFragment.class.getSimpleName();
+
     public static final String ARGUMENT_SCAN_DATA = "scan_data";
     public static final String ARGUMENT_IS_BTC = "is_btc";
     public static final String ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position";
@@ -92,10 +100,9 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     @Thunk FragmentSendBinding binding;
     @Thunk SendViewModel viewModel;
     @Thunk AlertDialog transactionSuccessDialog;
+    @Thunk boolean textChangeAllowed = true;
     private OnSendFragmentInteractionListener listener;
     private CustomKeypad customKeypad;
-    private TextWatcher btcTextWatcher;
-    private TextWatcher fiatTextWatcher;
     private MaterialProgressDialog progressDialog;
 
     private int selectedAccountPosition = -1;
@@ -164,7 +171,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         }
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_send, container, false);
-        viewModel = new SendViewModel(this);
+        viewModel = new SendViewModel(this, Locale.getDefault());
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -187,6 +194,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         setupToolbar();
         IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
+        viewModel.updateUI();
 
         if (listener != null) {
             listener.onSendFragmentStart();
@@ -405,7 +413,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private void setCustomKeypad() {
         customKeypad = binding.keyboard;
         customKeypad.setCallback(this);
-        customKeypad.setDecimalSeparator(viewModel.getDefaultSeparator());
+        customKeypad.setDecimalSeparator(getDefaultDecimalSeparator());
 
         //Enable custom keypad and disables default keyboard from popping up
         customKeypad.enableOnView(binding.amountRow.amountBtc);
@@ -421,17 +429,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         setupSendFromView();
         setupReceiveToView();
 
-        setBtcTextWatcher();
-        setFiatTextWatcher();
-
-        binding.amountRow.amountBtc.addTextChangedListener(btcTextWatcher);
-        binding.amountRow.amountBtc.setSelectAllOnFocus(true);
-
-        binding.amountRow.amountFiat.setHint("0" + viewModel.getDefaultSeparator() + "00");
-        binding.amountRow.amountFiat.addTextChangedListener(fiatTextWatcher);
-        binding.amountRow.amountFiat.setSelectAllOnFocus(true);
-
-        binding.amountRow.amountBtc.setHint("0" + viewModel.getDefaultSeparator() + "00");
+        setupBtcTextField();
+        setupFiatTextField();
 
         binding.customFee.addTextChangedListener(new TextWatcher() {
             @Override
@@ -482,8 +481,9 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
             viewModel.setReceivingAddress(null);
         });
         binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus && customKeypad != null)
+            if (hasFocus && customKeypad != null) {
                 customKeypad.setNumpadVisibility(View.GONE);
+            }
         });
     }
 
@@ -501,15 +501,14 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 binding.customFee.getText().toString(), null);
         binding.from.setText(itemAccount.label);
 
-        binding.from.setOnClickListener(v ->
-                AccountChooserActivity.startForResult(this,
-                        AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND,
-                        PaymentRequestType.REQUEST));
+        binding.from.setOnClickListener(v -> startFromFragment());
+        binding.imageviewDropdownSend.setOnClickListener(v -> startFromFragment());
+    }
 
-        binding.imageviewDropdownSend.setOnClickListener(v ->
-                AccountChooserActivity.startForResult(this,
-                        AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND,
-                        PaymentRequestType.REQUEST));
+    private void startFromFragment() {
+        AccountChooserActivity.startForResult(this,
+                AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND,
+                PaymentRequestType.REQUEST);
     }
 
     private void setupReceiveToView() {
@@ -538,16 +537,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     public void updateBtcAmount(String amount) {
         binding.amountRow.amountBtc.setText(amount);
         binding.amountRow.amountBtc.setSelection(binding.amountRow.amountBtc.getText().length());
-    }
-
-    @Override
-    public void onRemoveBtcTextChangeListener() {
-        binding.amountRow.amountBtc.removeTextChangedListener(btcTextWatcher);
-    }
-
-    @Override
-    public void onAddBtcTextChangeListener() {
-        binding.amountRow.amountBtc.addTextChangedListener(btcTextWatcher);
     }
 
     @Override
@@ -608,13 +597,18 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public void onRemoveFiatTextChangeListener() {
-        binding.amountRow.amountFiat.removeTextChangedListener(fiatTextWatcher);
+    public void updateBtcUnit(String unit) {
+        binding.amountRow.currencyBtc.setText(unit);
     }
 
     @Override
-    public void onAddFiatTextChangeListener() {
-        binding.amountRow.amountFiat.addTextChangedListener(fiatTextWatcher);
+    public void updateFiatUnit(String unit) {
+        binding.amountRow.currencyFiat.setText(unit);
+    }
+
+    @Override
+    public void onSetSpendAllAmount(String textFromSatoshis) {
+        binding.amountRow.amountBtc.setText(textFromSatoshis);
     }
 
     @Override
@@ -705,21 +699,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public void onUpdateBtcUnit(String unit) {
-        binding.amountRow.currencyBtc.setText(unit);
-    }
-
-    @Override
-    public void onUpdateFiatUnit(String unit) {
-        binding.amountRow.currencyFiat.setText(unit);
-    }
-
-    @Override
-    public void onSetSpendAllAmount(String textFromSatoshis) {
-        binding.amountRow.amountBtc.setText(textFromSatoshis);
-    }
-
-    @Override
     public void onShowSpendFromWatchOnly(String address) {
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.privx_required)
@@ -739,46 +718,141 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     @Override
     public void navigateToAddNote(String contactId, PaymentRequestType paymentRequestType, long satoshis) {
-        if (listener != null) listener.onTransactionNotesRequested(contactId, paymentRequestType, satoshis);
+        if (listener != null)
+            listener.onTransactionNotesRequested(contactId, paymentRequestType, satoshis);
     }
 
-    private void setBtcTextWatcher() {
-        btcTextWatcher = new TextWatcher() {
-            public void afterTextChanged(Editable editable) {
-                viewModel.afterBtcTextChanged(editable.toString());
-                setKeyListener(editable, binding.amountRow.amountBtc);
-            }
+    // BTC Field
+    private void setupBtcTextField() {
+        binding.amountRow.amountBtc.setSelectAllOnFocus(true);
+        binding.amountRow.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
 
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-        };
+        binding.amountRow.amountBtc.setKeyListener(
+                DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
+        binding.amountRow.amountBtc.addTextChangedListener(btcTextWatcher);
     }
 
-    private void setFiatTextWatcher() {
-        fiatTextWatcher = new TextWatcher() {
-            public void afterTextChanged(Editable editable) {
-                viewModel.afterFiatTextChanged(editable.toString());
-                setKeyListener(editable, binding.amountRow.amountFiat);
-            }
+    // Fiat Field
+    private void setupFiatTextField() {
+        binding.amountRow.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
+        binding.amountRow.amountFiat.setSelectAllOnFocus(true);
 
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+        binding.amountRow.amountFiat.setKeyListener(
+                DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
+        binding.amountRow.amountFiat.addTextChangedListener(fiatTextWatcher);
+    }
 
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-        };
+    @Override
+    public void updateBtcTextField(String text) {
+        binding.amountRow.amountBtc.setText(text);
+    }
+
+    @Override
+    public void updateFiatTextField(String text) {
+        binding.amountRow.amountFiat.setText(text);
     }
 
     @Thunk
     void setKeyListener(Editable s, EditText editText) {
-        if (s.toString().contains(viewModel.getDefaultDecimalSeparator())) {
+        if (s.toString().contains(getDefaultDecimalSeparator())) {
             editText.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
         } else {
-            editText.setKeyListener(DigitsKeyListener.getInstance("0123456789" + viewModel.getDefaultDecimalSeparator()));
+            editText.setKeyListener(DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
         }
+    }
+
+    @Thunk
+    Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
+        try {
+            if (input.contains(getDefaultDecimalSeparator())) {
+                String dec = input.substring(input.indexOf(getDefaultDecimalSeparator()));
+                if (dec.length() > 0) {
+                    dec = dec.substring(1);
+                    if (dec.length() > maxLength) {
+                        editText.setText(input.substring(0, input.length() - 1));
+                        editText.setSelection(editText.getText().length());
+                        s = editText.getEditableText();
+                    }
+                }
+            }
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "afterTextChanged: ", e);
+        }
+        return s;
+    }
+
+    private TextWatcher btcTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            // No-op
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            // No-op
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            String input = s.toString();
+
+            binding.amountRow.amountBtc.removeTextChangedListener(this);
+            NumberFormat btcFormat = NumberFormat.getInstance(Locale.getDefault());
+            btcFormat.setMaximumFractionDigits(viewModel.getCurrencyHelper().getMaxBtcDecimalLength() + 1);
+            btcFormat.setMinimumFractionDigits(0);
+
+            s = formatEditable(s, input, viewModel.getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountRow.amountBtc);
+
+            binding.amountRow.amountBtc.addTextChangedListener(this);
+
+            if (textChangeAllowed) {
+                textChangeAllowed = false;
+                viewModel.updateFiatTextField(s.toString());
+
+                textChangeAllowed = true;
+            }
+            setKeyListener(s, binding.amountRow.amountBtc);
+        }
+    };
+
+    private TextWatcher fiatTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            // No-op
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            // No-op
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            String input = s.toString();
+
+            binding.amountRow.amountFiat.removeTextChangedListener(this);
+            int maxLength = 2;
+            NumberFormat fiatFormat = NumberFormat.getInstance(Locale.getDefault());
+            fiatFormat.setMaximumFractionDigits(maxLength + 1);
+            fiatFormat.setMinimumFractionDigits(0);
+
+            s = formatEditable(s, input, maxLength, binding.amountRow.amountFiat);
+
+            binding.amountRow.amountFiat.addTextChangedListener(this);
+
+            if (textChangeAllowed) {
+                textChangeAllowed = false;
+                viewModel.updateBtcTextField(s.toString());
+                textChangeAllowed = true;
+            }
+            setKeyListener(s, binding.amountRow.amountFiat);
+        }
+    };
+
+    private String getDefaultDecimalSeparator() {
+        DecimalFormat format = (DecimalFormat) DecimalFormat.getInstance(Locale.getDefault());
+        DecimalFormatSymbols symbols = format.getDecimalFormatSymbols();
+        return Character.toString(symbols.getDecimalSeparator());
     }
 
     @Override
