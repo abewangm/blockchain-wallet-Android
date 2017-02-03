@@ -3,10 +3,7 @@ package piuk.blockchain.android.ui.balance;
 import com.google.common.collect.HashBiMap;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
-import android.databinding.BaseObservable;
-import android.databinding.Bindable;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
@@ -24,51 +21,42 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
-import piuk.blockchain.android.BR;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
-import piuk.blockchain.android.ui.base.ViewModel;
+import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.StringUtils;
 
 @SuppressWarnings("WeakerAccess")
-public class BalanceViewModel extends BaseObservable implements ViewModel {
+public class BalanceViewModel extends BaseViewModel {
 
     private static final long ONE_MONTH = 28 * 24 * 60 * 60 * 1000L;
 
-    private Context context;
     private DataListener dataListener;
-    private BalanceModel model;
 
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
     private List<Tx> transactionList;
-    @Inject protected PrefsUtil prefsUtil;
-    @Inject protected PayloadManager payloadManager;
-    @Inject protected TransactionListDataManager transactionListDataManager;
+    @Inject PrefsUtil prefsUtil;
+    @Inject PayloadManager payloadManager;
+    @Inject StringUtils stringUtils;
+    @Inject TransactionListDataManager transactionListDataManager;
     @VisibleForTesting CompositeDisposable compositeDisposable;
 
-    @Bindable
-    public String getBalance() {
-        return model.getBalance();
-    }
-
-    public void setBalance(String balance) {
-        model.setBalance(balance);
-        notifyPropertyChanged(BR.balance);
-    }
-
-    public PrefsUtil getPrefsUtil() {
-        return prefsUtil;
-    }
-
     public interface DataListener {
+
+        int getSelectedItemPosition();
+
+        boolean isBtc();
+
         void onRefreshAccounts();
 
         void onAccountSizeChange();
@@ -78,13 +66,15 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         void showBackupPromptDialog(boolean showNeverAgain);
 
         void show2FaDialog();
+
+        void updateBalance(String balance);
+
+        void setShowRefreshing(boolean showRefreshing);
     }
 
-    public BalanceViewModel(Context context, DataListener dataListener) {
+    public BalanceViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
-        this.context = context;
         this.dataListener = dataListener;
-        model = new BalanceModel();
 
         activeAccountAndAddressList = new ArrayList<>();
         activeAccountAndAddressBiMap = HashBiMap.create();
@@ -92,6 +82,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         compositeDisposable = new CompositeDisposable();
     }
 
+    @Override
     public void onViewReady() {
         if (prefsUtil.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
             // 1st run of the app
@@ -102,36 +93,39 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
                     transactionListDataManager.getListUpdateSubject()
                             .compose(RxUtil.applySchedulersToObservable())
                             .subscribe(txs -> {
-                                        if (hasTransactions()) {
-                                            if (!isBackedUp() && !getIfNeverPromptBackup()) {
-                                                // Show dialog and store date of dialog launch
-                                                if (getTimeOfLastSecurityPrompt() == 0) {
-                                                    dataListener.showBackupPromptDialog(false);
-                                                    storeTimeOfLastSecurityPrompt();
-                                                } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-                                                    dataListener.showBackupPromptDialog(true);
-                                                    storeTimeOfLastSecurityPrompt();
-                                                }
-                                            } else if (isBackedUp() && !getIfNeverPrompt2Fa()) {
-                                                compositeDisposable.add(
-                                                        getSettingsApi()
-                                                                .compose(RxUtil.applySchedulersToObservable())
-                                                                .subscribe(settings -> {
-                                                                    if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
-                                                                        // Show dialog for 2FA, store date of dialog launch
-                                                                        if (getTimeOfLastSecurityPrompt() == 0L
-                                                                                || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-                                                                            dataListener.show2FaDialog();
-                                                                            storeTimeOfLastSecurityPrompt();
-                                                                        }
-                                                                    }
-                                                                }, Throwable::printStackTrace));
-                                            }
+                                if (hasTransactions()) {
+                                    if (!isBackedUp() && !getIfNeverPromptBackup()) {
+                                        // Show dialog and store date of dialog launch
+                                        if (getTimeOfLastSecurityPrompt() == 0) {
+                                            dataListener.showBackupPromptDialog(false);
+                                            storeTimeOfLastSecurityPrompt();
+                                        } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
+                                            dataListener.showBackupPromptDialog(true);
+                                            storeTimeOfLastSecurityPrompt();
                                         }
+                                    } else if (isBackedUp() && !getIfNeverPrompt2Fa()) {
+                                        compositeDisposable.add(
+                                                getSettingsApi()
+                                                        .compose(RxUtil.applySchedulersToObservable())
+                                                        .subscribe(settings -> {
+                                                            if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
+                                                                // Show dialog for 2FA, store date of dialog launch
+                                                                if (getTimeOfLastSecurityPrompt() == 0L
+                                                                        || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
+                                                                    dataListener.show2FaDialog();
+                                                                    storeTimeOfLastSecurityPrompt();
+                                                                }
+                                                            }
+                                                        }, Throwable::printStackTrace));
+                                    }
+                                }
 
-                                    }, Throwable::printStackTrace
-                            ));
+                            }, Throwable::printStackTrace));
         }
+    }
+
+    public PrefsUtil getPrefsUtil() {
+        return prefsUtil;
     }
 
     /**
@@ -148,53 +142,15 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         prefsUtil.setValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER, true);
     }
 
-    private boolean isBackedUp() {
-        return payloadManager.getPayload() != null
-                && payloadManager.getPayload().getHdWallet() != null
-                && payloadManager.getPayload().getHdWallet().isMnemonicVerified();
-    }
-
-    private boolean hasTransactions() {
-        return !transactionListDataManager.getTransactionList().isEmpty();
-    }
-
-    private long getTimeOfLastSecurityPrompt() {
-        return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_TIME_ELAPSED, 0L);
-    }
-
-    private void storeTimeOfLastSecurityPrompt() {
-        prefsUtil.setValue(PrefsUtil.KEY_SECURITY_TIME_ELAPSED, System.currentTimeMillis());
-    }
-
-    private boolean getIfNeverPromptBackup() {
-        return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER, false);
-    }
-
-    private boolean getIfNeverPrompt2Fa() {
-        return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER, false);
-    }
-
-    private Observable<Settings> getSettingsApi() {
-        return Observable.fromCallable(() -> new Settings(payloadManager.getPayload().getGuid(), payloadManager.getPayload().getSharedKey()));
-    }
-
     public MonetaryUtil getMonetaryUtil() {
         return new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
-    }
-
-    @Override
-    public void destroy() {
-        context = null;
-        dataListener = null;
-        compositeDisposable.clear();
     }
 
     public List<ItemAccount> getActiveAccountAndAddressList() {
         return activeAccountAndAddressList;
     }
 
-    public void updateAccountList(Context context) {
-
+    public void updateAccountList() {
         //activeAccountAndAddressList is linked to Adapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
         activeAccountAndAddressList.clear();
         activeAccountAndAddressBiMap.clear();
@@ -231,8 +187,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
 
                 //Only V3 will display "All"
                 Account all = new Account();
-                all.setLabel(context.getResources().getString(R.string.all_accounts));
-//                all.setsetTags(Collections.singletonList(TAG_ALL));
+                all.setLabel(stringUtils.getString(R.string.all_accounts));
                 all.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
                 String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(all));
                 activeAccountAndAddressList.add(new ItemAccount(
@@ -247,10 +202,9 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
             } else if (activeLegacyAddresses.size() > 1) {
 
                 //V2 "All" at top of accounts spinner if wallet contains multiple legacy addresses
-                ImportedAccount iAccount = new ImportedAccount(context.getString(R.string.total_funds),
+                ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.total_funds),
                         payloadManager.getPayload().getLegacyAddressList(),
                         MultiAddrFactory.getInstance().getLegacyBalance());
-//                iAccount.setTags(Collections.singletonList(TAG_ALL));
                 iAccount.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
                 String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
                 activeAccountAndAddressList.add(new ItemAccount(
@@ -286,10 +240,9 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         if (payloadManager.getPayload().isUpgraded() && activeLegacyAddresses.size() > 0) {
 
             //Only V3 - Consolidate and add Legacy addresses to "Imported Addresses" at bottom of accounts spinner
-            ImportedAccount iAccount = new ImportedAccount(context.getString(R.string.imported_addresses),
+            ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
                     payloadManager.getPayload().getLegacyAddressList(),
                     MultiAddrFactory.getInstance().getLegacyBalance());
-//            iAccount.setTags(Collections.singletonList(TAG_IMPORTED_ADDRESSES));
             iAccount.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
             String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
             activeAccountAndAddressList.add(new ItemAccount(
@@ -311,7 +264,7 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
 
                 //Prefix "watch-only"
                 if (legacyAddress.isWatchOnly()) {
-                    labelOrAddress = context.getString(R.string.watch_only_label) + " " + labelOrAddress;
+                    labelOrAddress = stringUtils.getString(R.string.watch_only_label) + " " + labelOrAddress;
                 }
 
                 String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(legacyAddress));
@@ -338,13 +291,26 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         return transactionList;
     }
 
+    public void onTransactionListRefreshed() {
+        dataListener.setShowRefreshing(true);
+        compositeDisposable.add(
+                updateBalancesAndTransactions()
+                        .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
+                        .subscribe(() -> {
+                            updateAccountList();
+                            updateBalanceAndTransactionList(null, dataListener.getSelectedItemPosition(), dataListener.isBtc());
+                        }, throwable -> {
+                            // No-op
+                        }));
+    }
+
     //TODO refactor isBTC out
     public void updateBalanceAndTransactionList(Intent intent, int accountSpinnerPosition, boolean isBTC) {
 
         Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);//the current selected item in dropdown (Account or Legacy Address)
 
         //If current selected item gets edited by another platform object might become null
-        if (object == null && dataListener !=null) {
+        if (object == null && dataListener != null) {
             dataListener.onAccountSizeChange();
             object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);
         }
@@ -372,8 +338,14 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
 
         String balanceTotal = getBalanceString(isBTC, btc_balance);
 
-        setBalance(balanceTotal);
-        if (dataListener != null) dataListener.onRefreshBalanceAndTransactions();
+        if (dataListener != null) {
+            dataListener.updateBalance(balanceTotal);
+            dataListener.onRefreshBalanceAndTransactions();
+        }
+    }
+
+    public String getDisplayUnits() {
+        return (String) getMonetaryUtil().getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
     }
 
     @NonNull
@@ -392,7 +364,40 @@ public class BalanceViewModel extends BaseObservable implements ViewModel {
         return balanceTotal;
     }
 
-    public String getDisplayUnits() {
-        return (String) getMonetaryUtil().getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
+    private boolean isBackedUp() {
+        return payloadManager.getPayload() != null
+                && payloadManager.getPayload().getHdWallet() != null
+                && payloadManager.getPayload().getHdWallet().isMnemonicVerified();
+    }
+
+    private boolean hasTransactions() {
+        return !transactionListDataManager.getTransactionList().isEmpty();
+    }
+
+    private long getTimeOfLastSecurityPrompt() {
+        return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_TIME_ELAPSED, 0L);
+    }
+
+    private void storeTimeOfLastSecurityPrompt() {
+        prefsUtil.setValue(PrefsUtil.KEY_SECURITY_TIME_ELAPSED, System.currentTimeMillis());
+    }
+
+    private boolean getIfNeverPromptBackup() {
+        return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER, false);
+    }
+
+    private boolean getIfNeverPrompt2Fa() {
+        return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER, false);
+    }
+
+    private Observable<Settings> getSettingsApi() {
+        return Observable.fromCallable(() -> new Settings(payloadManager.getPayload().getGuid(), payloadManager.getPayload().getSharedKey()));
+    }
+
+    private Completable updateBalancesAndTransactions() {
+        return Completable.fromCallable(() -> {
+            payloadManager.updateBalancesAndTransactions();
+            return Void.TYPE;
+        }).compose(RxUtil.applySchedulersToCompletable());
     }
 }

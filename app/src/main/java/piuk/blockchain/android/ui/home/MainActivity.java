@@ -627,7 +627,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         boolean isBTC;
         int selectedAccountPosition;
         try {
-            isBTC = ((BalanceFragment) getCurrentFragment()).getIsBTC();
+            isBTC = ((BalanceFragment) getCurrentFragment()).isBtc();
             selectedAccountPosition = ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
         } catch (Exception e) {
             Log.e(TAG, "startSendFragment: ", e);
@@ -643,7 +643,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         boolean isBTC;
         int selectedAccountPosition;
         try {
-            isBTC = ((BalanceFragment) getCurrentFragment()).getIsBTC();
+            isBTC = ((BalanceFragment) getCurrentFragment()).isBtc();
             selectedAccountPosition = ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
         } catch (ClassCastException e) {
             Log.e(TAG, "startReceiveFragment: ", e);

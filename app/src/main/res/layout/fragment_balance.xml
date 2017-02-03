@@ -2,13 +2,6 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-        <variable
-            name="viewModel"
-            type="piuk.blockchain.android.ui.balance.BalanceViewModel" />
-    </data>
-
     <!-- MAIN CONTENT -->
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_container"
@@ -46,13 +39,12 @@
                 android:gravity="center_vertical">
 
                 <android.support.v7.widget.AppCompatTextView
-                    android:id="@+id/balance1"
+                    android:id="@+id/balance"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
                     android:gravity="center_horizontal"
                     android:includeFontPadding="false"
-                    android:text="@{viewModel.balance}"
                     android:textColor="@color/white"
                     android:textSize="28sp"
                     tools:text="10.0000002 BTC" />
@@ -61,7 +53,7 @@
                     android:id="@+id/accounts_spinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/balance1"
+                    android:layout_below="@+id/balance"
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="-8dp"
                     android:dropDownVerticalOffset="8dp"
