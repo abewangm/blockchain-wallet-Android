@@ -68,7 +68,7 @@ import piuk.blockchain.android.util.annotations.Thunk;
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
 import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
 
-public class MainActivity extends BaseAuthActivity implements BalanceFragment.Communicator,
+public class MainActivity extends BaseAuthActivity implements BalanceFragment.OnFragmentInteractionListener,
         MainViewModel.DataListener,
         SendFragment.OnSendFragmentInteractionListener,
         ReceiveFragment.OnReceiveFragmentInteractionListener,

@@ -5,8 +5,11 @@ import com.google.common.collect.HashBiMap;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 
 import info.blockchain.api.Settings;
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.ImportedAccount;
@@ -30,6 +33,7 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -71,6 +75,22 @@ public class BalanceViewModel extends BaseViewModel {
         void updateBalance(String balance);
 
         void setShowRefreshing(boolean showRefreshing);
+
+        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
+
+        void showAccountChoiceDialog(List<String> accounts, String fctxId);
+
+        void initiatePayment(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex);
+
+        void showWaitingForPaymentDialog();
+
+        void showWaitingForAddressDialog();
+
+        void showSendAddressDialog(String fctxId);
+
+        void showProgressDialog();
+
+        void dismissProgressDialog();
     }
 
     public BalanceViewModel(DataListener dataListener) {
@@ -126,7 +146,7 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     @SuppressWarnings("Convert2streamapi")
-    public void updateAccountList() {
+    void updateAccountList() {
         //activeAccountAndAddressList is linked to Adapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
         activeAccountAndAddressList.clear();
         activeAccountAndAddressBiMap.clear();
@@ -256,11 +276,11 @@ public class BalanceViewModel extends BaseViewModel {
         if (dataListener != null) dataListener.onRefreshAccounts();
     }
 
-    public List<Object> getTransactionList() {
+    List<Object> getTransactionList() {
         return displayList;
     }
 
-    public void onTransactionListRefreshed() {
+    void onTransactionListRefreshed() {
         dataListener.setShowRefreshing(true);
         compositeDisposable.add(
                 updateBalancesAndTransactions()
@@ -273,7 +293,7 @@ public class BalanceViewModel extends BaseViewModel {
                         }));
     }
 
-    public void updateBalanceAndTransactionList(Intent intent, int accountSpinnerPosition, boolean isBTC) {
+    void updateBalanceAndTransactionList(Intent intent, int accountSpinnerPosition, boolean isBTC) {
         Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);//the current selected item in dropdown (Account or Legacy Address)
 
         //If current selected item gets edited by another platform object might become null
@@ -322,7 +342,7 @@ public class BalanceViewModel extends BaseViewModel {
         }
     }
 
-    public void updateFacilitatedTransactions() {
+    void updateFacilitatedTransactions() {
         compositeDisposable.add(
                 contactsDataManager.fetchContacts()
                         .andThen(contactsDataManager.getUnfulfilledFacilitatedTransactions())
@@ -338,6 +358,92 @@ public class BalanceViewModel extends BaseViewModel {
                                 }, throwable -> {
                                     // TODO: 03/02/2017
                                 }));
+    }
+
+    void onPendingTransactionClicked(String fctxId) {
+        compositeDisposable.add(
+                contactsDataManager.getContactFromFctxId(fctxId)
+                        .subscribe(contact -> {
+                            FacilitatedTransaction transaction = contact.getFacilitatedTransaction().get(fctxId);
+
+                            if (transaction == null) {
+                                dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
+                            } else {
+
+                                // Payment request sent, waiting for address from recipient
+                                if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+                                        && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)
+                                        || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR))) {
+
+                                    dataListener.showWaitingForAddressDialog();
+
+                                    // Payment request sent, waiting for payment
+                                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                                        && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)
+                                        || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR))) {
+
+                                    dataListener.showWaitingForPaymentDialog();
+
+                                    // Received payment request, need to send address to sender
+                                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+                                        && (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)
+                                        || transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER))) {
+
+                                    List<String> accountNames = new ArrayList<>();
+                                    //noinspection Convert2streamapi
+                                    for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
+                                        if (!account.isArchived()) {
+                                            accountNames.add(account.getLabel());
+                                        }
+                                    }
+                                    if (accountNames.size() == 1) {
+                                        // Only one account, ask if you want to send an address
+                                        dataListener.showSendAddressDialog(fctxId);
+                                    } else {
+                                        // Show dialog allowing user to select which account they want to use
+                                        dataListener.showAccountChoiceDialog(accountNames, fctxId);
+                                    }
+
+                                    // Waiting for payment
+                                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                                        && (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)
+                                        || transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER))) {
+
+                                    dataListener.initiatePayment(
+                                            transaction.toBitcoinURI(),
+                                            contact.getId(),
+                                            contact.getMdid(),
+                                            transaction.getId(),
+                                            dataListener.isBtc(),
+                                            payloadManager.getPayload().getHdWallet().getDefaultIndex());
+                                }
+                            }
+                        }, throwable -> dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)));
+    }
+
+    void onAccountChosen(int accountPosition, String fctxId) {
+        dataListener.showProgressDialog();
+        compositeDisposable.add(
+                contactsDataManager.getContactFromFctxId(fctxId)
+                        .subscribe(contact -> {
+                            FacilitatedTransaction transaction = contact.getFacilitatedTransaction().get(fctxId);
+
+                            PaymentRequest paymentRequest = new PaymentRequest();
+                            paymentRequest.setIntended_amount(transaction.getIntended_amount());
+                            paymentRequest.setId(fctxId);
+
+                            compositeDisposable.add(
+                                    getNextReceiveAddress(getCorrectedAccountIndex(accountPosition))
+                                            .doOnNext(paymentRequest::setAddress)
+                                            .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
+                                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                                            .subscribe(
+                                                    () -> {
+                                                        dataListener.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK);
+                                                        onViewReady();
+                                                    },
+                                                    throwable -> dataListener.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
+                        }, throwable -> dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)));
     }
 
     @NonNull
@@ -428,6 +534,25 @@ public class BalanceViewModel extends BaseViewModel {
             payloadManager.updateBalancesAndTransactions();
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    private Observable<String> getNextReceiveAddress(int defaultIndex) {
+        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
+    }
+
+    private int getCorrectedAccountIndex(int accountIndex) {
+        // Filter accounts by active
+        List<Account> activeAccounts = new ArrayList<>();
+        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        for (int i = 0; i < accounts.size(); i++) {
+            Account account = accounts.get(i);
+            if (!account.isArchived()) {
+                activeAccounts.add(account);
+            }
+        }
+
+        // Find corrected position
+        return payloadManager.getPayload().getHdWallet().getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
 }

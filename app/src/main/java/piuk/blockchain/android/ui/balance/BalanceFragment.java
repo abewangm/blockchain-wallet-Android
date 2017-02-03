@@ -9,9 +9,11 @@ import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,6 +25,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +35,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.payload.PayloadBridge;
 import piuk.blockchain.android.databinding.FragmentBalanceBinding;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.home.SecurityPromptDialog;
@@ -56,7 +61,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     private int balanceDisplayState = SHOW_BTC;
     public int balanceBarHeight;
     private BalanceHeaderAdapter accountsAdapter;
-    @Thunk Communicator comm;
+    private MaterialProgressDialog progressDialog;
+    @Thunk OnFragmentInteractionListener interactionListener;
     @Thunk boolean isBTC = true;
     // Accounts list
     @Thunk AppCompatSpinner accountSpinner;
@@ -133,7 +139,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void onResume() {
         super.onResume();
-        comm.resetNavigationDrawer();
+        interactionListener.resetNavigationDrawer();
 
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(receiver, filter);
@@ -184,7 +190,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        comm = (Communicator) activity;
+        interactionListener = (OnFragmentInteractionListener) activity;
     }
 
     @Override
@@ -343,7 +349,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
             @Override
             public void onFctxClicked(String fctxId) {
-                // TODO: 03/02/2017
+                viewModel.onPendingTransactionClicked(fctxId);
             }
         });
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -450,6 +456,97 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     }
 
     @Override
+    public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
+        ToastCustom.makeText(getContext(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
+    public void showAccountChoiceDialog(List<String> accounts, String fctxId) {
+        AppCompatSpinner spinner = new AppCompatSpinner(getActivity());
+        spinner.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, accounts));
+        final int[] selection = {0};
+        //noinspection AnonymousInnerClassMayBeStatic
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selection[0] = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // No-op
+            }
+        });
+
+        FrameLayout frameLayout = new FrameLayout(getActivity());
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        int marginInPixels = (int) ViewUtils.convertDpToPixel(20, getActivity());
+        params.setMargins(marginInPixels, 0, marginInPixels, 0);
+        frameLayout.addView(spinner, params);
+
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_choose_account_message)
+                .setView(frameLayout)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.onAccountChosen(selection[0], fctxId))
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showSendAddressDialog(String fctxId) {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_send_address_message)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.onAccountChosen(0, fctxId))
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showWaitingForPaymentDialog() {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_waiting_for_payment_message)
+                .setPositiveButton(android.R.string.ok, null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showWaitingForAddressDialog() {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_waiting_for_address_message)
+                .setPositiveButton(android.R.string.ok, null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showProgressDialog() {
+        progressDialog = new MaterialProgressDialog(getActivity());
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(R.string.please_wait);
+        progressDialog.show();
+    }
+
+    @Override
+    public void dismissProgressDialog() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+    }
+
+    @Override
+    public void initiatePayment(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex) {
+
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         viewModel.destroy();
@@ -462,7 +559,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         }
     }
 
-    public interface Communicator {
+    public interface OnFragmentInteractionListener {
 
         void resetNavigationDrawer();
 

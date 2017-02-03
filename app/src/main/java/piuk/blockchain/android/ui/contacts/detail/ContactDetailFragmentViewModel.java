@@ -241,7 +241,6 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
                         payloadManager.getPayload().getHdWallet().getDefaultIndex());
             }
         }
-
     }
 
     void onAccountChosen(int accountPosition, String fctxId) {

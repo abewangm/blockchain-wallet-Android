@@ -467,4 +467,28 @@ public class ContactsDataManager {
                 });
     }
 
+    /**
+     * Returns a {@link Contact} object from a given FacilitatedTransaction ID. It's possible that
+     * the Observable will return an empty object, but very unlikely.
+     *
+     * @param id The {@link FacilitatedTransaction} ID.
+     * @return An {@link Observable} containing a {@link Contact} object OR potentially an empty
+     * Observable
+     */
+    public Observable<Contact> getContactFromFctxId(String id) {
+        return getContactList()
+                .toList()
+                .toObservable()
+                .flatMap(contacts -> {
+                    for (Contact contact : contacts) {
+                        if (!contact.getFacilitatedTransaction().isEmpty()
+                                && contact.getFacilitatedTransaction().get(id) != null) {
+                            return Observable.just(contact);
+                        }
+                    }
+
+                    return null;
+                });
+    }
+
 }

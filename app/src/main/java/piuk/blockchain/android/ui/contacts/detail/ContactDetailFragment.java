@@ -72,8 +72,6 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
 
         binding.buttonDelete.setOnClickListener(v -> viewModel.onDeleteContactClicked());
         binding.buttonRename.setOnClickListener(v -> viewModel.onRenameContactClicked());
-        binding.buttonSend.setOnClickListener(v -> viewModel.onSendMoneyClicked());
-        binding.buttonRequest.setOnClickListener(v -> viewModel.onRequestMoneyClicked());
 
         String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
@@ -134,8 +132,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
 
     @Override
     public void disablePayments() {
-        binding.buttonRequest.setEnabled(false);
-        binding.buttonSend.setEnabled(false);
+
     }
 
     @Override
@@ -185,7 +182,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
+                // No-op
             }
         });
 
@@ -243,16 +240,14 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
 
     @Override
     public void initiatePayment(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex) {
-        if (listener != null)
+        if (listener != null) {
             listener.onPaymentInitiated(uri, recipientId, mdid, fctxId, isBtc, defaultIndex);
+        }
     }
 
     @Override
     public void updateContactName(String name) {
         ((ContactDetailActivity) getActivity()).getToolbar().setTitle(name);
-
-        binding.buttonRequest.setText(getString(R.string.contacts_request_bitcoin, name));
-        binding.buttonSend.setText(getString(R.string.contacts_send_bitcoin, name));
         binding.textviewTransactionListHeader.setText(getString(R.string.contacts_detail_transactions, name));
     }
 
