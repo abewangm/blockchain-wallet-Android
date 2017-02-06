@@ -652,7 +652,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             selectedAccountPosition = -1;
         }
 
-        ReceiveFragment receiveFragment = ReceiveFragment.newInstance(isBTC, selectedAccountPosition);
+        ReceiveFragment receiveFragment = ReceiveFragment.newInstance(selectedAccountPosition);
         replaceFragmentWithAnimation(receiveFragment);
     }
 

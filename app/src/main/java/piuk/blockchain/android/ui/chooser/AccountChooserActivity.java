@@ -21,6 +21,7 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 public class AccountChooserActivity extends BaseAuthActivity implements AccountChooserViewModel.DataListener {
 
     public static final String EXTRA_REQUEST_TYPE = "request_type";
+    public static final String EXTRA_REQUEST_CODE = "request_code";
     public static final String EXTRA_SELECTED_ITEM = "selected_object";
     public static final String EXTRA_SELECTED_OBJECT_TYPE = "selected_object_type";
     public static final int REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE = 217;
@@ -42,12 +43,9 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
             throw new AssertionError("Request type must be passed to AccountChooserActivity");
         } else {
             paymentRequestType = (PaymentRequestType) intent.getSerializableExtra(EXTRA_REQUEST_TYPE);
-
-            if (paymentRequestType.equals(PaymentRequestType.SEND)) {
-                binding.toolbar.toolbarGeneral.setTitle(R.string.to);
-            } else {
-                binding.toolbar.toolbarGeneral.setTitle(R.string.from);
-            }
+            int requestCode = getIntent().getIntExtra(EXTRA_REQUEST_CODE, -1);
+            binding.toolbar.toolbarGeneral.setTitle(
+                    requestCode == REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE ? R.string.to : R.string.from);
 
             setSupportActionBar(binding.toolbar.toolbarGeneral);
             if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -86,6 +84,7 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
     public static void startForResult(Fragment fragment, int requestCode, PaymentRequestType paymentRequestType) {
         Intent starter = new Intent(fragment.getContext(), AccountChooserActivity.class);
         starter.putExtra(EXTRA_REQUEST_TYPE, paymentRequestType);
+        starter.putExtra(EXTRA_REQUEST_CODE, requestCode);
         fragment.startActivityForResult(starter, requestCode);
     }
 

@@ -359,6 +359,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL);
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {

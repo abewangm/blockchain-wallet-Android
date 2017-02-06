@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.FragmentContactDetailBinding;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -131,11 +130,6 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
     }
 
     @Override
-    public void disablePayments() {
-
-    }
-
-    @Override
     public void onTransactionsUpdated(List<FacilitatedTransaction> transactions) {
         transactionAdapter.onTransactionsUpdated(transactions);
         if (!transactions.isEmpty()) {
@@ -145,11 +139,6 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
             binding.recyclerView.setVisibility(View.GONE);
             binding.layoutNoTransactions.setVisibility(View.VISIBLE);
         }
-    }
-
-    @Override
-    public void startPaymentRequestActivity(PaymentRequestType paymentRequestType, String contactId) {
-//        ContactPaymentRequestActivity.start(getActivity(), paymentRequestType, contactId);
     }
 
     @Override

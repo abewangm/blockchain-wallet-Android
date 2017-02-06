@@ -8,6 +8,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
@@ -52,53 +53,75 @@ public class AccountChooserViewModel extends BaseViewModel {
         isBtc = balanceDisplayState != SHOW_FIAT;
     }
 
-    @SuppressWarnings({"ConstantConditions", "Convert2streamapi"})
     @Override
     public void onViewReady() {
         if (dataListener.getPaymentRequestType().equals(PaymentRequestType.SEND)) {
-            compositeDisposable.add(
-                    contactsDataManager.getContactList()
-                            .filter(ContactsPredicates.filterByConfirmed())
-                            .toList()
-                            .doOnSuccess(contacts -> {
-                                if (!contacts.isEmpty()) {
-                                    itemAccounts.add(new ItemAccount(stringUtils.getString(R.string.contacts_title), null, null, null, null));
-                                    for (Contact contact : contacts) {
-                                        itemAccounts.add(new ItemAccount(null, null, null, null, contact));
-                                    }
-                                }
-                            })
-                            .flatMapObservable(contacts -> getAccountList())
-                            .doOnNext(accounts -> {
-                                itemAccounts.add(new ItemAccount(stringUtils.getString(R.string.wallets), null, null, null, null));
-                                itemAccounts.addAll(accounts);
-                            })
-                            .flatMap(accounts -> getImportedList())
-                            .subscribe(
-                                    items -> {
-                                        if (!items.isEmpty()) {
-                                            itemAccounts.add(new ItemAccount(stringUtils.getString(R.string.imported_addresses), null, null, null, null));
-                                            itemAccounts.addAll(items);
-                                        }
-                                        dataListener.updateUi(itemAccounts);
-                                    }));
+            loadReceiveAccountsAndContacts();
         } else {
-            compositeDisposable.add(
-                    getAccountList()
-                            .doOnNext(accounts -> {
-                                itemAccounts.add(new ItemAccount(stringUtils.getString(R.string.wallets), null, null, null, null));
-                                itemAccounts.addAll(accounts);
-                            })
-                            .flatMap(accounts -> getImportedList())
-                            .subscribe(
-                                    items -> {
-                                        if (!items.isEmpty()) {
-                                            itemAccounts.add(new ItemAccount(stringUtils.getString(R.string.imported_addresses), null, null, null, null));
-                                            itemAccounts.addAll(items);
-                                        }
-                                        dataListener.updateUi(itemAccounts);
-                                    }));
+            loadReceiveAccountsOnly();
         }
+    }
+
+    private void loadReceiveAccountsAndContacts() {
+        compositeDisposable.add(
+                parseContactsList()
+                        .flatMapObservable(contacts -> parseAccountList())
+                        .flatMap(accounts -> parseImportedList())
+                        .subscribe(
+                                items -> dataListener.updateUi(itemAccounts),
+                                Throwable::printStackTrace));
+    }
+
+    private void loadReceiveAccountsOnly() {
+        compositeDisposable.add(
+                parseAccountList()
+                        .flatMap(accounts -> parseImportedList())
+                        .subscribe(
+                                list -> dataListener.updateUi(itemAccounts),
+                                Throwable::printStackTrace));
+    }
+
+    private void loadContactsOnly() {
+        compositeDisposable.add(
+                parseContactsList()
+                        .subscribe(
+                                items -> dataListener.updateUi(itemAccounts),
+                                Throwable::printStackTrace));
+    }
+
+    @SuppressWarnings({"ConstantConditions", "Convert2streamapi"})
+    private Single<List<Contact>> parseContactsList() {
+        return contactsDataManager.getContactList()
+                .filter(ContactsPredicates.filterByConfirmed())
+                .toList()
+                .doOnSuccess(contacts -> {
+                    if (!contacts.isEmpty()) {
+                        itemAccounts.add(new ItemAccount(stringUtils.getString(R.string.contacts_title), null, null, null, null));
+                        for (Contact contact : contacts) {
+                            itemAccounts.add(new ItemAccount(null, null, null, null, contact));
+                        }
+                    }
+                });
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private Observable<List<ItemAccount>> parseAccountList() {
+        return getAccountList()
+                .doOnNext(accounts -> {
+                    itemAccounts.add(new ItemAccount(stringUtils.getString(R.string.wallets), null, null, null, null));
+                    itemAccounts.addAll(accounts);
+                });
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private Observable<List<ItemAccount>> parseImportedList() {
+        return getImportedList()
+                .doOnNext(items -> {
+                    if (!items.isEmpty()) {
+                        itemAccounts.add(new ItemAccount(stringUtils.getString(R.string.imported_addresses), null, null, null, null));
+                        itemAccounts.addAll(items);
+                    }
+                });
     }
 
     private Observable<List<ItemAccount>> getAccountList() {

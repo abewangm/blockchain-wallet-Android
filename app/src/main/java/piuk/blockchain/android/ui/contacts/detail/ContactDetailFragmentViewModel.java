@@ -21,7 +21,6 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.FctxDateComparator;
-import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
@@ -65,11 +64,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
 
         void showDeleteUserDialog();
 
-        void disablePayments();
-
         void onTransactionsUpdated(List<FacilitatedTransaction> transactions);
-
-        void startPaymentRequestActivity(PaymentRequestType paymentRequestType, String contactId);
 
         void showAccountChoiceDialog(List<String> accounts, String fctxId);
 
@@ -106,11 +101,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
                             .doOnNext(contact -> {
                                 this.contact = contact;
                                 dataListener.updateContactName(contact.getName());
-
                                 sortAndUpdateTransactions(contact.getFacilitatedTransaction().values());
-                                if (contact.getMdid() == null || contact.getMdid().isEmpty()) {
-                                    dataListener.disablePayments();
-                                }
                             })
                             // Contact not found, quit page
                             .doOnError(throwable -> showErrorAndQuitPage())
@@ -170,14 +161,6 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
                                     },
                                     throwable -> dataListener.showToast(R.string.contacts_rename_failed, ToastCustom.TYPE_ERROR)));
         }
-    }
-
-    void onSendMoneyClicked() {
-        dataListener.startPaymentRequestActivity(PaymentRequestType.SEND, contact.getId());
-    }
-
-    void onRequestMoneyClicked() {
-        dataListener.startPaymentRequestActivity(PaymentRequestType.REQUEST, contact.getId());
     }
 
     void onTransactionClicked(String id) {

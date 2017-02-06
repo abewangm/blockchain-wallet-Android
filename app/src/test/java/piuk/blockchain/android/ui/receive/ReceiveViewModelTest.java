@@ -118,9 +118,9 @@ public class ReceiveViewModelTest {
         // Act
         mSubject.onViewReady();
         // Assert
-        verify(mActivity).onSpinnerDataChanged();
-        assertEquals(5, mSubject.mAccountMap.size());
-        assertEquals(2, mSubject.mSpinnerIndexMap.size());
+        verify(mActivity).onAccountDataChanged();
+        assertEquals(5, mSubject.accountMap.size());
+        assertEquals(2, mSubject.spinnerIndexMap.size());
     }
 
     @Test
@@ -192,7 +192,7 @@ public class ReceiveViewModelTest {
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
         // Act
         mSubject.onViewReady(); // Update account list first
-        Integer value = mSubject.getDefaultSpinnerPosition();
+        Integer value = mSubject.getDefaultAccountPosition();
         // Assert
         assertEquals(2, Math.toIntExact(value));
     }
@@ -206,7 +206,7 @@ public class ReceiveViewModelTest {
 
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
         // Act
-        Integer value = mSubject.getDefaultSpinnerPosition();
+        Integer value = mSubject.getDefaultAccountPosition();
         // Assert
         assertEquals(0, Math.toIntExact(value));
     }

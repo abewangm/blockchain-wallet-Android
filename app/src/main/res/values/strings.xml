@@ -629,6 +629,7 @@
     <string name="contacts_second_password_prompt">To use this service, we require you to enter your second password. You should only need to enter this once to use the Contacts functionality.</string>
     <string name="contacts_pending_transaction">Pending Transactions</string>
     <string name="contacts_transaction_history">Transaction History</string>
+    <string name="contacts_request_money_receive">Send request to contact</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>
