@@ -12,7 +12,6 @@ import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -329,16 +328,6 @@ public class ReceiveViewModelTest {
 
         // Assert
 
-    }
-
-    @Test
-    public void getAppUtil() throws Exception {
-        // Arrange
-
-        // Act
-        AppUtil util = mSubject.getAppUtil();
-        // Assert
-        Assert.assertEquals(util, mAppUtil);
     }
 
     private class MockApplicationModule extends ApplicationModule {
