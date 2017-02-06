@@ -18,6 +18,7 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.transaction.Tx;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +28,7 @@ import javax.inject.Inject;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.contacts.FctxDateComparator;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -345,8 +347,9 @@ public class BalanceViewModel extends BaseViewModel {
 
     void updateFacilitatedTransactions() {
         compositeDisposable.add(
-                contactsDataManager.fetchContacts()
-                        .andThen(contactsDataManager.getUnfulfilledFacilitatedTransactions())
+                contactsDataManager.getContactsWithUnreadPaymentRequests()
+                        .toList()
+                        .flatMapObservable(contacts -> contactsDataManager.getUnfulfilledFacilitatedTransactions())
                         .toList()
                         .subscribe(
                                 transactions -> {
@@ -360,6 +363,8 @@ public class BalanceViewModel extends BaseViewModel {
                                     }
 
                                     if (!transactions.isEmpty()) {
+                                        Collections.sort(transactions, new FctxDateComparator());
+                                        Collections.reverse(transactions);
                                         displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction));
                                         displayList.addAll(1, transactions);
                                         displayList.add(transactions.size() + 1, stringUtils.getString(R.string.contacts_transaction_history));

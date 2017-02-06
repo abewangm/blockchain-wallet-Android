@@ -543,7 +543,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void initiatePayment(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex) {
-
+        if (interactionListener != null) {
+            interactionListener.onPaymentInitiated(uri, recipientId, mdid, fctxId, isBtc, defaultIndex);
+        }
     }
 
     @Override
@@ -562,6 +564,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public interface OnFragmentInteractionListener {
 
         void resetNavigationDrawer();
+
+        void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex);
 
     }
 

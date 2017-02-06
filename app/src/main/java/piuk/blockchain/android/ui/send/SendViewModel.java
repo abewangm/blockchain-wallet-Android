@@ -33,8 +33,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -120,6 +118,7 @@ public class SendViewModel extends BaseViewModel {
         getSuggestedFee();
 
         sslVerifyUtil.validateSSL();
+        updateUI();
     }
 
     private boolean getBtcDisplayState() {
@@ -320,26 +319,8 @@ public class SendViewModel extends BaseViewModel {
         if (btcAmount != null && !btcAmount.equals("")) {
             if (dataListener != null) {
                 dataListener.updateBtcAmount(btcAmount);
-
-                double doubleBtcAmount;
-
-                try {
-                    NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
-                    Number btcNumber = numberFormat.parse(btcAmount);
-                    doubleBtcAmount = monetaryUtil.getUndenominatedAmount(btcNumber.doubleValue());
-                } catch (NumberFormatException | ParseException e) {
-                    doubleBtcAmount = 0.0;
-                }
-
-                sendModel.exchangeRate = exchangeRateFactory.getLastPrice(sendModel.fiatUnit);
-
-                double fiatAmount = sendModel.exchangeRate * doubleBtcAmount;
-
-                dataListener.onUpdateFiatAmount(monetaryUtil.getFiatFormat(sendModel.fiatUnit).format(fiatAmount));
-
-                //QR scan comes in as BTC - set current btc unit
+                // QR scan comes in as BTC - set current btc unit
                 prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
-
                 dataListener.updateBtcUnit(sendModel.btcUnit);
                 dataListener.updateFiatUnit(sendModel.fiatUnit);
             }

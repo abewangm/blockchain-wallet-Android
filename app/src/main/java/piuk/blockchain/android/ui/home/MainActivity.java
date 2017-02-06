@@ -566,6 +566,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
+    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex) {
+        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, null, isBtc, defaultIndex);
+        addFragment(sendFragment);
+    }
+
+    @Override
     public void kickToLauncherPage() {
         startSingleActivity(LauncherActivity.class);
     }
@@ -696,6 +702,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @Override
     public void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue) {
         // No-op, this callback is used elsewhere
+        // TODO: 06/02/2017 Broadcast payment if needed
     }
 
     @Override
