@@ -157,6 +157,21 @@ public class ReceiveViewModel extends BaseViewModel {
         return getDefaultAccountPosition();
     }
 
+    int getCorrectedAccountIndex(int accountIndex) {
+        // Filter accounts by active
+        List<Account> activeAccounts = new ArrayList<>();
+        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        for (int i = 0; i < accounts.size(); i++) {
+            Account account = accounts.get(i);
+            if (!account.isArchived()) {
+                activeAccounts.add(account);
+            }
+        }
+
+        // Find corrected position
+        return payloadManager.getPayload().getHdWallet().getAccounts().indexOf(activeAccounts.get(accountIndex));
+    }
+
     void updateAccountList() {
         accountMap.clear();
         spinnerIndexMap.clear();
@@ -206,11 +221,6 @@ public class ReceiveViewModel extends BaseViewModel {
     @Nullable
     Object getAccountItemForPosition(int position) {
         return accountMap.get(position);
-    }
-
-    @NonNull
-    AppUtil getAppUtil() {
-        return appUtil;
     }
 
     boolean warnWatchOnlySpend() {
@@ -289,7 +299,7 @@ public class ReceiveViewModel extends BaseViewModel {
             imageIntent.setType(type);
 
             if (AndroidUtils.is23orHigher()) {
-                Uri uriForFile = FileProvider.getUriForFile(applicationContext, getAppUtil().getPackageName() + ".fileProvider", file);
+                Uri uriForFile = FileProvider.getUriForFile(applicationContext, appUtil.getPackageName() + ".fileProvider", file);
                 imageIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 imageIntent.putExtra(Intent.EXTRA_STREAM, uriForFile);
             } else {

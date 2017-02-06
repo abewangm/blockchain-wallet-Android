@@ -2,7 +2,8 @@ package piuk.blockchain.android.data.contacts;
 
 public enum PaymentRequestType {
     SEND("send"),
-    REQUEST("request");
+    REQUEST("request"),
+    CONTACT("contact");
 
     private String name;
 

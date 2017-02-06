@@ -55,10 +55,14 @@ public class AccountChooserViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        if (dataListener.getPaymentRequestType().equals(PaymentRequestType.SEND)) {
+        PaymentRequestType paymentRequestType = dataListener.getPaymentRequestType();
+
+        if (paymentRequestType.equals(PaymentRequestType.SEND)) {
             loadReceiveAccountsAndContacts();
-        } else {
+        } else if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
             loadReceiveAccountsOnly();
+        } else {
+            loadContactsOnly();
         }
     }
 

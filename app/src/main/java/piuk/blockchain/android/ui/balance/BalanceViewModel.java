@@ -287,6 +287,7 @@ public class BalanceViewModel extends BaseViewModel {
                         .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
                         .subscribe(() -> {
                             updateAccountList();
+                            updateFacilitatedTransactions();
                             updateBalanceAndTransactionList(null, dataListener.getSelectedItemPosition(), dataListener.isBtc());
                         }, throwable -> {
                             // No-op
@@ -349,6 +350,15 @@ public class BalanceViewModel extends BaseViewModel {
                         .toList()
                         .subscribe(
                                 transactions -> {
+                                    // Remove previous Pending Transactions
+                                    Iterator iterator = displayList.iterator();
+                                    while (iterator.hasNext()) {
+                                        Object element = iterator.next();
+                                        if (!(element instanceof Tx)) {
+                                            iterator.remove();
+                                        }
+                                    }
+
                                     if (!transactions.isEmpty()) {
                                         displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction));
                                         displayList.addAll(1, transactions);

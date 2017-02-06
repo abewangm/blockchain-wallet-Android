@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,7 +13,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.ActivityContactDetailBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -26,8 +24,7 @@ import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_
 
 public class ContactDetailActivity extends BaseAuthActivity implements
         ContactDetailActivityViewModel.DataListener,
-        ContactDetailFragment.OnFragmentInteractionListener,
-        SendFragment.OnSendFragmentInteractionListener {
+        ContactDetailFragment.OnFragmentInteractionListener {
 
     private ActivityContactDetailBinding binding;
     private MaterialProgressDialog progressDialog;
@@ -158,11 +155,6 @@ public class ContactDetailActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue) {
-        viewModel.broadcastPaymentSuccess(mdid, transactionHash, fctxId, transactionValue);
-    }
-
-    @Override
     public void dismissPaymentPage() {
         onBackPressed();
     }
@@ -174,19 +166,4 @@ public class ContactDetailActivity extends BaseAuthActivity implements
         TransactionDetailActivity.start(this, bundle);
     }
 
-    // TODO: 02/02/2017 To be removed
-    @Override
-    public void onSendFragmentClose() {
-        // No-op
-    }
-
-    @Override
-    public void onSendFragmentStart() {
-        // No-op
-    }
-
-    @Override
-    public void onTransactionNotesRequested(String contactName, PaymentRequestType paymentRequestType, long satoshis) {
-        // No-op
-    }
 }

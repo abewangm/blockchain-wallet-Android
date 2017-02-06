@@ -21,6 +21,7 @@ public class ContactPaymentRequestNotesFragment extends Fragment implements
         ContactsPaymentRequestViewModel.DataListener {
 
     public static final String ARGUMENT_REQUEST_TYPE = "request_type";
+    public static final String ARGUMENT_ACCOUNT_POSITION = "account_position";
     public static final String ARGUMENT_CONTACT_ID = "contact_id";
     public static final String ARGUMENT_SATOSHIS = "satoshis";
 
@@ -33,11 +34,17 @@ public class ContactPaymentRequestNotesFragment extends Fragment implements
         // Required empty constructor
     }
 
-    public static ContactPaymentRequestNotesFragment newInstance(PaymentRequestType requestType, String contactName, long satoshis) {
+    public static ContactPaymentRequestNotesFragment newInstance(PaymentRequestType requestType,
+                                                                 @Nullable Integer accountPosition,
+                                                                 String contactId,
+                                                                 long satoshis) {
         Bundle args = new Bundle();
         args.putSerializable(ARGUMENT_REQUEST_TYPE, requestType);
-        args.putString(ARGUMENT_CONTACT_ID, contactName);
+        args.putString(ARGUMENT_CONTACT_ID, contactId);
         args.putLong(ARGUMENT_SATOSHIS, satoshis);
+        if (accountPosition != null) {
+            args.putInt(ARGUMENT_ACCOUNT_POSITION, accountPosition);
+        }
         ContactPaymentRequestNotesFragment fragment = new ContactPaymentRequestNotesFragment();
         fragment.setArguments(args);
         return fragment;

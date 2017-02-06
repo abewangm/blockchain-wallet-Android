@@ -40,6 +40,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
+import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.ImportedAccount;
 import info.blockchain.wallet.payload.LegacyAddress;
@@ -128,7 +129,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void startContactSelectionActivity() {
         AccountChooserActivity.startForResult(this,
                 AccountChooserActivity.REQUEST_CODE_CHOOSE_CONTACT,
-                PaymentRequestType.REQUEST);
+                PaymentRequestType.CONTACT);
     }
 
     @Override
@@ -335,6 +336,8 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     void displayQRCode(int position) {
         Object object = viewModel.getAccountItemForPosition(position);
         showInfoButton = showAddressInfoButtonIfNecessary(object);
+        // Disable send to contact button if not using HD account
+        binding.buttonSendToContact.setEnabled(object instanceof Account);
 
         String receiveAddress;
         if (object instanceof LegacyAddress) {
@@ -426,6 +429,21 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
             } catch (ClassNotFoundException e) {
                 Log.e(TAG, "onActivityResult: ", e);
                 selectAccount(viewModel.getDefaultAccountPosition());
+            }
+            // Choose contact for request
+        } else if (resultCode == Activity.RESULT_OK
+                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_CONTACT
+                && data != null) {
+
+            Contact contact = new Gson().fromJson(data.getStringExtra(EXTRA_SELECTED_ITEM), Contact.class);
+
+            if (listener != null) {
+                listener.onTransactionNotesRequested(
+                        contact.getId(),
+                        viewModel.getCorrectedAccountIndex(selectedAccountPosition),
+                        PaymentRequestType.REQUEST,
+                        viewModel.getCurrencyHelper().getLongAmount(
+                                binding.amountContainer.amountBtc.getText().toString()));
             }
         }
     }
@@ -563,7 +581,8 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
     @Override
     public void onAccountDataChanged() {
-        selectAccount(selectedAccountPosition);
+        selectAccount(selectedAccountPosition != -1
+                ? selectedAccountPosition : viewModel.getDefaultAccountPosition());
     }
 
     @Override
@@ -688,6 +707,8 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public interface OnReceiveFragmentInteractionListener {
 
         void onReceiveFragmentClose();
+
+        void onTransactionNotesRequested(String contactId, @Nullable Integer accountPosition, PaymentRequestType paymentRequestType, long satoshis);
 
     }
 }

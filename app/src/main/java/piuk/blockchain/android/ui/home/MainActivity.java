@@ -641,14 +641,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     public void startReceiveFragment() {
-        boolean isBTC;
         int selectedAccountPosition;
         try {
-            isBTC = ((BalanceFragment) getCurrentFragment()).isBtc();
             selectedAccountPosition = ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
         } catch (ClassCastException e) {
             Log.e(TAG, "startReceiveFragment: ", e);
-            isBTC = true;
             selectedAccountPosition = -1;
         }
 
@@ -702,8 +699,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void onTransactionNotesRequested(String contactId, PaymentRequestType paymentRequestType, long satoshis) {
-        addFragment(ContactPaymentRequestNotesFragment.newInstance(paymentRequestType, contactId, satoshis));
+    public void onTransactionNotesRequested(String contactId, @Nullable Integer accountPosition, PaymentRequestType paymentRequestType, long satoshis) {
+        addFragment(ContactPaymentRequestNotesFragment.newInstance(paymentRequestType, accountPosition, contactId, satoshis));
     }
 
     @Override

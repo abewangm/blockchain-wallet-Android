@@ -721,7 +721,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     @Override
     public void navigateToAddNote(String contactId, PaymentRequestType paymentRequestType, long satoshis) {
         if (listener != null)
-            listener.onTransactionNotesRequested(contactId, paymentRequestType, satoshis);
+            listener.onTransactionNotesRequested(contactId, null, paymentRequestType, satoshis);
     }
 
     // BTC Field
@@ -1089,6 +1089,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue);
 
-        void onTransactionNotesRequested(String contactName, PaymentRequestType paymentRequestType, long satoshis);
+        void onTransactionNotesRequested(String contactId, @Nullable Integer accountPosition, PaymentRequestType paymentRequestType, long satoshis);
     }
 }

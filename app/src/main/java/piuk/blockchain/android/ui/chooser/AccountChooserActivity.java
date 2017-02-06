@@ -46,10 +46,12 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
             paymentRequestType = (PaymentRequestType) intent.getSerializableExtra(EXTRA_REQUEST_TYPE);
             int requestCode = getIntent().getIntExtra(EXTRA_REQUEST_CODE, -1);
             binding.toolbar.toolbarGeneral.setTitle(
-                    requestCode == REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE ? R.string.to : R.string.from);
+                    requestCode == REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE
+                            || requestCode == REQUEST_CODE_CHOOSE_CONTACT ? R.string.to : R.string.from);
 
             setSupportActionBar(binding.toolbar.toolbarGeneral);
-            if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            if (getSupportActionBar() != null)
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
         viewModel.onViewReady();

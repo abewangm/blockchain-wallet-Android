@@ -19,8 +19,8 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.util.PrefsUtil;
 
+import static piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.ARGUMENT_ACCOUNT_POSITION;
 import static piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.ARGUMENT_CONTACT_ID;
 import static piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.ARGUMENT_REQUEST_TYPE;
 import static piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.ARGUMENT_SATOSHIS;
@@ -32,8 +32,8 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
     private DataListener dataListener;
     private Contact recipient;
     private long satoshis;
+    private int accountPosition;
     @Inject ContactsDataManager contactsDataManager;
-    @Inject PrefsUtil prefsUtil;
     @Inject PayloadManager payloadManager;
     private PaymentRequestType paymentRequestType;
 
@@ -68,6 +68,7 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
     public void onViewReady() {
         String contactId = dataListener.getFragmentBundle().getString(ARGUMENT_CONTACT_ID);
         satoshis = dataListener.getFragmentBundle().getLong(ARGUMENT_SATOSHIS, -1L);
+        accountPosition = dataListener.getFragmentBundle().getInt(ARGUMENT_ACCOUNT_POSITION, -1);
         paymentRequestType = (PaymentRequestType) dataListener.getFragmentBundle().getSerializable(ARGUMENT_REQUEST_TYPE);
 
         if (contactId != null && paymentRequestType != null && satoshis > -1L) {
@@ -87,15 +88,15 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
 
                 PaymentRequest paymentRequest = new PaymentRequest(satoshis, dataListener.getNote());
 
-//                compositeDisposable.add(
-//                        getNextReceiveAddress(accountPosition)
-//                                .doOnNext(paymentRequest::setAddress)
-//                                 Request that the other person sends payment
-//                                .flatMapCompletable(s -> contactsDataManager.requestSendPayment(recipient.getMdid(), paymentRequest))
-//                                .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-//                                .subscribe(
-//                                        () -> dataListener.showSendSuccessfulDialog(recipient.getName()),
-//                                        throwable -> dataListener.showToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR)));
+                compositeDisposable.add(
+                        getNextReceiveAddress(accountPosition)
+                                .doOnNext(paymentRequest::setAddress)
+                                 // Request that the other person sends payment
+                                .flatMapCompletable(s -> contactsDataManager.requestSendPayment(recipient.getMdid(), paymentRequest))
+                                .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                                .subscribe(
+                                        () -> dataListener.showSendSuccessfulDialog(recipient.getName()),
+                                        throwable -> dataListener.showToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR)));
 
             } else {
                 RequestForPaymentRequest request = new RequestForPaymentRequest(satoshis, dataListener.getNote());
