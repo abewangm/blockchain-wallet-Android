@@ -155,7 +155,7 @@ dependencies {
     annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
     annotationProcessor 'com.google.guava:guava:20.0'
     // Fingerprint authentication
-    compile 'com.mtramin:rxfingerprint:2.0.1'
+    compile 'com.mtramin:rxfingerprint:2.0.2'
     // GSON
     compile 'com.google.code.gson:gson:2.8.0'
     // UI/Instrumentation Tests
@@ -188,7 +188,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:3.4.0'
+        classpath 'me.tatarka:gradle-retrolambda:3.5.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
