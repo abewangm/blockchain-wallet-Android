@@ -115,12 +115,10 @@ public class ReceiveViewModel extends BaseViewModel {
 
     void onSendToContactClicked(String btcAmount) {
         long amountLong = currencyHelper.getLongAmount(btcAmount);
-        {
-            if (amountLong > 0) {
-                dataListener.startContactSelectionActivity();
-            } else {
-                dataListener.showToast(stringUtils.getString(R.string.invalid_amount), ToastCustom.TYPE_ERROR);
-            }
+        if (amountLong > 0) {
+            dataListener.startContactSelectionActivity();
+        } else {
+            dataListener.showToast(stringUtils.getString(R.string.invalid_amount), ToastCustom.TYPE_ERROR);
         }
     }
 

@@ -197,20 +197,6 @@ public class ReceiveViewModelTest {
         assertEquals(2, Math.toIntExact(value));
     }
 
-    @SuppressLint("NewApi")
-    @Test
-    public void getDefaultSpinnerPositionNotUpgraded() throws Exception {
-        // Arrange
-        Payload mockPayload = mock(Payload.class);
-        when(mockPayload.isUpgraded()).thenReturn(false);
-
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        // Act
-        Integer value = mSubject.getDefaultAccountPosition();
-        // Assert
-        assertEquals(0, Math.toIntExact(value));
-    }
-
     @Test
     public void getAccountItemForPosition() throws Exception {
         // Arrange
@@ -235,18 +221,6 @@ public class ReceiveViewModelTest {
         Object value = mSubject.getAccountItemForPosition(2);
         // Assert
         assertEquals(account2, value);
-    }
-
-    @Test
-    public void isUpgraded() throws Exception {
-        // Arrange
-        Payload mockPayload = mock(Payload.class);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mockPayload.isUpgraded()).thenReturn(true);
-        // Act
-        Boolean value = mSubject.isUpgraded();
-        // Assert
-        assertTrue(value);
     }
 
     @Test

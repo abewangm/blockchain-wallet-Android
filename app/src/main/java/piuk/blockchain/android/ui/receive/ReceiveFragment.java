@@ -98,10 +98,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
             if (intent.getAction().equals(BalanceFragment.ACTION_INTENT)) {
                 if (viewModel != null) {
                     // Update UI with new Address + QR
-                    // TODO: 06/02/2017 Update barcode on receive
-                    // Probably just need to call onViewReady, todo check
-//                    viewModel.updateAccountList();
-//                    displayQRCode(binding.content.accounts.spinner.getSelectedItemPosition());
+                    viewModel.updateAccountList();
                 }
             }
         }
@@ -129,7 +126,9 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
     @Override
     public void startContactSelectionActivity() {
-        // TODO: 06/02/2017
+        AccountChooserActivity.startForResult(this,
+                AccountChooserActivity.REQUEST_CODE_CHOOSE_CONTACT,
+                PaymentRequestType.REQUEST);
     }
 
     @Override
@@ -564,8 +563,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
     @Override
     public void onAccountDataChanged() {
-        // TODO: 06/02/2017
-//        if (addressAdapter != null) addressAdapter.notifyDataSetChanged();
+        selectAccount(selectedAccountPosition);
     }
 
     @Override

@@ -26,6 +26,7 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
     public static final String EXTRA_SELECTED_OBJECT_TYPE = "selected_object_type";
     public static final int REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE = 217;
     public static final int REQUEST_CODE_CHOOSE_ACCOUNT_SEND = 218;
+    public static final int REQUEST_CODE_CHOOSE_CONTACT = 219;
 
     private ActivityAccountChooserBinding binding;
     private AccountChooserViewModel viewModel;
