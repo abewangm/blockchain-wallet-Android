@@ -77,6 +77,8 @@ interface SendContract {
         void showSecondPasswordDialog();
 
         void navigateToAddNote(String contactId, PaymentRequestType paymentRequestType, long satoshis);
+
+        void lockDestination();
     }
 
 }

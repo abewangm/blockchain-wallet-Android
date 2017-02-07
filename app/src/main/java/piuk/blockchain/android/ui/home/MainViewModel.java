@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.util.Log;
 
 import info.blockchain.api.Balance;
@@ -28,10 +29,12 @@ import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
+import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
@@ -52,7 +55,6 @@ public class MainViewModel extends BaseViewModel {
 
     private static final String TAG = MainViewModel.class.getSimpleName();
 
-    private Context context;
     private DataListener dataListener;
     private OSUtil osUtil;
     @Inject protected PrefsUtil prefs;
@@ -62,6 +64,8 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected ContactsDataManager contactsDataManager;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
     @Inject protected NotificationTokenManager notificationTokenManager;
+    @Inject protected MultiAddrFactory multiAddrFactory;
+    @Inject protected Context applicationContext;
 
     public interface DataListener {
         void onRooted();
@@ -84,7 +88,7 @@ public class MainViewModel extends BaseViewModel {
 
         void showAddEmailDialog();
 
-        void showProgressDialog();
+        void showProgressDialog(@StringRes int message);
 
         void hideProgressDialog();
 
@@ -95,13 +99,18 @@ public class MainViewModel extends BaseViewModel {
         void setMessagesCount(int messageCount);
 
         void showContactsRegistrationFailure();
+
+        void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId, long transactionValue);
+
+        void showBroadcastSuccessDialog();
+
+        void showPaymentMismatchDialog(@StringRes int message);
     }
 
-    public MainViewModel(Context context, DataListener dataListener) {
+    public MainViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
-        this.context = context;
         this.dataListener = dataListener;
-        osUtil = new OSUtil(context);
+        osUtil = new OSUtil(applicationContext);
     }
 
     @Override
@@ -114,13 +123,121 @@ public class MainViewModel extends BaseViewModel {
         subscribeToNotifications();
     }
 
+    void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
+        dataListener.showProgressDialog(R.string.contacts_broadcasting_payment);
+
+        compositeDisposable.add(
+                // Get contacts
+                contactsDataManager.getContactList()
+                        // Find contact by MDID
+                        .filter(ContactsPredicates.filterByMdid(mdid))
+                        // Get FacilitatedTransaction from HashMap
+                        .flatMap(contact -> Observable.just(contact.getFacilitatedTransaction().get(facilitatedTxId)))
+                        // Check the payment value was appropriate
+                        .flatMapCompletable(transaction -> {
+                            // Too much sent
+                            if (transactionValue > transaction.getIntended_amount()) {
+                                dataListener.showPaymentMismatchDialog(R.string.contacts_too_much_sent);
+                                return Completable.complete();
+                                // Too little sent
+                            } else if (transactionValue < transaction.getIntended_amount()) {
+                                dataListener.showPaymentMismatchDialog(R.string.contacts_too_little_sent);
+                                return Completable.complete();
+                                // Correct amount sent
+                            } else {
+                                // Broadcast payment to shared metadata service
+                                return contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
+                                        // Show successfully broadcast
+                                        .doOnComplete(() -> dataListener.showBroadcastSuccessDialog())
+                                        // Show retry dialog if broadcast failed
+                                        .doOnError(throwable -> dataListener.showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
+                            }
+                        })
+                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
+                        .subscribe(
+                                () -> {
+                                    // No-op
+                                }, throwable -> {
+                                    // Not sure if it's worth notifying people at this point? Dialogs are advisory anyway.
+                                }));
+    }
+
+    void checkForMessages() {
+        compositeDisposable.add(
+                contactsDataManager.loadNodes()
+                        .flatMapCompletable(
+                                success -> {
+                                    if (success) {
+                                        return contactsDataManager.fetchContacts();
+                                    } else {
+                                        return Completable.error(new Throwable("Nodes not loaded"));
+                                    }
+                                })
+                        .andThen(contactsDataManager.getContactList())
+                        .toList()
+                        .flatMapObservable(contacts -> {
+                            if (!contacts.isEmpty()) {
+                                return contactsDataManager.getMessages(true);
+                            } else {
+                                return Observable.just(Collections.emptyList());
+                            }
+                        })
+                        .subscribe(
+                                messages -> dataListener.setMessagesCount(messages.size()),
+                                throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
+    }
+
+    void storeSwipeReceiveAddresses() {
+        swipeToReceiveHelper.updateAndStoreAddresses();
+    }
+
+    void checkIfShouldShowSurvey() {
+        if (!prefs.getValue(PrefsUtil.KEY_SURVEY_COMPLETED, false)) {
+            int visitsToPageThisSession = prefs.getValue(PrefsUtil.KEY_SURVEY_VISITS, 0);
+            // Trigger first time coming back to transaction tab
+            if (visitsToPageThisSession == 1) {
+                // Don't show past June 30th
+                Calendar surveyCutoffDate = Calendar.getInstance();
+                surveyCutoffDate.set(Calendar.YEAR, 2017);
+                surveyCutoffDate.set(Calendar.MONTH, Calendar.JUNE);
+                surveyCutoffDate.set(Calendar.DAY_OF_MONTH, 30);
+
+                if (Calendar.getInstance().before(surveyCutoffDate)) {
+                    dataListener.showSurveyPrompt();
+                    prefs.setValue(PrefsUtil.KEY_SURVEY_COMPLETED, true);
+                }
+            } else {
+                visitsToPageThisSession++;
+                prefs.setValue(PrefsUtil.KEY_SURVEY_VISITS, visitsToPageThisSession);
+            }
+        }
+
+    }
+
+    void unpair() {
+        dataListener.clearAllDynamicShortcuts();
+        payloadManager.wipe();
+        multiAddrFactory.wipe();
+        prefs.logOut();
+        appUtil.restartApp();
+        accessState.setPIN(null);
+    }
+
+    boolean areLauncherShortcutsEnabled() {
+        return prefs.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true);
+    }
+
+    PayloadManager getPayloadManager() {
+        return payloadManager;
+    }
+
     private void subscribeToNotifications() {
         compositeDisposable.add(
                 FcmCallbackService.getNotificationSubject()
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(
                                 notificationPayload -> checkForMessages(),
-                                throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
+                                Throwable::printStackTrace));
     }
 
     private void registerNodeForMetaDataService() {
@@ -141,7 +258,7 @@ public class MainViewModel extends BaseViewModel {
         }
 
         final String finalUri = uri;
-        if (finalUri != null || fromNotification) dataListener.showProgressDialog();
+        if (finalUri != null || fromNotification) dataListener.showProgressDialog(R.string.please_wait);
 
         final boolean finalFromNotification = fromNotification;
 
@@ -185,35 +302,6 @@ public class MainViewModel extends BaseViewModel {
         notificationTokenManager.resendNotificationToken();
     }
 
-    void checkForMessages() {
-        compositeDisposable.add(
-                contactsDataManager.loadNodes()
-                        .flatMapCompletable(
-                                success -> {
-                                    if (success) {
-                                        return contactsDataManager.fetchContacts();
-                                    } else {
-                                        return Completable.error(new Throwable("Nodes not loaded"));
-                                    }
-                                })
-                        .andThen(contactsDataManager.getContactList())
-                        .toList()
-                        .flatMapObservable(contacts -> {
-                            if (!contacts.isEmpty()) {
-                                return contactsDataManager.getMessages(true);
-                            } else {
-                                return Observable.just(Collections.emptyList());
-                            }
-                        })
-                        .subscribe(
-                                messages -> dataListener.setMessagesCount(messages.size()),
-                                throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
-    }
-
-    public void storeSwipeReceiveAddresses() {
-        swipeToReceiveHelper.updateAndStoreAddresses();
-    }
-
     private void checkIfShouldShowEmailVerification() {
         if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
             compositeDisposable.add(
@@ -233,35 +321,10 @@ public class MainViewModel extends BaseViewModel {
         }
     }
 
-    public void checkIfShouldShowSurvey() {
-        if (!prefs.getValue(PrefsUtil.KEY_SURVEY_COMPLETED, false)) {
-            int visitsToPageThisSession = prefs.getValue(PrefsUtil.KEY_SURVEY_VISITS, 0);
-            // Trigger first time coming back to transaction tab
-            if (visitsToPageThisSession == 1) {
-                // Don't show past June 30th
-                Calendar surveyCutoffDate = Calendar.getInstance();
-                surveyCutoffDate.set(Calendar.YEAR, 2017);
-                surveyCutoffDate.set(Calendar.MONTH, Calendar.JUNE);
-                surveyCutoffDate.set(Calendar.DAY_OF_MONTH, 30);
-
-                if (Calendar.getInstance().before(surveyCutoffDate)) {
-                    dataListener.showSurveyPrompt();
-                    prefs.setValue(PrefsUtil.KEY_SURVEY_COMPLETED, true);
-                }
-            } else {
-                visitsToPageThisSession++;
-                prefs.setValue(PrefsUtil.KEY_SURVEY_VISITS, visitsToPageThisSession);
-            }
-        }
-
-    }
-
     private Observable<Settings> getSettingsApi() {
-        return Observable.fromCallable(() -> new Settings(payloadManager.getPayload().getGuid(), payloadManager.getPayload().getSharedKey()));
-    }
-
-    public PayloadManager getPayloadManager() {
-        return payloadManager;
+        return Observable.fromCallable(() -> new Settings(
+                payloadManager.getPayload().getGuid(),
+                payloadManager.getPayload().getSharedKey()));
     }
 
     private void checkRooted() {
@@ -272,7 +335,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void checkConnectivity() {
-        if (ConnectivityStatus.hasConnectivity(context)) {
+        if (ConnectivityStatus.hasConnectivity(applicationContext)) {
             preLaunchChecks();
         } else {
             dataListener.onConnectivityFail();
@@ -355,13 +418,10 @@ public class MainViewModel extends BaseViewModel {
     public void destroy() {
         super.destroy();
         appUtil.deleteQR();
-        context = null;
-        dataListener = null;
         DynamicFeeCache.getInstance().destroy();
     }
 
     private void exchangeRateThread() {
-
         List<String> currencies = Arrays.asList(ExchangeRateFactory.getInstance().getCurrencies());
         String strCurrentSelectedFiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
         if (!currencies.contains(strCurrentSelectedFiat)) {
@@ -387,34 +447,20 @@ public class MainViewModel extends BaseViewModel {
         }).start();
     }
 
-    public void unpair() {
-        dataListener.clearAllDynamicShortcuts();
-        payloadManager.wipe();
-        MultiAddrFactory.getInstance().wipe();
-        prefs.logOut();
-        appUtil.restartApp();
-        accessState.setPIN(null);
-    }
-
-    public boolean areLauncherShortcutsEnabled() {
-        return prefs.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true);
-    }
-
     private void startWebSocketService() {
-        Intent intent = new Intent(context, WebSocketService.class);
+        Intent intent = new Intent(applicationContext, WebSocketService.class);
 
         if (!osUtil.isServiceRunning(WebSocketService.class)) {
-            context.startService(intent);
+            applicationContext.startService(intent);
         } else {
             // Restarting this here ensures re-subscription after app restart - the service may remain
             // running, but the subscription to the WebSocket won't be restarted unless onCreate called
-            context.stopService(intent);
-            context.startService(intent);
+            applicationContext.stopService(intent);
+            applicationContext.startService(intent);
         }
     }
 
     private void logEvents() {
-
         EventLogHandler handler = new EventLogHandler(prefs, WebUtil.getInstance());
         handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncrypted());
         handler.logBackupEvent(payloadManager.getPayload().getHdWallet().isMnemonicVerified());

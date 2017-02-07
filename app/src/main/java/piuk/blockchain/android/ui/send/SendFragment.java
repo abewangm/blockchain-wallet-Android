@@ -120,8 +120,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
-                // STOPSHIP: 03/02/2017 I don't think this is necessary anymore, but check with team
-//                ((AddressAdapter) binding.accounts.spinner.getAdapter()).updateData(viewModel.getAddressList(false));
+                viewModel.onViewReady();
+                viewModel.updateUI();
             }
         }
     };
@@ -192,9 +192,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
         viewModel.updateUI();
 
-        if (listener != null) {
-            listener.onSendFragmentStart();
-        }
+        if (listener != null) listener.onSendFragmentStart();
     }
 
     @Override
@@ -603,6 +601,14 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
+    public void lockDestination() {
+        // Disable changing destination and disable all input
+        binding.imageviewDropdownReceive.setVisibility(View.GONE);
+        binding.destination.setOnClickListener(null);
+        binding.destination.setKeyListener(null);
+    }
+
+    @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
@@ -696,21 +702,20 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 .setMessage(String.format(getString(R.string.watch_only_spend_instructionss), address))
                 .setCancelable(false)
                 .setPositiveButton(R.string.dialog_continue, (dialog, whichButton) -> {
-
                     if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                         PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), getActivity());
                     } else {
                         startScanActivity(SCAN_PRIVX);
                     }
-
                 })
                 .setNegativeButton(android.R.string.cancel, null).show();
     }
 
     @Override
     public void navigateToAddNote(String contactId, PaymentRequestType paymentRequestType, long satoshis) {
-        if (listener != null)
+        if (listener != null) {
             listener.onTransactionNotesRequested(contactId, null, paymentRequestType, satoshis);
+        }
     }
 
     // BTC Field
@@ -876,7 +881,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         if (details.hasConsumedAmounts) {
             dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
-
             if (details.hasConsumedAmounts) {
                 if (details.isSurge) feeMessage += "\n\n";
                 feeMessage += getString(R.string.large_tx_high_fee_warning);
@@ -1045,9 +1049,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     @Override
     public void finishPage() {
-        if (listener != null) {
-            listener.onSendFragmentClose();
-        }
+        if (listener != null) listener.onSendFragmentClose();
     }
 
     @Override

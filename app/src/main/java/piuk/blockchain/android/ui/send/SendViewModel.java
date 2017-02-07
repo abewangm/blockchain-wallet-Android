@@ -135,7 +135,10 @@ public class SendViewModel extends BaseViewModel {
                         contactsDataManager.getContactList()
                                 .filter(ContactsPredicates.filterById(contactId))
                                 .subscribe(
-                                        contact -> dataListener.setContactName(contact.getName()),
+                                        contact -> {
+                                            dataListener.setContactName(contact.getName());
+                                            dataListener.lockDestination();
+                                        },
                                         throwable -> dataListener.finishPage()));
             }
 

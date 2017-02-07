@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -97,12 +98,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         appUtil = new AppUtil(this);
-
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        viewModel = new MainViewModel(this, this);
-
+        viewModel = new MainViewModel(this);
         viewModel.onViewReady();
 
         binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
@@ -199,11 +198,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     protected void onDestroy() {
         super.onDestroy();
         viewModel.destroy();
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        setIntent(intent);
     }
 
     @Override
@@ -327,7 +321,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     public void selectDrawerItem(MenuItem menuItem) {
-
         switch (menuItem.getItemId()) {
             case R.id.nav_backup:
                 startActivityForResult(new Intent(MainActivity.this, BackupWalletActivity.class), REQUEST_BACKUP);
@@ -603,10 +596,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void showProgressDialog() {
+    public void showProgressDialog(@StringRes int message) {
         materialProgressDialog = new MaterialProgressDialog(this);
         materialProgressDialog.setCancelable(false);
-        materialProgressDialog.setMessage(R.string.please_wait);
+        materialProgressDialog.setMessage(message);
         materialProgressDialog.show();
     }
 
@@ -682,6 +675,38 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
+    public void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_payment_sent_failed_message)
+                .setPositiveButton(R.string.retry, (dialog, which) ->
+                        viewModel.broadcastPaymentSuccess(mdid, txHash, facilitatedTxId, transactionValue))
+                .setCancelable(false)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showPaymentMismatchDialog(@StringRes int message) {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showBroadcastSuccessDialog() {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_payment_sent_success)
+                .setPositiveButton(android.R.string.ok, null)
+                .create()
+                .show();
+    }
+
+    @Override
     public void onSendFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
     }
@@ -699,8 +724,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue) {
-        // No-op, this callback is used elsewhere
-        // TODO: 06/02/2017 Broadcast payment if needed
+        viewModel.broadcastPaymentSuccess(mdid, transactionHash, fctxId, transactionValue);
     }
 
     @Override

@@ -5,17 +5,14 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactDetailBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
-import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 
@@ -23,19 +20,15 @@ import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID;
 
 public class ContactDetailActivity extends BaseAuthActivity implements
-        ContactDetailActivityViewModel.DataListener,
         ContactDetailFragment.OnFragmentInteractionListener {
 
     private ActivityContactDetailBinding binding;
-    private MaterialProgressDialog progressDialog;
-    private ContactDetailActivityViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contact_detail);
-        viewModel = new ContactDetailActivityViewModel(this);
 
         binding.toolbar.toolbarGeneral.setTitle("");
         setSupportActionBar(binding.toolbar.toolbarGeneral);
@@ -47,10 +40,7 @@ public class ContactDetailActivity extends BaseAuthActivity implements
                             getIntent().getStringExtra(KEY_BUNDLE_CONTACT_ID)));
         } else {
             finish();
-            return;
         }
-
-        viewModel.onViewReady();
     }
 
     private void submitFragmentTransaction(Fragment fragment) {
@@ -83,13 +73,6 @@ public class ContactDetailActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, int defaultIndex) {
-        // TODO: 30/01/2017 Add scan route from contacts
-        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, null, defaultIndex);
-        submitFragmentTransaction(sendFragment);
-    }
-
-    @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragmentById = fragmentManager.findFragmentById(R.id.content_frame);
@@ -107,56 +90,9 @@ public class ContactDetailActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void showProgressDialog(@StringRes int string) {
-        progressDialog = new MaterialProgressDialog(this);
-        progressDialog.setCancelable(false);
-        progressDialog.setMessage(string);
-        progressDialog.show();
-    }
-
-    @Override
-    public void dismissProgressDialog() {
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-            progressDialog = null;
-        }
-    }
-
-    @Override
-    public void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.contacts_payment_sent_failed_message)
-                .setPositiveButton(R.string.retry, (dialog, which) ->
-                        viewModel.broadcastPaymentSuccess(mdid, txHash, facilitatedTxId, transactionValue))
-                .setCancelable(false)
-                .create()
-                .show();
-    }
-
-    @Override
-    public void showPaymentMismatchDialog(@StringRes int message) {
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, null)
-                .create()
-                .show();
-    }
-
-    @Override
-    public void showBroadcastSuccessDialog() {
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.contacts_payment_sent_success)
-                .setPositiveButton(android.R.string.ok, null)
-                .create()
-                .show();
-    }
-
-    @Override
-    public void dismissPaymentPage() {
-        onBackPressed();
+    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, int defaultIndex) {
+        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, null, defaultIndex);
+        submitFragmentTransaction(sendFragment);
     }
 
     @Override
@@ -165,5 +101,4 @@ public class ContactDetailActivity extends BaseAuthActivity implements
         bundle.putString(KEY_TRANSACTION_HASH, hash);
         TransactionDetailActivity.start(this, bundle);
     }
-
 }
