@@ -57,6 +57,10 @@ public class AccountChooserViewModel extends BaseViewModel {
     public void onViewReady() {
         PaymentRequestType paymentRequestType = dataListener.getPaymentRequestType();
 
+        if (paymentRequestType == null) {
+            throw new RuntimeException("Payment request type must be passed to the Account Chooser activity");
+        }
+
         if (paymentRequestType.equals(PaymentRequestType.SEND)) {
             loadReceiveAccountsAndContacts();
         } else if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {

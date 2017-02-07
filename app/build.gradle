@@ -100,7 +100,6 @@ android {
             includeNoLocationClasses = true
         }
     }
-
     sourceSets {
         test.java.srcDirs += 'src/test/kotlin'
     }
@@ -171,8 +170,6 @@ dependencies {
         exclude group: 'javax.inject', module: 'support-annotations'
     }
     // Unit Tests
-    testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testCompile 'org.json:json:20140107'
     testCompile "org.mockito:mockito-core:$mockitoVersion"
     testCompile 'org.hamcrest:hamcrest-junit:2.0.0.0'
@@ -180,6 +177,11 @@ dependencies {
         exclude group: 'com.google.guava'
         exclude group: 'com.google.protobuf'
     }
+    // Unit Tests in Kotlin
+    testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
+    // This can't be used until we update Mockito
+//    testCompile 'com.nhaarman:mockito-kotlin:1.2.0'
 }
 
 buildscript {

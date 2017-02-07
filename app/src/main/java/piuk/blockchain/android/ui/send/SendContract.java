@@ -24,8 +24,6 @@ interface SendContract {
 
         void updateBtcAmount(String amount);
 
-        void onUpdateFiatAmount(String amount);
-
         void updateBtcUnit(String unit);
 
         void updateFiatUnit(String unit);

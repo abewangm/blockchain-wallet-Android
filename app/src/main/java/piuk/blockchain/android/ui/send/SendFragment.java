@@ -542,12 +542,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public void onUpdateFiatAmount(String amount) {
-        binding.amountRow.amountFiat.setText(amount);
-        binding.amountRow.amountFiat.setSelection(binding.amountRow.amountFiat.getText().length());
-    }
-
-    @Override
     public void setDestinationAddress(String btcAddress) {
         binding.destination.setText(btcAddress);
     }
