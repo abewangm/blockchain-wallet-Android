@@ -24,7 +24,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -75,13 +74,17 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         ReceiveFragment.OnReceiveFragmentInteractionListener,
         ContactPaymentRequestNotesFragment.FragmentInteractionListener {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
-
     private static final String SUPPORT_URI = "http://support.blockchain.com/";
     private static final int REQUEST_BACKUP = 2225;
     private static final int MERCHANT_ACTIVITY = 1;
-    public static final int SCAN_URI = 2007;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
+
+    public static final String EXTRA_URI = "transaction_uri";
+    public static final String EXTRA_RECIPIENT_ID = "recipient_id";
+    public static final String EXTRA_MDID = "mdid";
+    public static final String EXTRA_FCTX_ID = "fctx_id";
+    public static final String EXTRA_DEFAULT_INDEX = "default_index";
+    public static final int SCAN_URI = 2007;
 
     @Thunk boolean drawerIsOpen = false;
 
@@ -90,6 +93,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private MaterialProgressDialog fetchTransactionsProgress;
     private AlertDialog rootedDialog;
     private MaterialProgressDialog materialProgressDialog;
+    private OnBalanceFragmentAddedCallback balanceFragmentAddedCallback;
     private AppUtil appUtil;
     private long backPressed;
     private Toolbar toolbar;
@@ -174,6 +178,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
             return true;
         });
+
+        handleIncomingIntent();
     }
 
     @SuppressLint("NewApi")
@@ -222,6 +228,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public static void start(Context context, Bundle bundle) {
+        Intent starter = new Intent(context, MainActivity.class);
+        starter.putExtras(bundle);
+        starter.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(starter);
     }
 
     public void setMessagesCount(int messageCount) {
@@ -616,47 +629,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public void onStartBalanceFragment() {
         BalanceFragment fragment = new BalanceFragment();
         replaceFragmentWithAnimation(fragment);
+        if (balanceFragmentAddedCallback != null) balanceFragmentAddedCallback.onFragmentAdded();
         viewModel.checkIfShouldShowSurvey();
-    }
-
-    public void startSendFragment(@Nullable String scanData, String scanRoute) {
-        int selectedAccountPosition;
-        if (getCurrentFragment() instanceof BalanceFragment) {
-            selectedAccountPosition = ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
-        } else if (getCurrentFragment() instanceof ReceiveFragment) {
-            selectedAccountPosition = ((ReceiveFragment) getCurrentFragment()).getSelectedAccountPosition();
-        } else {
-            selectedAccountPosition = -1;
-        }
-
-        SendFragment sendFragment = SendFragment.newInstance(scanData, scanRoute, selectedAccountPosition);
-        replaceFragmentWithAnimation(sendFragment);
-    }
-
-    public void startReceiveFragment() {
-        int selectedAccountPosition;
-        try {
-            selectedAccountPosition = ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
-        } catch (ClassCastException e) {
-            Log.e(TAG, "startReceiveFragment: ", e);
-            selectedAccountPosition = -1;
-        }
-
-        ReceiveFragment receiveFragment = ReceiveFragment.newInstance(selectedAccountPosition);
-        replaceFragmentWithAnimation(receiveFragment);
-    }
-
-    private void replaceFragmentWithAnimation(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-        transaction.replace(R.id.content_frame, fragment).commitAllowingStateLoss();
-    }
-
-    private void addFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.content_frame, fragment).commitAllowingStateLoss();
     }
 
     public AHBottomNavigation getBottomNavigationView() {
@@ -731,6 +705,72 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @Override
     public void onPageFinished() {
         onStartBalanceFragment();
+    }
+
+    private void startSendFragment(@Nullable String scanData, String scanRoute) {
+        SendFragment sendFragment = SendFragment.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
+        replaceFragmentWithAnimation(sendFragment);
+    }
+
+    private void startReceiveFragment() {
+        ReceiveFragment receiveFragment = ReceiveFragment.newInstance(getSelectedAccountFromFragments());
+        replaceFragmentWithAnimation(receiveFragment);
+    }
+
+    private int getSelectedAccountFromFragments() {
+        int selectedAccountPosition;
+        if (getCurrentFragment() instanceof BalanceFragment) {
+            selectedAccountPosition = ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
+        } else if (getCurrentFragment() instanceof ReceiveFragment) {
+            selectedAccountPosition = ((ReceiveFragment) getCurrentFragment()).getSelectedAccountPosition();
+        } else {
+            selectedAccountPosition = -1;
+        }
+        return selectedAccountPosition;
+    }
+
+    private void replaceFragmentWithAnimation(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+        transaction.replace(R.id.content_frame, fragment).commitAllowingStateLoss();
+    }
+
+    private void addFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.add(R.id.content_frame, fragment).commitAllowingStateLoss();
+    }
+
+    private void handleIncomingIntent() {
+        if (getIntent().hasExtra(EXTRA_URI)) {
+            String uri = getIntent().getStringExtra(EXTRA_URI);
+            String recipientId = getIntent().getStringExtra(EXTRA_RECIPIENT_ID);
+            String mdid = getIntent().getStringExtra(EXTRA_MDID);
+            String fctxId = getIntent().getStringExtra(EXTRA_FCTX_ID);
+            int accountPosition = getIntent().getIntExtra(EXTRA_DEFAULT_INDEX, -1);
+
+            if (getCurrentFragment() != null && getCurrentFragment() instanceof BalanceFragment) {
+                startSendFragmentFromIntent(uri, recipientId, mdid, fctxId, accountPosition);
+            } else {
+                // Wait for fragment transaction to finish and then pop in
+                balanceFragmentAddedCallback = () -> {
+                    startSendFragmentFromIntent(uri, recipientId, mdid, fctxId, accountPosition);
+                    balanceFragmentAddedCallback = null;
+                };
+            }
+        }
+    }
+
+    private void startSendFragmentFromIntent(String uri, String recipientId, String mdid, String fctxId, int accountPosition) {
+        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, null, accountPosition);
+        replaceFragmentWithAnimation(sendFragment);
+    }
+
+    private interface OnBalanceFragmentAddedCallback {
+
+        void onFragmentAdded();
+
     }
 
 }

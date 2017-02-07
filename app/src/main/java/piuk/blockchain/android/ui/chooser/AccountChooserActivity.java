@@ -58,7 +58,6 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
         viewModel.onViewReady();
     }
 
-
     @Override
     public void showNoContacts() {
         binding.recyclerview.setVisibility(View.GONE);

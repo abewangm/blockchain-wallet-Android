@@ -308,7 +308,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         accountsAdapter.setDropDownViewResource(R.layout.item_balance_account_dropdown);
         accountSpinner.setAdapter(accountsAdapter);
-        accountSpinner.setOnTouchListener((v, event) -> event.getAction() == MotionEvent.ACTION_UP && ((MainActivity) getActivity()).getDrawerOpen());
+        accountSpinner.setOnTouchListener((v, event) -> event.getAction() == MotionEvent.ACTION_UP
+                && ((MainActivity) getActivity()).getDrawerOpen());
         accountSpinner.post(() -> accountSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
