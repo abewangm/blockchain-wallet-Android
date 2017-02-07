@@ -82,7 +82,7 @@ public class BalanceViewModel extends BaseViewModel {
 
         void showAccountChoiceDialog(List<String> accounts, String fctxId);
 
-        void initiatePayment(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex);
+        void initiatePayment(String uri, String recipientId, String mdid, String fctxId, int defaultIndex);
 
         void showWaitingForPaymentDialog();
 
@@ -429,7 +429,6 @@ public class BalanceViewModel extends BaseViewModel {
                                             contact.getId(),
                                             contact.getMdid(),
                                             transaction.getId(),
-                                            dataListener.isBtc(),
                                             payloadManager.getPayload().getHdWallet().getDefaultIndex());
                                 }
                             }

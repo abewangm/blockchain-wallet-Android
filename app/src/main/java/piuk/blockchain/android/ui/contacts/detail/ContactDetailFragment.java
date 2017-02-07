@@ -228,9 +228,9 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
     }
 
     @Override
-    public void initiatePayment(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex) {
+    public void initiatePayment(String uri, String recipientId, String mdid, String fctxId, int defaultIndex) {
         if (listener != null) {
-            listener.onPaymentInitiated(uri, recipientId, mdid, fctxId, isBtc, defaultIndex);
+            listener.onPaymentInitiated(uri, recipientId, mdid, fctxId, defaultIndex);
         }
     }
 
@@ -266,7 +266,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
 
         void onFinishPageCalled();
 
-        void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex);
+        void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, int defaultIndex);
 
         void onShowTransactionDetailCalled(String hash);
 

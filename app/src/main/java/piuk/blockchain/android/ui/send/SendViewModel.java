@@ -121,11 +121,6 @@ public class SendViewModel extends BaseViewModel {
         updateUI();
     }
 
-    private boolean getBtcDisplayState() {
-        int BALANCE_DISPLAY_STATE = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-        return BALANCE_DISPLAY_STATE != SHOW_FIAT;
-    }
-
     @Override
     public void onViewReady() {
         if (dataListener.getFragmentBundle() != null) {
@@ -1096,6 +1091,11 @@ public class SendViewModel extends BaseViewModel {
         } else {
             showToast(R.string.invalid_private_key, ToastCustom.TYPE_ERROR);
         }
+    }
+
+    private boolean getBtcDisplayState() {
+        int BALANCE_DISPLAY_STATE = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+        return BALANCE_DISPLAY_STATE != SHOW_FIAT;
     }
 
     private void showToast(@StringRes int message, @ToastCustom.ToastType String type) {

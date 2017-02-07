@@ -83,9 +83,9 @@ public class ContactDetailActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex) {
+    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, int defaultIndex) {
         // TODO: 30/01/2017 Add scan route from contacts
-        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, null, isBtc, defaultIndex);
+        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, null, defaultIndex);
         submitFragmentTransaction(sendFragment);
     }
 

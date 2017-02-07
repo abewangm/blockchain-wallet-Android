@@ -86,7 +86,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private static final String TAG = SendFragment.class.getSimpleName();
 
     public static final String ARGUMENT_SCAN_DATA = "scan_data";
-    public static final String ARGUMENT_IS_BTC = "is_btc";
     public static final String ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     public static final String ARGUMENT_CONTACT_ID = "contact_id";
     public static final String ARGUMENT_CONTACT_MDID = "contact_mdid";
@@ -136,7 +135,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                                            @Nullable String mdid,
                                            @Nullable String fctxId,
                                            String scanRoute,
-                                           boolean isBtc,
                                            int selectedAccountPosition) {
         SendFragment fragment = new SendFragment();
         Bundle args = new Bundle();
@@ -144,7 +142,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         args.putString(ARGUMENT_CONTACT_ID, contactId);
         args.putString(ARGUMENT_CONTACT_MDID, mdid);
         args.putString(ARGUMENT_FCTX_ID, fctxId);
-        args.putBoolean(ARGUMENT_IS_BTC, isBtc);
         args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute);
         args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
         fragment.setArguments(args);
@@ -152,13 +149,11 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     public static SendFragment newInstance(@Nullable String scanData,
-                                           boolean isBtc,
                                            String scanRoute,
                                            int selectedAccountPosition) {
         SendFragment fragment = new SendFragment();
         Bundle args = new Bundle();
         args.putString(ARGUMENT_SCAN_DATA, scanData);
-        args.putBoolean(ARGUMENT_IS_BTC, isBtc);
         args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute);
         args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
         fragment.setArguments(args);
@@ -461,16 +456,16 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         binding.buttonSend.setOnClickListener(v -> {
             customKeypad.setNumpadVisibility(View.GONE);
             if (ConnectivityStatus.hasConnectivity(getActivity())) {
-                requestSendPayment();
+                requestSendPayment(binding.amountRow.amountBtc.getText().toString());
             } else {
                 showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
             }
         });
     }
 
-    private void requestSendPayment() {
+    private void requestSendPayment(String amount) {
         viewModel.onSendClicked(binding.customFee.getText().toString(),
-                binding.amountRow.amountBtc.getText().toString(),
+                amount,
                 false,
                 binding.destination.getText().toString());
     }
@@ -988,8 +983,10 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 .setTitle(R.string.warning)
                 .setMessage(body)
                 .setCancelable(false)
-                .setPositiveButton(positiveAction, (dialog, which) -> requestSendPayment())
-                .setNegativeButton(negativeAction, (dialog, which) -> requestSendPayment())
+                .setPositiveButton(positiveAction, (dialog, which) ->
+                        requestSendPayment(absoluteFeeSuggested))
+                .setNegativeButton(negativeAction, (dialog, which) ->
+                        requestSendPayment(binding.amountRow.amountBtc.getText().toString()))
                 .create()
                 .show();
     }

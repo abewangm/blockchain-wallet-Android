@@ -92,30 +92,6 @@ public class BaseAuthActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays a {@link Snackbar} on the current page with a clickable action.
-     *
-     * @param view          The root View of the current activity
-     * @param message       The message to be displayed
-     * @param length        The length of time for the Snackbar to be displayed
-     * @param action        The action to be displayed
-     * @param clickListener An OnClickListener to handle action callbacks
-     */
-    public void showSnackbar(View view, @StringRes int message, @ViewUtils.SnackbarLength int length, @StringRes int action, View.OnClickListener clickListener) {
-        makeSnackbar(view, message, length).setAction(action, clickListener).show();
-    }
-
-    /**
-     * Displays a {@link Snackbar} on the current page.
-     *
-     * @param view    The root View of the current activity
-     * @param message The message to be displayed
-     * @param length  The length of time for the Snackbar to be displayed
-     */
-    public void showSnackbar(View view, @StringRes int message, @ViewUtils.SnackbarLength int length) {
-        makeSnackbar(view, message, length).show();
-    }
-
-    /**
      * Starts the logout timer. Override in an activity if timeout is not needed.
      */
     protected void startLogoutTimer() {

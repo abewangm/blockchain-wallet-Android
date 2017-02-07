@@ -30,9 +30,7 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.PrefsUtil;
 
-import static piuk.blockchain.android.ui.balance.BalanceFragment.SHOW_BTC;
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID;
-import static piuk.blockchain.android.ui.send.SendViewModel.SHOW_FIAT;
 
 
 @SuppressWarnings("WeakerAccess")
@@ -68,7 +66,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
 
         void showAccountChoiceDialog(List<String> accounts, String fctxId);
 
-        void initiatePayment(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex);
+        void initiatePayment(String uri, String recipientId, String mdid, String fctxId, int defaultIndex);
 
         void showWaitingForPaymentDialog();
 
@@ -213,14 +211,11 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
                     && (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)
                     || transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER))) {
 
-                int balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-                boolean isBTC = balanceDisplayState != SHOW_FIAT;
                 dataListener.initiatePayment(
                         transaction.toBitcoinURI(),
                         contact.getId(),
                         contact.getMdid(),
                         transaction.getId(),
-                        isBTC,
                         payloadManager.getPayload().getHdWallet().getDefaultIndex());
             }
         }

@@ -84,10 +84,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Thunk boolean drawerIsOpen = false;
 
-    private MainViewModel mainViewModel;
+    private MainViewModel viewModel;
     private ActivityMainBinding binding;
     private MaterialProgressDialog fetchTransactionsProgress;
-    private AlertDialog mRootedDialog;
+    private AlertDialog rootedDialog;
     private MaterialProgressDialog materialProgressDialog;
     private AppUtil appUtil;
     private long backPressed;
@@ -101,9 +101,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         appUtil = new AppUtil(this);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        mainViewModel = new MainViewModel(this, this);
+        viewModel = new MainViewModel(this, this);
 
-        mainViewModel.onViewReady();
+        viewModel.onViewReady();
 
         binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -182,10 +182,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     protected void onResume() {
         super.onResume();
         appUtil.deleteQR();
-        mainViewModel.storeSwipeReceiveAddresses();
+        viewModel.storeSwipeReceiveAddresses();
         resetNavigationDrawer();
 
-        if (AndroidUtils.is25orHigher() && mainViewModel.areLauncherShortcutsEnabled()) {
+        if (AndroidUtils.is25orHigher() && viewModel.areLauncherShortcutsEnabled()) {
             LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(
                     this,
                     PayloadManager.getInstance(),
@@ -198,7 +198,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mainViewModel.destroy();
+        viewModel.destroy();
     }
 
     @Override
@@ -354,7 +354,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                         .setTitle(R.string.unpair_wallet)
                         .setMessage(R.string.ask_you_sure_unpair)
-                        .setPositiveButton(R.string.unpair, (dialog, which) -> mainViewModel.unpair())
+                        .setPositiveButton(R.string.unpair, (dialog, which) -> viewModel.unpair())
                         .setNegativeButton(android.R.string.cancel, null)
                         .show();
                 break;
@@ -369,7 +369,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         MenuItem backUpMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_backup);
         MenuItem upgradeMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_upgrade);
 
-        if (mainViewModel.getPayloadManager().isNotUpgraded()) {
+        if (viewModel.getPayloadManager().isNotUpgraded()) {
             //Legacy
             upgradeMenuItem.setVisible(true);
             backUpMenuItem.setVisible(false);
@@ -382,9 +382,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         MenuItem backUpView = binding.navigationView.getMenu().findItem(R.id.nav_backup);
         Drawable drawable = backUpView.getIcon();
         drawable.mutate();
-        if (mainViewModel.getPayloadManager().getPayload() != null &&
-                mainViewModel.getPayloadManager().getPayload().getHdWallet() != null &&
-                !mainViewModel.getPayloadManager().getPayload().getHdWallet().isMnemonicVerified()) {
+        if (viewModel.getPayloadManager().getPayload() != null &&
+                viewModel.getPayloadManager().getPayload().getHdWallet() != null &&
+                !viewModel.getPayloadManager().getPayload().getHdWallet().isMnemonicVerified()) {
             //Not backed up
             drawable.setColorFilter(ContextCompat.getColor(this, R.color.blockchain_send_red), PorterDuff.Mode.SRC_ATOP);
         } else {
@@ -428,8 +428,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @Override
     protected void onStop() {
         super.onStop();
-        if (mRootedDialog != null && mRootedDialog.isShowing()) {
-            mRootedDialog.dismiss();
+        if (rootedDialog != null && rootedDialog.isShowing()) {
+            rootedDialog.dismiss();
         }
     }
 
@@ -465,13 +465,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         Handler handler = new Handler();
         handler.postDelayed(() -> {
             if (!isFinishing()) {
-                mRootedDialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                rootedDialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                         .setMessage(getString(R.string.device_rooted))
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_continue, null)
                         .create();
 
-                mRootedDialog.show();
+                rootedDialog.show();
             }
         }, 500);
     }
@@ -536,7 +536,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
                     .setMessage(R.string.contacts_register_nodes_failure)
-                    .setPositiveButton(R.string.retry, (dialog, which) -> mainViewModel.checkForMessages())
+                    .setPositiveButton(R.string.retry, (dialog, which) -> viewModel.checkForMessages())
                     .create()
                     .show();
         }
@@ -566,8 +566,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, boolean isBtc, int defaultIndex) {
-        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, null, isBtc, defaultIndex);
+    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, int defaultIndex) {
+        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, null, defaultIndex);
         addFragment(sendFragment);
     }
 
@@ -627,22 +627,20 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public void onStartBalanceFragment() {
         BalanceFragment fragment = new BalanceFragment();
         replaceFragmentWithAnimation(fragment);
-        mainViewModel.checkIfShouldShowSurvey();
+        viewModel.checkIfShouldShowSurvey();
     }
 
     public void startSendFragment(@Nullable String scanData, String scanRoute) {
-        boolean isBTC;
         int selectedAccountPosition;
-        try {
-            isBTC = ((BalanceFragment) getCurrentFragment()).isBtc();
+        if (getCurrentFragment() instanceof BalanceFragment) {
             selectedAccountPosition = ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
-        } catch (Exception e) {
-            Log.e(TAG, "startSendFragment: ", e);
-            isBTC = true;
+        } else if (getCurrentFragment() instanceof ReceiveFragment) {
+            selectedAccountPosition = ((ReceiveFragment) getCurrentFragment()).getSelectedAccountPosition();
+        } else {
             selectedAccountPosition = -1;
         }
 
-        SendFragment sendFragment = SendFragment.newInstance(scanData, isBTC, scanRoute, selectedAccountPosition);
+        SendFragment sendFragment = SendFragment.newInstance(scanData, scanRoute, selectedAccountPosition);
         replaceFragmentWithAnimation(sendFragment);
     }
 

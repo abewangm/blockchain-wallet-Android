@@ -196,8 +196,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
             return true;
         });
 
-        selectAccount(viewModel.getDefaultAccountPosition());
-
         binding.destination.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE,
@@ -312,6 +310,10 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
             Log.e(TAG, "afterTextChanged: ", e);
         }
         return s;
+    }
+
+    public int getSelectedAccountPosition() {
+        return selectedAccountPosition;
     }
 
     private void setCustomKeypad() {
