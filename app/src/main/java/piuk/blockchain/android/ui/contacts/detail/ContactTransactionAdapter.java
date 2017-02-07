@@ -4,6 +4,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
+import android.text.TextUtils;
 import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -124,7 +125,8 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
                     new RelativeSizeSpan(0.67f), spannable.length() - 3, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        holder.title.setText(spannable + " " + holder.title.getText());
+        Spannable title = Spannable.Factory.getInstance().newSpannable(" " + holder.title.getText());
+        holder.title.setText(TextUtils.concat(spannable, title));
     }
 
     void setClickListener(TransactionClickListener listener) {

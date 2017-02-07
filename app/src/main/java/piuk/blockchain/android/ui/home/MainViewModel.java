@@ -96,8 +96,6 @@ public class MainViewModel extends BaseViewModel {
 
         void showSurveyPrompt();
 
-        void setMessagesCount(int messageCount);
-
         void showContactsRegistrationFailure();
 
         void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId, long transactionValue);
@@ -183,7 +181,9 @@ public class MainViewModel extends BaseViewModel {
                             }
                         })
                         .subscribe(
-                                messages -> dataListener.setMessagesCount(messages.size()),
+                                messages -> {
+                                    // No-op
+                                },
                                 throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
     }
 

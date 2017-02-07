@@ -44,7 +44,7 @@ public class NotificationTokenManager {
         } else {
             // Store token and send once login event happens
             accessState.getAuthEventSubject().subscribe(authEvent -> {
-                if (authEvent == AccessState.AuthEvent.Login) {
+                if (authEvent == AccessState.AuthEvent.LOGIN) {
                     // Send token
                     sendFirebaseToken(token);
                 }

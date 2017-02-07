@@ -187,9 +187,9 @@ public class AccessState {
         prefs.logIn();
         isLoggedIn = loggedIn;
         if (isLoggedIn) {
-            authEventSubject.onNext(AuthEvent.Login);
+            authEventSubject.onNext(AuthEvent.LOGIN);
         } else {
-            authEventSubject.onNext(AuthEvent.Logout);
+            authEventSubject.onNext(AuthEvent.LOGOUT);
         }
     }
 
@@ -202,7 +202,7 @@ public class AccessState {
 
     @SuppressWarnings("WeakerAccess")
     public enum AuthEvent {
-        Login,
-        Logout
+        LOGIN,
+        LOGOUT
     }
 }

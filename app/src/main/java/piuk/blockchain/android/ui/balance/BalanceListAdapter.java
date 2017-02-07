@@ -8,6 +8,7 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
+import android.text.TextUtils;
 import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -152,10 +153,9 @@ class BalanceListAdapter extends RecyclerView.Adapter {
 
         String fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
 
-        fctxViewHolder.title.setText(
-                getDisplaySpannable(transaction.getIntended_amount(), fiatBalance, fiatString)
-                        + " "
-                        + fctxViewHolder.title.getText());
+        Spannable spannable = getDisplaySpannable(transaction.getIntended_amount(), fiatBalance, fiatString);
+        Spannable title = Spannable.Factory.getInstance().newSpannable(" " + fctxViewHolder.title.getText());
+        fctxViewHolder.title.setText(TextUtils.concat(spannable, title));
     }
 
     private void bindTxView(RecyclerView.ViewHolder holder, int position) {

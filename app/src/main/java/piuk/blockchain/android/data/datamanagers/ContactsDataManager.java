@@ -18,6 +18,7 @@ import java.util.List;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
+import io.reactivex.subjects.PublishSubject;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.ContactsService;
 
@@ -45,10 +46,25 @@ public class ContactsDataManager {
 
     private ContactsService contactsService;
     private PayloadManager payloadManager;
+    private static PublishSubject<ContactsEvent> serviceInitSubject = PublishSubject.create();
+
+    public enum ContactsEvent {
+        INIT
+    }
 
     public ContactsDataManager(ContactsService contactsService, PayloadManager payloadManager) {
         this.contactsService = contactsService;
         this.payloadManager = payloadManager;
+    }
+
+    /**
+     * Returns a {@link PublishSubject} which emits an item when the contacts service has been fully
+     * and successfully initialised.
+     *
+     * @return A {@link PublishSubject}
+     */
+    public static PublishSubject<ContactsEvent> getServiceInitSubject() {
+        return serviceInitSubject;
     }
 
     /**
@@ -396,6 +412,7 @@ public class ContactsDataManager {
      */
     public Completable publishXpub() {
         return contactsService.publishXpub()
+                .doOnComplete(() -> getServiceInitSubject().onNext(ContactsEvent.INIT))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -487,7 +504,7 @@ public class ContactsDataManager {
                         }
                     }
 
-                    return null;
+                    return Observable.empty();
                 });
     }
 

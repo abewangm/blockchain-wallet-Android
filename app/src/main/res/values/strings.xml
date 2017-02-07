@@ -630,6 +630,7 @@
     <string name="contacts_pending_transaction">Pending Transactions</string>
     <string name="contacts_transaction_history">Transaction History</string>
     <string name="contacts_request_money_receive">Send request to contact</string>
+    <string name="contacts_no_confirmed_contacts_found">No confirmed contacts found!</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>

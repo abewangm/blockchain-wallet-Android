@@ -105,6 +105,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         balanceBarHeight = (int) getResources().getDimension(R.dimen.balance_bar_height);
 
         setupViews();
+        viewModel.updateFacilitatedTransactions();
 
         return binding.getRoot();
     }
@@ -130,7 +131,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-
         if (isVisibleToUser) {
             viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
         }
@@ -451,10 +451,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.rvTransactions.scrollToPosition(0);
     }
 
-    public void updateFacilitatedTransactions() {
-        viewModel.updateFacilitatedTransactions();
-    }
-
     @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(getContext(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
@@ -546,6 +542,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         if (interactionListener != null) {
             interactionListener.onPaymentInitiated(uri, recipientId, mdid, fctxId, defaultIndex);
         }
+    }
+
+    @Override
+    public void showFctxRequiringAttention(int number) {
+        ((MainActivity) getActivity()).setMessagesCount(number);
     }
 
     @Override

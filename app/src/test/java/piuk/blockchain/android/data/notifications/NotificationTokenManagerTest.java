@@ -73,7 +73,7 @@ public class NotificationTokenManagerTest {
         when(notificationService.sendNotificationToken(anyString(), anyString(), anyString())).thenReturn(Completable.complete());
         // Act
         subject.storeAndUpdateToken("token");
-        testSubject.onNext(AuthEvent.Login);
+        testSubject.onNext(AuthEvent.LOGIN);
         // Assert
         verify(accessState).isLoggedIn();
         verify(accessState).getAuthEventSubject();

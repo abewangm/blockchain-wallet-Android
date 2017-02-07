@@ -224,11 +224,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         }
     }
 
-    @Override
     public void setMessagesCount(int messageCount) {
-        if (getCurrentFragment() instanceof BalanceFragment) {
-            ((BalanceFragment) getCurrentFragment()).updateFacilitatedTransactions();
-        }
         binding.navigationView.getMenu()
                 .findItem(R.id.nav_contacts)
                 .getActionView()

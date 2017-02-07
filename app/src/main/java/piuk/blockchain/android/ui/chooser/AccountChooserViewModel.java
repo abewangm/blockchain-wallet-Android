@@ -43,6 +43,8 @@ public class AccountChooserViewModel extends BaseViewModel {
 
         void updateUi(List<ItemAccount> items);
 
+        void showNoContacts();
+
     }
 
     AccountChooserViewModel(DataListener dataListener) {
@@ -93,7 +95,13 @@ public class AccountChooserViewModel extends BaseViewModel {
         compositeDisposable.add(
                 parseContactsList()
                         .subscribe(
-                                items -> dataListener.updateUi(itemAccounts),
+                                items -> {
+                                    if (!items.isEmpty()) {
+                                        dataListener.updateUi(itemAccounts);
+                                    } else {
+                                        dataListener.showNoContacts();
+                                    }
+                                },
                                 Throwable::printStackTrace));
     }
 

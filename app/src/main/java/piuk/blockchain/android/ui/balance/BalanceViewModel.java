@@ -93,6 +93,8 @@ public class BalanceViewModel extends BaseViewModel {
         void showProgressDialog();
 
         void dismissProgressDialog();
+
+        void showFctxRequiringAttention(int number);
     }
 
     public BalanceViewModel(DataListener dataListener) {
@@ -145,6 +147,9 @@ public class BalanceViewModel extends BaseViewModel {
 
                             }, Throwable::printStackTrace));
         }
+
+        ContactsDataManager.getServiceInitSubject()
+                .subscribe(contactsEvent -> updateFacilitatedTransactions());
     }
 
     @SuppressWarnings("Convert2streamapi")
@@ -362,6 +367,8 @@ public class BalanceViewModel extends BaseViewModel {
                                         }
                                     }
 
+                                    dataListener.showFctxRequiringAttention(getNumberOfFctxRequiringAttention(transactions));
+
                                     if (!transactions.isEmpty()) {
                                         Collections.sort(transactions, new FctxDateComparator());
                                         Collections.reverse(transactions);
@@ -567,6 +574,26 @@ public class BalanceViewModel extends BaseViewModel {
 
         // Find corrected position
         return payloadManager.getPayload().getHdWallet().getAccounts().indexOf(activeAccounts.get(accountIndex));
+    }
+
+    private int getNumberOfFctxRequiringAttention(List<FacilitatedTransaction> facilitatedTransactions) {
+        int value = 0;
+        for (FacilitatedTransaction transaction : facilitatedTransactions) {
+            if (transaction.getState() != null
+                    && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+                    && transaction.getRole() != null
+                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
+                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
+                value++;
+            } else if (transaction.getState() != null
+                    && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                    && transaction.getRole() != null
+                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
+                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
+                value++;
+            }
+        }
+        return value;
     }
 
 }

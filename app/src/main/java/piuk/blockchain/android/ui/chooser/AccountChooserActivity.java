@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
+import android.view.View;
 
 import java.util.List;
 
@@ -55,6 +56,13 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
         }
 
         viewModel.onViewReady();
+    }
+
+
+    @Override
+    public void showNoContacts() {
+        binding.recyclerview.setVisibility(View.GONE);
+        binding.layoutNoContacts.setVisibility(View.VISIBLE);
     }
 
     @Override
