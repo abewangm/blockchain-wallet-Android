@@ -352,7 +352,8 @@ public class BalanceViewModel extends BaseViewModel {
 
     void updateFacilitatedTransactions() {
         compositeDisposable.add(
-                contactsDataManager.getContactsWithUnreadPaymentRequests()
+                contactsDataManager.fetchContacts()
+                        .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
                         .toList()
                         .flatMapObservable(contacts -> contactsDataManager.getUnfulfilledFacilitatedTransactions())
                         .toList()
@@ -377,9 +378,7 @@ public class BalanceViewModel extends BaseViewModel {
                                         displayList.add(transactions.size() + 1, stringUtils.getString(R.string.contacts_transaction_history));
                                         dataListener.onRefreshBalanceAndTransactions();
                                     }
-                                }, throwable -> {
-                                    // TODO: 03/02/2017
-                                }));
+                                }, Throwable::printStackTrace));
     }
 
     void onPendingTransactionClicked(String fctxId) {

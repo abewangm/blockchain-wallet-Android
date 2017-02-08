@@ -91,6 +91,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     public static final String ARGUMENT_CONTACT_MDID = "contact_mdid";
     public static final String ARGUMENT_FCTX_ID = "fctx_id";
     public static final String ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE = "address_input_route";
+    public static final String ARGUMENT_LAUNCH_CONFIRMATION = "launch_confirmation";
 
     private static final int SCAN_URI = 2007;
     private static final int SCAN_PRIVX = 2008;
@@ -130,11 +131,11 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         // Required empty public constructor
     }
 
-    public static SendFragment newInstance(@Nullable String scanData,
-                                           @Nullable String contactId,
-                                           @Nullable String mdid,
-                                           @Nullable String fctxId,
-                                           String scanRoute,
+    public static SendFragment newInstance(@NonNull String scanData,
+                                           @NonNull String contactId,
+                                           @NonNull String mdid,
+                                           @NonNull String fctxId,
+                                           @Nullable String scanRoute,
                                            int selectedAccountPosition) {
         SendFragment fragment = new SendFragment();
         Bundle args = new Bundle();
@@ -144,6 +145,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         args.putString(ARGUMENT_FCTX_ID, fctxId);
         args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute);
         args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
+        // This constructor triggers launch of the confirmation dialog immediately using this flag
+        args.putBoolean(ARGUMENT_LAUNCH_CONFIRMATION, true);
         fragment.setArguments(args);
         return fragment;
     }
@@ -245,15 +248,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void startScanActivity(int code) {
-        if (!new AppUtil(getActivity()).isCameraOpen()) {
-            Intent intent = new Intent(getActivity(), CaptureActivity.class);
-            startActivityForResult(intent, code);
-        } else {
-            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
         }
     }
 
@@ -403,6 +397,15 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         layoutParams.addRule(RelativeLayout.ABOVE, R.id.keyboard);
 
         binding.scrollView.setLayoutParams(layoutParams);
+    }
+
+    private void startScanActivity(int code) {
+        if (!new AppUtil(getActivity()).isCameraOpen()) {
+            Intent intent = new Intent(getActivity(), CaptureActivity.class);
+            startActivityForResult(intent, code);
+        } else {
+            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
+        }
     }
 
     private void setCustomKeypad() {
@@ -606,6 +609,11 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         binding.imageviewDropdownReceive.setVisibility(View.GONE);
         binding.destination.setOnClickListener(null);
         binding.destination.setKeyListener(null);
+
+        if (getArguments() != null && getArguments().containsKey(ARGUMENT_LAUNCH_CONFIRMATION)) {
+            // Skip straight to payment confirmation
+            requestSendPayment(binding.amountRow.amountBtc.getText().toString());
+        }
     }
 
     @Override

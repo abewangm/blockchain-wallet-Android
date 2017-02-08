@@ -569,8 +569,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, int defaultIndex) {
-        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, null, defaultIndex);
-        addFragment(sendFragment);
+        startSendFragmentFromIntent(uri, recipientId, mdid, fctxId, defaultIndex);
     }
 
     @Override
@@ -756,6 +755,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 // Wait for fragment transaction to finish and then pop in
                 balanceFragmentAddedCallback = () -> {
                     startSendFragmentFromIntent(uri, recipientId, mdid, fctxId, accountPosition);
+                    // Null-out callback as not to cause issues later
                     balanceFragmentAddedCallback = null;
                 };
             }

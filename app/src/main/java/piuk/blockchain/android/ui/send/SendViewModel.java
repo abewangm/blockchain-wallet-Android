@@ -170,17 +170,19 @@ public class SendViewModel extends BaseViewModel {
     void onSendClicked(String customFee, String amount, boolean bypassFeeCheck, String address) {
         // Contact selected but no FacilitationTransaction to respond to
         if (fctxId == null && contactMdid != null) {
-            if (isValidSpend(sendModel.pendingTransaction, true)) {
-                compositeDisposable.add(
-                        contactsDataManager.getContactList()
-                                .filter(ContactsPredicates.filterByMdid(contactMdid))
-                                .subscribe(
-                                        contact -> dataListener.navigateToAddNote(
-                                                contact.getId(),
-                                                PaymentRequestType.SEND,
-                                                sendModel.pendingTransaction.bigIntAmount.intValue()),
-                                        throwable -> showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR)));
-            }
+            setupTransaction(customFee, amount, () -> {
+                if (isValidSpend(sendModel.pendingTransaction, true)) {
+                    compositeDisposable.add(
+                            contactsDataManager.getContactList()
+                                    .filter(ContactsPredicates.filterByMdid(contactMdid))
+                                    .subscribe(
+                                            contact -> dataListener.navigateToAddNote(
+                                                    contact.getId(),
+                                                    PaymentRequestType.SEND,
+                                                    sendModel.pendingTransaction.bigIntAmount.intValue()),
+                                            throwable -> showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR)));
+                }
+            });
         } else {
             setupTransaction(customFee, amount, () -> sendClicked(bypassFeeCheck, address));
         }
@@ -651,6 +653,8 @@ public class SendViewModel extends BaseViewModel {
         if (FormatsUtil.getInstance().isValidBitcoinAddress(address)) {
             //Receiving address manual or scanned input
             sendModel.pendingTransaction.receivingAddress = address;
+        } else {
+            sendModel.recipient = address;
         }
 
         if (bypassFeeCheck || isFeeAdequate()) {
@@ -749,7 +753,9 @@ public class SendViewModel extends BaseViewModel {
 
         PaymentConfirmationDetails details = new PaymentConfirmationDetails();
         details.fromLabel = pendingTransaction.sendingObject.label;
-        if (pendingTransaction.receivingObject != null
+        if (contactMdid != null) {
+            details.toLabel = sendModel.recipient;
+        } else if (pendingTransaction.receivingObject != null
                 && pendingTransaction.receivingObject.label != null
                 && !pendingTransaction.receivingObject.label.isEmpty()) {
             details.toLabel = pendingTransaction.receivingObject.label;

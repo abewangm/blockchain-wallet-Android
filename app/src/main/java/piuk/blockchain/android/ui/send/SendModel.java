@@ -49,4 +49,9 @@ public class SendModel {
     boolean isBTC;
     double btcExchange;
 
+    /**
+     * For storing a Contact name, account name etc
+     */
+    String recipient;
+
 }
