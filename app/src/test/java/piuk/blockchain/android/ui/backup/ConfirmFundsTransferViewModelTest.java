@@ -45,6 +45,7 @@ import piuk.blockchain.android.util.StringUtils;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -176,7 +177,8 @@ public class ConfirmFundsTransferViewModelTest {
     @Test
     public void sendPaymentNoArchive() throws Exception {
         // Arrange
-        when(mFundsDataManager.sendPayment(any(Payment.class), anyListOf(PendingTransaction.class), any(CharSequenceX.class))).thenReturn(Observable.just("hash"));
+        mSubject.mPendingTransactions = new ArrayList<>();
+        when(mFundsDataManager.sendPayment(any(Payment.class), anyList(), any(CharSequenceX.class))).thenReturn(Observable.just("hash"));
         when(mActivity.getIfArchiveChecked()).thenReturn(false);
         // Act
         mSubject.sendPayment(new CharSequenceX("password"));
@@ -194,7 +196,8 @@ public class ConfirmFundsTransferViewModelTest {
     @Test
     public void sendPaymentError() throws Exception {
         // Arrange
-        when(mFundsDataManager.sendPayment(any(Payment.class), anyListOf(PendingTransaction.class), any(CharSequenceX.class))).thenReturn(Observable.error(new Throwable()));
+        mSubject.mPendingTransactions = new ArrayList<>();
+        when(mFundsDataManager.sendPayment(any(Payment.class), anyList(), any(CharSequenceX.class))).thenReturn(Observable.error(new Throwable()));
         when(mActivity.getIfArchiveChecked()).thenReturn(false);
         // Act
         mSubject.sendPayment(new CharSequenceX("password"));

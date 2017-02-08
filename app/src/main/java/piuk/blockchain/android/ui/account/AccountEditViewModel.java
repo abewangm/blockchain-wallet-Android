@@ -330,9 +330,7 @@ public class AccountEditViewModel extends BaseViewModel {
                                 dataListener.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
                             }
 
-                        }, throwable -> {
-                            dataListener.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
-                        }));
+                        }, throwable -> dataListener.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR)));
 
     }
 
@@ -341,7 +339,6 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     private PaymentConfirmationDetails getTransactionDetailsForDisplay(PendingTransaction pendingTransaction) {
-
         PaymentConfirmationDetails details = new PaymentConfirmationDetails();
         details.fromLabel = pendingTransaction.sendingObject.label;
         if (pendingTransaction.receivingObject != null
@@ -433,9 +430,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
                             accountModel.setTransferFundsVisibility(View.GONE);
                             dataListener.setActivityResult(Activity.RESULT_OK);
-                        }, throwable -> {
-                            dataListener.showToast(R.string.send_failed, ToastCustom.TYPE_ERROR);
-                        }));
+                        }, throwable -> dataListener.showToast(R.string.send_failed, ToastCustom.TYPE_ERROR)));
 
     }
 
@@ -466,10 +461,7 @@ public class AccountEditViewModel extends BaseViewModel {
                                 } else {
                                     reverLabelAndShowError(revertLabel);
                                 }
-                            }, throwable -> {
-                                reverLabelAndShowError(revertLabel);
-
-                            }));
+                            }, throwable -> reverLabelAndShowError(revertLabel)));
         } else {
             dataListener.showToast(R.string.label_cant_be_empty, ToastCustom.TYPE_ERROR);
         }
@@ -510,9 +502,7 @@ public class AccountEditViewModel extends BaseViewModel {
                             } else {
                                 revertDefaultAndShowError(revertDefault);
                             }
-                        }, throwable -> {
-                            revertDefaultAndShowError(revertDefault);
-                        }));
+                        }, throwable -> revertDefaultAndShowError(revertDefault)));
     }
 
     private void updateSwipeToReceiveAddresses() {
@@ -640,7 +630,6 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     private void remoteSaveUnmatchedPrivateKey(final LegacyAddress legacyAddress) {
-
         Payload updatedPayload = payloadManager.getPayload();
         List<LegacyAddress> updatedLegacyAddresses = updatedPayload.getLegacyAddressList();
         updatedLegacyAddresses.add(legacyAddress);

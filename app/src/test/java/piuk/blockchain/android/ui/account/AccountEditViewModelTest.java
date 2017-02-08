@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.account;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
@@ -54,9 +53,10 @@ import piuk.blockchain.android.util.StringUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -116,14 +116,15 @@ public class AccountEditViewModelTest {
         Account account = new Account();
         when(mockPayload.getHdWallet().getAccounts()).thenReturn(Arrays.asList(account, importedAccount));
         when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(stringUtils.getString(anyInt())).thenReturn("string resource");
         // Act
         subject.onViewReady();
         // Assert
         verify(activity).getIntent();
         verify(accountEditModel).setLabel(anyString());
-        verify(accountEditModel).setLabelHeader(anyString());
+        verify(accountEditModel).setLabelHeader("string resource");
         verify(accountEditModel).setScanPrivateKeyVisibility(anyInt());
-        verify(accountEditModel).setXpubText(anyString());
+        verify(accountEditModel).setXpubText("string resource");
         verify(accountEditModel).setTransferFundsVisibility(anyInt());
     }
 
@@ -140,14 +141,15 @@ public class AccountEditViewModelTest {
         account.setArchived(true);
         when(mockPayload.getHdWallet().getAccounts()).thenReturn(Arrays.asList(account, importedAccount));
         when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(stringUtils.getString(anyInt())).thenReturn("string resource");
         // Act
         subject.onViewReady();
         // Assert
         verify(activity).getIntent();
         verify(accountEditModel).setLabel(anyString());
-        verify(accountEditModel).setLabelHeader(anyString());
+        verify(accountEditModel).setLabelHeader("string resource");
         verify(accountEditModel).setScanPrivateKeyVisibility(anyInt());
-        verify(accountEditModel).setXpubText(anyString());
+        verify(accountEditModel).setXpubText("string resource");
         verify(accountEditModel).setTransferFundsVisibility(anyInt());
     }
 
@@ -163,14 +165,15 @@ public class AccountEditViewModelTest {
         when(mockPayload.getLegacyAddressList()).thenReturn(Collections.singletonList(legacyAddress));
         when(payloadManager.getPayload()).thenReturn(mockPayload);
         when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
+        when(stringUtils.getString(anyInt())).thenReturn("string resource");
         // Act
         subject.onViewReady();
         // Assert
         verify(activity).getIntent();
-        verify(accountEditModel).setLabel(anyString());
-        verify(accountEditModel).setLabelHeader(anyString());
+        verify(accountEditModel).setLabel(isNull());
+        verify(accountEditModel).setLabelHeader("string resource");
         verify(accountEditModel).setScanPrivateKeyVisibility(anyInt());
-        verify(accountEditModel).setXpubText(anyString());
+        verify(accountEditModel).setXpubText("string resource");
         verify(accountEditModel).setTransferFundsVisibility(anyInt());
     }
 
@@ -188,14 +191,15 @@ public class AccountEditViewModelTest {
         when(payloadManager.getPayload()).thenReturn(mockPayload);
         when(mockPayload.isUpgraded()).thenReturn(true);
         when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
+        when(stringUtils.getString(anyInt())).thenReturn("string resource");
         // Act
         subject.onViewReady();
         // Assert
         verify(activity).getIntent();
-        verify(accountEditModel).setLabel(anyString());
-        verify(accountEditModel).setLabelHeader(anyString());
+        verify(accountEditModel).setLabel(isNull());
+        verify(accountEditModel).setLabelHeader("string resource");
         verify(accountEditModel).setScanPrivateKeyVisibility(anyInt());
-        verify(accountEditModel).setXpubText(anyString());
+        verify(accountEditModel).setXpubText("string resource");
         verify(accountEditModel).setTransferFundsVisibility(anyInt());
     }
 
@@ -224,6 +228,7 @@ public class AccountEditViewModelTest {
     @Test
     public void onClickTransferFundsSuccessTransactionEmpty() throws Exception {
         // Arrange
+        subject.legacyAddress = new LegacyAddress();
         PendingTransaction pendingTransaction = new PendingTransaction();
         pendingTransaction.bigIntAmount = new BigInteger("0");
         when(accountEditDataManager.getPendingTransactionForLegacyAddress(any(LegacyAddress.class), any(Payment.class)))
@@ -239,6 +244,7 @@ public class AccountEditViewModelTest {
     @Test
     public void onClickTransferFundsError() throws Exception {
         // Arrange
+        subject.legacyAddress = new LegacyAddress();
         when(accountEditDataManager.getPendingTransactionForLegacyAddress(any(LegacyAddress.class), any(Payment.class)))
                 .thenReturn(Observable.error(new Throwable()));
         // Act
@@ -267,14 +273,15 @@ public class AccountEditViewModelTest {
         pendingTransaction.bigIntFee = new BigInteger("1");
         LegacyAddress legacyAddress = new LegacyAddress();
         pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress);
+        pendingTransaction.unspentOutputBundle = new SpendableUnspentOutputs();
         Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
         when(payloadManager.getPayload()).thenReturn(mockPayload);
         when(accountEditDataManager.submitPayment(
                 any(SpendableUnspentOutputs.class),
-                anyListOf(ECKey.class),
-                anyString(),
-                anyString(),
+                anyList(),
+                isNull(),
+                isNull(),
                 any(BigInteger.class),
                 any(BigInteger.class))).thenReturn(Observable.just("hash"));
         when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(true));
@@ -296,14 +303,15 @@ public class AccountEditViewModelTest {
         pendingTransaction.bigIntFee = new BigInteger("1");
         LegacyAddress legacyAddress = new LegacyAddress();
         pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress);
+        pendingTransaction.unspentOutputBundle = new SpendableUnspentOutputs();
         Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
         when(mockPayload.isDoubleEncrypted()).thenReturn(false);
         when(payloadManager.getPayload()).thenReturn(mockPayload);
         when(accountEditDataManager.submitPayment(
                 any(SpendableUnspentOutputs.class),
-                anyListOf(ECKey.class),
-                anyString(),
-                anyString(),
+                anyList(),
+                isNull(),
+                isNull(),
                 any(BigInteger.class),
                 any(BigInteger.class))).thenReturn(Observable.error(new Throwable()));
         // Act
@@ -364,13 +372,14 @@ public class AccountEditViewModelTest {
     public void updateAccountLabelFailed() throws Exception {
         // Arrange
         subject.legacyAddress = new LegacyAddress();
+        subject.legacyAddress.setLabel("old label");
         when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(false));
         // Act
-        subject.updateAccountLabel("label");
+        subject.updateAccountLabel("new label");
         // Assert
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
-        verify(accountEditModel).setLabel(anyString());
+        verify(accountEditModel).setLabel("old label");
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
     }
@@ -379,13 +388,14 @@ public class AccountEditViewModelTest {
     public void updateAccountLabelError() throws Exception {
         // Arrange
         subject.legacyAddress = new LegacyAddress();
+        subject.legacyAddress.setLabel("old label");
         when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.error(new Throwable()));
         // Act
-        subject.updateAccountLabel("label");
+        subject.updateAccountLabel("new label");
         // Assert
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
-        verify(accountEditModel).setLabel(anyString());
+        verify(accountEditModel).setLabel("old label");
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
     }
@@ -393,11 +403,11 @@ public class AccountEditViewModelTest {
     @Test
     public void onClickChangeLabel() throws Exception {
         // Arrange
-
+        when(accountEditModel.getLabel()).thenReturn("label");
         // Act
         subject.onClickChangeLabel(null);
         // Assert
-        verify(activity).promptAccountLabel(anyString());
+        verify(activity).promptAccountLabel("label");
     }
 
     @Test
@@ -499,17 +509,18 @@ public class AccountEditViewModelTest {
         // Act
         subject.onClickShowXpub(null);
         // Assert
-        verify(activity).showAddressDetails(anyString(), anyString(), anyString(), any(Bitmap.class), anyString());
+        verify(activity).showAddressDetails(isNull(), isNull(), isNull(), isNull(), isNull());
     }
 
     @Test
     public void onClickArchive() throws Exception {
         // Arrange
         subject.account = new Account();
+        when(stringUtils.getString(anyInt())).thenReturn("resource string");
         // Act
         subject.onClickArchive(null);
         // Assert
-        verify(activity).promptArchive(anyString(), anyString());
+        verify(activity).promptArchive("resource string", "resource string");
     }
 
     @Test
@@ -519,7 +530,7 @@ public class AccountEditViewModelTest {
         // Act
         subject.showAddressDetails();
         // Assert
-        verify(activity).showAddressDetails(anyString(), anyString(), anyString(), any(Bitmap.class), anyString());
+        verify(activity).showAddressDetails(isNull(), isNull(), isNull(), isNull(), isNull());
     }
 
     @Test

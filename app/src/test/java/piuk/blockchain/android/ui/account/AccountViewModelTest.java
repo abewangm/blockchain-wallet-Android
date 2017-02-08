@@ -45,6 +45,7 @@ import io.reactivex.Observable;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -171,7 +172,7 @@ public class AccountViewModelTest {
     @Test
     public void createNewAccountSuccessful() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), any(CharSequenceX.class))).thenReturn(Observable.just(new Account()));
+        when(accountDataManager.createNewAccount(anyString(), isNull())).thenReturn(Observable.just(new Account()));
         // Act
         subject.createNewAccount("");
         // Assert
@@ -187,7 +188,7 @@ public class AccountViewModelTest {
     @Test
     public void createNewAccountDecryptionException() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new DecryptionException()));
+        when(accountDataManager.createNewAccount(anyString(), isNull())).thenReturn(Observable.error(new DecryptionException()));
         // Act
         subject.createNewAccount("");
         // Assert
@@ -201,7 +202,7 @@ public class AccountViewModelTest {
     @Test
     public void createNewAccountPayloadException() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new PayloadException()));
+        when(accountDataManager.createNewAccount(anyString(), isNull())).thenReturn(Observable.error(new PayloadException()));
         // Act
         subject.createNewAccount("");
         // Assert
@@ -215,7 +216,7 @@ public class AccountViewModelTest {
     @Test
     public void createNewAccountUnknownException() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new Exception()));
+        when(accountDataManager.createNewAccount(anyString(), isNull())).thenReturn(Observable.error(new Exception()));
         // Act
         subject.createNewAccount("");
         // Assert

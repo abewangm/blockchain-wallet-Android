@@ -30,7 +30,6 @@ import piuk.blockchain.android.util.StringUtils;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -105,7 +104,7 @@ public class AuthDataManagerTest extends RxTest {
         // Arrange
         when(mAccessState.createPin(any(CharSequenceX.class), anyString())).thenReturn(Observable.just(true));
         // Act
-        TestObserver<Boolean> observer = mSubject.createPin(any(CharSequenceX.class), anyString()).test();
+        TestObserver<Boolean> observer = mSubject.createPin(new CharSequenceX(""), "").test();
         // Assert
         verify(mAccessState).createPin(any(CharSequenceX.class), anyString());
         observer.assertComplete();
@@ -117,14 +116,16 @@ public class AuthDataManagerTest extends RxTest {
     public void createHdWallet() throws Exception {
         // Arrange
         Payload payload = new Payload();
+        payload.setSharedKey("shared key");
+        payload.setGuid("guid");
         when(mPayloadManager.createHDWallet(anyString(), anyString())).thenReturn(payload);
         // Act
         TestObserver<Payload> observer = mSubject.createHdWallet("", "").test();
         // Assert
         verify(mPayloadManager).createHDWallet(anyString(), anyString());
-        verify(mAppUtil).setSharedKey(anyString());
+        verify(mAppUtil).setSharedKey("shared key");
         verify(mAppUtil).setNewlyCreated(true);
-        verify(mPrefsUtil).setValue(eq(PrefsUtil.KEY_GUID), anyString());
+        verify(mPrefsUtil).setValue(PrefsUtil.KEY_GUID, "guid");
         observer.assertComplete();
         observer.onNext(payload);
         observer.assertNoErrors();
@@ -134,14 +135,17 @@ public class AuthDataManagerTest extends RxTest {
     public void restoreHdWallet() throws Exception {
         // Arrange
         Payload payload = new Payload();
+        payload.setSharedKey("shared key");
+        payload.setGuid("guid");
         when(mPayloadManager.restoreHDWallet(anyString(), anyString(), anyString())).thenReturn(payload);
+        when(mStringUtils.getString(anyInt())).thenReturn("string resource");
         // Act
         TestObserver<Payload> observer = mSubject.restoreHdWallet("", "", "").test();
         // Assert
         verify(mPayloadManager).restoreHDWallet(anyString(), anyString(), anyString());
-        verify(mAppUtil).setSharedKey(anyString());
+        verify(mAppUtil).setSharedKey("shared key");
         verify(mAppUtil).setNewlyCreated(true);
-        verify(mPrefsUtil).setValue(eq(PrefsUtil.KEY_GUID), anyString());
+        verify(mPrefsUtil).setValue(PrefsUtil.KEY_GUID, "guid");
         observer.assertComplete();
         observer.onNext(payload);
         observer.assertNoErrors();
@@ -154,6 +158,7 @@ public class AuthDataManagerTest extends RxTest {
     public void restoreHdWalletNullPayload() throws Exception {
         // Arrange
         when(mPayloadManager.restoreHDWallet(anyString(), anyString(), anyString())).thenReturn(null);
+        when(mStringUtils.getString(anyInt())).thenReturn("string resource");
         // Act
         TestObserver<Payload> observer = mSubject.restoreHdWallet("", "", "").test();
         // Assert

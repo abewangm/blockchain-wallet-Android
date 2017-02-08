@@ -41,6 +41,7 @@ import piuk.blockchain.android.util.StringUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -165,7 +166,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         verify(mActivity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
         verify(mActivity).setToAddresses(any());
         verify(mActivity).setTransactionValueFiat(anyString());
-        verify(mActivity).setFromAddress(anyString());
+        verify(mActivity).setFromAddress(isNull());
         verify(mActivity).onDataLoaded();
     }
 

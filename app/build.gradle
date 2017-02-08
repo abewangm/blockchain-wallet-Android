@@ -180,8 +180,7 @@ dependencies {
     // Unit Tests in Kotlin
     testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    // This can't be used until we update Mockito
-//    testCompile 'com.nhaarman:mockito-kotlin:1.2.0'
+    testCompile 'com.nhaarman:mockito-kotlin:1.2.0'
 }
 
 buildscript {

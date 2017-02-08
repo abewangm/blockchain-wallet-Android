@@ -54,6 +54,7 @@ public class AccountEditDataManagerTest extends RxTest {
     public void getPendingTransactionForLegacyAddress() throws Exception {
         // Arrange
         LegacyAddress legacyAddress = new LegacyAddress();
+        legacyAddress.setAddress("");
         Payment payment = new Payment();
         SuggestedFee suggestedFee = new SuggestedFee();
         suggestedFee.defaultFeePerKb = BigInteger.valueOf(100);

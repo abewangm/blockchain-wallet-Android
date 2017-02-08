@@ -275,7 +275,7 @@ public class SettingsViewModelTest {
     @Test
     public void updateEmailInvalid() throws Exception {
         // Arrange
-
+        when(stringUtils.getString(anyInt())).thenReturn("string resource");
         // Act
         subject.updateEmail(null);
         // Assert
@@ -329,7 +329,7 @@ public class SettingsViewModelTest {
     @Test
     public void updateSmsInvalid() throws Exception {
         // Arrange
-
+        when(stringUtils.getString(anyInt())).thenReturn("string resource");
         // Act
         subject.updateSms("");
         // Assert
