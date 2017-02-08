@@ -154,7 +154,7 @@ dependencies {
     annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
     annotationProcessor 'com.google.guava:guava:20.0'
     // Fingerprint authentication
-    compile 'com.mtramin:rxfingerprint:2.0.2'
+    compile 'com.mtramin:rxfingerprint:2.0.3'
     // GSON
     compile 'com.google.code.gson:gson:2.8.0'
     // UI/Instrumentation Tests
