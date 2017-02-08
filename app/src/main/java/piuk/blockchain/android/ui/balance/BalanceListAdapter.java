@@ -110,22 +110,24 @@ class BalanceListAdapter extends RecyclerView.Adapter {
 
         if (transaction.getState() != null
                 && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-            fctxViewHolder.title.setText(stringUtils.getString(R.string.contacts_waiting_for_address_title));
-
             if (transaction.getRole() != null
                     && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
                     || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
                 fctxViewHolder.indicator.setVisibility(View.VISIBLE);
+                fctxViewHolder.title.setText(stringUtils.getString(R.string.contacts_waiting_for_address_send_title));
+            } else {
+                fctxViewHolder.title.setText(stringUtils.getString(R.string.contacts_waiting_for_address_title));
             }
 
         } else if (transaction.getState() != null
                 && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-            fctxViewHolder.title.setText(stringUtils.getString(R.string.contacts_waiting_for_payment_title));
-
             if (transaction.getRole() != null
                     && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
                     || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
                 fctxViewHolder.indicator.setVisibility(View.VISIBLE);
+                fctxViewHolder.title.setText(stringUtils.getString(R.string.contacts_waiting_for_payment_send_title));
+            } else {
+                fctxViewHolder.title.setText(stringUtils.getString(R.string.contacts_waiting_for_payment_title));
             }
 
         } else if (transaction.getState() != null
