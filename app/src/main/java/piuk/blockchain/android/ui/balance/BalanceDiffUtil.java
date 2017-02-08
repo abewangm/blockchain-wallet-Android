@@ -8,6 +8,8 @@ import info.blockchain.wallet.transaction.Tx;
 
 import java.util.List;
 
+import piuk.blockchain.android.data.contacts.ContactTransactionModel;
+
 class BalanceDiffUtil extends DiffUtil.Callback {
 
     private List<Object> oldItems;
@@ -43,13 +45,17 @@ class BalanceDiffUtil extends DiffUtil.Callback {
         } else {
             if (oldItem instanceof String) {
                 return oldItem.equals(newItem);
-            } else if (oldItem instanceof FacilitatedTransaction) {
-                FacilitatedTransaction oldFctx = (FacilitatedTransaction) oldItem;
-                FacilitatedTransaction newFctx = (FacilitatedTransaction) newItem;
+            } else if (oldItem instanceof ContactTransactionModel) {
+                ContactTransactionModel oldContactTxModel = (ContactTransactionModel) oldItem;
+                ContactTransactionModel newContactTxModel = (ContactTransactionModel) newItem;
+                FacilitatedTransaction oldFctx = oldContactTxModel.getFacilitatedTransaction();
+                FacilitatedTransaction newFctx = newContactTxModel.getFacilitatedTransaction();
 
                 return
-                        // Amount
-                        oldFctx.getIntended_amount() == newFctx.getIntended_amount()
+                        // Contact Name
+                        oldContactTxModel.getContactName().equals(newContactTxModel.getContactName())
+                                // Amount
+                                && oldFctx.getIntended_amount() == newFctx.getIntended_amount()
                                 // Created
                                 && oldFctx.getCreated() == newFctx.getCreated()
                                 // ID

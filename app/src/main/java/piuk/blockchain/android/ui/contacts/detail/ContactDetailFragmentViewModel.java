@@ -62,7 +62,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
 
         void showDeleteUserDialog();
 
-        void onTransactionsUpdated(List<FacilitatedTransaction> transactions);
+        void onTransactionsUpdated(List<FacilitatedTransaction> transactions, String contactName);
 
         void showAccountChoiceDialog(List<String> accounts, String fctxId);
 
@@ -266,7 +266,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
         Collections.sort(facilitatedTransactions, new FctxDateComparator());
         Collections.reverse(facilitatedTransactions);
 
-        dataListener.onTransactionsUpdated(facilitatedTransactions);
+        dataListener.onTransactionsUpdated(facilitatedTransactions, contact.getName());
     }
 
     private void showErrorAndQuitPage() {

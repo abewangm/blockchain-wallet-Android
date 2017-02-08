@@ -19,6 +19,7 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
+import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.ContactsService;
 
@@ -460,23 +461,23 @@ public class ContactsDataManager {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Returns a stream of {@link FacilitatedTransaction} objects where the transaction is yet to
+     * Returns a stream of {@link ContactTransactionModel} objects where the transaction is yet to
      * be completed, ie the hash is empty.
      *
-     * @return An {@link Observable} stream of {@link FacilitatedTransaction} objects
+     * @return An {@link Observable} stream of {@link ContactTransactionModel} objects
      */
     @SuppressWarnings("Convert2streamapi")
-    public Observable<FacilitatedTransaction> getUnfulfilledFacilitatedTransactions() {
+    public Observable<ContactTransactionModel> getUnfulfilledFacilitatedTransactions() {
         return getContactList()
                 .toList()
                 .toObservable()
                 .flatMap(contacts -> {
-                    ArrayList<FacilitatedTransaction> transactions = new ArrayList<>();
+                    ArrayList<ContactTransactionModel> transactions = new ArrayList<>();
                     for (Contact contact : contacts) {
                         for (FacilitatedTransaction transaction : contact.getFacilitatedTransaction().values()) {
                             // If hash is null, transaction has not been completed
                             if (transaction.getTx_hash() == null || transaction.getTx_hash().isEmpty()) {
-                                transactions.add(transaction);
+                                transactions.add(new ContactTransactionModel(contact.getName(), transaction));
                             }
                         }
                     }

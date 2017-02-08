@@ -765,6 +765,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private void startSendFragmentFromIntent(String uri, String recipientId, String mdid, String fctxId, int accountPosition) {
         SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, null, accountPosition);
         replaceFragmentWithAnimation(sendFragment);
+        binding.bottomNavigation.restoreBottomNavigation();
     }
 
     private interface OnBalanceFragmentAddedCallback {

@@ -28,7 +28,8 @@ import javax.inject.Inject;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.contacts.FctxDateComparator;
+import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
+import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -371,7 +372,7 @@ public class BalanceViewModel extends BaseViewModel {
                                     dataListener.showFctxRequiringAttention(getNumberOfFctxRequiringAttention(transactions));
 
                                     if (!transactions.isEmpty()) {
-                                        Collections.sort(transactions, new FctxDateComparator());
+                                        Collections.sort(transactions, new ContactTransactionDateComparator());
                                         Collections.reverse(transactions);
                                         displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction));
                                         displayList.addAll(1, transactions);
@@ -575,9 +576,10 @@ public class BalanceViewModel extends BaseViewModel {
         return payloadManager.getPayload().getHdWallet().getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
-    private int getNumberOfFctxRequiringAttention(List<FacilitatedTransaction> facilitatedTransactions) {
+    private int getNumberOfFctxRequiringAttention(List<ContactTransactionModel> facilitatedTransactions) {
         int value = 0;
-        for (FacilitatedTransaction transaction : facilitatedTransactions) {
+        for (ContactTransactionModel transactionModel : facilitatedTransactions) {
+            FacilitatedTransaction transaction = transactionModel.getFacilitatedTransaction();
             if (transaction.getState() != null
                     && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
                     && transaction.getRole() != null

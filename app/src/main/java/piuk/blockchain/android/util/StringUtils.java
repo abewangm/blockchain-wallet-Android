@@ -6,17 +6,21 @@ import android.support.annotation.StringRes;
 
 public class StringUtils {
 
-    private Context mContext;
+    private Context context;
 
     public StringUtils(Context context) {
-        mContext = context;
+        this.context = context;
     }
 
     public String getString(@StringRes int stringId) {
-        return mContext.getString(stringId);
+        return context.getString(stringId);
     }
 
     public String getQuantityString(@PluralsRes int pluralId, int size) {
-        return mContext.getResources().getQuantityString(pluralId, size, size);
+        return context.getResources().getQuantityString(pluralId, size, size);
+    }
+
+    public String getFormattedString(@StringRes int stringId, Object... formatArgs) {
+        return context.getResources().getString(stringId, formatArgs);
     }
 }

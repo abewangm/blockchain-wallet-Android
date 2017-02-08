@@ -72,18 +72,6 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
         binding.buttonDelete.setOnClickListener(v -> viewModel.onDeleteContactClicked());
         binding.buttonRename.setOnClickListener(v -> viewModel.onRenameContactClicked());
 
-        String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
-
-        transactionAdapter = new ContactTransactionAdapter(new ArrayList<>(),
-                new StringUtils(getActivity()),
-                viewModel.getPrefsUtil(),
-                lastPrice);
-        transactionAdapter.setClickListener(id -> viewModel.onTransactionClicked(id));
-
-        binding.recyclerView.setAdapter(transactionAdapter);
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
         viewModel.onViewReady();
     }
 
@@ -130,7 +118,11 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
     }
 
     @Override
-    public void onTransactionsUpdated(List<FacilitatedTransaction> transactions) {
+    public void onTransactionsUpdated(List<FacilitatedTransaction> transactions, String contactName) {
+        if (transactionAdapter == null) {
+            setUpAdapter(contactName);
+        }
+
         transactionAdapter.onTransactionsUpdated(transactions);
         if (!transactions.isEmpty()) {
             binding.recyclerView.setVisibility(View.VISIBLE);
@@ -139,6 +131,22 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
             binding.recyclerView.setVisibility(View.GONE);
             binding.layoutNoTransactions.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void setUpAdapter(String contactName) {
+        String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
+
+        transactionAdapter = new ContactTransactionAdapter(
+                new ArrayList<>(),
+                contactName,
+                new StringUtils(getActivity()),
+                viewModel.getPrefsUtil(),
+                lastPrice);
+        transactionAdapter.setClickListener(id -> viewModel.onTransactionClicked(id));
+
+        binding.recyclerView.setAdapter(transactionAdapter);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
     @Override

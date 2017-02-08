@@ -621,10 +621,6 @@
     <string name="contacts_broadcasting_payment">We\'re just informing your contact that you\'ve sent them some bitcoin, please wait.</string>
     <string name="contacts_payment_sent_success">Payment sent! We\'ve notified your contact to let them know that you\'ve completed the transaction.</string>
     <string name="contacts_payment_sent_failed_message">There was an error notifying your contact that you have sent them a payment. Please check your connection and try again.</string>
-    <string name="contacts_waiting_for_payment_title">Waiting for payment</string>
-    <string name="contacts_waiting_for_payment_send_title">Ready to send payment</string>
-    <string name="contacts_waiting_for_address_title">Waiting for address</string>
-    <string name="contacts_waiting_for_address_send_title">Ready to send address</string>
     <string name="contacts_register_nodes_failure">We couldn\'t connect you to the contacts service. Please retry to enable full functionality.</string>
     <string name="contacts_too_much_sent">Looks like you sent more bitcoin than was requested. You can request some back from your contact if you wish. We have not marked the payment as complete.</string>
     <string name="contacts_too_little_sent">Looks like you sent less bitcoin than was requested. Your contact will still receive the bitcoin you sent, but we have not marked the payment as complete.</string>
@@ -633,6 +629,13 @@
     <string name="contacts_transaction_history">Transaction History</string>
     <string name="contacts_request_money_receive">Send request to contact</string>
     <string name="contacts_no_confirmed_contacts_found">No confirmed contacts found!</string>
+    <!-- CONTACTS PENDING TRANSACTION STRINGS -->
+    <string name="contacts_sending_to_contact_ready_to_send">Sending %1$s to %2$s\nReady to send</string>
+    <string name="contacts_sending_to_contact_waiting">Sending %1$s to %2$s\nWaiting for %2$s to accept</string>
+    <string name="contacts_requesting_from_contact_waiting_for_payment">Requested %1$s from %2$s\nWaiting for payment</string>
+    <string name="contacts_requesting_from_contact_waiting_to_accept">Requested %1$s from %2$s\nWaiting for %2$s to accept</string>
+    <string name="contacts_send_complete">Sent %1$s to %2$s</string>
+    <string name="contacts_receive_complete">Received %1$s from %2$s</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>
