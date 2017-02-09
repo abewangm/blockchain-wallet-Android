@@ -96,6 +96,8 @@ public class BalanceViewModel extends BaseViewModel {
         void dismissProgressDialog();
 
         void showFctxRequiringAttention(int number);
+
+        void showDeleteFacilitatedTransactionDialog(String fctxId);
     }
 
     public BalanceViewModel(DataListener dataListener) {
@@ -386,7 +388,7 @@ public class BalanceViewModel extends BaseViewModel {
         compositeDisposable.add(
                 contactsDataManager.getContactFromFctxId(fctxId)
                         .subscribe(contact -> {
-                            FacilitatedTransaction transaction = contact.getFacilitatedTransaction().get(fctxId);
+                            FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
 
                             if (transaction == null) {
                                 dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
@@ -442,15 +444,32 @@ public class BalanceViewModel extends BaseViewModel {
                         }, throwable -> dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)));
     }
 
+    void onPendingTransactionLongClicked(String fctxId) {
+        dataListener.showDeleteFacilitatedTransactionDialog(fctxId);
+    }
+
+    void confirmDeleteFacilitatedTransaction(String fctxId) {
+        compositeDisposable.add(
+                contactsDataManager.getContactFromFctxId(fctxId)
+                        .flatMapCompletable(contact -> contactsDataManager.deleteFacilitatedTransaction(contact.getMdid(), fctxId))
+                        .doOnError(throwable -> contactsDataManager.fetchContacts())
+                        .subscribe(
+                                () -> {
+                                    updateFacilitatedTransactions();
+                                    dataListener.showToast(R.string.contacts_pending_transaction_delete_success, ToastCustom.TYPE_OK);
+                                },
+                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_delete_failure, ToastCustom.TYPE_ERROR)));
+    }
+
     void onAccountChosen(int accountPosition, String fctxId) {
         dataListener.showProgressDialog();
         compositeDisposable.add(
                 contactsDataManager.getContactFromFctxId(fctxId)
                         .subscribe(contact -> {
-                            FacilitatedTransaction transaction = contact.getFacilitatedTransaction().get(fctxId);
+                            FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
 
                             PaymentRequest paymentRequest = new PaymentRequest();
-                            paymentRequest.setIntended_amount(transaction.getIntended_amount());
+                            paymentRequest.setIntended_amount(transaction.getIntendedAmount());
                             paymentRequest.setId(fctxId);
 
                             compositeDisposable.add(

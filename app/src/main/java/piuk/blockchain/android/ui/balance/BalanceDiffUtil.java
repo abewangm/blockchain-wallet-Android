@@ -55,15 +55,15 @@ class BalanceDiffUtil extends DiffUtil.Callback {
                         // Contact Name
                         oldContactTxModel.getContactName().equals(newContactTxModel.getContactName())
                                 // Amount
-                                && oldFctx.getIntended_amount() == newFctx.getIntended_amount()
+                                && oldFctx.getIntendedAmount() == newFctx.getIntendedAmount()
                                 // Created
                                 && oldFctx.getCreated() == newFctx.getCreated()
                                 // ID
                                 && (oldFctx.getId() != null ? oldFctx.getId() : "")
                                 .equals((newFctx.getId() != null ? newFctx.getId() : ""))
                                 // Hash
-                                && (oldFctx.getTx_hash() != null ? oldFctx.getTx_hash() : "")
-                                .equals((newFctx.getTx_hash() != null ? newFctx.getTx_hash() : ""))
+                                && (oldFctx.getTxHash() != null ? oldFctx.getTxHash() : "")
+                                .equals((newFctx.getTxHash() != null ? newFctx.getTxHash() : ""))
                                 // Role
                                 && (oldFctx.getRole() != null ? oldFctx.getRole() : "")
                                 .equals((newFctx.getRole() != null ? newFctx.getRole() : ""))

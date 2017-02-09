@@ -75,6 +75,8 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
         void showTransactionDetail(String txHash);
 
         void showSendAddressDialog(String fctxId);
+
+        void showDeleteFacilitatedTransactionDialog(String fctxId);
     }
 
     ContactDetailFragmentViewModel(DataListener dataListener) {
@@ -99,7 +101,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
                             .doOnNext(contact -> {
                                 this.contact = contact;
                                 dataListener.updateContactName(contact.getName());
-                                sortAndUpdateTransactions(contact.getFacilitatedTransaction().values());
+                                sortAndUpdateTransactions(contact.getFacilitatedTransactions().values());
                             })
                             // Contact not found, quit page
                             .doOnError(throwable -> showErrorAndQuitPage())
@@ -107,7 +109,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
                             .flatMapCompletable(contact -> contactsDataManager.fetchContacts())
                             .subscribe(
                                     // Update with FacilitatedTransactions, UI handles diff
-                                    () -> sortAndUpdateTransactions(contact.getFacilitatedTransaction().values()),
+                                    () -> sortAndUpdateTransactions(contact.getFacilitatedTransactions().values()),
                                     // Show error if updating contacts failed
                                     throwable -> dataListener.showToast(R.string.contacts_digesting_messages_failed, ToastCustom.TYPE_ERROR)));
         } else {
@@ -162,7 +164,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
     }
 
     void onTransactionClicked(String id) {
-        FacilitatedTransaction transaction = contact.getFacilitatedTransaction().get(id);
+        FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(id);
 
         if (transaction == null) {
             dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
@@ -184,7 +186,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
 
                 // Payment sent, show detail regardless of role
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
-                dataListener.showTransactionDetail(transaction.getTx_hash());
+                dataListener.showTransactionDetail(transaction.getTxHash());
 
                 // Received payment request, need to send address to sender
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
@@ -221,12 +223,29 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
         }
     }
 
+    void onTransactionLongClicked(String fctxId) {
+        dataListener.showDeleteFacilitatedTransactionDialog(fctxId);
+    }
+
+    void confirmDeleteFacilitatedTransaction(String fctxId) {
+        compositeDisposable.add(
+                contactsDataManager.getContactFromFctxId(fctxId)
+                        .flatMapCompletable(contact -> contactsDataManager.deleteFacilitatedTransaction(contact.getMdid(), fctxId))
+                        .doOnError(throwable -> contactsDataManager.fetchContacts())
+                        .subscribe(
+                                () -> {
+                                    onViewReady();
+                                    dataListener.showToast(R.string.contacts_pending_transaction_delete_success, ToastCustom.TYPE_OK);
+                                },
+                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_delete_failure, ToastCustom.TYPE_ERROR)));
+    }
+
     void onAccountChosen(int accountPosition, String fctxId) {
         dataListener.showProgressDialog();
-        FacilitatedTransaction transaction = contact.getFacilitatedTransaction().get(fctxId);
+        FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
 
         PaymentRequest paymentRequest = new PaymentRequest();
-        paymentRequest.setIntended_amount(transaction.getIntended_amount());
+        paymentRequest.setIntended_amount(transaction.getIntendedAmount());
         paymentRequest.setId(fctxId);
 
         compositeDisposable.add(

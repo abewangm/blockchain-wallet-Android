@@ -109,14 +109,19 @@ class BalanceListAdapter extends RecyclerView.Adapter {
             if (listClickListener != null) listClickListener.onFctxClicked(transaction.getId());
         });
 
+        holder.itemView.setOnLongClickListener(view -> {
+            if (listClickListener != null) listClickListener.onFctxLongClicked(transaction.getId());
+            return true;
+        });
+
         fctxViewHolder.indicator.setVisibility(View.GONE);
         fctxViewHolder.title.setTextColor(ContextCompat.getColor(fctxViewHolder.title.getContext(), R.color.black));
 
-        double btcBalance = transaction.getIntended_amount() / 1e8;
+        double btcBalance = transaction.getIntendedAmount() / 1e8;
         double fiatBalance = btcExchangeRate * btcBalance;
 
         String fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        Spannable amountSpannable = getDisplaySpannable(transaction.getIntended_amount(), fiatBalance, fiatString);
+        Spannable amountSpannable = getDisplaySpannable(transaction.getIntendedAmount(), fiatBalance, fiatString);
 
         if (transaction.getState() != null
                 && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
@@ -260,12 +265,18 @@ class BalanceListAdapter extends RecyclerView.Adapter {
             spannable = Spannable.Factory.getInstance().newSpannable(
                     monetaryUtil.getDisplayAmountWithFormatting(Math.abs(btcAmount)) + " " + getDisplayUnits());
             spannable.setSpan(
-                    new RelativeSizeSpan(0.67f), spannable.length() - getDisplayUnits().length(), spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    new RelativeSizeSpan(0.67f),
+                    spannable.length() - getDisplayUnits().length(),
+                    spannable.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {
             spannable = Spannable.Factory.getInstance().newSpannable(
                     monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatAmount)) + " " + fiatString);
             spannable.setSpan(
-                    new RelativeSizeSpan(0.67f), spannable.length() - 3, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    new RelativeSizeSpan(0.67f),
+                    spannable.length() - 3,
+                    spannable.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         return spannable;
     }
@@ -339,6 +350,8 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         void onValueClicked(boolean isBtc);
 
         void onFctxClicked(String fctxId);
+
+        void onFctxLongClicked(String fctxId);
     }
 
     private static class TxViewHolder extends RecyclerView.ViewHolder {

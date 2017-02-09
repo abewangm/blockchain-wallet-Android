@@ -319,4 +319,23 @@ public class ContactsService {
         });
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // FACILITATED TRANSACTIONS
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Deletes a {@link FacilitatedTransaction} object from a {@link Contact} and then syncs the
+     * Contact list with the server.
+     *
+     * @param mdid   The Contact's MDID
+     * @param fctxId The FacilitatedTransaction's ID
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable deleteFacilitatedTransaction(String mdid, String fctxId) {
+        return Completable.fromCallable(() -> {
+            contacts.deleteFacilitatedTransaction(mdid, fctxId);
+            return Void.TYPE;
+        });
+    }
+
 }

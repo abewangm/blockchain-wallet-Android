@@ -629,6 +629,9 @@
     <string name="contacts_transaction_history">Transaction History</string>
     <string name="contacts_request_money_receive">Send request to contact</string>
     <string name="contacts_no_confirmed_contacts_found">No confirmed contacts found!</string>
+    <string name="contacts_delete_pending_transaction">Are you sure you want to delete this pending transaction? Please note this will not delete the request from your contact\'s device. No bitcoin will be lost.</string>
+    <string name="contacts_pending_transaction_delete_success">Pending transaction successfully deleted</string>
+    <string name="contacts_pending_transaction_delete_failure">Pending transaction deletion failed</string>
     <!-- CONTACTS PENDING TRANSACTION STRINGS -->
     <string name="contacts_sending_to_contact_ready_to_send">Sending %1$s to %2$s\nReady to send</string>
     <string name="contacts_sending_to_contact_waiting">Sending %1$s to %2$s\nWaiting for %2$s to accept</string>

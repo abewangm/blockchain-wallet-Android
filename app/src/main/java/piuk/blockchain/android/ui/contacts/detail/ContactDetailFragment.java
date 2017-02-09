@@ -32,14 +32,15 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.ViewUtils;
+import piuk.blockchain.android.util.annotations.Thunk;
 
 
 public class ContactDetailFragment extends Fragment implements ContactDetailFragmentViewModel.DataListener {
 
     private static final String ARGUMENT_CONTACT_ID = "contact_id";
 
+    @Thunk ContactDetailFragmentViewModel viewModel;
     private FragmentContactDetailBinding binding;
-    private ContactDetailFragmentViewModel viewModel;
     private MaterialProgressDialog progressDialog;
     private ContactTransactionAdapter transactionAdapter;
     private OnFragmentInteractionListener listener;
@@ -118,6 +119,17 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
     }
 
     @Override
+    public void showDeleteFacilitatedTransactionDialog(String fctxId) {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_delete_pending_transaction)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.confirmDeleteFacilitatedTransaction(fctxId))
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
+                .show();
+    }
+
+    @Override
     public void onTransactionsUpdated(List<FacilitatedTransaction> transactions, String contactName) {
         if (transactionAdapter == null) {
             setUpAdapter(contactName);
@@ -143,11 +155,23 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
                 new StringUtils(getActivity()),
                 viewModel.getPrefsUtil(),
                 lastPrice);
-        transactionAdapter.setClickListener(id -> viewModel.onTransactionClicked(id));
+        transactionAdapter.setClickListener(new ContactTransactionAdapter.TransactionClickListener() {
+            @Override
+            public void onClick(String fctxId) {
+                viewModel.onTransactionClicked(fctxId);
+            }
+
+            @Override
+            public void onLongClick(String fctxId) {
+                viewModel.onTransactionLongClicked(fctxId);
+            }
+        });
 
         binding.recyclerView.setAdapter(transactionAdapter);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
+
+
 
     @Override
     public void showProgressDialog() {

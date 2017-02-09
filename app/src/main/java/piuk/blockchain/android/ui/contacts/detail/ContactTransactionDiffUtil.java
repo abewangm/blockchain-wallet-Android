@@ -43,11 +43,11 @@ public class ContactTransactionDiffUtil extends DiffUtil.Callback {
                 .equals(newContact.getState() != null ? newContact.getState() : "")
                 && (oldContact.getAddress() != null ? oldContact.getAddress() : "")
                 .equals(newContact.getAddress() != null ? newContact.getAddress() : "")
-                && (oldContact.getTx_hash() != null ? oldContact.getTx_hash() : "")
-                .equals(newContact.getTx_hash() != null ? newContact.getTx_hash() : "")
+                && (oldContact.getTxHash() != null ? oldContact.getTxHash() : "")
+                .equals(newContact.getTxHash() != null ? newContact.getTxHash() : "")
                 && (oldContact.getRole() != null ? oldContact.getRole() : "")
                 .equals(newContact.getRole() != null ? newContact.getRole() : "")
-                && (oldContact.getIntended_amount() == newContact.getIntended_amount());
+                && (oldContact.getIntendedAmount() == newContact.getIntendedAmount());
     }
 
     @Nullable

@@ -67,14 +67,19 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
             if (listener != null) listener.onClick(transaction.getId());
         });
 
+        holder.itemView.setOnLongClickListener(view -> {
+            if (listener != null ) listener.onLongClick(transaction.getId());
+            return true;
+        });
+
         holder.indicator.setVisibility(View.GONE);
         holder.title.setTextColor(ContextCompat.getColor(holder.title.getContext(), R.color.black));
 
-        double btcBalance = transaction.getIntended_amount() / 1e8;
+        double btcBalance = transaction.getIntendedAmount() / 1e8;
         double fiatBalance = lastPrice * btcBalance;
 
         String fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        Spannable amountSpannable = getDisplaySpannable(transaction.getIntended_amount(), fiatBalance, fiatString);
+        Spannable amountSpannable = getDisplaySpannable(transaction.getIntendedAmount(), fiatBalance, fiatString);
 
         if (transaction.getState() != null
                 && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
@@ -172,6 +177,9 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
                         holder.title.getContext(),
                         R.color.blockchain_receive_green));
             }
+
+            // Can't delete completed transactions
+            holder.itemView.setOnLongClickListener(null);
         }
 
         holder.subtitle.setText(transaction.getNote());
@@ -187,7 +195,8 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
     }
 
     void onTransactionsUpdated(List<FacilitatedTransaction> transactions) {
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new ContactTransactionDiffUtil(facilitatedTransactions, transactions));
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
+                new ContactTransactionDiffUtil(facilitatedTransactions, transactions));
         facilitatedTransactions = transactions;
         diffResult.dispatchUpdatesTo(this);
     }
@@ -202,12 +211,18 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
             spannable = Spannable.Factory.getInstance().newSpannable(
                     monetaryUtil.getDisplayAmountWithFormatting(Math.abs(btcAmount)) + " " + getDisplayUnits());
             spannable.setSpan(
-                    new RelativeSizeSpan(0.67f), spannable.length() - getDisplayUnits().length(), spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    new RelativeSizeSpan(0.67f),
+                    spannable.length() - getDisplayUnits().length(),
+                    spannable.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {
             spannable = Spannable.Factory.getInstance().newSpannable(
                     monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatAmount)) + " " + fiatString);
             spannable.setSpan(
-                    new RelativeSizeSpan(0.67f), spannable.length() - 3, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    new RelativeSizeSpan(0.67f),
+                    spannable.length() - 3,
+                    spannable.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         return spannable;
     }
@@ -228,7 +243,9 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
 
     interface TransactionClickListener {
 
-        void onClick(String id);
+        void onClick(String fctxId);
+
+        void onLongClick(String fctxId);
 
     }
 }

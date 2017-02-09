@@ -130,15 +130,15 @@ public class MainViewModel extends BaseViewModel {
                         // Find contact by MDID
                         .filter(ContactsPredicates.filterByMdid(mdid))
                         // Get FacilitatedTransaction from HashMap
-                        .flatMap(contact -> Observable.just(contact.getFacilitatedTransaction().get(facilitatedTxId)))
+                        .flatMap(contact -> Observable.just(contact.getFacilitatedTransactions().get(facilitatedTxId)))
                         // Check the payment value was appropriate
                         .flatMapCompletable(transaction -> {
                             // Too much sent
-                            if (transactionValue > transaction.getIntended_amount()) {
+                            if (transactionValue > transaction.getIntendedAmount()) {
                                 dataListener.showPaymentMismatchDialog(R.string.contacts_too_much_sent);
                                 return Completable.complete();
                                 // Too little sent
-                            } else if (transactionValue < transaction.getIntended_amount()) {
+                            } else if (transactionValue < transaction.getIntendedAmount()) {
                                 dataListener.showPaymentMismatchDialog(R.string.contacts_too_little_sent);
                                 return Completable.complete();
                                 // Correct amount sent

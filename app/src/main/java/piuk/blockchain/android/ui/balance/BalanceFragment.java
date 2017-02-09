@@ -352,6 +352,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             public void onFctxClicked(String fctxId) {
                 viewModel.onPendingTransactionClicked(fctxId);
             }
+
+            @Override
+            public void onFctxLongClicked(String fctxId) {
+                viewModel.onPendingTransactionLongClicked(fctxId);
+            }
         });
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         binding.rvTransactions.setHasFixedSize(true);
@@ -518,6 +523,17 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_waiting_for_address_message)
                 .setPositiveButton(android.R.string.ok, null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showDeleteFacilitatedTransactionDialog(String fctxId) {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_delete_pending_transaction)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.confirmDeleteFacilitatedTransaction(fctxId))
+                .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
     }
