@@ -232,11 +232,9 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
                 contactsDataManager.getContactFromFctxId(fctxId)
                         .flatMapCompletable(contact -> contactsDataManager.deleteFacilitatedTransaction(contact.getMdid(), fctxId))
                         .doOnError(throwable -> contactsDataManager.fetchContacts())
+                        .doAfterTerminate(this::onViewReady)
                         .subscribe(
-                                () -> {
-                                    onViewReady();
-                                    dataListener.showToast(R.string.contacts_pending_transaction_delete_success, ToastCustom.TYPE_OK);
-                                },
+                                () -> dataListener.showToast(R.string.contacts_pending_transaction_delete_success, ToastCustom.TYPE_OK),
                                 throwable -> dataListener.showToast(R.string.contacts_pending_transaction_delete_failure, ToastCustom.TYPE_ERROR)));
     }
 
