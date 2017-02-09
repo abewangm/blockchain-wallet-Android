@@ -9,7 +9,7 @@ import piuk.blockchain.android.util.ListUtil;
 
 public abstract class ListStore<T> {
 
-    List<T> data;
+    private List<T> data;
 
     public ListStore() {
         data = new ArrayList<>();

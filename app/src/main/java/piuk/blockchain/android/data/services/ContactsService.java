@@ -124,10 +124,21 @@ public class ContactsService {
     }
 
     /**
-     * Removes a contact from the locally stored Contacts list. Saves updated list to server
+     * Removes a contact from the locally stored Contacts list. Saves updated list to server.
      */
     public Completable removeContact(Contact contact) {
         return Completable.fromAction(() -> contacts.removeContact(contact));
+    }
+
+    /**
+     * Renames a {@link Contact} and then saves the changes to the server.
+     *
+     * @param contactId The ID of the Contact you wish to update
+     * @param name      The new name for the Contact
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable renameContact(String contactId, String name) {
+        return Completable.fromAction(() -> contacts.renameContact(contactId, name));
     }
 
     ///////////////////////////////////////////////////////////////////////////

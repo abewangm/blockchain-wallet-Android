@@ -21,6 +21,7 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.services.ContactsService;
 import piuk.blockchain.android.data.services.NotificationService;
+import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
@@ -59,10 +60,14 @@ public class ApiModule {
                 new NotificationService(new Notifications()), accessState, payloadManager, prefsUtil);
     }
 
+    // TODO: 09/02/2017 This should be moved to DataManagerModule eventually
     @Provides
     @Singleton
     protected ContactsDataManager provideContactsManager(PayloadManager payloadManager) {
-        return new ContactsDataManager(new ContactsService(new Contacts()), payloadManager);
+        return new ContactsDataManager(
+                new ContactsService(new Contacts()),
+                payloadManager,
+                new PendingTransactionListStore());
     }
 
     @Provides

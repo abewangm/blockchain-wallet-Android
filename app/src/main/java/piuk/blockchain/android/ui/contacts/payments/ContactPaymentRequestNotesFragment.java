@@ -72,7 +72,7 @@ public class ContactPaymentRequestNotesFragment extends Fragment implements
         setSummary(paymentRequestType, name);
         setHint(paymentRequestType);
         binding.editTextNote.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
+            if (hasFocus || !binding.editTextNote.getText().toString().isEmpty()) {
                 binding.inputLayoutNote.setHint(getString(R.string.contacts_payment_request_note_hint));
             } else {
                 setHint(paymentRequestType);

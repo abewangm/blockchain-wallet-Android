@@ -35,11 +35,11 @@ import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 
-public class ContactDetailFragment extends Fragment implements ContactDetailFragmentViewModel.DataListener {
+public class ContactDetailFragment extends Fragment implements ContactDetailViewModel.DataListener {
 
     private static final String ARGUMENT_CONTACT_ID = "contact_id";
 
-    @Thunk ContactDetailFragmentViewModel viewModel;
+    @Thunk ContactDetailViewModel viewModel;
     private FragmentContactDetailBinding binding;
     private MaterialProgressDialog progressDialog;
     private ContactTransactionAdapter transactionAdapter;
@@ -68,7 +68,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ContactDetailFragmentViewModel(this);
+        viewModel = new ContactDetailViewModel(this);
 
         binding.buttonDelete.setOnClickListener(v -> viewModel.onDeleteContactClicked());
         binding.buttonRename.setOnClickListener(v -> viewModel.onRenameContactClicked());
@@ -270,6 +270,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailFrag
     public void updateContactName(String name) {
         ((ContactDetailActivity) getActivity()).getToolbar().setTitle(name);
         binding.textviewTransactionListHeader.setText(getString(R.string.contacts_detail_transactions, name));
+        if (transactionAdapter != null) transactionAdapter.onNameUpdated(name);
     }
 
     @Override

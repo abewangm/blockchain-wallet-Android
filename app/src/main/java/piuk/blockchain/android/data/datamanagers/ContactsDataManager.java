@@ -22,6 +22,7 @@ import io.reactivex.subjects.PublishSubject;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.ContactsService;
+import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 
 /**
  * A manager for handling all Metadata/Shared Metadata/Contacts based operations. Using this class
@@ -47,15 +48,19 @@ public class ContactsDataManager {
 
     private ContactsService contactsService;
     private PayloadManager payloadManager;
+    private PendingTransactionListStore pendingTransactionListStore;
     private static PublishSubject<ContactsEvent> serviceInitSubject = PublishSubject.create();
 
     public enum ContactsEvent {
         INIT
     }
 
-    public ContactsDataManager(ContactsService contactsService, PayloadManager payloadManager) {
+    public ContactsDataManager(ContactsService contactsService,
+                               PayloadManager payloadManager,
+                               PendingTransactionListStore pendingTransactionListStore) {
         this.contactsService = contactsService;
         this.payloadManager = payloadManager;
+        this.pendingTransactionListStore = pendingTransactionListStore;
     }
 
     /**
@@ -283,6 +288,18 @@ public class ContactsDataManager {
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
+    /**
+     * Renames a {@link Contact} and then saves the changes to the server.
+     *
+     * @param contactId The ID of the Contact you wish to update
+     * @param name      The new name for the Contact
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable renameContact(String contactId, String name) {
+        return contactsService.renameContact(contactId, name)
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // INVITATIONS
     ///////////////////////////////////////////////////////////////////////////
@@ -461,13 +478,14 @@ public class ContactsDataManager {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Returns a stream of {@link ContactTransactionModel} objects where the transaction is yet to
-     * be completed, ie the hash is empty.
+     * Finds and returns a stream of {@link ContactTransactionModel} objects and stores them locally
+     * where the transaction is yet to be completed, ie the hash is empty.
      *
      * @return An {@link Observable} stream of {@link ContactTransactionModel} objects
      */
     @SuppressWarnings("Convert2streamapi")
-    public Observable<ContactTransactionModel> getUnfulfilledFacilitatedTransactions() {
+    public Observable<ContactTransactionModel> refreshFacilitatedTransactions() {
+        pendingTransactionListStore.clearList();
         return getContactList()
                 .toList()
                 .toObservable()
@@ -477,12 +495,24 @@ public class ContactsDataManager {
                         for (FacilitatedTransaction transaction : contact.getFacilitatedTransactions().values()) {
                             // If hash is null, transaction has not been completed
                             if (transaction.getTxHash() == null || transaction.getTxHash().isEmpty()) {
-                                transactions.add(new ContactTransactionModel(contact.getName(), transaction));
+                                ContactTransactionModel model = new ContactTransactionModel(contact.getName(), transaction);
+                                pendingTransactionListStore.insertTransaction(model);
+                                transactions.add(model);
                             }
                         }
                     }
                     return Observable.fromIterable(transactions);
                 });
+    }
+
+    /**
+     * Returns a stream of {@link ContactTransactionModel} objects from disk where the transaction
+     * is yet to be completed, ie the hash is empty.
+     *
+     * @return An {@link Observable} stream of {@link ContactTransactionModel} objects
+     */
+    public Observable<ContactTransactionModel> getFacilitatedTransactions() {
+        return Observable.fromIterable(pendingTransactionListStore.getList());
     }
 
     /**

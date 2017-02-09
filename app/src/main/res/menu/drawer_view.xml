@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:id="@+id/submenu_1">
         <item
@@ -21,8 +20,7 @@
         <item
             android:id="@+id/nav_contacts"
             android:icon="@drawable/ic_person_grey600_24dp"
-            android:title="@string/contacts_title"
-            app:actionLayout="@layout/menu_contacts_indicator" />
+            android:title="@string/contacts_title" />
 
         <item
             android:id="@+id/nav_map"

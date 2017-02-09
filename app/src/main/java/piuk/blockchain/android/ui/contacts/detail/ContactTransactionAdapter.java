@@ -201,6 +201,11 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
         diffResult.dispatchUpdatesTo(this);
     }
 
+    void onNameUpdated(String name) {
+        contactName = name;
+        notifyDataSetChanged();
+    }
+
     private String getDisplayUnits() {
         return (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
     }

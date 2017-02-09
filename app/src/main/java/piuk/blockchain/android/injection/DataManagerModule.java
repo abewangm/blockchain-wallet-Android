@@ -133,9 +133,9 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager
-                                                                payloadManager, MultiAddrFactory
-                                                                multiAddrFactory, PrefsUtil prefsUtil) {
+    protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager,
+                                                               MultiAddrFactory multiAddrFactory,
+                                                               PrefsUtil prefsUtil) {
         return new SwipeToReceiveHelper(payloadManager, multiAddrFactory, prefsUtil);
     }
 

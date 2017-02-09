@@ -238,12 +238,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     public void setMessagesCount(int messageCount) {
-        binding.navigationView.getMenu()
-                .findItem(R.id.nav_contacts)
-                .getActionView()
-                .findViewById(R.id.menu_icon_count)
-                .setVisibility(messageCount);
-
         if (messageCount > 0) {
             AHNotification notification = new AHNotification.Builder()
                     .setText(String.valueOf(messageCount))

@@ -152,7 +152,7 @@ public class BalanceViewModel extends BaseViewModel {
         }
 
         ContactsDataManager.getServiceInitSubject()
-                .subscribe(contactsEvent -> updateFacilitatedTransactions());
+                .subscribe(contactsEvent -> refreshFacilitatedTransactions());
     }
 
     @SuppressWarnings("Convert2streamapi")
@@ -297,7 +297,7 @@ public class BalanceViewModel extends BaseViewModel {
                         .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
                         .subscribe(() -> {
                             updateAccountList();
-                            updateFacilitatedTransactions();
+                            refreshFacilitatedTransactions();
                             updateBalanceAndTransactionList(null, dataListener.getSelectedItemPosition(), dataListener.isBtc());
                         }, throwable -> {
                             // No-op
@@ -353,35 +353,25 @@ public class BalanceViewModel extends BaseViewModel {
         }
     }
 
-    void updateFacilitatedTransactions() {
+    void refreshFacilitatedTransactions() {
         compositeDisposable.add(
                 contactsDataManager.fetchContacts()
                         .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
                         .toList()
-                        .flatMapObservable(contacts -> contactsDataManager.getUnfulfilledFacilitatedTransactions())
+                        .flatMapObservable(contacts -> contactsDataManager.refreshFacilitatedTransactions())
                         .toList()
                         .subscribe(
-                                transactions -> {
-                                    // Remove previous Pending Transactions
-                                    Iterator iterator = displayList.iterator();
-                                    while (iterator.hasNext()) {
-                                        Object element = iterator.next();
-                                        if (!(element instanceof Tx)) {
-                                            iterator.remove();
-                                        }
-                                    }
+                                this::handlePendingTransactions,
+                                Throwable::printStackTrace));
+    }
 
-                                    dataListener.showFctxRequiringAttention(getNumberOfFctxRequiringAttention(transactions));
-
-                                    if (!transactions.isEmpty()) {
-                                        Collections.sort(transactions, new ContactTransactionDateComparator());
-                                        Collections.reverse(transactions);
-                                        displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction));
-                                        displayList.addAll(1, transactions);
-                                        displayList.add(transactions.size() + 1, stringUtils.getString(R.string.contacts_transaction_history));
-                                        dataListener.onRefreshBalanceAndTransactions();
-                                    }
-                                }, Throwable::printStackTrace));
+    void getFacilitatedTransactions() {
+        compositeDisposable.add(
+                contactsDataManager.getFacilitatedTransactions()
+                        .toList()
+                        .subscribe(
+                                this::handlePendingTransactions,
+                                Throwable::printStackTrace));
     }
 
     void onPendingTransactionClicked(String fctxId) {
@@ -453,7 +443,7 @@ public class BalanceViewModel extends BaseViewModel {
                 contactsDataManager.getContactFromFctxId(fctxId)
                         .flatMapCompletable(contact -> contactsDataManager.deleteFacilitatedTransaction(contact.getMdid(), fctxId))
                         .doOnError(throwable -> contactsDataManager.fetchContacts())
-                        .doAfterTerminate(this::updateFacilitatedTransactions)
+                        .doAfterTerminate(this::refreshFacilitatedTransactions)
                         .subscribe(
                                 () -> dataListener.showToast(R.string.contacts_pending_transaction_delete_success, ToastCustom.TYPE_OK),
                                 throwable -> dataListener.showToast(R.string.contacts_pending_transaction_delete_failure, ToastCustom.TYPE_ERROR)));
@@ -467,7 +457,7 @@ public class BalanceViewModel extends BaseViewModel {
                             FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
 
                             PaymentRequest paymentRequest = new PaymentRequest();
-                            paymentRequest.setIntended_amount(transaction.getIntendedAmount());
+                            paymentRequest.setIntendedAmount(transaction.getIntendedAmount());
                             paymentRequest.setId(fctxId);
 
                             compositeDisposable.add(
@@ -612,6 +602,28 @@ public class BalanceViewModel extends BaseViewModel {
             }
         }
         return value;
+    }
+
+    private void handlePendingTransactions(List<ContactTransactionModel> transactions) {
+        // Remove previous Pending Transactions
+        Iterator iterator = displayList.iterator();
+        while (iterator.hasNext()) {
+            Object element = iterator.next();
+            if (!(element instanceof Tx)) {
+                iterator.remove();
+            }
+        }
+
+        dataListener.showFctxRequiringAttention(getNumberOfFctxRequiringAttention(transactions));
+
+        if (!transactions.isEmpty()) {
+            Collections.sort(transactions, new ContactTransactionDateComparator());
+            Collections.reverse(transactions);
+            displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction));
+            displayList.addAll(1, transactions);
+            displayList.add(transactions.size() + 1, stringUtils.getString(R.string.contacts_transaction_history));
+            dataListener.onRefreshBalanceAndTransactions();
+        }
     }
 
 }

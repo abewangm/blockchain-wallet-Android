@@ -34,9 +34,9 @@ import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_
 
 
 @SuppressWarnings("WeakerAccess")
-public class ContactDetailFragmentViewModel extends BaseViewModel {
+public class ContactDetailViewModel extends BaseViewModel {
 
-    private static final String TAG = ContactDetailFragmentViewModel.class.getSimpleName();
+    private static final String TAG = ContactDetailViewModel.class.getSimpleName();
 
     private DataListener dataListener;
     private Contact contact;
@@ -79,7 +79,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
         void showDeleteFacilitatedTransactionDialog(String fctxId);
     }
 
-    ContactDetailFragmentViewModel(DataListener dataListener) {
+    ContactDetailViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
     }
@@ -150,14 +150,13 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
         } else {
             dataListener.showProgressDialog();
 
-            contact.setName(name);
             compositeDisposable.add(
-                    contactsDataManager.saveContacts()
+                    contactsDataManager.renameContact(contact.getId(), name)
                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                             .subscribe(
                                     () -> {
                                         dataListener.updateContactName(name);
-                                        dataListener.showToast(R.string.contacts_rename_success, ToastCustom.TYPE_GENERAL);
+                                        dataListener.showToast(R.string.contacts_rename_success, ToastCustom.TYPE_OK);
                                     },
                                     throwable -> dataListener.showToast(R.string.contacts_rename_failed, ToastCustom.TYPE_ERROR)));
         }
@@ -243,7 +242,7 @@ public class ContactDetailFragmentViewModel extends BaseViewModel {
         FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
 
         PaymentRequest paymentRequest = new PaymentRequest();
-        paymentRequest.setIntended_amount(transaction.getIntendedAmount());
+        paymentRequest.setIntendedAmount(transaction.getIntendedAmount());
         paymentRequest.setId(fctxId);
 
         compositeDisposable.add(
