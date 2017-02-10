@@ -9,10 +9,12 @@ import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.transaction.Tx;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Completable;
@@ -46,10 +48,12 @@ import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 @SuppressWarnings({"WeakerAccess", "AnonymousInnerClassMayBeStatic"})
 public class ContactsDataManager {
 
+    private static PublishSubject<ContactsEvent> serviceInitSubject = PublishSubject.create();
+
     private ContactsService contactsService;
     private PayloadManager payloadManager;
     private PendingTransactionListStore pendingTransactionListStore;
-    private static PublishSubject<ContactsEvent> serviceInitSubject = PublishSubject.create();
+    private HashMap<String, String> contactsTransactionMap = new HashMap<>();
 
     public enum ContactsEvent {
         INIT
@@ -216,12 +220,27 @@ public class ContactsDataManager {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Fetches an updated version of the contacts list
+     * Fetches an updated version of the contacts list and parses {@link FacilitatedTransaction}
+     * objects into a map if completed.
      *
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
+    @SuppressWarnings("Convert2streamapi")
     public Completable fetchContacts() {
         return contactsService.fetchContacts()
+                .andThen(contactsService.getContactList())
+                .toList()
+                .doOnEvent((contacts, throwable) -> {
+                    contactsTransactionMap.clear();
+                    for (Contact contact : contacts) {
+                        for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
+                            if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
+                                contactsTransactionMap.put(tx.getTxHash(), contact.getName());
+                            }
+                        }
+                    }
+                })
+                .toCompletable()
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -551,4 +570,13 @@ public class ContactsDataManager {
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
+    /**
+     * Returns a Map of Contact names keyed to transaction hashes.
+     *
+     * @return A {@link HashMap} where the key is a {@link Tx#getHash()}, and the value is a {@link
+     * Contact#getName()}
+     */
+    public HashMap<String, String> getContactsTransactionMap() {
+        return contactsTransactionMap;
+    }
 }

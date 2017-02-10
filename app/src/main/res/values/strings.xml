@@ -639,6 +639,8 @@
     <string name="contacts_requesting_from_contact_waiting_to_accept">Requested %1$s from %2$s\nWaiting for %2$s to accept</string>
     <string name="contacts_send_complete">Sent %1$s to %2$s</string>
     <string name="contacts_receive_complete">Received %1$s from %2$s</string>
+    <string name="contacts_received">Received from %1$s</string>
+    <string name="contacts_sent">Sent to %1$s</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>

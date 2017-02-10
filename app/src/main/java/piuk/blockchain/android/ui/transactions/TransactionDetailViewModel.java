@@ -28,6 +28,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -52,6 +53,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     @Inject piuk.blockchain.android.util.StringUtils mStringUtils;
     @Inject TransactionListDataManager mTransactionListDataManager;
     @Inject ExchangeRateFactory mExchangeRateFactory;
+    @Inject ContactsDataManager mContactsDataManager;
 
     private double mBtcExchangeRate;
     private String mFiatType;
@@ -135,9 +137,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
                                 mDataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
                                 mDataListener.setDescription(description);
                             }
-                        }, throwable -> {
-                            mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-                        }));
+                        }, throwable -> mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
     }
 
     private void updateUiFromTransaction(Tx transaction) {
@@ -185,14 +185,22 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     ArrayList<RecipientModel> recipients = new ArrayList<>();
 
                     for (Map.Entry<String, Long> item : outputMap.entrySet()) {
+
                         RecipientModel recipientModel = new RecipientModel(
                                 mTransactionHelper.addressToLabel(item.getKey()),
                                 mMonetaryUtil.getDisplayAmountWithFormatting(item.getValue()),
                                 getDisplayUnits());
+
+                        if (mContactsDataManager.getContactsTransactionMap().containsKey(transaction.getHash())) {
+                            String contactName = mContactsDataManager.getContactsTransactionMap().get(transaction.getHash());
+                            recipientModel.setAddress(contactName);
+                        }
+
                         recipients.add(recipientModel);
                     }
 
                     setFee(result);
+
                     mDataListener.setToAddresses(recipients);
                     mDataListener.setTransactionValueFiat(value);
                     mDataListener.onDataLoaded();

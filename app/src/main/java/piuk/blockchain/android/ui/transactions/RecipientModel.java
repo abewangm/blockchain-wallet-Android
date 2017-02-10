@@ -2,25 +2,29 @@ package piuk.blockchain.android.ui.transactions;
 
 public class RecipientModel {
 
-    private String mAddress;
-    private String mValue;
-    private String mDisplayUnits;
+    private String address;
+    private String value;
+    private String displayUnits;
 
     RecipientModel(String address, String value, String displayUnits) {
-        mAddress = address;
-        mValue = value;
-        mDisplayUnits = displayUnits;
+        this.address = address;
+        this.value = value;
+        this.displayUnits = displayUnits;
     }
 
     public String getAddress() {
-        return mAddress;
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getValue() {
-        return mValue;
+        return value;
     }
 
     public String getDisplayUnits() {
-        return mDisplayUnits;
+        return displayUnits;
     }
 }

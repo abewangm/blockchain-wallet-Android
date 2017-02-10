@@ -32,6 +32,8 @@ import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
+import piuk.blockchain.android.data.notifications.FcmCallbackService;
+import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
@@ -153,6 +155,14 @@ public class BalanceViewModel extends BaseViewModel {
 
         ContactsDataManager.getServiceInitSubject()
                 .subscribe(contactsEvent -> refreshFacilitatedTransactions());
+
+        FcmCallbackService.getNotificationSubject()
+                .subscribe(notificationPayload -> {
+                    if (notificationPayload.getType() != null
+                            && notificationPayload.getType().equals(NotificationPayload.NotificationType.PAYMENT)) {
+                        refreshFacilitatedTransactions();
+                    }
+                });
     }
 
     @SuppressWarnings("Convert2streamapi")
@@ -288,6 +298,10 @@ public class BalanceViewModel extends BaseViewModel {
 
     List<Object> getTransactionList() {
         return displayList;
+    }
+
+    HashMap<String, String> getContactsTransactionMap() {
+        return contactsDataManager.getContactsTransactionMap();
     }
 
     void onTransactionListRefreshed() {

@@ -21,6 +21,7 @@ import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.transaction.Tx;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import piuk.blockchain.android.R;
@@ -45,8 +46,10 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     private double btcExchangeRate;
     private boolean isBtc;
     private BalanceListClickListener listClickListener;
+    private HashMap<String, String> contactsTransactionMap;
 
-    BalanceListAdapter(PrefsUtil prefsUtil,
+    BalanceListAdapter(HashMap<String, String> contactsTransactionMap,
+                       PrefsUtil prefsUtil,
                        MonetaryUtil monetaryUtil,
                        StringUtils stringUtils,
                        DateUtil dateUtil,
@@ -54,6 +57,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
                        boolean isBtc) {
 
         objects = new ArrayList<>();
+        this.contactsTransactionMap = contactsTransactionMap;
         this.prefsUtil = prefsUtil;
         this.monetaryUtil = monetaryUtil;
         this.stringUtils = stringUtils;
@@ -216,13 +220,28 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         String dirText = tx.getDirection();
         switch (dirText) {
             case MultiAddrFactory.MOVED:
-                txViewHolder.direction.setText(txViewHolder.direction.getContext().getResources().getString(R.string.MOVED));
+                txViewHolder.direction.setText(
+                        txViewHolder.direction.getContext().getString(R.string.MOVED));
                 break;
             case MultiAddrFactory.RECEIVED:
-                txViewHolder.direction.setText(txViewHolder.direction.getContext().getResources().getString(R.string.RECEIVED));
+                if (contactsTransactionMap.containsKey(tx.getHash())) {
+                    String contactName = contactsTransactionMap.get(tx.getHash());
+                    txViewHolder.direction.setText(
+                            txViewHolder.direction.getContext().getString(R.string.contacts_received, contactName));
+                } else {
+                    txViewHolder.direction.setText(
+                            txViewHolder.direction.getContext().getString(R.string.RECEIVED));
+                }
                 break;
             case MultiAddrFactory.SENT:
-                txViewHolder.direction.setText(txViewHolder.direction.getContext().getResources().getString(R.string.SENT));
+                if (contactsTransactionMap.containsKey(tx.getHash())) {
+                    String contactName = contactsTransactionMap.get(tx.getHash());
+                    txViewHolder.direction.setText(
+                            txViewHolder.direction.getContext().getString(R.string.contacts_sent, contactName));
+                } else {
+                    txViewHolder.direction.setText(
+                            txViewHolder.direction.getContext().getString(R.string.SENT));
+                }
                 break;
         }
 

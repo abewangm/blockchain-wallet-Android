@@ -330,6 +330,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
 
         transactionAdapter = new BalanceListAdapter(
+                viewModel.getContactsTransactionMap(),
                 viewModel.getPrefsUtil(),
                 viewModel.getMonetaryUtil(),
                 viewModel.stringUtils,
