@@ -25,9 +25,10 @@ public class EventLogHandler {
     public static final String URL_EVENT_TX_INPUT_FROM_PASTE = URL_EVENT_BASE + "wallet_android_tx_from_paste";
     public static final String URL_EVENT_TX_INPUT_FROM_URI = URL_EVENT_BASE + "wallet_android_tx_from_uri";
     public static final String URL_EVENT_TX_INPUT_FROM_DROPDOWN = URL_EVENT_BASE + "wallet_android_tx_from_dropdown";
+    public static final String URL_EVENT_TX_INPUT_FROM_CONTACTS = URL_EVENT_BASE + "wallet_android_tx_from_contacts";
 
-    PrefsUtil prefsUtil;
-    WebUtil webUtil;
+    private PrefsUtil prefsUtil;
+    private WebUtil webUtil;
 
     public EventLogHandler(PrefsUtil prefsUtil, WebUtil webUtil) {
         this.webUtil = webUtil;
@@ -54,7 +55,7 @@ public class EventLogHandler {
 
     private String getBoolean(boolean active) {
         if (active)
-            return  "1";
+            return "1";
         else
             return "0";
     }
@@ -68,10 +69,10 @@ public class EventLogHandler {
 
                         try {
                             JSONObject responseJson = new JSONObject(response);
-                            if(responseJson.has("success") && responseJson.getBoolean("success")) {
+                            if (responseJson.has("success") && responseJson.getBoolean("success")) {
                                 //success
                             } else {
-                                Log.e(TAG, "Log Event Failed: "+url);
+                                Log.e(TAG, "Log Event Failed: " + url);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -81,23 +82,22 @@ public class EventLogHandler {
     }
 
     private void logEventOnce(String key, String url) {
-
         if (!prefsUtil.getValue(key, false)) {
             sendEvent(url)
-                .subscribeOn(Schedulers.io())
-                .subscribe(response -> {
-                    if (response != null && FormatsUtil.getInstance().isValidJson(response)) {
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(response -> {
+                        if (response != null && FormatsUtil.getInstance().isValidJson(response)) {
 
-                        try {
-                            JSONObject responseJson = new JSONObject(response);
-                            if(responseJson.has("success") && responseJson.getBoolean("success")) {
-                                prefsUtil.setValue(key, true);
+                            try {
+                                JSONObject responseJson = new JSONObject(response);
+                                if (responseJson.has("success") && responseJson.getBoolean("success")) {
+                                    prefsUtil.setValue(key, true);
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
                         }
-                    }
-                }, Throwable::printStackTrace);
+                    }, Throwable::printStackTrace);
         }
     }
 

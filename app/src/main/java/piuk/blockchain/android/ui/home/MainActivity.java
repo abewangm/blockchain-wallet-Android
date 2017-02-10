@@ -67,6 +67,7 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
 import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
+import static piuk.blockchain.android.util.EventLogHandler.URL_EVENT_TX_INPUT_FROM_CONTACTS;
 
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.OnFragmentInteractionListener,
         MainViewModel.DataListener,
@@ -757,7 +758,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     private void startSendFragmentFromIntent(String uri, String recipientId, String mdid, String fctxId, int accountPosition) {
-        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, null, accountPosition);
+        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, URL_EVENT_TX_INPUT_FROM_CONTACTS, accountPosition);
         replaceFragmentWithAnimation(sendFragment);
         binding.bottomNavigation.restoreBottomNavigation();
     }
