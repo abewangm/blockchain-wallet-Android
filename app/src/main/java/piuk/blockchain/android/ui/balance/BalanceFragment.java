@@ -81,11 +81,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             if (intent.getAction().equals(ACTION_INTENT) && getActivity() != null) {
                 binding.swipeContainer.setRefreshing(true);
                 viewModel.updateAccountList();
+                viewModel.refreshFacilitatedTransactions();
                 viewModel.updateBalanceAndTransactionList(intent, accountSpinner.getSelectedItemPosition(), isBTC);
                 transactionAdapter.onTransactionsUpdated(viewModel.getTransactionList());
                 binding.swipeContainer.setRefreshing(false);
                 binding.rvTransactions.getAdapter().notifyDataSetChanged();
-                binding.rvTransactions.scrollToPosition(0);
                 // Check backup status on receiving funds
                 viewModel.onViewReady();
                 binding.rvTransactions.scrollToPosition(0);
@@ -330,7 +330,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
 
         transactionAdapter = new BalanceListAdapter(
-                viewModel.getTransactionList(),
                 viewModel.getPrefsUtil(),
                 viewModel.getMonetaryUtil(),
                 viewModel.stringUtils,

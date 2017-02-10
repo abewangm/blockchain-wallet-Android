@@ -468,7 +468,7 @@ public class BalanceViewModel extends BaseViewModel {
                                             .subscribe(
                                                     () -> {
                                                         dataListener.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK);
-                                                        onViewReady();
+                                                        refreshFacilitatedTransactions();
                                                     },
                                                     throwable -> dataListener.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
                         }, throwable -> dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)));
@@ -554,7 +554,9 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     private Observable<Settings> getSettingsApi() {
-        return Observable.fromCallable(() -> new Settings(payloadManager.getPayload().getGuid(), payloadManager.getPayload().getSharedKey()));
+        return Observable.fromCallable(() -> new Settings(
+                payloadManager.getPayload().getGuid(),
+                payloadManager.getPayload().getSharedKey()));
     }
 
     private Completable updateBalancesAndTransactions() {
@@ -622,6 +624,8 @@ public class BalanceViewModel extends BaseViewModel {
             displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction));
             displayList.addAll(1, transactions);
             displayList.add(transactions.size() + 1, stringUtils.getString(R.string.contacts_transaction_history));
+            dataListener.onRefreshBalanceAndTransactions();
+        } else {
             dataListener.onRefreshBalanceAndTransactions();
         }
     }

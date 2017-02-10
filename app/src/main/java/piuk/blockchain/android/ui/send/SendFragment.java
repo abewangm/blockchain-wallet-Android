@@ -121,7 +121,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
-                viewModel.onViewReady();
                 viewModel.updateUI();
             }
         }

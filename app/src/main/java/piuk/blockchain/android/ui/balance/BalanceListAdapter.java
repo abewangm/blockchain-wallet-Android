@@ -20,6 +20,7 @@ import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.transaction.Tx;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import piuk.blockchain.android.R;
@@ -45,15 +46,14 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     private boolean isBtc;
     private BalanceListClickListener listClickListener;
 
-    BalanceListAdapter(List<Object> objects,
-                       PrefsUtil prefsUtil,
+    BalanceListAdapter(PrefsUtil prefsUtil,
                        MonetaryUtil monetaryUtil,
                        StringUtils stringUtils,
                        DateUtil dateUtil,
                        double btcExchangeRate,
                        boolean isBtc) {
 
-        this.objects = objects;
+        objects = new ArrayList<>();
         this.prefsUtil = prefsUtil;
         this.monetaryUtil = monetaryUtil;
         this.stringUtils = stringUtils;
@@ -90,6 +90,11 @@ class BalanceListAdapter extends RecyclerView.Adapter {
                 bindTxView(holder, position);
                 break;
         }
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, List payloads) {
+        onBindViewHolder(holder, position);
     }
 
     private void bindHeaderView(RecyclerView.ViewHolder holder, int position) {
@@ -254,8 +259,9 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         });
 
         txViewHolder.touchView.setOnClickListener(v -> {
-            if (listClickListener != null)
-                listClickListener.onTransactionClicked(getRealTxPosition(position));
+            if (listClickListener != null) {
+                listClickListener.onTransactionClicked(getRealTxPosition(txViewHolder.getAdapterPosition()));
+            }
         });
     }
 
