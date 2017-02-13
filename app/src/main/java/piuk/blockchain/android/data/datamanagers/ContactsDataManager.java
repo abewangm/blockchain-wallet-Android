@@ -1,6 +1,7 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
@@ -53,7 +54,7 @@ public class ContactsDataManager {
     private ContactsService contactsService;
     private PayloadManager payloadManager;
     private PendingTransactionListStore pendingTransactionListStore;
-    private HashMap<String, String> contactsTransactionMap = new HashMap<>();
+    @VisibleForTesting HashMap<String, String> contactsTransactionMap = new HashMap<>();
 
     public enum ContactsEvent {
         INIT

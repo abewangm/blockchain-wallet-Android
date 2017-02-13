@@ -1,20 +1,26 @@
 package piuk.blockchain.android.ui.chooser
 
+import android.app.Application
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
+import info.blockchain.wallet.multiaddr.MultiAddrFactory
+import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Observable
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.contacts.PaymentRequestType
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.equals
+import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
+import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import java.util.*
@@ -29,17 +35,19 @@ class AccountChooserViewModelTest {
     private var mockPrefsUtil: PrefsUtil = mock()
     private var mockWalletAccountHelper: WalletAccountHelper = mock()
     private var mockStringUtils: StringUtils = mock()
-    private var mockContactsDataManager: ContactsDataManager = mock()
+    private var mockContactsManager: ContactsDataManager = mock()
 
     @Before
     @Throws(Exception::class)
     fun setUp() {
-        subject = AccountChooserViewModel(mockActivity).apply {
-            prefsUtil = mockPrefsUtil
-            walletAccountHelper = mockWalletAccountHelper
-            stringUtils = mockStringUtils
-            contactsDataManager = mockContactsDataManager
-        }
+
+        InjectorTestUtils.initApplicationComponent(
+                Injector.getInstance(),
+                MockApplicationModule(RuntimeEnvironment.application),
+                MockApiModule(),
+                MockDataManagerModule())
+
+        subject = AccountChooserViewModel(mockActivity)
     }
 
     @Test(expected = RuntimeException::class)
@@ -63,11 +71,11 @@ class AccountChooserViewModelTest {
         val contact1 = Contact()
         contact1.mdid = "mdid"
         val contact2 = Contact()
-        whenever(mockContactsDataManager.contactList).thenReturn(Observable.just(contact0, contact1, contact2))
+        whenever(mockContactsManager.contactList).thenReturn(Observable.just(contact0, contact1, contact2))
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockContactsDataManager).contactList
+        verify(mockContactsManager).contactList
         val captor = argumentCaptor<List<ItemAccount>>()
         verify(mockActivity).updateUi(captor.capture())
         // Value is 3 as only 2 confirmed contacts plus header
@@ -82,11 +90,11 @@ class AccountChooserViewModelTest {
         val contact0 = Contact()
         val contact1 = Contact()
         val contact2 = Contact()
-        whenever(mockContactsDataManager.contactList).thenReturn(Observable.just(contact0, contact1, contact2))
+        whenever(mockContactsManager.contactList).thenReturn(Observable.just(contact0, contact1, contact2))
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockContactsDataManager).contactList
+        verify(mockContactsManager).contactList
         verify(mockActivity).showNoContacts()
     }
 
@@ -121,7 +129,7 @@ class AccountChooserViewModelTest {
         val contact1 = Contact()
         contact1.mdid = "mdid"
         val contact2 = Contact()
-        whenever(mockContactsDataManager.contactList).thenReturn(Observable.just(contact0, contact1, contact2))
+        whenever(mockContactsManager.contactList).thenReturn(Observable.just(contact0, contact1, contact2))
         val itemAccount0 = ItemAccount("", "", null, null, null)
         val itemAccount1 = ItemAccount("", "", null, null, null)
         val itemAccount2 = ItemAccount("", "", null, null, null)
@@ -136,6 +144,32 @@ class AccountChooserViewModelTest {
         verify(mockActivity).updateUi(captor.capture())
         // Value includes 3 headers, 3 accounts, 3 legacy addresses, 2 confirmed contacts
         captor.firstValue.size equals 11
+    }
+
+    inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
+        override fun providePrefsUtil(): PrefsUtil {
+            return mockPrefsUtil
+        }
+
+        override fun provideStringUtils(): StringUtils {
+            return mockStringUtils
+        }
+    }
+
+    inner class MockDataManagerModule : DataManagerModule() {
+        override fun provideWalletAccountHelper(payloadManager: PayloadManager?,
+                                                prefsUtil: PrefsUtil?,
+                                                stringUtils: StringUtils?,
+                                                exchangeRateFactory: ExchangeRateFactory?,
+                                                multiAddrFactory: MultiAddrFactory?): WalletAccountHelper {
+            return mockWalletAccountHelper
+        }
+    }
+
+    inner class MockApiModule : ApiModule() {
+        override fun provideContactsManager(payloadManager: PayloadManager?): ContactsDataManager {
+            return mockContactsManager
+        }
     }
 
 }

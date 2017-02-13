@@ -19,7 +19,7 @@ import java.util.*
 class ContactsServiceTest : RxTest() {
 
     private lateinit var subject: ContactsService
-    val mockContacts: Contacts = mock()
+    private val mockContacts: Contacts = mock()
 
     @Before
     @Throws(Exception::class)
