@@ -221,6 +221,7 @@ public class TransactionListDataManager {
         return transactions;
     }
 
+    @SuppressWarnings("Convert2streamapi")
     @VisibleForTesting
     @NonNull
     List<Tx> getAllXpubAndLegacyTxs() {

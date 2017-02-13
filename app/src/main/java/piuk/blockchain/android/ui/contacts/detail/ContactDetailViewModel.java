@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.contacts.detail;
 
 import android.os.Bundle;
 import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.Contact;
@@ -39,7 +40,7 @@ public class ContactDetailViewModel extends BaseViewModel {
     private static final String TAG = ContactDetailViewModel.class.getSimpleName();
 
     private DataListener dataListener;
-    private Contact contact;
+    @VisibleForTesting Contact contact;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadManager payloadManager;
     @Inject PrefsUtil prefsUtil;
@@ -132,7 +133,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(() -> {
                             // Quit page, show toast
-                            dataListener.showToast(R.string.contacts_delete_contact_success, ToastCustom.TYPE_GENERAL);
+                            dataListener.showToast(R.string.contacts_delete_contact_success, ToastCustom.TYPE_OK);
                             dataListener.finishPage();
                         }, throwable -> dataListener.showToast(R.string.contacts_delete_contact_failed, ToastCustom.TYPE_ERROR)));
     }
@@ -185,6 +186,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
                 // Payment sent, show detail regardless of role
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
+
                 dataListener.showTransactionDetail(transaction.getTxHash());
 
                 // Received payment request, need to send address to sender
