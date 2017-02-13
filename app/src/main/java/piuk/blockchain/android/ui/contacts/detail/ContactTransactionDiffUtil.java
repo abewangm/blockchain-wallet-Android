@@ -7,7 +7,7 @@ import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 
 import java.util.List;
 
-public class ContactTransactionDiffUtil extends DiffUtil.Callback {
+class ContactTransactionDiffUtil extends DiffUtil.Callback {
 
     private List<FacilitatedTransaction> oldTransactions;
     private List<FacilitatedTransaction> newTransactions;
@@ -38,16 +38,7 @@ public class ContactTransactionDiffUtil extends DiffUtil.Callback {
         FacilitatedTransaction oldContact = oldTransactions.get(oldItemPosition);
         FacilitatedTransaction newContact = newTransactions.get(newItemPosition);
 
-        return oldContact.getId().equals(newContact.getId())
-                && (oldContact.getState() != null ? oldContact.getState() : "")
-                .equals(newContact.getState() != null ? newContact.getState() : "")
-                && (oldContact.getAddress() != null ? oldContact.getAddress() : "")
-                .equals(newContact.getAddress() != null ? newContact.getAddress() : "")
-                && (oldContact.getTxHash() != null ? oldContact.getTxHash() : "")
-                .equals(newContact.getTxHash() != null ? newContact.getTxHash() : "")
-                && (oldContact.getRole() != null ? oldContact.getRole() : "")
-                .equals(newContact.getRole() != null ? newContact.getRole() : "")
-                && (oldContact.getIntendedAmount() == newContact.getIntendedAmount());
+        return oldContact.equals(newContact);
     }
 
     @Nullable

@@ -36,12 +36,7 @@ class ContactsDiffUtil extends DiffUtil.Callback {
         ContactsListItem oldContact = oldContacts.get(oldItemPosition);
         ContactsListItem newContact = newContacts.get(newItemPosition);
 
-        return oldContact.getId().equals(newContact.getId())
-                && (oldContact.getContactName() != null ? oldContact.getContactName() : "")
-                .equals(newContact.getContactName() != null ? newContact.getContactName() : "")
-                && oldContact.getStatus().equals(newContact.getStatus())
-                && oldContact.getInviteTime() == newContact.getInviteTime()
-                && oldContact.requiresResponse() == newContact.requiresResponse();
+        return oldContact.equals(newContact);
     }
 
     @Nullable

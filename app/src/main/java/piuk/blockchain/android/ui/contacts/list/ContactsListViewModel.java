@@ -17,7 +17,6 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
-import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
@@ -31,7 +30,6 @@ public class ContactsListViewModel extends BaseViewModel {
     private static final String TAG = ContactsListViewModel.class.getSimpleName();
 
     private DataListener dataListener;
-    @Inject QrCodeDataManager qrCodeDataManager;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadManager payloadManager;
     @Inject PrefsUtil prefsUtil;
@@ -63,26 +61,8 @@ public class ContactsListViewModel extends BaseViewModel {
     public void onViewReady() {
         // Subscribe to notification events
         subscribeToNotifications();
-
-        dataListener.setUiState(ContactsListActivity.LOADING);
-        compositeDisposable.add(
-                contactsDataManager.loadNodes()
-                        .subscribe(
-                                success -> {
-                                    if (success) {
-                                        loadContacts();
-                                    } else {
-                                        // Not set up, most likely has a second password enabled
-                                        if (payloadManager.getPayload().isDoubleEncrypted()) {
-                                            dataListener.showSecondPasswordDialog();
-                                            dataListener.setUiState(ContactsListActivity.FAILURE);
-                                        } else {
-                                            initContactsService(null);
-                                        }
-                                    }
-                                }, throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
-
-        loadContacts();
+        // Set up page if Metadata initialized
+        attemptPageSetup(true);
 
         Intent intent = dataListener.getPageIntent();
         if (intent != null && intent.hasExtra(ContactsListActivity.EXTRA_METADATA_URI)) {
@@ -102,7 +82,7 @@ public class ContactsListViewModel extends BaseViewModel {
                         .andThen(contactsDataManager.registerMdid())
                         .andThen(contactsDataManager.publishXpub())
                         .subscribe(
-                                this::onViewReady,
+                                () -> attemptPageSetup(false),
                                 throwable -> {
                                     dataListener.setUiState(ContactsListActivity.FAILURE);
                                     if (throwable instanceof DecryptionException) {
@@ -193,9 +173,7 @@ public class ContactsListViewModel extends BaseViewModel {
                 FcmCallbackService.getNotificationSubject()
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(
-                                notificationPayload -> {
-//                                    onViewReady();
-                                },
+                                notificationPayload -> loadContacts(),
                                 throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
     }
 
@@ -210,8 +188,32 @@ public class ContactsListViewModel extends BaseViewModel {
                         .subscribe(
                                 contacts -> {
                                     handleContactListUpdate(contacts);
-                                    dataListener.showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_GENERAL);
+                                    dataListener.showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
                                 }, throwable -> dataListener.showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR)));
 
+    }
+
+    private void attemptPageSetup(boolean firstAttempt) {
+        if (firstAttempt) {
+            dataListener.setUiState(ContactsListActivity.LOADING);
+            compositeDisposable.add(
+                    contactsDataManager.loadNodes()
+                            .subscribe(
+                                    success -> {
+                                        if (success) {
+                                            loadContacts();
+                                        } else {
+                                            // Not set up, most likely has a second password enabled
+                                            if (payloadManager.getPayload().isDoubleEncrypted()) {
+                                                dataListener.showSecondPasswordDialog();
+                                                dataListener.setUiState(ContactsListActivity.FAILURE);
+                                            } else {
+                                                initContactsService(null);
+                                            }
+                                        }
+                                    }, throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
+        } else {
+            dataListener.setUiState(ContactsListActivity.FAILURE);
+        }
     }
 }
