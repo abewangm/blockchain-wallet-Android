@@ -75,8 +75,8 @@
 
     <string name="command2">Scan pairing code</string>
     <string name="command3">I can\'t access my camera</string>
-    <string name="CREATE">CREATE NEW WALLET</string>
-    <string name="LOGIN">Log in to my Wallet</string>
+    <string name="create_a_wallet">Create a wallet</string>
+    <string name="log_in">Log in</string>
     <string name="pair_your_wallet">Pair Your Wallet</string>
     <string name="manual_pairing">Manual Pairing</string>
     <string name="pair_wallet_step_1">Log in to your Blockchain Wallet via your PC or Mac at %1$s.</string>

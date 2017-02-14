@@ -186,7 +186,7 @@
             android:layout_marginTop="16dp"
             android:text="@string/transfer_all"
             android:textSize="14sp"
-            android:theme="@style/ButtonBlue" />
+            android:theme="@style/ButtonBlueTheme" />
 
     </LinearLayout>
 

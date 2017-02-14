@@ -9,7 +9,7 @@
         android:background="@android:color/transparent"
         android:gravity="bottom"
         android:orientation="vertical"
-        tools:background="@color/blockchain_blue">
+        tools:background="@color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -18,20 +18,30 @@
             android:layout_marginTop="16dp"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/titleBox"
+                fontPath="fonts/Montserrat-Regular.ttf"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:padding="@dimen/pinentry_padding"
+                android:text="@string/pin_entry"
+                android:textColor="@color/primary_navy_medium"
+                android:textSize="@dimen/pinentry_hint_size" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="24dp"
                 android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:paddingLeft="32dp"
-                android:paddingRight="32dp">
+                android:orientation="horizontal">
 
                 <ImageView
                     android:id="@+id/pinBox0"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dip"
+                    android:layout_margin="10dp"
                     android:layout_weight="1"
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY"
@@ -41,7 +51,7 @@
                     android:id="@+id/pinBox1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dip"
+                    android:layout_margin="10dp"
                     android:layout_weight="1"
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY"
@@ -51,7 +61,7 @@
                     android:id="@+id/pinBox2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dip"
+                    android:layout_margin="10dp"
                     android:layout_weight="1"
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY"
@@ -61,23 +71,13 @@
                     android:id="@+id/pinBox3"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dip"
+                    android:layout_margin="10dp"
                     android:layout_weight="1"
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY"
                     android:src="@drawable/rounded_view_blue_white_border" />
 
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/titleBox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:padding="@dimen/pinentry_padding"
-                android:text="@string/pin_entry"
-                android:textColor="@color/white"
-                android:textSize="@dimen/pinentry_hint_size" />
 
             <android.support.v7.widget.AppCompatImageView
                 android:id="@+id/fingerprint_logo"
@@ -86,7 +86,7 @@
                 android:layout_gravity="center"
                 android:layout_margin="16dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="@color/white"
+                android:tint="@color/primary_navy_dark"
                 android:visibility="gone"
                 app:srcCompat="@drawable/ic_fingerprint" />
 
@@ -108,7 +108,7 @@
                 android:layout_gravity="center_vertical"
                 android:paddingLeft="16dp"
                 android:text="@string/swipe_receive_hint"
-                android:textColor="@color/blockchain_pearl_white"
+                android:textColor="@color/primary_navy_medium"
                 android:textSize="14sp" />
 
             <android.support.v7.widget.AppCompatImageView
@@ -118,6 +118,7 @@
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
                 android:rotation="180"
+                android:tint="@color/primary_navy_medium"
                 app:srcCompat="@drawable/ic_arrow_back_white_24dp" />
 
         </LinearLayout>

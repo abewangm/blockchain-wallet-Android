@@ -9,10 +9,10 @@
     </data>
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blockchain_pearl_white">
+        android:background="@color/blockchain_pearl_white"
+        android:orientation="vertical">
 
         <include layout="@layout/toolbar_general" />
 
@@ -24,37 +24,37 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:focusable="true"
-                android:focusableInTouchMode="true">
+                android:focusableInTouchMode="true"
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
+                    android:layout_marginBottom="36dp"
                     android:layout_marginTop="56dp"
+                    android:gravity="center_horizontal"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:layout_marginBottom="36dp"
                     android:text="@string/recover_funds_instructions" />
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp"
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginTop="8dp">
 
                     <android.support.v7.widget.AppCompatEditText
                         android:id="@+id/field_passphrase"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:maxLines="1"
-                        android:inputType="textShortMessage"
+                        android:hint="@string/recovery_passphrase"
                         android:imeOptions="actionGo"
-                        android:scrollHorizontally="true"
-                        android:hint="@string/recovery_passphrase" />
+                        android:inputType="textShortMessage"
+                        android:maxLines="1"
+                        android:scrollHorizontally="true" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -63,15 +63,9 @@
 
         <TextView
             android:id="@+id/button_continue"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
+            style="@style/MegaButtonBlue"
             android:layout_gravity="center_horizontal|center_vertical"
-            android:background="@color/blockchain_blue"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="@string/recover_funds"
-            android:textAlignment="gravity"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:text="@string/recover_funds" />
 
     </LinearLayout>
 </layout>

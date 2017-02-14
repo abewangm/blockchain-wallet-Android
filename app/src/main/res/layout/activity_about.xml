@@ -5,18 +5,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
-        android:background="@color/blockchain_blue"
+        android:background="@color/white"
         android:gravity="center_horizontal"
         android:minWidth="420dp"
         android:orientation="vertical">
 
-        <ImageView
-            android:layout_width="165dp"
-            android:layout_height="188dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
+
+        <android.support.v7.widget.AppCompatImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginTop="16dp"
             android:gravity="center_horizontal"
-            android:src="@drawable/logo3x" />
+            android:src="@drawable/vector_icon_blue" />
+
+        <android.support.v7.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="22dp"
+            android:layout_marginTop="24dp"
+            android:gravity="center_horizontal"
+            android:src="@drawable/vector_blockchain"
+            android:tint="@color/primary_navy_medium" />
 
         <TextView
             android:id="@+id/about"

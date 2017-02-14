@@ -104,9 +104,8 @@ public final class CaptureActivity extends BaseAuthActivity implements SurfaceHo
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_scan);
 
-        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar_general);
-        toolbar.setTitle(getResources().getString(R.string.scan_qr));
-        setSupportActionBar(toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        setupToolbar(toolbar, R.string.scan_qr);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -114,7 +113,7 @@ public final class CaptureActivity extends BaseAuthActivity implements SurfaceHo
         hasSurface = false;
         inactivityTimer = new InactivityTimer(this);
 
-        hasFlashLight = this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
+        hasFlashLight = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
     }
 
     private int getCurrentOrientation() {

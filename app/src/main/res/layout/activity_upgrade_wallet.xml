@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blockchain_upgrade_wallet_bg"
+        android:background="@color/white"
         android:orientation="vertical">
 
         <ImageView
@@ -16,7 +17,7 @@
             android:layout_margin="16dp"
             android:gravity="center_horizontal"
             android:scaleType="fitCenter"
-            android:src="@drawable/logo3x" />
+            android:src="@drawable/vector_icon_blue" />
 
         <TextView
             android:id="@+id/upgrade_page_title"
@@ -61,7 +62,7 @@
             android:progressDrawable="@drawable/progress_white"
             android:visibility="gone" />
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/btn_upgrade_complete"
             android:layout_width="match_parent"
             android:layout_height="60dp"
@@ -69,19 +70,18 @@
             android:layout_marginBottom="32dp"
             android:layout_marginLeft="32dp"
             android:layout_marginRight="32dp"
-            android:background="@drawable/rounded_view_white2"
             android:gravity="center"
             android:onClick="upgradeClicked"
             android:text="@string/CONTINUE"
-            android:textColor="@color/blockchain_blue"
-            android:textSize="20sp"
-            android:visibility="gone" />
+            android:theme="@style/ButtonBlueTheme"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
         <LinearLayout
             android:id="@+id/upgrade_action_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/blockchain_blue"
+            android:background="@color/white"
             android:orientation="vertical"
             android:paddingBottom="32dp"
             android:paddingLeft="32dp"
@@ -119,17 +119,15 @@
 
             </LinearLayout>
 
-            <Button
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/upgrade_btn"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_gravity="center_horizontal"
-                android:background="@drawable/rounded_view_white2"
                 android:gravity="center"
                 android:onClick="upgradeClicked"
                 android:text="@string/UPGRADE_YOUR_WALLET"
-                android:textColor="@color/blockchain_blue"
-                android:textSize="20sp" />
+                android:theme="@style/ButtonBlueTheme" />
 
         </LinearLayout>
 

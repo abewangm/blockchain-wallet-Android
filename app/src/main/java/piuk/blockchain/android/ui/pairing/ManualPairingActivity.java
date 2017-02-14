@@ -31,8 +31,7 @@ public class ManualPairingActivity extends BaseAuthActivity implements ManualPai
         mViewModel = new ManualPairingViewModel(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        toolbar.setTitle(getResources().getString(R.string.manual_pairing));
-        setSupportActionBar(toolbar);
+        setupToolbar(toolbar, R.string.manual_pairing);
 
         mBinding.commandNext.setOnClickListener(v -> mViewModel.onContinueClicked());
 

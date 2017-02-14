@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -31,6 +32,8 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 
 import info.blockchain.wallet.payload.PayloadManager;
+
+import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import java.util.Arrays;
 
@@ -88,7 +91,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         appUtil = new AppUtil(this);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
@@ -127,10 +129,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         binding.bottomNavigation.addItems(Arrays.asList(item1, item2, item3));
 
         // Styling
-        binding.bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.blockchain_blue));
-        binding.bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.blockchain_grey));
+        binding.bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.primary_blue_accent));
+        binding.bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.primary_dark_gray));
         binding.bottomNavigation.setForceTint(true);
         binding.bottomNavigation.setUseElevation(true);
+        Typeface typeface = TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf");
+        binding.bottomNavigation.setTitleTypeface(typeface);
 
         // Select transactions by default
         binding.bottomNavigation.setCurrentItem(1);

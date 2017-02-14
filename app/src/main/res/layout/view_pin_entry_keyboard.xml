@@ -5,7 +5,6 @@
         android:id="@+id/numericPad"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/blockchain_navigation_bar"
         android:orientation="vertical">
 
         <LinearLayout style="@style/PinEntryKeyboardHorizontalContainer">
@@ -191,16 +190,17 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/selector_pearl_white"
+                android:background="@drawable/selector_navy_blue"
                 android:gravity="center"
                 android:orientation="vertical">
 
-                <ImageView
+                <android.support.v7.widget.AppCompatImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:gravity="center"
-                    android:src="@drawable/ic_backspace_grey600_36dp" />
+                    android:src="@drawable/ic_backspace_grey600_36dp"
+                    android:tint="@color/white" />
 
             </LinearLayout>
         </LinearLayout>

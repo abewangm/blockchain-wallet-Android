@@ -1,12 +1,20 @@
 package piuk.blockchain.android.ui.base;
 
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.WindowManager;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
+import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.BuildConfig;
@@ -62,6 +70,36 @@ public class BaseAuthActivity extends AppCompatActivity {
                                 Throwable::printStackTrace));
     }
 
+    /**
+     * Applies the title to the {@link Toolbar} which is then set as the Activity's
+     * SupportActionBar. Also applies the Montserrat-Regular font, as this cannot be done elsewhere
+     * for now.
+     *
+     * @param toolbar The {@link Toolbar} for the current activity
+     * @param title   The title for the page, as a StringRes
+     */
+    public void setupToolbar(Toolbar toolbar, @StringRes int title) {
+        toolbar.setTitle(CalligraphyUtils.applyTypefaceSpan(
+                getString(title),
+                TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+
+        setSupportActionBar(toolbar);
+    }
+
+    /**
+     * Applies the title to the Activity's {@link ActionBar}. This method is the fragment equivalent
+     * of {@link #setupToolbar(Toolbar, int)} Also applies the Montserrat-Regular font, as this
+     * cannot be done elsewhere for now.
+     *
+     * @param actionBar The {@link ActionBar} for the current activity
+     * @param title     The title for the page, as a StringRes
+     */
+    public void setupToolbar(ActionBar actionBar, @StringRes int title) {
+        actionBar.setTitle(CalligraphyUtils.applyTypefaceSpan(
+                getString(title),
+                TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+    }
+
     @CallSuper
     @Override
     protected void onResume() {
@@ -86,6 +124,14 @@ public class BaseAuthActivity extends AppCompatActivity {
         if (mAlertDialog != null) {
             mAlertDialog.dismiss();
         }
+    }
+
+    /**
+     * Init font library by passing in base Context.
+     */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     /**

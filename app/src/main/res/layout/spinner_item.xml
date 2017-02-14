@@ -13,7 +13,7 @@
         android:paddingBottom="5dip"
         android:maxLines="1"
         android:marqueeRepeatLimit="marquee_forever"
-        android:background="@drawable/selector_pearl_white"
+        android:background="@drawable/selector_navy_blue"
         android:drawablePadding="8dp"
         android:drawableRight="@drawable/ic_arrow_drop_down_grey600_24dp" />
 </layout>

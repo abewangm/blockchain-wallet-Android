@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -26,6 +27,7 @@ import info.blockchain.wallet.util.PasswordUtil;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentCreateWalletBinding;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.pairing.PairOrCreateWalletActivity;
 import piuk.blockchain.android.ui.recover.RecoverFundsActivity;
 import piuk.blockchain.android.ui.settings.SettingsFragment;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -49,13 +51,17 @@ public class CreateWalletFragment extends Fragment {
 
         mRecoveringFunds = getActivity().getIntent().getBooleanExtra(LandingActivity.KEY_INTENT_RECOVERING_FUNDS, false);
 
+        int title;
         if (mRecoveringFunds) {
-            getActivity().setTitle(getString(R.string.recover_funds));
+            title = R.string.recover_funds;
             binding.commandNext.setText(getString(R.string.dialog_continue));
         } else {
-            getActivity().setTitle(getString(R.string.new_wallet));
+            title = R.string.new_wallet;
             binding.commandNext.setText(getString(R.string.create_wallet));
         }
+
+        ((PairOrCreateWalletActivity) getActivity()).setupToolbar(
+                ((AppCompatActivity) getActivity()).getSupportActionBar(), title);
 
         binding.tos.setMovementMethod(LinkMovementMethod.getInstance());//make link clickable
         binding.commandNext.setClickable(false);

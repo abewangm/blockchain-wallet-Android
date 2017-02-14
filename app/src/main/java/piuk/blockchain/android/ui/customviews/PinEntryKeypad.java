@@ -39,7 +39,7 @@ public class PinEntryKeypad extends LinearLayout implements View.OnClickListener
         setGravity(Gravity.BOTTOM);
 
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.pin_entry_keyboard, this, true);
+        inflater.inflate(R.layout.view_pin_entry_keyboard, this, true);
 
         LinearLayout keypad = (LinearLayout) findViewById(R.id.numericPad);
 

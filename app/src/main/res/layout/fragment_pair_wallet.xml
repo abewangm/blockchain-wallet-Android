@@ -11,86 +11,86 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical"
+            android:background="@color/blockchain_pearl_white"
             android:gravity="center"
-            android:background="@color/blockchain_pearl_white">
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:textSize="33sp"
-                    android:textColor="@color/blockchain_blue"
                     android:gravity="center_vertical"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:text="1" />
+                    android:text="1"
+                    android:textColor="@color/blockchain_blue"
+                    android:textSize="33sp" />
 
                 <TextView
-                        android:id="@+id/pairing_first_step"
+                    android:id="@+id/pairing_first_step"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:textColor="@color/black"
                     android:gravity="center_vertical"
                     android:paddingRight="16dp"
-                    android:text="@string/pair_wallet_step_1" />
+                    android:text="@string/pair_wallet_step_1"
+                    android:textColor="@color/black" />
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:textSize="33sp"
-                    android:textColor="@color/blockchain_blue"
                     android:gravity="center_vertical"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:text="2" />
+                    android:text="2"
+                    android:textColor="@color/blockchain_blue"
+                    android:textSize="33sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:textColor="@color/black"
                     android:gravity="center_vertical"
                     android:paddingRight="16dp"
-                    android:text="@string/pair_wallet_step_2" />
+                    android:text="@string/pair_wallet_step_2"
+                    android:textColor="@color/black" />
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:textSize="33sp"
-                    android:textColor="@color/blockchain_blue"
                     android:gravity="center_vertical"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:text="3" />
+                    android:text="3"
+                    android:textColor="@color/blockchain_blue"
+                    android:textSize="33sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:textColor="@color/black"
                     android:gravity="center_vertical"
                     android:paddingRight="16dp"
-                    android:text="@string/pair_wallet_step_3" />
+                    android:text="@string/pair_wallet_step_3"
+                    android:textColor="@color/black" />
 
             </LinearLayout>
 
@@ -104,27 +104,15 @@
 
             <TextView
                 android:id="@+id/command_scan"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:background="@color/blockchain_blue"
+                style="@style/MegaButtonBlue"
                 android:layout_gravity="center_horizontal|center_vertical"
-                android:gravity="center_horizontal|center_vertical"
-                android:text="@string/command2"
-                android:textAlignment="gravity"
-                android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:text="@string/command2" />
 
             <TextView
                 android:id="@+id/command_manual"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
+                style="@style/MegaButtonWhite"
                 android:layout_gravity="center_horizontal|center_vertical"
-                android:background="@color/blockchain_light_grey"
-                android:gravity="center_horizontal|center_vertical"
-                android:text="@string/command3"
-                android:textAlignment="gravity"
-                android:textColor="@color/blockchain_grey"
-                android:textSize="16sp" />
+                android:text="@string/command3" />
 
         </LinearLayout>
 

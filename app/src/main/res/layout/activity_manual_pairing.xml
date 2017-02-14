@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <data>
-
-        <variable
-            name="viewModel"
-            type="piuk.blockchain.android.ui.pairing.ManualPairingViewModel" />
-    </data>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,36 +22,36 @@
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:layout_marginLeft="16dp"
-                    android:layout_marginRight="16dp">
+                    android:layout_marginRight="16dp"
+                    android:layout_marginTop="16dp">
 
                     <android.support.v7.widget.AppCompatEditText
                         android:id="@+id/wallet_id"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:maxLines="1"
-                        android:inputType="text"
+                        android:hint="@string/wallet_id"
                         android:imeOptions="actionNext"
-                        android:hint="@string/wallet_id" />
+                        android:inputType="text"
+                        android:maxLines="1" />
 
                 </android.support.design.widget.TextInputLayout>
 
                 <piuk.blockchain.android.ui.customviews.AnimatedPasswordInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:layout_marginLeft="16dp"
-                    android:layout_marginRight="16dp">
+                    android:layout_marginRight="16dp"
+                    android:layout_marginTop="16dp">
 
                     <android.support.v7.widget.AppCompatEditText
                         android:id="@+id/wallet_pass"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:maxLines="1"
-                        android:inputType="textPassword"
+                        android:hint="@string/password"
                         android:imeOptions="actionGo"
-                        android:hint="@string/password" />
+                        android:inputType="textPassword"
+                        android:maxLines="1" />
 
                 </piuk.blockchain.android.ui.customviews.AnimatedPasswordInputLayout>
 
@@ -77,15 +69,9 @@
 
         <TextView
             android:id="@+id/command_next"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
+            style="@style/MegaButtonBlue"
             android:layout_gravity="center_horizontal|center_vertical"
-            android:background="@color/blockchain_blue"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="@string/CONTINUE"
-            android:textAlignment="gravity"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:text="@string/CONTINUE" />
 
     </LinearLayout>
 </layout>
