@@ -102,7 +102,7 @@ android {
 }
 
 ext {
-    supportVersion = '25.1.0'
+    supportVersion = '25.1.1'
     googleServicesVersion = '10.0.1'
     rxJavaVersion = '2.0.4'
     rxAndroidVersion = '2.0.1'
@@ -150,6 +150,9 @@ dependencies {
     annotationProcessor 'com.google.guava:guava:19.0'
     // Fingerprint authentication
     compile 'com.mtramin:rxfingerprint:2.0.1'
+    // Custom fonts
+    compile 'uk.co.chrisjenx:calligraphy:2.2.0'
+
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
@@ -162,6 +165,7 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
         exclude group: 'javax.inject', module: 'support-annotations'
     }
+
     // Unit Tests
     testCompile 'org.json:json:20140107'
     testCompile 'org.mockito:mockito-core:1.9.5'

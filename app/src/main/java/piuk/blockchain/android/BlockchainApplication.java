@@ -15,6 +15,8 @@ import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
 import info.blockchain.api.PinStore;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -48,7 +50,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(base));
 
         if (BuildConfig.DEBUG && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             MultiDex.install(base);
