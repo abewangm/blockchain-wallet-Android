@@ -11,8 +11,8 @@ public class ContactTransactionDateComparator implements Comparator<ContactTrans
     @Override
     public int compare(ContactTransactionModel transaction1, ContactTransactionModel transaction2) {
         return Long.compare(
-                transaction1.getFacilitatedTransaction().getCreated(),
-                transaction2.getFacilitatedTransaction().getCreated());
+                transaction1.getFacilitatedTransaction().getLastUpdated(),
+                transaction2.getFacilitatedTransaction().getLastUpdated());
     }
 
 }
