@@ -63,7 +63,7 @@
                 android:id="@+id/confirm_continue"
                 style="@style/CustomDialogButton"
                 android:text="@string/CONTINUE"
-                android:textColor="@color/blockchain_blue" />
+                android:textColor="@color/primary_blue_accent" />
 
         </LinearLayout>
     </LinearLayout>

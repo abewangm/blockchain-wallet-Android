@@ -12,13 +12,13 @@ import java.util.List;
 
 import piuk.blockchain.android.R;
 
-public class ShareReceiveIntentAdapter extends RecyclerView.Adapter<ShareReceiveIntentAdapter.ViewHolder> {
+class ShareReceiveIntentAdapter extends RecyclerView.Adapter<ShareReceiveIntentAdapter.ViewHolder> {
 
     private final List<ReceiveViewModel.SendPaymentCodeData> mData;
     private OnItemClickedListener itemClickedListener;
     private Context mContext;
 
-    public ShareReceiveIntentAdapter(List<ReceiveViewModel.SendPaymentCodeData> repoDataArrayList) {
+    ShareReceiveIntentAdapter(List<ReceiveViewModel.SendPaymentCodeData> repoDataArrayList) {
         mData = repoDataArrayList;
     }
 
@@ -49,7 +49,7 @@ public class ShareReceiveIntentAdapter extends RecyclerView.Adapter<ShareReceive
         return mData != null ? mData.size() : 0;
     }
 
-    public void setItemClickedListener(OnItemClickedListener itemClickedListener) {
+    void setItemClickedListener(OnItemClickedListener itemClickedListener) {
         this.itemClickedListener = itemClickedListener;
     }
 

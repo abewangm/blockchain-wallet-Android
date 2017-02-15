@@ -149,6 +149,8 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
         setHasOptionsMenu(true);
 
+        binding.content.scrollView.post(() -> binding.content.scrollView.scrollTo(0, 0));
+
         return binding.getRoot();
     }
 
@@ -418,21 +420,20 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void onResume() {
         super.onResume();
         viewModel.updateSpinnerList();
-
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
     }
 
     @Override
     public void showQrLoading() {
-        binding.content.ivAddressInfo.setVisibility(View.GONE);
-        binding.content.qr.setVisibility(View.GONE);
-        binding.content.receivingAddress.setVisibility(View.GONE);
+        binding.content.ivAddressInfo.setVisibility(View.INVISIBLE);
+        binding.content.qr.setVisibility(View.INVISIBLE);
+        binding.content.receivingAddress.setVisibility(View.INVISIBLE);
         binding.content.progressBar2.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void showQrCode(@Nullable Bitmap bitmap) {
-        binding.content.progressBar2.setVisibility(View.GONE);
+        binding.content.progressBar2.setVisibility(View.INVISIBLE);
         binding.content.qr.setVisibility(View.VISIBLE);
         binding.content.receivingAddress.setVisibility(View.VISIBLE);
         binding.content.qr.setImageBitmap(bitmap);
