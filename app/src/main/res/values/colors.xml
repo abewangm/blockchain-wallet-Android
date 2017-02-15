@@ -67,6 +67,7 @@
 
     <!-- Specified in designs but not named in spec -->
     <color name="primary_gray_dark">#4c4c4c</color>
+    <color name="primary_gray_light">#d2ced0</color>
     <color name="product_gray_transferred">#7b9eb1</color>
     <color name="product_gray_transferred_50">#807b9eb1</color>
     <color name="product_red_sent">#f26c57</color>

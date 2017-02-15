@@ -24,7 +24,6 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,14 +46,11 @@ import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
-import piuk.blockchain.android.ui.customviews.CustomKeypad;
-import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
-import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
@@ -153,6 +149,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         if (listener != null) {
             listener.onSendFragmentStart();
         }
+
+        setupToolbar();
     }
 
     @Override
@@ -163,7 +161,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     private void setupToolbar() {
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.send_bitcoin);
+            ((BaseAuthActivity) getActivity()).setupToolbar(
+                    ((MainActivity) getActivity()).getSupportActionBar(), R.string.send_bitcoin);
 
             ViewUtils.setElevation(
                     getActivity().findViewById(R.id.appbar_layout),

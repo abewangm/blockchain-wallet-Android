@@ -12,15 +12,14 @@
         android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blockchain_pearl_white"
+        android:background="@color/white"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
         <ScrollView
             android:id="@+id/scrollView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/blockchain_pearl_white">
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -30,7 +29,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/blockchain_pearl_white"
+                    android:background="@color/white"
                     android:orientation="vertical">
 
                     <LinearLayout
@@ -44,13 +43,15 @@
                         android:paddingTop="16dp">
 
                         <TextView
+                            fontPath="fonts/Montserrat-Light.ttf"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/from"
-                            android:textColor="@color/blockchain_grey" />
+                            android:textColor="@color/primary_gray_dark" />
 
                         <include
                             android:id="@+id/accounts"
+                            fontPath="fonts/Montserrat-Regular.ttf"
                             layout="@layout/include_spinner_compat"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -70,12 +71,13 @@
                         android:paddingLeft="16dp">
 
                         <TextView
+                            fontPath="fonts/Montserrat-Light.ttf"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center|left"
                             android:paddingTop="8dp"
                             android:text="@string/to"
-                            android:textColor="@color/blockchain_grey" />
+                            android:textColor="@color/primary_gray_dark" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -84,10 +86,11 @@
 
                             <EditText
                                 android:id="@+id/destination"
+                                fontPath="fonts/Montserrat-Regular.ttf"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="0.9"
-                                android:background="@color/blockchain_pearl_white"
+                                android:background="@color/white"
                                 android:focusable="true"
                                 android:focusableInTouchMode="true"
                                 android:hint="@string/to_field_helper"
@@ -99,6 +102,7 @@
 
                             <piuk.blockchain.android.ui.customviews.ReselectSpinner
                                 android:id="@+id/sp_destination"
+                                fontPath="fonts/Montserrat-Regular.ttf"
                                 android:layout_width="58dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="0.1"
@@ -115,6 +119,7 @@
 
                     <TextView
                         android:id="@+id/max"
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal|center_vertical"
@@ -158,11 +163,12 @@
 
                         <TextView
                             android:id="@+id/tv_fee_unit"
+                            fontPath="fonts/Montserrat-Light.ttf"
                             android:layout_width="50dp"
                             android:layout_height="match_parent"
                             android:gravity="center_vertical"
                             android:text="@string/fee"
-                            android:textColor="@color/blockchain_grey" />
+                            android:textColor="@color/primary_gray_dark" />
 
                         <android.support.design.widget.TextInputLayout
                             android:layout_width="0dp"
@@ -175,6 +181,7 @@
 
                             <android.support.v7.widget.AppCompatEditText
                                 android:id="@+id/custom_fee"
+                                fontPath="fonts/Montserrat-Regular.ttf"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="number|numberDecimal"
@@ -193,6 +200,7 @@
 
                         <TextView
                             android:id="@+id/tv_estimate"
+                            fontPath="fonts/Montserrat-Regular.ttf"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -205,13 +213,14 @@
 
                 <TextView
                     android:id="@+id/unconfirmed_funds_warning"
+                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
                     android:gravity="center"
                     android:text="@{viewModel.sendModel.unconfirmedFunds}"
-                    android:textColor="@color/blockchain_send_red" />
+                    android:textColor="@color/product_red_medium" />
 
             </LinearLayout>
         </ScrollView>

@@ -63,7 +63,7 @@
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
                         android:text="1"
-                        android:textColor="@color/blockchain_blue"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
@@ -85,7 +85,7 @@
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
                         android:text="2"
-                        android:textColor="@color/blockchain_blue"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
@@ -107,7 +107,7 @@
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
                         android:text="3"
-                        android:textColor="@color/blockchain_blue"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
@@ -128,7 +128,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
-                        android:src="@drawable/ic_backspace_grey600_36dp" />
+                        android:src="@drawable/ic_backspace_grey600_36dp"
+                        android:tint="@color/white" />
 
                 </LinearLayout>
 
@@ -157,7 +158,7 @@
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
                         android:text="4"
-                        android:textColor="@color/blockchain_blue"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/pinentry_num_text_size" />
 
 
@@ -180,7 +181,7 @@
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
                         android:text="5"
-                        android:textColor="@color/blockchain_blue"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/pinentry_num_text_size" />
 
 
@@ -203,7 +204,7 @@
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
                         android:text="6"
-                        android:textColor="@color/blockchain_blue"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/pinentry_num_text_size" />
 
 
@@ -213,7 +214,7 @@
                     android:layout_width="0dip"
                     android:layout_height="54dip"
                     android:layout_weight="1"
-                    android:background="@color/blockchain_pearl_white"
+                    android:background="@color/primary_navy_medium"
                     android:gravity="center" />
 
             </TableRow>
@@ -241,7 +242,7 @@
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
                         android:text="7"
-                        android:textColor="@color/blockchain_blue"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
@@ -263,7 +264,7 @@
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
                         android:text="8"
-                        android:textColor="@color/blockchain_blue"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
@@ -285,7 +286,7 @@
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
                         android:text="9"
-                        android:textColor="@color/blockchain_blue"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
@@ -294,7 +295,7 @@
                     android:layout_width="0dip"
                     android:layout_height="54dip"
                     android:layout_weight="1"
-                    android:background="@color/blockchain_pearl_white"
+                    android:background="@color/primary_navy_medium"
                     android:gravity="center" />
             </TableRow>
 
@@ -321,7 +322,7 @@
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
                         android:text="."
-                        android:textColor="@color/blockchain_blue"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
@@ -344,7 +345,7 @@
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
                         android:text="0"
-                        android:textColor="@color/blockchain_blue"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/pinentry_num_text_size" />
 
                 </LinearLayout>
@@ -353,7 +354,7 @@
                     android:layout_width="0dip"
                     android:layout_height="54dip"
                     android:layout_weight="1"
-                    android:background="@color/blockchain_pearl_white"
+                    android:background="@color/primary_navy_medium"
                     android:gravity="center" />
 
                 <LinearLayout
@@ -372,7 +373,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:gravity="center_vertical|center_horizontal"
-                        android:src="@drawable/ic_check_circle_grey600_36dp" />
+                        android:src="@drawable/ic_check_circle_grey600_36dp"
+                        android:tint="@color/white" />
 
                 </LinearLayout>
             </TableRow>
@@ -380,7 +382,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="8dp"
-                android:background="@color/blockchain_pearl_white" />
+                android:background="@color/primary_navy_medium" />
         </TableLayout>
 
     </LinearLayout>

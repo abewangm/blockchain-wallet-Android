@@ -58,6 +58,7 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentReceiveBinding;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
+import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -153,7 +154,8 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
     private void setupToolbar() {
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.receive_bitcoin);
+            ((BaseAuthActivity) getActivity()).setupToolbar(
+                    ((MainActivity) getActivity()).getSupportActionBar(), R.string.receive_bitcoin);
 
             ViewUtils.setElevation(
                     getActivity().findViewById(R.id.appbar_layout),

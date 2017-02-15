@@ -10,11 +10,11 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
             android:layout_marginLeft="24dp"
             android:layout_marginRight="24dp"
-            android:layout_marginBottom="16dp">
+            android:layout_marginTop="24dp"
+            android:orientation="vertical">
 
 
             <LinearLayout
@@ -25,8 +25,8 @@
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="@string/warning"
                     android:textColor="@color/black"
                     android:textSize="24sp" />
@@ -36,8 +36,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/watchonly_address_receive_warning"
                 android:layout_marginTop="16dp"
+                android:text="@string/watchonly_address_receive_warning"
                 android:textColor="@color/blockchain_grey" />
 
         </LinearLayout>
@@ -54,14 +54,14 @@
         <LinearLayout style="@style/CustomDialogButtonContainer">
 
             <android.support.v7.widget.AppCompatButton
-                style="@style/CustomDialogButton"
                 android:id="@+id/confirm_cancel"
+                style="@style/CustomDialogButton"
                 android:text="@string/cancel"
                 android:textColor="@color/blockchain_grey" />
 
             <android.support.v7.widget.AppCompatButton
-                style="@style/CustomDialogButton"
                 android:id="@+id/confirm_continue"
+                style="@style/CustomDialogButton"
                 android:text="@string/CONTINUE"
                 android:textColor="@color/blockchain_blue" />
 
