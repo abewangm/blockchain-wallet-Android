@@ -230,7 +230,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
                 R.string.security_centre_backup_title,
                 getString(R.string.security_centre_backup_message),
-                R.drawable.vector_padlock,
+                R.drawable.vector_lock,
                 R.string.security_centre_backup_positive_button,
                 true,
                 showNeverAgain

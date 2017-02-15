@@ -98,7 +98,7 @@
             android:padding="16dp"
             android:tint="@color/primary_navy_medium"
             android:visibility="gone"
-            app:srcCompat="@drawable/ic_settings_white_24dp"
+            app:srcCompat="@drawable/vector_settings"
             tools:visibility="visible" />
 
     </RelativeLayout>

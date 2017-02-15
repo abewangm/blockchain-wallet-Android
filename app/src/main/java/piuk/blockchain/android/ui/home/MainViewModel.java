@@ -23,6 +23,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
@@ -38,6 +39,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
+import piuk.blockchain.android.util.StringUtils;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
@@ -50,6 +52,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
+    @Inject protected StringUtils stringUtils;
 
     public interface DataListener {
         void onRooted();
@@ -73,6 +76,8 @@ public class MainViewModel extends BaseViewModel {
         void clearAllDynamicShortcuts();
 
         void showSurveyPrompt();
+
+        void updateCurrentPrice(String price);
     }
 
     public MainViewModel(Context context, DataListener dataListener) {
@@ -240,7 +245,7 @@ public class MainViewModel extends BaseViewModel {
         DynamicFeeCache.getInstance().destroy();
     }
 
-    private void exchangeRateThread() {
+    public void exchangeRateThread() {
 
         List<String> currencies = Arrays.asList(ExchangeRateFactory.getInstance().getCurrencies());
         String strCurrentSelectedFiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
@@ -258,6 +263,7 @@ public class MainViewModel extends BaseViewModel {
 
                 ExchangeRateFactory.getInstance().setData(response);
                 ExchangeRateFactory.getInstance().updateFxPricesForEnabledCurrencies();
+                dataListener.updateCurrentPrice(getFormattedPriceString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -265,6 +271,14 @@ public class MainViewModel extends BaseViewModel {
             Looper.loop();
 
         }).start();
+    }
+
+    private String getFormattedPriceString() {
+        String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
+        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiat);
+        String fiatSymbol = ExchangeRateFactory.getInstance().getSymbol(fiat);
+        String args = fiatSymbol + lastPrice;
+        return stringUtils.getFormattedString(R.string.current_price, args);
     }
 
     public void unpair() {

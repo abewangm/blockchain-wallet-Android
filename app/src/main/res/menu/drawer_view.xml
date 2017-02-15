@@ -9,17 +9,17 @@
 
         <item
             android:id="@+id/nav_backup"
-            android:icon="@drawable/bad_backup"
+            android:icon="@drawable/vector_lock"
             android:title="@string/backup_wallet" />
 
         <item
             android:id="@+id/nav_addresses"
-            android:icon="@drawable/ic_person_grey600_24dp"
+            android:icon="@drawable/vector_wallet"
             android:title="@string/addresses" />
 
         <item
             android:id="@+id/nav_map"
-            android:icon="@drawable/icon_merchantdirectory"
+            android:icon="@drawable/vector_merchant"
             android:title="@string/merchant_map" />
 
     </group>
@@ -28,17 +28,17 @@
 
         <item
             android:id="@+id/nav_settings"
-            android:icon="@drawable/icon_settings"
+            android:icon="@drawable/vector_settings"
             android:title="@string/action_settings" />
 
         <item
             android:id="@+id/nav_support"
-            android:icon="@drawable/ic_help_grey600_24dp"
+            android:icon="@drawable/vector_help"
             android:title="@string/support" />
 
         <item
             android:id="@+id/nav_logout"
-            android:icon="@drawable/icon_logout"
+            android:icon="@drawable/vector_left_arrow"
             android:title="@string/logout" />
 
     </group>

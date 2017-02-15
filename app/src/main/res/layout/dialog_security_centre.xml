@@ -11,12 +11,12 @@
         android:layout_height="150dp"
         android:background="@color/blockchain_blue">
 
-        <android.support.v7.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/icon"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_gravity="center"
-            tools:src="@drawable/vector_padlock" />
+            tools:src="@drawable/vector_lock" />
     </FrameLayout>
 
     <!-- Main content -->
@@ -26,15 +26,17 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <android.support.v7.widget.AppCompatTextView
+        <TextView
             android:id="@+id/title"
             style="@style/Base.DialogWindowTitle.AppCompat"
+            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
+            tools:ignore="MissingPrefix"
             tools:text="@string/security_centre_email_title" />
 
-        <android.support.v7.widget.AppCompatTextView
+        <TextView
             android:id="@+id/message"
             style="@style/Base.TextAppearance.AppCompat.Small"
             android:layout_width="match_parent"
@@ -55,20 +57,20 @@
     <!-- Button Layout -->
     <LinearLayout style="@style/CustomDialogButtonContainer">
 
-        <android.support.v7.widget.AppCompatButton
+        <Button
             android:id="@+id/button_negative"
             style="@style/CustomDialogButton"
             android:layout_gravity="right"
             android:text="@string/not_now"
-            android:textColor="@color/blockchain_grey"
+            android:textColor="@color/primary_gray_dark"
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <android.support.v7.widget.AppCompatButton
+        <Button
             android:id="@+id/button_positive"
             style="@style/CustomDialogButton"
             android:layout_gravity="right"
-            android:textColor="@color/blockchain_blue"
+            android:textColor="@color/primary_blue_accent"
             tools:text="@android:string/ok" />
 
     </LinearLayout>

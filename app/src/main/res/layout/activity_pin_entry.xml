@@ -16,7 +16,7 @@
             android:background="?selectableItemBackgroundBorderless"
             android:padding="16dp"
             android:visibility="invisible"
-            app:srcCompat="@drawable/ic_settings_white_24dp"
+            app:srcCompat="@drawable/vector_settings"
             android:tint="@color/primary_navy_medium"
             tools:visibility="visible" />
 
