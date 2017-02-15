@@ -258,7 +258,6 @@ public class MainViewModel extends BaseViewModel {
 
             String response = null;
             try {
-                // TODO: 07/09/2016 Exchange rate only fetched once per session? Should try to update more often
                 response = new ExchangeTicker().getExchangeRate();
 
                 ExchangeRateFactory.getInstance().setData(response);

@@ -4,7 +4,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blockchain_blue"
+        android:background="@color/primary_navy_medium"
         android:orientation="vertical">
 
         <LinearLayout
@@ -17,7 +17,6 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
                 android:paddingBottom="16dp"
                 android:paddingTop="32dp"
                 android:text="@string/backup_verify_heading"
@@ -26,29 +25,27 @@
 
             <android.support.v7.widget.AppCompatEditText
                 android:id="@+id/etFirstRequest"
-                style="@style/RecoveryPhraseEditText">
+                style="@style/RecoveryPhraseEditText"
+                android:theme="@style/RecoveryPhraseTextCursorTheme">
 
                 <requestFocus />
             </android.support.v7.widget.AppCompatEditText>
 
-            <View style="@style/RecoveryPhraseEditTextUnderline" />
-
             <android.support.v7.widget.AppCompatEditText
                 android:id="@+id/etSecondRequest"
-                style="@style/RecoveryPhraseEditText" />
-
-            <View style="@style/RecoveryPhraseEditTextUnderline" />
+                style="@style/RecoveryPhraseEditText"
+                android:theme="@style/RecoveryPhraseTextCursorTheme" />
 
             <android.support.v7.widget.AppCompatEditText
                 android:id="@+id/etThirdRequest"
-                style="@style/RecoveryPhraseEditText" />
-
-            <View style="@style/RecoveryPhraseEditTextUnderline" />
+                style="@style/RecoveryPhraseEditText"
+                android:theme="@style/RecoveryPhraseTextCursorTheme" />
 
         </LinearLayout>
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/verify_action"
+            style="@style/ButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"

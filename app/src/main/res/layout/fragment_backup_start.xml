@@ -4,13 +4,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blockchain_pearl_white"
+        android:background="@color/white"
         android:orientation="vertical"
         android:padding="32dp">
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/backup_header"
             style="@style/TextAppearance.AppCompat.Headline"
+            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="24dp"
@@ -25,6 +26,7 @@
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/backup_wallet_action"
+            style="@style/ButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"

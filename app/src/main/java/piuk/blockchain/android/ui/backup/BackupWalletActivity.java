@@ -18,9 +18,8 @@ public class BackupWalletActivity extends BaseAuthActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_backup_wallet);
 
-        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar_general);
-        toolbar.setTitle(getResources().getString(R.string.backup_wallet));
-        setSupportActionBar(toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        setupToolbar(toolbar, R.string.backup_wallet);
 
         if (isBackedUp()) {
             startFragment(BackupWalletCompletedFragment.newInstance(false), BackupWalletCompletedFragment.TAG);

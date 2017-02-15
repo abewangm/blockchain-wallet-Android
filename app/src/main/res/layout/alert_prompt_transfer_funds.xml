@@ -46,13 +46,13 @@
                 android:id="@+id/confirm_cancel"
                 style="@style/CustomDialogButton"
                 android:text="@string/not_now"
-                android:textColor="@color/blockchain_grey" />
+                android:textColor="@color/primary_gray_dark" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/confirm_send"
                 style="@style/CustomDialogButton"
                 android:text="@string/transfer"
-                android:textColor="@color/blockchain_blue" />
+                android:textColor="@color/primary_blue_accent" />
 
         </LinearLayout>
     </LinearLayout>
