@@ -11,16 +11,17 @@
         android:orientation="vertical">
 
 
-        <android.support.v7.widget.AppCompatImageView
+        <ImageView
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:layout_marginTop="16dp"
             android:gravity="center_horizontal"
             android:src="@drawable/vector_icon_blue" />
 
-        <android.support.v7.widget.AppCompatImageView
+        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="22dp"
+            android:layout_marginBottom="24dp"
             android:layout_marginTop="24dp"
             android:gravity="center_horizontal"
             android:src="@drawable/vector_blockchain"
@@ -28,45 +29,49 @@
 
         <TextView
             android:id="@+id/about"
+            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
             android:gravity="center_horizontal"
-            android:textColor="@color/white"
-            android:textSize="22sp" />
+            android:textColor="@color/primary_navy_medium"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/rate_us"
+            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
             android:gravity="center"
             android:text="@string/rate_us"
-            android:textColor="@color/white"
-            android:textSize="22sp" />
+            android:textColor="@color/primary_navy_medium"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/licenses"
+            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:gravity="center"
             android:text="@string/licenses"
-            android:textColor="@color/white"
-            android:textSize="22sp" />
+            android:textColor="@color/primary_navy_medium"
+            android:textSize="16sp" />
 
 
         <TextView
             android:id="@+id/free_wallet"
+            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:gravity="center"
             android:text="@string/merchant_download"
-            android:textColor="@color/white"
-            android:textSize="22sp" />
+            android:textColor="@color/primary_navy_medium"
+            android:textSize="16sp" />
 
     </LinearLayout>
 </layout>

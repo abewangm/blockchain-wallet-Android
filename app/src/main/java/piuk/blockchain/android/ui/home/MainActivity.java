@@ -130,7 +130,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
         // Styling
         binding.bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.primary_blue_accent));
-        binding.bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.primary_dark_gray));
+        binding.bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.primary_gray_dark));
         binding.bottomNavigation.setForceTint(true);
         binding.bottomNavigation.setUseElevation(true);
         Typeface typeface = TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf");

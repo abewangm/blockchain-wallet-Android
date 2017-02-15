@@ -79,7 +79,7 @@
 
             </LinearLayout>
 
-            <android.support.v7.widget.AppCompatImageView
+            <ImageView
                 android:id="@+id/fingerprint_logo"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -102,7 +102,8 @@
             android:orientation="horizontal"
             android:paddingBottom="8dp">
 
-            <android.support.v7.widget.AppCompatTextView
+            <TextView
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -111,7 +112,7 @@
                 android:textColor="@color/primary_navy_medium"
                 android:textSize="14sp" />
 
-            <android.support.v7.widget.AppCompatImageView
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

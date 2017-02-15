@@ -17,7 +17,7 @@
             android:alpha="0.8"
             android:gravity="center_horizontal"
             android:text="@string/your_transactions"
-            android:textColor="@color/primary_dark_gray"
+            android:textColor="@color/primary_gray_dark"
             android:textSize="20sp" />
 
         <TextView
@@ -30,7 +30,7 @@
             android:alpha="0.8"
             android:gravity="center_horizontal"
             android:text="@string/transaction_occur_when"
-            android:textColor="@color/primary_dark_gray"
+            android:textColor="@color/primary_gray_dark"
             android:textSize="16sp" />
 
     </LinearLayout>

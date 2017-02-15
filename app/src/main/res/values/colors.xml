@@ -61,10 +61,17 @@
     <color name="secondary_pink_light">#F9B0A1</color>
     <color name="secondary_red_light">#F26C57</color>
 
+    <!-- For warning messages -->
     <color name="product_green_medium">#00A76F</color>
     <color name="product_red_medium">#CA3A3C</color>
 
     <!-- Specified in designs but not named in spec -->
-    <color name="primary_dark_gray">#4c4c4c</color>
+    <color name="primary_gray_dark">#4c4c4c</color>
+    <color name="product_gray_transferred">#7b9eb1</color>
+    <color name="product_gray_transferred_50">#807b9eb1</color>
+    <color name="product_red_sent">#f26c57</color>
+    <color name="product_red_sent_50">#80f26c57</color>
+    <color name="product_green_received">#0bbabc</color>
+    <color name="product_green_received_50">#800bbabc</color>
 
 </resources>

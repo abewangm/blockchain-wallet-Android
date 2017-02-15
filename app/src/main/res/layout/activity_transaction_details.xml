@@ -3,13 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-        <variable
-            name="viewModel"
-            type="piuk.blockchain.android.ui.transactions.TransactionDetailViewModel" />
-    </data>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -52,7 +45,7 @@
                     android:id="@+id/double_spend_warning"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/alert_red"
+                    android:background="@color/product_red_medium"
                     android:orientation="vertical"
                     android:visibility="gone"
                     tools:visibility="visible">
@@ -63,14 +56,15 @@
                         android:layout_gravity="center"
                         android:orientation="horizontal">
 
-                        <android.support.v7.widget.AppCompatImageView
+                        <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:padding="8dp"
                             app:srcCompat="@drawable/ic_warning_white_24dp" />
 
-                        <android.support.v7.widget.AppCompatTextView
+                        <TextView
+                            fontPath="fonts/Montserrat-Regular.ttf"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
@@ -86,42 +80,44 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="16dp">
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
                         android:id="@+id/transaction_type"
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
-                        android:fontFamily="sans-serif-medium"
                         android:textSize="20sp"
                         tools:text="Received"
-                        tools:textColor="@color/blockchain_receive_green" />
+                        tools:textColor="@color/product_green_received" />
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
                         android:id="@+id/transaction_amount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
                         android:textSize="20sp"
                         tools:text="1.234567 BTC"
-                        tools:textColor="@color/blockchain_receive_green" />
+                        tools:textColor="@color/product_green_received" />
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
                         android:id="@+id/transaction_value"
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
                         android:layout_below="@+id/transaction_amount"
-                        android:textColor="@color/light_grey_text"
+                        android:textColor="@color/primary_gray"
                         android:textSize="14sp"
                         tools:text="Value when recieved: $200" />
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
                         android:id="@+id/transaction_fee"
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
                         android:layout_below="@+id/transaction_value"
-                        android:textColor="@color/light_grey_text"
+                        android:textColor="@color/primary_gray"
                         android:textSize="14sp"
                         tools:text="Transaction fee: 0.00000124 BTC" />
 
@@ -135,18 +131,20 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="16dp">
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
                         android:id="@+id/title_description"
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
                         android:layout_marginBottom="8dp"
                         android:text="@string/description"
-                        android:textColor="@color/blockchain_grey"
+                        android:textColor="@color/primary_gray"
                         android:textSize="14sp" />
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
                         android:id="@+id/description_field"
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/title_description"
@@ -156,10 +154,11 @@
                         android:hint="@string/transaction_detail_description_hint"
                         android:maxLines="1"
                         android:paddingRight="8dp"
-                        android:textColorHint="@color/light_grey_text"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/product_gray_transferred_50"
                         android:textSize="16sp" />
 
-                    <android.support.v7.widget.AppCompatImageView
+                    <ImageView
                         android:id="@+id/edit_icon"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
@@ -181,12 +180,13 @@
                     android:layout_marginTop="16dp"
                     android:orientation="vertical">
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:text="@string/to"
-                        android:textColor="@color/blockchain_grey"
+                        android:textColor="@color/primary_gray"
                         android:textSize="14sp" />
 
                     <LinearLayout
@@ -195,8 +195,9 @@
                         android:layout_marginBottom="16dp"
                         android:orientation="horizontal">
 
-                        <android.support.v7.widget.AppCompatTextView
+                        <TextView
                             android:id="@+id/to_address"
+                            fontPath="fonts/Montserrat-Regular.ttf"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="0.9"
@@ -217,16 +218,18 @@
 
                     </LinearLayout>
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:text="@string/from"
-                        android:textColor="@color/blockchain_grey"
+                        android:textColor="@color/primary_gray"
                         android:textSize="14sp" />
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
                         android:id="@+id/from_address"
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/black"
@@ -244,16 +247,18 @@
                     android:layout_margin="16dp"
                     android:orientation="vertical">
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:text="@string/transaction_detail_date"
-                        android:textColor="@color/blockchain_grey"
+                        android:textColor="@color/primary_gray"
                         android:textSize="14sp" />
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
                         android:id="@+id/date"
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/black"
@@ -272,19 +277,21 @@
                     android:layout_margin="16dp"
                     android:orientation="vertical">
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:text="@string/transaction_detail_status"
-                        android:textColor="@color/blockchain_grey"
+                        android:textColor="@color/primary_gray"
                         android:textSize="14sp" />
 
-                    <android.support.v7.widget.AppCompatTextView
+                    <TextView
                         android:id="@+id/status"
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/blockchain_blue"
+                        android:textColor="@color/black"
                         android:textSize="16sp"
                         tools:text="Confirmed" />
 
