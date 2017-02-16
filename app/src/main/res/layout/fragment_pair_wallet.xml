@@ -11,7 +11,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/blockchain_pearl_white"
+            android:background="@color/white"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -28,7 +28,7 @@
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
                     android:text="1"
-                    android:textColor="@color/blockchain_blue"
+                    android:textColor="@color/primary_navy_medium"
                     android:textSize="33sp" />
 
                 <TextView
@@ -55,7 +55,7 @@
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
                     android:text="2"
-                    android:textColor="@color/blockchain_blue"
+                    android:textColor="@color/primary_navy_medium"
                     android:textSize="33sp" />
 
                 <TextView
@@ -81,7 +81,7 @@
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
                     android:text="3"
-                    android:textColor="@color/blockchain_blue"
+                    android:textColor="@color/primary_navy_medium"
                     android:textSize="33sp" />
 
                 <TextView

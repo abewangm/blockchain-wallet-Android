@@ -25,9 +25,7 @@
                     android:id="@+id/progressbar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:indeterminateTint="@color/primary_navy_dark"
-                    android:indeterminateTintMode="src_atop" />
+                    android:layout_gravity="center" />
 
                 <ImageView
                     android:id="@+id/qr_code"

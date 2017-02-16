@@ -32,7 +32,7 @@
                 android:id="@+id/content_frame"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/blockchain_pearl_white"
+                android:background="@color/white"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
             <!--The bottom navigation panel -->
@@ -54,6 +54,6 @@
             android:background="@android:color/white"
             app:headerLayout="@layout/navigation_drawer_header"
             app:insetForeground="@color/primary_navy_medium"
-            app:menu="@menu/drawer_view" />
+            app:menu="@menu/menu_nav_drawer" />
     </android.support.v4.widget.DrawerLayout>
 </layout>

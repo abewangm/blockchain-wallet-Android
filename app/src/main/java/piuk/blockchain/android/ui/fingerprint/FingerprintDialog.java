@@ -160,7 +160,7 @@ public class FingerprintDialog extends AppCompatDialogFragment
         @Override
         public void run() {
             if (getContext() != null) {
-                statusTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.light_grey_text));
+                statusTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.primary_gray_medium));
                 statusTextView.setText(getString(R.string.fingerprint_hint));
                 fingerprintIcon.setImageResource(R.drawable.ic_fingerprint_logo);
             }

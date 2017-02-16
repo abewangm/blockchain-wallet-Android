@@ -7,13 +7,6 @@
 
     <dimen name="swipe_receive_qr_size">240dp</dimen>
 
-    <dimen name="fab_size_normal">56dp</dimen>
-    <dimen name="fab_size_mini">40dp</dimen>
-    <dimen name="fab_icon_size">24dp</dimen>
-    <dimen name="fab_shadow_offset">3dp</dimen>
-    <dimen name="fab_shadow_radius">9dp</dimen>
-    <dimen name="fab_stroke_width">1dp</dimen>
-
     <dimen name="action_bar_height">56dp</dimen>
     <dimen name="expandable_layout_base_height">72dp</dimen>
     <dimen name="balance_bar_height">72dp</dimen>

@@ -35,7 +35,6 @@
             android:id="@+id/numericPad"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/blockchain_navigation_bar"
             android:gravity="center_horizontal"
             android:shrinkColumns="*"
             android:stretchColumns="*">
@@ -378,12 +377,6 @@
 
                 </LinearLayout>
             </TableRow>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:background="@color/primary_navy_medium" />
         </TableLayout>
-
     </LinearLayout>
 </merge>

@@ -119,7 +119,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.account_activity_actions, menu);
+        inflater.inflate(R.menu.menu_account, menu);
         transferFundsMenuItem = menu.findItem(R.id.action_transfer_funds);
         viewModel.checkTransferableLegacyFunds(true, true);//Auto popup
 

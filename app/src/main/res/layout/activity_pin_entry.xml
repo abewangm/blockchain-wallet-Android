@@ -28,7 +28,7 @@
             android:layout_below="@+id/button_settings"
             android:layout_centerHorizontal="true"
             android:adjustViewBounds="true"
-            android:src="@drawable/vector_icon_blue" />
+            app:srcCompat="@drawable/vector_icon_blue" />
 
         <piuk.blockchain.android.ui.customviews.NonSwipeableViewPager
             android:id="@+id/viewpager"

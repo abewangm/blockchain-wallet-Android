@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/blockchain_pearl_white"
+    android:background="@color/white"
     android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
@@ -84,7 +84,7 @@
                 android:layout_height="match_parent"
                 android:paddingBottom="8dp"
                 android:text="@string/to"
-                android:textColor="@color/blockchain_grey"
+                android:textColor="@color/primary_gray_medium"
                 android:textSize="14sp"
                 tools:ignore="MissingPrefix" />
 

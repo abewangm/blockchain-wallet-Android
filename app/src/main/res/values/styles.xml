@@ -11,10 +11,10 @@
         <item name="colorPrimaryDark">@color/primary_navy_dark</item>
         <item name="colorAccent">@color/primary_navy_dark</item>
 
-        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorPrimary">@color/black</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
 
-        <item name="android:windowBackground">@color/blockchain_pearl_white</item>
+        <item name="android:windowBackground">@color/white</item>
         <item name="android:windowContentTransitions">true</item>
 
         <item name="android:toolbarStyle">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
@@ -74,7 +74,7 @@
         <item name="android:gravity">center_vertical</item>
         <item name="android:textCursorDrawable">@null</item>
         <item name="android:inputType">textPassword</item>
-        <item name="android:textColor">@color/blockchain_grey</item>
+        <item name="android:textColor">@color/primary_gray_medium</item>
     </style>
 
     <style name="PasswordChangeDialogEditTextLayout">
@@ -126,7 +126,7 @@
 
     <!-- Using a Theme to apply the button color as it doesn't work in Styles -->
     <style name="ButtonGreenTheme" parent="Widget.AppCompat.Button.Colored">
-        <item name="colorButtonNormal">@color/blockchain_receive_green</item>
+        <item name="colorButtonNormal">@color/product_green_medium</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:textSize">16sp</item>
     </style>
@@ -150,7 +150,7 @@
     </style>
 
     <style name="ButtonWhiteTheme" parent="Widget.AppCompat.Button.Colored">
-        <item name="colorButtonNormal">@color/blockchain_pearl_white</item>
+        <item name="colorButtonNormal">@color/white</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">16sp</item>
     </style>
@@ -191,7 +191,7 @@
         <item name="android:maxLines">1</item>
         <item name="android:layout_marginBottom">8dp</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:textColorHint">@color/white_50</item>
+        <item name="android:textColorHint">@color/primary_gray_medium</item>
     </style>
 
     <style name="RecoveryPhraseTextCursorTheme">

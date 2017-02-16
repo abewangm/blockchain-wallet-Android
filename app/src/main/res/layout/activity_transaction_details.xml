@@ -69,7 +69,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:text="@string/transaction_detail_double_spend"
-                            android:textColor="@color/blockchain_pearl_white" />
+                            android:textColor="@color/white" />
 
                     </LinearLayout>
                 </LinearLayout>

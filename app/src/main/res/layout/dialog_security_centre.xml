@@ -16,6 +16,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_gravity="center"
+            android:tint="@color/white"
             tools:src="@drawable/vector_lock" />
     </FrameLayout>
 
@@ -70,7 +71,7 @@
             android:id="@+id/button_positive"
             style="@style/CustomDialogButton"
             android:layout_gravity="right"
-            android:textColor="@color/primary_blue_accent"
+            android:textColor="@color/primary_navy_medium"
             tools:text="@android:string/ok" />
 
     </LinearLayout>

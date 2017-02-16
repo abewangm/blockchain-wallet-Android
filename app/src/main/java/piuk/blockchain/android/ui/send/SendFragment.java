@@ -174,7 +174,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.send_activity_actions, menu);
+        inflater.inflate(R.menu.menu_send, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -745,8 +745,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                 .setPositiveButton(android.R.string.ok, null).show());
 
         if (details.isSurge) {
-            dialogBinding.confirmFeeBtc.setTextColor(ContextCompat.getColor(getContext(), R.color.blockchain_send_red));
-            dialogBinding.confirmFeeFiat.setTextColor(ContextCompat.getColor(getContext(), R.color.blockchain_send_red));
+            dialogBinding.confirmFeeBtc.setTextColor(ContextCompat.getColor(getContext(), R.color.product_red_medium));
+            dialogBinding.confirmFeeFiat.setTextColor(ContextCompat.getColor(getContext(), R.color.product_red_medium));
             dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
         }
 

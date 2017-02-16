@@ -10,7 +10,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/blockchain_pearl_white"
+            android:background="@color/white"
             android:orientation="vertical">
 
             <RelativeLayout
@@ -64,7 +64,7 @@
                     android:layout_margin="16dp"
                     android:src="@drawable/ic_arrow_back_white_24dp"
                     android:rotation="-90"
-                    android:tint="@color/primary_blue_accent" />
+                    android:tint="@color/primary_navy_medium" />
 
                 <TextView
                     android:id="@+id/confirm_to_label"
@@ -188,7 +188,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical|right"
                             android:text="@string/customize"
-                            android:textColor="@color/blockchain_blue"
+                            android:textColor="@color/primary_navy_medium"
                             android:textSize="14sp" />
 
                     </LinearLayout>

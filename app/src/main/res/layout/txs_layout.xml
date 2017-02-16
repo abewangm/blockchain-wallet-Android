@@ -19,7 +19,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_gravity="top"
-                android:background="@color/blockchain_light_grey" />
+                android:background="@color/primary_gray_light" />
 
             <View
                 android:id="@+id/tx_touch_view"

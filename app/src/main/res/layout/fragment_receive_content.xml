@@ -39,7 +39,7 @@
                         android:paddingRight="32dp"
                         android:paddingTop="16dp"
                         android:text="@string/share_instructions"
-                        android:textColor="@color/blockchain_grey" />
+                        android:textColor="@color/primary_gray_dark" />
 
                     <FrameLayout
                         android:layout_width="wrap_content"

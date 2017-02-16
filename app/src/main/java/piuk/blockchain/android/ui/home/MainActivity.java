@@ -15,7 +15,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -29,7 +28,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
@@ -127,9 +125,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         });
 
         // Create items
-        AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.blockchain_pearl_white);
-        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.transactions, R.drawable.vector_transactions, R.color.blockchain_pearl_white);
-        AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.receive_bitcoin, R.drawable.vector_receive, R.color.blockchain_pearl_white);
+        AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.white);
+        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.transactions, R.drawable.vector_transactions, R.color.white);
+        AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.receive_bitcoin, R.drawable.vector_receive, R.color.white);
 
         // Add items
         binding.bottomNavigation.addItems(Arrays.asList(item1, item2, item3));
@@ -207,7 +205,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_activity_actions, menu);
+        getMenuInflater().inflate(R.menu.menu_main_activity, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -352,17 +350,17 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             backUpMenuItem.setVisible(true);
         }
 
-        // STOPSHIP: 15/02/2017 This tinting does not work with vectors currently
+        binding.nvView.setItemIconTintList(null);
         Drawable drawable = DrawableCompat.wrap(ContextCompat.getDrawable(this, R.drawable.vector_lock));
         drawable.mutate();
         if (mainViewModel.getPayloadManager().getPayload() != null &&
                 mainViewModel.getPayloadManager().getPayload().getHdWallet() != null &&
                 !mainViewModel.getPayloadManager().getPayload().getHdWallet().isMnemonicVerified()) {
-            //Not backed up
+            // Not backed up
             DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.product_red_medium));
             DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_ATOP);
         } else {
-            //Backed up
+            // Backed up
             DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.product_green_medium));
             DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_ATOP);
         }

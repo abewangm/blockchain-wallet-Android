@@ -25,7 +25,6 @@ import piuk.blockchain.android.ui.zxing.camera.CameraManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -34,7 +33,6 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -297,7 +295,7 @@ public final class CaptureActivity extends BaseAuthActivity implements SurfaceHo
         if (points != null && points.length > 0) {
             Canvas canvas = new Canvas(barcode);
             Paint paint = new Paint();
-            paint.setColor(ContextCompat.getColor(this, R.color.blockchain_blue));
+            paint.setColor(ContextCompat.getColor(this, R.color.primary_blue_accent));
             if (points.length == 2) {
                 paint.setStrokeWidth(4.0f);
                 drawLine(canvas, paint, points[0], points[1]);
@@ -408,7 +406,7 @@ public final class CaptureActivity extends BaseAuthActivity implements SurfaceHo
         // Inflate the menu items for use in the action bar
         if (hasFlashLight) {
             MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.scan_actions, menu);
+            inflater.inflate(R.menu.menu_scan, menu);
         }
         return super.onCreateOptionsMenu(menu);
     }
