@@ -31,7 +31,7 @@
 
         </LinearLayout>
 
-        <android.support.v7.widget.AppCompatCheckBox
+        <CheckBox
             android:id="@+id/confirm_dont_ask_again"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -42,13 +42,13 @@
 
         <LinearLayout style="@style/CustomDialogButtonContainer">
 
-            <android.support.v7.widget.AppCompatButton
+            <Button
                 android:id="@+id/confirm_cancel"
                 style="@style/CustomDialogButton"
                 android:text="@string/not_now"
                 android:textColor="@color/primary_gray_dark" />
 
-            <android.support.v7.widget.AppCompatButton
+            <Button
                 android:id="@+id/confirm_send"
                 style="@style/CustomDialogButton"
                 android:text="@string/transfer"

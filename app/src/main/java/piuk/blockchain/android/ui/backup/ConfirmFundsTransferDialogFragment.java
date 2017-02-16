@@ -8,10 +8,7 @@ import android.support.annotation.StringRes;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatDialogFragment;
-import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.AppCompatSpinner;
-import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,9 +17,15 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import info.blockchain.wallet.util.CharSequenceX;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
+import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
@@ -42,13 +45,13 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
 
     // Views
     @Thunk AppCompatSpinner mToSpinner;
-    private AppCompatTextView mFromLabel;
-    private AppCompatTextView mTransferAmountBtc;
-    private AppCompatTextView mTransferAmountFiat;
-    private AppCompatTextView mFeeAmountBtc;
-    private AppCompatTextView mFeeAmountFiat;
-    private AppCompatCheckBox mArchiveCheckbox;
-    private AppCompatButton mTransferButton;
+    private TextView mFromLabel;
+    private TextView mTransferAmountBtc;
+    private TextView mTransferAmountFiat;
+    private TextView mFeeAmountBtc;
+    private TextView mFeeAmountFiat;
+    private CheckBox mArchiveCheckbox;
+    private Button mTransferButton;
     // Layouts
     private RelativeLayout mLoadingLayout;
 
@@ -86,18 +89,22 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> dismiss());
-        toolbar.setTitle(R.string.transfer_confirm);
+
+        CharSequence charSequence = CalligraphyUtils.applyTypefaceSpan(
+                getString(R.string.transfer_confirm),
+                TypefaceUtils.load(getContext().getAssets(), "fonts/Montserrat-Regular.ttf"));
+        toolbar.setTitle(charSequence);
 
         mViewModel = new ConfirmFundsTransferViewModel(this);
 
-        mFromLabel = (AppCompatTextView) view.findViewById(R.id.label_from);
+        mFromLabel = (TextView) view.findViewById(R.id.label_from);
         mToSpinner = (AppCompatSpinner) view.findViewById(R.id.spinner_destination);
-        mTransferAmountBtc = (AppCompatTextView) view.findViewById(R.id.label_transfer_amount_btc);
-        mTransferAmountFiat = (AppCompatTextView) view.findViewById(R.id.label_transfer_amount_fiat);
-        mFeeAmountBtc = (AppCompatTextView) view.findViewById(R.id.label_fee_amount_btc);
-        mFeeAmountFiat = (AppCompatTextView) view.findViewById(R.id.label_fee_amount_fiat);
-        mArchiveCheckbox = (AppCompatCheckBox) view.findViewById(R.id.checkbox_archive);
-        mTransferButton = (AppCompatButton) view.findViewById(R.id.button_transfer_all);
+        mTransferAmountBtc = (TextView) view.findViewById(R.id.label_transfer_amount_btc);
+        mTransferAmountFiat = (TextView) view.findViewById(R.id.label_transfer_amount_fiat);
+        mFeeAmountBtc = (TextView) view.findViewById(R.id.label_fee_amount_btc);
+        mFeeAmountFiat = (TextView) view.findViewById(R.id.label_fee_amount_fiat);
+        mArchiveCheckbox = (CheckBox) view.findViewById(R.id.checkbox_archive);
+        mTransferButton = (Button) view.findViewById(R.id.button_transfer_all);
 
         mLoadingLayout = (RelativeLayout) view.findViewById(R.id.loading_layout);
 

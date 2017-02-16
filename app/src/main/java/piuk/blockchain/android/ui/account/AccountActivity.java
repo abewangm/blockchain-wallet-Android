@@ -63,10 +63,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     private static final int EDIT_ACTIVITY_REQUEST_CODE = 2007;
     private static final int ADDRESS_LABEL_MAX_LENGTH = 17;
 
-    public static final String IMPORT_ADDRESS = "import_account";
-    public static final String CREATE_NEW = "create_wallet";
-    protected static String IMPORTED_HEADER;
-
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
@@ -83,7 +79,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     private MenuItem transferFundsMenuItem;
     private PrefsUtil prefsUtil;
     private MonetaryUtil monetaryUtil;
-    private int hdAccountsIdx;
     @Thunk MaterialProgressDialog progress;
     @Thunk PayloadManager payloadManager;
     @Thunk AccountViewModel viewModel;
@@ -101,10 +96,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
         viewModel = new AccountViewModel(this);
 
-        setSupportActionBar(binding.toolbarContainer.toolbarGeneral);
-        getSupportActionBar().setTitle("");
+        setupToolbar(binding.toolbarContainer.toolbarGeneral, R.string.addresses);
 
-        IMPORTED_HEADER = getResources().getString(R.string.imported_addresses);
         binding.accountsList.setLayoutManager(new LinearLayoutManager(this));
         binding.accountsList.setHasFixedSize(true);
         accountsAndImportedList = new ArrayList<>();
@@ -115,8 +108,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     @Thunk
     void onRowClick(int position) {
         Intent intent = new Intent(this, AccountEditActivity.class);
-        if (position >= hdAccountsIdx) {
-            intent.putExtra("address_index", position - hdAccountsIdx);
+        if (position >= payloadManager.getPayload().getHdWallet().getAccounts().size()) {
+            intent.putExtra("address_index", position - payloadManager.getPayload().getHdWallet().getAccounts().size());
         } else {
             intent.putExtra("account_index", position);
         }
@@ -238,6 +231,9 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             accountClone.remove(accountClone.size() - 1);
         }
 
+        // Create New Wallet button at top position
+        accountsAndImportedList.add(new AccountItem(AccountItem.TYPE_CREATE_NEW_WALLET_BUTTON));
+
         int defaultIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
         Account defaultAccount = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultIndex);
 
@@ -253,40 +249,25 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                     label,
                     null,
                     balance,
-                    ContextCompat.getDrawable(this, R.drawable.icon_accounthd),
                     accountClone.get(i).isArchived(),
                     false,
-                    defaultAccount.getXpub().equals(accountClone.get(i).getXpub())));
+                    defaultAccount.getXpub().equals(accountClone.get(i).getXpub()),
+                    AccountItem.TYPE_ACCOUNT));
             correctedPosition++;
         }
 
-        // Create New button position
-        accountsAndImportedList.add(new AccountItem(null,
-                CREATE_NEW,
-                null,
-                "",
-                ContextCompat.getDrawable(this, R.drawable.icon_accounthd),
-                false, false, false));
-        hdAccountsIdx = correctedPosition;
+        // Import Address button at first position after wallets
+        accountsAndImportedList.add(new AccountItem(AccountItem.TYPE_IMPORT_ADDRESS_BUTTON));
 
-        ImportedAccount iAccount = null;
+        ImportedAccount importedAccount = null;
         if (payloadManager.getPayload().getLegacyAddressList().size() > 0) {
-            iAccount = new ImportedAccount(getString(R.string.imported_addresses),
+            importedAccount = new ImportedAccount(getString(R.string.imported_addresses),
                     payloadManager.getPayload().getLegacyAddressList(),
                     MultiAddrFactory.getInstance().getLegacyBalance());
         }
 
-        if (iAccount != null) {
-
-            // Imported Header Position
-            accountsAndImportedList.add(new AccountItem(null,
-                    getString(R.string.imported_addresses),
-                    null,
-                    "",
-                    ContextCompat.getDrawable(this, R.drawable.icon_accounthd),
-                    false, false, false));
-
-            legacy = iAccount.getLegacyAddresses();
+        if (importedAccount != null) {
+            legacy = importedAccount.getLegacyAddresses();
             for (int j = 0; j < legacy.size(); j++) {
 
                 String label = legacy.get(j).getLabel();
@@ -302,21 +283,13 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                         label,
                         address,
                         balance,
-                        ContextCompat.getDrawable(this, R.drawable.icon_imported),
                         legacy.get(j).getTag() == LegacyAddress.ARCHIVED_ADDRESS,
                         legacy.get(j).isWatchOnly(),
-                        false));
+                        false,
+                        AccountItem.TYPE_ACCOUNT));
                 correctedPosition++;
             }
         }
-
-        // Import Address button at last position
-        accountsAndImportedList.add(new AccountItem(null,
-                IMPORT_ADDRESS,
-                null,
-                "",
-                ContextCompat.getDrawable(this, R.drawable.icon_accounthd),
-                false, false, false));
 
         if (accountsAdapter == null) {
             accountsAdapter = new AccountAdapter(accountsAndImportedList);
@@ -332,7 +305,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 }
 
                 @Override
-                public void onCardClicked(int correctedPosition) {
+                public void onAccountClicked(int correctedPosition) {
                     onRowClick(correctedPosition);
                 }
             });

@@ -23,27 +23,27 @@
                 android:textColor="@color/white"
                 android:textSize="14sp" />
 
-            <android.support.v7.widget.AppCompatEditText
+            <EditText
                 android:id="@+id/etFirstRequest"
                 style="@style/RecoveryPhraseEditText"
                 android:theme="@style/RecoveryPhraseTextCursorTheme">
 
                 <requestFocus />
-            </android.support.v7.widget.AppCompatEditText>
+            </EditText>
 
-            <android.support.v7.widget.AppCompatEditText
+            <EditText
                 android:id="@+id/etSecondRequest"
                 style="@style/RecoveryPhraseEditText"
                 android:theme="@style/RecoveryPhraseTextCursorTheme" />
 
-            <android.support.v7.widget.AppCompatEditText
+            <EditText
                 android:id="@+id/etThirdRequest"
                 style="@style/RecoveryPhraseEditText"
                 android:theme="@style/RecoveryPhraseTextCursorTheme" />
 
         </LinearLayout>
 
-        <android.support.v7.widget.AppCompatButton
+        <Button
             android:id="@+id/verify_action"
             style="@style/ButtonStyle"
             android:layout_width="match_parent"
