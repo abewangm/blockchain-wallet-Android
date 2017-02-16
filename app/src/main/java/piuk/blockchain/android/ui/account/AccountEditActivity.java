@@ -19,6 +19,7 @@ import android.text.InputFilter;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -27,7 +28,6 @@ import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.databinding.ActivityAccountEditBinding;
 import piuk.blockchain.android.databinding.AlertGenericWarningBinding;
-import piuk.blockchain.android.databinding.AlertShowExtendedPublicKeyBinding;
 import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -59,10 +59,9 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         viewModel = new AccountEditViewModel(new AccountEditModel(this), this);
         binding.setViewModel(viewModel);
 
-        binding.toolbarContainer.toolbarGeneral.setTitle(getResources().getString(R.string.edit));
-        setSupportActionBar(binding.toolbarContainer.toolbarGeneral);
+        setupToolbar(binding.toolbarContainer.toolbarGeneral, R.string.edit);
 
-        binding.transferContainer.setOnClickListener(v -> {
+        binding.tvTransfer.setOnClickListener(v -> {
             if (viewModel.transferFundsClickable()) {
                 new SecondPasswordHandler(this).validate(new SecondPasswordHandler.ResultListener() {
                     @Override
@@ -223,8 +222,8 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
                 .setPositiveButton(android.R.string.ok, null).show());
 
         if (details.isSurge) {
-            dialogBinding.confirmFeeBtc.setTextColor(ContextCompat.getColor(this, R.color.blockchain_send_red));
-            dialogBinding.confirmFeeFiat.setTextColor(ContextCompat.getColor(this, R.color.blockchain_send_red));
+            dialogBinding.confirmFeeBtc.setTextColor(ContextCompat.getColor(this, R.color.product_red_medium));
+            dialogBinding.confirmFeeFiat.setTextColor(ContextCompat.getColor(this, R.color.product_red_medium));
             dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
         }
 
@@ -339,35 +338,24 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
 
     @Override
     public void showAddressDetails(String heading, String note, String copy, Bitmap bitmap, String qrString) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.AlertDialogStyle);
-        AlertShowExtendedPublicKeyBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
-                R.layout.alert_show_extended_public_key, null, false);
-        dialogBuilder.setView(dialogBinding.getRoot());
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_view_qr, null);
+        ImageView imageView = (ImageView) view.findViewById(R.id.imageview_qr);
+        imageView.setImageBitmap(bitmap);
 
-        final AlertDialog alertDialog = dialogBuilder.create();
-        alertDialog.setCanceledOnTouchOutside(false);
-
-        dialogBinding.tvWarningHeading.setText(heading);
-        dialogBinding.tvXpubNote.setText(note);
-        dialogBinding.tvExtendedXpub.setText(copy);
-        dialogBinding.tvExtendedXpub.setTextColor(ContextCompat.getColor(this, R.color.blockchain_blue));
-        dialogBinding.ivQr.setImageBitmap(bitmap);
-
-        dialogBinding.tvExtendedXpub.setOnClickListener(v -> {
-            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(android.content.Context.CLIPBOARD_SERVICE);
-            android.content.ClipData clip = null;
-            clip = android.content.ClipData.newPlainText("Send address", qrString);
-            ToastCustom.makeText(this, getString(R.string.copied_to_clipboard), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
-            clipboard.setPrimaryClip(clip);
-        });
-
-        dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialog.isShowing()) {
-                alertDialog.cancel();
-            }
-        });
-
-        alertDialog.show();
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(heading)
+                .setMessage(note)
+                .setView(view)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(copy, (dialog, which) -> {
+                    android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+                    android.content.ClipData clip = null;
+                    clip = android.content.ClipData.newPlainText("Send address", qrString);
+                    ToastCustom.makeText(this, getString(R.string.copied_to_clipboard), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
+                    clipboard.setPrimaryClip(clip);
+                })
+                .create()
+                .show();
     }
 
     @Override

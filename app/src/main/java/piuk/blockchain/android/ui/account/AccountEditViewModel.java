@@ -223,7 +223,7 @@ public class AccountEditViewModel extends BaseViewModel {
         } else {
             accountModel.setDefaultAccountVisibility(View.VISIBLE);
             accountModel.setDefaultText(stringUtils.getString(R.string.make_default));
-            accountModel.setDefaultTextColor(R.color.primary_blue_accent);
+            accountModel.setDefaultTextColor(R.color.primary_blue_medium);
         }
     }
 
@@ -510,9 +510,7 @@ public class AccountEditViewModel extends BaseViewModel {
                             } else {
                                 revertDefaultAndShowError(revertDefault);
                             }
-                        }, throwable -> {
-                            revertDefaultAndShowError(revertDefault);
-                        }));
+                        }, throwable -> revertDefaultAndShowError(revertDefault)));
     }
 
     private void updateSwipeToReceiveAddresses() {
