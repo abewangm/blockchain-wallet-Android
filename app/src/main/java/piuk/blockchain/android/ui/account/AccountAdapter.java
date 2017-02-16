@@ -50,7 +50,7 @@ class AccountAdapter extends RecyclerView.Adapter {
         } else if (getItemViewType(position) == TYPE_IMPORT_ADDRESS_BUTTON) {
             // Import address button
             HeaderViewHolder headerViewHolder = (HeaderViewHolder) holder;
-            headerViewHolder.title.setText(R.string.import_address);
+            headerViewHolder.title.setText(R.string.imported_addresses);
 
             headerViewHolder.itemView.setOnClickListener(v -> {
                 if (listener != null) listener.onImportAddressClicked();

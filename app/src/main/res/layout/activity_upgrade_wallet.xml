@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
@@ -17,31 +18,32 @@
             android:layout_margin="16dp"
             android:gravity="center_horizontal"
             android:scaleType="fitCenter"
-            android:src="@drawable/vector_icon_blue" />
+            app:srcCompat="@drawable/vector_icon_blue" />
 
         <TextView
             android:id="@+id/upgrade_page_title"
+            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingLeft="48dp"
             android:paddingRight="48dp"
             android:text="@string/confirm_upgrade_header"
-            android:textColor="@color/white"
+            android:textColor="@color/primary_navy_medium"
             android:textSize="16sp" />
 
         <TextSwitcher
             android:id="@+id/upgrade_page_header"
+            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:alpha="0.7"
             android:gravity="center"
             android:paddingBottom="10dp"
             android:paddingLeft="48dp"
             android:paddingRight="48dp"
             android:paddingTop="16dp"
             android:text="@string/upgrade_page_1"
-            android:textColor="@color/white"
+            android:textColor="@color/primary_navy_medium"
             android:textSize="12sp" />
 
         <android.support.v4.view.ViewPager
@@ -58,12 +60,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:indeterminateDrawable="@drawable/progress_white"
-            android:progressDrawable="@drawable/progress_white"
             android:visibility="gone" />
 
-        <android.support.v7.widget.AppCompatButton
+        <Button
             android:id="@+id/btn_upgrade_complete"
+            style="@style/ButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_gravity="center_horizontal"
@@ -75,7 +76,7 @@
             android:text="@string/CONTINUE"
             android:theme="@style/ButtonBlueTheme"
             android:visibility="gone"
-            tools:visibility="visible"/>
+            tools:visibility="visible" />
 
         <LinearLayout
             android:id="@+id/upgrade_action_container"
@@ -119,8 +120,9 @@
 
             </LinearLayout>
 
-            <android.support.v7.widget.AppCompatButton
+            <Button
                 android:id="@+id/upgrade_btn"
+                style="@style/ButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_gravity="center_horizontal"

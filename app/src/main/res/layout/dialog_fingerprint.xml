@@ -73,7 +73,7 @@
             style="?android:attr/buttonBarPositiveButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/blockchain_blue"
+            android:textColor="@color/primary_blue_accent"
             tools:text="USE PIN" />
     </LinearLayout>
 

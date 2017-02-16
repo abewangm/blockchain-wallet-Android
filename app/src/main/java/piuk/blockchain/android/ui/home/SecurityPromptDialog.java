@@ -6,13 +6,13 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatDialogFragment;
-import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.AppCompatCheckBox;
-import android.support.v7.widget.AppCompatImageView;
-import android.support.v7.widget.AppCompatTextView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import piuk.blockchain.android.R;
 
@@ -27,12 +27,12 @@ public class SecurityPromptDialog extends AppCompatDialogFragment {
     private static final String KEY_SHOW_CHECKBOX = "show_checkbox";
     private static final String KEY_SHOW_NEGATIVE_BUTTON = "show_negative_button";
 
-    private AppCompatImageView mIcon;
-    private AppCompatTextView mTitle;
-    private AppCompatTextView mMessage;
-    private AppCompatButton mPositiveButton;
-    private AppCompatButton mNegativeButton;
-    private AppCompatCheckBox mCheckBox;
+    private ImageView mIcon;
+    private TextView mTitle;
+    private TextView mMessage;
+    private Button mPositiveButton;
+    private Button mNegativeButton;
+    private CheckBox mCheckBox;
 
     private View.OnClickListener mPositiveButtonListener;
     private View.OnClickListener mNegativeButtonListener;
@@ -90,12 +90,12 @@ public class SecurityPromptDialog extends AppCompatDialogFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mIcon = (AppCompatImageView) view.findViewById(R.id.icon);
-        mTitle = (AppCompatTextView) view.findViewById(R.id.title);
-        mMessage = (AppCompatTextView) view.findViewById(R.id.message);
-        mPositiveButton = (AppCompatButton) view.findViewById(R.id.button_positive);
-        mNegativeButton = (AppCompatButton) view.findViewById(R.id.button_negative);
-        mCheckBox = (AppCompatCheckBox) view.findViewById(R.id.checkbox);
+        mIcon = (ImageView) view.findViewById(R.id.icon);
+        mTitle = (TextView) view.findViewById(R.id.title);
+        mMessage = (TextView) view.findViewById(R.id.message);
+        mPositiveButton = (Button) view.findViewById(R.id.button_positive);
+        mNegativeButton = (Button) view.findViewById(R.id.button_negative);
+        mCheckBox = (CheckBox) view.findViewById(R.id.checkbox);
 
         mPositiveButton.setOnClickListener(v -> {
             if (mPositiveButtonListener != null) mPositiveButtonListener.onClick(mPositiveButton);

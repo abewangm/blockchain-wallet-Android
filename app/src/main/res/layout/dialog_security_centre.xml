@@ -9,7 +9,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:background="@color/blockchain_blue">
+        android:background="@color/primary_navy_medium">
 
         <ImageView
             android:id="@+id/icon"
@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             tools:text="@string/security_centre_email_message" />
 
-        <android.support.v7.widget.AppCompatCheckBox
+        <CheckBox
             android:id="@+id/checkbox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
