@@ -518,7 +518,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
     private AlertDialog showAddressChangedInfo() {
         return new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(getString(R.string.why_has_my_address_changed))
+                .setTitle(getString(R.string.information))
                 .setMessage(getString(R.string.new_address_info))
                 .setPositiveButton(R.string.learn_more, (dialog, which) -> {
                     Intent intent = new Intent();

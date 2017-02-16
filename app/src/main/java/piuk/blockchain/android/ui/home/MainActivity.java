@@ -75,7 +75,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final String SUPPORT_URI = "http://support.blockchain.com/";
+    private static final String SUPPORT_URI = "https://support.blockchain.com/";
     private static final int REQUEST_BACKUP = 2225;
     private static final int MERCHANT_ACTIVITY = 1;
     public static final int SCAN_URI = 2007;
@@ -468,9 +468,14 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 R.string.security_centre_email_title,
                 message,
                 R.drawable.vector_email,
-                android.R.string.ok);
+                R.string.security_centre_email_check);
         securityPromptDialog.showDialog(getSupportFragmentManager());
-        securityPromptDialog.setPositiveButtonListener(v -> securityPromptDialog.dismiss());
+        securityPromptDialog.setPositiveButtonListener(v -> {
+            securityPromptDialog.dismiss();
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_APP_EMAIL);
+            startActivity(Intent.createChooser(intent, getString(R.string.security_centre_email_check)));
+        });
     }
 
     @Override

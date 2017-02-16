@@ -1,5 +1,7 @@
 package piuk.blockchain.android.ui.transactions;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
@@ -37,6 +39,12 @@ public class TransactionDetailWebViewActivity extends BaseAuthActivity {
         } else {
             finish();
         }
+    }
+
+    public static void start(Context context, String url) {
+        Intent starter = new Intent(context, TransactionDetailWebViewActivity.class);
+        starter.putExtra(KEY_TRANSACTION_URL, url);
+        context.startActivity(starter);
     }
 
     @Override
