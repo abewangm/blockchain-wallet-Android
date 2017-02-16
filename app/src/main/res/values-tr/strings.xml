@@ -392,7 +392,6 @@
     <string name="hint_reveals_password_error">Ana cüzdan şifrenizi şifre ipucunuz olarak ayarlayamazsınız.</string>
     <string name="why_has_my_address_changed">Adresim neden değişti?</string>
     <string name="learn_more">Daha Fazla Öğren</string>
-    <string name="new_address_info">Artırılmış güvenlik için her bir ödeme için eşsiz bir adres oluşturmaktayız. Cüzdanınızda oluşturulan tüm adresler, Al seçeneğinde artık görünmeseler bile halen para alabilirler.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Bitcoin ödeme talebi</string>
     <string name="email_request_body">Lütfen %2$s Bitcoin adresine %1$s BTC gönder.</string>

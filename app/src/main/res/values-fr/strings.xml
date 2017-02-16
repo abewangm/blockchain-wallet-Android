@@ -392,7 +392,6 @@
     <string name="hint_reveals_password_error">Vous ne pouvez pas choisir le mot de passe de votre portefeuille principal comme indice de mot de passe.</string>
     <string name="why_has_my_address_changed">Pourquoi mon adresse a-t-elle changé ?</string>
     <string name="learn_more">En savoir plus</string>
-    <string name="new_address_info">Pour une meilleure confidentialité, nous générons une adresse unique pour chaque paiement. Toutes les adresses générées dans votre portefeuille peuvent toujours recevoir des fonds, même si elles n\'apparaissent plus dans la section « Recevoir ».</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Demande de paiement en Bitcoin</string>
     <string name="email_request_body">Veuillez envoyer %1$s BTC à l\'adresse Bitcoin %2$s.</string>

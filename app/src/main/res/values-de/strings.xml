@@ -392,7 +392,6 @@
     <string name="hint_reveals_password_error">Sie können Ihr Wallet-Hauptpasswort nicht als Passworthinweis einsetzen.</string>
     <string name="why_has_my_address_changed">Warum hat sich meine Adresse geändert?</string>
     <string name="learn_more">Mehr dazu</string>
-    <string name="new_address_info">Für eine größere Privatsphäre erzeugen wir für jede Zahlung eine einmalige Adresse. Alle in Ihrer Wallet generierten Adressen können selbst dann noch Guthaben empfangen, wenn sie nicht mehr unter \'Empfangen\' erscheinen.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Bitcoin-Zahlungsaufforderung</string>
     <string name="email_request_body">Bitte senden Sie%1$s BTC an die Bitcoin-Adresse %2$s.</string>

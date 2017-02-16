@@ -392,7 +392,6 @@
     <string name="hint_reveals_password_error">คุณไม่สามารถตั้งรหัสผ่านกระเป๋าเงินหลักของคุณเป็นคำใบ้รหัสผ่านของคุณได้</string>
     <string name="why_has_my_address_changed">ทำไมที่อยู่ของฉันถึงเปลี่ยนไป?</string>
     <string name="learn_more">เรียนรู้เพิ่มเติม</string>
-    <string name="new_address_info">เราสร้างที่อยู่ที่เป็นเอกลักษณ์สำหรับการชำระเงินทุกครั้งเพื่อความเป็นส่วนตัวที่มากยิ่งขึ้น ที่อยู่ทั้งหมดซึ่งได้รับการสร้างในกระเป๋าเงินของคุณยังสามารถรับเงินได้ แม้กระทั่งเมื่อมันไม่ได้แสดงภายใต้ส่วนการรับแล้วก็ตาม</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">คำร้องขอการชำระเงิน Bitcoin</string>
     <string name="email_request_body">โปรดส่ง %1$s BTC ไปยังที่อยู่ Bitcoin %2$s</string>

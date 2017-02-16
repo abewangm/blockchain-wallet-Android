@@ -392,7 +392,6 @@
     <string name="hint_reveals_password_error">Вы не можете задать пароль кошелька в качестве подсказки для пароля.</string>
     <string name="why_has_my_address_changed">Почему мой адрес изменился?</string>
     <string name="learn_more">Подробнее</string>
-    <string name="new_address_info">С целью усиления конфиденциальности мы генерируем уникальный адрес для каждого платежа. Все адреса, сгенерированные в вашем кошельке, могут и дальше принимать средства, даже если эти адреса не находятся под словом Получить.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Запрос платежа Bitcoin</string>
     <string name="email_request_body">Отправьте %1$s BTC на Bitcoin-адрес%2$s.</string>

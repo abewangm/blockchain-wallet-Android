@@ -392,7 +392,6 @@
     <string name="hint_reveals_password_error">Twoje główne hasło do portfela nie może być takie samo jak wskazówka hasła.</string>
     <string name="why_has_my_address_changed">Dlaczego mój adres uległ zmianie?</string>
     <string name="learn_more">Dowiedz się więcej</string>
-    <string name="new_address_info">Dla zwiększonej prywatności, generujemy unikalny adres dla każdej płatności. Wszystkie adresy wygenerowane w Twoim portfelu nadal mogą otrzymywać płatności, nawet jeśli nie znajdują się w dziale "Otrzymuj".</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Żądanie płatności bitcoin</string>
     <string name="email_request_body">Proszę wysłać %1$s BTC na adres bitcoin %2$s</string>

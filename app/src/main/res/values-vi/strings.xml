@@ -392,7 +392,6 @@
     <string name="hint_reveals_password_error">Bạn không thể đặt mật khẩu chính của mình làm cụm từ gợi ý mật khẩu.</string>
     <string name="why_has_my_address_changed">Tại sao địa chỉ của tôi đã thay đổi?</string>
     <string name="learn_more">Tìm hiểu thêm</string>
-    <string name="new_address_info">Để tăng cường bảo mật, chúng tôi tạo một địa chỉ độc nhất cho mỗi thanh toán. Tất cả các địa chỉ được tạo trong ví của bạn đều có thể nhận tiền, thậm chí khi không còn xuất hiện trong mục Nhận.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Yêu cầu thanh toán Bitcoin</string>
     <string name="email_request_body">Vui lòng gửi %1$s BTC đến địa chỉ Bitcoin %2$s.</string>

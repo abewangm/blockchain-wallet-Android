@@ -468,8 +468,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
                 R.string.security_centre_email_title,
                 message,
                 R.drawable.vector_email,
-                R.string.security_centre_email_check);
+                R.string.security_centre_email_check,
+                true,
+                false);
         securityPromptDialog.showDialog(getSupportFragmentManager());
+        securityPromptDialog.setNegativeButtonListener(v -> securityPromptDialog.dismiss());
         securityPromptDialog.setPositiveButtonListener(v -> {
             securityPromptDialog.dismiss();
             Intent intent = new Intent(Intent.ACTION_MAIN);

@@ -392,7 +392,6 @@
     <string name="hint_reveals_password_error">No se puede establecer la contraseña principal de la cartera como tu sugerencia de contraseña.</string>
     <string name="why_has_my_address_changed">¿Por qué ha cambiado mi dirección?</string>
     <string name="learn_more">Saber más</string>
-    <string name="new_address_info">Para una privacidad mejorada, generamos una dirección única para cada pago. Todas las direcciones generadas en tu monedero todavía pueden recibir fondos, aúnque ya no aparezcan bajo Recibir.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Solicitud de pago de Bitcoin</string>
     <string name="email_request_body">Por favor, envía %1$s BTC a la dirección Bitcoin %2$s.</string>

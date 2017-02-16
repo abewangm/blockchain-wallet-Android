@@ -523,7 +523,6 @@
     <string name="hint_reveals_password_error">사용자 주 지갑 암호는 암호 힌트로 설정할 수 없습니다.</string>
     <string name="why_has_my_address_changed">내 주소가 왜 바뀌었나요?</string>
     <string name="learn_more">더 배우기</string>
-    <string name="new_address_info">개인 정보 추가 보안을 위해 모든 지불에 대한 고유 주소를 우리가 만들었습니다. 귀하 지갑에서 생성된 모든 주소는 \'받기\' 아래 안 나타나도 계속 자금을 받을 수 있습니다.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">비트코인 지불 요청</string>
     <string name="email_request_body">%1$s BTC을 비트코인 주소 %2$s로 보내십시오.</string>

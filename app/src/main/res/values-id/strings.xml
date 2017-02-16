@@ -392,7 +392,6 @@
     <string name="hint_reveals_password_error">Anda tidak dapat menetapkan kata sandi dompet utama sebagai petunjuk kata sandi Anda.</string>
     <string name="why_has_my_address_changed">Mengapa alamat saya berubah?</string>
     <string name="learn_more">Pelajari Lebih Lanjut</string>
-    <string name="new_address_info">Untuk meningkatkan privasi, kami menghasilkan alamat unik untuk setiap pembayaran. Semua alamat yang dihasilkan dalam dompet Anda masih dapat menerima dana, bahkan jika mereka tidak lagi muncul di bawah Menerima.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Permintaan pembayaran Bitcoin</string>
     <string name="email_request_body">Mohon kirim%1$s BTC ke alamat Bitcoin %2$s.</string>
