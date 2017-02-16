@@ -25,7 +25,7 @@ public class TransactionDetailWebViewActivity extends BaseAuthActivity {
         setContentView(R.layout.activity_transaction_detail_webview);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        toolbar.setTitle(getResources().getString(R.string.transaction_detail_tab_title));
+        setupToolbar(toolbar, R.string.transaction_detail_tab_title);
         setSupportActionBar(toolbar);
 
         mWebView = (WebView) findViewById(R.id.webView);
@@ -59,7 +59,7 @@ public class TransactionDetailWebViewActivity extends BaseAuthActivity {
     private class DetailsWebViewClient extends WebChromeClient {
 
         DetailsWebViewClient() {
-            super();
+            // Empty Constructor
         }
 
         @Override
