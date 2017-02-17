@@ -68,8 +68,6 @@
 
     <string name="command2">Koppelcode scannen</string>
     <string name="command3">Ik heb geen toegang tot mijn camera</string>
-    <string name="CREATE">NIEUWE PORTEMONNEE AANMAKEN</string>
-    <string name="LOGIN">Log in op mijn portemonnee</string>
     <string name="pair_your_wallet">Koppel uw Portemonnee</string>
     <string name="manual_pairing">Handmatige koppeling</string>
     <string name="pair_wallet_step_1">Log in op uw Blockchain Portemonnee via uw pc of Mac op %1$s.</string>
@@ -392,7 +390,6 @@
     <string name="hint_reveals_password_error">U kunt het hoofdwachtwoord van uw portemonnee niet instellen als uw wachtwoordhint.</string>
     <string name="why_has_my_address_changed">Waarom is mijn adres gewijzigd?</string>
     <string name="learn_more">Kom meer te weten</string>
-    <string name="new_address_info">Voor meer privacy genereren we een uniek adres voor elke betaling. Alle adressen die zijn gegenereerd in uw portemonnee kunnen nog steeds geld ontvangen, zelfs als ze niet langer verschijnen onder Ontvangen.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Bitcoin-betalingsverzoek</string>
     <string name="email_request_body">Verzend %1$s BTC naar Bitcoin-adres %2$s.</string>

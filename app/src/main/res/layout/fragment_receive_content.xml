@@ -75,16 +75,6 @@
                         android:textIsSelectable="true"
                         android:textSize="14sp" />
 
-                    <ImageView
-                        android:id="@+id/iv_address_info"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:padding="16dp"
-                        android:src="@drawable/ic_info_outline_grey600_24dp"
-                        android:tint="@color/primary_gray_dark" />
-
                 </LinearLayout>
 
                 <include layout="@layout/divider_grey" />

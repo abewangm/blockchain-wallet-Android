@@ -4,7 +4,7 @@
     <group android:id="@+id/submenu_1">
         <item
             android:id="@+id/nav_upgrade"
-            android:icon="@drawable/ic_info_outline_grey600_24dp"
+            android:icon="@drawable/ic_warning_white_24dp"
             android:title="@string/upgrade_wallet" />
 
         <item

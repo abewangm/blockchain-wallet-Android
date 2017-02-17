@@ -12,6 +12,9 @@ import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -142,11 +145,30 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
     @Override
     public void setStatus(String status, String hash) {
         mBinding.status.setText(status);
-        mBinding.statusLayout.setOnClickListener(v -> {
-            Intent intent = new Intent(this, TransactionDetailWebViewActivity.class);
-            intent.putExtra(KEY_TRANSACTION_URL, "https://blockchain.info/tx/" + hash);
-            startActivity(intent);
-        });
+        mBinding.buttonVerify.setOnClickListener(v ->
+                TransactionDetailWebViewActivity.start(this, "https://blockchain.info/tx/" + hash));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_transaction_detail, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_share:
+                Intent shareIntent = new Intent();
+                shareIntent.setAction(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_TEXT, "https://blockchain.info/tx/" + mViewModel.getTransactionHash());
+                shareIntent.setType("text/plain");
+                startActivity(Intent.createChooser(shareIntent, getString(R.string.transaction_detail_share_chooser)));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

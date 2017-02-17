@@ -226,6 +226,10 @@ public class TransactionDetailViewModel extends BaseViewModel {
         return mPayloadManager.getPayload().getTransactionNotesMap().get(mTransaction.getHash());
     }
 
+    public String getTransactionHash() {
+        return mTransaction.getHash();
+    }
+
     @VisibleForTesting
     void setConfirmationStatus(Tx transaction) {
         long confirmations = transaction.getConfirmations();

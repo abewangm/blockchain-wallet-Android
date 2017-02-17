@@ -68,8 +68,6 @@
 
     <string name="command2">ペアリングコードをスキャン</string>
     <string name="command3">カメラにアクセスできません</string>
-    <string name="CREATE">新規財布を作成</string>
-    <string name="LOGIN">私の財布にログイン</string>
     <string name="pair_your_wallet">財布をペアリング</string>
     <string name="manual_pairing">手動ペアリング</string>
     <string name="pair_wallet_step_1">%1$sからPCもしくはMac経由でブロックチェーンウォレットにログインしてください。</string>
@@ -392,7 +390,6 @@
     <string name="hint_reveals_password_error">メイン財布のパスワードをパスワードヒントに設定することはできません。</string>
     <string name="why_has_my_address_changed">なぜ私のアドレスが変更したのでしょうか？</string>
     <string name="learn_more">さらに詳しく</string>
-    <string name="new_address_info">プライバシー強化のため、毎回の支払いに一意のアドレスが生成されます。「受信」に表示されていない場合でも、財布で生成されたアドレスは全て資金を受信できます。</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">ビットコイン決済リクエスト</string>
     <string name="email_request_body">%1$s BTCをビットコインアドレス%2$sに送信してください。</string>
