@@ -10,7 +10,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/blockchain_blue"
+            android:background="@color/white"
             android:orientation="vertical">
 
             <LinearLayout
@@ -21,10 +21,18 @@
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="165dp"
-                    android:layout_height="151dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:gravity="center_horizontal"
-                    android:src="@drawable/logo3x" />
+                    app:srcCompat="@drawable/vector_icon_blue" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="22dp"
+                    android:layout_marginTop="24dp"
+                    android:gravity="center_horizontal"
+                    app:srcCompat="@drawable/vector_blockchain"
+                    android:tint="@color/primary_navy_medium" />
 
             </LinearLayout>
 
@@ -33,52 +41,54 @@
                 android:layout_height="0dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_weight="50"
-                android:background="@color/blockchain_blue"
                 android:orientation="vertical">
 
                 <Button
                     android:id="@+id/create"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="16dp"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/rounded_view_white2"
-                    android:elevation="5dp"
-                    android:paddingLeft="32dp"
-                    android:paddingRight="32dp"
-                    android:text="@string/CREATE"
-                    android:textColor="@color/blockchain_blue"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/login"
+                    style="@style/ButtonStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/blockchain_blue"
-                    android:fontFamily="sans-serif-medium"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="8dp"
+                    android:paddingBottom="16dp"
+                    android:paddingLeft="48dp"
+                    android:paddingRight="48dp"
+                    android:paddingTop="16dp"
+                    android:text="@string/create_a_wallet"
+                    android:theme="@style/ButtonLightBlueTheme" />
+
+                <Button
+                    android:id="@+id/login"
+                    style="@style/ButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
                     android:gravity="center"
-                    android:padding="12dp"
-                    android:text="@string/LOGIN"
-                    android:textColor="@color/white"
-                    android:textSize="20sp" />
+                    android:paddingBottom="16dp"
+                    android:paddingLeft="48dp"
+                    android:paddingRight="48dp"
+                    android:paddingTop="16dp"
+                    android:text="@string/log_in"
+                    android:theme="@style/ButtonBlueTheme" />
 
                 <TextView
                     android:id="@+id/recover_funds"
+                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/blockchain_blue"
-                    android:fontFamily="sans-serif-medium"
+                    android:layout_margin="8dp"
                     android:gravity="center"
-                    android:padding="12dp"
+                    android:paddingLeft="48dp"
+                    android:paddingRight="48dp"
                     android:text="@string/recover_funds"
-                    android:textColor="@color/white"
-                    android:textSize="20sp" />
+                    android:textAllCaps="true"
+                    android:textColor="@color/primary_navy_medium"
+                    android:textSize="16sp" />
 
             </LinearLayout>
         </LinearLayout>
 
-        <android.support.v7.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/button_settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -86,8 +96,9 @@
             android:layout_alignParentTop="true"
             android:background="?selectableItemBackgroundBorderless"
             android:padding="16dp"
+            android:tint="@color/primary_navy_medium"
             android:visibility="gone"
-            app:srcCompat="@drawable/ic_settings_white_24dp"
+            app:srcCompat="@drawable/vector_settings"
             tools:visibility="visible" />
 
     </RelativeLayout>

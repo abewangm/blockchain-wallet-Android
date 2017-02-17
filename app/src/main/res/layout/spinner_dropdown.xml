@@ -2,9 +2,10 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView
+        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="@drawable/selector_pearl_white"
+        android:background="@drawable/selector_white"
         android:gravity="left|center_vertical"
         android:marqueeRepeatLimit="marquee_forever"
         android:maxLines="1"

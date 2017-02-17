@@ -13,7 +13,7 @@
             android:layout_width="0dp"
             android:layout_weight="30"
             android:layout_height="match_parent"
-            android:textColor="@color/blockchain_grey"
+            android:textColor="@color/primary_gray_medium"
             android:gravity="center_vertical"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
@@ -32,7 +32,7 @@
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="fill_parent"
                 android:layout_height="3dp"
-                android:background="@color/blockchain_light_grey"
+                android:background="@color/primary_gray_light"
                 android:progressDrawable="@drawable/progress_orange" />
 
             <TextView
@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="5dp"
                 android:text="Weak"
-                android:textColor="@color/blockchain_grey" />
+                android:textColor="@color/primary_gray_medium" />
         </LinearLayout>
 
 

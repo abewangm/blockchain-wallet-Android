@@ -58,6 +58,7 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentReceiveBinding;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
+import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -148,12 +149,15 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
         setHasOptionsMenu(true);
 
+        binding.content.scrollView.post(() -> binding.content.scrollView.scrollTo(0, 0));
+
         return binding.getRoot();
     }
 
     private void setupToolbar() {
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.receive_bitcoin);
+            ((BaseAuthActivity) getActivity()).setupToolbar(
+                    ((MainActivity) getActivity()).getSupportActionBar(), R.string.receive_bitcoin);
 
             ViewUtils.setElevation(
                     getActivity().findViewById(R.id.appbar_layout),
@@ -416,21 +420,20 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void onResume() {
         super.onResume();
         viewModel.updateSpinnerList();
-
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
     }
 
     @Override
     public void showQrLoading() {
-        binding.content.ivAddressInfo.setVisibility(View.GONE);
-        binding.content.qr.setVisibility(View.GONE);
-        binding.content.receivingAddress.setVisibility(View.GONE);
+        binding.content.ivAddressInfo.setVisibility(View.INVISIBLE);
+        binding.content.qr.setVisibility(View.INVISIBLE);
+        binding.content.receivingAddress.setVisibility(View.INVISIBLE);
         binding.content.progressBar2.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void showQrCode(@Nullable Bitmap bitmap) {
-        binding.content.progressBar2.setVisibility(View.GONE);
+        binding.content.progressBar2.setVisibility(View.INVISIBLE);
         binding.content.qr.setVisibility(View.VISIBLE);
         binding.content.receivingAddress.setVisibility(View.VISIBLE);
         binding.content.qr.setImageBitmap(bitmap);

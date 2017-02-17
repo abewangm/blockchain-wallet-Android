@@ -1,24 +1,22 @@
 package piuk.blockchain.android.ui.account;
 
-import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import piuk.blockchain.android.R;
 
-class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHolder> {
+import static piuk.blockchain.android.ui.account.AccountItem.TYPE_ACCOUNT;
+import static piuk.blockchain.android.ui.account.AccountItem.TYPE_CREATE_NEW_WALLET_BUTTON;
+import static piuk.blockchain.android.ui.account.AccountItem.TYPE_IMPORT_ADDRESS_BUTTON;
 
-    private static final int TYPE_IMPORTED_HEADER = -1;
-    private static final int TYPE_CREATE_NEW_WALLET_BUTTON = -2;
-    private static final int TYPE_IMPORT_ADDRESS_BUTTON = -3;
+class AccountAdapter extends RecyclerView.Adapter {
+
     private ArrayList<AccountItem> items;
     private AccountHeadersListener listener;
 
@@ -27,89 +25,78 @@ class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHolder> {
     }
 
     @Override
-    public AccountAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row, parent, false);
-
-        if (viewType == TYPE_IMPORTED_HEADER) {
-            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row_header, parent, false);
-
-        } else if (viewType == TYPE_CREATE_NEW_WALLET_BUTTON || viewType == TYPE_IMPORT_ADDRESS_BUTTON) {
-            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row_buttons, parent, false);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (viewType == TYPE_CREATE_NEW_WALLET_BUTTON || viewType == TYPE_IMPORT_ADDRESS_BUTTON) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row_header, parent, false);
+            return new HeaderViewHolder(v);
+        } else if (viewType == TYPE_ACCOUNT) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row, parent, false);
+            return new AccountViewHolder(v);
+        } else {
+            throw new IllegalArgumentException("Unknown ViewType " + viewType);
         }
-
-        return new ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        // Imported Items header
-        if (holder.getItemViewType() == TYPE_IMPORTED_HEADER)
-            return;
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (getItemViewType(position) == TYPE_CREATE_NEW_WALLET_BUTTON) {
+            // Create new wallet button
+            HeaderViewHolder headerViewHolder = (HeaderViewHolder) holder;
+            headerViewHolder.title.setText(R.string.wallets);
 
-        // Create new wallet button
-        if (holder.getItemViewType() == TYPE_CREATE_NEW_WALLET_BUTTON) {
-            holder.description.setText(R.string.create_new);
-
-            holder.cardView.setOnClickListener(v -> {
+            headerViewHolder.itemView.setOnClickListener(v -> {
                 if (listener != null) listener.onCreateNewClicked();
             });
-            return;
-        }
+        } else if (getItemViewType(position) == TYPE_IMPORT_ADDRESS_BUTTON) {
+            // Import address button
+            HeaderViewHolder headerViewHolder = (HeaderViewHolder) holder;
+            headerViewHolder.title.setText(R.string.imported_addresses);
 
-        // Import address button
-        if (holder.getItemViewType() == TYPE_IMPORT_ADDRESS_BUTTON) {
-            holder.description.setText(R.string.import_address);
-
-            holder.cardView.setOnClickListener(v -> {
+            headerViewHolder.itemView.setOnClickListener(v -> {
                 if (listener != null) listener.onImportAddressClicked();
             });
-            return;
-        }
-
-        AccountItem accountItem = items.get(position);
-
-        // Normal account view
-        holder.cardView.setOnClickListener(v -> {
-            if (listener != null) listener.onCardClicked(accountItem.getCorrectPosition());
-        });
-
-        holder.title.setText(accountItem.getLabel());
-
-        if (!accountItem.getAddress().isEmpty()) {
-            holder.address.setVisibility(View.VISIBLE);
-            holder.address.setText(accountItem.getAddress());
         } else {
-            holder.address.setVisibility(View.GONE);
-        }
+            AccountViewHolder accountViewHolder = (AccountViewHolder) holder;
 
-        if (accountItem.isArchived()) {
-            holder.amount.setText(R.string.archived_label);
-            holder.amount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.blockchain_transfer_blue));
-        } else {
-            holder.amount.setText(accountItem.getAmount());
-            holder.amount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.blockchain_receive_green));
-        }
+            AccountItem accountItem = items.get(position);
 
-        if (accountItem.isWatchOnly()) {
-            holder.tag.setText(holder.itemView.getContext().getString(R.string.watch_only));
-            holder.tag.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.blockchain_send_red));
-        }
+            // Normal account view
+            accountViewHolder.itemView.setOnClickListener(v -> {
+                if (listener != null) listener.onAccountClicked(accountItem.getCorrectPosition());
+            });
 
-        if (accountItem.isDefault()) {
-            holder.tag.setText(holder.itemView.getContext().getString(R.string.default_label));
-            holder.tag.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.blockchain_grey));
-        }
+            accountViewHolder.title.setText(accountItem.getLabel());
 
-        if (!accountItem.isWatchOnly() && !accountItem.isDefault()) {
-            holder.tag.setVisibility(View.GONE);
-        } else {
-            holder.tag.setVisibility(View.VISIBLE);
-        }
+            if (!accountItem.getAddress().isEmpty()) {
+                accountViewHolder.address.setVisibility(View.VISIBLE);
+                accountViewHolder.address.setText(accountItem.getAddress());
+            } else {
+                accountViewHolder.address.setVisibility(View.GONE);
+            }
 
-        Drawable drawable = accountItem.getIcon();
-        if (drawable != null) {
-            holder.icon.setImageDrawable(drawable);
+            if (accountItem.isArchived()) {
+                accountViewHolder.amount.setText(R.string.archived_label);
+                accountViewHolder.amount.setTextColor(ContextCompat.getColor(accountViewHolder.itemView.getContext(), R.color.product_gray_transferred));
+            } else {
+                accountViewHolder.amount.setText(accountItem.getAmount());
+                accountViewHolder.amount.setTextColor(ContextCompat.getColor(accountViewHolder.itemView.getContext(), R.color.product_green_medium));
+            }
+
+            if (accountItem.isWatchOnly()) {
+                accountViewHolder.tag.setText(accountViewHolder.itemView.getContext().getString(R.string.watch_only));
+                accountViewHolder.tag.setTextColor(ContextCompat.getColor(accountViewHolder.itemView.getContext(), R.color.product_red_medium));
+            }
+
+            if (accountItem.isDefault()) {
+                accountViewHolder.tag.setText(accountViewHolder.itemView.getContext().getString(R.string.default_label));
+                accountViewHolder.tag.setTextColor(ContextCompat.getColor(accountViewHolder.itemView.getContext(), R.color.product_gray_transferred));
+            }
+
+            if (!accountItem.isWatchOnly() && !accountItem.isDefault()) {
+                accountViewHolder.tag.setVisibility(View.GONE);
+            } else {
+                accountViewHolder.tag.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -120,42 +107,38 @@ class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        String title = items.get(position).getLabel();
-
-        if (title.equals(AccountActivity.IMPORTED_HEADER)) {
-            return TYPE_IMPORTED_HEADER;
-        } else if (title.equals(AccountActivity.IMPORT_ADDRESS)) {
-            return TYPE_IMPORT_ADDRESS_BUTTON;
-        } else if (title.equals(AccountActivity.CREATE_NEW)) {
-            return TYPE_CREATE_NEW_WALLET_BUTTON;
-        }
-
-        return 0;
+        return items.get(position).getType();
     }
 
     void setAccountHeaderListener(AccountHeadersListener accountHeadersListener) {
         listener = accountHeadersListener;
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    private static class AccountViewHolder extends RecyclerView.ViewHolder {
 
-        CardView cardView;
         TextView title;
         TextView address;
-        ImageView icon;
         TextView amount;
         TextView tag;
         TextView description;
 
-        ViewHolder(View view) {
+        AccountViewHolder(View view) {
             super(view);
-            cardView = (CardView) view.findViewById(R.id.card_view);
             title = (TextView) view.findViewById(R.id.my_account_row_label);
             address = (TextView) view.findViewById(R.id.my_account_row_address);
-            icon = (ImageView) view.findViewById(R.id.my_account_row_icon);
             amount = (TextView) view.findViewById(R.id.my_account_row_amount);
             tag = (TextView) view.findViewById(R.id.my_account_row_tag);
             description = (TextView) view.findViewById(R.id.description);
+        }
+    }
+
+    private static class HeaderViewHolder extends RecyclerView.ViewHolder {
+
+        TextView title;
+
+        HeaderViewHolder(View itemView) {
+            super(itemView);
+            title = (TextView) itemView.findViewById(R.id.account_row_header);
         }
     }
 
@@ -165,6 +148,6 @@ class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHolder> {
 
         void onImportAddressClicked();
 
-        void onCardClicked(int correctedPosition);
+        void onAccountClicked(int correctedPosition);
     }
 }

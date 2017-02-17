@@ -4,17 +4,17 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blockchain_pearl_white"
+        android:background="@color/white"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
             android:layout_marginLeft="24dp"
             android:layout_marginRight="24dp"
-            android:layout_marginBottom="16dp">
+            android:layout_marginTop="24dp"
+            android:orientation="vertical">
 
 
             <LinearLayout
@@ -25,8 +25,8 @@
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="@string/warning"
                     android:textColor="@color/black"
                     android:textSize="24sp" />
@@ -36,9 +36,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/watchonly_address_receive_warning"
                 android:layout_marginTop="16dp"
-                android:textColor="@color/blockchain_grey" />
+                android:text="@string/watchonly_address_receive_warning"
+                android:textColor="@color/primary_gray_dark" />
 
         </LinearLayout>
 
@@ -49,21 +49,21 @@
             android:layout_marginLeft="18dp"
             android:gravity="center|left"
             android:text="@string/dont_ask_again"
-            android:textColor="@color/primary_text_default_material_light" />
+            android:textColor="@color/black" />
 
         <LinearLayout style="@style/CustomDialogButtonContainer">
 
             <android.support.v7.widget.AppCompatButton
-                style="@style/CustomDialogButton"
                 android:id="@+id/confirm_cancel"
+                style="@style/CustomDialogButton"
                 android:text="@string/cancel"
-                android:textColor="@color/blockchain_grey" />
+                android:textColor="@color/primary_gray_dark" />
 
             <android.support.v7.widget.AppCompatButton
-                style="@style/CustomDialogButton"
                 android:id="@+id/confirm_continue"
+                style="@style/CustomDialogButton"
                 android:text="@string/CONTINUE"
-                android:textColor="@color/blockchain_blue" />
+                android:textColor="@color/primary_navy_medium" />
 
         </LinearLayout>
     </LinearLayout>

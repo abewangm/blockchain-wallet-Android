@@ -5,7 +5,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/blockchain_blue"
+        android:background="@color/white"
         android:orientation="vertical">
 
         <!-- MAIN LAYOUT -->
@@ -25,11 +25,9 @@
                     android:id="@+id/progressbar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:indeterminateTint="@color/blockchain_pearl_white"
-                    android:indeterminateTintMode="src_atop" />
+                    android:layout_gravity="center" />
 
-                <android.support.v7.widget.AppCompatImageView
+                <ImageView
                     android:id="@+id/qr_code"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -42,20 +40,23 @@
                     android:visibility="invisible" />
             </FrameLayout>
 
-            <android.support.v7.widget.AppCompatTextView
+            <TextView
                 android:id="@+id/receiving_account"
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/qr_layout"
                 android:layout_centerHorizontal="true"
                 android:gravity="center"
                 android:padding="16dp"
-                android:textColor="@color/blockchain_pearl_white"
+                android:textAllCaps="true"
+                android:textColor="@color/primary_navy_medium"
                 android:textSize="20sp"
                 tools:text="My Bitcoin Wallet" />
 
-            <android.support.v7.widget.AppCompatEditText
+            <EditText
                 android:id="@+id/receiving_address"
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/receiving_account"
@@ -65,7 +66,7 @@
                 android:inputType="none"
                 android:maxLines="1"
                 android:padding="8dp"
-                android:textColor="@color/blockchain_pearl_white"
+                android:textColor="@color/primary_navy_medium"
                 android:textIsSelectable="true"
                 android:textSize="14sp"
                 tools:text="A bitcoin address" />
@@ -80,7 +81,8 @@
             android:layout_height="match_parent"
             android:visibility="gone">
 
-            <android.support.v7.widget.AppCompatTextView
+            <TextView
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -88,7 +90,7 @@
                 android:padding="16dp"
                 android:text="@string/swipe_receive_no_addresses"
                 android:textAppearance="?android:textAppearanceMedium"
-                android:textColor="@color/blockchain_pearl_white" />
+                android:textColor="@color/primary_navy_medium" />
 
         </RelativeLayout>
     </LinearLayout>

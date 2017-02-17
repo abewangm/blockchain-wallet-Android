@@ -19,7 +19,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_gravity="top"
-                android:background="@color/blockchain_light_grey" />
+                android:background="@color/primary_gray_light" />
 
             <View
                 android:id="@+id/tx_touch_view"
@@ -32,6 +32,7 @@
             <!-- DATE -->
             <TextView
                 android:id="@+id/ts"
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|left"
@@ -63,18 +64,20 @@
 
                     <TextView
                         android:id="@+id/direction"
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="4dp"
                         android:layout_marginRight="4dp"
                         android:layout_marginTop="4dp"
-                        android:fontFamily="sans-serif"
                         android:text="Sent"
-                        android:textColor="@color/blockchain_grey"
+                        android:textAllCaps="true"
+                        android:textColor="@color/primary_gray"
                         android:textSize="16sp" />
 
                     <TextView
                         android:id="@+id/watch_only"
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="4dp"
@@ -82,7 +85,6 @@
                         android:layout_marginTop="2dp"
                         android:background="@drawable/rounded_view_grey"
                         android:ellipsize="end"
-                        android:fontFamily="sans-serif"
                         android:maxLines="1"
                         android:paddingBottom="4dp"
                         android:paddingLeft="8dp"
@@ -93,25 +95,25 @@
                         android:textSize="10sp" />
                 </LinearLayout>
 
-                <android.support.v7.widget.AppCompatImageView
+                <ImageView
                     android:id="@+id/double_spend_warning"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toLeftOf="@id/result"
                     android:padding="8dp"
-                    android:tint="@color/blockchain_send_red"
+                    android:tint="@color/product_red_medium"
                     app:srcCompat="@drawable/ic_warning_white_24dp" />
 
                 <!-- VALUE -->
                 <TextView
                     android:id="@+id/result"
+                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="32dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:background="@drawable/rounded_view_green"
-                    android:fontFamily="sans-serif"
                     android:gravity="center_horizontal|center_vertical"
                     android:minWidth="120dp"
                     android:textColor="@color/white"

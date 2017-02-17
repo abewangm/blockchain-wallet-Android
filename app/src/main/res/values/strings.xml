@@ -3,6 +3,7 @@
 
     <string name="backup_wallet">Backup funds</string>
     <string name="upgrade_wallet">Upgrade</string>
+    <string name="current_price">1 BTC = %1$s</string>
 
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Settings</string>
@@ -75,8 +76,8 @@
 
     <string name="command2">Scan pairing code</string>
     <string name="command3">I can\'t access my camera</string>
-    <string name="CREATE">CREATE NEW WALLET</string>
-    <string name="LOGIN">Log in to my Wallet</string>
+    <string name="create_a_wallet">Create a wallet</string>
+    <string name="log_in">Log in</string>
     <string name="pair_your_wallet">Pair Your Wallet</string>
     <string name="manual_pairing">Manual Pairing</string>
     <string name="pair_wallet_step_1">Log in to your Blockchain Wallet via your PC or Mac at %1$s.</string>
@@ -184,6 +185,7 @@
     <string name="addresses">Addresses</string>
     <string name="create_new">Create New</string>
     <string name="import_address">Import Address</string>
+    <string name="wallets">Wallets</string>
     <string name="save_name">Save name</string>
 
     <string name="receive_address_to_clipboard">Copy this receive address to the clipboard? If so, be advised that other applications may be able to look at this information.</string>
@@ -234,16 +236,16 @@
 
     <string name="watch_only_label">(watch-only)</string>
     <string name="address_book_label">(address book)</string>
-    <string name="archived_label">(archived)</string>
+    <string name="archived_label">Archived</string>
 
     <string name="transaction_submitted">Transaction complete</string>
     <string name="transaction_failed">Transaction failed</string>
-    <string name="UPGRADE_YOUR_WALLET">Ok, let\'s go!</string>
+    <string name="UPGRADE_YOUR_WALLET">OK, let\'s go!</string>
     <string name="upgrade_page_1">Simplified backup and recovery.</string>
     <string name="upgrade_page_2">Enhanced privacy through hierarchical deterministic addresses.</string>
     <string name="upgrade_page_3">Customize the way you organize your Bitcoin in your Blockchain Wallet.</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>-->
-    <string name="confirm_upgrade_header">Hey we\'ve added these new features to your Blockchain wallet:</string>
+    <string name="confirm_upgrade_header">Hey, we\'ve added these new features to your Blockchain wallet:</string>
     <string name="upgrading">Upgrading…</string>
     <string name="upgrading_started_info">Your wallet is upgrading, please be patient this may take some time depending on the size and age of your wallet.</string>
     <string name="upgrade_success_heading">Your wallet has been upgraded!</string>

@@ -9,9 +9,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.AppCompatTextView;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -23,8 +23,8 @@ public class ReceiveQrActivity extends BaseAuthActivity implements ReceiveQrView
     public static final String INTENT_EXTRA_LABEL = "extra_label";
 
     private ImageView imageView;
-    private AppCompatTextView title;
-    private AppCompatTextView address;
+    private TextView title;
+    private TextView address;
     private ReceiveQrViewModel viewModel;
 
     @Override
@@ -35,10 +35,10 @@ public class ReceiveQrActivity extends BaseAuthActivity implements ReceiveQrView
         viewModel = new ReceiveQrViewModel(this);
 
         imageView = (ImageView) findViewById(R.id.imageview_qr);
-        title = (AppCompatTextView) findViewById(R.id.account_name);
-        address = (AppCompatTextView) findViewById(R.id.address_info);
-        AppCompatButton done = (AppCompatButton) findViewById(R.id.action_done);
-        AppCompatButton copyAddress = (AppCompatButton) findViewById(R.id.action_copy);
+        title = (TextView) findViewById(R.id.account_name);
+        address = (TextView) findViewById(R.id.address_info);
+        Button done = (Button) findViewById(R.id.action_done);
+        Button copyAddress = (Button) findViewById(R.id.action_copy);
 
         viewModel.onViewReady();
 

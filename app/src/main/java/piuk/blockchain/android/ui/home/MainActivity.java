@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -18,6 +19,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -26,11 +28,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 
 import info.blockchain.wallet.payload.PayloadManager;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
+import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import java.util.Arrays;
 
@@ -83,12 +89,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
     private AlertDialog mRootedDialog;
     private AppUtil appUtil;
     private long backPressed;
+    private Typeface typeface;
 
     @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         appUtil = new AppUtil(this);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
@@ -119,18 +125,20 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         });
 
         // Create items
-        AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.blockchain_pearl_white);
-        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.transactions, R.drawable.vector_transactions, R.color.blockchain_pearl_white);
-        AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.receive_bitcoin, R.drawable.vector_receive, R.color.blockchain_pearl_white);
+        AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.white);
+        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.transactions, R.drawable.vector_transactions, R.color.white);
+        AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.receive_bitcoin, R.drawable.vector_receive, R.color.white);
 
         // Add items
         binding.bottomNavigation.addItems(Arrays.asList(item1, item2, item3));
 
         // Styling
-        binding.bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.blockchain_blue));
-        binding.bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.blockchain_grey));
+        binding.bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.primary_blue_accent));
+        binding.bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.primary_gray_dark));
         binding.bottomNavigation.setForceTint(true);
         binding.bottomNavigation.setUseElevation(true);
+        Typeface typeface = TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf");
+        binding.bottomNavigation.setTitleTypeface(typeface);
 
         // Select transactions by default
         binding.bottomNavigation.setCurrentItem(1);
@@ -159,6 +167,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
             return true;
         });
+
+        applyFontToNavDrawer();
     }
 
     @SuppressLint("NewApi")
@@ -167,6 +177,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         super.onResume();
         appUtil.deleteQR();
         mainViewModel.storeSwipeReceiveAddresses();
+        mainViewModel.exchangeRateThread();
         resetNavigationDrawer();
 
         if (AndroidUtils.is25orHigher() && mainViewModel.areLauncherShortcutsEnabled()) {
@@ -194,7 +205,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_activity_actions, menu);
+        getMenuInflater().inflate(R.menu.menu_main_activity, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -339,18 +350,22 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             backUpMenuItem.setVisible(true);
         }
 
-        MenuItem backUpView = binding.nvView.getMenu().findItem(R.id.nav_backup);
-        Drawable drawable = backUpView.getIcon();
+        binding.nvView.setItemIconTintList(null);
+        Drawable drawable = DrawableCompat.wrap(ContextCompat.getDrawable(this, R.drawable.vector_lock));
         drawable.mutate();
         if (mainViewModel.getPayloadManager().getPayload() != null &&
                 mainViewModel.getPayloadManager().getPayload().getHdWallet() != null &&
                 !mainViewModel.getPayloadManager().getPayload().getHdWallet().isMnemonicVerified()) {
-            //Not backed up
-            drawable.setColorFilter(ContextCompat.getColor(this, R.color.blockchain_send_red), PorterDuff.Mode.SRC_ATOP);
+            // Not backed up
+            DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.product_red_medium));
+            DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_ATOP);
         } else {
-            //Backed up
-            drawable.setColorFilter(ContextCompat.getColor(this, R.color.alert_green), PorterDuff.Mode.SRC_ATOP);
+            // Backed up
+            DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.product_green_medium));
+            DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_ATOP);
         }
+
+        binding.nvView.getMenu().findItem(R.id.nav_backup).setIcon(drawable);
 
         binding.nvView.setNavigationItemSelectedListener(
                 menuItem -> {
@@ -366,6 +381,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
             binding.bottomNavigation.setCurrentItem(2);
         }
+    }
+
+    @Override
+    public void updateCurrentPrice(String price) {
+        View headerView = binding.nvView.getHeaderView(0);
+        TextView currentPrice = (TextView) headerView.findViewById(R.id.textview_current_price);
+        currentPrice.setText(price);
     }
 
     private void startMerchantActivity() {
@@ -582,6 +604,23 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
 
     public AHBottomNavigation getBottomNavigationView() {
         return binding.bottomNavigation;
+    }
+
+    private void applyFontToNavDrawer() {
+        Menu menu = binding.nvView.getMenu();
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem menuItem = menu.getItem(i);
+            applyFontToMenuItem(menuItem);
+        }
+    }
+
+    private void applyFontToMenuItem(MenuItem menuItem) {
+        if (typeface == null) {
+            typeface = TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf");
+        }
+        menuItem.setTitle(CalligraphyUtils.applyTypefaceSpan(
+                menuItem.getTitle(),
+                typeface));
     }
 
     @Override

@@ -1,6 +1,5 @@
 package piuk.blockchain.android.util;
 
-import android.util.Log;
 import info.blockchain.wallet.util.WebUtil;
 
 import org.junit.Before;
@@ -232,6 +231,7 @@ public class EventLogHandlerTest {
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_BACKUP, false);
     }
 
+    @Ignore
     @Test
     public void logAddressInputEvent() throws Exception {
         // Arrange

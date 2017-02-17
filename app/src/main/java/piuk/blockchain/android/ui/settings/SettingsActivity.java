@@ -26,8 +26,8 @@ public class SettingsActivity extends BaseAuthActivity {
 
     private void setupToolbar() {
         //TODO - don't use NoActionBar in styles.xml (affects BalanceFragment, so don't just edit styles.xml)
-        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar_general);
-        toolbar.setTitle(getResources().getString(R.string.action_settings));
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        setupToolbar(toolbar, R.string.action_settings);
         toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white));
         toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.ic_arrow_back_white_24dp));
         toolbar.setNavigationOnClickListener(v -> onBackPressed());

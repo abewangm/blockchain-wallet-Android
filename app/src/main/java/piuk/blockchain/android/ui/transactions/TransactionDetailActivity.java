@@ -41,8 +41,7 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
         mViewModel = new TransactionDetailViewModel(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        toolbar.setTitle(getResources().getString(R.string.transaction_detail_title));
-        setSupportActionBar(toolbar);
+        setupToolbar(toolbar, R.string.transaction_detail_title);
 
         mBinding.editIcon.setOnClickListener(v -> mBinding.descriptionField.performClick());
         mBinding.descriptionField.setOnClickListener(v -> {

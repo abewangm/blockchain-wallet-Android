@@ -340,8 +340,8 @@ class WebSocketHandler {
                 title,
                 marquee,
                 text,
-                R.drawable.ic_notification_transparent,
-                R.drawable.ic_launcher,
+                R.drawable.ic_notification_white,
+                R.drawable.ic_notification_white,
                 MainActivity.class,
                 1000);
     }

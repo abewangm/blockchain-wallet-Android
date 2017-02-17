@@ -33,7 +33,7 @@ public class NotificationsUtil {
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(drawableCompat)
-                .setColor(ContextCompat.getColor(context, R.color.blockchain_blue))
+                .setColor(ContextCompat.getColor(context, R.color.primary_navy_medium))
                 .setContentTitle(title)
                 .setContentIntent(intent)
                 .setWhen(System.currentTimeMillis())

@@ -55,8 +55,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private double mBtcExchangeRate;
     private String mFiatType;
 
-    @VisibleForTesting
-    Tx mTransaction;
+    @VisibleForTesting Tx mTransaction;
 
     public interface DataListener {
 
@@ -257,13 +256,13 @@ public class TransactionDetailViewModel extends BaseViewModel {
         double btcBalance = transaction.getAmount() / 1e8;
         if (transaction.isMove()) {
             mDataListener.setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
-                    ? R.color.blockchain_transfer_blue_50 : R.color.blockchain_transfer_blue);
+                    ? R.color.product_gray_transferred_50 : R.color.product_gray_transferred);
         } else if (btcBalance < 0.0) {
             mDataListener.setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
-                    ? R.color.blockchain_red_50 : R.color.blockchain_send_red);
+                    ? R.color.product_red_sent_50 : R.color.product_red_sent);
         } else {
             mDataListener.setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
-                    ? R.color.blockchain_green_50 : R.color.blockchain_receive_green);
+                    ? R.color.product_green_received_50 : R.color.product_green_received);
         }
     }
 

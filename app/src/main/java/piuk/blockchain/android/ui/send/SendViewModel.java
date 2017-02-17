@@ -34,7 +34,6 @@ import info.blockchain.wallet.util.WebUtil;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
-import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
@@ -687,9 +686,9 @@ public class SendViewModel extends BaseViewModel {
      */
     private void validateCustomFee(BigInteger totalToSend, BigInteger totalAvailable) {
         if (totalToSend.compareTo(totalAvailable) == 1) {
-            sendModel.setCustomFeeColor(ContextCompat.getColor(context, R.color.blockchain_send_red));
+            sendModel.setCustomFeeColor(ContextCompat.getColor(context, R.color.product_red_medium));
         } else {
-            sendModel.setCustomFeeColor(ContextCompat.getColor(context, R.color.textColorPrimary));
+            sendModel.setCustomFeeColor(ContextCompat.getColor(context, R.color.black));
         }
     }
 
@@ -713,9 +712,9 @@ public class SendViewModel extends BaseViewModel {
 
         if (balanceAfterFee <= 0 && context != null) {
             sendModel.setMaxAvailable(stringUtils.getString(R.string.insufficient_funds));
-            sendModel.setMaxAvailableColor(ContextCompat.getColor(context, R.color.blockchain_send_red));
+            sendModel.setMaxAvailableColor(ContextCompat.getColor(context, R.color.product_red_medium));
         } else {
-            sendModel.setMaxAvailableColor(ContextCompat.getColor(context, R.color.blockchain_blue));
+            sendModel.setMaxAvailableColor(ContextCompat.getColor(context, R.color.primary_blue_accent));
         }
     }
 
@@ -837,9 +836,9 @@ public class SendViewModel extends BaseViewModel {
         sendModel.setEstimate(estimateText);
 
         if (estimateText.equals(unlikelyToConfirmMessage)) {
-            sendModel.setEstimateColor(ContextCompat.getColor(context, R.color.blockchain_send_red));
+            sendModel.setEstimateColor(ContextCompat.getColor(context, R.color.product_red_medium));
         } else {
-            sendModel.setEstimateColor(ContextCompat.getColor(context, R.color.blockchain_blue));
+            sendModel.setEstimateColor(ContextCompat.getColor(context, R.color.primary_blue_accent));
         }
 
         return estimateText;
@@ -1028,10 +1027,10 @@ public class SendViewModel extends BaseViewModel {
         if (sendModel.maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
             if (dataListener != null)
                 dataListener.onShowToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
-            sendModel.setCustomFeeColor(R.color.blockchain_send_red);
+            sendModel.setCustomFeeColor(R.color.product_red_medium);
             return false;
         } else {
-            sendModel.setCustomFeeColor(R.color.primary_text_default_material_light);
+            sendModel.setCustomFeeColor(R.color.black);
         }
 
         //Validate addresses

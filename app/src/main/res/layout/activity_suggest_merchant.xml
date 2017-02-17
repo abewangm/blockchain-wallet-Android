@@ -8,15 +8,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/white"
             android:orientation="vertical">
 
             <include layout="@layout/toolbar_general" />
-
-            <View
-                android:id="@+id/shadow"
-                android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:background="@drawable/container_dropshadow_gradient" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -27,32 +22,31 @@
                 android:paddingRight="16dp">
 
                 <TextView
-                    android:layout_width="0dp"
+                    fontPath="fonts/Montserrat-Light.ttf"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="3"
                     android:text="@string/name"
-                    android:textColor="@color/blockchain_grey" />
+                    android:textColor="@color/primary_gray_dark" />
 
                 <EditText
                     android:id="@+id/merchant_name"
+                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="7"
-                    android:background="@color/blockchain_pearl_white"
+                    android:layout_weight="1"
+                    android:background="@color/white"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
+                    android:inputType="textCapWords"
                     android:maxLines="1"
                     android:paddingLeft="16dp"
                     android:text=""
-                    android:textColor="@color/primary_text_default_material_light"
+                    android:textColor="@color/black"
                     android:textCursorDrawable="@null" />
 
             </LinearLayout>
 
-            <View
-                android:layout_width="fill_parent"
-                android:layout_height="1dp"
-                android:background="@color/blockchain_light_grey" />
+            <include layout="@layout/divider_grey" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -62,28 +56,26 @@
                 android:paddingLeft="16dp">
 
                 <TextView
-                    android:layout_width="0dp"
+                    fontPath="fonts/Montserrat-Light.ttf"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="16dp"
-                    android:layout_weight="3"
                     android:text="@string/business_category"
-                    android:textColor="@color/blockchain_grey" />
+                    android:textColor="@color/primary_gray_dark" />
 
                 <Spinner
                     android:id="@+id/merchant_category_spinner"
+                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="0dp"
                     android:layout_height="48dp"
-                    android:layout_weight="7"
+                    android:layout_weight="1"
                     android:background="?android:selectableItemBackground"
                     android:divider="@null"
                     android:dropDownSelector="?android:selectableItemBackground" />
 
             </LinearLayout>
 
-            <View
-                android:layout_width="fill_parent"
-                android:layout_height="1dp"
-                android:background="@color/blockchain_light_grey" />
+            <include layout="@layout/divider_grey" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -94,45 +86,43 @@
                 android:paddingRight="16dp">
 
                 <TextView
+                    fontPath="fonts/Montserrat-Light.ttf"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="3"
                     android:text="@string/location"
-                    android:textColor="@color/blockchain_grey" />
+                    android:textColor="@color/primary_gray_dark" />
 
                 <TextView
                     android:id="@+id/manual_entry_action"
+                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="3"
-                    android:background="@drawable/selector_pearl_white"
+                    android:background="@drawable/selector_white"
                     android:clickable="true"
-                    android:gravity="bottom|center_horizontal"
+                    android:gravity="center"
                     android:onClick="manualClicked"
-                    android:paddingBottom="10dp"
                     android:text="@string/manual_entry"
-                    android:textColor="@color/primary_text_default_material_light"
+                    android:textColor="@color/black"
                     android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/current_location_action"
+                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="4"
-                    android:background="@drawable/selector_pearl_white"
+                    android:background="@drawable/selector_white"
                     android:clickable="true"
-                    android:gravity="bottom|center_horizontal"
+                    android:gravity="center"
                     android:onClick="autoClicked"
-                    android:paddingBottom="10dp"
                     android:text="@string/use_my_current_location"
-                    android:textColor="@color/blockchain_blue"
+                    android:textColor="@color/primary_navy_medium"
                     android:textSize="12sp" />
             </LinearLayout>
 
-            <View
-                android:layout_width="fill_parent"
-                android:layout_height="1dp"
-                android:background="@color/blockchain_light_grey" />
+            <include layout="@layout/divider_grey" />
 
             <include layout="@layout/activity_suggest_merchant_map_include" />
 
@@ -142,16 +132,9 @@
 
         <TextView
             android:id="@+id/command_save"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
+            style="@style/MegaButtonBlue"
             android:layout_alignParentBottom="true"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:background="@color/blockchain_blue"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="@string/save"
-            android:textAlignment="gravity"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:text="@string/save" />
 
     </RelativeLayout>
 </layout>

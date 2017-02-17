@@ -10,23 +10,28 @@
         android:orientation="vertical">
 
         <TextView
+            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:alpha="0.8"
             android:gravity="center_horizontal"
             android:text="@string/your_transactions"
-            android:textSize="16sp" />
+            android:textColor="@color/primary_gray_dark"
+            android:textSize="20sp" />
 
         <TextView
+            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="32dp"
+            android:layout_marginRight="32dp"
             android:layout_marginTop="8dp"
             android:alpha="0.8"
-            android:background="@drawable/underline"
             android:gravity="center_horizontal"
             android:text="@string/transaction_occur_when"
-            android:textSize="12sp" />
+            android:textColor="@color/primary_gray_dark"
+            android:textSize="16sp" />
 
     </LinearLayout>
 </layout>

@@ -230,7 +230,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
                 R.string.security_centre_backup_title,
                 getString(R.string.security_centre_backup_message),
-                R.drawable.vector_padlock,
+                R.drawable.vector_lock,
                 R.string.security_centre_backup_positive_button,
                 true,
                 showNeverAgain
@@ -402,9 +402,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 }.execute();
             }
         });
-        binding.swipeContainer.setColorSchemeResources(R.color.blockchain_receive_green,
-                R.color.blockchain_blue,
-                R.color.blockchain_send_red);
+        binding.swipeContainer.setColorSchemeResources(R.color.product_green_medium,
+                R.color.primary_blue_medium,
+                R.color.product_red_medium);
     }
 
     @Thunk

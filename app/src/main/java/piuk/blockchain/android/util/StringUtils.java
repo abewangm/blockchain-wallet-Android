@@ -19,4 +19,8 @@ public class StringUtils {
     public String getQuantityString(@PluralsRes int pluralId, int size) {
         return mContext.getResources().getQuantityString(pluralId, size, size);
     }
+
+    public String getFormattedString(@StringRes int stringId, Object... args) {
+        return mContext.getResources().getString(stringId, args);
+    }
 }

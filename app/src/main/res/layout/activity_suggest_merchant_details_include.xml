@@ -5,7 +5,7 @@
         android:id="@+id/confirm_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blockchain_pearl_white"
+        android:background="@color/white"
         android:orientation="vertical">
 
         <LinearLayout
@@ -17,30 +17,30 @@
             android:paddingRight="16dp">
 
             <TextView
+                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/description"
-                android:textColor="@color/blockchain_grey" />
+                android:textColor="@color/primary_gray_dark" />
 
             <EditText
                 android:id="@+id/description"
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/blockchain_pearl_white"
+                android:background="@color/white"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:inputType="textCapSentences|textLongMessage"
                 android:maxLines="1"
                 android:paddingLeft="16dp"
-                android:textColor="@color/primary_text_default_material_light"
+                android:textColor="@color/black"
                 android:textCursorDrawable="@null" />
 
         </LinearLayout>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:background="@color/blockchain_light_grey" />
+        <include layout="@layout/divider_grey" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -51,30 +51,30 @@
             android:paddingRight="16dp">
 
             <TextView
+                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/street_address"
-                android:textColor="@color/blockchain_grey" />
+                android:textColor="@color/primary_gray_dark" />
 
             <EditText
                 android:id="@+id/street_address"
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/blockchain_pearl_white"
+                android:background="@color/white"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:inputType="textCapWords"
                 android:maxLines="1"
                 android:paddingLeft="16dp"
-                android:textColor="@color/primary_text_default_material_light"
+                android:textColor="@color/black"
                 android:textCursorDrawable="@null" />
 
         </LinearLayout>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:background="@color/blockchain_light_grey" />
+        <include layout="@layout/divider_grey" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -85,30 +85,30 @@
             android:paddingRight="16dp">
 
             <TextView
+                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/city"
-                android:textColor="@color/blockchain_grey" />
+                android:textColor="@color/primary_gray_dark" />
 
             <EditText
                 android:id="@+id/city"
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/blockchain_pearl_white"
+                android:background="@color/white"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:inputType="textCapWords"
                 android:maxLines="1"
                 android:paddingLeft="16dp"
-                android:textColor="@color/primary_text_default_material_light"
+                android:textColor="@color/black"
                 android:textCursorDrawable="@null" />
 
         </LinearLayout>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:background="@color/blockchain_light_grey" />
+        <include layout="@layout/divider_grey" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -119,30 +119,30 @@
             android:paddingRight="16dp">
 
             <TextView
+                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/postal"
-                android:textColor="@color/blockchain_grey" />
+                android:textColor="@color/primary_gray_dark" />
 
             <EditText
                 android:id="@+id/zip"
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/blockchain_pearl_white"
+                android:background="@color/white"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:inputType="textCapCharacters"
                 android:maxLines="1"
                 android:paddingLeft="16dp"
-                android:textColor="@color/primary_text_default_material_light"
+                android:textColor="@color/black"
                 android:textCursorDrawable="@null" />
 
         </LinearLayout>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:background="@color/blockchain_light_grey" />
+        <include layout="@layout/divider_grey" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -153,30 +153,30 @@
             android:paddingRight="16dp">
 
             <TextView
+                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/telephone"
-                android:textColor="@color/blockchain_grey" />
+                android:textColor="@color/primary_gray_dark" />
 
             <EditText
                 android:id="@+id/telephone"
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/blockchain_pearl_white"
+                android:background="@color/white"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:inputType="phone"
                 android:maxLines="1"
                 android:paddingLeft="16dp"
-                android:textColor="@color/primary_text_default_material_light"
+                android:textColor="@color/black"
                 android:textCursorDrawable="@null" />
 
         </LinearLayout>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:background="@color/blockchain_light_grey" />
+        <include layout="@layout/divider_grey" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -187,30 +187,30 @@
             android:paddingRight="16dp">
 
             <TextView
+                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/web"
-                android:textColor="@color/blockchain_grey" />
+                android:textColor="@color/primary_gray_dark" />
 
             <EditText
                 android:id="@+id/web"
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/blockchain_pearl_white"
+                android:background="@color/white"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:inputType="textUri"
                 android:maxLines="1"
                 android:paddingLeft="16dp"
-                android:textColor="@color/primary_text_default_material_light"
+                android:textColor="@color/black"
                 android:textCursorDrawable="@null" />
 
         </LinearLayout>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:background="@color/blockchain_light_grey" />
+        <include layout="@layout/divider_grey" />
 
     </LinearLayout>
 </layout>

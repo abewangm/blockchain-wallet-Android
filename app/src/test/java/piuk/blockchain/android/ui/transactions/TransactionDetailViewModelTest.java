@@ -160,7 +160,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         verify(mActivity, times(3)).getPageIntent();
         verify(mActivity).setStatus("Pending (0/3 Confirmations)", "hash");
         verify(mActivity).setTransactionType("MOVED");
-        verify(mActivity).setTransactionColour(R.color.blockchain_transfer_blue_50);
+        verify(mActivity).setTransactionColour(R.color.product_gray_transferred_50);
         verify(mActivity).setDescription(null);
         verify(mActivity).setDate(anyString());
         verify(mActivity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
@@ -202,7 +202,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         verify(mActivity, times(3)).getPageIntent();
         verify(mActivity).setStatus("Pending (0/3 Confirmations)", "hash");
         verify(mActivity).setTransactionType("MOVED");
-        verify(mActivity).setTransactionColour(R.color.blockchain_transfer_blue_50);
+        verify(mActivity).setTransactionColour(R.color.product_gray_transferred_50);
         verify(mActivity).setDescription(null);
         verify(mActivity).setDate(anyString());
         verify(mActivity).setToAddresses(any());
@@ -342,7 +342,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Act
         mSubject.setTransactionColor(mTxMoved);
         // Assert
-        verify(mActivity).setTransactionColour(R.color.blockchain_transfer_blue_50);
+        verify(mActivity).setTransactionColour(R.color.product_gray_transferred_50);
         verifyNoMoreInteractions(mActivity);
     }
 
@@ -353,7 +353,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Act
         mSubject.setTransactionColor(mTxMoved);
         // Assert
-        verify(mActivity).setTransactionColour(R.color.blockchain_transfer_blue);
+        verify(mActivity).setTransactionColour(R.color.product_gray_transferred);
         verifyNoMoreInteractions(mActivity);
     }
 
@@ -364,7 +364,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Act
         mSubject.setTransactionColor(mTxSent);
         // Assert
-        verify(mActivity).setTransactionColour(R.color.blockchain_red_50);
+        verify(mActivity).setTransactionColour(R.color.product_red_sent_50);
         verifyNoMoreInteractions(mActivity);
     }
 
@@ -375,7 +375,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Act
         mSubject.setTransactionColor(mTxSent);
         // Assert
-        verify(mActivity).setTransactionColour(R.color.blockchain_send_red);
+        verify(mActivity).setTransactionColour(R.color.product_red_sent);
         verifyNoMoreInteractions(mActivity);
     }
 
@@ -386,7 +386,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Act
         mSubject.setTransactionColor(mTxReceived);
         // Assert
-        verify(mActivity).setTransactionColour(R.color.blockchain_green_50);
+        verify(mActivity).setTransactionColour(R.color.product_green_received_50);
         verifyNoMoreInteractions(mActivity);
     }
 
@@ -397,7 +397,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Act
         mSubject.setTransactionColor(mTxReceived);
         // Assert
-        verify(mActivity).setTransactionColour(R.color.blockchain_receive_green);
+        verify(mActivity).setTransactionColour(R.color.product_green_received);
         verifyNoMoreInteractions(mActivity);
     }
 

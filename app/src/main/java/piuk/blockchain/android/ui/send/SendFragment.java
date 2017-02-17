@@ -24,7 +24,6 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,14 +46,11 @@ import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
-import piuk.blockchain.android.ui.customviews.CustomKeypad;
-import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
-import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
@@ -153,6 +149,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
         if (listener != null) {
             listener.onSendFragmentStart();
         }
+
+        setupToolbar();
     }
 
     @Override
@@ -163,7 +161,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     private void setupToolbar() {
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.send_bitcoin);
+            ((BaseAuthActivity) getActivity()).setupToolbar(
+                    ((MainActivity) getActivity()).getSupportActionBar(), R.string.send_bitcoin);
 
             ViewUtils.setElevation(
                     getActivity().findViewById(R.id.appbar_layout),
@@ -175,7 +174,7 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.send_activity_actions, menu);
+        inflater.inflate(R.menu.menu_send, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -746,8 +745,8 @@ public class SendFragment extends Fragment implements SendViewModel.DataListener
                 .setPositiveButton(android.R.string.ok, null).show());
 
         if (details.isSurge) {
-            dialogBinding.confirmFeeBtc.setTextColor(ContextCompat.getColor(getContext(), R.color.blockchain_send_red));
-            dialogBinding.confirmFeeFiat.setTextColor(ContextCompat.getColor(getContext(), R.color.blockchain_send_red));
+            dialogBinding.confirmFeeBtc.setTextColor(ContextCompat.getColor(getContext(), R.color.product_red_medium));
+            dialogBinding.confirmFeeFiat.setTextColor(ContextCompat.getColor(getContext(), R.color.product_red_medium));
             dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
         }
 

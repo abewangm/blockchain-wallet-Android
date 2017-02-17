@@ -83,9 +83,7 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
         setContentView(R.layout.activity_suggest_merchant);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        setSupportActionBar(toolbar);
-
-        setTitle(R.string.suggest_merchant);
+        setupToolbar(toolbar, R.string.suggest_merchant);
 
         edName = (EditText) findViewById(R.id.merchant_name);
         edDescription = (EditText) findViewById(R.id.description);

@@ -18,7 +18,7 @@
     </style>
 
     <style name="StackedAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:colorAccent">@color/blockchain_blue</item>
+        <item name="android:colorAccent">@color/primary_navy_medium</item>
         <item name="buttonBarButtonStyle">@style/StackedButtonBarButtonStyle</item>
     </style>
 
