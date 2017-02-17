@@ -68,8 +68,6 @@
 
     <string name="command2">Koppelcode scannen</string>
     <string name="command3">Ik heb geen toegang tot mijn camera</string>
-    <string name="CREATE">NIEUWE PORTEMONNEE AANMAKEN</string>
-    <string name="LOGIN">Log in op mijn portemonnee</string>
     <string name="pair_your_wallet">Koppel uw Portemonnee</string>
     <string name="manual_pairing">Handmatige koppeling</string>
     <string name="pair_wallet_step_1">Log in op uw Blockchain Portemonnee via uw pc of Mac op %1$s.</string>

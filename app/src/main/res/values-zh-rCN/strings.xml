@@ -68,8 +68,6 @@
 
     <string name="command2">扫描配对代码</string>
     <string name="command3">我无法访问我的摄像头</string>
-    <string name="CREATE">创建新钱包</string>
-    <string name="LOGIN">登录「我的钱包」</string>
     <string name="pair_your_wallet">配对您的钱包</string>
     <string name="manual_pairing">手动配对</string>
     <string name="pair_wallet_step_1">在 PC 或 Mac 上通过 %1$s 登录您的 Blockchain 钱包。</string>

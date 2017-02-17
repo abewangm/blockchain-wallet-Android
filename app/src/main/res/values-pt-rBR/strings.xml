@@ -68,8 +68,6 @@
 
     <string name="command2">Escanear código de pareamento</string>
     <string name="command3">Não consigo acessar minha câmera</string>
-    <string name="CREATE">CRIAR NOVA CARTEIRA</string>
-    <string name="LOGIN">Acessar a minha carteira</string>
     <string name="pair_your_wallet">Pareie sua carteira.</string>
     <string name="manual_pairing">Pareamento Manual</string>
     <string name="pair_wallet_step_1">Acesse sua Carteira Blockchain com seu PC ou Mac em %1$s.</string>

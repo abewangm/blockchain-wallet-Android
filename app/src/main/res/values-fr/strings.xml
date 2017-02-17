@@ -68,8 +68,6 @@
 
     <string name="command2">Scannez le code de jumelage</string>
     <string name="command3">Je ne peux pas accéder à mon appareil photo</string>
-    <string name="CREATE">CRÉER UN NOUVEAU PORTEFEUILLE</string>
-    <string name="LOGIN">Me connecter à mon portefeuille</string>
     <string name="pair_your_wallet">Jumelez votre portefeuille</string>
     <string name="manual_pairing">Jumelage manuel</string>
     <string name="pair_wallet_step_1">Connectez-vous à votre portefeuille Blockchain via votre PC ou votre Mac à l\’adresse %1$s.</string>

@@ -68,8 +68,6 @@
 
     <string name="command2">Eşleştirme kodunu tara</string>
     <string name="command3">Kamerama erişemiyorum</string>
-    <string name="CREATE">YENİ CÜZDAN OLUŞTUR</string>
-    <string name="LOGIN">Cüzdanıma giriş yap</string>
     <string name="pair_your_wallet">Cüzdanınızı Eşleştirin</string>
     <string name="manual_pairing">Manüel Eşleştirme</string>
     <string name="pair_wallet_step_1">Blockchain Cüzdanınıza %1$s adresinden PC veya Mac cihazınızla giriş yapın.</string>

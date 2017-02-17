@@ -68,8 +68,6 @@
 
     <string name="command2">Pindai kode pemasangan</string>
     <string name="command3">Saya tidak dapat mengakses kamera saya</string>
-    <string name="CREATE">BUAT DOMPET BARU</string>
-    <string name="LOGIN">Masuk ke dompet saya</string>
     <string name="pair_your_wallet">Pasangkan Dompet Anda</string>
     <string name="manual_pairing">Pemasangan Manual</string>
     <string name="pair_wallet_step_1">Masuk ke Dompet Blockchain Anda melalui komputer atau Mac Anda di %1$s.</string>

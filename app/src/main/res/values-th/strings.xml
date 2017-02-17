@@ -68,8 +68,6 @@
 
     <string name="command2">สแกนรหัสจับคู่</string>
     <string name="command3">ฉันไม่สามารถใช้งานกล้องของฉันได้</string>
-    <string name="CREATE">สร้างกระเป๋าเงินใหม่</string>
-    <string name="LOGIN">ล็อกอินไปยังกระเป๋าเงินของฉัน</string>
     <string name="pair_your_wallet">จับคู่กระเป๋าเงินของคุณ</string>
     <string name="manual_pairing">จับคู่ด้วยตนเอง</string>
     <string name="pair_wallet_step_1">ล็อกอินไปยังกระเป๋าเงิน Blockchain ของคุณผ่านทาง PC หรือ Mac ของคุณที่ %1$s</string>

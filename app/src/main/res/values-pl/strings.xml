@@ -68,8 +68,6 @@
 
     <string name="command2">Skanuj kod parowania</string>
     <string name="command3">Nie mam dostępu do mojego aparatu</string>
-    <string name="CREATE">STWÓRZ NOWY PORTFEL</string>
-    <string name="LOGIN">Zaloguj się do mojego portfela</string>
     <string name="pair_your_wallet">Sparuj swój Portfel</string>
     <string name="manual_pairing">Parowanie ręczne</string>
     <string name="pair_wallet_step_1">Zaloguj się do swojego Portfela Blockchain na swoim komputerze lub Macu pod adresem %1$s</string>

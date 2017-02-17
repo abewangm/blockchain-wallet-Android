@@ -68,8 +68,6 @@
 
     <string name="command2">Naskenovat párovací kód</string>
     <string name="command3">Nedaří se mi spustit fotoaparát</string>
-    <string name="CREATE">VYTVOŘIT NOVOU PENĚŽENKU</string>
-    <string name="LOGIN">Přihlásit se do peněženky</string>
     <string name="pair_your_wallet">Spárujte svoji peněženku</string>
     <string name="manual_pairing">Ruční spárování</string>
     <string name="pair_wallet_step_1">Přihlaste se ke své peněžence Blockchain přes počítač nebo Mac na stránce %1$s.</string>

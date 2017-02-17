@@ -68,8 +68,6 @@
 
     <string name="command2">Отсканируйте код сопряжения</string>
     <string name="command3">Я не могу получить доступ к своей камере</string>
-    <string name="CREATE">СОЗДАТЬ НОВЫЙ КОШЕЛЕК</string>
-    <string name="LOGIN">Войти в мой кошелек</string>
     <string name="pair_your_wallet">Выполните сопряжение своего кошелька</string>
     <string name="manual_pairing">Ручное сопряжение</string>
     <string name="pair_wallet_step_1">Войдите в свой кошелек Blockchain на ПК или Mac, пройдя по ссылке %1$s.</string>

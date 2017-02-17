@@ -68,8 +68,6 @@
 
     <string name="command2">Fai la scansione del codice di associazione</string>
     <string name="command3">Non riesco ad accedere alla mia fotocamera</string>
-    <string name="CREATE">CREA UN NUOVO PORTAFOGLIO</string>
-    <string name="LOGIN">Accedi al mio portafoglio</string>
     <string name="pair_your_wallet">Associa il tuo portafoglio</string>
     <string name="manual_pairing">Associazione manuale</string>
     <string name="pair_wallet_step_1">Accedi al tuo Portafoglio Blockchain tramite il tuo PC o Mac su %1$s.</string>

@@ -68,8 +68,6 @@
 
     <string name="command2">Сканувати код пари</string>
     <string name="command3">Я не можу отримати доступ до камері</string>
-    <string name="CREATE">СТВОРИТИ НОВИЙ ГАМАНЕЦЬ</string>
-    <string name="LOGIN">Увійти в мій гаманець</string>
     <string name="pair_your_wallet">Спаруйте Свій гаманець</string>
     <string name="manual_pairing">Ручне парування</string>
     <string name="pair_wallet_step_1">Увійдіть у свій гаманець Blockchain з ПК чи Mac на %1$s.</string>

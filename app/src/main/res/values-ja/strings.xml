@@ -68,8 +68,6 @@
 
     <string name="command2">ペアリングコードをスキャン</string>
     <string name="command3">カメラにアクセスできません</string>
-    <string name="CREATE">新規財布を作成</string>
-    <string name="LOGIN">私の財布にログイン</string>
     <string name="pair_your_wallet">財布をペアリング</string>
     <string name="manual_pairing">手動ペアリング</string>
     <string name="pair_wallet_step_1">%1$sからPCもしくはMac経由でブロックチェーンウォレットにログインしてください。</string>

@@ -68,8 +68,6 @@
 
     <string name="command2">Kombinationscode scannen</string>
     <string name="command3">Ich kann auf meine Kamera nicht zugreifen</string>
-    <string name="CREATE">NEUE WALLET ERSTELLEN</string>
-    <string name="LOGIN">Bei meiner Wallet anmelden</string>
     <string name="pair_your_wallet">Die eigene Wallet kombinieren</string>
     <string name="manual_pairing">Per Hand kombinieren</string>
     <string name="pair_wallet_step_1">Melden Sie sich bei Ihrer Blockchain-Wallet per PC oder Mac auf %1$s an.</string>

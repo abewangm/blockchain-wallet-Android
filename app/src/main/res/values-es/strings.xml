@@ -68,8 +68,6 @@
 
     <string name="command2">Escanear el código de sincronización</string>
     <string name="command3">No puedo acceder a mi cámara</string>
-    <string name="CREATE">CREAR UN NUEVO MONEDERO</string>
-    <string name="LOGIN">Iniciar sesión en mi monedero</string>
     <string name="pair_your_wallet">Sincronizar tu monedero</string>
     <string name="manual_pairing">Sincronización manual</string>
     <string name="pair_wallet_step_1">Inicia sesión en tu monedero Blockchain a través de tu PC o Mac en %1$s.</string>

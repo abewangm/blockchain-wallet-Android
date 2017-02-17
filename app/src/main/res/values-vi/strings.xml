@@ -68,8 +68,6 @@
 
     <string name="command2">Quét mã kết nối</string>
     <string name="command3">Tôi không thể truy cập camera</string>
-    <string name="CREATE">TẠO VÍ MỚI</string>
-    <string name="LOGIN">Đăng nhập vào ví của bạn</string>
     <string name="pair_your_wallet">Kết nối ví của bạn</string>
     <string name="manual_pairing">Kết nối thủ công</string>
     <string name="pair_wallet_step_1">Đăng nhập vào Ví Blockchain của bạn bằng PC hoặc Mac tại %1$s.</string>
