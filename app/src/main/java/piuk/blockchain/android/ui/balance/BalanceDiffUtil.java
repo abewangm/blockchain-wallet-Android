@@ -1,53 +1,40 @@
 package piuk.blockchain.android.ui.balance;
 
-import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
-
-import info.blockchain.wallet.transaction.Tx;
 
 import java.util.List;
 
 class BalanceDiffUtil extends DiffUtil.Callback {
 
-    private List<Tx> oldTransactions;
-    private List<Tx> newTransactions;
+    private List<Object> oldItems;
+    private List<Object> newItems;
 
-    BalanceDiffUtil(List<Tx> oldTransactions, List<Tx> newTransactions) {
-        this.oldTransactions = oldTransactions;
-        this.newTransactions = newTransactions;
+    BalanceDiffUtil(List<Object> oldItems, List<Object> newItems) {
+        this.oldItems = oldItems;
+        this.newItems = newItems;
     }
 
     @Override
     public int getOldListSize() {
-        return oldTransactions != null ? oldTransactions.size() : 0;
+        return oldItems != null ? oldItems.size() : 0;
     }
 
     @Override
     public int getNewListSize() {
-        return newTransactions != null ? newTransactions.size() : 0;
+        return newItems != null ? newItems.size() : 0;
     }
 
     @Override
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-        return oldTransactions.get(oldItemPosition).getHash().equals(
-                newTransactions.get(newItemPosition).getHash());
+        return oldItems.getClass().equals(newItems.getClass())
+                && oldItems.get(oldItemPosition).hashCode() == newItems.get(newItemPosition).hashCode();
     }
 
     @Override
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-        Tx oldTransaction = oldTransactions.get(oldItemPosition);
-        Tx newTransaction = newTransactions.get(newItemPosition);
-
-        return oldTransaction.getDirection().equals(newTransaction.getDirection())
-                && oldTransaction.getAmount() == newTransaction.getAmount()
-                && oldTransaction.getConfirmations() == newTransaction.getConfirmations()
-                && oldTransaction.getTS() == newTransaction.getTS()
-                && oldTransaction.isWatchOnly() == newTransaction.isWatchOnly();
+        Object oldItem = oldItems.get(oldItemPosition);
+        Object newItem = newItems.get(newItemPosition);
+        return oldItem.equals(newItem);
     }
 
-    @Nullable
-    @Override
-    public Object getChangePayload(int oldItemPosition, int newItemPosition) {
-        return super.getChangePayload(oldItemPosition, newItemPosition);
-    }
 }

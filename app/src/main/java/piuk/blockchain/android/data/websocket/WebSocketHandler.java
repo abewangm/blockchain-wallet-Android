@@ -1,5 +1,6 @@
 package piuk.blockchain.android.data.websocket;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
@@ -49,6 +50,7 @@ class WebSocketHandler {
     private boolean stoppedDeliberately = false;
     private String[] xpubs;
     private String[] addrs;
+    private NotificationManager notificationManager;
     @Thunk String guid;
     @Thunk WebSocket connection;
     @Thunk HashSet<String> subHashSet = new HashSet<>();
@@ -60,6 +62,7 @@ class WebSocketHandler {
 
     public WebSocketHandler(Context context,
                             PayloadManager payloadManager,
+                            NotificationManager notificationManager,
                             MonetaryUtil monetaryUtil,
                             String guid,
                             String[] xpubs,
@@ -67,6 +70,7 @@ class WebSocketHandler {
 
         this.context = context;
         this.payloadManager = payloadManager;
+        this.notificationManager = notificationManager;
         this.monetaryUtil = monetaryUtil;
         this.guid = guid;
         this.xpubs = xpubs;
@@ -336,7 +340,7 @@ class WebSocketHandler {
     }
 
     private void triggerNotification(String title, String marquee, String text) {
-        new NotificationsUtil(context).setNotification(
+        new NotificationsUtil(context, notificationManager).setNotification(
                 title,
                 marquee,
                 text,

@@ -1,5 +1,8 @@
 package piuk.blockchain.android.ui.transactions;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 import android.annotation.SuppressLint;
 import android.support.v4.util.Pair;
 
@@ -13,7 +16,6 @@ import info.blockchain.wallet.transaction.Transaction;
 import info.blockchain.wallet.transaction.Tx;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -62,8 +64,6 @@ public class TransactionHelperTest {
     }
 
     @Test
-    @Ignore
-    // TODO: 21/10/2016 I broke this test. Needs fixing
     public void addressToLabelIsOwnHd() throws Exception {
         // Arrange
         HDWallet hdWallet = new HDWallet();
@@ -72,7 +72,9 @@ public class TransactionHelperTest {
         hdWallet.getAccounts().add(account);
         Payload payload = new Payload();
         payload.setHdWallets(hdWallet);
-//        payload.getXpub2Account().put("value", 0);
+        BiMap<String, Integer> biMap = HashBiMap.create();
+        biMap.put("value", 0);
+        when(mPayloadManager.getXpubToAccountIndexMap()).thenReturn(biMap);
         when(mPayloadManager.getPayload()).thenReturn(payload);
         when(multiAddrFactory.isOwnHDAddress(anyString())).thenReturn(true);
         HashMap<String, String> hashmap = new HashMap<>();

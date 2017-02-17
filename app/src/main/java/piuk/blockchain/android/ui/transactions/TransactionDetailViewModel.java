@@ -28,6 +28,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -36,6 +37,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
 @SuppressWarnings("WeakerAccess")
@@ -51,6 +53,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     @Inject piuk.blockchain.android.util.StringUtils mStringUtils;
     @Inject TransactionListDataManager mTransactionListDataManager;
     @Inject ExchangeRateFactory mExchangeRateFactory;
+    @Inject ContactsDataManager mContactsDataManager;
 
     private double mBtcExchangeRate;
     private String mFiatType;
@@ -102,16 +105,22 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        if (mDataListener.getPageIntent() != null
-                && mDataListener.getPageIntent().hasExtra(KEY_TRANSACTION_LIST_POSITION)) {
+        Intent pageIntent = mDataListener.getPageIntent();
+        if (pageIntent != null && pageIntent.hasExtra(KEY_TRANSACTION_LIST_POSITION)) {
 
-            int transactionPosition = mDataListener.getPageIntent().getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1);
+            int transactionPosition = pageIntent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1);
             if (transactionPosition == -1) {
                 mDataListener.pageFinish();
             } else {
                 mTransaction = mTransactionListDataManager.getTransactionList().get(transactionPosition);
                 updateUiFromTransaction(mTransaction);
             }
+        } else if (pageIntent != null && pageIntent.hasExtra(KEY_TRANSACTION_HASH)) {
+            compositeDisposable.add(
+                    mTransactionListDataManager.getTxFromHash(pageIntent.getStringExtra(KEY_TRANSACTION_HASH))
+                            .subscribe(
+                                    this::updateUiFromTransaction,
+                                    throwable -> mDataListener.pageFinish()));
         } else {
             mDataListener.pageFinish();
         }
@@ -128,9 +137,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
                                 mDataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
                                 mDataListener.setDescription(description);
                             }
-                        }, throwable -> {
-                            mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-                        }));
+                        }, throwable -> mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
     }
 
     private void updateUiFromTransaction(Tx transaction) {
@@ -178,14 +185,22 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     ArrayList<RecipientModel> recipients = new ArrayList<>();
 
                     for (Map.Entry<String, Long> item : outputMap.entrySet()) {
+
                         RecipientModel recipientModel = new RecipientModel(
                                 mTransactionHelper.addressToLabel(item.getKey()),
                                 mMonetaryUtil.getDisplayAmountWithFormatting(item.getValue()),
                                 getDisplayUnits());
+
+                        if (mContactsDataManager.getContactsTransactionMap().containsKey(transaction.getHash())) {
+                            String contactName = mContactsDataManager.getContactsTransactionMap().get(transaction.getHash());
+                            recipientModel.setAddress(contactName);
+                        }
+
                         recipients.add(recipientModel);
                     }
 
                     setFee(result);
+
                     mDataListener.setToAddresses(recipients);
                     mDataListener.setTransactionValueFiat(value);
                     mDataListener.onDataLoaded();

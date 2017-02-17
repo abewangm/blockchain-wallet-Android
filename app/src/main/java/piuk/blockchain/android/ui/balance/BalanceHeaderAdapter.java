@@ -96,4 +96,5 @@ class BalanceHeaderAdapter extends ArrayAdapter<ItemAccount> {
         this.exchangeRate = exchangeRate;
         notifyDataSetChanged();
     }
+
 }

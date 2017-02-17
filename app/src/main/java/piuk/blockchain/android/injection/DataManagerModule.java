@@ -3,6 +3,7 @@ package piuk.blockchain.android.injection;
 import android.content.Context;
 
 import info.blockchain.api.AddressInfo;
+import info.blockchain.api.DynamicFee;
 import info.blockchain.api.Settings;
 import info.blockchain.api.TransactionDetails;
 import info.blockchain.api.Unspent;
@@ -17,7 +18,8 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
+import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
+import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
@@ -62,8 +64,8 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected ReceiveDataManager provideReceiveDataManager() {
-        return new ReceiveDataManager();
+    protected QrCodeDataManager provideReceiveDataManager() {
+        return new QrCodeDataManager();
     }
 
     @Provides
@@ -131,9 +133,15 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected SwipeToReceiveHelper swipeToReceiveHelper(PayloadManager
-                                                                payloadManager, MultiAddrFactory
-                                                                multiAddrFactory, PrefsUtil prefsUtil) {
+    protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager,
+                                                               MultiAddrFactory multiAddrFactory,
+                                                               PrefsUtil prefsUtil) {
         return new SwipeToReceiveHelper(payloadManager, multiAddrFactory, prefsUtil);
+    }
+
+    @Provides
+    @ViewModelScope
+    protected SendDataManager provideSendDataManager() {
+        return new SendDataManager(new PaymentService(new Payment()), new DynamicFee(), new Unspent());
     }
 }

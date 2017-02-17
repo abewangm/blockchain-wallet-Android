@@ -17,6 +17,8 @@ interface PersistentPrefs {
     String KEY_EMAIL_VERIFY_ASK_LATER = "email_verify_ask_later";
     String KEY_BALANCE_DISPLAY_STATE = "balance_display_state";
     String KEY_SCHEME_URL = "scheme_url";
+    String KEY_METADATA_URI = "metadata_uri";
+    String KEY_CONTACTS_NOTIFICATION = "contacts_notification";
     String KEY_CURRENT_APP_VERSION = "KEY_CURRENT_APP_VERSION";
     String KEY_NEWLY_CREATED_WALLET = "newly_created_wallet";
     String LOGGED_OUT = "logged_out";
@@ -31,6 +33,7 @@ interface PersistentPrefs {
     String KEY_ENCRYPTED_PIN_CODE = "encrypted_pin_code";
     String KEY_FINGERPRINT_ENABLED = "fingerprint_enabled";
     String KEY_RECEIVE_SHORTCUTS_ENABLED = "receive_shortcuts_enabled";
+    String KEY_FIREBASE_TOKEN = "firebase_token";
     String KEY_SWIPE_TO_RECEIVE_ENABLED = "swipe_to_receive_enabled";
     String KEY_SURVEY_COMPLETED = "survey_completed";
     String KEY_SURVEY_VISITS = "survey_visits";

@@ -41,13 +41,13 @@ import piuk.blockchain.android.util.StringUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -117,7 +117,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Act
         mSubject.onViewReady();
         // Assert
-        verify(mActivity, times(2)).getPageIntent();
+        verify(mActivity).getPageIntent();
         verify(mActivity).pageFinish();
         verifyNoMoreInteractions(mActivity);
     }
@@ -132,7 +132,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Act
         mSubject.onViewReady();
         // Assert
-        verify(mActivity, times(3)).getPageIntent();
+        verify(mActivity).getPageIntent();
         verify(mActivity).pageFinish();
         verifyNoMoreInteractions(mActivity);
     }
@@ -157,7 +157,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Act
         mSubject.onViewReady();
         // Assert
-        verify(mActivity, times(3)).getPageIntent();
+        verify(mActivity).getPageIntent();
         verify(mActivity).setStatus("Pending (0/3 Confirmations)", "hash");
         verify(mActivity).setTransactionType("MOVED");
         verify(mActivity).setTransactionColour(R.color.product_gray_transferred_50);
@@ -166,7 +166,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         verify(mActivity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
         verify(mActivity).setToAddresses(any());
         verify(mActivity).setTransactionValueFiat(anyString());
-        verify(mActivity).setFromAddress(anyString());
+        verify(mActivity).setFromAddress(isNull());
         verify(mActivity).onDataLoaded();
     }
 
@@ -199,7 +199,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Act
         mSubject.onViewReady();
         // Assert
-        verify(mActivity, times(3)).getPageIntent();
+        verify(mActivity).getPageIntent();
         verify(mActivity).setStatus("Pending (0/3 Confirmations)", "hash");
         verify(mActivity).setTransactionType("MOVED");
         verify(mActivity).setTransactionColour(R.color.product_gray_transferred_50);

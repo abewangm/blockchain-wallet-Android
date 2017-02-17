@@ -35,6 +35,8 @@ import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyListOf;
@@ -111,9 +113,9 @@ public class TransferFundsDataManagerTest extends RxTest {
             return null;
         }).when(mockPayment).submitPayment(
                 any(SpendableUnspentOutputs.class),
-                anyListOf(ECKey.class),
-                anyString(),
-                anyString(),
+                anyList(),
+                isNull(),
+                isNull(),
                 any(BigInteger.class),
                 any(BigInteger.class),
                 any(Payment.SubmitPaymentListener.class));
@@ -123,6 +125,7 @@ public class TransferFundsDataManagerTest extends RxTest {
         transaction1.sendingObject.accountObject = new LegacyAddress();
         transaction1.bigIntAmount = new BigInteger("1000000");
         transaction1.bigIntFee = new BigInteger("100");
+        transaction1.unspentOutputBundle = new SpendableUnspentOutputs();
 
         List<PendingTransaction> pendingTransactions = new ArrayList<PendingTransaction>() {{
             add(transaction1);
@@ -185,7 +188,7 @@ public class TransferFundsDataManagerTest extends RxTest {
         observer.assertNoValues();
     }
 
-    @Test
+    @Test()
     public void sendPaymentFailed() throws Exception {
         // Arrange
         Payment mockPayment = mock(Payment.class);
@@ -194,16 +197,17 @@ public class TransferFundsDataManagerTest extends RxTest {
             return null;
         }).when(mockPayment).submitPayment(
                 any(SpendableUnspentOutputs.class),
-                anyListOf(ECKey.class),
-                anyString(),
-                anyString(),
-                any(BigInteger.class),
-                any(BigInteger.class),
+                anyList(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
                 any(Payment.SubmitPaymentListener.class));
 
         PendingTransaction transaction1 = new PendingTransaction();
         transaction1.sendingObject = new ItemAccount("", "", null, null, null);
         transaction1.sendingObject.accountObject = new LegacyAddress();
+        transaction1.unspentOutputBundle = new SpendableUnspentOutputs();
 
         List<PendingTransaction> pendingTransactions = new ArrayList<PendingTransaction>() {{
             add(transaction1);

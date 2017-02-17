@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
-import android.util.Log;
 import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
@@ -17,7 +16,6 @@ import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
-import org.bitcoinj.params.MainNetParams;
 
 import javax.inject.Inject;
 
@@ -265,7 +263,6 @@ public class AccountViewModel extends BaseViewModel {
     }
 
     private void importNonBip38Address(String format, String data, @Nullable CharSequenceX secondPassword) {
-
         dataListener.showProgressDialog(R.string.please_wait);
 
         compositeDisposable.add(

@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'kotlin-android'
 apply from: '../jacoco.gradle'
 apply from: 'environment.gradle'
 
@@ -89,7 +90,7 @@ android {
     // Always show the result of every unit test, even if it passes.
     testOptions.unitTests.all {
         testLogging {
-            events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+            events 'passed', 'skipped', 'failed'
         }
         reports.junitXml.destination = file('../build/test-results/')
         // This allows "unstable" builds on CI rather than straight failures
@@ -99,20 +100,22 @@ android {
             includeNoLocationClasses = true
         }
     }
+    sourceSets {
+        test.java.srcDirs += 'src/test/kotlin'
+    }
 }
 
-ext {
-    supportVersion = '25.1.1'
-    googleServicesVersion = '10.0.1'
-    rxJavaVersion = '2.0.4'
-    rxAndroidVersion = '2.0.1'
-    daggerVersion = '2.8'
-    retrofitVersion = '2.1.0'
-    okHttpVersion = '3.5.0'
+// Ensure no Kotlin code is present in the production app... for now.
+afterEvaluate {
+    android.sourceSets.all { sourceSet ->
+        if (!sourceSet.name.startsWith("test")) {
+            sourceSet.kotlin.setSrcDirs([])
+        }
+    }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile files('libs/MyWalletHD.jar')
     compile "com.android.support:appcompat-v7:$supportVersion"
     compile "com.android.support:recyclerview-v7:$supportVersion"
     compile "com.android.support:cardview-v7:$supportVersion"
@@ -133,8 +136,10 @@ dependencies {
     compile 'org.thoughtcrime.ssl.pinning:AndroidPinning:1.0.0'
     compile 'com.neovisionaries:nv-websocket-client:1.19'
     compile('com.google.zxing:core:3.3.0') { transitive = true }
-    compile 'com.github.mukeshsolanki:country-picker-android:1.1.6'
+    compile 'com.github.mukeshsolanki:country-picker-android:1.1.7'
     compile 'com.aurelhubert:ahbottomnavigation:2.0.2'
+    // URL Builder
+    compile "io.mikael:urlbuilder:2.0.8"
     // RxJava
     compile "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
     compile "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
@@ -147,15 +152,17 @@ dependencies {
     // Dagger2
     compile "com.google.dagger:dagger:$daggerVersion"
     annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
-    annotationProcessor 'com.google.guava:guava:19.0'
+    annotationProcessor 'com.google.guava:guava:20.0'
     // Fingerprint authentication
-    compile 'com.mtramin:rxfingerprint:2.0.1'
+    compile 'com.mtramin:rxfingerprint:2.0.3'
     // Custom fonts
     compile 'uk.co.chrisjenx:calligraphy:2.2.0'
+    // GSON
+    compile 'com.google.code.gson:gson:2.8.0'
 
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
-    androidTestCompile 'org.mockito:mockito-core:1.9.5'
+    androidTestCompile "org.mockito:mockito-core:$mockitoVersion"
     androidTestCompile 'com.jayway.android.robotium:robotium-solo:5.6.3'
     androidTestCompile "com.android.support:support-annotations:$supportVersion"
     androidTestCompile 'com.android.support.test:rules:0.5'
@@ -168,12 +175,16 @@ dependencies {
 
     // Unit Tests
     testCompile 'org.json:json:20140107'
-    testCompile 'org.mockito:mockito-core:1.9.5'
+    testCompile "org.mockito:mockito-core:$mockitoVersion"
     testCompile 'org.hamcrest:hamcrest-junit:2.0.0.0'
-    testCompile('org.robolectric:robolectric:3.1.4') {
+    testCompile('org.robolectric:robolectric:3.2.2') {
         exclude group: 'com.google.guava'
         exclude group: 'com.google.protobuf'
     }
+    // Unit Tests in Kotlin
+    testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
+    testCompile 'com.nhaarman:mockito-kotlin:1.2.0'
 }
 
 buildscript {
@@ -182,7 +193,8 @@ buildscript {
     }
 
     dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:3.4.0'
+        classpath 'me.tatarka:gradle-retrolambda:3.5.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
 

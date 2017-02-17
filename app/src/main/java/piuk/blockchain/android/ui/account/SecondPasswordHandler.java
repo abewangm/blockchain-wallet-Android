@@ -40,6 +40,7 @@ public class SecondPasswordHandler {
 
             final AppCompatEditText passwordField = new AppCompatEditText(context);
             passwordField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            passwordField.setHint(R.string.password);
 
             new AlertDialog.Builder(context, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)

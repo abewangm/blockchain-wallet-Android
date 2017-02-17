@@ -80,6 +80,8 @@ class EnvironmentSwitcher {
                             "Environment set to " + debugSettings.getCurrentEnvironment().getName(),
                             ToastCustom.LENGTH_SHORT,
                             ToastCustom.TYPE_OK);
+
+                    resetAllTimers();
                 })
                 .setNegativeButton("Reset Timers", (dialogInterface, i) -> resetAllTimers())
                 .create()
@@ -95,6 +97,7 @@ class EnvironmentSwitcher {
         prefsUtil.removeValue(AccountViewModel.KEY_WARN_TRANSFER_ALL);
         prefsUtil.removeValue(PrefsUtil.KEY_SURVEY_COMPLETED);
         prefsUtil.removeValue(PrefsUtil.KEY_SURVEY_VISITS);
+
         AppRate.reset(context);
         AccessState.getInstance().setPIN(null);
 

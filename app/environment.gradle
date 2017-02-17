@@ -1,6 +1,6 @@
 /**
  * This loads Staging and Dev URLs from a file in the project root named 'urls.properties' which
- * defines each respective URL and is hidden from VCS. The app will function correctly in production
+ * defines each respective URL and is hidden from Git. The app will function correctly in production
  * without it, but will crash if switched to another environment via the debug menu.
  */
 

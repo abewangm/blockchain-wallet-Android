@@ -8,13 +8,10 @@ import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
 
-import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.NetworkParameters;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -25,10 +22,9 @@ import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.services.AddressInfoService;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -52,7 +48,7 @@ public class AccountDataManagerTest extends RxTest {
     public void createNewAccountSuccess() throws Exception {
         // Arrange
         Account mockAccount = mock(Account.class);
-        when(payloadManager.addAccount(anyString(), anyString())).thenReturn(mockAccount);
+        when(payloadManager.addAccount(anyString(), isNull())).thenReturn(mockAccount);
         // Act
         TestObserver<Account> observer = subject.createNewAccount("", null).test();
         // Assert
@@ -103,9 +99,22 @@ public class AccountDataManagerTest extends RxTest {
     public void setPrivateKeySuccessNoDoubleEncryption() throws Exception {
         // Arrange
         ECKey mockECKey = mock(ECKey.class);
-        when(payloadManager.setKeyForLegacyAddress(any(ECKey.class), any(CharSequenceX.class))).thenReturn(true);
+        when(payloadManager.setKeyForLegacyAddress(any(ECKey.class), isNull())).thenReturn(true);
         // Act
         TestObserver<Boolean> observer = subject.setPrivateKey(mockECKey, null).test();
+        // Assert
+        observer.assertNoErrors();
+        observer.assertComplete();
+        assertEquals(true, observer.values().get(0).booleanValue());
+    }
+
+    @Test
+    public void setPrivateKeySuccessWithDoubleEncryption() throws Exception {
+        // Arrange
+        ECKey mockECKey = mock(ECKey.class);
+        when(payloadManager.setKeyForLegacyAddress(any(ECKey.class), any(CharSequenceX.class))).thenReturn(true);
+        // Act
+        TestObserver<Boolean> observer = subject.setPrivateKey(mockECKey, new CharSequenceX("password")).test();
         // Assert
         observer.assertNoErrors();
         observer.assertComplete();

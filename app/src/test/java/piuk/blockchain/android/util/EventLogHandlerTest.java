@@ -20,12 +20,10 @@ import static org.mockito.Mockito.when;
 
 public class EventLogHandlerTest {
 
-    @Mock
-    PrefsUtil prefsUtil;
-    @Mock
-    WebUtil webUtil;
+    @Mock PrefsUtil prefsUtil;
+    @Mock WebUtil webUtil;
 
-    String successTrue = "{\"success\":true}";
+    private static final String SUCCESS_TRUE = "{\"success\":true}";
 
     @Before
     public void setUp() throws Exception {
@@ -33,12 +31,12 @@ public class EventLogHandlerTest {
     }
 
     private void arrangeShouldLog() throws Exception{
-        when(webUtil.getURL(anyString())).thenReturn(successTrue);
+        when(webUtil.getURL(anyString())).thenReturn(SUCCESS_TRUE);
         when(prefsUtil.getValue(anyString(), anyBoolean())).thenReturn(false);//has not been logged
     }
 
     private void arrangeShouldNotLog() throws Exception{
-        when(webUtil.getURL(anyString())).thenReturn(successTrue);
+        when(webUtil.getURL(anyString())).thenReturn(SUCCESS_TRUE);
         when(prefsUtil.getValue(anyString(), anyBoolean())).thenReturn(true);//has been logged
     }
 
@@ -72,8 +70,8 @@ public class EventLogHandlerTest {
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_2ND_PW, true);
     }
 
-    @Test
     @Ignore //20/12/2016 Disabled
+    @Test
     public void enabled_logLegacy_notPreviouslyLogged_shouldLog() throws Exception {
         // Arrange
         arrangeShouldLog();
@@ -88,8 +86,8 @@ public class EventLogHandlerTest {
         verify(prefsUtil).setValue(PrefsUtil.KEY_EVENT_LEGACY, true);
     }
 
-    @Test
     @Ignore //20/12/2016 Disabled
+    @Test
     public void enabled_logLegacy_previouslyLogged_shouldNotLog() throws Exception {
         // Arrange
         arrangeShouldNotLog();
@@ -104,8 +102,8 @@ public class EventLogHandlerTest {
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_LEGACY, false);
     }
 
-    @Test
     @Ignore //20/12/2016 Disabled
+    @Test
     public void enabled_logBackup_notPreviouslyLogged_shouldLog() throws Exception {
         // Arrange
         arrangeShouldLog();
@@ -120,8 +118,8 @@ public class EventLogHandlerTest {
         verify(prefsUtil).setValue(PrefsUtil.KEY_EVENT_BACKUP, true);
     }
 
-    @Test
     @Ignore //20/12/2016 Disabled
+    @Test
     public void enabled_logBackup_previouslyLogged_shouldNotLog() throws Exception {
         // Arrange
         arrangeShouldNotLog();
@@ -167,8 +165,8 @@ public class EventLogHandlerTest {
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_2ND_PW, true);
     }
 
-    @Test
     @Ignore //20/12/2016 Disabled
+    @Test
     public void disabled_logLegacy_notPreviouslyLogged_shouldLog() throws Exception {
         // Arrange
         arrangeShouldLog();
@@ -183,8 +181,8 @@ public class EventLogHandlerTest {
         verify(prefsUtil).setValue(PrefsUtil.KEY_EVENT_LEGACY, true);
     }
 
-    @Test
     @Ignore //20/12/2016 Disabled
+    @Test
     public void disabled_logLegacy_previouslyLogged_shouldNotLog() throws Exception {
         // Arrange
         arrangeShouldNotLog();
@@ -199,8 +197,8 @@ public class EventLogHandlerTest {
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_LEGACY, false);
     }
 
-    @Test
     @Ignore //20/12/2016 Disabled
+    @Test
     public void disabled_logBackup_notPreviouslyLogged_shouldLog() throws Exception {
         // Arrange
         arrangeShouldLog();
@@ -215,8 +213,8 @@ public class EventLogHandlerTest {
         verify(prefsUtil).setValue(PrefsUtil.KEY_EVENT_BACKUP, true);
     }
 
-    @Test
     @Ignore //20/12/2016 Disabled
+    @Test
     public void disabled_logBackup_previouslyLogged_shouldNotLog() throws Exception {
         // Arrange
         arrangeShouldNotLog();
@@ -243,6 +241,6 @@ public class EventLogHandlerTest {
 
         // Assert
         Thread.sleep(200);
-        verify(webUtil, never()).getURL(EventLogHandler.URL_EVENT_TX_INPUT_FROM_DROPDOWN);
+        verify(webUtil).getURL(EventLogHandler.URL_EVENT_TX_INPUT_FROM_DROPDOWN);
     }
 }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="@color/white"
+        android:foreground="?attr/selectableItemBackground"
+        android:theme="@style/PlainTheme">
+
+        <TextView
+            android:id="@+id/header_name"
+            fontPath="fonts/Montserrat-Regular.ttf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:padding="16dp"
+            android:text="@string/imported_addresses"
+            android:textColor="@color/primary_navy_medium"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/imageview_plus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:padding="16dp"
+            android:tint="@color/primary_navy_medium"
+            app:srcCompat="@drawable/ic_add" />
+
+    </RelativeLayout>
+</layout>

@@ -12,8 +12,6 @@
         <ImageView
             android:layout_width="87dp"
             android:layout_height="79dp"
-            android:layout_alignParentTop="true"
-            android:layout_centerInParent="true"
             android:layout_gravity="center_horizontal"
             android:layout_margin="16dp"
             android:gravity="center_horizontal"
@@ -109,14 +107,14 @@
                     android:layout_width="16dip"
                     android:layout_height="16dip"
                     android:layout_margin="10dip"
-                    android:background="@drawable/rounded_view_dark_blue" />
+                    android:background="@drawable/rounded_view_accent_blue" />
 
                 <TextView
                     android:id="@+id/pageBox2"
                     android:layout_width="16dip"
                     android:layout_height="16dip"
                     android:layout_margin="10dip"
-                    android:background="@drawable/rounded_view_dark_blue" />
+                    android:background="@drawable/rounded_view_accent_blue" />
 
             </LinearLayout>
 

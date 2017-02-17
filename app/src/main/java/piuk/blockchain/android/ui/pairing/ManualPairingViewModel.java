@@ -102,10 +102,7 @@ public class ManualPairingViewModel extends BaseViewModel {
                                 mWaitingForAuth = false;
                                 attemptDecryptPayload(password, guid, response);
                             }
-                        }, throwable -> {
-                            throwable.printStackTrace();
-                            showErrorToastAndRestartApp(R.string.auth_failed);
-                        }));
+                        }, throwable -> showErrorToastAndRestartApp(R.string.auth_failed)));
     }
 
     private void attemptDecryptPayload(CharSequenceX password, String guid, String payload) {

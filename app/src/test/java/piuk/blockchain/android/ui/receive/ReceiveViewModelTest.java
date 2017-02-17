@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.receive;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.content.Context;
 import android.graphics.Bitmap;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -11,7 +12,6 @@ import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +30,7 @@ import java.util.Locale;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
+import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -40,6 +40,7 @@ import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
 
 import static junit.framework.Assert.assertNotNull;
@@ -55,6 +56,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.receive.ReceiveViewModel.KEY_WARN_WATCH_ONLY_SPEND;
 
+@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class ReceiveViewModelTest {
@@ -64,9 +66,10 @@ public class ReceiveViewModelTest {
     @Mock AppUtil mAppUtil;
     @Mock PrefsUtil mPrefsUtil;
     @Mock StringUtils mStringUtils;
-    @Mock ReceiveDataManager mDataManager;
+    @Mock QrCodeDataManager mDataManager;
     @Mock ExchangeRateFactory mExchangeRateFactory;
     @Mock WalletAccountHelper mWalletAccountHelper;
+    @Mock SSLVerifyUtil mSslVerifyUtil;
     @Mock private ReceiveViewModel.DataListener mActivity;
 
     @Before
@@ -114,9 +117,9 @@ public class ReceiveViewModelTest {
         // Act
         mSubject.onViewReady();
         // Assert
-        verify(mActivity).onSpinnerDataChanged();
-        assertEquals(5, mSubject.mAccountMap.size());
-        assertEquals(2, mSubject.mSpinnerIndexMap.size());
+        verify(mActivity).onAccountDataChanged();
+        assertEquals(5, mSubject.accountMap.size());
+        assertEquals(2, mSubject.spinnerIndexMap.size());
     }
 
     @Test
@@ -188,23 +191,9 @@ public class ReceiveViewModelTest {
         when(mPayloadManager.getPayload()).thenReturn(mockPayload);
         // Act
         mSubject.onViewReady(); // Update account list first
-        Integer value = mSubject.getDefaultSpinnerPosition();
+        Integer value = mSubject.getDefaultAccountPosition();
         // Assert
         assertEquals(2, Math.toIntExact(value));
-    }
-
-    @SuppressLint("NewApi")
-    @Test
-    public void getDefaultSpinnerPositionNotUpgraded() throws Exception {
-        // Arrange
-        Payload mockPayload = mock(Payload.class);
-        when(mockPayload.isUpgraded()).thenReturn(false);
-
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        // Act
-        Integer value = mSubject.getDefaultSpinnerPosition();
-        // Assert
-        assertEquals(0, Math.toIntExact(value));
     }
 
     @Test
@@ -231,18 +220,6 @@ public class ReceiveViewModelTest {
         Object value = mSubject.getAccountItemForPosition(2);
         // Assert
         assertEquals(account2, value);
-    }
-
-    @Test
-    public void isUpgraded() throws Exception {
-        // Arrange
-        Payload mockPayload = mock(Payload.class);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mockPayload.isUpgraded()).thenReturn(true);
-        // Act
-        Boolean value = mSubject.isUpgraded();
-        // Assert
-        assertTrue(value);
     }
 
     @Test
@@ -353,16 +330,6 @@ public class ReceiveViewModelTest {
 
     }
 
-    @Test
-    public void getAppUtil() throws Exception {
-        // Arrange
-
-        // Act
-        AppUtil util = mSubject.getAppUtil();
-        // Assert
-        Assert.assertEquals(util, mAppUtil);
-    }
-
     private class MockApplicationModule extends ApplicationModule {
 
         MockApplicationModule(Application application) {
@@ -396,12 +363,17 @@ public class ReceiveViewModelTest {
         protected PayloadManager providePayloadManager() {
             return mPayloadManager;
         }
+
+        @Override
+        protected SSLVerifyUtil provideSSlVerifyUtil(Context context) {
+            return mSslVerifyUtil;
+        }
     }
 
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected ReceiveDataManager provideReceiveDataManager() {
+        protected QrCodeDataManager provideReceiveDataManager() {
             return mDataManager;
         }
 

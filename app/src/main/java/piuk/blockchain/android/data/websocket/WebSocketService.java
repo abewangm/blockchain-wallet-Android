@@ -1,5 +1,6 @@
 package piuk.blockchain.android.data.websocket;
 
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,7 +9,6 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -25,6 +25,7 @@ public class WebSocketService extends Service {
     private final IBinder binder = new LocalBinder();
     @Inject protected PayloadManager payloadManager;
     @Inject protected PrefsUtil prefsUtil;
+    @Inject protected NotificationManager notificationManager;
     @Thunk WebSocketHandler webSocketHandler;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -63,6 +64,7 @@ public class WebSocketService extends Service {
         webSocketHandler = new WebSocketHandler(
                 getApplicationContext(),
                 payloadManager,
+                notificationManager,
                 new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
                 payloadManager.getPayload().getGuid(),
                 xpubs,

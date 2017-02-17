@@ -13,5 +13,4 @@ public class InjectorTestUtils {
                                                 DataManagerModule managerModule) {
         injector.initAppComponent(applicationModule, apiModule, managerModule);
     }
-
 }

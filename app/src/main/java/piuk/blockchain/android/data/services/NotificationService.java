@@ -19,7 +19,8 @@ public class NotificationService {
      * @param token     A Firebase notification token
      * @param guid      The user's GUID
      * @param sharedKey The user's shared key
-     * @return A {@link Completable}, ie an Observable specifically for methods returning void.
+     * @return A {@link Completable}, ie an Observable type object specifically for methods
+     * returning void.
      */
     public Completable sendNotificationToken(String token, String guid, String sharedKey) {
         return Completable.fromCallable(() -> {

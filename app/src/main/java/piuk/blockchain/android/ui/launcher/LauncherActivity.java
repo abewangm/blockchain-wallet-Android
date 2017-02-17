@@ -21,14 +21,14 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 public class LauncherActivity extends AppCompatActivity implements LauncherViewModel.DataListener {
 
-    private LauncherViewModel mViewModel;
+    private LauncherViewModel viewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
 
-        mViewModel = new LauncherViewModel(this);
+        viewModel = new LauncherViewModel(this);
 
         Handler handler = new Handler();
         handler.postDelayed(new DelayStartRunnable(this), 500);
@@ -36,7 +36,7 @@ public class LauncherActivity extends AppCompatActivity implements LauncherViewM
 
     @Thunk
     void onViewReady() {
-        mViewModel.onViewReady();
+        viewModel.onViewReady();
     }
 
     @Override
@@ -61,8 +61,8 @@ public class LauncherActivity extends AppCompatActivity implements LauncherViewM
                 .setMessage(getString(R.string.not_sane_error))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
-                    mViewModel.getAppUtil().clearCredentialsAndRestart();
-                    mViewModel.getAppUtil().restartApp();
+                    viewModel.getAppUtil().clearCredentialsAndRestart();
+                    viewModel.getAppUtil().restartApp();
                 })
                 .show();
     }
@@ -86,7 +86,7 @@ public class LauncherActivity extends AppCompatActivity implements LauncherViewM
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mViewModel.destroy();
+        viewModel.destroy();
     }
 
     private void startSingleActivity(Class clazz) {

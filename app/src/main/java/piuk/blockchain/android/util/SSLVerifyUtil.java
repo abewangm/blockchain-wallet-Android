@@ -10,7 +10,6 @@ import org.thoughtcrime.ssl.pinning.util.PinningHelper;
 import java.io.IOException;
 import java.net.URL;
 
-import javax.inject.Inject;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLHandshakeException;
 
@@ -34,7 +33,6 @@ public class SSLVerifyUtil {
 
     private Context context;
 
-    @Inject
     public SSLVerifyUtil(Context context) {
         this.context = context;
     }
@@ -45,21 +43,21 @@ public class SSLVerifyUtil {
                 @Override
                 public void onSuccess() {
                     Log.i(TAG, "SSL pinning completed successfully");
-                    mSslPinningSubject.onNext(SslEvent.Success);
+                    mSslPinningSubject.onNext(SslEvent.SUCCESS);
                 }
 
                 @Override
                 public void onServerDown() {
-                    mSslPinningSubject.onNext(SslEvent.ServerDown);
+                    mSslPinningSubject.onNext(SslEvent.SERVER_DOWN);
                 }
 
                 @Override
                 public void onPinningFail() {
-                    mSslPinningSubject.onNext(SslEvent.PinningFail);
+                    mSslPinningSubject.onNext(SslEvent.PINNING_FAIL);
                 }
             });
         } else {
-            mSslPinningSubject.onNext(SslEvent.NoConnection);
+            mSslPinningSubject.onNext(SslEvent.NO_CONNECTION);
         }
     }
 
@@ -69,10 +67,10 @@ public class SSLVerifyUtil {
 
     @SuppressWarnings("WeakerAccess")
     public enum SslEvent {
-        Success,
-        ServerDown,
-        PinningFail,
-        NoConnection
+        SUCCESS,
+        SERVER_DOWN,
+        PINNING_FAIL,
+        NO_CONNECTION
     }
 
     interface CertificateCheckInterface {

@@ -46,6 +46,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -172,7 +173,7 @@ public class AccountViewModelTest {
     @Test
     public void createNewAccountSuccessful() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), any(CharSequenceX.class))).thenReturn(Observable.just(new Account()));
+        when(accountDataManager.createNewAccount(anyString(), isNull())).thenReturn(Observable.just(new Account()));
         // Act
         subject.createNewAccount("");
         // Assert
@@ -188,7 +189,7 @@ public class AccountViewModelTest {
     @Test
     public void createNewAccountDecryptionException() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new DecryptionException()));
+        when(accountDataManager.createNewAccount(anyString(), isNull())).thenReturn(Observable.error(new DecryptionException()));
         // Act
         subject.createNewAccount("");
         // Assert
@@ -202,7 +203,7 @@ public class AccountViewModelTest {
     @Test
     public void createNewAccountPayloadException() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new PayloadException()));
+        when(accountDataManager.createNewAccount(anyString(), isNull())).thenReturn(Observable.error(new PayloadException()));
         // Act
         subject.createNewAccount("");
         // Assert
@@ -216,7 +217,7 @@ public class AccountViewModelTest {
     @Test
     public void createNewAccountUnknownException() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), any(CharSequenceX.class))).thenReturn(Observable.error(new Exception()));
+        when(accountDataManager.createNewAccount(anyString(), isNull())).thenReturn(Observable.error(new Exception()));
         // Act
         subject.createNewAccount("");
         // Assert
@@ -321,13 +322,28 @@ public class AccountViewModelTest {
     @Test
     public void onAddressScannedNonBip38() throws Exception {
         // Arrange
+        when(accountDataManager.getKeyFromImportedData(anyString(), anyString())).thenReturn(Observable.just(mock(ECKey.class)));
+        // Act
+        subject.onAddressScanned("L1FQxC7wmmRNNe2YFPNXscPq3kaheiA4T7SnTr7vYSBW7Jw1A7PD");
+        // Assert
+        verify(accountDataManager).getKeyFromImportedData(anyString(), anyString());
+        verify(activity).showProgressDialog(anyInt());
+        verify(activity).dismissProgressDialog();
+    }
 
+    @Test
+    public void onAddressScannedNonBip38Failure() throws Exception {
+        // Arrange
+        when(accountDataManager.getKeyFromImportedData(anyString(), anyString())).thenReturn(Observable.error(new Throwable()));
         // Act
         subject.onAddressScanned("L1FQxC7wmmRNNe2YFPNXscPq3kaheiA4T7SnTr7vYSBW7Jw1A7PD");
         when(accountDataManager.getKeyFromImportedData(anyString(), anyString())).thenReturn(Observable.just(mock(ECKey.class)));
         // Assert
+        verify(accountDataManager).getKeyFromImportedData(anyString(), anyString());
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
     }
 
     @Test

@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.receive;
 
 import com.google.common.collect.HashBiMap;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -39,7 +40,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
+import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -56,27 +57,29 @@ import piuk.blockchain.android.util.StringUtils;
 public class ReceiveViewModel extends BaseViewModel {
 
     public static final String TAG = ReceiveViewModel.class.getSimpleName();
-    static final String KEY_WARN_WATCH_ONLY_SPEND = "warn_watch_only_spend";
+    public static final String KEY_WARN_WATCH_ONLY_SPEND = "warn_watch_only_spend";
+
     private static final int DIMENSION_QR_CODE = 600;
 
-    private DataListener mDataListener;
-    @Inject PayloadManager mPayloadManager;
-    @Inject AppUtil mAppUtil;
-    @Inject PrefsUtil mPrefsUtil;
-    @Inject StringUtils mStringUtils;
-    @Inject ReceiveDataManager mDataManager;
-    @Inject WalletAccountHelper mWalletAccountHelper;
-    @Inject SSLVerifyUtil mSSLVerifyUtil;
-    @Inject Context mApplicationContext;
-    @VisibleForTesting HashBiMap<Integer, Object> mAccountMap;
-    @VisibleForTesting SparseIntArray mSpinnerIndexMap;
-    private ReceiveCurrencyHelper mCurrencyHelper;
+    private DataListener dataListener;
+    private ReceiveCurrencyHelper currencyHelper;
+
+    @Inject PayloadManager payloadManager;
+    @Inject AppUtil appUtil;
+    @Inject PrefsUtil prefsUtil;
+    @Inject StringUtils stringUtils;
+    @Inject QrCodeDataManager qrCodeDataManager;
+    @Inject WalletAccountHelper walletAccountHelper;
+    @Inject SSLVerifyUtil sslVerifyUtil;
+    @Inject Context applicationContext;
+    @VisibleForTesting HashBiMap<Integer, Object> accountMap;
+    @VisibleForTesting SparseIntArray spinnerIndexMap;
 
     public interface DataListener {
 
         Bitmap getQrBitmap();
 
-        void onSpinnerDataChanged();
+        void onAccountDataChanged();
 
         void showQrLoading();
 
@@ -88,169 +91,166 @@ public class ReceiveViewModel extends BaseViewModel {
 
         void updateBtcTextField(String text);
 
+        void startContactSelectionActivity();
+
     }
 
-    public ReceiveViewModel(DataListener listener, Locale locale) {
+    ReceiveViewModel(DataListener listener, Locale locale) {
         Injector.getInstance().getDataManagerComponent().inject(this);
-        mDataListener = listener;
+        dataListener = listener;
 
-        int btcUnitType = mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
+        int btcUnitType = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         MonetaryUtil monetaryUtil = new MonetaryUtil(btcUnitType);
-        mCurrencyHelper = new ReceiveCurrencyHelper(monetaryUtil, locale);
+        currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, locale);
 
-        mAccountMap = HashBiMap.create();
-        mSpinnerIndexMap = new SparseIntArray();
+        accountMap = HashBiMap.create();
+        spinnerIndexMap = new SparseIntArray();
     }
 
     @Override
     public void onViewReady() {
-        mSSLVerifyUtil.validateSSL();
-        updateSpinnerList();
+        sslVerifyUtil.validateSSL();
+        updateAccountList();
+    }
+
+    void onSendToContactClicked(String btcAmount) {
+        long amountLong = currencyHelper.getLongAmount(btcAmount);
+        if (amountLong > 0) {
+            dataListener.startContactSelectionActivity();
+        } else {
+            dataListener.showToast(stringUtils.getString(R.string.invalid_amount), ToastCustom.TYPE_ERROR);
+        }
     }
 
     @NonNull
-    public List<ItemAccount> getReceiveToList() {
-        return new ArrayList<ItemAccount>() {{
-            addAll(mWalletAccountHelper.getAccountItems(true));
-            addAll(mWalletAccountHelper.getAddressBookEntries());
-        }};
+    List<ItemAccount> getReceiveToList() {
+        ArrayList<ItemAccount> itemAccounts = new ArrayList<>();
+        itemAccounts.addAll(walletAccountHelper.getAccountItems(true));
+        itemAccounts.addAll(walletAccountHelper.getAddressBookEntries());
+        return itemAccounts;
     }
 
     @NonNull
-    public ReceiveCurrencyHelper getCurrencyHelper() {
-        return mCurrencyHelper;
+    ReceiveCurrencyHelper getCurrencyHelper() {
+        return currencyHelper;
     }
 
     @NonNull
-    public PrefsUtil getPrefsUtil() {
-        return mPrefsUtil;
+    PrefsUtil getPrefsUtil() {
+        return prefsUtil;
     }
 
-    public void updateSpinnerList() {
-        mAccountMap.clear();
-        mSpinnerIndexMap.clear();
+    // TODO: 06/02/2017 This is not a nice way of doing things. We need to refactor this stuff
+    // into a Map of some description and start passing around HashCodes maybe.
+    int getObjectPosition(Object object) {
+        for (Object item : accountMap.values()) {
+            if (object instanceof Account && item instanceof Account) {
+                if (((Account) object).getXpub().equals(((Account) item).getXpub())) {
+                    return accountMap.inverse().get(item);
+                }
+            } else if (object instanceof LegacyAddress && item instanceof LegacyAddress) {
+                if (((LegacyAddress) object).getAddress().equals(((LegacyAddress) item).getAddress())) {
+                    return accountMap.inverse().get(item);
+                }
+            }
+        }
+        return getDefaultAccountPosition();
+    }
 
-        int spinnerIndex = 0;
-
-        if (isUpgraded()) {
-            // V3
-            List<Account> accounts = mPayloadManager.getPayload().getHdWallet().getAccounts();
-            int accountIndex = 0;
-            for (Account item : accounts) {
-
-                mSpinnerIndexMap.put(spinnerIndex, accountIndex);
-                accountIndex++;
-
-                if (item.isArchived())
-                    // Skip archived account
-                    continue;
-
-                mAccountMap.put(spinnerIndex, item);
-                spinnerIndex++;
+    int getCorrectedAccountIndex(int accountIndex) {
+        // Filter accounts by active
+        List<Account> activeAccounts = new ArrayList<>();
+        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        for (int i = 0; i < accounts.size(); i++) {
+            Account account = accounts.get(i);
+            if (!account.isArchived()) {
+                activeAccounts.add(account);
             }
         }
 
-        // Legacy Addresses
-        List<LegacyAddress> legacyAddresses = mPayloadManager.getPayload().getLegacyAddressList();
-        for (LegacyAddress legacyAddress : legacyAddresses) {
+        // Find corrected position
+        return payloadManager.getPayload().getHdWallet().getAccounts().indexOf(activeAccounts.get(accountIndex));
+    }
 
+    void updateAccountList() {
+        accountMap.clear();
+        spinnerIndexMap.clear();
+        int spinnerIndex = 0;
+        // V3
+        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        int accountIndex = 0;
+        for (Account item : accounts) {
+            spinnerIndexMap.put(spinnerIndex, accountIndex);
+            accountIndex++;
+            if (item.isArchived())
+                // Skip archived account
+                continue;
+
+            accountMap.put(spinnerIndex, item);
+            spinnerIndex++;
+        }
+
+        // Legacy Addresses
+        List<LegacyAddress> legacyAddresses = payloadManager.getPayload().getLegacyAddressList();
+        for (LegacyAddress legacyAddress : legacyAddresses) {
             if (legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS)
                 // Skip archived address
                 continue;
 
-            mAccountMap.put(spinnerIndex, legacyAddress);
+            accountMap.put(spinnerIndex, legacyAddress);
             spinnerIndex++;
         }
 
-        mDataListener.onSpinnerDataChanged();
+        dataListener.onAccountDataChanged();
     }
 
-    public void generateQrCode(String uri) {
-        mDataListener.showQrLoading();
+    void generateQrCode(String uri) {
+        dataListener.showQrLoading();
         compositeDisposable.clear();
         compositeDisposable.add(
-                mDataManager.generateQrCode(uri, DIMENSION_QR_CODE)
+                qrCodeDataManager.generateQrCode(uri, DIMENSION_QR_CODE)
                         .subscribe(
-                                qrCode -> mDataListener.showQrCode(qrCode),
-                                throwable -> mDataListener.showQrCode(null)));
+                                qrCode -> dataListener.showQrCode(qrCode),
+                                throwable -> dataListener.showQrCode(null)));
     }
 
-    public int getDefaultSpinnerPosition() {
-        if (isUpgraded()) {
-            return mAccountMap.inverse().get(getDefaultAccount());
-        } else {
-            return 0;
-        }
-    }
-
-    private Account getDefaultAccount() {
-        return mPayloadManager.getPayload().getHdWallet().getAccounts().get(
-                mPayloadManager.getPayload().getHdWallet().getDefaultIndex());
+    int getDefaultAccountPosition() {
+        return accountMap.inverse().get(getDefaultAccount());
     }
 
     @Nullable
-    public Object getAccountItemForPosition(int position) {
-        return mAccountMap.get(position);
+    Object getAccountItemForPosition(int position) {
+        return accountMap.get(position);
     }
 
-    public boolean isUpgraded() {
-        return mPayloadManager.getPayload().isUpgraded();
+    boolean warnWatchOnlySpend() {
+        return prefsUtil.getValue(KEY_WARN_WATCH_ONLY_SPEND, true);
     }
 
-    public boolean warnWatchOnlySpend() {
-        return mPrefsUtil.getValue(KEY_WARN_WATCH_ONLY_SPEND, true);
+    void setWarnWatchOnlySpend(boolean warn) {
+        prefsUtil.setValue(KEY_WARN_WATCH_ONLY_SPEND, warn);
     }
 
-    public void setWarnWatchOnlySpend(boolean warn) {
-        mPrefsUtil.setValue(KEY_WARN_WATCH_ONLY_SPEND, warn);
-    }
-
-    public void updateFiatTextField(String bitcoin) {
+    void updateFiatTextField(String bitcoin) {
         if (bitcoin.isEmpty()) bitcoin = "0";
-        double btcAmount = mCurrencyHelper.getUndenominatedAmount(mCurrencyHelper.getDoubleAmount(bitcoin));
-        double fiatAmount = mCurrencyHelper.getLastPrice() * btcAmount;
-        mDataListener.updateFiatTextField(mCurrencyHelper.getFormattedFiatString(fiatAmount));
+        double btcAmount = currencyHelper.getUndenominatedAmount(currencyHelper.getDoubleAmount(bitcoin));
+        double fiatAmount = currencyHelper.getLastPrice() * btcAmount;
+        dataListener.updateFiatTextField(currencyHelper.getFormattedFiatString(fiatAmount));
     }
 
-    public void updateBtcTextField(String fiat) {
+    void updateBtcTextField(String fiat) {
         if (fiat.isEmpty()) fiat = "0";
-        double fiatAmount = mCurrencyHelper.getDoubleAmount(fiat);
-        double btcAmount = fiatAmount / mCurrencyHelper.getLastPrice();
-        mDataListener.updateBtcTextField(mCurrencyHelper.getFormattedBtcString(btcAmount));
+        double fiatAmount = currencyHelper.getDoubleAmount(fiat);
+        double btcAmount = fiatAmount / currencyHelper.getLastPrice();
+        dataListener.updateBtcTextField(currencyHelper.getFormattedBtcString(btcAmount));
     }
 
     @Nullable
-    private File getQrFile() {
-        String strFileName = mAppUtil.getReceiveQRFilename();
-        File file = new File(strFileName);
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
-                Log.e(TAG, "getQrFile: ", e);
-            }
-        }
-        file.setReadable(true, false);
-        return file;
-    }
-
-    @Nullable
-    private FileOutputStream getFileOutputStream(File file) {
-        FileOutputStream fos = null;
+    String getV3ReceiveAddress(Account account) {
         try {
-            fos = new FileOutputStream(file);
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "getFileOutputStream: ", e);
-        }
-        return fos;
-    }
-
-    @Nullable
-    public String getV3ReceiveAddress(Account account) {
-        try {
-            int spinnerIndex = mAccountMap.inverse().get(account);
-            int accountIndex = mSpinnerIndexMap.get(spinnerIndex);
-            return mPayloadManager.getNextReceiveAddress(accountIndex);
+            int spinnerIndex = accountMap.inverse().get(account);
+            int accountIndex = spinnerIndexMap.get(spinnerIndex);
+            return payloadManager.getNextReceiveAddress(accountIndex);
         } catch (Exception e) {
             Log.e(TAG, "getV3ReceiveAddress: ", e);
             return null;
@@ -258,26 +258,26 @@ public class ReceiveViewModel extends BaseViewModel {
     }
 
     @Nullable
-    public List<SendPaymentCodeData> getIntentDataList(String uri) {
+    List<SendPaymentCodeData> getIntentDataList(String uri) {
         File file = getQrFile();
         FileOutputStream outputStream;
         outputStream = getFileOutputStream(file);
 
         if (outputStream != null) {
-            Bitmap bitmap = mDataListener.getQrBitmap();
+            Bitmap bitmap = dataListener.getQrBitmap();
             bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
 
             try {
                 outputStream.close();
             } catch (IOException e) {
                 Log.e(TAG, "getIntentDataList: ", e);
-                mDataListener.showToast(e.getMessage(), ToastCustom.TYPE_ERROR);
+                dataListener.showToast(e.getMessage(), ToastCustom.TYPE_ERROR);
                 return null;
             }
 
             List<SendPaymentCodeData> dataList = new ArrayList<>();
 
-            PackageManager packageManager = mAppUtil.getPackageManager();
+            PackageManager packageManager = appUtil.getPackageManager();
 
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
             emailIntent.setType("application/image");
@@ -286,7 +286,7 @@ public class ReceiveViewModel extends BaseViewModel {
             if (getFormattedEmailLink(uri) != null) {
                 emailIntent.setData(getFormattedEmailLink(uri));
             } else {
-                mDataListener.showToast(mStringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
+                dataListener.showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
                 return null;
             }
 
@@ -299,7 +299,7 @@ public class ReceiveViewModel extends BaseViewModel {
             imageIntent.setType(type);
 
             if (AndroidUtils.is23orHigher()) {
-                Uri uriForFile = FileProvider.getUriForFile(mApplicationContext, getAppUtil().getPackageName() + ".fileProvider", file);
+                Uri uriForFile = FileProvider.getUriForFile(applicationContext, appUtil.getPackageName() + ".fileProvider", file);
                 imageIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 imageIntent.putExtra(Intent.EXTRA_STREAM, uriForFile);
             } else {
@@ -339,10 +339,37 @@ public class ReceiveViewModel extends BaseViewModel {
             return dataList;
 
         } else {
-            mDataListener.showToast(mStringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
+            dataListener.showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
             return null;
         }
+    }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @SuppressLint("SetWorldReadable")
+    @Nullable
+    private File getQrFile() {
+        String strFileName = appUtil.getReceiveQRFilename();
+        File file = new File(strFileName);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (Exception e) {
+                Log.e(TAG, "getQrFile: ", e);
+            }
+        }
+        file.setReadable(true, false);
+        return file;
+    }
+
+    @Nullable
+    private FileOutputStream getFileOutputStream(File file) {
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(file);
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "getFileOutputStream: ", e);
+        }
+        return fos;
     }
 
     @Nullable
@@ -350,12 +377,12 @@ public class ReceiveViewModel extends BaseViewModel {
         try {
             BitcoinURI addressUri = new BitcoinURI(uri);
             String amount = addressUri.getAmount() != null ? " " + addressUri.getAmount().toPlainString() : "";
-            String address = addressUri.getAddress() != null ? addressUri.getAddress().toString() : mStringUtils.getString(R.string.email_request_body_fallback);
-            String body = String.format(mStringUtils.getString(R.string.email_request_body), amount, address);
+            String address = addressUri.getAddress() != null ? addressUri.getAddress().toString() : stringUtils.getString(R.string.email_request_body_fallback);
+            String body = String.format(stringUtils.getString(R.string.email_request_body), amount, address);
 
             String builder = "mailto:" +
                     "?subject=" +
-                    mStringUtils.getString(R.string.email_request_subject) +
+                    stringUtils.getString(R.string.email_request_subject) +
                     "&body=" +
                     body +
                     '\n' +
@@ -370,11 +397,17 @@ public class ReceiveViewModel extends BaseViewModel {
         }
     }
 
+    private Account getDefaultAccount() {
+        return payloadManager.getPayload().getHdWallet().getAccounts().get(
+                payloadManager.getPayload().getHdWallet().getDefaultIndex());
+    }
+
     /**
      * Prevents apps being added to the list twice, as it's confusing for users. Full email Intent
      * takes priority.
      */
     private void addResolveInfoToMap(Intent intent, HashMap<String, Pair<ResolveInfo, Intent>> intentHashMap, List<ResolveInfo> resolveInfo) {
+        //noinspection Convert2streamapi
         for (ResolveInfo info : resolveInfo) {
             if (!intentHashMap.containsKey(info.activityInfo.name)) {
                 intentHashMap.put(info.activityInfo.name, new Pair<>(info, new Intent(intent)));
@@ -382,32 +415,27 @@ public class ReceiveViewModel extends BaseViewModel {
         }
     }
 
-    @NonNull
-    public AppUtil getAppUtil() {
-        return mAppUtil;
-    }
-
-    public static class SendPaymentCodeData {
-        private Drawable mLogo;
-        private String mTitle;
-        private Intent mIntent;
+    static class SendPaymentCodeData {
+        private Drawable logo;
+        private String title;
+        private Intent intent;
 
         SendPaymentCodeData(String title, Drawable logo, Intent intent) {
-            mTitle = title;
-            mLogo = logo;
-            mIntent = intent;
+            this.title = title;
+            this.logo = logo;
+            this.intent = intent;
         }
 
         public Intent getIntent() {
-            return mIntent;
+            return intent;
         }
 
         public String getTitle() {
-            return mTitle;
+            return title;
         }
 
         public Drawable getLogo() {
-            return mLogo;
+            return logo;
         }
     }
 }
