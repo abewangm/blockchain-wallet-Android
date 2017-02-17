@@ -57,6 +57,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public static final String ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH";
     public static final String KEY_TRANSACTION_LIST_POSITION = "transaction_list_position";
     public static final String KEY_TRANSACTION_HASH = "transaction_hash";
+    public static final String ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment";
     public static final int SHOW_BTC = 1;
     private static final int SHOW_FIAT = 2;
     private int balanceDisplayState = SHOW_BTC;
@@ -75,13 +76,24 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Thunk BalanceViewModel viewModel;
     @Thunk AppBarLayout appBarLayout;
 
+    public BalanceFragment() {
+        // Required empty constructor
+    }
+
+    public static BalanceFragment newInstance(boolean broadcastingPayment) {
+        Bundle args = new Bundle();
+        args.putBoolean(ARGUMENT_BROADCASTING_PAYMENT, broadcastingPayment);
+        BalanceFragment fragment = new BalanceFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(ACTION_INTENT) && getActivity() != null) {
                 binding.swipeContainer.setRefreshing(true);
                 viewModel.updateAccountList();
-                viewModel.refreshFacilitatedTransactions();
                 viewModel.updateBalanceAndTransactionList(intent, accountSpinner.getSelectedItemPosition(), isBTC);
                 transactionAdapter.onTransactionsUpdated(viewModel.getTransactionList());
                 binding.swipeContainer.setRefreshing(false);
@@ -106,7 +118,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         balanceBarHeight = (int) getResources().getDimension(R.dimen.balance_bar_height);
 
         setupViews();
-        viewModel.refreshFacilitatedTransactions();
+
+        if (getArguments() == null || !getArguments().getBoolean(ARGUMENT_BROADCASTING_PAYMENT, false)) {
+            refreshFacilitatedTransactions();
+        }
 
         return binding.getRoot();
     }
@@ -276,6 +291,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         return position - 1;
     }
 
+    public void refreshFacilitatedTransactions() {
+        viewModel.refreshFacilitatedTransactions();
+    }
+
     private void setupViews() {
         binding.noTransactionMessage.noTxMessage.setVisibility(View.GONE);
 
@@ -442,6 +461,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         List<Object> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
         transactionAdapter.onTransactionsUpdated(newTransactions);
+        transactionAdapter.onContactsMapChanged(viewModel.getContactsTransactionMap());
         binding.balanceLayout.post(() -> setToolbarOffset(0));
 
         //Display help text to user if no transactionList on selected account/address

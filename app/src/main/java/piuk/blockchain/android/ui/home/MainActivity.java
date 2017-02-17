@@ -98,6 +98,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private AppUtil appUtil;
     private long backPressed;
     private Toolbar toolbar;
+    private boolean paymentToContactMade = false;
 
     @SuppressLint("NewApi")
     @Override
@@ -165,7 +166,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                         }
                         break;
                     case 1:
-                        onStartBalanceFragment();
+                        onStartBalanceFragment(paymentToContactMade);
                         break;
                     case 2:
                         startReceiveFragment();
@@ -620,8 +621,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void onStartBalanceFragment() {
-        BalanceFragment fragment = new BalanceFragment();
+    public void onStartBalanceFragment(boolean paymentToContactMade) {
+        BalanceFragment fragment = BalanceFragment.newInstance(paymentToContactMade);
         replaceFragmentWithAnimation(fragment);
         if (balanceFragmentAddedCallback != null) balanceFragmentAddedCallback.onFragmentAdded();
         viewModel.checkIfShouldShowSurvey();
@@ -662,6 +663,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void showBroadcastSuccessDialog() {
+        if (getCurrentFragment() instanceof BalanceFragment) {
+            ((BalanceFragment) getCurrentFragment()).refreshFacilitatedTransactions();
+        }
+
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_payment_sent_success)
@@ -671,7 +676,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void onSendFragmentClose() {
+    public void onSendFragmentClose(boolean paymentToContactMade) {
+        // Flag to prevent reloading of transactions whilst broadcasting payment to prevent race condition
+        this.paymentToContactMade = paymentToContactMade;
         binding.bottomNavigation.setCurrentItem(1);
     }
 
@@ -698,7 +705,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void onPageFinished() {
-        onStartBalanceFragment();
+        onStartBalanceFragment(false);
     }
 
     private void startSendFragment(@Nullable String scanData, String scanRoute) {

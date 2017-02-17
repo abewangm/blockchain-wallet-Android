@@ -50,7 +50,7 @@ interface SendContract {
 
         void onShowBIP38PassphrasePrompt(String scanData);
 
-        void finishPage();
+        void finishPage(boolean paymentToContactMade);
 
         void setContactName(String name);
 

@@ -139,7 +139,7 @@ public class SendViewModel extends BaseViewModel {
                                             dataListener.setContactName(contact.getName());
                                             dataListener.lockDestination();
                                         },
-                                        throwable -> dataListener.finishPage()));
+                                        throwable -> dataListener.finishPage(false)));
             }
 
             if (scanData != null) {
@@ -426,7 +426,7 @@ public class SendViewModel extends BaseViewModel {
             return spendableCoins.getAbsoluteFee();
         } else {
             // App is likely in low memory environment, leave page gracefully
-            if (dataListener != null) dataListener.finishPage();
+            if (dataListener != null) dataListener.finishPage(false);
             return null;
         }
     }
@@ -492,7 +492,7 @@ public class SendViewModel extends BaseViewModel {
             }
         } else {
             // App is likely in low memory environment, leave page gracefully
-            if (dataListener != null) dataListener.finishPage();
+            if (dataListener != null) dataListener.finishPage(false);
         }
     }
 

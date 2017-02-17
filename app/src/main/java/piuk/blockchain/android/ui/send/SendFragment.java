@@ -215,7 +215,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                         ViewUtils.convertDpToPixel(5F, getContext()));
             }
         } else {
-            finishPage();
+            finishPage(false);
         }
     }
 
@@ -672,7 +672,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         if (listener != null) {
             listener.onSendPaymentSuccessful(mdid, hash, fctxId, transactionValue);
         }
-        finishPage();
+        finishPage(true);
     }
 
     @Override
@@ -1055,8 +1055,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public void finishPage() {
-        if (listener != null) listener.onSendFragmentClose();
+    public void finishPage(boolean paymentToContactMade) {
+        if (listener != null) listener.onSendFragmentClose(paymentToContactMade);
     }
 
     @Override
@@ -1083,7 +1083,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     public interface OnSendFragmentInteractionListener {
 
-        void onSendFragmentClose();
+        void onSendFragmentClose(boolean paymentToContactMade);
 
         void onSendFragmentStart();
 

@@ -80,7 +80,7 @@ public class MainViewModel extends BaseViewModel {
 
         void onStartContactsActivity(@Nullable String data);
 
-        void onStartBalanceFragment();
+        void onStartBalanceFragment(boolean paymentToContactMade);
 
         void kickToLauncherPage();
 
@@ -370,7 +370,7 @@ public class MainViewModel extends BaseViewModel {
 
                 if (dataListener != null) {
                     dataListener.onFetchTransactionCompleted();
-                    dataListener.onStartBalanceFragment();
+                    dataListener.onStartBalanceFragment(false);
                 }
 
                 if (prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").length() > 0) {

@@ -360,6 +360,11 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         notifyAdapterDataSetChanged(null);
     }
 
+    void onContactsMapChanged(HashMap<String, String> contactsTransactionMap) {
+        this.contactsTransactionMap = contactsTransactionMap;
+        notifyDataSetChanged();
+    }
+
     void notifyAdapterDataSetChanged(@Nullable Double btcExchangeRate) {
         if (btcExchangeRate != null) {
             this.btcExchangeRate = btcExchangeRate;
