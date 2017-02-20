@@ -233,10 +233,12 @@ public class ContactsDataManager {
                 .toList()
                 .doOnEvent((contacts, throwable) -> {
                     contactsTransactionMap.clear();
-                    for (Contact contact : contacts) {
-                        for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
-                            if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
-                                contactsTransactionMap.put(tx.getTxHash(), contact.getName());
+                    if (contacts != null) {
+                        for (Contact contact : contacts) {
+                            for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
+                                if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
+                                    contactsTransactionMap.put(tx.getTxHash(), contact.getName());
+                                }
                             }
                         }
                     }
