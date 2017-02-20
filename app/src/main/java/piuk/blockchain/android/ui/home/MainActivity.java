@@ -7,9 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,7 +17,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -349,23 +346,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.Co
             upgradeMenuItem.setVisible(false);
             backUpMenuItem.setVisible(true);
         }
-
-        binding.nvView.setItemIconTintList(null);
-        Drawable drawable = DrawableCompat.wrap(ContextCompat.getDrawable(this, R.drawable.vector_lock));
-        drawable.mutate();
-        if (mainViewModel.getPayloadManager().getPayload() != null &&
-                mainViewModel.getPayloadManager().getPayload().getHdWallet() != null &&
-                !mainViewModel.getPayloadManager().getPayload().getHdWallet().isMnemonicVerified()) {
-            // Not backed up
-            DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.product_red_medium));
-            DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_ATOP);
-        } else {
-            // Backed up
-            DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.product_green_medium));
-            DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_ATOP);
-        }
-
-        binding.nvView.getMenu().findItem(R.id.nav_backup).setIcon(drawable);
 
         binding.nvView.setNavigationItemSelectedListener(
                 menuItem -> {

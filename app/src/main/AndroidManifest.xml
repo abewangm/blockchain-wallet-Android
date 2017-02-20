@@ -119,10 +119,6 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="stateHidden" />
 
-        <activity
-            android:name=".ui.transactions.TransactionDetailWebViewActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-
         <service
             android:name=".data.websocket.WebSocketService"
             android:stopWithTask="true" />

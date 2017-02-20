@@ -8,7 +8,7 @@
     <group android:translateX="9.000000">
         <group android:translateY="0.518272">
             <path
-                android:fillColor="@color/primary_gray_dark"
+                android:fillColor="@color/white"
                 android:pathData="M34.9475083,32.6878405 C30.5740864,38.2559468 26.1156146,43.7549502
 21.6916944,49.2831894 C21.6159468,49.3775415 21.5255814,49.4612625
 21.3887043,49.6047841 C19.848505,47.6792027 18.3534884,45.8160797
@@ -34,7 +34,7 @@
                 android:strokeWidth="1" />
         </group>
         <path
-            android:fillColor="@color/primary_gray_dark"
+            android:fillColor="@color/white"
             android:pathData="M21.4146179,15.2600664 C17.2910299,15.2600664 13.9408638,18.5916279
 13.9328904,22.700598 C13.923588,26.8401329 17.2790698,30.2142193
 21.4079734,30.2168771 C25.5342193,30.218206 28.8936877,26.8481063
