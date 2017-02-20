@@ -195,7 +195,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:3.5.0'
+        classpath 'me.tatarka:gradle-retrolambda:3.4.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
