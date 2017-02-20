@@ -68,8 +68,6 @@
 
     <string name="command2">Fai la scansione del codice di associazione</string>
     <string name="command3">Non riesco ad accedere alla mia fotocamera</string>
-    <string name="CREATE">CREA UN NUOVO PORTAFOGLIO</string>
-    <string name="LOGIN">Accedi al mio portafoglio</string>
     <string name="pair_your_wallet">Associa il tuo portafoglio</string>
     <string name="manual_pairing">Associazione manuale</string>
     <string name="pair_wallet_step_1">Accedi al tuo Portafoglio Blockchain tramite il tuo PC o Mac su %1$s.</string>
@@ -394,7 +392,6 @@
     <string name="hint_reveals_password_error">Non puoi impostare la tua password portafoglio principale come la tua password suggerita.</string>
     <string name="why_has_my_address_changed">Perchè è stato cambiato il mio indirizzo?</string>
     <string name="learn_more">Maggiori dettagli</string>
-    <string name="new_address_info">Per una migliore privacy, noi generiamo un indirizzo unico per ogni pagamento. Tutti gli indirizzi generati nel tuo portafoglio possono ugualmente ricevere soldi, anche se non appaiono più sotto la voce Ricevi</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Richiesta di pagamento in Bitcoin</string>
     <string name="email_request_body">Invia %1$s BTC all\'indirizzo Bitcoin %2$s.</string>

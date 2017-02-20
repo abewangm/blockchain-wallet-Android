@@ -68,8 +68,6 @@
 
     <string name="command2">Escanear código de pareamento</string>
     <string name="command3">Não consigo acessar minha câmera</string>
-    <string name="CREATE">CRIAR NOVA CARTEIRA</string>
-    <string name="LOGIN">Acessar a minha carteira</string>
     <string name="pair_your_wallet">Pareie sua carteira.</string>
     <string name="manual_pairing">Pareamento Manual</string>
     <string name="pair_wallet_step_1">Acesse sua Carteira Blockchain com seu PC ou Mac em %1$s.</string>
@@ -392,7 +390,6 @@
     <string name="hint_reveals_password_error">A dica de senha não pode ser igual à senha principal da carteira.</string>
     <string name="why_has_my_address_changed">Por que meu endereço mudou?</string>
     <string name="learn_more">Saiba Mais</string>
-    <string name="new_address_info">Para maior privacidade, nós geramos um endereço único para cada pagamento. Todos os endereços gerados em sua carteira ainda podem receber fundos, mesmo se não aparecerem mais embaixo de Receber.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Solicitar pagamento em bitcoin</string>
     <string name="email_request_body">Por favor, envie %1$s BTC ao endereço Bitcoin %2$s.</string>

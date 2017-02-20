@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -10,7 +11,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:src="@drawable/ic_person_grey600_24dp" />
+        android:tint="@color/product_gray_transferred"
+        app:srcCompat="@drawable/vector_user" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
             android:minWidth="250dp"
-            android:textColor="@color/blockchain_grey"
+            android:textColor="@color/primary_gray_medium"
             tools:text="1XUzFYTvEjWxLkqtL4100MQ7zyzRvq9xXX" />
 
         <android.support.v7.widget.AppCompatTextView

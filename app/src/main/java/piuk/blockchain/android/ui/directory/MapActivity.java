@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.directory;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -29,9 +28,7 @@ import android.text.util.Linkify;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -49,15 +46,12 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 
 public class MapActivity extends BaseAuthActivity implements LocationListener, OnMapReadyCallback {
 
-    private final String TAG = getClass().getSimpleName();
-
     private static final long MIN_TIME = 400;
     private static final float MIN_DISTANCE = 1000;
     private static final int radius = 40000;
     public static ArrayList<MerchantDirectory.Merchant> merchantList = null;
     private static float Z00M_LEVEL_DEFAULT = 13.0f;
     private static float Z00M_LEVEL_CLOSE = 18.0f;
-    private static boolean launchedList = false;
     private GoogleMap map = null;
     private LocationManager locationManager = null;
     private Location currLocation = null;
@@ -96,7 +90,6 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
     private boolean spendSelected = true;
     private boolean atmSelected = true;
     private HashMap<String, MerchantDirectory.Merchant> markerValues = null;
-    private LatLngBounds bounds = null;
     private LinearLayout infoLayout = null;
 
     @Override
@@ -111,8 +104,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
         setContentView(R.layout.activity_map);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        toolbar.setTitle(R.string.merchant_map);
-        setSupportActionBar(toolbar);
+        setupToolbar(toolbar, R.string.merchant_map);
 
         markerValues = new HashMap<>();
         merchantList = new ArrayList<>();
@@ -159,8 +151,6 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
 
             findViewById(R.id.row_call).setVisibility(View.VISIBLE);
             findViewById(R.id.row_web).setVisibility(View.VISIBLE);
-
-            LatLng latLng = marker.getPosition();
 
             MerchantDirectory.Merchant b = markerValues.get(marker.getId());
 
@@ -262,7 +252,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             changeZoom = false;
             imgCafe.setImageResource(cafeSelected ? R.drawable.marker_cafe_off : R.drawable.marker_cafe);
             dividerCafe.setBackgroundColor(cafeSelected ? color_category_unselected : color_cafe_selected);
-            cafeSelected = cafeSelected ? false : true;
+            cafeSelected = !cafeSelected;
             drawData(false, null, null, false);
             return false;
         });
@@ -272,7 +262,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             changeZoom = false;
             imgDrink.setImageResource(drinkSelected ? R.drawable.marker_drink_off : R.drawable.marker_drink);
             dividerDrink.setBackgroundColor(drinkSelected ? color_category_unselected : color_drink_selected);
-            drinkSelected = drinkSelected ? false : true;
+            drinkSelected = !drinkSelected;
             drawData(false, null, null, false);
             return false;
         });
@@ -282,7 +272,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             changeZoom = false;
             imgEat.setImageResource(eatSelected ? R.drawable.marker_eat_off : R.drawable.marker_eat);
             dividerEat.setBackgroundColor(eatSelected ? color_category_unselected : color_eat_selected);
-            eatSelected = eatSelected ? false : true;
+            eatSelected = !eatSelected;
             drawData(false, null, null, false);
             return false;
         });
@@ -292,7 +282,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             changeZoom = false;
             imgSpend.setImageResource(spendSelected ? R.drawable.marker_spend_off : R.drawable.marker_spend);
             dividerSpend.setBackgroundColor(spendSelected ? color_category_unselected : color_spend_selected);
-            spendSelected = spendSelected ? false : true;
+            spendSelected = !spendSelected;
             drawData(false, null, null, false);
             return false;
         });
@@ -302,7 +292,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             changeZoom = false;
             imgATM.setImageResource(atmSelected ? R.drawable.marker_atm_off : R.drawable.marker_atm);
             dividerATM.setBackgroundColor(atmSelected ? color_category_unselected : color_atm_selected);
-            atmSelected = atmSelected ? false : true;
+            atmSelected = !atmSelected;
             drawData(false, null, null, false);
             return false;
         });
@@ -320,8 +310,6 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
         } else {
             currLocation = (lastKnownByGps.getAccuracy() <= lastKnownByNetwork.getAccuracy()) ? lastKnownByGps : lastKnownByNetwork;
         }
-
-        launchedList = false;
 
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currLocation.getLatitude(), currLocation.getLongitude()), Z00M_LEVEL_DEFAULT));
         drawData(true, null, null, false);
@@ -356,14 +344,8 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        launchedList = false;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.merchant_activity_actions, menu);
+        getMenuInflater().inflate(R.menu.menu_merchant, menu);
         return true;
     }
 
@@ -535,14 +517,14 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
 
         float currentZoomLevel = 21;
         int currentFoundPoi = 0;
-        LatLngBounds bounds = null;
+        LatLngBounds bounds;
         List<LatLng> found = new ArrayList<>();
         Location location = new Location("");
         location.setLatitude(loc.latitude);
         location.setLongitude(loc.longitude);
 
         boolean continueZooming = true;
-        boolean continueSearchingInsideRadius = true;
+        boolean continueSearchingInsideRadius;
 
         while (continueZooming) {
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, currentZoomLevel--));
@@ -550,7 +532,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             Location swLoc = new Location("");
             swLoc.setLatitude(bounds.southwest.latitude);
             swLoc.setLongitude(bounds.southwest.longitude);
-            continueSearchingInsideRadius = (Math.round(location.distanceTo(swLoc) / 100) > radius) ? false : true;
+            continueSearchingInsideRadius = Math.round(location.distanceTo(swLoc) / 100) <= radius;
 
             for (MerchantDirectory.Merchant merchant : merchantList) {
 
@@ -578,7 +560,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
                 }
 
             }
-            continueZooming = ((currentZoomLevel > 0) && continueZooming) ? true : false;
+            continueZooming = ((currentZoomLevel > 0) && continueZooming);
 
         }
     }

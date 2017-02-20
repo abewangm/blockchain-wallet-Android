@@ -29,8 +29,7 @@ public class RecoverFundsActivity extends BaseAuthActivity implements RecoverFun
         mViewModel = new RecoverFundsViewModel(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        toolbar.setTitle(getResources().getString(R.string.recover_funds));
-        setSupportActionBar(toolbar);
+        setupToolbar(toolbar, R.string.recover_funds);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mBinding.buttonContinue.setOnClickListener(view -> mViewModel.onContinueClicked());

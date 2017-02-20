@@ -68,8 +68,6 @@
 
     <string name="command2">Quét mã kết nối</string>
     <string name="command3">Tôi không thể truy cập camera</string>
-    <string name="CREATE">TẠO VÍ MỚI</string>
-    <string name="LOGIN">Đăng nhập vào ví của bạn</string>
     <string name="pair_your_wallet">Kết nối ví của bạn</string>
     <string name="manual_pairing">Kết nối thủ công</string>
     <string name="pair_wallet_step_1">Đăng nhập vào Ví Blockchain của bạn bằng PC hoặc Mac tại %1$s.</string>
@@ -392,7 +390,6 @@
     <string name="hint_reveals_password_error">Bạn không thể đặt mật khẩu chính của mình làm cụm từ gợi ý mật khẩu.</string>
     <string name="why_has_my_address_changed">Tại sao địa chỉ của tôi đã thay đổi?</string>
     <string name="learn_more">Tìm hiểu thêm</string>
-    <string name="new_address_info">Để tăng cường bảo mật, chúng tôi tạo một địa chỉ độc nhất cho mỗi thanh toán. Tất cả các địa chỉ được tạo trong ví của bạn đều có thể nhận tiền, thậm chí khi không còn xuất hiện trong mục Nhận.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Yêu cầu thanh toán Bitcoin</string>
     <string name="email_request_body">Vui lòng gửi %1$s BTC đến địa chỉ Bitcoin %2$s.</string>

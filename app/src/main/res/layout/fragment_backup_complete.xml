@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blockchain_pearl_white"
+        android:background="@color/white"
         android:orientation="vertical"
         android:padding="32dp">
 
@@ -20,56 +21,58 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <android.support.v7.widget.AppCompatTextView
+                <TextView
+                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/backup_header_complete"
                     android:textColor="@color/black"
                     android:textSize="20sp" />
 
-                <android.support.v7.widget.AppCompatTextView
+                <TextView
                     android:id="@+id/subheading_date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/blockchain_grey"
+                    android:textColor="@color/primary_gray_dark"
                     android:textSize="12sp"
                     tools:text="Last backup: Sept 08, 2016" />
 
             </LinearLayout>
 
             <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:layout_marginRight="8dp"
-                android:background="@drawable/round_view_green_dark"
                 android:contentDescription="@string/backup_confirmed"
                 android:padding="8dp"
-                android:src="@drawable/ic_done_white_48dp" />
+                app:srcCompat="@drawable/vector_success" />
 
         </RelativeLayout>
 
-        <android.support.v7.widget.AppCompatTextView
+        <TextView
             style="@style/TextAppearance.AppCompat.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/backup_complete_message" />
 
-        <android.support.v7.widget.AppCompatTextView
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="@string/backup_lost_mnemonic"
-            android:textColor="@color/blockchain_grey"
+            android:textColor="@color/primary_gray_dark"
             android:textSize="12sp" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/button_backup_again"
+            style="@style/ButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="@string/backup_again"
-            android:theme="@style/ButtonBlue" />
+            android:theme="@style/ButtonBlueTheme" />
     </LinearLayout>
 
 </layout>

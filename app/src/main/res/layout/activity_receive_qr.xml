@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/blockchain_pearl_white"
+    android:background="@color/white"
     android:paddingTop="24dp">
 
-    <android.support.v7.widget.AppCompatTextView
+    <TextView
         android:id="@+id/account_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
         android:layout_below="@+id/account_name"
         android:layout_centerHorizontal="true" />
 
-    <android.support.v7.widget.AppCompatTextView
+    <TextView
         android:id="@+id/address_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,22 +52,22 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <android.support.v7.widget.AppCompatButton
+        <Button
             android:id="@+id/action_copy"
             style="?android:attr/buttonBarPositiveButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/copy_address"
-            android:textColor="@color/blockchain_blue"
+            android:textColor="@color/primary_navy_medium"
             android:theme="@style/PlainTheme" />
 
-        <android.support.v7.widget.AppCompatButton
+        <Button
             android:id="@+id/action_done"
             style="?android:attr/buttonBarPositiveButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/done"
-            android:textColor="@color/blockchain_blue"
+            android:textColor="@color/primary_navy_medium"
             android:theme="@style/PlainTheme" />
     </LinearLayout>
 </RelativeLayout>

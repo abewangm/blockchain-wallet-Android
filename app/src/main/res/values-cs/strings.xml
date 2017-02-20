@@ -68,8 +68,6 @@
 
     <string name="command2">Naskenovat párovací kód</string>
     <string name="command3">Nedaří se mi spustit fotoaparát</string>
-    <string name="CREATE">VYTVOŘIT NOVOU PENĚŽENKU</string>
-    <string name="LOGIN">Přihlásit se do peněženky</string>
     <string name="pair_your_wallet">Spárujte svoji peněženku</string>
     <string name="manual_pairing">Ruční spárování</string>
     <string name="pair_wallet_step_1">Přihlaste se ke své peněžence Blockchain přes počítač nebo Mac na stránce %1$s.</string>
@@ -392,7 +390,6 @@
     <string name="hint_reveals_password_error">Jako nápovědu k heslu nemůžete nastavit svoje hlavní heslo k peněžence.</string>
     <string name="why_has_my_address_changed">Proč se moje adresa změnila?</string>
     <string name="learn_more">Zjistit více</string>
-    <string name="new_address_info">Z důvodu zvýšení zabezpečení vytváříme jedinečnou adresu pro každou platbu. Všechny adresy vytvořené v rámci vaší peněženky mohou i nadále přijímat prostředky, i když už se nezobrazují v nabídce Přijmout.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Požadavek na bitcoinovou platbu</string>
     <string name="email_request_body">Odešlete prosím %1$s BTC na bitcoinovou adresu %2$s.</string>

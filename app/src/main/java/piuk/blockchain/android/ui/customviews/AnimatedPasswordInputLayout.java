@@ -47,14 +47,14 @@ public class AnimatedPasswordInputLayout extends TextInputLayout {
     private void setVectorDrawableIfRequired() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Drawable drawable = ContextCompat.getDrawable(getContext(), R.drawable.asl_password_visibility);
-            drawable.setTint(ContextCompat.getColor(getContext(), R.color.blockchain_grey));
+            drawable.setTint(ContextCompat.getColor(getContext(), R.color.primary_gray_medium));
             setPasswordVisibilityToggleDrawable(drawable);
         }
     }
 
     private void initListener() {
         if (isPasswordVisibilityToggleEnabled()) {
-            mToggle = (ImageButton) this.findViewById(R.id.text_input_password_toggle);
+            mToggle = (ImageButton) findViewById(R.id.text_input_password_toggle);
             mToggle.setOnTouchListener((v, event) -> {
                 if (event != null && event.getAction() == MotionEvent.ACTION_UP) {
                     if (!mPasswordWarningSeen

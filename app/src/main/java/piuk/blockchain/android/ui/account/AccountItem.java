@@ -1,30 +1,43 @@
 package piuk.blockchain.android.ui.account;
 
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 class AccountItem {
 
+    static final int TYPE_CREATE_NEW_WALLET_BUTTON = 0;
+    static final int TYPE_IMPORT_ADDRESS_BUTTON = 1;
+    static final int TYPE_ACCOUNT = 2;
+
     private String label;
     private String address;
-    private Drawable icon;
     private String amount;
     private boolean isArchived;
     private boolean isWatchOnly;
     private boolean isDefault;
     private Integer correctedPosition;
+    private int type;
 
-    AccountItem(@Nullable Integer correctedPosition, String title, String address, String amount,
-                Drawable icon, boolean isArchived, boolean isWatchOnly, boolean isDefault) {
+    AccountItem(@Nullable Integer correctedPosition,
+                String label,
+                String address,
+                String amount,
+                boolean isArchived,
+                boolean isWatchOnly,
+                boolean isDefault,
+                int type) {
         this.correctedPosition = correctedPosition;
-        this.label = title;
+        this.label = label;
         this.address = address;
         this.amount = amount;
-        this.icon = icon;
         this.isArchived = isArchived;
         this.isWatchOnly = isWatchOnly;
         this.isDefault = isDefault;
+        this.type = type;
+    }
+
+    AccountItem(int type) {
+        this.type = type;
     }
 
     @NonNull
@@ -35,11 +48,6 @@ class AccountItem {
     @NonNull
     public String getAddress() {
         return address != null ? address : "";
-    }
-
-    @Nullable
-    public Drawable getIcon() {
-        return icon;
     }
 
     @NonNull
@@ -69,6 +77,10 @@ class AccountItem {
 
     public void setDefault(boolean aDefault) {
         isDefault = aDefault;
+    }
+
+    public int getType() {
+        return type;
     }
 
     @NonNull

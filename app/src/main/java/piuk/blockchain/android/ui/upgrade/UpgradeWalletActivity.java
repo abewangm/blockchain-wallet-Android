@@ -3,8 +3,8 @@ package piuk.blockchain.android.ui.upgrade;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
@@ -65,11 +65,11 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
             TextView myText = new TextView(this);
             myText.setGravity(Gravity.CENTER);
             myText.setTextSize(14);
-            myText.setTextColor(Color.WHITE);
+            myText.setTextColor(ContextCompat.getColor(this, R.color.primary_navy_medium));
             return myText;
         });
-        binding.upgradePageHeader.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.abc_fade_in));
-        binding.upgradePageHeader.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.abc_fade_out));
+        binding.upgradePageHeader.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+        binding.upgradePageHeader.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_out));
         binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_1));
 
         CustomPagerAdapter mCustomPagerAdapter = new CustomPagerAdapter(this);
@@ -283,9 +283,8 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
         }
     }
 
-    private void setBackGround(View view, int res){
-        int sdk = android.os.Build.VERSION.SDK_INT;
-        if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+    private void setBackGround(View view, int res) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             //noinspection deprecation
             view.setBackgroundDrawable(ContextCompat.getDrawable(this, res));
         } else {
@@ -293,14 +292,14 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
         }
     }
 
-    static class CustomPagerAdapter extends PagerAdapter {
+    private static class CustomPagerAdapter extends PagerAdapter {
 
         Context mContext;
         LayoutInflater mLayoutInflater;
         int[] mResources = {
-                R.drawable.upgrade_backup_hilite,
-                R.drawable.upgrade_hd_address_hilite,
-                R.drawable.upgrade_tx_list_hilite,
+                R.drawable.upgrade_backup,
+                R.drawable.upgrade_hd,
+                R.drawable.upgrade_balance
         };
 
         CustomPagerAdapter(Context context) {

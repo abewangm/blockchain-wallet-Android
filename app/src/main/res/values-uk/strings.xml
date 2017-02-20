@@ -68,8 +68,6 @@
 
     <string name="command2">Сканувати код пари</string>
     <string name="command3">Я не можу отримати доступ до камері</string>
-    <string name="CREATE">СТВОРИТИ НОВИЙ ГАМАНЕЦЬ</string>
-    <string name="LOGIN">Увійти в мій гаманець</string>
     <string name="pair_your_wallet">Спаруйте Свій гаманець</string>
     <string name="manual_pairing">Ручне парування</string>
     <string name="pair_wallet_step_1">Увійдіть у свій гаманець Blockchain з ПК чи Mac на %1$s.</string>
@@ -392,7 +390,6 @@
     <string name="hint_reveals_password_error">Ви не можете використовувати свій основний пароль гаманця в якості підказки для нагадування пароля.</string>
     <string name="why_has_my_address_changed">Чому моя адреса змінилась?</string>
     <string name="learn_more">Дізнатись більше</string>
-    <string name="new_address_info">Для підвищення конфіденційності ми генеруємо унікальну адресу для кожного платежу. Усі адреси, згенеровані у вашому гаманці, все ще можуть отримувати кошти, навіть якщо вони більше не з\'являються під пунктом Отримати.</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Запит Bitcoin-платежу</string>
     <string name="email_request_body">Будь ласка, відправте%1$s BTC на Bitcoin-адресу %2$s.</string>

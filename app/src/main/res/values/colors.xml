@@ -1,31 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--Spec v1.3-->
-    <color name="blockchain_blue">#FF1B8AC7</color>
-    <color name="blockchain_dark_blue">#1476ab</color>
-    <color name="blockchain_send_red">#e27e82</color>
-    <color name="blockchain_receive_green">#85b45b</color>
-    <color name="blockchain_transfer_blue">#5bacd0</color>
-    <color name="blockchain_pearl_white">#fafafa</color>
-    <color name="blockchain_grey">#FF808080</color>
-    <color name="blockchain_light_grey">#FFf0f0f0</color>
-    <color name="blockchain_navigation_bar">#FF000000</color>
-    <color name="textColorPrimary">@color/primary_text_default_material_light</color>
+    <color name="white">@android:color/white</color>
+    <color name="black">@android:color/black</color>
 
-    <color name="blockchain_red_50">#80e27e82</color>
-    <color name="blockchain_green_50">#8085b45b</color>
-    <color name="blockchain_transfer_blue_50">#805bacd0</color>
-
-    <color name="white">#FFffff</color>
-    <color name="white_50">#80ffffff</color>
-
-    <color name="black">#000000</color>
-    <color name="backup_card_blue">#07537d</color>
-    <color name="backup_card_text">#676767</color>
-    <color name="dropshadow_grey">#CCCCCC</color>
-    <color name="light_grey_text">#b1b1b1</color>
-
+    <!-- Toasts -->
     <color name="toast_error_background">#EFD5D6</color>
     <color name="toast_error_text">#963033</color>
     <color name="toast_warning_background">#FBF7DB</color>
@@ -33,15 +12,40 @@
     <color name="toast_info_background">#D8F296</color>
     <color name="toast_info_text">#4F772F</color>
 
-    <color name="blockchain_upgrade_wallet_bg">#22AFEC</color>
-
+    <!-- ZXing -->
     <color name="barcode_viewfinder_laser">#ffcc0000</color>
     <color name="barcode_viewfinder_mask">#60000000</color>
     <color name="barcode_possible_result_points">#FF1B8AC7</color>
     <color name="barcode_result_view">#b0000000</color>
 
-    <color name="alert_green">#00C853</color>
-    <color name="alert_red">#af4f4e</color>
+    <!-- New Color palette 2017 Branding -->
+    <color name="primary_navy_dark">#153A62</color>
+    <color name="primary_blue_light">#B2D5E5</color>
+    <color name="primary_blue_accent">#10ADE4</color>
+    <color name="primary_blue_medium">#3558A8</color>
+    <color name="primary_gray">#799EB2</color>
+    <color name="primary_navy_medium">#004A7C</color>
 
-    <color name="warning_color">#f4511e</color>
+    <color name="secondary_yellow_light">#FFE6B4</color>
+    <color name="secondary_yellow_medium">#FFCF62</color>
+    <color name="secondary_teal_light">#84D0D3</color>
+    <color name="secondary_teal_medium">#00BABC</color>
+    <color name="secondary_pink_light">#F9B0A1</color>
+    <color name="secondary_red_light">#F26C57</color>
+
+    <!-- For warning messages -->
+    <color name="product_green_medium">#00A76F</color>
+    <color name="product_red_medium">#CA3A3C</color>
+
+    <!-- Specified in designs but not named in spec -->
+    <color name="primary_gray_dark">#4c4c4c</color>
+    <color name="primary_gray_medium">#FF808080</color>
+    <color name="primary_gray_light">#d2ced0</color>
+    <color name="product_gray_transferred">#7b9eb1</color>
+    <color name="product_gray_transferred_50">#807b9eb1</color>
+    <color name="product_red_sent">#f26c57</color>
+    <color name="product_red_sent_50">#80f26c57</color>
+    <color name="product_green_received">#0bbabc</color>
+    <color name="product_green_received_50">#800bbabc</color>
+
 </resources>

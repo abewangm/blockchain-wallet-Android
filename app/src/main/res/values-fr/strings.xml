@@ -68,8 +68,6 @@
 
     <string name="command2">Scannez le code de jumelage</string>
     <string name="command3">Je ne peux pas accéder à mon appareil photo</string>
-    <string name="CREATE">CRÉER UN NOUVEAU PORTEFEUILLE</string>
-    <string name="LOGIN">Me connecter à mon portefeuille</string>
     <string name="pair_your_wallet">Jumelez votre portefeuille</string>
     <string name="manual_pairing">Jumelage manuel</string>
     <string name="pair_wallet_step_1">Connectez-vous à votre portefeuille Blockchain via votre PC ou votre Mac à l\’adresse %1$s.</string>
@@ -392,7 +390,6 @@
     <string name="hint_reveals_password_error">Vous ne pouvez pas choisir le mot de passe de votre portefeuille principal comme indice de mot de passe.</string>
     <string name="why_has_my_address_changed">Pourquoi mon adresse a-t-elle changé ?</string>
     <string name="learn_more">En savoir plus</string>
-    <string name="new_address_info">Pour une meilleure confidentialité, nous générons une adresse unique pour chaque paiement. Toutes les adresses générées dans votre portefeuille peuvent toujours recevoir des fonds, même si elles n\'apparaissent plus dans la section « Recevoir ».</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">Demande de paiement en Bitcoin</string>
     <string name="email_request_body">Veuillez envoyer %1$s BTC à l\'adresse Bitcoin %2$s.</string>

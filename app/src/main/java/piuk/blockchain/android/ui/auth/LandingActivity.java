@@ -40,7 +40,6 @@ public class LandingActivity extends BaseAuthActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_landing);
-        setTitle(R.string.app_name);
 
         DebugSettings debugSettings = new DebugSettings();
 

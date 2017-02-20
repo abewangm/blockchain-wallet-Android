@@ -35,8 +35,7 @@ public class PasswordRequiredActivity extends BaseAuthActivity implements Passwo
         mViewModel = new PasswordRequiredViewModel(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        toolbar.setTitle(getResources().getString(R.string.confirm_password));
-        setSupportActionBar(toolbar);
+        setupToolbar(toolbar, R.string.confirm_password);
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
         mBinding.buttonContinue.setOnClickListener(view -> mViewModel.onContinueClicked());

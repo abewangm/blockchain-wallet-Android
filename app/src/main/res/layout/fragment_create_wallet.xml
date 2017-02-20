@@ -22,29 +22,28 @@
                     android:layout_height="56dp"
                     android:orientation="horizontal">
 
-
                     <TextView
                         android:layout_width="0dp"
-                        android:layout_weight="30"
                         android:layout_height="match_parent"
-                        android:textColor="@color/blockchain_grey"
+                        android:layout_weight="30"
                         android:gravity="center_vertical"
                         android:paddingLeft="16dp"
-                        android:text="@string/email" />
+                        android:text="@string/email"
+                        android:textColor="@color/primary_gray_dark" />
 
                     <EditText
                         android:id="@+id/email_address"
                         android:layout_width="0dp"
-                        android:layout_weight="70"
                         android:layout_height="match_parent"
+                        android:layout_weight="70"
+                        android:background="@color/white"
                         android:focusable="true"
                         android:focusableInTouchMode="true"
-                        android:maxLines="1"
                         android:gravity="center_vertical"
-                        android:background="@color/white"
-                        android:textCursorDrawable="@null"
                         android:inputType="textEmailAddress"
-                        android:textColor="@color/blockchain_grey">
+                        android:maxLines="1"
+                        android:textColor="@color/primary_gray_dark"
+                        android:textCursorDrawable="@null">
 
                         <requestFocus />
                     </EditText>
@@ -54,7 +53,7 @@
                 <View
                     android:layout_width="fill_parent"
                     android:layout_height="1dp"
-                    android:background="@color/blockchain_light_grey" />
+                    android:background="@color/primary_gray_light" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -63,26 +62,26 @@
 
                     <TextView
                         android:layout_width="0dp"
-                        android:layout_weight="30"
                         android:layout_height="match_parent"
-                        android:textColor="@color/blockchain_grey"
+                        android:layout_weight="30"
                         android:gravity="center_vertical"
                         android:paddingLeft="16dp"
-                        android:text="@string/password" />
+                        android:text="@string/password"
+                        android:textColor="@color/primary_gray_dark" />
 
                     <EditText
                         android:id="@+id/wallet_pass"
                         android:layout_width="0dp"
-                        android:layout_weight="70"
                         android:layout_height="match_parent"
+                        android:layout_weight="70"
+                        android:background="@color/white"
                         android:focusable="true"
                         android:focusableInTouchMode="true"
-                        android:maxLines="1"
                         android:gravity="center_vertical"
                         android:inputType="textPassword"
-                        android:background="@color/white"
-                        android:textCursorDrawable="@null"
-                        android:textColor="@color/blockchain_grey" />
+                        android:maxLines="1"
+                        android:textColor="@color/primary_gray_dark"
+                        android:textCursorDrawable="@null" />
 
                 </LinearLayout>
 
@@ -93,7 +92,7 @@
                 <View
                     android:layout_width="fill_parent"
                     android:layout_height="1dp"
-                    android:background="@color/blockchain_light_grey" />
+                    android:background="@color/primary_gray_light" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -102,35 +101,35 @@
 
                     <TextView
                         android:layout_width="0dp"
-                        android:layout_weight="30"
                         android:layout_height="match_parent"
-                        android:maxWidth="100dp"
-                        android:textColor="@color/blockchain_grey"
+                        android:layout_weight="30"
                         android:gravity="center_vertical"
+                        android:maxWidth="100dp"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
-                        android:text="@string/confirm_password" />
+                        android:text="@string/confirm_password"
+                        android:textColor="@color/primary_gray_dark" />
 
                     <EditText
                         android:id="@+id/wallet_pass_confrirm"
                         android:layout_width="0dp"
-                        android:layout_weight="70"
                         android:layout_height="match_parent"
+                        android:layout_weight="70"
+                        android:background="@color/white"
                         android:focusable="true"
                         android:focusableInTouchMode="true"
-                        android:maxLines="1"
                         android:gravity="center_vertical"
                         android:inputType="textPassword"
-                        android:background="@color/white"
-                        android:textCursorDrawable="@null"
-                        android:textColor="@color/blockchain_grey" />
+                        android:maxLines="1"
+                        android:textColor="@color/primary_gray_dark"
+                        android:textCursorDrawable="@null" />
 
                 </LinearLayout>
 
                 <View
                     android:layout_width="fill_parent"
                     android:layout_height="1dp"
-                    android:background="@color/blockchain_light_grey" />
+                    android:background="@color/primary_gray_light" />
 
                 <TextView
                     android:id="@+id/tos"
@@ -138,7 +137,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:padding="32dp"
-                    android:textColor="@color/blockchain_grey" />
+                    android:textColor="@color/primary_gray_dark" />
 
             </LinearLayout>
 
@@ -146,15 +145,9 @@
 
         <TextView
             android:id="@+id/command_next"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
+            style="@style/MegaButtonBlue"
             android:layout_gravity="center_horizontal|center_vertical"
-            android:background="@color/blockchain_blue"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="@string/create_wallet"
-            android:textAlignment="gravity"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:text="@string/create_wallet" />
 
     </LinearLayout>
 </layout>

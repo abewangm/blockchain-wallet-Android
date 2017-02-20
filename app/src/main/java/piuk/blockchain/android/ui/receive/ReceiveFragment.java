@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -40,7 +39,6 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.ImportedAccount;
 import info.blockchain.wallet.payload.LegacyAddress;
 
 import org.bitcoinj.core.Coin;
@@ -58,6 +56,7 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentReceiveBinding;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
+import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -72,7 +71,6 @@ import piuk.blockchain.android.util.annotations.Thunk;
 public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataListener, CustomKeypadCallback {
 
     private static final String TAG = ReceiveFragment.class.getSimpleName();
-    private static final String LINK_ADDRESS_INFO = "https://support.blockchain.com/hc/en-us/articles/210353663-Why-is-my-bitcoin-address-changing-";
     private static final String ARG_IS_BTC = "is_btc";
     private static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
@@ -85,7 +83,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     private OnReceiveFragmentInteractionListener listener;
 
     @Thunk boolean textChangeAllowed = true;
-    private boolean showInfoButton = false;
     private String uri;
     private long backPressed;
     private boolean isBtc;
@@ -148,12 +145,15 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
         setHasOptionsMenu(true);
 
+        binding.content.scrollView.post(() -> binding.content.scrollView.scrollTo(0, 0));
+
         return binding.getRoot();
     }
 
     private void setupToolbar() {
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.receive_bitcoin);
+            ((BaseAuthActivity) getActivity()).setupToolbar(
+                    ((MainActivity) getActivity()).getSupportActionBar(), R.string.receive_bitcoin);
 
             ViewUtils.setElevation(
                     getActivity().findViewById(R.id.appbar_layout),
@@ -233,9 +233,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 }
             }
         });
-
-        // Info Button
-        binding.content.ivAddressInfo.setOnClickListener(v -> showAddressChangedInfo());
 
         // QR Code
         binding.content.qr.setOnClickListener(v -> showClipboardWarning());
@@ -371,7 +368,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         binding.content.accounts.spinner.setSelection(spinnerIndex);
 
         Object object = viewModel.getAccountItemForPosition(spinnerIndex);
-        showInfoButton = showAddressInfoButtonIfNecessary(object);
 
         String receiveAddress;
         if (object instanceof LegacyAddress) {
@@ -416,27 +412,22 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void onResume() {
         super.onResume();
         viewModel.updateSpinnerList();
-
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
     }
 
     @Override
     public void showQrLoading() {
-        binding.content.ivAddressInfo.setVisibility(View.GONE);
-        binding.content.qr.setVisibility(View.GONE);
-        binding.content.receivingAddress.setVisibility(View.GONE);
+        binding.content.qr.setVisibility(View.INVISIBLE);
+        binding.content.receivingAddress.setVisibility(View.INVISIBLE);
         binding.content.progressBar2.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void showQrCode(@Nullable Bitmap bitmap) {
-        binding.content.progressBar2.setVisibility(View.GONE);
+        binding.content.progressBar2.setVisibility(View.INVISIBLE);
         binding.content.qr.setVisibility(View.VISIBLE);
         binding.content.receivingAddress.setVisibility(View.VISIBLE);
         binding.content.qr.setImageBitmap(bitmap);
-        if (showInfoButton) {
-            binding.content.ivAddressInfo.setVisibility(View.VISIBLE);
-        }
     }
 
     private void setupBottomSheet(String uri) {
@@ -455,10 +446,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
             adapter.notifyDataSetChanged();
         }
-    }
-
-    private boolean showAddressInfoButtonIfNecessary(Object object) {
-        return !(object instanceof ImportedAccount || object instanceof LegacyAddress);
     }
 
     private void onShareClicked() {
@@ -510,20 +497,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
                 })
                 .setNegativeButton(R.string.no, null)
-                .show();
-    }
-
-    private AlertDialog showAddressChangedInfo() {
-        return new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(getString(R.string.why_has_my_address_changed))
-                .setMessage(getString(R.string.new_address_info))
-                .setPositiveButton(R.string.learn_more, (dialog, which) -> {
-                    Intent intent = new Intent();
-                    intent.setData(Uri.parse(LINK_ADDRESS_INFO));
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                })
-                .setNegativeButton(android.R.string.ok, null)
                 .show();
     }
 

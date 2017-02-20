@@ -68,8 +68,6 @@
 
     <string name="command2">扫描配对代码</string>
     <string name="command3">我无法访问我的摄像头</string>
-    <string name="CREATE">创建新钱包</string>
-    <string name="LOGIN">登录「我的钱包」</string>
     <string name="pair_your_wallet">配对您的钱包</string>
     <string name="manual_pairing">手动配对</string>
     <string name="pair_wallet_step_1">在 PC 或 Mac 上通过 %1$s 登录您的 Blockchain 钱包。</string>
@@ -392,7 +390,6 @@
     <string name="hint_reveals_password_error">不可将钱包主密码设置为密码提示。</string>
     <string name="why_has_my_address_changed">为什么我的地址改了？</string>
     <string name="learn_more">了解更多</string>
-    <string name="new_address_info">为了增加隐私，我们为每笔付款生成了一个独一无二的地址。您的钱包中生成的所有地址，即使不再在“接收”中显示，也仍然能够接收资金。</string>
 
     <!-- SHARE RECEIVE ADDRESS --><string name="email_request_subject">比特币付款请求</string>
     <string name="email_request_body">请向比特币地址%2$s发送%1$s BTC。</string>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:id="@+id/submenu_1">
+        <item
+            android:id="@+id/nav_upgrade"
+            android:icon="@drawable/ic_warning_white_24dp"
+            android:title="@string/upgrade_wallet" />
+
+        <item
+            android:id="@+id/nav_backup"
+            android:icon="@drawable/vector_lock"
+            android:title="@string/backup_wallet" />
+
+        <item
+            android:id="@+id/nav_addresses"
+            android:icon="@drawable/vector_wallet"
+            android:title="@string/addresses" />
+
+        <item
+            android:id="@+id/nav_map"
+            android:icon="@drawable/vector_merchant"
+            android:title="@string/merchant_map" />
+
+    </group>
+
+    <group android:id="@+id/submenu_2">
+
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/vector_settings"
+            android:title="@string/action_settings" />
+
+        <item
+            android:id="@+id/nav_support"
+            android:icon="@drawable/vector_help"
+            android:title="@string/support" />
+
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/vector_left_arrow"
+            android:title="@string/logout" />
+
+    </group>
+
+</menu>

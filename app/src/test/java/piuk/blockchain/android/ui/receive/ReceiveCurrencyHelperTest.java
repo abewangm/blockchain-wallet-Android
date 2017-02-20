@@ -145,7 +145,7 @@ public class ReceiveCurrencyHelperTest {
         // Act
         Integer value = mSubject.getMaxBtcDecimalLength();
         // Assert
-        assertEquals(Integer.valueOf(4), value);
+        assertEquals(Integer.valueOf(5), value);
     }
 
     @Test

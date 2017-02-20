@@ -16,12 +16,14 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import java.util.Calendar;
+
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 
 public class AboutDialog extends AppCompatDialogFragment {
 
-    private static final String strMerchantPackage = "info.blockchain.merchant";
+    private static final String STR_MERCHANT_PACKAGE = "info.blockchain.merchant";
 
     public AboutDialog() {
         // No-op
@@ -37,7 +39,7 @@ public class AboutDialog extends AppCompatDialogFragment {
         TextView rateUs = (TextView) view.findViewById(R.id.rate_us);
         TextView freeWallet = (TextView) view.findViewById(R.id.free_wallet);
 
-        about.setText(getString(R.string.about, BuildConfig.VERSION_NAME, "2015"));
+        about.setText(getString(R.string.about, BuildConfig.VERSION_NAME, String.valueOf(Calendar.getInstance().get(Calendar.YEAR))));
 
         rateUs.setOnClickListener(v -> {
             try {
@@ -65,7 +67,7 @@ public class AboutDialog extends AppCompatDialogFragment {
         } else {
             freeWallet.setOnClickListener(v -> {
                 try {
-                    Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + strMerchantPackage));
+                    Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + STR_MERCHANT_PACKAGE));
                     startActivity(marketIntent);
                 } catch (ActivityNotFoundException e) {
                     Log.e(AboutDialog.class.getSimpleName(), "Google Play Store not found", e);
@@ -79,7 +81,7 @@ public class AboutDialog extends AppCompatDialogFragment {
     private boolean hasWallet() {
         PackageManager pm = getActivity().getPackageManager();
         try {
-            pm.getPackageInfo(strMerchantPackage, 0);
+            pm.getPackageInfo(STR_MERCHANT_PACKAGE, 0);
             return true;
         } catch (NameNotFoundException nnfe) {
             return false;

@@ -24,15 +24,17 @@
 
                 <TextView
                     android:id="@+id/currency_btc"
+                    fontPath="fonts/Montserrat-Light.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_marginTop="8dp"
                     android:gravity="center_vertical"
                     android:text="BTC"
-                    android:textColor="@color/blockchain_grey" />
+                    android:textColor="@color/primary_gray_dark" />
 
                 <EditText
                     android:id="@+id/amount_btc"
+                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
@@ -45,6 +47,7 @@
                     android:maxLength="17"
                     android:minHeight="48dp"
                     android:selectAllOnFocus="true"
+                    android:textColor="@color/black"
                     android:textCursorDrawable="@null">
 
                     <requestFocus />
@@ -55,7 +58,7 @@
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:background="@color/blockchain_light_grey" />
+                android:background="@color/primary_gray_light" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -65,16 +68,18 @@
 
                 <TextView
                     android:id="@+id/currency_fiat"
+                    fontPath="fonts/Montserrat-Light.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="16dp"
                     android:layout_marginTop="8dp"
                     android:gravity="center_vertical"
                     android:text="USD"
-                    android:textColor="@color/blockchain_grey" />
+                    android:textColor="@color/primary_gray_dark" />
 
                 <EditText
                     android:id="@+id/amount_fiat"
+                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="16dp"
@@ -88,6 +93,7 @@
                     android:maxLength="17"
                     android:minHeight="48dp"
                     android:selectAllOnFocus="true"
+                    android:textColor="@color/black"
                     android:textCursorDrawable="@null" />
 
             </LinearLayout>

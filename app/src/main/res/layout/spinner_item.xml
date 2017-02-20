@@ -3,17 +3,18 @@
 
     <TextView
         android:id="@+id/text"
+        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textSize="16sp"
+        android:background="@drawable/selector_white"
+        android:drawablePadding="8dp"
+        android:drawableRight="@drawable/ic_arrow_drop_down_grey600_24dp"
         android:gravity="left|center_vertical"
-        android:textColor="#FF000000"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:maxLines="1"
+        android:paddingBottom="5dip"
         android:paddingRight="16dip"
         android:paddingTop="5dip"
-        android:paddingBottom="5dip"
-        android:maxLines="1"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:background="@drawable/selector_pearl_white"
-        android:drawablePadding="8dp"
-        android:drawableRight="@drawable/ic_arrow_drop_down_grey600_24dp" />
+        android:textColor="@color/black"
+        android:textSize="16sp" />
 </layout>

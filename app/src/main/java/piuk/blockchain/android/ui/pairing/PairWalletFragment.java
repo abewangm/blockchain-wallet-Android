@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +32,8 @@ public class PairWalletFragment extends Fragment implements FragmentCompat.OnReq
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_pair_wallet, container, false);
 
-        getActivity().setTitle(getResources().getString(R.string.pair_your_wallet));
+        ((PairOrCreateWalletActivity) getActivity()).setupToolbar(
+                ((AppCompatActivity) getActivity()).getSupportActionBar(), R.string.pair_your_wallet);
 
         binding.pairingFirstStep.setText(getString(R.string.pair_wallet_step_1, PersistentUrls.getInstance().getCurrentBaseServerUrl() + "wallet"));
 

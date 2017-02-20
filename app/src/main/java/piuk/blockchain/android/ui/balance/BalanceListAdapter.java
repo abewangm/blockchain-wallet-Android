@@ -4,13 +4,13 @@ import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -98,11 +98,11 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
             if (tx.isMove()) {
                 holder.result.setBackgroundResource(
                         tx.getConfirmations() < nbConfirmations
-                                ? R.drawable.rounded_view_lighter_blue_50 : R.drawable.rounded_view_lighter_blue);
+                                ? R.drawable.rounded_view_transferred_50 : R.drawable.rounded_view_transferred);
 
                 holder.direction.setTextColor(ContextCompat.getColor(holder.direction.getContext(),
                         tx.getConfirmations() < nbConfirmations
-                                ? R.color.blockchain_transfer_blue_50 : R.color.blockchain_transfer_blue));
+                                ? R.color.product_gray_transferred_50 : R.color.product_gray_transferred));
 
             } else if (btcBalance < 0.0) {
                 holder.result.setBackgroundResource(
@@ -111,7 +111,7 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
 
                 holder.direction.setTextColor(ContextCompat.getColor(holder.direction.getContext(),
                         tx.getConfirmations() < nbConfirmations
-                                ? R.color.blockchain_red_50 : R.color.blockchain_send_red));
+                                ? R.color.product_red_sent_50 : R.color.product_red_sent));
 
             } else {
                 holder.result.setBackgroundResource(
@@ -120,7 +120,7 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
 
                 holder.direction.setTextColor(ContextCompat.getColor(holder.direction.getContext(),
                         tx.getConfirmations() < nbConfirmations
-                                ? R.color.blockchain_green_50 : R.color.blockchain_receive_green));
+                                ? R.color.product_green_received_50 : R.color.product_green_received));
             }
 
             if (tx.isWatchOnly()) {
@@ -198,7 +198,7 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
         TextView timeSince;
         TextView direction;
         TextView watchOnly;
-        AppCompatImageView doubleSpend;
+        ImageView doubleSpend;
 
         ViewHolder(View view) {
             super(view);
@@ -207,7 +207,7 @@ class BalanceListAdapter extends RecyclerView.Adapter<BalanceListAdapter.ViewHol
             timeSince = (TextView) view.findViewById(R.id.ts);
             direction = (TextView) view.findViewById(R.id.direction);
             watchOnly = (TextView) view.findViewById(R.id.watch_only);
-            doubleSpend = (AppCompatImageView) view.findViewById(R.id.double_spend_warning);
+            doubleSpend = (ImageView) view.findViewById(R.id.double_spend_warning);
         }
     }
 }

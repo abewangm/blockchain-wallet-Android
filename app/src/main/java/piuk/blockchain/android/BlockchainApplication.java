@@ -9,11 +9,14 @@ import android.content.Intent;
 import android.os.Build;
 import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
 import info.blockchain.api.PinStore;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -49,6 +52,12 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+
+        CalligraphyConfig.initDefault(
+                new CalligraphyConfig.Builder()
+                        .addCustomStyle(AppCompatButton.class, R.attr.buttonStyle)
+                        .setFontAttrId(R.attr.fontPath)
+                        .build());
 
         if (BuildConfig.DEBUG && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             MultiDex.install(base);
