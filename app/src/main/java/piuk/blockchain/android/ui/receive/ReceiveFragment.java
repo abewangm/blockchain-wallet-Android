@@ -130,9 +130,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_receive, container, false);
         viewModel = new ReceiveViewModel(this, Locale.getDefault());
-
-        setupToolbar();
-
         viewModel.onViewReady();
 
         setupLayout();
@@ -411,6 +408,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     @Override
     public void onResume() {
         super.onResume();
+        setupToolbar();
         viewModel.updateSpinnerList();
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
     }

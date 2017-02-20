@@ -3,7 +3,9 @@
 
     <string name="backup_wallet">Backup funds</string>
     <string name="upgrade_wallet">Upgrade</string>
-    <string name="current_price">1 BTC = %1$s</string>
+    <string name="current_price_btc">1 BTC = %1$s</string>
+    <string name="current_price_millibits">1 mBTC = %1$s</string>
+    <string name="current_price_bits">1 bit = %1$s</string>
 
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Settings</string>
@@ -124,7 +126,7 @@
     <string name="rate_us">Rate us</string>
     <string name="licenses">Licenses</string>
     <string name="email_chooser">Send e-mail…</string>
-    <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Free Merchant app</string>
     <string name="password_or_wipe">Enter using your password or forget this wallet</string>
     <string name="use_password">Use password</string>
