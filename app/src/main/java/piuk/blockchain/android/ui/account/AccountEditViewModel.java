@@ -223,7 +223,7 @@ public class AccountEditViewModel extends BaseViewModel {
         } else {
             accountModel.setDefaultAccountVisibility(View.VISIBLE);
             accountModel.setDefaultText(stringUtils.getString(R.string.make_default));
-            accountModel.setDefaultTextColor(R.color.primary_blue_medium);
+            accountModel.setDefaultTextColor(R.color.primary_navy_medium);
         }
     }
 
@@ -459,15 +459,15 @@ public class AccountEditViewModel extends BaseViewModel {
                                     accountModel.setLabel(finalNewLabel);
                                     dataListener.setActivityResult(Activity.RESULT_OK);
                                 } else {
-                                    reverLabelAndShowError(revertLabel);
+                                    revertLabelAndShowError(revertLabel);
                                 }
-                            }, throwable -> reverLabelAndShowError(revertLabel)));
+                            }, throwable -> revertLabelAndShowError(revertLabel)));
         } else {
             dataListener.showToast(R.string.label_cant_be_empty, ToastCustom.TYPE_ERROR);
         }
     }
 
-    private void reverLabelAndShowError(String revertLabel) {
+    private void revertLabelAndShowError(String revertLabel) {
         // Remote save not successful - revert
         if (account != null) {
             account.setLabel(revertLabel);

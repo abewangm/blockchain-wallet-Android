@@ -41,6 +41,15 @@ public class AccountChooserViewModel extends BaseViewModel {
 
         PaymentRequestType getPaymentRequestType();
 
+        /**
+         * We can't simply call BuildConfig.CONTACTS_ENABLED in this class as it would make it
+         * impossible to test, as it's reliant on the build.gradle config. Passing it here
+         * allows us to change the response via mocking the DataListener.
+         *
+         * TODO: This should be removed once/if Contacts ships
+         */
+        boolean getIfContactsEnabled();
+
         void updateUi(List<ItemAccount> items);
 
         void showNoContacts();
@@ -64,7 +73,11 @@ public class AccountChooserViewModel extends BaseViewModel {
         }
 
         if (paymentRequestType.equals(PaymentRequestType.SEND)) {
-            loadReceiveAccountsAndContacts();
+            if (dataListener.getIfContactsEnabled()) {
+                loadReceiveAccountsAndContacts();
+            } else {
+                loadReceiveAccountsOnly();
+            }
         } else if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
             loadReceiveAccountsOnly();
         } else {

@@ -32,6 +32,7 @@ import android.widget.FrameLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.payload.PayloadBridge;
 import piuk.blockchain.android.databinding.FragmentBalanceBinding;
@@ -417,6 +418,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public boolean isBtc() {
         return isBTC;
+    }
+
+    @Override
+    public boolean getIfContactsEnabled() {
+        return BuildConfig.CONTACTS_ENABLED;
     }
 
     @Override

@@ -52,6 +52,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
@@ -202,8 +203,12 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE,
                         PaymentRequestType.REQUEST));
 
-        binding.buttonSendToContact.setOnClickListener(v ->
-                viewModel.onSendToContactClicked(binding.amountContainer.amountBtc.getText().toString()));
+        if (BuildConfig.CONTACTS_ENABLED) {
+            binding.buttonSendToContact.setOnClickListener(v ->
+                    viewModel.onSendToContactClicked(binding.amountContainer.amountBtc.getText().toString()));
+        } else {
+            binding.buttonSendToContact.setVisibility(View.GONE);
+        }
     }
 
     private TextWatcher btcTextWatcher = new TextWatcher() {

@@ -67,6 +67,15 @@ public class BalanceViewModel extends BaseViewModel {
 
         boolean isBtc();
 
+        /**
+         * We can't simply call BuildConfig.CONTACTS_ENABLED in this class as it would make it
+         * impossible to test, as it's reliant on the build.gradle config. Passing it here
+         * allows us to change the response via mocking the DataListener.
+         *
+         * TODO: This should be removed once/if Contacts ships
+         */
+        boolean getIfContactsEnabled();
+
         void onRefreshAccounts();
 
         void onAccountSizeChange();
@@ -368,15 +377,17 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     void refreshFacilitatedTransactions() {
-        compositeDisposable.add(
-                contactsDataManager.fetchContacts()
-                        .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
-                        .toList()
-                        .flatMapObservable(contacts -> contactsDataManager.refreshFacilitatedTransactions())
-                        .toList()
-                        .subscribe(
-                                this::handlePendingTransactions,
-                                Throwable::printStackTrace));
+        if (dataListener.getIfContactsEnabled()) {
+            compositeDisposable.add(
+                    contactsDataManager.fetchContacts()
+                            .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
+                            .toList()
+                            .flatMapObservable(contacts -> contactsDataManager.refreshFacilitatedTransactions())
+                            .toList()
+                            .subscribe(
+                                    this::handlePendingTransactions,
+                                    Throwable::printStackTrace));
+        }
     }
 
     void getFacilitatedTransactions() {

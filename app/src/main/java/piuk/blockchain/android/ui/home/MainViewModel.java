@@ -70,6 +70,16 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected StringUtils stringUtils;
 
     public interface DataListener {
+
+        /**
+         * We can't simply call BuildConfig.CONTACTS_ENABLED in this class as it would make it
+         * impossible to test, as it's reliant on the build.gradle config. Passing it here
+         * allows us to change the response via mocking the DataListener.
+         *
+         * TODO: This should be removed once/if Contacts ships
+         */
+        boolean getIfContactsEnabled();
+
         void onRooted();
 
         void onConnectivityFail();
@@ -121,8 +131,10 @@ public class MainViewModel extends BaseViewModel {
         checkConnectivity();
         checkIfShouldShowEmailVerification();
         startWebSocketService();
-        registerNodeForMetaDataService();
         subscribeToNotifications();
+        if (dataListener.getIfContactsEnabled()) {
+            registerNodeForMetaDataService();
+        }
     }
 
     void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {

@@ -22,7 +22,6 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.util.PrefsUtil;
 
 @SuppressWarnings("WeakerAccess")
 public class ContactsListViewModel extends BaseViewModel {
@@ -32,7 +31,6 @@ public class ContactsListViewModel extends BaseViewModel {
     private DataListener dataListener;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadManager payloadManager;
-    @Inject PrefsUtil prefsUtil;
 
     interface DataListener {
 
