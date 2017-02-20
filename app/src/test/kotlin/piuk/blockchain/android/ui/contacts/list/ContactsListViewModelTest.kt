@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.contacts.list
 
-import android.app.Application
 import android.content.Intent
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
@@ -21,7 +20,6 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
-import piuk.blockchain.android.util.PrefsUtil
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
@@ -31,7 +29,6 @@ class ContactsListViewModelTest {
     private var mockActivity: ContactsListViewModel.DataListener = mock()
     private var mockContactsManager: ContactsDataManager = mock()
     private var mockPayloadManager: PayloadManager = mock()
-    private var mockPrefsUtil: PrefsUtil = mock()
 
     @Before
     @Throws(Exception::class)
@@ -39,7 +36,7 @@ class ContactsListViewModelTest {
 
         InjectorTestUtils.initApplicationComponent(
                 Injector.getInstance(),
-                MockApplicationModule(RuntimeEnvironment.application),
+                ApplicationModule(RuntimeEnvironment.application),
                 MockApiModule(),
                 DataManagerModule())
 
@@ -251,12 +248,6 @@ class ContactsListViewModelTest {
         verify(mockContactsManager).registerMdid()
         verify(mockContactsManager).publishXpub()
         verifyNoMoreInteractions(mockContactsManager)
-    }
-
-    inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-        override fun providePrefsUtil(): PrefsUtil {
-            return mockPrefsUtil
-        }
     }
 
     inner class MockApiModule : ApiModule() {

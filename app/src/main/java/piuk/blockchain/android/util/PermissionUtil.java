@@ -7,6 +7,7 @@ import android.content.Context;
 import android.support.design.widget.Snackbar;
 import android.support.v13.app.FragmentCompat;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import piuk.blockchain.android.R;
@@ -21,8 +22,8 @@ public class PermissionUtil {
      * Requests the camera permission from an Android framework fragment
      *
      * @param parentView The root view of the fragment
-     * @param context   A context
-     * @param fragment  An Android framework {@link android.app.Fragment}
+     * @param context    A context
+     * @param fragment   An Android framework {@link android.app.Fragment}
      */
     public static void requestCameraPermissionFromFragment(View parentView, Context context, final Fragment fragment) {
         // Permission has not been granted and must be requested.
@@ -34,7 +35,8 @@ public class PermissionUtil {
                 FragmentCompat.requestPermissions(fragment,
                         new String[]{Manifest.permission.CAMERA},
                         PERMISSION_REQUEST_CAMERA);
-            }).show();
+            }).setActionTextColor(ContextCompat.getColor(parentView.getContext(), R.color.primary_blue_accent))
+                    .show();
 
         } else {
             FragmentCompat.requestPermissions(fragment,
@@ -47,7 +49,7 @@ public class PermissionUtil {
      * Requests the camera permission from an Appcompat fragment
      *
      * @param parentView The root view of the fragment
-     * @param fragment  An Android framework {@link android.support.v4.app.Fragment}
+     * @param fragment   An Android framework {@link android.support.v4.app.Fragment}
      */
     public static void requestCameraPermissionFromFragment(View parentView, final android.support.v4.app.Fragment fragment) {
         // Permission has not been granted and must be requested.
@@ -59,7 +61,8 @@ public class PermissionUtil {
                 fragment.requestPermissions(
                         new String[]{Manifest.permission.CAMERA},
                         PERMISSION_REQUEST_CAMERA);
-            }).show();
+            }).setActionTextColor(ContextCompat.getColor(parentView.getContext(), R.color.primary_blue_accent))
+                    .show();
 
         } else {
             fragment.requestPermissions(
@@ -78,7 +81,8 @@ public class PermissionUtil {
                 ActivityCompat.requestPermissions(activity,
                         new String[]{Manifest.permission.CAMERA},
                         PERMISSION_REQUEST_CAMERA);
-            }).show();
+            }).setActionTextColor(ContextCompat.getColor(parentView.getContext(), R.color.primary_blue_accent))
+                    .show();
 
         } else {
             ActivityCompat.requestPermissions(activity,
@@ -98,7 +102,8 @@ public class PermissionUtil {
                 ActivityCompat.requestPermissions(activity,
                         new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
                         PERMISSION_REQUEST_LOCATION);
-            }).show();
+            }).setActionTextColor(ContextCompat.getColor(parentView.getContext(), R.color.primary_blue_accent))
+                    .show();
 
         } else {
             ActivityCompat.requestPermissions(activity,
@@ -117,7 +122,8 @@ public class PermissionUtil {
                 ActivityCompat.requestPermissions(activity,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         PERMISSION_REQUEST_WRITE_STORAGE);
-            }).show();
+            }).setActionTextColor(ContextCompat.getColor(parentView.getContext(), R.color.primary_blue_accent))
+                    .show();
 
         } else {
             ActivityCompat.requestPermissions(activity,
@@ -136,7 +142,8 @@ public class PermissionUtil {
                 fragment.requestPermissions(
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         PERMISSION_REQUEST_WRITE_STORAGE);
-            }).show();
+            }).setActionTextColor(ContextCompat.getColor(parentView.getContext(), R.color.primary_blue_accent))
+                    .show();
 
         } else {
             fragment.requestPermissions(

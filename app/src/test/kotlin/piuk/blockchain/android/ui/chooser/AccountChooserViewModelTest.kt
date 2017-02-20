@@ -121,9 +121,10 @@ class AccountChooserViewModelTest {
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyRequestTypeSend() {
+    fun onViewReadyRequestTypeSendContactsEnabled() {
         // Arrange
         whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.SEND)
+        whenever(mockActivity.ifContactsEnabled).thenReturn(true)
         val contact0 = Contact()
         contact0.mdid = "mdid"
         val contact1 = Contact()
@@ -138,12 +139,36 @@ class AccountChooserViewModelTest {
         // Act
         subject.onViewReady()
         // Assert
+        verify(mockContactsManager).contactList
         verify(mockWalletAccountHelper).getHdAccounts(any())
         verify(mockWalletAccountHelper).getLegacyAddresses(any())
         val captor = argumentCaptor<List<ItemAccount>>()
         verify(mockActivity).updateUi(captor.capture())
         // Value includes 3 headers, 3 accounts, 3 legacy addresses, 2 confirmed contacts
         captor.firstValue.size equals 11
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onViewReadyRequestTypeSendContactsDisabled() {
+        // Arrange
+        whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.SEND)
+        whenever(mockActivity.ifContactsEnabled).thenReturn(false)
+        val itemAccount0 = ItemAccount("", "", null, null, null)
+        val itemAccount1 = ItemAccount("", "", null, null, null)
+        val itemAccount2 = ItemAccount("", "", null, null, null)
+        whenever(mockWalletAccountHelper.getHdAccounts(any())).thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        whenever(mockWalletAccountHelper.getLegacyAddresses(any())).thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        // Act
+        subject.onViewReady()
+        // Assert
+        verifyZeroInteractions(mockContactsManager)
+        verify(mockWalletAccountHelper).getHdAccounts(any())
+        verify(mockWalletAccountHelper).getLegacyAddresses(any())
+        val captor = argumentCaptor<List<ItemAccount>>()
+        verify(mockActivity).updateUi(captor.capture())
+        // Value includes 2 headers, 3 accounts, 3 legacy addresses, 0 Contacts
+        captor.firstValue.size equals 8
     }
 
     inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {

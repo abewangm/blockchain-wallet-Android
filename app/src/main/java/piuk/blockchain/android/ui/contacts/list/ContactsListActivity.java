@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.contacts.list;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
@@ -15,11 +16,14 @@ import android.text.InputType;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import uk.co.chrisjenx.calligraphy.TypefaceUtils;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactsBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -48,6 +52,10 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contacts);
         viewModel = new ContactsListViewModel(this);
 
+        if (!BuildConfig.CONTACTS_ENABLED) {
+            throw new RuntimeException("Someone attempted to load ContactsListActivity despite Contacts being disabled.");
+        }
+
         setupToolbar(binding.toolbar, R.string.contacts_title);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -66,6 +74,10 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         });
         binding.recyclerviewContacts.setAdapter(contactsListAdapter);
         binding.recyclerviewContacts.setLayoutManager(new LinearLayoutManager(this));
+
+        Typeface typeface = TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf");
+        binding.toolbarLayout.setExpandedTitleTypeface(typeface);
+        binding.toolbarLayout.setCollapsedTitleTypeface(typeface);
     }
 
     @Override

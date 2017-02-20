@@ -42,6 +42,7 @@ import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import java.util.Arrays;
 
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
@@ -194,6 +195,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
         handleIncomingIntent();
         applyFontToNavDrawer();
+        if (!BuildConfig.CONTACTS_ENABLED) {
+            hideContacts();
+        }
     }
 
     @SuppressLint("NewApi")
@@ -647,6 +651,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
+    public boolean getIfContactsEnabled() {
+        return BuildConfig.CONTACTS_ENABLED;
+    }
+
+    @Override
     public void onScanInput(String strUri) {
         doScanInput(strUri, EventLogHandler.URL_EVENT_TX_INPUT_FROM_URI);
     }
@@ -669,6 +678,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             MenuItem menuItem = menu.getItem(i);
             applyFontToMenuItem(menuItem);
         }
+    }
+
+    private void hideContacts() {
+        Menu menu = binding.navigationView.getMenu();
+        menu.findItem(R.id.nav_contacts).setVisible(false);
     }
 
     private void applyFontToMenuItem(MenuItem menuItem) {

@@ -28,6 +28,8 @@ android {
         buildConfigField "String", "DEV_WEBSOCKET", devWebsocket
         buildConfigField "String", "STAGING_WEBSOCKET", stagingWebsocket
         buildConfigField "String", "TESTNET_WEBSOCKET", testnetWebsocket
+        // Flag for Contacts feature
+        buildConfigField "boolean", "CONTACTS_ENABLED", "false"
     }
     buildTypes {
         release {
