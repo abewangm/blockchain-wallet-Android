@@ -13,6 +13,11 @@
             android:title="@string/backup_wallet" />
 
         <item
+          android:id="@+id/nav_buy"
+          android:icon="@drawable/vector_buy"
+          android:title="@string/buy" />
+
+        <item
             android:id="@+id/nav_addresses"
             android:icon="@drawable/vector_wallet"
             android:title="@string/addresses" />

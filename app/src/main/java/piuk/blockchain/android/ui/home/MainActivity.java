@@ -37,6 +37,7 @@ import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
 import info.blockchain.wallet.payload.PayloadManager;
 
+import piuk.blockchain.android.ui.buy.BuyActivity;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -348,6 +349,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 break;
             case R.id.nav_addresses:
                 startActivity(new Intent(MainActivity.this, AccountActivity.class));
+                break;
+            case R.id.nav_buy:
+                startActivity(new Intent(MainActivity.this, BuyActivity.class));
                 break;
             case R.id.nav_contacts:
                 ContactsListActivity.start(this, null);

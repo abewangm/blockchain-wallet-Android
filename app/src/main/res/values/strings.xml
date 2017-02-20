@@ -655,4 +655,5 @@
     <string name="survey_message">Would you like to fill out a short survey to help improve your wallet experience?\n\nWe value your feedback!</string>
     <string name="survey_positive_button">Take survey</string>
 
+    <string name="buy">Buy Bitcoin</string>
 </resources>
