@@ -282,6 +282,7 @@ public class MainViewModel extends BaseViewModel {
         double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiat);
         String fiatSymbol = ExchangeRateFactory.getInstance().getSymbol(fiat);
         DecimalFormat format = new DecimalFormat();
+        format.setMinimumFractionDigits(2);
 
         switch (getCurrentBitcoinFormat()) {
             case MonetaryUtil.MICRO_BTC:
