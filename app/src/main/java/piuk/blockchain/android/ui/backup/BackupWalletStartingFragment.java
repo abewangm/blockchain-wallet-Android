@@ -4,10 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +15,6 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentBackupStartBinding;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.ui.auth.PinEntryActivity;
-import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 import static android.app.Activity.RESULT_OK;
@@ -34,11 +30,6 @@ public class BackupWalletStartingFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FragmentBackupStartBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_backup_start, container, false);
-
-        ActionBar supportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && supportActionBar != null) {
-            supportActionBar.setElevation(ViewUtils.convertDpToPixel(5F, getActivity()));
-        }
 
         binding.backupWalletAction.setOnClickListener(v -> {
 

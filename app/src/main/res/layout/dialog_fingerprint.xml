@@ -70,10 +70,10 @@
 
         <Button
             android:id="@+id/action_cancel"
-            style="?android:attr/buttonBarPositiveButtonStyle"
+            style="@style/CustomDialogButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/primary_navy_medium"
+            android:textColor="@color/primary_blue_accent"
             tools:text="USE PIN" />
     </LinearLayout>
 

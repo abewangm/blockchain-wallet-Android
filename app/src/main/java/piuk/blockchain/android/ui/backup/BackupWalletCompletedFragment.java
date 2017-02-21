@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.databinding.DataBindingUtil;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -29,7 +27,6 @@ import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.databinding.AlertPromptTransferFundsBinding;
 import piuk.blockchain.android.databinding.FragmentBackupCompleteBinding;
 import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.ViewUtils;
 
 public class BackupWalletCompletedFragment extends Fragment {
 
@@ -51,11 +48,6 @@ public class BackupWalletCompletedFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FragmentBackupCompleteBinding dataBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_backup_complete, container, false);
         compositeDisposable = new CompositeDisposable();
-
-        ActionBar supportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && supportActionBar != null) {
-            supportActionBar.setElevation(ViewUtils.convertDpToPixel(5F, getActivity()));
-        }
 
         long lastBackup = new PrefsUtil(getActivity()).getValue(BackupWalletActivity.BACKUP_DATE_KEY, 0);
 

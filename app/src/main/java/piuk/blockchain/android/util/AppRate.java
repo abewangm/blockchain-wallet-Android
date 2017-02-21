@@ -109,7 +109,7 @@ public class AppRate implements android.content.DialogInterface.OnClickListener,
         String dismiss = hostActivity.getString(R.string.rate_no);
 
         return new AlertDialog.Builder(hostActivity, R.style.StackedAlertDialogStyle)
-                .setIcon(R.mipmap.ic_launcher)
+                .setIcon(R.drawable.vector_icon_blue)
                 .setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(rate, this)

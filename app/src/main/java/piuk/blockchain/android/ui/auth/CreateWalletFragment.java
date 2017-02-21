@@ -163,7 +163,7 @@ public class CreateWalletFragment extends Fragment {
         String text2 = getString(R.string.blockchain_tos);
 
         Spannable spannable = new SpannableString(text + text2);
-        spannable.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getActivity(), R.color.primary_navy_medium)),
+        spannable.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getActivity(), R.color.primary_blue_accent)),
                 text.length(), text.length() + text2.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         binding.tos.setText(spannable, TextView.BufferType.SPANNABLE);
 

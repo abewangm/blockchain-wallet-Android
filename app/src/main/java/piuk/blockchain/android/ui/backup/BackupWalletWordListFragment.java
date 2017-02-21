@@ -4,10 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,17 +28,12 @@ public class BackupWalletWordListFragment extends Fragment {
     int currentWordIndex = 0;
     @Thunk String[] mnemonic;
     @Thunk String word;
-    private String of;
+    @Thunk String of;
     private String secondPassword;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_backup_word_list, container, false);
-
-        ActionBar supportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && supportActionBar != null) {
-            supportActionBar.setElevation(0F);
-        }
 
         Bundle bundle = getArguments();
         if (bundle != null) {
@@ -69,7 +61,7 @@ public class BackupWalletWordListFragment extends Fragment {
             if (currentWordIndex >= 0) {
                 binding.previousWordAction.setVisibility(View.VISIBLE);
             } else {
-                binding.previousWordAction.setVisibility(View.GONE);
+                binding.previousWordAction.setVisibility(View.INVISIBLE);
             }
 
             if (currentWordIndex < mnemonic.length - 1) {
@@ -130,7 +122,7 @@ public class BackupWalletWordListFragment extends Fragment {
             binding.nextWordAction.setText(getResources().getString(R.string.backup_next_word));
 
             if (currentWordIndex == 1) {
-                binding.previousWordAction.setVisibility(View.GONE);
+                binding.previousWordAction.setVisibility(View.INVISIBLE);
             }
 
             animExitToRight.setAnimationListener(new Animation.AnimationListener() {

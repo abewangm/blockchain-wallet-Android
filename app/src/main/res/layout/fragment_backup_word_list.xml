@@ -5,7 +5,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/primary_navy_medium"
+        android:background="@color/white"
         android:orientation="vertical">
 
         <TextView
@@ -16,7 +16,7 @@
             android:paddingRight="72dp"
             android:paddingTop="32dp"
             android:text="@string/backup_write_down_words"
-            android:textColor="@color/white"
+            android:textColor="@color/primary_gray_dark"
             android:textSize="14sp" />
 
         <TextView
@@ -24,10 +24,10 @@
             fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:alpha=".35"
+            android:alpha=".5"
             android:gravity="center"
             android:text="Word 0 of 12"
-            android:textColor="@color/white"
+            android:textColor="@color/primary_gray_dark"
             android:textSize="18sp" />
 
         <LinearLayout
@@ -38,7 +38,7 @@
             android:layout_marginLeft="72dp"
             android:layout_marginRight="72dp"
             android:layout_marginTop="10dp"
-            android:background="@color/white"
+            android:background="@color/primary_navy_medium"
             android:gravity="center">
 
             <TextView
@@ -48,43 +48,40 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:padding="16dp"
-                android:textColor="@color/primary_gray_dark"
+                android:textColor="@color/white"
                 android:textSize="24sp"
                 tools:text="house" />
 
         </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TextView
+            <Button
                 android:id="@+id/previous_word_action"
-                fontPath="fonts/Montserrat-Regular.ttf"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/selector_navy_blue"
-                android:padding="16dp"
+                style="@style/ButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="left|center_vertical"
+                android:layout_margin="8dp"
+                android:layout_weight="1"
                 android:text="@string/backup_previous_word"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:visibility="gone" />
+                android:theme="@style/ButtonLightBlueTheme"
+                android:visibility="invisible"
+                tools:visibility="visible" />
 
-            <TextView
+            <Button
                 android:id="@+id/next_word_action"
-                fontPath="fonts/Montserrat-Regular.ttf"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/selector_navy_blue"
-                android:padding="16dp"
+                style="@style/ButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="right|center_vertical"
+                android:layout_margin="8dp"
+                android:layout_weight="1"
                 android:text="@string/backup_next_word"
-                android:textColor="@color/white"
-                android:textSize="14sp" />
-        </RelativeLayout>
+                android:theme="@style/ButtonLightBlueTheme" />
+        </LinearLayout>
 
     </LinearLayout>
 </layout>

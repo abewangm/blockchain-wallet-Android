@@ -74,7 +74,7 @@
             android:gravity="center"
             android:onClick="upgradeClicked"
             android:text="@string/CONTINUE"
-            android:theme="@style/ButtonBlueTheme"
+            android:theme="@style/ButtonLightBlueTheme"
             android:visibility="gone"
             tools:visibility="visible" />
 
@@ -129,7 +129,7 @@
                 android:gravity="center"
                 android:onClick="upgradeClicked"
                 android:text="@string/UPGRADE_YOUR_WALLET"
-                android:theme="@style/ButtonBlueTheme" />
+                android:theme="@style/ButtonLightBlueTheme" />
 
         </LinearLayout>
 
