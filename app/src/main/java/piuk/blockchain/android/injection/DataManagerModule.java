@@ -64,7 +64,7 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected QrCodeDataManager provideReceiveDataManager() {
+    protected QrCodeDataManager provideQrDataManager() {
         return new QrCodeDataManager();
     }
 

@@ -13,7 +13,7 @@ public class NotificationPayload {
     private String body;
     private NotificationData data;
 
-    NotificationPayload(Map<String, String> map) {
+    public NotificationPayload(Map<String, String> map) {
         if (map.containsKey("title")) {
             title = map.get("title");
         }
