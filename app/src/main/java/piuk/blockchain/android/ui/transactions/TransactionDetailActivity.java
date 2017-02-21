@@ -33,7 +33,6 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 public class TransactionDetailActivity extends BaseAuthActivity implements TransactionDetailViewModel.DataListener {
 
-    public static final String KEY_TRANSACTION_URL = "key_transaction_url";
     @Thunk ActivityTransactionDetailsBinding mBinding;
     private TransactionDetailViewModel mViewModel;
 
