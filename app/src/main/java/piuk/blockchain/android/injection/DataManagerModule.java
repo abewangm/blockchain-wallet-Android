@@ -2,18 +2,14 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
-import info.blockchain.api.AddressInfo;
-import info.blockchain.api.DynamicFee;
-import info.blockchain.api.Settings;
-import info.blockchain.api.TransactionDetails;
-import info.blockchain.api.Unspent;
-import info.blockchain.api.WalletPayload;
+import info.blockchain.wallet.api.data.Fees;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 
 import dagger.Module;
 import dagger.Provides;
+import info.blockchain.wallet.settings.SettingsManager;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
@@ -55,7 +51,7 @@ public class DataManagerModule {
         return new AuthDataManager(
                 payloadManager,
                 prefsUtil,
-                new WalletPayloadService(new WalletPayload()),
+                new WalletPayloadService(),
                 appUtil,
                 aesUtilWrapper,
                 accessState,
@@ -84,7 +80,7 @@ public class DataManagerModule {
                                                                            TransactionListStore transactionListStore) {
         return new TransactionListDataManager(
                 payloadManager,
-                new TransactionDetailsService(new TransactionDetails()),
+                new TransactionDetailsService(),
                 transactionListStore);
     }
 
@@ -92,7 +88,7 @@ public class DataManagerModule {
     @ViewModelScope
     protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager,
                                                                        MultiAddrFactory multiAddrFactory) {
-        return new TransferFundsDataManager(payloadManager, multiAddrFactory, new Unspent(), new Payment());
+        return new TransferFundsDataManager(payloadManager, multiAddrFactory);
     }
 
     @Provides
@@ -106,7 +102,7 @@ public class DataManagerModule {
     @ViewModelScope
     protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
                                                            MultiAddrFactory multiAddrFactory) {
-        return new AccountDataManager(payloadManager, multiAddrFactory, new AddressInfoService(new AddressInfo()));
+        return new AccountDataManager(payloadManager, multiAddrFactory, new AddressInfoService());
     }
 
     @Provides
@@ -119,15 +115,15 @@ public class DataManagerModule {
     @Provides
     @ViewModelScope
     protected SettingsDataManager provideSettingsDataManager() {
-        return new SettingsDataManager(new SettingsService(new Settings()));
+        return new SettingsDataManager(new SettingsService(new SettingsManager()));
     }
 
     @Provides
     @ViewModelScope
     protected AccountEditDataManager provideAccountEditDataManager(PayloadManager payloadManager) {
         return new AccountEditDataManager(
-                new UnspentService(new Unspent()),
-                new PaymentService(new Payment()),
+                new UnspentService(),
+                new PaymentService(),
                 payloadManager);
     }
 
@@ -142,6 +138,6 @@ public class DataManagerModule {
     @Provides
     @ViewModelScope
     protected SendDataManager provideSendDataManager() {
-        return new SendDataManager(new PaymentService(new Payment()), new DynamicFee(), new Unspent());
+        return new SendDataManager(new PaymentService());
     }
 }

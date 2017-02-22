@@ -1,21 +1,16 @@
 package piuk.blockchain.android.data.services;
 
-import info.blockchain.api.PinStore;
+import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.api.data.Status;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 
 import org.json.JSONObject;
 
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import io.reactivex.Observable;
+import retrofit2.Response;
 
 public class PinStoreService {
-
-    private PinStore pinStore;
-
-    public PinStoreService(PinStore pinStore) {
-        this.pinStore = pinStore;
-    }
-
 
     /**
      * Sends the access key to the server
@@ -25,9 +20,8 @@ public class PinStoreService {
      * @param pin       The user's PIN
      * @return          An {@link Observable<Boolean>} where the boolean represents success
      */
-    public Observable<Boolean> setAccessKey(String key, String value, String pin) {
-        return Observable.fromCallable(() -> pinStore.setAccess(key, value, pin))
-                .map(jsonObject -> jsonObject.has("success"))
+    public Observable<Response<Status>> setAccessKey(String key, String value, String pin) {
+        return Observable.fromCallable(() -> WalletApi.setAccess(key, value, pin).execute())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -38,17 +32,17 @@ public class PinStoreService {
      * @param pin   The user's PIN
      * @return      A {@link JSONObject} which may or may not contain the field "success"
      */
-    public Observable<JSONObject> validateAccess(String key, String pin) {
+    public Observable<Response<Status>> validateAccess(String key, String pin) {
         return createValidateAccessObservable(key, pin)
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    private Observable<JSONObject> createValidateAccessObservable(String key, String pin) {
+    private Observable<Response<Status>> createValidateAccessObservable(String key, String pin) {
         return Observable.create(observableEmitter -> {
             try {
-                JSONObject object = pinStore.validateAccess(key, pin);
+                Response<Status> response = WalletApi.validateAccess(key, pin).execute();
                 if (!observableEmitter.isDisposed()) {
-                    observableEmitter.onNext(object);
+                    observableEmitter.onNext(response);
                     observableEmitter.onComplete();
                 }
             } catch (Exception e) {

@@ -45,7 +45,7 @@ public class BackupWalletStartingFragment extends Fragment {
             mPayloadManager = PayloadManager.getInstance();
 
             // Wallet is double encrypted
-            if (mPayloadManager.getPayload().isDoubleEncrypted()) {
+            if (mPayloadManager.getPayload().isDoubleEncryption()) {
                 new SecondPasswordHandler(getActivity()).validate(new SecondPasswordHandler.ResultListener() {
                     @Override
                     public void onNoSecondPassword() {

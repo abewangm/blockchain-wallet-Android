@@ -1,40 +1,38 @@
 package piuk.blockchain.android.data.services;
 
-import info.blockchain.api.WalletPayload;
-
+import info.blockchain.wallet.api.WalletApi;
+import org.apache.commons.lang3.NotImplementedException;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import io.reactivex.Observable;
 
 public class WalletPayloadService {
 
-    private WalletPayload walletPayload;
-
-    public WalletPayloadService(WalletPayload walletPayload) {
-        this.walletPayload = walletPayload;
-    }
-
     /**
      * Get encrypted copy of Payload
      *
      * @param guid          A user's GUID
-     * @param sessionId     The session ID
+//     * @param sessionId     The session ID
      * @return              {@link Observable<String>} wrapping an encrypted Payload
      */
-    public Observable<String> getEncryptedPayload(String guid, String sessionId) {
-        return Observable.fromCallable(() -> walletPayload.getEncryptedPayload(guid, sessionId))
-                .compose(RxUtil.applySchedulersToObservable());
+    // TODO: 21/02/2017 removed sessionId - might not need it anymore
+    public Observable<String> getEncryptedPayload(String guid) {
+        // TODO: 21/02/2017
+        throw new NotImplementedException("");
+//        return Observable.fromCallable(() -> WalletApi.fetchEncryptedPayload(guid))
+//                .compose(RxUtil.applySchedulersToObservable());
     }
 
-    /**
-     * Get the current session ID
-     *
-     * @param guid          A user's GUID
-     * @return              {@link Observable<String>} wrapping the session ID
-     */
-    public Observable<String> getSessionId(String guid) {
-        return Observable.fromCallable(() -> walletPayload.getSessionId(guid))
-                .compose(RxUtil.applySchedulersToObservable());
-    }
+//    /**
+//     * Get the current session ID
+//     *
+//     * @param guid          A user's GUID
+//     * @return              {@link Observable<String>} wrapping the session ID
+//     */
+    // TODO: 22/02/2017  
+//    public Observable<String> getSessionId(String guid) {
+//        return Observable.fromCallable(() -> walletPayload.getSessionId(guid))
+//                .compose(RxUtil.applySchedulersToObservable());
+//    }
 
     /**
      * Get the encryption password for pairing
@@ -43,7 +41,9 @@ public class WalletPayloadService {
      * @return              {@link Observable<String>} wrapping the pairing encryption password
      */
     public Observable<String> getPairingEncryptionPassword(String guid) {
-        return Observable.fromCallable(() -> walletPayload.getPairingEncryptionPassword(guid))
-                .compose(RxUtil.applySchedulersToObservable());
+        // TODO: 21/02/2017
+        throw new NotImplementedException("");
+//        return Observable.fromCallable(() -> WalletApi.fetchPairingEncryptionPassword(guid))
+//                .compose(RxUtil.applySchedulersToObservable());
     }
 }

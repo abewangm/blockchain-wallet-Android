@@ -3,7 +3,11 @@ package piuk.blockchain.android.data.payload;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 
+import info.blockchain.wallet.exceptions.EncryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.payload.PayloadManager;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * PayloadBridge.java : singleton class for remote save of payload
@@ -40,9 +44,14 @@ public class PayloadBridge {
         new Thread(() -> {
             Looper.prepare();
 
-            if (payloadManager.savePayloadToServer()) {
-                if (listener != null) listener.onSaveSuccess();
-            } else {
+            try {
+                if (payloadManager.save()) {
+                    if (listener != null) listener.onSaveSuccess();
+                } else {
+                    if (listener != null) listener.onSaveFail();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
                 if (listener != null) listener.onSaveFail();
             }
 

@@ -86,11 +86,8 @@ public class ContactsDataManager {
      * loaded nodes
      */
     public Observable<Boolean> loadNodes() {
-        return Observable.fromCallable(() -> payloadManager.loadNodes(
-                payloadManager.getPayload().getGuid(),
-                payloadManager.getPayload().getSharedKey(),
-                payloadManager.getTempPassword().toString()))
-                .compose(RxUtil.applySchedulersToObservable());
+        return Observable.fromCallable(() -> payloadManager.loadNodes())
+            .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -136,10 +133,7 @@ public class ContactsDataManager {
      */
     public Completable registerMdid() {
         return Completable.fromCallable(() -> {
-            payloadManager.registerMdid(
-                    payloadManager.getPayload().getGuid(),
-                    payloadManager.getPayload().getSharedKey(),
-                    payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
+            payloadManager.registerMdid(payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }
@@ -153,9 +147,7 @@ public class ContactsDataManager {
     public Completable unregisterMdid() {
         return Completable.fromCallable(() -> {
             payloadManager.unregisterMdid(
-                    payloadManager.getPayload().getGuid(),
-                    payloadManager.getPayload().getSharedKey(),
-                    payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
+                payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }

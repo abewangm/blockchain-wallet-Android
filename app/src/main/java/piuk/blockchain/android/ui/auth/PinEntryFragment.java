@@ -19,8 +19,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
-import info.blockchain.wallet.util.CharSequenceX;
-
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
@@ -132,7 +130,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     }
 
     @Override
-    public void showFingerprintDialog(CharSequenceX pincode) {
+    public void showFingerprintDialog(String pincode) {
         // Show icon for relaunching dialog
         binding.fingerprintLogo.setVisibility(View.VISIBLE);
         binding.fingerprintLogo.setOnClickListener(v -> viewModel.checkFingerprintStatus());
@@ -141,7 +139,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
             fingerprintDialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.AUTHENTICATE);
             fingerprintDialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
                 @Override
-                public void onAuthenticated(CharSequenceX data) {
+                public void onAuthenticated(String data) {
                     dismissFingerprintDialog();
                     viewModel.loginWithDecryptedPin(data);
                 }
@@ -310,7 +308,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
                     final String pw = password.getText().toString();
 
                     if (pw.length() > 0) {
-                        viewModel.validatePassword(new CharSequenceX(pw));
+                        viewModel.validatePassword(pw);
                     } else {
                         viewModel.incrementFailureCountAndRestart();
                     }

@@ -1,7 +1,7 @@
 package piuk.blockchain.android.ui.send;
 
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
 import java.math.BigInteger;
 

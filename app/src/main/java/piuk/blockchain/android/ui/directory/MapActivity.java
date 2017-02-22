@@ -33,8 +33,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import info.blockchain.api.MerchantDirectory;
-
+import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.api.data.Merchant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +49,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
     private static final long MIN_TIME = 400;
     private static final float MIN_DISTANCE = 1000;
     private static final int radius = 40000;
-    public static ArrayList<MerchantDirectory.Merchant> merchantList = null;
+    public static ArrayList<Merchant> merchantList = null;
     private static float Z00M_LEVEL_DEFAULT = 13.0f;
     private static float Z00M_LEVEL_CLOSE = 18.0f;
     private GoogleMap map = null;
@@ -89,7 +89,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
     private boolean eatSelected = true;
     private boolean spendSelected = true;
     private boolean atmSelected = true;
-    private HashMap<String, MerchantDirectory.Merchant> markerValues = null;
+    private HashMap<String, Merchant> markerValues = null;
     private LinearLayout infoLayout = null;
 
     @Override
@@ -152,12 +152,12 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             findViewById(R.id.row_call).setVisibility(View.VISIBLE);
             findViewById(R.id.row_web).setVisibility(View.VISIBLE);
 
-            MerchantDirectory.Merchant b = markerValues.get(marker.getId());
+            Merchant b = markerValues.get(marker.getId());
 
             String url = "http://maps.google.com/?saddr=" +
                     currLocation.getLatitude() + "," + currLocation.getLongitude() +
                     "&daddr=" + markerValues.get(marker.getId()).latitude + "," + markerValues.get(marker.getId()).longitude;
-            tvAddress.setText(Html.fromHtml("<a href=\"" + url + "\">" + b.address + ", " + b.city + " " + b.postal_code + "</a>"));
+            tvAddress.setText(Html.fromHtml("<a href=\"" + url + "\">" + b.address + ", " + b.city + " " + b.postalCode + "</a>"));
             tvAddress.setMovementMethod(LinkMovementMethod.getInstance());
 
             if (b.phone != null && b.phone.trim().length() > 0) {
@@ -179,24 +179,24 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             tvName.setText(b.name);
             int category;
             try {
-                category = b.category_id;
+                category = b.categoryId;
             } catch (Exception e) {
                 category = 0;
             }
             switch (category) {
-                case MerchantDirectory.Merchant.HEADING_CAFE:
+                case Merchant.HEADING_CAFE:
                     tvName.setTextColor(color_cafe_selected);
                     break;
-                case MerchantDirectory.Merchant.HEADING_BAR:
+                case Merchant.HEADING_BAR:
                     tvName.setTextColor(color_drink_selected);
                     break;
-                case MerchantDirectory.Merchant.HEADING_RESTAURANT:
+                case Merchant.HEADING_RESTAURANT:
                     tvName.setTextColor(color_eat_selected);
                     break;
-                case MerchantDirectory.Merchant.HEADING_SPEND:
+                case Merchant.HEADING_SPEND:
                     tvName.setTextColor(color_spend_selected);
                     break;
-                case MerchantDirectory.Merchant.HEADING_ATM:
+                case Merchant.HEADING_ATM:
                     tvName.setTextColor(color_atm_selected);
                     break;
                 default:
@@ -394,7 +394,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             try {
                 if (fetch) {
 
-                    merchantList = new MerchantDirectory().getAllMerchants();
+                    merchantList = WalletApi.getAllMerchants().execute().body();
                 }
 
                 handler.post(() -> {
@@ -403,7 +403,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
 
                         if (merchantList != null && merchantList.size() > 0) {
 
-                            MerchantDirectory.Merchant merchant = null;
+                            Merchant merchant = null;
 
                             for (int i = 0; i < merchantList.size(); i++) {
 
@@ -411,48 +411,48 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
 
                                 BitmapDescriptor bmd = null;
 
-                                int category = merchant.category_id;
+                                int category = merchant.categoryId;
 
                                 switch (category) {
-                                    case MerchantDirectory.Merchant.HEADING_CAFE:
+                                    case Merchant.HEADING_CAFE:
                                         if (cafeSelected) {
-                                            bmd = merchant.featured_merchant ?
+                                            bmd = merchant.featuredMerchant ?
                                                     BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe_featured) :
                                                     BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe);
                                         } else {
                                             bmd = null;
                                         }
                                         break;
-                                    case MerchantDirectory.Merchant.HEADING_BAR:
+                                    case Merchant.HEADING_BAR:
                                         if (drinkSelected) {
-                                            bmd = merchant.featured_merchant ?
+                                            bmd = merchant.featuredMerchant ?
                                                     BitmapDescriptorFactory.fromResource(R.drawable.marker_drink_featured) :
                                                     BitmapDescriptorFactory.fromResource(R.drawable.marker_drink);
                                         } else {
                                             bmd = null;
                                         }
                                         break;
-                                    case MerchantDirectory.Merchant.HEADING_RESTAURANT:
+                                    case Merchant.HEADING_RESTAURANT:
                                         if (eatSelected) {
-                                            bmd = merchant.featured_merchant ?
+                                            bmd = merchant.featuredMerchant ?
                                                     BitmapDescriptorFactory.fromResource(R.drawable.marker_eat_featured) :
                                                     BitmapDescriptorFactory.fromResource(R.drawable.marker_eat);
                                         } else {
                                             bmd = null;
                                         }
                                         break;
-                                    case MerchantDirectory.Merchant.HEADING_SPEND:
+                                    case Merchant.HEADING_SPEND:
                                         if (spendSelected) {
-                                            bmd = merchant.featured_merchant ?
+                                            bmd = merchant.featuredMerchant ?
                                                     BitmapDescriptorFactory.fromResource(R.drawable.marker_spend_featured) :
                                                     BitmapDescriptorFactory.fromResource(R.drawable.marker_spend);
                                         } else {
                                             bmd = null;
                                         }
                                         break;
-                                    case MerchantDirectory.Merchant.HEADING_ATM:
+                                    case Merchant.HEADING_ATM:
                                         if (atmSelected) {
-                                            bmd = merchant.featured_merchant ?
+                                            bmd = merchant.featuredMerchant ?
                                                     BitmapDescriptorFactory.fromResource(R.drawable.marker_atm_featured) :
                                                     BitmapDescriptorFactory.fromResource(R.drawable.marker_atm);
                                         } else {
@@ -461,7 +461,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
                                         break;
                                     default:
                                         if (cafeSelected) {
-                                            bmd = merchant.featured_merchant ?
+                                            bmd = merchant.featuredMerchant ?
                                                     BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe_featured) :
                                                     BitmapDescriptorFactory.fromResource(R.drawable.marker_cafe);
                                         } else {
@@ -534,7 +534,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             swLoc.setLongitude(bounds.southwest.longitude);
             continueSearchingInsideRadius = Math.round(location.distanceTo(swLoc) / 100) <= radius;
 
-            for (MerchantDirectory.Merchant merchant : merchantList) {
+            for (Merchant merchant : merchantList) {
 
                 LatLng pos = new LatLng(merchant.latitude, merchant.longitude);
 

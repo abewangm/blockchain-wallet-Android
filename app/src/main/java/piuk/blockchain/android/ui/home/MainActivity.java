@@ -397,8 +397,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         Drawable drawable = DrawableCompat.wrap(ContextCompat.getDrawable(this, R.drawable.vector_lock));
         drawable.mutate();
         if (viewModel.getPayloadManager().getPayload() != null &&
-                viewModel.getPayloadManager().getPayload().getHdWallet() != null &&
-                !viewModel.getPayloadManager().getPayload().getHdWallet().isMnemonicVerified()) {
+                viewModel.getPayloadManager().getPayload().getHdWallets() != null &&
+                !viewModel.getPayloadManager().getPayload().getHdWallets().get(0).isMnemonicVerified()) {
             // Not backed up
             DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.product_red_medium));
             DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_ATOP);
@@ -430,7 +430,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public void updateCurrentPrice(String price) {
         View headerView = binding.navigationView.getHeaderView(0);
         TextView currentPrice = (TextView) headerView.findViewById(R.id.textview_current_price);
-        currentPrice.setText(price);
+
+        runOnUiThread(() -> currentPrice.setText(price));
     }
 
     private void startMerchantActivity() {

@@ -118,6 +118,7 @@ afterEvaluate {
 
 dependencies {
     compile files('libs/MyWalletHD.jar')
+    compile group: 'info.blockchain', name: 'api-client', version: '0.1.4-SNAPSHOT'
     compile "com.android.support:appcompat-v7:$supportVersion"
     compile "com.android.support:recyclerview-v7:$supportVersion"
     compile "com.android.support:cardview-v7:$supportVersion"
@@ -203,7 +204,16 @@ buildscript {
 // Required for RetroLambda && CountryPicker
 repositories {
     jcenter()
-    maven { url "https://jitpack.io" }
+    maven {
+        url "https://jitpack.io"
+    }
+    maven {
+        url nexusUrl + '/repository/maven-public/'
+        credentials(PasswordCredentials) {
+            username nexusUsername
+            password nexusPassword
+        }
+    }
 }
 
 // This must remain at the bottom of this file until Google work out a better way to do this

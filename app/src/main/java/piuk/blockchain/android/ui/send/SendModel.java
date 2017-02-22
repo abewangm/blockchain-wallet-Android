@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.send;
 
-import info.blockchain.wallet.payment.data.SuggestedFee;
-
+import info.blockchain.wallet.payment.SuggestedFee;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
@@ -29,6 +28,7 @@ public class SendModel {
     int btcUniti;
     String fiatUnit;
     double exchangeRate;
+
     SuggestedFee suggestedFee;
 
     /**

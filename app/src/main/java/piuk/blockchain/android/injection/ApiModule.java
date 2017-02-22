@@ -2,8 +2,7 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
-import info.blockchain.api.Notifications;
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -57,7 +56,7 @@ public class ApiModule {
                                                                        PrefsUtil prefsUtil) {
 
         return new NotificationTokenManager(
-                new NotificationService(new Notifications()), accessState, payloadManager, prefsUtil);
+                new NotificationService(), accessState, payloadManager, prefsUtil);
     }
 
     // TODO: 09/02/2017 This should be moved to DataManagerModule eventually

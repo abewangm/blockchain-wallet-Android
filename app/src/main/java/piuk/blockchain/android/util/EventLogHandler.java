@@ -65,7 +65,7 @@ public class EventLogHandler {
         sendEvent(url)
                 .subscribeOn(Schedulers.io())
                 .subscribe(response -> {
-                    if (response != null && FormatsUtil.getInstance().isValidJson(response)) {
+                    if (response != null && FormatsUtil.isValidJson(response)) {
 
                         try {
                             JSONObject responseJson = new JSONObject(response);
@@ -86,7 +86,7 @@ public class EventLogHandler {
             sendEvent(url)
                     .subscribeOn(Schedulers.io())
                     .subscribe(response -> {
-                        if (response != null && FormatsUtil.getInstance().isValidJson(response)) {
+                        if (response != null && FormatsUtil.isValidJson(response)) {
 
                             try {
                                 JSONObject responseJson = new JSONObject(response);

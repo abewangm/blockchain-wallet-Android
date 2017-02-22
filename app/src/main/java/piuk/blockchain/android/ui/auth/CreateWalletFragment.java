@@ -131,7 +131,7 @@ public class CreateWalletFragment extends Fragment {
             final String pw1 = binding.walletPass.getText().toString();
             final String pw2 = binding.walletPassConfrirm.getText().toString();
 
-            if (!FormatsUtil.getInstance().isValidEmailAddress(em)) {
+            if (!FormatsUtil.isValidEmailAddress(em)) {
                 ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
             } else if (pw1.length() < 4) {
                 ToastCustom.makeText(getActivity(), getString(R.string.invalid_password_too_short), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);

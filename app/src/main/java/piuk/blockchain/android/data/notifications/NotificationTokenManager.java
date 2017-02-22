@@ -6,9 +6,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 
+import info.blockchain.wallet.payload.data.Wallet;
 import io.reactivex.Completable;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -93,7 +93,7 @@ public class NotificationTokenManager {
     }
 
     private void sendFirebaseToken(String refreshedToken) {
-        Payload payload = payloadManager.getPayload();
+        Wallet payload = payloadManager.getPayload();
         String guid = payload.getGuid();
         String sharedKey = payload.getSharedKey();
 

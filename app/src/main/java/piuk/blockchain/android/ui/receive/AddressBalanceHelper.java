@@ -1,9 +1,9 @@
 package piuk.blockchain.android.ui.receive;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
 
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 import piuk.blockchain.android.util.MonetaryUtil;
 
 class AddressBalanceHelper {

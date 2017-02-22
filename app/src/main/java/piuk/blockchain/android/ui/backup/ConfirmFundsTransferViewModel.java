@@ -4,11 +4,10 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payment.Payment;
-import info.blockchain.wallet.util.CharSequenceX;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +75,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        updateToAddress(mPayloadManager.getPayload().getHdWallet().getDefaultIndex());
+        updateToAddress(mPayloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
     }
 
     public void accountSelected(int position) {
@@ -137,25 +136,26 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
      *
      * @param secondPassword The user's double encryption password if necessary
      */
-    public void sendPayment(@Nullable CharSequenceX secondPassword) {
+    public void sendPayment(@Nullable String secondPassword) {
         boolean archiveAll = mDataListener.getIfArchiveChecked();
         mDataListener.setPaymentButtonEnabled(false);
         mDataListener.showProgressDialog();
-        compositeDisposable.add(
-                mFundsDataManager.sendPayment(new Payment(), mPendingTransactions, secondPassword)
-                        .subscribe(s -> {
-                            mDataListener.hideProgressDialog();
-                            mDataListener.showToast(R.string.transfer_confirmed, ToastCustom.TYPE_OK);
-                            if (archiveAll) {
-                                archiveAll();
-                            } else {
-                                mDataListener.dismissDialog();
-                            }
-                        }, throwable -> {
-                            mDataListener.hideProgressDialog();
-                            mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-                            mDataListener.dismissDialog();
-                        }));
+        // TODO: 21/02/2017  
+//        compositeDisposable.add(
+//                mFundsDataManager.sendPayment(new Payment(), mPendingTransactions, secondPassword)
+//                        .subscribe(s -> {
+//                            mDataListener.hideProgressDialog();
+//                            mDataListener.showToast(R.string.transfer_confirmed, ToastCustom.TYPE_OK);
+//                            if (archiveAll) {
+//                                archiveAll();
+//                            } else {
+//                                mDataListener.dismissDialog();
+//                            }
+//                        }, throwable -> {
+//                            mDataListener.hideProgressDialog();
+//                            mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+//                            mDataListener.dismissDialog();
+//                        }));
     }
 
     /**
@@ -175,7 +175,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
      * @return int account position in list of non-archived accounts
      */
     public int getDefaultAccount() {
-        return Math.max(getCorrectedAccountIndex(mPayloadManager.getPayload().getHdWallet().getDefaultIndex()), 0);
+        return Math.max(getCorrectedAccountIndex(mPayloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx()), 0);
     }
 
     @Thunk
@@ -205,7 +205,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
     }
 
     private int getAdjustedAccountPosition(int position) {
-        List<Account> accounts = mPayloadManager.getPayload().getHdWallet().getAccounts();
+        List<Account> accounts = mPayloadManager.getPayload().getHdWallets().get(0).getAccounts();
         int adjustedPosition = 0;
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
@@ -223,7 +223,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
     private int getCorrectedAccountIndex(int accountIndex) {
         // Filter accounts by active
         List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = mPayloadManager.getPayload().getHdWallet().getAccounts();
+        List<Account> accounts = mPayloadManager.getPayload().getHdWallets().get(0).getAccounts();
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
             if (!account.isArchived()) {
@@ -232,6 +232,6 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
         }
 
         // Find corrected position
-        return activeAccounts.indexOf(mPayloadManager.getPayload().getHdWallet().getAccounts().get(accountIndex));
+        return activeAccounts.indexOf(mPayloadManager.getPayload().getHdWallets().get(0).getAccounts().get(accountIndex));
     }
 }

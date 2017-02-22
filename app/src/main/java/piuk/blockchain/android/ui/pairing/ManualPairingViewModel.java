@@ -6,9 +6,6 @@ import android.support.annotation.StringRes;
 import android.support.annotation.UiThread;
 import android.support.annotation.VisibleForTesting;
 
-import info.blockchain.api.WalletPayload;
-import info.blockchain.wallet.util.CharSequenceX;
-
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
@@ -67,45 +64,46 @@ public class ManualPairingViewModel extends BaseViewModel {
         } else if (password == null || password.isEmpty()) {
             showErrorToast(R.string.invalid_password);
         } else {
-            verifyPassword(new CharSequenceX(password), guid);
+            verifyPassword(password, guid);
         }
     }
 
-    private void verifyPassword(CharSequenceX password, String guid) {
+    private void verifyPassword(String password, String guid) {
         mDataListener.showProgressDialog(R.string.validating_password, null, false);
 
         mWaitingForAuth = true;
 
-        compositeDisposable.add(
-                mAuthDataManager.getSessionId(guid)
-                        .flatMap(sessionId -> mAuthDataManager.getEncryptedPayload(guid, sessionId))
-                        .subscribe(response -> {
-                            if (response.equals(WalletPayload.KEY_AUTH_REQUIRED)) {
-                                showCheckEmailDialog();
-
-                                compositeDisposable.add(
-                                        mAuthDataManager.startPollingAuthStatus(guid).subscribe(payloadResponse -> {
-                                            mWaitingForAuth = false;
-
-                                            if (payloadResponse == null || payloadResponse.equals(WalletPayload.KEY_AUTH_REQUIRED)) {
-                                                showErrorToastAndRestartApp(R.string.auth_failed);
-                                                return;
-
-                                            }
-                                            attemptDecryptPayload(password, guid, payloadResponse);
-
-                                        }, throwable -> {
-                                            mWaitingForAuth = false;
-                                            showErrorToastAndRestartApp(R.string.auth_failed);
-                                        }));
-                            } else {
-                                mWaitingForAuth = false;
-                                attemptDecryptPayload(password, guid, response);
-                            }
-                        }, throwable -> showErrorToastAndRestartApp(R.string.auth_failed)));
+        // TODO: 21/02/2017  session?
+//        compositeDisposable.add(
+//                mAuthDataManager.getSessionId(guid)
+//                        .flatMap(sessionId -> mAuthDataManager.getEncryptedPayload(guid, sessionId))
+//                        .subscribe(response -> {
+//                            if (response.equals(WalletPayload.KEY_AUTH_REQUIRED)) {
+//                                showCheckEmailDialog();
+//
+//                                compositeDisposable.add(
+//                                        mAuthDataManager.startPollingAuthStatus(guid).subscribe(payloadResponse -> {
+//                                            mWaitingForAuth = false;
+//
+//                                            if (payloadResponse == null || payloadResponse.equals(WalletPayload.KEY_AUTH_REQUIRED)) {
+//                                                showErrorToastAndRestartApp(R.string.auth_failed);
+//                                                return;
+//
+//                                            }
+//                                            attemptDecryptPayload(password, guid, payloadResponse);
+//
+//                                        }, throwable -> {
+//                                            mWaitingForAuth = false;
+//                                            showErrorToastAndRestartApp(R.string.auth_failed);
+//                                        }));
+//                            } else {
+//                                mWaitingForAuth = false;
+//                                attemptDecryptPayload(password, guid, response);
+//                            }
+//                        }, throwable -> showErrorToastAndRestartApp(R.string.auth_failed)));
     }
 
-    private void attemptDecryptPayload(CharSequenceX password, String guid, String payload) {
+    private void attemptDecryptPayload(String password, String guid, String payload) {
         mAuthDataManager.attemptDecryptPayload(password, guid, payload, new AuthDataManager.DecryptPayloadListener() {
             @Override
             public void onSuccess() {

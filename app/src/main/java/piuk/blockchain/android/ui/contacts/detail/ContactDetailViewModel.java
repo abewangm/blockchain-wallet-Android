@@ -8,9 +8,9 @@ import android.util.Log;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
-import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.PayloadManager;
 
+import info.blockchain.wallet.payload.data.Account;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,6 +19,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import org.apache.commons.lang3.NotImplementedException;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.FctxDateComparator;
@@ -196,7 +197,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
                 List<String> accountNames = new ArrayList<>();
                 //noinspection Convert2streamapi
-                for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
+                for (Account account : payloadManager.getPayload().getHdWallets().get(0).getAccounts()) {
                     if (!account.isArchived()) {
                         accountNames.add(account.getLabel());
                     }
@@ -219,7 +220,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                         contact.getId(),
                         contact.getMdid(),
                         transaction.getId(),
-                        payloadManager.getPayload().getHdWallet().getDefaultIndex());
+                        payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
             }
         }
     }
@@ -276,7 +277,9 @@ public class ContactDetailViewModel extends BaseViewModel {
     }
 
     private Observable<String> getNextReceiveAddress(int defaultIndex) {
-        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
+        // TODO: 21/02/2017
+        throw new NotImplementedException("");
+//        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
     }
 
     private void sortAndUpdateTransactions(Collection<FacilitatedTransaction> values) {
@@ -295,7 +298,7 @@ public class ContactDetailViewModel extends BaseViewModel {
     private int getCorrectedAccountIndex(int accountIndex) {
         // Filter accounts by active
         List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
             if (!account.isArchived()) {
@@ -304,7 +307,7 @@ public class ContactDetailViewModel extends BaseViewModel {
         }
 
         // Find corrected position
-        return payloadManager.getPayload().getHdWallet().getAccounts().indexOf(activeAccounts.get(accountIndex));
+        return payloadManager.getPayload().getHdWallets().get(0).getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
 }

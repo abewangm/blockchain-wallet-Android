@@ -7,14 +7,13 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
-import info.blockchain.api.Settings;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.ImportedAccount;
-import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.settings.SettingsManager;
 import info.blockchain.wallet.transaction.Tx;
 
 import java.util.ArrayList;
@@ -27,6 +26,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import org.apache.commons.lang3.NotImplementedException;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
@@ -143,19 +143,21 @@ public class BalanceViewModel extends BaseViewModel {
                                             storeTimeOfLastSecurityPrompt();
                                         }
                                     } else if (isBackedUp() && !getIfNeverPrompt2Fa()) {
-                                        compositeDisposable.add(
-                                                getSettingsApi()
-                                                        .compose(RxUtil.applySchedulersToObservable())
-                                                        .subscribe(settings -> {
-                                                            if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
-                                                                // Show dialog for 2FA, store date of dialog launch
-                                                                if (getTimeOfLastSecurityPrompt() == 0L
-                                                                        || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-                                                                    dataListener.show2FaDialog();
-                                                                    storeTimeOfLastSecurityPrompt();
-                                                                }
-                                                            }
-                                                        }, Throwable::printStackTrace));
+                                        throw new NotImplementedException("todo");
+                                        // TODO: 22/02/2017  
+//                                        compositeDisposable.add(
+//                                                getSettingsApi()
+//                                                        .compose(RxUtil.applySchedulersToObservable())
+//                                                        .subscribe(settings -> {
+//                                                            if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
+//                                                                // Show dialog for 2FA, store date of dialog launch
+//                                                                if (getTimeOfLastSecurityPrompt() == 0L
+//                                                                        || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
+//                                                                    dataListener.show2FaDialog();
+//                                                                    storeTimeOfLastSecurityPrompt();
+//                                                                }
+//                                                            }
+//                                                        }, Throwable::printStackTrace));
                                     }
                                 }
 
@@ -190,7 +192,7 @@ public class BalanceViewModel extends BaseViewModel {
         List<Account> activeAccounts = new ArrayList<>();
         if (payloadManager.getPayload().isUpgraded()) {
 
-            allAccounts = payloadManager.getPayload().getHdWallet().getAccounts();//V3
+            allAccounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();//V3
 
             for (Account item : allAccounts) {
                 if (!item.isArchived()) {
@@ -207,99 +209,102 @@ public class BalanceViewModel extends BaseViewModel {
 
         //"All" - total balance
         if (activeAccounts.size() > 1 || activeLegacyAddresses.size() > 0) {
-            if (payloadManager.getPayload().isUpgraded()) {
-
-                //Only V3 will display "All"
-                Account all = new Account();
-                all.setLabel(stringUtils.getString(R.string.all_accounts));
-                all.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
-                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(all));
-                activeAccountAndAddressList.add(new ItemAccount(
-                        all.getLabel(),
-                        balance,
-                        null,
-                        Math.round(transactionListDataManager.getBtcBalance(all)),
-                        null));
-                activeAccountAndAddressBiMap.put(all, spinnerIndex);
-                spinnerIndex++;
-
-            } else if (activeLegacyAddresses.size() > 1) {
-
-                //V2 "All" at top of accounts spinner if wallet contains multiple legacy addresses
-                ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.total_funds),
-                        payloadManager.getPayload().getLegacyAddressList(),
-                        MultiAddrFactory.getInstance().getLegacyBalance());
-                iAccount.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
-                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
-                activeAccountAndAddressList.add(new ItemAccount(
-                        iAccount.getLabel(),
-                        balance,
-                        null,
-                        Math.round(transactionListDataManager.getBtcBalance(iAccount)),
-                        null));
-                activeAccountAndAddressBiMap.put(iAccount, spinnerIndex);
-                spinnerIndex++;
-            }
+            // TODO: 21/02/2017
+//            if (payloadManager.getPayload().isUpgraded()) {
+//
+//                //Only V3 will display "All"
+//                Account all = new Account();
+//                all.setLabel(stringUtils.getString(R.string.all_accounts));
+//                all.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
+//                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(all));
+//                activeAccountAndAddressList.add(new ItemAccount(
+//                        all.getLabel(),
+//                        balance,
+//                        null,
+//                        Math.round(transactionListDataManager.getBtcBalance(all)),
+//                        null));
+//                activeAccountAndAddressBiMap.put(all, spinnerIndex);
+//                spinnerIndex++;
+//
+//            } else if (activeLegacyAddresses.size() > 1) {
+//
+//                //V2 "All" at top of accounts spinner if wallet contains multiple legacy addresses
+//                ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.total_funds),
+//                        payloadManager.getPayload().getLegacyAddressList(),
+//                        MultiAddrFactory.getInstance().getLegacyBalance());
+//                iAccount.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
+//                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
+//                activeAccountAndAddressList.add(new ItemAccount(
+//                        iAccount.getLabel(),
+//                        balance,
+//                        null,
+//                        Math.round(transactionListDataManager.getBtcBalance(iAccount)),
+//                        null));
+//                activeAccountAndAddressBiMap.put(iAccount, spinnerIndex);
+//                spinnerIndex++;
+//            }
         }
 
         //Add accounts to map
         int accountIndex = 0;
-        for (Account item : activeAccounts) {
-
-            //Give unlabeled account a label
-            if (item.getLabel().trim().length() == 0) item.setLabel("Account: " + accountIndex);
-            String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(item));
-            activeAccountAndAddressList.add(new ItemAccount(
-                    item.getLabel(),
-                    balance,
-                    null,
-                    Math.round(transactionListDataManager.getBtcBalance(item)),
-                    null));
-            activeAccountAndAddressBiMap.put(item, spinnerIndex);
-            spinnerIndex++;
-            accountIndex++;
-        }
+        // TODO: 21/02/2017  
+//        for (Account item : activeAccounts) {
+//
+//            //Give unlabeled account a label
+//            if (item.getLabel().trim().length() == 0) item.setLabel("Account: " + accountIndex);
+//            String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(item));
+//            activeAccountAndAddressList.add(new ItemAccount(
+//                    item.getLabel(),
+//                    balance,
+//                    null,
+//                    Math.round(transactionListDataManager.getBtcBalance(item)),
+//                    null));
+//            activeAccountAndAddressBiMap.put(item, spinnerIndex);
+//            spinnerIndex++;
+//            accountIndex++;
+//        }
 
         //Add "Imported Addresses" or "Total Funds" to map
-        if (payloadManager.getPayload().isUpgraded() && activeLegacyAddresses.size() > 0) {
-            //Only V3 - Consolidate and add Legacy addresses to "Imported Addresses" at bottom of accounts spinner
-            ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
-                    payloadManager.getPayload().getLegacyAddressList(),
-                    MultiAddrFactory.getInstance().getLegacyBalance());
-            iAccount.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
-            String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
-            activeAccountAndAddressList.add(new ItemAccount(
-                    iAccount.getLabel(),
-                    balance,
-                    null,
-                    Math.round(transactionListDataManager.getBtcBalance(iAccount)),
-                    null));
-            activeAccountAndAddressBiMap.put(iAccount, spinnerIndex);
-            spinnerIndex++;
-
-        } else {
-            for (LegacyAddress legacyAddress : activeLegacyAddresses) {
-                //If address has no label, we'll display address
-                String labelOrAddress = legacyAddress.getLabel() == null ||
-                        legacyAddress.getLabel().trim().length() == 0 ?
-                        legacyAddress.getAddress() : legacyAddress.getLabel();
-
-                //Prefix "watch-only"
-                if (legacyAddress.isWatchOnly()) {
-                    labelOrAddress = stringUtils.getString(R.string.watch_only_label) + " " + labelOrAddress;
-                }
-
-                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(legacyAddress));
-                activeAccountAndAddressList.add(new ItemAccount(
-                        labelOrAddress,
-                        balance,
-                        null,
-                        Math.round(transactionListDataManager.getBtcBalance(legacyAddress)),
-                        null));
-                activeAccountAndAddressBiMap.put(legacyAddress, spinnerIndex);
-                spinnerIndex++;
-            }
-        }
+        // TODO: 21/02/2017
+//        if (payloadManager.getPayload().isUpgraded() && activeLegacyAddresses.size() > 0) {
+//            //Only V3 - Consolidate and add Legacy addresses to "Imported Addresses" at bottom of accounts spinner
+//            ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
+//                    payloadManager.getPayload().getLegacyAddressList(),
+//                    MultiAddrFactory.getInstance().getLegacyBalance());
+//            iAccount.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
+//            String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
+//            activeAccountAndAddressList.add(new ItemAccount(
+//                    iAccount.getLabel(),
+//                    balance,
+//                    null,
+//                    Math.round(transactionListDataManager.getBtcBalance(iAccount)),
+//                    null));
+//            activeAccountAndAddressBiMap.put(iAccount, spinnerIndex);
+//            spinnerIndex++;
+//
+//        } else {
+//            for (LegacyAddress legacyAddress : activeLegacyAddresses) {
+//                //If address has no label, we'll display address
+//                String labelOrAddress = legacyAddress.getLabel() == null ||
+//                        legacyAddress.getLabel().trim().length() == 0 ?
+//                        legacyAddress.getAddress() : legacyAddress.getLabel();
+//
+//                //Prefix "watch-only"
+//                if (legacyAddress.isWatchOnly()) {
+//                    labelOrAddress = stringUtils.getString(R.string.watch_only_label) + " " + labelOrAddress;
+//                }
+//
+//                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(legacyAddress));
+//                activeAccountAndAddressList.add(new ItemAccount(
+//                        labelOrAddress,
+//                        balance,
+//                        null,
+//                        Math.round(transactionListDataManager.getBtcBalance(legacyAddress)),
+//                        null));
+//                activeAccountAndAddressBiMap.put(legacyAddress, spinnerIndex);
+//                spinnerIndex++;
+//            }
+//        }
 
         //If we have multiple accounts/addresses we will show dropdown in toolbar, otherwise we will only display a static text
         if (dataListener != null) dataListener.onRefreshAccounts();
@@ -430,7 +435,7 @@ public class BalanceViewModel extends BaseViewModel {
 
                                     List<String> accountNames = new ArrayList<>();
                                     //noinspection Convert2streamapi
-                                    for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
+                                    for (Account account : payloadManager.getPayload().getHdWallets().get(0).getAccounts()) {
                                         if (!account.isArchived()) {
                                             accountNames.add(account.getLabel());
                                         }
@@ -453,7 +458,7 @@ public class BalanceViewModel extends BaseViewModel {
                                             contact.getId(),
                                             contact.getMdid(),
                                             transaction.getId(),
-                                            payloadManager.getPayload().getHdWallet().getDefaultIndex());
+                                            payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
                                 }
                             }
                         }, throwable -> dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)));
@@ -554,8 +559,8 @@ public class BalanceViewModel extends BaseViewModel {
 
     private boolean isBackedUp() {
         return payloadManager.getPayload() != null
-                && payloadManager.getPayload().getHdWallet() != null
-                && payloadManager.getPayload().getHdWallet().isMnemonicVerified();
+                && payloadManager.getPayload().getHdWallets() != null
+                && payloadManager.getPayload().getHdWallets().get(0).isMnemonicVerified();
     }
 
     private boolean hasTransactions() {
@@ -578,27 +583,30 @@ public class BalanceViewModel extends BaseViewModel {
         return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER, false);
     }
 
-    private Observable<Settings> getSettingsApi() {
-        return Observable.fromCallable(() -> new Settings(
+    private Observable<SettingsManager> getSettingsApi() {
+        return Observable.fromCallable(() -> new SettingsManager(
                 payloadManager.getPayload().getGuid(),
                 payloadManager.getPayload().getSharedKey()));
     }
 
     private Completable updateBalancesAndTransactions() {
         return Completable.fromCallable(() -> {
-            payloadManager.updateBalancesAndTransactions();
+            // TODO: 22/02/2017  
+//            payloadManager.updateBalancesAndTransactions();
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     private Observable<String> getNextReceiveAddress(int defaultIndex) {
-        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
+        // TODO: 21/02/2017
+        throw new NotImplementedException("");
+//        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
     }
 
     private int getCorrectedAccountIndex(int accountIndex) {
         // Filter accounts by active
         List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
             if (!account.isArchived()) {
@@ -607,7 +615,7 @@ public class BalanceViewModel extends BaseViewModel {
         }
 
         // Find corrected position
-        return payloadManager.getPayload().getHdWallet().getAccounts().indexOf(activeAccounts.get(accountIndex));
+        return payloadManager.getPayload().getHdWallets().get(0).getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
     private int getNumberOfFctxRequiringAttention(List<ContactTransactionModel> facilitatedTransactions) {

@@ -4,10 +4,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.HDWallet;
-import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.HDWallet;
+import info.blockchain.wallet.payload.data.Wallet;
 import info.blockchain.wallet.transaction.Transaction;
 import info.blockchain.wallet.transaction.Tx;
 
@@ -34,7 +34,7 @@ public class TransactionHelper {
     @NonNull
     public String addressToLabel(String address) {
 
-        HDWallet hdWallet = payloadManager.getPayload().getHdWallet();
+        HDWallet hdWallet = payloadManager.getPayload().getHdWallets().get(0);
         List<Account> accountList = new ArrayList<>();
         if (hdWallet != null && hdWallet.getAccounts() != null) {
             accountList = hdWallet.getAccounts();
@@ -48,16 +48,17 @@ public class TransactionHelper {
                 // Even though it looks like this shouldn't happen, it sometimes happens with
                 // transfers if user clicks to view details immediately.
                 // TODO - see if isOwnHDAddress could be updated to solve this
-                int accIndex = payloadManager.getXpubToAccountIndexMap().get(xpub);
-                String label = accountList.get(accIndex).getLabel();
-                if (label != null && !label.isEmpty())
-                    return label;
+                // TODO: 21/02/2017
+//                int accIndex = payloadManager.getXpubToAccountIndexMap().get(xpub);
+//                String label = accountList.get(accIndex).getLabel();
+//                if (label != null && !label.isEmpty())
+//                    return label;
             }
             // If address one of owned legacy addresses
         } else if (payloadManager.getPayload().getLegacyAddressStringList().contains(address)
                 || payloadManager.getPayload().getWatchOnlyAddressStringList().contains(address)) {
 
-            Payload payload = payloadManager.getPayload();
+            Wallet payload = payloadManager.getPayload();
 
             String label = payload.getLegacyAddressList().get(payload.getLegacyAddressStringList().indexOf(address)).getLabel();
             if (label != null && !label.isEmpty()) {

@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
 
 import javax.inject.Inject;
 
@@ -84,7 +83,8 @@ public class LauncherViewModel extends BaseViewModel {
 
         // No GUID? Treat as new installation
         if (mPrefsUtil.getValue(PrefsUtil.KEY_GUID, "").isEmpty()) {
-            mPayloadManager.setTempPassword(new CharSequenceX(""));
+            // TODO: 21/02/2017 why set temp pw here? wipe rather?
+//            mPayloadManager.setTempPassword("");
             mDataListener.onNoGuid();
 
         } else if (hasLoggedOut) {

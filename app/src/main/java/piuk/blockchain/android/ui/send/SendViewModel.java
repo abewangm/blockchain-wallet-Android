@@ -5,22 +5,14 @@ import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
-import info.blockchain.api.DynamicFee;
-import info.blockchain.api.PersistentUrls;
-import info.blockchain.util.FeeUtil;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.AddressBookEntry;
-import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.AddressBook;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payment.Payment;
-import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
-import info.blockchain.wallet.payment.data.SuggestedFee;
-import info.blockchain.wallet.payment.data.SweepBundle;
-import info.blockchain.wallet.payment.data.UnspentOutputs;
-import info.blockchain.wallet.send.SendCoins;
-import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.WebUtil;
@@ -191,7 +183,7 @@ public class SendViewModel extends BaseViewModel {
     int getDefaultAccount() {
         int result = 0;
         if (payloadManager.getPayload().isUpgraded()) {
-            result = payloadManager.getPayload().getHdWallet().getDefaultIndex();
+            result = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
         }
         return Math.max(getCorrectedAccountIndex(result), 0);
     }
@@ -208,7 +200,7 @@ public class SendViewModel extends BaseViewModel {
     private int getCorrectedAccountIndex(int accountIndex) {
         // Filter accounts by active
         List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
             if (!account.isArchived()) {
@@ -217,7 +209,7 @@ public class SendViewModel extends BaseViewModel {
         }
 
         // Find corrected position
-        return activeAccounts.indexOf(payloadManager.getPayload().getHdWallet().getAccounts().get(accountIndex));
+        return activeAccounts.indexOf(payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(accountIndex));
     }
 
     /**
@@ -293,11 +285,11 @@ public class SendViewModel extends BaseViewModel {
             scanData = "bitcoin:" + scanData.substring(10);
         }
 
-        if (FormatsUtil.getInstance().isValidBitcoinAddress(scanData)) {
+        if (FormatsUtil.isValidBitcoinAddress(scanData)) {
             btcAddress = scanData;
-        } else if (FormatsUtil.getInstance().isBitcoinUri(scanData)) {
-            btcAddress = FormatsUtil.getInstance().getBitcoinAddress(scanData);
-            btcAmount = FormatsUtil.getInstance().getBitcoinAmount(scanData);
+        } else if (FormatsUtil.isBitcoinUri(scanData)) {
+            btcAddress = FormatsUtil.getBitcoinAddress(scanData);
+            btcAmount = FormatsUtil.getBitcoinAmount(scanData);
 
             //Convert to correct units
             try {
@@ -331,16 +323,17 @@ public class SendViewModel extends BaseViewModel {
      * Get cached dynamic fee from Bci dynamic fee API
      */
     private void getSuggestedFee() {
+        // TODO: 21/02/2017
         // Get cached fee
-        sendModel.suggestedFee = DynamicFeeCache.getInstance().getSuggestedFee();
+//        sendModel.suggestedFee = DynamicFeeCache.getInstance().get....;
 
         // Refresh fee cache
-        compositeDisposable.add(
-                sendDataManager.getSuggestedFee()
-                        .doAfterTerminate(() -> sendModel.suggestedFee = DynamicFeeCache.getInstance().getSuggestedFee())
-                        .subscribe(
-                                suggestedFee -> DynamicFeeCache.getInstance().setSuggestedFee(suggestedFee),
-                                throwable -> DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDefaultFee())));
+//        compositeDisposable.add(
+//                sendDataManager.getSuggestedFee()
+//                        .doAfterTerminate(() -> sendModel.suggestedFee = DynamicFeeCache.getInstance().getSuggestedFee())
+//                        .subscribe(
+//                                suggestedFee -> DynamicFeeCache.getInstance().setSuggestedFee(suggestedFee),
+//                                throwable -> DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDefaultFee())));
     }
 
     /**
@@ -389,112 +382,116 @@ public class SendViewModel extends BaseViewModel {
 
         if (unspentApiDisposable != null) unspentApiDisposable.dispose();
 
-        unspentApiDisposable = getUnspentApiResponse(address)
-                .compose(RxUtil.applySchedulersToObservable())
-                .subscribe(
-                        jsonObject -> {
-                            if (jsonObject != null) {
-                                BigInteger amountToSend = getSatoshisFromText(amountToSendText);
-                                BigInteger customFee = getSatoshisFromText(customFeeText);
-                                final UnspentOutputs coins = payment.getCoins(jsonObject);
-                                // Future use. There might be some unconfirmed funds. Not displaying a warning currently (to line up with iOS and Web wallet)
-                                dataListener.setUnconfirmedFunds(coins.getNotice() != null ? coins.getNotice() : "");
-                                sendModel.absoluteSuggestedFee = getSuggestedAbsoluteFee(coins, amountToSend);
-
-                                if (customFeeText != null && !customFeeText.isEmpty() || customFee.compareTo(BigInteger.ZERO) == 1) {
-                                    customFeePayment(coins, amountToSend, customFee, spendAll);
-                                } else {
-                                    suggestedFeePayment(coins, amountToSend, spendAll);
-                                }
-                            } else {
-                                // No unspent outputs
-                                updateMaxAvailable(0);
-                                sendModel.pendingTransaction.unspentOutputBundle = null;
-                            }
-
-                            if (listener != null) listener.onReady();
-                        }, throwable -> {
-                            // No unspent outputs
-                            updateMaxAvailable(0);
-                            sendModel.pendingTransaction.unspentOutputBundle = null;
-                        });
+        // TODO: 21/02/2017
+//        unspentApiDisposable = getUnspentApiResponse(address)
+//                .compose(RxUtil.applySchedulersToObservable())
+//                .subscribe(
+//                        jsonObject -> {
+//                            if (jsonObject != null) {
+//                                BigInteger amountToSend = getSatoshisFromText(amountToSendText);
+//                                BigInteger customFee = getSatoshisFromText(customFeeText);
+//                                final UnspentOutputs coins = payment.getCoins(jsonObject);
+//                                // Future use. There might be some unconfirmed funds. Not displaying a warning currently (to line up with iOS and Web wallet)
+//                                dataListener.setUnconfirmedFunds(coins.getNotice() != null ? coins.getNotice() : "");
+//                                sendModel.absoluteSuggestedFee = getSuggestedAbsoluteFee(coins, amountToSend);
+//
+//                                if (customFeeText != null && !customFeeText.isEmpty() || customFee.compareTo(BigInteger.ZERO) == 1) {
+//                                    customFeePayment(coins, amountToSend, customFee, spendAll);
+//                                } else {
+//                                    suggestedFeePayment(coins, amountToSend, spendAll);
+//                                }
+//                            } else {
+//                                // No unspent outputs
+//                                updateMaxAvailable(0);
+//                                sendModel.pendingTransaction.unspentOutputBundle = null;
+//                            }
+//
+//                            if (listener != null) listener.onReady();
+//                        }, throwable -> {
+//                            // No unspent outputs
+//                            updateMaxAvailable(0);
+//                            sendModel.pendingTransaction.unspentOutputBundle = null;
+//                        });
     }
 
-    private BigInteger getSuggestedAbsoluteFee(final UnspentOutputs coins, BigInteger amountToSend) {
-        if (sendModel.suggestedFee != null) {
-            SpendableUnspentOutputs spendableCoins = payment.getSpendableCoins(coins, amountToSend, sendModel.suggestedFee.defaultFeePerKb);
-            return spendableCoins.getAbsoluteFee();
-        } else {
-            // App is likely in low memory environment, leave page gracefully
-            if (dataListener != null) dataListener.finishPage(false);
-            return null;
-        }
-    }
+    // TODO: 21/02/2017
+//    private BigInteger getSuggestedAbsoluteFee(final UnspentOutputs coins, BigInteger amountToSend) {
+//        if (sendModel.suggestedFee != null) {
+//            SpendableUnspentOutputs spendableCoins = payment.getSpendableCoins(coins, amountToSend, sendModel.suggestedFee.defaultFeePerKb);
+//            return spendableCoins.getAbsoluteFee();
+//        } else {
+//            // App is likely in low memory environment, leave page gracefully
+//            if (dataListener != null) dataListener.finishPage(false);
+//            return null;
+//        }
+//    }
 
     /**
      * Payment will use customized fee
      */
-    private void customFeePayment(final UnspentOutputs coins, BigInteger amountToSend, BigInteger customFee, boolean spendAll) {
-        SweepBundle sweepBundle = payment.getSweepBundle(coins, BigInteger.ZERO);
-        long balanceAfterFee = sweepBundle.getSweepAmount().longValue() - customFee.longValue();
-        updateMaxAvailable(balanceAfterFee);
-
-        if (spendAll) {
-            amountToSend = BigInteger.valueOf(balanceAfterFee);
-            if (dataListener != null) {
-                dataListener.onSetSpendAllAmount(getTextFromSatoshis(balanceAfterFee));
-            }
-        }
-
-        validateCustomFee(amountToSend.add(customFee), sweepBundle.getSweepAmount());
-
-        SpendableUnspentOutputs unspentOutputBundle = payment.getSpendableCoins(coins,
-                amountToSend.add(customFee),
-                BigInteger.ZERO);
-
-        sendModel.pendingTransaction.bigIntAmount = amountToSend;
-        sendModel.pendingTransaction.unspentOutputBundle = unspentOutputBundle;
-        sendModel.pendingTransaction.bigIntFee = customFee;
-
-        if (sendModel.suggestedFee != null && sendModel.suggestedFee.estimateList != null) {
-            updateEstimateConfirmationTime(amountToSend, customFee.longValue(), coins);
-        }
-    }
+    // TODO: 21/02/2017
+//    private void customFeePayment(final UnspentOutputs coins, BigInteger amountToSend, BigInteger customFee, boolean spendAll) {
+//        SweepBundle sweepBundle = payment.getSweepBundle(coins, BigInteger.ZERO);
+//        long balanceAfterFee = sweepBundle.getSweepAmount().longValue() - customFee.longValue();
+//        updateMaxAvailable(balanceAfterFee);
+//
+//        if (spendAll) {
+//            amountToSend = BigInteger.valueOf(balanceAfterFee);
+//            if (dataListener != null) {
+//                dataListener.onSetSpendAllAmount(getTextFromSatoshis(balanceAfterFee));
+//            }
+//        }
+//
+//        validateCustomFee(amountToSend.add(customFee), sweepBundle.getSweepAmount());
+//
+//        SpendableUnspentOutputs unspentOutputBundle = payment.getSpendableCoins(coins,
+//                amountToSend.add(customFee),
+//                BigInteger.ZERO);
+//
+//        sendModel.pendingTransaction.bigIntAmount = amountToSend;
+//        sendModel.pendingTransaction.unspentOutputBundle = unspentOutputBundle;
+//        sendModel.pendingTransaction.bigIntFee = customFee;
+//
+//        if (sendModel.suggestedFee != null && sendModel.suggestedFee.estimateList != null) {
+//            updateEstimateConfirmationTime(amountToSend, customFee.longValue(), coins);
+//        }
+//    }
 
     /**
      * Payment will use suggested dynamic fee
      */
-    private void suggestedFeePayment(final UnspentOutputs coins, BigInteger amountToSend, boolean spendAll) {
-        if (sendModel.suggestedFee != null) {
-            SweepBundle sweepBundle = payment.getSweepBundle(coins, sendModel.suggestedFee.defaultFeePerKb);
-            long balanceAfterFee = sweepBundle.getSweepAmount().longValue();
-            updateMaxAvailable(balanceAfterFee);
-
-            if (spendAll) {
-                amountToSend = BigInteger.valueOf(balanceAfterFee);
-                if (dataListener != null) {
-                    dataListener.onSetSpendAllAmount(getTextFromSatoshis(balanceAfterFee));
-                }
-            }
-
-            BigInteger feePerKb = sendModel.suggestedFee.defaultFeePerKb;
-
-            SpendableUnspentOutputs unspentOutputBundle = payment.getSpendableCoins(coins,
-                    amountToSend,
-                    feePerKb);
-
-            sendModel.pendingTransaction.bigIntAmount = amountToSend;
-            sendModel.pendingTransaction.unspentOutputBundle = unspentOutputBundle;
-            sendModel.pendingTransaction.bigIntFee = sendModel.pendingTransaction.unspentOutputBundle.getAbsoluteFee();
-
-            if (sendModel.suggestedFee != null && sendModel.suggestedFee.estimateList != null) {
-                updateEstimateConfirmationTime(amountToSend, sendModel.pendingTransaction.bigIntFee.longValue(), coins);
-            }
-        } else {
-            // App is likely in low memory environment, leave page gracefully
-            if (dataListener != null) dataListener.finishPage(false);
-        }
-    }
+    // TODO: 21/02/2017
+//    private void suggestedFeePayment(final UnspentOutputs coins, BigInteger amountToSend, boolean spendAll) {
+//        if (sendModel.suggestedFee != null) {
+//            SweepBundle sweepBundle = payment.getSweepBundle(coins, sendModel.suggestedFee.defaultFeePerKb);
+//            long balanceAfterFee = sweepBundle.getSweepAmount().longValue();
+//            updateMaxAvailable(balanceAfterFee);
+//
+//            if (spendAll) {
+//                amountToSend = BigInteger.valueOf(balanceAfterFee);
+//                if (dataListener != null) {
+//                    dataListener.onSetSpendAllAmount(getTextFromSatoshis(balanceAfterFee));
+//                }
+//            }
+//
+//            BigInteger feePerKb = sendModel.suggestedFee.defaultFeePerKb;
+//
+//            SpendableUnspentOutputs unspentOutputBundle = payment.getSpendableCoins(coins,
+//                    amountToSend,
+//                    feePerKb);
+//
+//            sendModel.pendingTransaction.bigIntAmount = amountToSend;
+//            sendModel.pendingTransaction.unspentOutputBundle = unspentOutputBundle;
+//            sendModel.pendingTransaction.bigIntFee = sendModel.pendingTransaction.unspentOutputBundle.getAbsoluteFee();
+//
+//            if (sendModel.suggestedFee != null && sendModel.suggestedFee.estimateList != null) {
+//                updateEstimateConfirmationTime(amountToSend, sendModel.pendingTransaction.bigIntFee.longValue(), coins);
+//            }
+//        } else {
+//            // App is likely in low memory environment, leave page gracefully
+//            if (dataListener != null) dataListener.finishPage(false);
+//        }
+//    }
 
     /**
      * If user set customized fee that exceeds available amount, disable send button
@@ -534,20 +531,21 @@ public class SendViewModel extends BaseViewModel {
      *
      * @return List of fees needed to be included in co-responding blocks
      */
-    private BigInteger[] getEstimatedBlocks(BigInteger amountToSend, ArrayList<SuggestedFee.Estimates> estimates, UnspentOutputs coins) {
-        BigInteger[] absoluteFeeSuggestedEstimates = new BigInteger[estimates.size()];
-
-        for (int i = 0; i < absoluteFeeSuggestedEstimates.length; i++) {
-            BigInteger feePerKb = estimates.get(i).fee;
-            SpendableUnspentOutputs unspentOutputBundle = payment.getSpendableCoins(coins, amountToSend, feePerKb);
-
-            if (unspentOutputBundle != null) {
-                absoluteFeeSuggestedEstimates[i] = unspentOutputBundle.getAbsoluteFee();
-            }
-        }
-
-        return absoluteFeeSuggestedEstimates;
-    }
+    // TODO: 21/02/2017
+//    private BigInteger[] getEstimatedBlocks(BigInteger amountToSend, ArrayList<SuggestedFee.Estimates> estimates, UnspentOutputs coins) {
+//        BigInteger[] absoluteFeeSuggestedEstimates = new BigInteger[estimates.size()];
+//
+//        for (int i = 0; i < absoluteFeeSuggestedEstimates.length; i++) {
+//            BigInteger feePerKb = estimates.get(i).fee;
+//            SpendableUnspentOutputs unspentOutputBundle = payment.getSpendableCoins(coins, amountToSend, feePerKb);
+//
+//            if (unspentOutputBundle != null) {
+//                absoluteFeeSuggestedEstimates[i] = unspentOutputBundle.getAbsoluteFee();
+//            }
+//        }
+//
+//        return absoluteFeeSuggestedEstimates;
+//    }
 
     /**
      * Retrieves unspent api data in memory. If not in memory yet, it will be retrieved and added.
@@ -555,25 +553,25 @@ public class SendViewModel extends BaseViewModel {
      *
      * TODO - can speed up by checking if multi_address balance > 0 before calling unspent_api
      */
-    private Observable<JSONObject> getUnspentApiResponse(String address) {
-        if (sendModel.unspentApiResponse.containsKey(address)) {
-            return Observable.just(sendModel.unspentApiResponse.get(address));
-        } else {
-            // Get cache if is default account
-            DefaultAccountUnspentCache cache = DefaultAccountUnspentCache.getInstance();
-            if (payloadManager.getPayload().getHdWallet() != null && address.equals(cache.getXpub())) {
-                // Refresh default account cache
-                return sendDataManager.getUnspentOutputs(address)
-                        .doOnNext(jsonObject -> {
-                            cache.setUnspentApiResponse(address, jsonObject);
-                            sendModel.unspentApiResponse.put(address, jsonObject);
-                        });
-            } else {
-                return sendDataManager.getUnspentOutputs(address)
-                        .doOnNext(jsonObject -> sendModel.unspentApiResponse.put(address, jsonObject));
-            }
-        }
-    }
+//    private Observable<JSONObject> getUnspentApiResponse(String address) {
+//        if (sendModel.unspentApiResponse.containsKey(address)) {
+//            return Observable.just(sendModel.unspentApiResponse.get(address));
+//        } else {
+//            // Get cache if is default account
+//            DefaultAccountUnspentCache cache = DefaultAccountUnspentCache.getInstance();
+//            if (payloadManager.getPayload().getHdWallet() != null && address.equals(cache.getXpub())) {
+//                // Refresh default account cache
+//                return sendDataManager.getUnspentOutputs(address)
+//                        .doOnNext(jsonObject -> {
+//                            cache.setUnspentApiResponse(address, jsonObject);
+//                            sendModel.unspentApiResponse.put(address, jsonObject);
+//                        });
+//            } else {
+//                return sendDataManager.getUnspentOutputs(address)
+//                        .doOnNext(jsonObject -> sendModel.unspentApiResponse.put(address, jsonObject));
+//            }
+//        }
+//    }
 
     /**
      * Returns amount of satoshis from btc amount. This could be btc, mbtc or bits.
@@ -611,31 +609,32 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Updates text displaying what block tx will be included in
      */
-    private String updateEstimateConfirmationTime(BigInteger amountToSend, long fee, UnspentOutputs coins) {
-        sendModel.absoluteSuggestedFeeEstimates = getEstimatedBlocks(amountToSend, sendModel.suggestedFee.estimateList, coins);
-
-        String likelyToConfirmMessage = stringUtils.getString(R.string.estimate_confirm_block_count);
-        String unlikelyToConfirmMessage = stringUtils.getString(R.string.fee_too_low_no_confirm);
-
-        long minutesPerBlock = 10;
-        Arrays.sort(sendModel.absoluteSuggestedFeeEstimates, Collections.reverseOrder());
-
-        String estimateText = unlikelyToConfirmMessage;
-
-        for (int i = 0; i < sendModel.absoluteSuggestedFeeEstimates.length; i++) {
-            if (fee >= sendModel.absoluteSuggestedFeeEstimates[i].longValue()) {
-                estimateText = likelyToConfirmMessage;
-                estimateText = String.format(estimateText, ((i + 1) * minutesPerBlock), (i + 1));
-                break;
-            }
-        }
-
-        dataListener.setEstimate(estimateText);
-        dataListener.setEstimateColor(estimateText.equals(unlikelyToConfirmMessage)
-                ? R.color.product_red_medium : R.color.primary_blue_accent);
-
-        return estimateText;
-    }
+    // TODO: 21/02/2017
+//    private String updateEstimateConfirmationTime(BigInteger amountToSend, long fee, UnspentOutputs coins) {
+//        sendModel.absoluteSuggestedFeeEstimates = getEstimatedBlocks(amountToSend, sendModel.suggestedFee.estimateList, coins);
+//
+//        String likelyToConfirmMessage = stringUtils.getString(R.string.estimate_confirm_block_count);
+//        String unlikelyToConfirmMessage = stringUtils.getString(R.string.fee_too_low_no_confirm);
+//
+//        long minutesPerBlock = 10;
+//        Arrays.sort(sendModel.absoluteSuggestedFeeEstimates, Collections.reverseOrder());
+//
+//        String estimateText = unlikelyToConfirmMessage;
+//
+//        for (int i = 0; i < sendModel.absoluteSuggestedFeeEstimates.length; i++) {
+//            if (fee >= sendModel.absoluteSuggestedFeeEstimates[i].longValue()) {
+//                estimateText = likelyToConfirmMessage;
+//                estimateText = String.format(estimateText, ((i + 1) * minutesPerBlock), (i + 1));
+//                break;
+//            }
+//        }
+//
+//        dataListener.setEstimate(estimateText);
+//        dataListener.setEstimateColor(estimateText.equals(unlikelyToConfirmMessage)
+//                ? R.color.product_red_medium : R.color.primary_blue_accent);
+//
+//        return estimateText;
+//    }
 
     private void setupTransaction(String customFeeText,
                                   String amount,
@@ -650,7 +649,7 @@ public class SendViewModel extends BaseViewModel {
 
     private void sendClicked(boolean bypassFeeCheck, String address) {
         checkClipboardPaste(address);
-        if (FormatsUtil.getInstance().isValidBitcoinAddress(address)) {
+        if (FormatsUtil.isValidBitcoinAddress(address)) {
             //Receiving address manual or scanned input
             sendModel.pendingTransaction.receivingAddress = address;
         } else {
@@ -666,7 +665,7 @@ public class SendViewModel extends BaseViewModel {
                 }
 
                 if (legacyAddress != null && legacyAddress.isWatchOnly() &&
-                        (legacyAddress.getEncryptedKey() == null || legacyAddress.getEncryptedKey().isEmpty())) {
+                        (legacyAddress.getPrivateKey() == null || legacyAddress.getPrivateKey().isEmpty())) {
                     if (dataListener != null) {
                         dataListener.onShowSpendFromWatchOnly(((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject).getAddress());
                     }
@@ -696,7 +695,7 @@ public class SendViewModel extends BaseViewModel {
     private boolean isFeeAdequate() {
         //Push tx endpoint only accepts > 10000 per kb fees
         if (sendModel.pendingTransaction.unspentOutputBundle != null && sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs() != null
-                && !FeeUtil.isAdequateFee(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(),
+                && !Payment.isAdequateFee(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(),
                 2,//assume change
                 sendModel.pendingTransaction.bigIntFee)) {
             showToast(R.string.insufficient_fee, ToastCustom.TYPE_ERROR);
@@ -791,7 +790,7 @@ public class SendViewModel extends BaseViewModel {
      * total
      */
     boolean isLargeTransaction() {
-        int txSize = FeeUtil.estimatedSize(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
+        int txSize = Payment.estimatedSize(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = sendModel.absoluteSuggestedFee.doubleValue() / sendModel.pendingTransaction.bigIntAmount.doubleValue() * 100.0;
 
         return sendModel.absoluteSuggestedFee.longValue() > SendModel.LARGE_TX_FEE
@@ -837,7 +836,7 @@ public class SendViewModel extends BaseViewModel {
 
         if (!checkAmountsOnly) {
             // Validate addresses
-            if (pendingTransaction.receivingAddress == null || !FormatsUtil.getInstance().isValidBitcoinAddress(pendingTransaction.receivingAddress)) {
+            if (pendingTransaction.receivingAddress == null || !FormatsUtil.isValidBitcoinAddress(pendingTransaction.receivingAddress)) {
                 showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
                 return false;
             }
@@ -870,42 +869,43 @@ public class SendViewModel extends BaseViewModel {
      * Set the receiving object. Null can be passed to reset receiving address for when user
      * customizes address
      */
-    void setReceivingAddress(@Nullable ItemAccount selectedItem) {
-        metricInputFlag = null;
-
-        sendModel.pendingTransaction.receivingObject = selectedItem;
-        if (selectedItem != null) {
-            if (selectedItem.accountObject instanceof Account) {
-                //V3
-                Account account = ((Account) selectedItem.accountObject);
-                try {
-                    sendModel.pendingTransaction.receivingAddress = payloadManager.getNextReceiveAddress(account.getRealIdx());
-                } catch (AddressFormatException e) {
-                    Log.e(TAG, "setReceivingAddress: ", e);
-                }
-
-            } else if (selectedItem.accountObject instanceof LegacyAddress) {
-                //V2
-                LegacyAddress legacyAddress = ((LegacyAddress) selectedItem.accountObject);
-                sendModel.pendingTransaction.receivingAddress = legacyAddress.getAddress();
-
-                if (legacyAddress.isWatchOnly())
-                    if (legacyAddress.isWatchOnly() && prefsUtil.getValue("WARN_WATCH_ONLY_SPEND", true)) {
-                        if (dataListener != null) {
-                            dataListener.onShowReceiveToWatchOnlyWarning(legacyAddress.getAddress());
-                        }
-                    }
-            } else {
-                //Address book
-                AddressBookEntry addressBook = ((AddressBookEntry) selectedItem.accountObject);
-                sendModel.pendingTransaction.receivingAddress = addressBook.getAddress();
-            }
-
-            metricInputFlag = EventLogHandler.URL_EVENT_TX_INPUT_FROM_DROPDOWN;
-        } else {
-            sendModel.pendingTransaction.receivingAddress = "";
-        }
-    }
+    // TODO: 21/02/2017
+//    void setReceivingAddress(@Nullable ItemAccount selectedItem) {
+//        metricInputFlag = null;
+//
+//        sendModel.pendingTransaction.receivingObject = selectedItem;
+//        if (selectedItem != null) {
+//            if (selectedItem.accountObject instanceof Account) {
+//                //V3
+//                Account account = ((Account) selectedItem.accountObject);
+//                try {
+//                    sendModel.pendingTransaction.receivingAddress = payloadManager.getNextReceiveAddress(account.getRealIdx());
+//                } catch (AddressFormatException e) {
+//                    Log.e(TAG, "setReceivingAddress: ", e);
+//                }
+//
+//            } else if (selectedItem.accountObject instanceof LegacyAddress) {
+//                //V2
+//                LegacyAddress legacyAddress = ((LegacyAddress) selectedItem.accountObject);
+//                sendModel.pendingTransaction.receivingAddress = legacyAddress.getAddress();
+//
+//                if (legacyAddress.isWatchOnly())
+//                    if (legacyAddress.isWatchOnly() && prefsUtil.getValue("WARN_WATCH_ONLY_SPEND", true)) {
+//                        if (dataListener != null) {
+//                            dataListener.onShowReceiveToWatchOnlyWarning(legacyAddress.getAddress());
+//                        }
+//                    }
+//            } else {
+//                //Address book
+//                AddressBook addressBook = ((AddressBook) selectedItem.accountObject);
+//                sendModel.pendingTransaction.receivingAddress = addressBook.getAddress();
+//            }
+//
+//            metricInputFlag = EventLogHandler.URL_EVENT_TX_INPUT_FROM_DROPDOWN;
+//        } else {
+//            sendModel.pendingTransaction.receivingAddress = "";
+//        }
+//    }
 
     private boolean isValidAmount(BigInteger bAmount) {
         if (bAmount == null) {
@@ -913,7 +913,7 @@ public class SendViewModel extends BaseViewModel {
         }
 
         // Test that amount is more than dust
-        if (bAmount.compareTo(SendCoins.bDust) == -1) {
+        if (bAmount.compareTo(Payment.DUST) == -1) {
             return false;
         }
 
@@ -928,77 +928,79 @@ public class SendViewModel extends BaseViewModel {
     }
 
     /**
-     * Executes transaction //TODO implement transaction queue for when transaction fails
+     * Executes transaction
      */
-    void submitPayment(AlertDialog alertDialog) {
-        String changeAddress;
-        List<ECKey> keys = new ArrayList<>();
-        Account account;
-        LegacyAddress legacyAddress;
-        try {
-            if (sendModel.pendingTransaction.isHD()) {
-                account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);
-                changeAddress = payloadManager.getNextChangeAddress(account.getRealIdx());
+    // TODO: 21/02/2017
+//    void submitPayment(AlertDialog alertDialog) {
+//        String changeAddress;
+//        List<ECKey> keys = new ArrayList<>();
+//        Account account;
+//        LegacyAddress legacyAddress;
+//        try {
+//            if (sendModel.pendingTransaction.isHD()) {
+//                account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);
+//                changeAddress = payloadManager.getNextChangeAddress(account.getRealIdx());
+//
+//                keys.addAll(payloadManager.getHDKeys(sendModel.verifiedSecondPassword, account, sendModel.pendingTransaction.unspentOutputBundle));
+//
+//            } else {
+//                legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
+//                changeAddress = legacyAddress.getAddress();
+//
+//                if (!legacyAddress.isWatchOnly() && payloadManager.getPayload().isDoubleEncrypted()) {
+//                    ECKey walletKey = legacyAddress.getECKey(new CharSequenceX(sendModel.verifiedSecondPassword));
+//                    keys.add(walletKey);
+//                } else {
+//                    ECKey walletKey = legacyAddress.getECKey();
+//                    keys.add(walletKey);
+//                }
+//            }
+//
+//        } catch (Exception e) {
+//            Log.e(TAG, "submitPayment: ", e);
+//            dataListener.dismissProgressDialog();
+//            showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR);
+//            return;
+//        }
+//
+//        dataListener.showProgressDialog();
+//
+//        compositeDisposable.add(
+//                sendDataManager.submitPayment(
+//                        sendModel.pendingTransaction.unspentOutputBundle,
+//                        keys,
+//                        sendModel.pendingTransaction.receivingAddress,
+//                        changeAddress,
+//                        sendModel.pendingTransaction.bigIntFee,
+//                        sendModel.pendingTransaction.bigIntAmount)
+//                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+//                        .subscribe(
+//                                hash -> {
+//                                    clearUnspentResponseCache();
+//
+//                                    if (alertDialog != null && alertDialog.isShowing()) {
+//                                        alertDialog.dismiss();
+//                                    }
+//
+//                                    handleSuccessfulPayment(hash);
+//                                }, throwable -> showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)));
+//    }
 
-                keys.addAll(payloadManager.getHDKeys(sendModel.verifiedSecondPassword, account, sendModel.pendingTransaction.unspentOutputBundle));
-
-            } else {
-                legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
-                changeAddress = legacyAddress.getAddress();
-
-                if (!legacyAddress.isWatchOnly() && payloadManager.getPayload().isDoubleEncrypted()) {
-                    ECKey walletKey = legacyAddress.getECKey(new CharSequenceX(sendModel.verifiedSecondPassword));
-                    keys.add(walletKey);
-                } else {
-                    ECKey walletKey = legacyAddress.getECKey();
-                    keys.add(walletKey);
-                }
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, "submitPayment: ", e);
-            dataListener.dismissProgressDialog();
-            showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR);
-            return;
-        }
-
-        dataListener.showProgressDialog();
-
-        compositeDisposable.add(
-                sendDataManager.submitPayment(
-                        sendModel.pendingTransaction.unspentOutputBundle,
-                        keys,
-                        sendModel.pendingTransaction.receivingAddress,
-                        changeAddress,
-                        sendModel.pendingTransaction.bigIntFee,
-                        sendModel.pendingTransaction.bigIntAmount)
-                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                        .subscribe(
-                                hash -> {
-                                    clearUnspentResponseCache();
-
-                                    if (alertDialog != null && alertDialog.isShowing()) {
-                                        alertDialog.dismiss();
-                                    }
-
-                                    handleSuccessfulPayment(hash);
-                                }, throwable -> showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)));
-    }
-
-    private void handleSuccessfulPayment(String hash) {
-        if (sendModel.pendingTransaction.isHD()) {
-            // increment change address counter
-            ((Account) sendModel.pendingTransaction.sendingObject.accountObject).incChange();
-        }
-
-        updateInternalBalances();
-        PayloadBridge.getInstance().remoteSaveThread(null);
-        if (dataListener != null) {
-            dataListener.onShowTransactionSuccess(contactMdid, hash, fctxId, sendModel.pendingTransaction.bigIntAmount.longValue());
-        }
-
-        logAddressInputMetric();
-    }
+    // TODO: 21/02/2017
+//    private void handleSuccessfulPayment(String hash) {
+//        if (sendModel.pendingTransaction.isHD()) {
+//            // increment change address counter
+//            ((Account) sendModel.pendingTransaction.sendingObject.accountObject).incChange();
+//        }
+//
+//        updateInternalBalances();
+//        PayloadBridge.getInstance().remoteSaveThread(null);
+//        if (dataListener != null) {
+//            dataListener.onShowTransactionSuccess(contactMdid, hash, fctxId, sendModel.pendingTransaction.bigIntAmount.longValue());
+//        }
+//
+//        logAddressInputMetric();
+//    }
 
     private void logAddressInputMetric() {
         EventLogHandler handler = new EventLogHandler(prefsUtil, WebUtil.getInstance());
@@ -1092,10 +1094,9 @@ public class SendViewModel extends BaseViewModel {
 
             //Create copy, otherwise pass by ref will override private key in wallet payload
             LegacyAddress tempLegacyAddress = new LegacyAddress();
-            tempLegacyAddress.setEncryptedKeyBytes(key.getPrivKeyBytes());
+            tempLegacyAddress.setPrivateKeyFromBytes(key.getPrivKeyBytes());
             tempLegacyAddress.setAddress(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
             tempLegacyAddress.setLabel(legacyAddress.getLabel());
-            tempLegacyAddress.setWatchOnly(true);
             sendModel.pendingTransaction.sendingObject.accountObject = tempLegacyAddress;
 
             confirmPayment();

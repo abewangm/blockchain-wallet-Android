@@ -11,9 +11,10 @@ import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.payload.PayloadManager;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -177,13 +178,15 @@ class WebSocketHandler {
     }
 
     private Completable updateBalancesAndTxs() {
-        return Completable.fromCallable(() -> {
-            payloadManager.updateBalancesAndTransactions();
-            return Void.TYPE;
-        }).doAfterTerminate(() -> {
-            Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-        }).compose(RxUtil.applySchedulersToCompletable());
+        // TODO: 21/02/2017
+        throw new NotImplementedException("");
+//        return Completable.fromCallable(() -> {
+//            payloadManager.updateBalancesAndTransactions();
+//            return Void.TYPE;
+//        }).doAfterTerminate(() -> {
+//            Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
+//            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+//        }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     private Completable connectToWebSocket() {
@@ -292,7 +295,7 @@ class WebSocketHandler {
                 updateBalancesAndTransactions();
 
             } else if (op.equals("on_change")) {
-                final String localChecksum = payloadManager.getCheckSum();
+                final String localChecksum = payloadManager.getPayloadChecksum();
 
                 boolean isSameChecksum = false;
                 if (jsonObject.has("checksum")) {
@@ -329,12 +332,10 @@ class WebSocketHandler {
 
     private Completable downloadChangedPayload() {
         return Completable.fromCallable(() -> {
-            payloadManager.initiatePayload(
+            payloadManager.initializeAndDecrypt(
                     payloadManager.getPayload().getSharedKey(),
                     payloadManager.getPayload().getGuid(),
-                    payloadManager.getTempPassword(), () -> {
-                        // No-op, blocking call
-                    });
+                    payloadManager.getTempPassword());
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }

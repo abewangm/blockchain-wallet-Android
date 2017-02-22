@@ -15,6 +15,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 
+import java.util.List;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentBackupWordListBinding;
 import piuk.blockchain.android.util.BackupWalletUtil;
@@ -29,7 +30,8 @@ public class BackupWalletWordListFragment extends Fragment {
     private Animation animExitToRight;
 
     int currentWordIndex = 0;
-    @Thunk String[] mnemonic;
+    @Thunk
+    List<String> mnemonic;
     @Thunk String word;
     private String of;
     private String secondPassword;
@@ -58,11 +60,11 @@ public class BackupWalletWordListFragment extends Fragment {
         animEnterFromLeft = AnimationUtils.loadAnimation(getActivity(), R.anim.enter_from_left);
 
         mnemonic = new BackupWalletUtil().getMnemonic(secondPassword);
-        if (currentWordIndex == mnemonic.length) {
+        if (currentWordIndex == mnemonic.size()) {
             currentWordIndex = 0;
         }
         binding.tvCurrentWord.setText(word + " " + (currentWordIndex + 1) + " " + of + " 12");
-        binding.tvPressReveal.setText(mnemonic[currentWordIndex]);
+        binding.tvPressReveal.setText(mnemonic.get(currentWordIndex));
 
         binding.nextWordAction.setOnClickListener(v -> {
 
@@ -72,7 +74,7 @@ public class BackupWalletWordListFragment extends Fragment {
                 binding.previousWordAction.setVisibility(View.GONE);
             }
 
-            if (currentWordIndex < mnemonic.length - 1) {
+            if (currentWordIndex < mnemonic.size() - 1) {
 
                 animExitToLeft.setAnimationListener(new Animation.AnimationListener() {
                     @Override
@@ -89,7 +91,7 @@ public class BackupWalletWordListFragment extends Fragment {
                     @Override
                     public void onAnimationEnd(Animation animation) {
                         binding.cardLayout.startAnimation(animEnterFromRight);
-                        binding.tvPressReveal.setText(mnemonic[currentWordIndex]);
+                        binding.tvPressReveal.setText(mnemonic.get(currentWordIndex));
                     }
                 });
 
@@ -99,7 +101,7 @@ public class BackupWalletWordListFragment extends Fragment {
 
             currentWordIndex++;
 
-            if (currentWordIndex == mnemonic.length) {
+            if (currentWordIndex == mnemonic.size()) {
 
                 currentWordIndex = 0;
 
@@ -117,7 +119,7 @@ public class BackupWalletWordListFragment extends Fragment {
                         .commit();
             } else {
 
-                if (currentWordIndex == mnemonic.length - 1) {
+                if (currentWordIndex == mnemonic.size() - 1) {
                     binding.nextWordAction.setText(getResources().getString(R.string.backup_done));
                 } else {
                     binding.nextWordAction.setText(getResources().getString(R.string.backup_next_word));
@@ -148,7 +150,7 @@ public class BackupWalletWordListFragment extends Fragment {
                 @Override
                 public void onAnimationEnd(Animation animation) {
                     binding.cardLayout.startAnimation(animEnterFromLeft);
-                    binding.tvPressReveal.setText(mnemonic[currentWordIndex]);
+                    binding.tvPressReveal.setText(mnemonic.get(currentWordIndex));
                 }
             });
 

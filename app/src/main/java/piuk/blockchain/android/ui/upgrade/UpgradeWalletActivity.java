@@ -11,6 +11,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AlertDialog.Builder;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -23,7 +24,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.PasswordUtil;
 
 import io.reactivex.exceptions.Exceptions;
@@ -103,7 +103,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
             LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
             final LinearLayout pwLayout = (LinearLayout) inflater.inflate(R.layout.modal_change_password, null);
 
-            new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+            new Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
                     .setMessage(R.string.weak_password)
                     .setCancelable(false)
@@ -121,22 +121,23 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                                 showToast(R.string.password_mismatch_error, ToastCustom.TYPE_ERROR);
                             } else {
 
-                                final CharSequenceX currentPassword = payloadManager.getTempPassword();
-                                payloadManager.setTempPassword(new CharSequenceX(password2));
-
-                                AccessState.getInstance().createPin(payloadManager.getTempPassword(), AccessState.getInstance().getPIN())
-                                        .subscribe(success -> {
-                                            if (success) {
-                                                PayloadBridge.getInstance().remoteSaveThread(null);
-                                                showToast(R.string.password_changed, ToastCustom.TYPE_OK);
-                                            } else {
-                                                throw Exceptions.propagate(new Throwable("Create PIN failed"));
-                                            }
-                                        }, throwable -> {
-                                            payloadManager.setTempPassword(currentPassword);
-                                            showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-                                            showToast(R.string.password_unchanged, ToastCustom.TYPE_ERROR);
-                                        });
+                                // TODO: 21/02/2017
+//                                final String currentPassword = payloadManager.getTempPassword();
+//                                payloadManager.setTempPassword(password2);
+//
+//                                AccessState.getInstance().createPin(payloadManager.getTempPassword(), AccessState.getInstance().getPIN())
+//                                        .subscribe(success -> {
+//                                            if (success) {
+//                                                PayloadBridge.getInstance().remoteSaveThread(null);
+//                                                showToast(R.string.password_changed, ToastCustom.TYPE_OK);
+//                                            } else {
+//                                                throw Exceptions.propagate(new Throwable("Create PIN failed"));
+//                                            }
+//                                        }, throwable -> {
+//                                            payloadManager.setTempPassword(currentPassword);
+//                                            showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
+//                                            showToast(R.string.password_unchanged, ToastCustom.TYPE_ERROR);
+//                                        });
                             }
                         }
                     })
@@ -151,18 +152,18 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
         new SecondPasswordHandler(UpgradeWalletActivity.this).validate(new SecondPasswordHandler.ResultListener() {
             @Override
             public void onNoSecondPassword() {
-                doUpgrade(new CharSequenceX(""));
+                doUpgrade("");
             }
 
             @Override
             public void onSecondPasswordValidated(String validateSecondPassword) {
-                doUpgrade(new CharSequenceX(validateSecondPassword));
+                doUpgrade(validateSecondPassword);
             }
         });
     }
 
     @Thunk
-    void doUpgrade(final CharSequenceX secondPassword) {
+    void doUpgrade(final String secondPassword) {
 
         onUpgradeStart();
 
@@ -174,35 +175,36 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                     if (ConnectivityStatus.hasConnectivity(UpgradeWalletActivity.this)) {
                         appUtil.setNewlyCreated(true);
 
-                        payloadManager.upgradeV2PayloadToV3(
-                                secondPassword,
-                                appUtil.isNewlyCreated(),
-                                getResources().getString(R.string.default_wallet_name),
-                                new PayloadManager.UpgradePayloadListener() {
-                                    @Override
-                                    public void onDoubleEncryptionPasswordError() {
-                                        showToast(R.string.double_encryption_password_error, ToastCustom.TYPE_ERROR);
-                                        upgradeClicked(null);
-                                    }
-
-                                    @Override
-                                    public void onUpgradeSuccess() {
-                                        if (new OSUtil(UpgradeWalletActivity.this).isServiceRunning(WebSocketService.class)) {
-                                            stopService(new Intent(UpgradeWalletActivity.this,
-                                                    WebSocketService.class));
-                                        }
-                                        startService(new Intent(UpgradeWalletActivity.this,
-                                                WebSocketService.class));
-
-                                        payloadManager.getPayload().getHdWallet().getAccounts().get(0).setLabel(getResources().getString(R.string.default_wallet_name));
-                                        onUpgradeCompleted();
-                                    }
-
-                                    @Override
-                                    public void onUpgradeFail() {
-                                        onUpgradeFailed();
-                                    }
-                                });
+                        // TODO: 21/02/2017
+//                        payloadManager.upgradeV2PayloadToV3(
+//                                secondPassword,
+//                                appUtil.isNewlyCreated(),
+//                                getResources().getString(R.string.default_wallet_name),
+//                                new PayloadManager.UpgradePayloadListener() {
+//                                    @Override
+//                                    public void onDoubleEncryptionPasswordError() {
+//                                        showToast(R.string.double_encryption_password_error, ToastCustom.TYPE_ERROR);
+//                                        upgradeClicked(null);
+//                                    }
+//
+//                                    @Override
+//                                    public void onUpgradeSuccess() {
+//                                        if (new OSUtil(UpgradeWalletActivity.this).isServiceRunning(WebSocketService.class)) {
+//                                            stopService(new Intent(UpgradeWalletActivity.this,
+//                                                    WebSocketService.class));
+//                                        }
+//                                        startService(new Intent(UpgradeWalletActivity.this,
+//                                                WebSocketService.class));
+//
+//                                        payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(0).setLabel(getResources().getString(R.string.default_wallet_name));
+//                                        onUpgradeCompleted();
+//                                    }
+//
+//                                    @Override
+//                                    public void onUpgradeFail() {
+//                                        onUpgradeFailed();
+//                                    }
+//                                });
                     }
 
                 } catch (Exception e) {

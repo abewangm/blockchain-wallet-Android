@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
 
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 import java.util.List;
 
 import piuk.blockchain.android.R;

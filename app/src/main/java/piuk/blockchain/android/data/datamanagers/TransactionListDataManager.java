@@ -5,9 +5,9 @@ import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.transaction.Transaction;
 import info.blockchain.wallet.transaction.Tx;
 import info.blockchain.wallet.transaction.TxMostRecentDateComparator;
@@ -19,6 +19,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
+import org.apache.commons.lang3.NotImplementedException;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.TransactionDetailsService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
@@ -113,41 +114,45 @@ public class TransactionListDataManager {
      * @return A BTC value as a double.
      */
     public double getBtcBalance(Object object) {
-        // Update Balance
-        double balance = 0.0D;
-        if (object instanceof Account) {
-            // V3
-            Account account = ((Account) object);
-            // V3 - All
-            if (account.getRealIdx() == INDEX_ALL_REAL) {
-                if (payloadManager.getPayload().isUpgraded()) {
-                    // Balance = all xpubs + all legacy address balances
-                    balance = ((double) MultiAddrFactory.getInstance().getXpubBalance())
-                            + ((double) MultiAddrFactory.getInstance().getLegacyActiveBalance());
-                } else {
-                    // Balance = all legacy address balances
-                    balance = ((double) MultiAddrFactory.getInstance().getLegacyActiveBalance());
-                }
-            } else if (account.getRealIdx() == INDEX_IMPORTED_ADDRESSES) {
-                balance = ((double) MultiAddrFactory.getInstance().getLegacyActiveBalance());
-            } else {
-                // V3 - Individual
-                if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(account.getXpub())) {
-                    HashMap<String, Long> xpubAmounts = MultiAddrFactory.getInstance().getXpubAmounts();
-                    Long bal = (xpubAmounts.get(account.getXpub()) == null ? 0L : xpubAmounts.get(account.getXpub()));
-                    balance = ((double) (bal));
-                }
-            }
-        } else if (object instanceof LegacyAddress) {
-            // V2
-            LegacyAddress legacyAddress = ((LegacyAddress) object);
-            balance = MultiAddrFactory.getInstance().getLegacyBalance(legacyAddress.getAddress());
-        } else {
-            Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
-            return balance;
-        }
 
-        return balance;
+        // TODO: 21/02/2017
+        throw new NotImplementedException("");
+
+        // Update Balance
+//        double balance = 0.0D;
+//        if (object instanceof Account) {
+//            // V3
+//            Account account = ((Account) object);
+//            // V3 - All
+//            if (account.getRealIdx() == INDEX_ALL_REAL) {
+//                if (payloadManager.getPayload().isUpgraded()) {
+//                    // Balance = all xpubs + all legacy address balances
+//                    balance = ((double) MultiAddrFactory.getInstance().getXpubBalance())
+//                            + ((double) MultiAddrFactory.getInstance().getLegacyActiveBalance());
+//                } else {
+//                    // Balance = all legacy address balances
+//                    balance = ((double) MultiAddrFactory.getInstance().getLegacyActiveBalance());
+//                }
+//            } else if (account.getRealIdx() == INDEX_IMPORTED_ADDRESSES) {
+//                balance = ((double) MultiAddrFactory.getInstance().getLegacyActiveBalance());
+//            } else {
+//                // V3 - Individual
+//                if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(account.getXpub())) {
+//                    HashMap<String, Long> xpubAmounts = MultiAddrFactory.getInstance().getXpubAmounts();
+//                    Long bal = (xpubAmounts.get(account.getXpub()) == null ? 0L : xpubAmounts.get(account.getXpub()));
+//                    balance = ((double) (bal));
+//                }
+//            }
+//        } else if (object instanceof LegacyAddress) {
+//            // V2
+//            LegacyAddress legacyAddress = ((LegacyAddress) object);
+//            balance = MultiAddrFactory.getInstance().getLegacyBalance(legacyAddress.getAddress());
+//        } else {
+//            Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
+//            return balance;
+//        }
+//
+//        return balance;
     }
 
     /**
@@ -192,33 +197,37 @@ public class TransactionListDataManager {
      * @return If save was successful
      */
     public Observable<Boolean> updateTransactionNotes(String transactionHash, String notes) {
-        payloadManager.getPayload().getTransactionNotesMap().put(transactionHash, notes);
-        return Observable.fromCallable(() -> payloadManager.savePayloadToServer())
+        payloadManager.getPayload().getTxNotes().put(transactionHash, notes);
+        return Observable.fromCallable(() -> payloadManager.save())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     private List<Tx> getV3Transactions(Account account) {
-        List<Tx> transactions = new ArrayList<>();
 
-        if (account.getRealIdx() == INDEX_ALL_REAL) {
-            if (payloadManager.getPayload().isUpgraded()) {
-                transactions.addAll(getAllXpubAndLegacyTxs());
-            } else {
-                transactions.addAll(MultiAddrFactory.getInstance().getLegacyTxs());
-            }
+        // TODO: 21/02/2017
+        throw new NotImplementedException("");
 
-        } else if (account.getRealIdx() == INDEX_IMPORTED_ADDRESSES) {
-            // V3 - Imported Addresses
-            transactions.addAll(MultiAddrFactory.getInstance().getLegacyTxs());
-        } else {
-            // V3 - Individual
-            String xpub = account.getXpub();
-            if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(xpub)) {
-                ListUtil.addAllIfNotNull(transactions, MultiAddrFactory.getInstance().getXpubTxs().get(xpub));
-            }
-        }
-
-        return transactions;
+//        List<Tx> transactions = new ArrayList<>();
+//
+//        if (account.getRealIdx() == INDEX_ALL_REAL) {
+//            if (payloadManager.getPayload().isUpgraded()) {
+//                transactions.addAll(getAllXpubAndLegacyTxs());
+//            } else {
+//                transactions.addAll(MultiAddrFactory.getInstance().getLegacyTxs());
+//            }
+//
+//        } else if (account.getRealIdx() == INDEX_IMPORTED_ADDRESSES) {
+//            // V3 - Imported Addresses
+//            transactions.addAll(MultiAddrFactory.getInstance().getLegacyTxs());
+//        } else {
+//            // V3 - Individual
+//            String xpub = account.getXpub();
+//            if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(xpub)) {
+//                ListUtil.addAllIfNotNull(transactions, MultiAddrFactory.getInstance().getXpubTxs().get(xpub));
+//            }
+//        }
+//
+//        return transactions;
     }
 
     @SuppressWarnings("Convert2streamapi")

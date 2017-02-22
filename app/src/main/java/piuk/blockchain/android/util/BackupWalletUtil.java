@@ -24,14 +24,14 @@ public class BackupWalletUtil {
     public List<Pair<Integer, String>> getConfirmSequence(String secondPassword) {
 
         List<Pair<Integer, String>> toBeConfirmed = new ArrayList<>();
-        String[] s = getMnemonic(secondPassword);
+        List<String> s = getMnemonic(secondPassword);
         SecureRandom random = new SecureRandom();
         List<Integer> seen = new ArrayList<>();
 
         int sel = 0;
         int i = 0;
         while (i < 3) {
-            sel = random.nextInt(s.length);
+            sel = random.nextInt(s.size());
             if (!seen.contains(sel)) {
                 seen.add(sel);
                 i++;
@@ -41,7 +41,7 @@ public class BackupWalletUtil {
         Collections.sort(seen);
 
         for (int ii = 0; ii < 3; ii++) {
-            toBeConfirmed.add(new Pair<>(seen.get(ii), s[seen.get(ii)]));
+            toBeConfirmed.add(new Pair<>(seen.get(ii), s.get(seen.get(ii))));
         }
 
         return toBeConfirmed;
@@ -52,14 +52,10 @@ public class BackupWalletUtil {
      *
      * @return String[]
      */
-    public String[] getMnemonic(String secondPassword) {
+    public List<String> getMnemonic(String secondPassword) {
 
         try {
-            if(PayloadManager.getInstance().getPayload().isDoubleEncrypted()) {
-                return PayloadManager.getInstance().getMnemonic(secondPassword);
-            } else {
-                return PayloadManager.getInstance().getMnemonic();
-            }
+            return PayloadManager.getInstance().getPayload().getMnemonic(secondPassword);
         } catch (Exception e) {
             Log.e(BackupWalletUtil.class.getSimpleName(), "getMnemonic: ", e);
             return null;

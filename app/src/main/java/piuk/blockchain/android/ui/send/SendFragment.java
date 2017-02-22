@@ -42,9 +42,9 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
 
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -274,17 +274,18 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 Class type = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE));
                 Object object = new Gson().fromJson(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
 
-                if (object instanceof Contact) {
-                    viewModel.setContact(((Contact) object));
-                } else if (object instanceof Account) {
-                    Account account = ((Account) object);
-                    viewModel.setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account));
-                    binding.destination.setText(account.getLabel());
-                } else if (object instanceof LegacyAddress) {
-                    LegacyAddress legacyAddress = ((LegacyAddress) object);
-                    viewModel.setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress));
-                    binding.destination.setText(legacyAddress.getLabel());
-                }
+                // TODO: 21/02/2017  
+//                if (object instanceof Contact) {
+//                    viewModel.setContact(((Contact) object));
+//                } else if (object instanceof Account) {
+//                    Account account = ((Account) object);
+//                    viewModel.setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account));
+//                    binding.destination.setText(account.getLabel());
+//                } else if (object instanceof LegacyAddress) {
+//                    LegacyAddress legacyAddress = ((LegacyAddress) object);
+//                    viewModel.setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress));
+//                    binding.destination.setText(legacyAddress.getLabel());
+//                }
 
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
@@ -473,17 +474,18 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     private void setupDestinationView() {
-        binding.destination.setHorizontallyScrolling(false);
-        binding.destination.setLines(3);
-        binding.destination.setOnClickListener(view -> {
-            binding.destination.setText("");
-            viewModel.setReceivingAddress(null);
-        });
-        binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus && customKeypad != null) {
-                customKeypad.setNumpadVisibility(View.GONE);
-            }
-        });
+        // TODO: 21/02/2017  
+//        binding.destination.setHorizontallyScrolling(false);
+//        binding.destination.setLines(3);
+//        binding.destination.setOnClickListener(view -> {
+//            binding.destination.setText("");
+//            viewModel.setReceivingAddress(null);
+//        });
+//        binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
+//            if (hasFocus && customKeypad != null) {
+//                customKeypad.setNumpadVisibility(View.GONE);
+//            }
+//        });
     }
 
     private void setupSendFromView() {
@@ -935,13 +937,14 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         });
 
         dialogBinding.confirmSend.setOnClickListener(v -> {
-            if (ConnectivityStatus.hasConnectivity(getActivity())) {
-                dialogBinding.confirmSend.setClickable(false);
-                viewModel.submitPayment(alertDialog);
-            } else {
-                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
-                // Queue tx here
-            }
+            // TODO: 21/02/2017  
+//            if (ConnectivityStatus.hasConnectivity(getActivity())) {
+//                dialogBinding.confirmSend.setClickable(false);
+//                viewModel.submitPayment(alertDialog);
+//            } else {
+//                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+//                // Queue tx here
+//            }
         });
 
         if (getActivity() != null && !getActivity().isFinishing()) {

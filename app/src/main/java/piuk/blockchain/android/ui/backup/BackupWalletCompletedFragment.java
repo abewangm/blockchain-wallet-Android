@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import info.blockchain.api.Unspent;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
@@ -77,21 +76,22 @@ public class BackupWalletCompletedFragment extends Fragment {
                     .commit();
         });
 
-        if (getArguments() != null && getArguments().getBoolean(KEY_CHECK_TRANSFER)) {
-            TransferFundsDataManager fundsHelper =
-                    new TransferFundsDataManager(
-                            PayloadManager.getInstance(),
-                            MultiAddrFactory.getInstance(),
-                            new Unspent(),
-                            new Payment());
-            compositeDisposable.add(
-                    fundsHelper.getTransferableFundTransactionListForDefaultAccount()
-                            .subscribe(triple -> {
-                                if (!triple.getLeft().isEmpty()) {
-                                    showTransferFundsPrompt();
-                                }
-                            }, Throwable::printStackTrace));
-        }
+        // TODO: 21/02/2017  
+//        if (getArguments() != null && getArguments().getBoolean(KEY_CHECK_TRANSFER)) {
+//            TransferFundsDataManager fundsHelper =
+//                    new TransferFundsDataManager(
+//                            PayloadManager.getInstance(),
+//                            MultiAddrFactory.getInstance(),
+//                            new Unspent(),
+//                            new Payment());
+//            compositeDisposable.add(
+//                    fundsHelper.getTransferableFundTransactionListForDefaultAccount()
+//                            .subscribe(triple -> {
+//                                if (!triple.getLeft().isEmpty()) {
+//                                    showTransferFundsPrompt();
+//                                }
+//                            }, Throwable::printStackTrace));
+//        }
 
         return dataBinding.getRoot();
     }

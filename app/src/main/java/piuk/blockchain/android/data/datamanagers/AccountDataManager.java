@@ -4,14 +4,13 @@ import android.support.annotation.Nullable;
 
 import android.support.v4.media.MediaBrowserCompat;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
-import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
 import info.blockchain.wallet.util.PrivateKeyFactory;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 
@@ -43,49 +42,39 @@ public class AccountDataManager {
      * @param secondPassword An optional double encryption password
      * @return An {@link Observable<Account>} wrapping the newly created Account
      */
-    public Observable<Account> createNewAccount(String accountLabel, @Nullable CharSequenceX secondPassword) {
+    public Observable<Account> createNewAccount(String accountLabel, @Nullable String secondPassword) {
         return Observable.fromCallable(() -> payloadManager.addAccount(accountLabel,
-                secondPassword != null ? secondPassword.toString() : null))
+                secondPassword != null ? secondPassword : null))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    /**
-     * Sets a private key for an associated {@link LegacyAddress} which is already in the {@link
-     * Payload} as a watch only address
-     *
-     * @param key            An {@link ECKey}
-     * @param secondPassword An optional double encryption password
-     * @return An {@link Observable<Boolean>} representing a successful save
-     */
-    public Observable<Boolean> setPrivateKey(ECKey key, @Nullable CharSequenceX secondPassword) {
-        return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword))
-                .compose(RxUtil.applySchedulersToObservable());
-    }
+    // TODO: 22/02/2017  
+//    /**
+//     * Sets a private key for an associated {@link LegacyAddress} which is already in the {@link
+//     * info.blockchain.wallet.payload.data.Wallet} as a watch only address
+//     *
+//     * @param key            An {@link ECKey}
+//     * @param secondPassword An optional double encryption password
+//     * @return An {@link Observable<Boolean>} representing a successful save
+//     */
+//    public Observable<LegacyAddress> setPrivateKey(ECKey key, @Nullable String secondPassword) {
+//        return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword))
+//                .compose(RxUtil.applySchedulersToObservable());
+//    }
 
     /**
      * Sets a private key for a {@link LegacyAddress}
      *
-     * @param legacyAddress  The {@link LegacyAddress} to which you wish to add the key
      * @param key            The {@link ECKey} for the address
      * @param secondPassword An optional double encryption password
      */
-    public void setKeyForLegacyAddress(LegacyAddress legacyAddress, ECKey key, @Nullable CharSequenceX secondPassword) throws Exception {
-        // If double encrypted, save encrypted in payload
-        if (!payloadManager.getPayload().isDoubleEncrypted()) {
-            legacyAddress.setEncryptedKeyBytes(key.getPrivKeyBytes());
-        } else {
-            String encryptedKey = Base58.encode(key.getPrivKeyBytes());
-            String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
-                    payloadManager.getPayload().getSharedKey(),
-                    secondPassword != null ? secondPassword.toString() : null,
-                    payloadManager.getPayload().getOptions().getIterations());
-
-            legacyAddress.setEncryptedKey(encrypted2);
-        }
+    public Observable<LegacyAddress> setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword) throws Exception {
+        return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword))
+            .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link Payload} and
+     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link info.blockchain.wallet.payload.data.Wallet} and
      * the {@link MultiAddrFactory}
      *
      * @param legacyAddress The updated address
@@ -97,25 +86,29 @@ public class AccountDataManager {
     }
 
     private Observable<Boolean> createUpdateLegacyAddressObservable(LegacyAddress address) {
-        return Observable.fromCallable(() -> payloadManager.addLegacyAddress(address))
-                .flatMap(RxUtil.ternary(
-                        Boolean::booleanValue,
-                        aBoolean -> addAddressAndUpdate(address).flatMap(total -> Observable.just(true)),
-                        aBoolean -> Observable.just(false)));
+        // TODO: 21/02/2017
+        throw new NotImplementedException("");
+//        return Observable.fromCallable(() -> payloadManager.addLegacyAddress(address))
+//                .flatMap(RxUtil.ternary(
+//                        Boolean::booleanValue,
+//                        aBoolean -> addAddressAndUpdate(address).flatMap(total -> Observable.just(true)),
+//                        aBoolean -> Observable.just(false)));
     }
 
     private Observable<Long> addAddressAndUpdate(LegacyAddress address) {
-        try {
-            List<String> legacyAddressList = payloadManager.getPayload().getLegacyAddressStringList();
-            multiAddrFactory.refreshLegacyAddressData(legacyAddressList.toArray(new String[legacyAddressList.size()]), false);
-        } catch (Exception e) {
-            throw Exceptions.propagate(e);
-        }
-        return addressInfoService.getAddressBalance(address, PARAMETER_FINAL_BALANCE)
-                .doOnNext(balance -> {
-                    multiAddrFactory.setLegacyBalance(address.getAddress(), balance);
-                    multiAddrFactory.setLegacyBalance(MultiAddrFactory.getInstance().getLegacyBalance() + balance);
-                });
+        // TODO: 21/02/2017
+        throw new NotImplementedException("");
+//        try {
+//            List<String> legacyAddressList = payloadManager.getPayload().getLegacyAddressStringList();
+//            multiAddrFactory.refreshLegacyAddressData(legacyAddressList.toArray(new String[legacyAddressList.size()]), false);
+//        } catch (Exception e) {
+//            throw Exceptions.propagate(e);
+//        }
+//        return addressInfoService.getAddressBalance(address, PARAMETER_FINAL_BALANCE)
+//                .doOnNext(balance -> {
+//                    multiAddrFactory.setLegacyBalance(address.getAddress(), balance);
+//                    multiAddrFactory.setLegacyBalance(MultiAddrFactory.getInstance().getLegacyBalance() + balance);
+//                });
     }
 
     public Observable<ECKey> getKeyFromImportedData(String format, String data) {

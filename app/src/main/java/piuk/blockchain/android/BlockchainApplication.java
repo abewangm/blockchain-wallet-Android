@@ -11,10 +11,8 @@ import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 
-import info.blockchain.BlockchainFramework;
-import info.blockchain.FrameworkInterface;
-import info.blockchain.api.PinStore;
-
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.FrameworkInterface;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import javax.inject.Inject;
@@ -83,7 +81,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
         AccessState.getInstance().initAccessState(this,
                 new PrefsUtil(this),
-                new PinStoreService(new PinStore()),
+                new PinStoreService(),
                 appUtil);
 
         // Apply PRNG fixes on app start if needed
@@ -118,6 +116,21 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Override
     public Retrofit getRetrofitServerInstance() {
         return retrofitServer.get();
+    }
+
+    @Override
+    public String getApiCode() {
+        return "25a6ad13-1633-4dfb-b6ee-9b91cdf0b5c3";
+    }
+
+    @Override
+    public String getDevice() {
+        return "android";
+    }
+
+    @Override
+    public String getAppVersion() {
+        return BuildConfig.VERSION_NAME;
     }
 
     /**

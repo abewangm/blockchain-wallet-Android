@@ -31,14 +31,15 @@ public class WebSocketService extends Service {
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
-            if (intent.getAction().equals(ACTION_INTENT)) {
-                if (intent.hasExtra("address")) {
-                    webSocketHandler.subscribeToAddress(intent.getStringExtra("address"));
-                }
-                if (intent.hasExtra("xpub")) {
-                    webSocketHandler.subscribeToXpub(intent.getStringExtra("xpub"));
-                }
-            }
+            // TODO: 21/02/2017  
+//            if (intent.getAction().equals(ACTION_INTENT)) {
+//                if (intent.hasExtra("address")) {
+//                    webSocketHandler.subscribeToAddress(intent.getStringExtra("address"));
+//                }
+//                if (intent.hasExtra("xpub")) {
+//                    webSocketHandler.subscribeToXpub(intent.getStringExtra("xpub"));
+//                }
+//            }
         }
     };
 
@@ -58,26 +59,27 @@ public class WebSocketService extends Service {
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(receiver, filter);
 
-        String[] addrs = getAddresses();
-        String[] xpubs = getXpubs();
-
-        webSocketHandler = new WebSocketHandler(
-                getApplicationContext(),
-                payloadManager,
-                notificationManager,
-                new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
-                payloadManager.getPayload().getGuid(),
-                xpubs,
-                addrs);
-
-        webSocketHandler.start();
+        // TODO: 21/02/2017  
+//        String[] addrs = getAddresses();
+//        String[] xpubs = getXpubs();
+//
+//        webSocketHandler = new WebSocketHandler(
+//                getApplicationContext(),
+//                payloadManager,
+//                notificationManager,
+//                new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
+//                payloadManager.getPayload().getGuid(),
+//                xpubs,
+//                addrs);
+//
+//        webSocketHandler.start();
     }
 
     private String[] getXpubs() {
         int nbAccounts = 0;
         if (payloadManager.getPayload().isUpgraded()) {
             try {
-                nbAccounts = payloadManager.getPayload().getHdWallet().getAccounts().size();
+                nbAccounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts().size();
             } catch (java.lang.IndexOutOfBoundsException e) {
                 nbAccounts = 0;
             }
@@ -85,7 +87,7 @@ public class WebSocketService extends Service {
 
         final String[] xpubs = new String[nbAccounts];
         for (int i = 0; i < nbAccounts; i++) {
-            String s = payloadManager.getPayload().getHdWallet().getAccounts().get(i).getXpub();
+            String s = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(i).getXpub();
             if (s != null && s.length() > 0) {
                 xpubs[i] = s;
             }

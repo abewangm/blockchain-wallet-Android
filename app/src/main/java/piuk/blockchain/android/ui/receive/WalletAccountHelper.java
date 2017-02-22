@@ -3,11 +3,11 @@ package piuk.blockchain.android.ui.receive;
 import android.support.annotation.NonNull;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.AddressBookEntry;
-import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.AddressBook;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,7 +75,7 @@ public class WalletAccountHelper {
         List<ItemAccount> accountArrayList = new ArrayList<>();
         if (payloadManager.getPayload().isUpgraded()) {
 
-            List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+            List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
             for (Account account : accounts) {
 
                 if (account.isArchived())
@@ -149,8 +149,8 @@ public class WalletAccountHelper {
     public List<ItemAccount> getAddressBookEntries() {
         List<ItemAccount> itemAccountList = new ArrayList<>();
 
-        List<AddressBookEntry> addressBookEntries = payloadManager.getPayload().getAddressBookEntryList();
-        for (AddressBookEntry addressBookEntry : addressBookEntries) {
+        List<AddressBook> addressBookEntries = payloadManager.getPayload().getAddressBook();
+        for (AddressBook addressBookEntry : addressBookEntries) {
 
             // If address has no label, we'll display address
             String labelOrAddress = addressBookEntry.getLabel() == null || addressBookEntry.getLabel().length() == 0 ? addressBookEntry.getAddress() : addressBookEntry.getLabel();

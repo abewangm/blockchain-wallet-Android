@@ -1,9 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import info.blockchain.api.DynamicFee;
-import info.blockchain.api.Unspent;
-import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
-import info.blockchain.wallet.payment.data.SuggestedFee;
+import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
@@ -20,13 +17,9 @@ import piuk.blockchain.android.data.services.PaymentService;
 public class SendDataManager {
 
     private PaymentService paymentService;
-    private DynamicFee dynamicFee;
-    private Unspent unspent;
 
-    public SendDataManager(PaymentService paymentService, DynamicFee dynamicFee, Unspent unspent) {
+    public SendDataManager(PaymentService paymentService) {
         this.paymentService = paymentService;
-        this.dynamicFee = dynamicFee;
-        this.unspent = unspent;
     }
 
     /**
@@ -41,20 +34,20 @@ public class SendDataManager {
      * @return An {@link Observable<String>} where the String is the transaction hash
      */
     public Observable<String> submitPayment(SpendableUnspentOutputs unspentOutputBundle,
-                                            List<ECKey> keys,
-                                            String toAddress,
-                                            String changeAddress,
-                                            BigInteger bigIntFee,
-                                            BigInteger bigIntAmount) {
+        List<ECKey> keys,
+        String toAddress,
+        String changeAddress,
+        BigInteger bigIntFee,
+        BigInteger bigIntAmount) {
 
         return paymentService.submitPayment(
-                unspentOutputBundle,
-                keys,
-                toAddress,
-                changeAddress,
-                bigIntFee,
-                bigIntAmount)
-                .compose(RxUtil.applySchedulersToObservable());
+            unspentOutputBundle,
+            keys,
+            toAddress,
+            changeAddress,
+            bigIntFee,
+            bigIntAmount)
+            .compose(RxUtil.applySchedulersToObservable());
     }
 
     public Observable<ECKey> getEcKeyFromBip38(String password, String scanData, NetworkParameters networkParameters) {
@@ -64,14 +57,16 @@ public class SendDataManager {
         }).compose(RxUtil.applySchedulersToObservable());
     }
 
-    public Observable<SuggestedFee> getSuggestedFee() {
-        return Observable.fromCallable(() -> dynamicFee.getDynamicFee())
-                .compose(RxUtil.applySchedulersToObservable());
-    }
-
-    public Observable<JSONObject> getUnspentOutputs(String address) {
-        return Observable.fromCallable(() -> unspent.getUnspentOutputs(address))
-                .compose(RxUtil.applySchedulersToObservable());
-    }
+    // TODO: 22/02/2017  
+//    public Observable<SuggestedFee> getSuggestedFee() {
+//        return Observable.fromCallable(() -> dynamicFee.getDynamicFee())
+//                .compose(RxUtil.applySchedulersToObservable());
+//    }
+//
+    // TODO: 22/02/2017  
+//    public Observable<JSONObject> getUnspentOutputs(String address) {
+//        return Observable.fromCallable(() -> unspent.getUnspentOutputs(address))
+//                .compose(RxUtil.applySchedulersToObservable());
+//    }
 
 }

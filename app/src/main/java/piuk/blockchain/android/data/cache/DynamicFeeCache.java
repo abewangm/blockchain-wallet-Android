@@ -1,12 +1,12 @@
 package piuk.blockchain.android.data.cache;
 
-import info.blockchain.wallet.payment.data.SuggestedFee;
+import info.blockchain.wallet.api.data.FeesList;
 
 public class DynamicFeeCache {
 
     private static DynamicFeeCache instance;
 
-    private SuggestedFee suggestedFee;
+    private FeesList suggestedFee;
 
     private DynamicFeeCache() {
         // No-op
@@ -19,11 +19,11 @@ public class DynamicFeeCache {
         return instance;
     }
 
-    public SuggestedFee getSuggestedFee() {
+    public FeesList getSuggestedFee() {
         return suggestedFee;
     }
 
-    public void setSuggestedFee(SuggestedFee suggestedFee) {
+    public void setSuggestedFee(FeesList suggestedFee) {
         this.suggestedFee = suggestedFee;
     }
 

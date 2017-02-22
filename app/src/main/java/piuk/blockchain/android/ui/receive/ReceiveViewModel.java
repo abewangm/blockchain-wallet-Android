@@ -19,10 +19,11 @@ import android.util.Pair;
 import android.util.SparseIntArray;
 import android.webkit.MimeTypeMap;
 
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
 
@@ -160,7 +161,7 @@ public class ReceiveViewModel extends BaseViewModel {
     int getCorrectedAccountIndex(int accountIndex) {
         // Filter accounts by active
         List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
             if (!account.isArchived()) {
@@ -169,7 +170,7 @@ public class ReceiveViewModel extends BaseViewModel {
         }
 
         // Find corrected position
-        return payloadManager.getPayload().getHdWallet().getAccounts().indexOf(activeAccounts.get(accountIndex));
+        return payloadManager.getPayload().getHdWallets().get(0).getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
     void updateAccountList() {
@@ -177,7 +178,7 @@ public class ReceiveViewModel extends BaseViewModel {
         spinnerIndexMap.clear();
         int spinnerIndex = 0;
         // V3
-        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
         int accountIndex = 0;
         for (Account item : accounts) {
             spinnerIndexMap.put(spinnerIndex, accountIndex);
@@ -247,14 +248,16 @@ public class ReceiveViewModel extends BaseViewModel {
 
     @Nullable
     String getV3ReceiveAddress(Account account) {
-        try {
-            int spinnerIndex = accountMap.inverse().get(account);
-            int accountIndex = spinnerIndexMap.get(spinnerIndex);
-            return payloadManager.getNextReceiveAddress(accountIndex);
-        } catch (Exception e) {
-            Log.e(TAG, "getV3ReceiveAddress: ", e);
-            return null;
-        }
+        // TODO: 21/02/2017
+        throw new NotImplementedException("getNextReceiveAddress");
+//        try {
+//            int spinnerIndex = accountMap.inverse().get(account);
+//            int accountIndex = spinnerIndexMap.get(spinnerIndex);
+//            return payloadManager.getNextReceiveAddress(accountIndex);
+//        } catch (Exception e) {
+//            Log.e(TAG, "getV3ReceiveAddress: ", e);
+//            return null;
+//        }
     }
 
     @Nullable
@@ -398,8 +401,8 @@ public class ReceiveViewModel extends BaseViewModel {
     }
 
     private Account getDefaultAccount() {
-        return payloadManager.getPayload().getHdWallet().getAccounts().get(
-                payloadManager.getPayload().getHdWallet().getDefaultIndex());
+        return payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(
+                payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
     }
 
     /**

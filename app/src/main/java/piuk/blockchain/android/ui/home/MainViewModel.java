@@ -7,22 +7,26 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.util.Log;
 
-import info.blockchain.api.Balance;
-import info.blockchain.api.DynamicFee;
-import info.blockchain.api.ExchangeTicker;
-import info.blockchain.api.Settings;
-import info.blockchain.api.Unspent;
+import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.api.data.Balance;
+import info.blockchain.api.data.UnspentOutputs;
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.api.data.FeesList;
+import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payment.Payment;
+import info.blockchain.wallet.settings.SettingsManager;
 import info.blockchain.wallet.util.WebUtil;
 
-import org.json.JSONObject;
+import java.io.IOException;
 
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -46,10 +50,13 @@ import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.ExchangeRateFactory.TickerListener;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
 import piuk.blockchain.android.util.StringUtils;
+import retrofit2.Call;
+import retrofit2.Response;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
@@ -281,7 +288,7 @@ public class MainViewModel extends BaseViewModel {
                             if (loaded) {
                                 return contactsDataManager.getMetadataNodeFactory();
                             } else {
-                                if (!payloadManager.getPayload().isDoubleEncrypted()) {
+                                if (!payloadManager.getPayload().isDoubleEncryption()) {
                                     return contactsDataManager.generateNodes(null)
                                             .andThen(contactsDataManager.getMetadataNodeFactory());
                                 } else {
@@ -320,24 +327,29 @@ public class MainViewModel extends BaseViewModel {
             compositeDisposable.add(
                     getSettingsApi()
                             .compose(RxUtil.applySchedulersToObservable())
-                            .subscribe(settings -> {
-                                if (!settings.isEmailVerified()) {
-                                    appUtil.setNewlyCreated(false);
-                                    String email = settings.getEmail();
-                                    if (email != null && !email.isEmpty()) {
-                                        dataListener.showEmailVerificationDialog(email);
-                                    } else {
-                                        dataListener.showAddEmailDialog();
+                            .subscribe(call -> {
+
+                                if(call.isSuccessful()) {
+                                    Settings settings = call.body();
+                                    if (settings.isEmailVerified()) {
+                                        appUtil.setNewlyCreated(false);
+                                        String email = settings.getEmail();
+                                        if (email != null && !email.isEmpty()) {
+                                            dataListener.showEmailVerificationDialog(email);
+                                        } else {
+                                            dataListener.showAddEmailDialog();
+                                        }
                                     }
                                 }
+
                             }, Throwable::printStackTrace));
         }
     }
 
-    private Observable<Settings> getSettingsApi() {
-        return Observable.fromCallable(() -> new Settings(
+    private Observable<Response<Settings>> getSettingsApi() {
+        return Observable.fromCallable(() -> new SettingsManager(
                 payloadManager.getPayload().getGuid(),
-                payloadManager.getPayload().getSharedKey()));
+                payloadManager.getPayload().getSharedKey()).getInfo().execute());
     }
 
     private void checkRooted() {
@@ -373,11 +385,12 @@ public class MainViewModel extends BaseViewModel {
 
                 Looper.prepare();
 
-                try {
-                    payloadManager.updateBalancesAndTransactions();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                // TODO: 21/02/2017 MultiAddress
+//                try {
+//                    payloadManager.updateBalancesAndTransactions();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
 
                 storeSwipeReceiveAddresses();
 
@@ -403,25 +416,40 @@ public class MainViewModel extends BaseViewModel {
 
     private void cacheDynamicFee() {
         try {
-            DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDynamicFee());
-        } catch (Exception e) {
-            Log.e(TAG, "cacheDynamicFee: ", e);
+            Response<FeesList> response = Payment.getDynamicFee().execute();
+            if(response.isSuccessful()) {
+                FeesList body = response.body();
+                DynamicFeeCache.getInstance().setSuggestedFee(body);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     private void cacheDefaultAccountUnspentData() {
 
-        if (payloadManager.getPayload().getHdWallet() != null) {
+        if (payloadManager.getPayload().getHdWallets() != null) {
 
-            int defaultAccountIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
+            int defaultAccountIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
 
-            Account defaultAccount = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultAccountIndex);
+            Account defaultAccount = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultAccountIndex);
             String xpub = defaultAccount.getXpub();
 
             try {
-                JSONObject unspentResponse = new Unspent().getUnspentOutputs(xpub);
-                DefaultAccountUnspentCache.getInstance().setUnspentApiResponse(xpub, unspentResponse);
-            } catch (Exception e) {
+                // TODO: 22/02/2017 quick fix. can be improved
+                Response<UnspentOutputs> response = new BlockExplorer(
+                    BlockchainFramework.getRetrofitServerInstance(),
+                    BlockchainFramework.getApiCode())
+                .getUnspentOutputs(Arrays.asList(xpub)).execute();
+
+                if(response.isSuccessful()) {
+                    DefaultAccountUnspentCache.getInstance()
+                        .setUnspentApiResponse(xpub, response.body());
+                } else {
+                    Log.e(TAG, "Failed to set DefaultAccountUnspentCache. Might not have free outputs to spend.");
+                }
+
+            } catch (IOException e) {
                 Log.e(TAG, "cacheDefaultAccountUnspentData: ", e);
             }
         }
@@ -432,25 +460,19 @@ public class MainViewModel extends BaseViewModel {
         super.destroy();
         appUtil.deleteQR();
         DynamicFeeCache.getInstance().destroy();
+        ExchangeRateFactory.getInstance().stopTicker();
     }
 
     private void exchangeRateThread() {
-        List<String> currencies = Arrays.asList(ExchangeRateFactory.getInstance().getCurrencies());
-        String strCurrentSelectedFiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
-        if (!currencies.contains(strCurrentSelectedFiat)) {
-            prefs.setValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        }
 
         new Thread(() -> {
             Looper.prepare();
 
-            String response = null;
             try {
-                response = new ExchangeTicker().getExchangeRate();
+                //Start ticker that will refresh btc exchange rate every 5 min
+                ExchangeRateFactory.getInstance().startTicker(
+                    () -> dataListener.updateCurrentPrice(getFormattedPriceString()));
 
-                ExchangeRateFactory.getInstance().setData(response);
-                ExchangeRateFactory.getInstance().updateFxPricesForEnabledCurrencies();
-                dataListener.updateCurrentPrice(getFormattedPriceString());
             } catch (Exception e) {
                 Log.e(TAG, "exchangeRateThread: ", e);
             }
@@ -483,13 +505,28 @@ public class MainViewModel extends BaseViewModel {
 
     private void logEvents() {
         EventLogHandler handler = new EventLogHandler(prefs, WebUtil.getInstance());
-        handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncrypted());
-        handler.logBackupEvent(payloadManager.getPayload().getHdWallet().isMnemonicVerified());
+        handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncryption());
+        handler.logBackupEvent(payloadManager.getPayload().getHdWallets().get(0).isMnemonicVerified());
 
         try {
             List<String> activeLegacyAddressStrings = PayloadManager.getInstance().getPayload().getLegacyAddressStringList();
-            long balance = new Balance().getTotalBalance(activeLegacyAddressStrings);
-            handler.logLegacyEvent(balance > 0L);
+
+            // TODO: 21/02/2017 Quick fix. This should be tested thoroughly
+            Call<HashMap<String, Balance>> call = new BlockExplorer(
+                BlockchainFramework.getRetrofitServerInstance(),
+                BlockchainFramework.getApiCode())
+                .getBalance(activeLegacyAddressStrings, BlockExplorer.TX_FILTER_ALL);
+
+            Response<HashMap<String, Balance>> exe = call.execute();
+
+            if(exe.isSuccessful()) {
+
+                for(String address : activeLegacyAddressStrings) {
+                    Balance balance = exe.body().get(address);
+                    handler.logLegacyEvent(balance.getFinalBalance().longValue() > 0L);
+                    break;
+                }
+            }
         } catch (Exception e) {
             Log.e(TAG, "logEvents: ", e);
         }

@@ -7,9 +7,9 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
+import android.util.Log;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
 
 import org.spongycastle.util.encoders.Hex;
 
@@ -60,43 +60,46 @@ public class AccessState {
         return instance;
     }
 
-    public Observable<Boolean> createPin(CharSequenceX password, String passedPin) {
+    public Observable<Boolean> createPin(String password, String passedPin) {
         return createPinObservable(password, passedPin)
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    public Observable<CharSequenceX> validatePin(String passedPin) {
+    public Observable<String> validatePin(String passedPin) {
         mPin = passedPin;
 
         String key = prefs.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
         String encryptedPassword = prefs.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
 
         return pinStore.validateAccess(key, passedPin)
-                .flatMap(jsonObject -> {
-                    if (jsonObject.has("success")) {
-                        try {
-                            String decryptionKey = (String) jsonObject.get("success");
-                            return Observable.just(new CharSequenceX(
-                                    AESUtil.decrypt(encryptedPassword,
-                                            new CharSequenceX(decryptionKey),
-                                            AESUtil.PIN_PBKDF2_ITERATIONS)));
-                        } catch (Exception e) {
-                            throw Exceptions.propagate(new Throwable("Validate access failed"));
-                        }
-                    } else {
+            .flatMap(response -> {
+                if (response.isSuccessful()) {
+                    try {
+                        String decryptionKey = response.body().getSuccess();
+
+                        String decryptedPassword = AESUtil.decrypt(encryptedPassword,
+                            decryptionKey,
+                            AESUtil.PIN_PBKDF2_ITERATIONS);
+
+                        return Observable.just(decryptedPassword);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                         throw Exceptions.propagate(new Throwable("Validate access failed"));
                     }
-                })
-                .compose(RxUtil.applySchedulersToObservable());
+                } else {
+                    throw Exceptions.propagate(new Throwable("Validate access failed"));
+                }
+            })
+            .compose(RxUtil.applySchedulersToObservable());
     }
 
     // TODO: 14/10/2016 This should be moved elsewhere in the
     public Observable<Boolean> syncPayloadToServer() {
-        return Observable.fromCallable(() -> PayloadManager.getInstance().savePayloadToServer())
+        return Observable.fromCallable(() -> PayloadManager.getInstance().save())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    private Observable<Boolean> createPinObservable(CharSequenceX password, String passedPin) {
+    private Observable<Boolean> createPinObservable(String password, String passedPin) {
         if (passedPin == null || passedPin.equals("0000") || passedPin.length() != 4) {
             return Observable.just(false);
         }
@@ -114,22 +117,32 @@ public class AccessState {
                 String value = new String(Hex.encode(bytes), "UTF-8");
 
                 pinStore.setAccessKey(key, value, passedPin)
-                        .subscribe(success -> {
-                            String encryptedPassword = null;
-                            try {
-                                encryptedPassword = new AESUtilWrapper().encrypt(
-                                        password.toString(), new CharSequenceX(value), AESUtil.PIN_PBKDF2_ITERATIONS);
+                        .subscribe(call -> {
 
-                                prefs.setValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, encryptedPassword);
-                                prefs.setValue(PrefsUtil.KEY_PIN_IDENTIFIER, key);
+                            if(call.isSuccessful()) {
 
-                                if (!subscriber.isDisposed()) {
-                                    subscriber.onNext(true);
-                                    subscriber.onComplete();
+                                String encryptedPassword = null;
+                                try {
+
+                                    String encryptionKey = Hex.toHexString(value.getBytes("UTF-8"));
+
+                                    encryptedPassword = new AESUtilWrapper().encrypt(
+                                        password, encryptionKey, AESUtil.PIN_PBKDF2_ITERATIONS);
+
+                                    prefs.setValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD,
+                                        encryptedPassword);
+                                    prefs.setValue(PrefsUtil.KEY_PIN_IDENTIFIER, key);
+
+                                    if (!subscriber.isDisposed()) {
+                                        subscriber.onNext(true);
+                                        subscriber.onComplete();
+                                    }
+
+                                } catch (Exception e) {
+                                    throw Exceptions.propagate(e);
                                 }
-
-                            } catch (Exception e) {
-                                throw Exceptions.propagate(e);
+                            } else {
+                                throw Exceptions.propagate(new Throwable("Validate access failed: "+call.errorBody().string()));
                             }
 
                         }, throwable -> {

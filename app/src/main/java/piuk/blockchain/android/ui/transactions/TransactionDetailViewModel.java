@@ -233,12 +233,12 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
 
     private void setTransactionNote(Tx transaction) {
-        String notes = mPayloadManager.getPayload().getTransactionNotesMap().get(transaction.getHash());
+        String notes = mPayloadManager.getPayload().getTxNotes().get(transaction.getHash());
         mDataListener.setDescription(notes);
     }
 
     public String getTransactionNote() {
-        return mPayloadManager.getPayload().getTransactionNotesMap().get(mTransaction.getHash());
+        return mPayloadManager.getPayload().getTxNotes().get(mTransaction.getHash());
     }
 
     public String getTransactionHash() {
@@ -288,24 +288,30 @@ public class TransactionDetailViewModel extends BaseViewModel {
     @VisibleForTesting
     Observable<String> getTransactionValueString(String currency, Tx transaction) {
         if (currency.equals("USD")) {
-            return mExchangeRateFactory.getHistoricPrice((long) Math.abs(transaction.getAmount()), mFiatType, transaction.getTS() * 1000)
-                    .map(aDouble -> {
-                        int stringId = -1;
-                        switch (transaction.getDirection()) {
-                            case MultiAddrFactory.MOVED:
-                                stringId = R.string.transaction_detail_value_at_time_transferred;
-                                break;
-                            case MultiAddrFactory.SENT:
-                                stringId = R.string.transaction_detail_value_at_time_sent;
-                                break;
-                            case MultiAddrFactory.RECEIVED:
-                                stringId = R.string.transaction_detail_value_at_time_received;
-                                break;
-                        }
-                        return mStringUtils.getString(stringId)
-                                + mExchangeRateFactory.getSymbol(mFiatType)
-                                + mMonetaryUtil.getFiatFormat(mFiatType).format(aDouble);
-                    });
+            try {
+                return mExchangeRateFactory.getHistoricPrice((long) Math.abs(transaction.getAmount()), mFiatType, transaction.getTS() * 1000)
+                        .map(aDouble -> {
+                            int stringId = -1;
+                            switch (transaction.getDirection()) {
+                                case MultiAddrFactory.MOVED:
+                                    stringId = R.string.transaction_detail_value_at_time_transferred;
+                                    break;
+                                case MultiAddrFactory.SENT:
+                                    stringId = R.string.transaction_detail_value_at_time_sent;
+                                    break;
+                                case MultiAddrFactory.RECEIVED:
+                                    stringId = R.string.transaction_detail_value_at_time_received;
+                                    break;
+                            }
+                            return mStringUtils.getString(stringId)
+                                    + mExchangeRateFactory.getSymbol(mFiatType)
+                                    + mMonetaryUtil.getFiatFormat(mFiatType).format(aDouble);
+                        });
+            } catch (Exception e) {
+                // TODO: 22/02/2017 catch exception?
+                e.printStackTrace();
+                return null;
+            }
         } else {
             return Observable.just(getTransactionValueFiat(transaction));
         }

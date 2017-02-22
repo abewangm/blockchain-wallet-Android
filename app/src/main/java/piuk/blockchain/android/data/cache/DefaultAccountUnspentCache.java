@@ -1,13 +1,15 @@
 package piuk.blockchain.android.data.cache;
 
+import info.blockchain.api.data.UnspentOutputs;
 import org.json.JSONObject;
+import retrofit2.Response;
 
 public class DefaultAccountUnspentCache {
 
     private static DefaultAccountUnspentCache instance;
 
     private String xpub;
-    private JSONObject unspentApiResponse;
+    private UnspentOutputs unspentApiResponse;
 
     private DefaultAccountUnspentCache() {
         // No-op
@@ -24,11 +26,11 @@ public class DefaultAccountUnspentCache {
         instance = null;
     }
 
-    public JSONObject getUnspentApiResponse() {
+    public UnspentOutputs getUnspentApiResponse() {
         return unspentApiResponse;
     }
 
-    public void setUnspentApiResponse(String xpub, JSONObject unspentApiResponse) {
+    public void setUnspentApiResponse(String xpub, UnspentOutputs unspentApiResponse) {
         this.xpub = xpub;
         this.unspentApiResponse = unspentApiResponse;
     }

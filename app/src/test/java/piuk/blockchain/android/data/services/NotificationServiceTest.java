@@ -1,7 +1,5 @@
 package piuk.blockchain.android.data.services;
 
-import info.blockchain.api.Notifications;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -13,14 +11,14 @@ import piuk.blockchain.android.RxTest;
 public class NotificationServiceTest extends RxTest {
 
     private NotificationService subject;
-    @Mock Notifications notifications;
+//    @Mock Notifications notifications;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        subject = new NotificationService(notifications);
+        subject = new NotificationService();
     }
 
     @Test

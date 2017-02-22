@@ -9,6 +9,7 @@ import android.text.InputType;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import io.reactivex.Observable;
+import org.apache.commons.lang3.NotImplementedException;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -34,40 +35,42 @@ public class SecondPasswordHandler {
 
     public void validate(final ResultListener listener) {
 
-        if (!payloadManager.getPayload().isDoubleEncrypted()) {
-            listener.onNoSecondPassword();
-        } else {
-
-            final AppCompatEditText passwordField = new AppCompatEditText(context);
-            passwordField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-            passwordField.setHint(R.string.password);
-
-            new AlertDialog.Builder(context, R.style.AlertDialogStyle)
-                    .setTitle(R.string.app_name)
-                    .setMessage(R.string.enter_double_encryption_pw)
-                    .setView(ViewUtils.getAlertDialogEditTextLayout(context, passwordField))
-                    .setCancelable(false)
-                    .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
-
-                        String secondPassword = passwordField.getText().toString();
-
-                        if (secondPassword.length() > 0) {
-                            showProgressDialog(R.string.validating_password);
-                            validateSecondPassword(secondPassword)
-                                    .compose(RxUtil.applySchedulersToObservable())
-                                    .doAfterTerminate(this::dismissProgressDialog)
-                                    .subscribe(success -> {
-                                        if (success) {
-                                            listener.onSecondPasswordValidated(secondPassword);
-                                        } else {
-                                            showErrorToast();
-                                        }
-                                    }, throwable -> showErrorToast());
-                        } else {
-                            showErrorToast();
-                        }
-                    }).setNegativeButton(android.R.string.cancel, null).show();
-        }
+        throw new NotImplementedException("jar handles second pw");
+        // TODO: 22/02/2017  
+//        if (!payloadManager.getPayload().isDoubleEncryption()) {
+//            listener.onNoSecondPassword();
+//        } else {
+//
+//            final AppCompatEditText passwordField = new AppCompatEditText(context);
+//            passwordField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+//            passwordField.setHint(R.string.password);
+//
+//            new AlertDialog.Builder(context, R.style.AlertDialogStyle)
+//                    .setTitle(R.string.app_name)
+//                    .setMessage(R.string.enter_double_encryption_pw)
+//                    .setView(ViewUtils.getAlertDialogEditTextLayout(context, passwordField))
+//                    .setCancelable(false)
+//                    .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
+//
+//                        String secondPassword = passwordField.getText().toString();
+//
+//                        if (secondPassword.length() > 0) {
+//                            showProgressDialog(R.string.validating_password);
+//                            validateSecondPassword(secondPassword)
+//                                    .compose(RxUtil.applySchedulersToObservable())
+//                                    .doAfterTerminate(this::dismissProgressDialog)
+//                                    .subscribe(success -> {
+//                                        if (success) {
+//                                            listener.onSecondPasswordValidated(secondPassword);
+//                                        } else {
+//                                            showErrorToast();
+//                                        }
+//                                    }, throwable -> showErrorToast());
+//                        } else {
+//                            showErrorToast();
+//                        }
+//                    }).setNegativeButton(android.R.string.cancel, null).show();
+//        }
     }
 
     private void showErrorToast() {
@@ -78,9 +81,10 @@ public class SecondPasswordHandler {
                 ToastCustom.TYPE_ERROR);
     }
 
-    private Observable<Boolean> validateSecondPassword(String password) {
-        return Observable.fromCallable(() -> payloadManager.validateSecondPassword(password));
-    }
+    // TODO: 22/02/2017  
+//    private Observable<Void> validateSecondPassword(String password) {
+//        return Observable.fromCallable(payloadManager.validateSecondPassword(password));
+//    }
 
     public void showProgressDialog(@StringRes int messageId) {
         dismissProgressDialog();

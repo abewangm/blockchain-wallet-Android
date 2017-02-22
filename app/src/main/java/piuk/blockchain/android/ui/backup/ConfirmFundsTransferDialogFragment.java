@@ -22,8 +22,6 @@ import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import info.blockchain.wallet.util.CharSequenceX;
-
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -154,7 +152,7 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
 
                     @Override
                     public void onSecondPasswordValidated(String validateSecondPassword) {
-                        mViewModel.sendPayment(new CharSequenceX(validateSecondPassword));
+                        mViewModel.sendPayment(validateSecondPassword);
                     }
                 }));
 

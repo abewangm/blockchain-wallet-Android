@@ -42,20 +42,21 @@ public class SwipeToReceiveHelper {
         if (getIfSwipeEnabled()) {
             int numOfAddresses = 5;
 
-            int defaultAccountIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
-            String receiveAccountName = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultAccountIndex).getLabel();
+            int defaultAccountIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
+            String receiveAccountName = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultAccountIndex).getLabel();
             storeAccountName(receiveAccountName);
 
             StringBuilder stringBuilder = new StringBuilder();
 
-            for (int i = 0; i < numOfAddresses; i++) {
-                try {
-                    String receiveAddress = payloadManager.getReceiveAddressAtPosition(defaultAccountIndex, i);
-                    stringBuilder.append(receiveAddress).append(",");
-                } catch (AddressFormatException e) {
-                    Log.e(TAG, "updateAndStoreAddresses: ", e);
-                }
-            }
+            // TODO: 21/02/2017
+//            for (int i = 0; i < numOfAddresses; i++) {
+//                try {
+//                    String receiveAddress = payloadManager.getReceiveAddressAtPosition(defaultAccountIndex, i);
+//                    stringBuilder.append(receiveAddress).append(",");
+//                } catch (AddressFormatException e) {
+//                    Log.e(TAG, "updateAndStoreAddresses: ", e);
+//                }
+//            }
 
             storeAddresses(stringBuilder.toString());
         }

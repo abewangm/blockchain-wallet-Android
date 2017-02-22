@@ -5,15 +5,19 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.EncryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
+import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.exceptions.PayloadException;
-import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
 
@@ -46,7 +50,7 @@ public class AccountViewModel extends BaseViewModel {
     @Inject PrefsUtil prefsUtil;
     @Inject AppUtil appUtil;
     @Inject PrivateKeyFactory privateKeyFactory;
-    @VisibleForTesting CharSequenceX doubleEncryptionPassword;
+    @VisibleForTesting String doubleEncryptionPassword;
 
     AccountViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
@@ -83,7 +87,7 @@ public class AccountViewModel extends BaseViewModel {
         // No-op
     }
 
-    void setDoubleEncryptionPassword(CharSequenceX secondPassword) {
+    void setDoubleEncryptionPassword(String secondPassword) {
         doubleEncryptionPassword = secondPassword;
     }
 
@@ -181,7 +185,7 @@ public class AccountViewModel extends BaseViewModel {
      * @param data     The address to be imported
      * @param password The BIP38 encryption passphrase
      */
-    void importBip38Address(String data, CharSequenceX password) {
+    void importBip38Address(String data, String password) {
         dataListener.showProgressDialog(R.string.please_wait);
         try {
             BIP38PrivateKey bip38 = new BIP38PrivateKey(PersistentUrls.getInstance().getCurrentNetworkParams(), data);
@@ -229,9 +233,8 @@ public class AccountViewModel extends BaseViewModel {
         LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setAddress(address);
         legacyAddress.setCreatedDeviceName("android");
-        legacyAddress.setCreated(System.currentTimeMillis());
+        legacyAddress.setCreatedTime(System.currentTimeMillis());
         legacyAddress.setCreatedDeviceVersion(BuildConfig.VERSION_NAME);
-        legacyAddress.setWatchOnly(true);
         dataListener.showRenameImportedAddressDialog(legacyAddress);
     }
 
@@ -239,7 +242,7 @@ public class AccountViewModel extends BaseViewModel {
         
         address = correctAddressFormatting(address);
 
-        if (!FormatsUtil.getInstance().isValidBitcoinAddress(address)) {
+        if (!FormatsUtil.isValidBitcoinAddress(address)) {
             dataListener.showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
         } else if (payloadManager.getPayload().getLegacyAddressStringList().contains(address)) {
             dataListener.showToast(R.string.address_already_in_wallet, ToastCustom.TYPE_ERROR);
@@ -255,14 +258,14 @@ public class AccountViewModel extends BaseViewModel {
             address = "bitcoin:" + address.substring(10);
         }
 
-        if (FormatsUtil.getInstance().isBitcoinUri(address)) {
-            address = FormatsUtil.getInstance().getBitcoinAddress(address);
+        if (FormatsUtil.isBitcoinUri(address)) {
+            address = FormatsUtil.getBitcoinAddress(address);
         }
 
         return address;
     }
 
-    private void importNonBip38Address(String format, String data, @Nullable CharSequenceX secondPassword) {
+    private void importNonBip38Address(String format, String data, @Nullable String secondPassword) {
         dataListener.showProgressDialog(R.string.please_wait);
 
         compositeDisposable.add(
@@ -276,28 +279,23 @@ public class AccountViewModel extends BaseViewModel {
     }
 
     @VisibleForTesting
-    void handlePrivateKey(ECKey key, @Nullable CharSequenceX secondPassword) {
-        if (key != null && key.hasPrivKey()
-                && payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
+    void handlePrivateKey(ECKey key, @Nullable String secondPassword)
+        throws NoSuchAlgorithmException, EncryptionException, DecryptionException, IOException, NoSuchAddressException, HDWalletException {
 
-            // A private key to an existing address has been scanned
-            setPrivateECKey(key, secondPassword);
-
-        } else if (key != null && key.hasPrivKey()
-                && !payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
-            LegacyAddress legacyAddress =
-                    new LegacyAddress(
-                            null,
-                            System.currentTimeMillis() / 1000L,
-                            key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString(),
-                            "",
-                            0L,
-                            "android",
-                            BuildConfig.VERSION_NAME);
-
+        if (key != null && key.hasPrivKey()) {
             try {
-                accountDataManager.setKeyForLegacyAddress(legacyAddress, key, secondPassword);
-                dataListener.showRenameImportedAddressDialog(legacyAddress);
+                // A private key to an existing address has been scanned
+                compositeDisposable.add(
+                    accountDataManager.setKeyForLegacyAddress(key, secondPassword)
+                        .subscribe(legacyAddress -> {
+                            if (legacyAddress != null) {
+                                dataListener.showToast(R.string.private_key_successfully_imported, ToastCustom.TYPE_OK);
+                                dataListener.onUpdateAccountsList();
+                                dataListener.showRenameImportedAddressDialog(legacyAddress);
+                            } else {
+                                throw Exceptions.propagate(new Throwable("Save unsuccessful"));
+                            }
+                        }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
             } catch (Exception e) {
                 e.printStackTrace();
                 dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
@@ -305,18 +303,5 @@ public class AccountViewModel extends BaseViewModel {
         } else {
             dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
         }
-    }
-
-    private void setPrivateECKey(ECKey key, @Nullable CharSequenceX secondPassword) {
-        compositeDisposable.add(
-                accountDataManager.setPrivateKey(key, secondPassword)
-                        .subscribe(success -> {
-                            if (success) {
-                                dataListener.showToast(R.string.private_key_successfully_imported, ToastCustom.TYPE_OK);
-                                dataListener.onUpdateAccountsList();
-                            } else {
-                                throw Exceptions.propagate(new Throwable("Save unsuccessful"));
-                            }
-                        }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 }

@@ -1,8 +1,10 @@
 package piuk.blockchain.android.data.services;
 
 import info.blockchain.wallet.payment.Payment;
-import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
+import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
+import java.util.HashMap;
+import okhttp3.ResponseBody;
 import org.bitcoinj.core.ECKey;
 
 import java.math.BigInteger;
@@ -10,14 +12,11 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
+import org.bitcoinj.core.Transaction;
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class PaymentService {
-
-    private Payment payment;
-
-    public PaymentService(Payment payment) {
-        this.payment = payment;
-    }
 
     /**
      * Submits a payment to a specified address and returns the transaction hash if successful
@@ -39,14 +38,30 @@ public class PaymentService {
 
         return Observable.create(observableOnSubscribe -> {
             try {
-                payment.submitPayment(
-                        unspentOutputBundle,
-                        keys,
-                        toAddress,
-                        changeAddress,
-                        bigIntFee,
-                        bigIntAmount,
-                        new SubmitPaymentListener(observableOnSubscribe));
+
+                HashMap<String, BigInteger> receivers = new HashMap<String, BigInteger>();
+                receivers.put(toAddress, bigIntAmount);
+
+                Transaction tx = Payment.makeTransaction(
+                    unspentOutputBundle.getSpendableOutputs(),
+                    receivers,
+                    bigIntFee,
+                    changeAddress);
+
+                Payment.signTransaction(tx, keys);
+
+                // TODO: 17/02/2017 Improve this. I just got rid of errors here for now.
+                Call<ResponseBody> call = Payment.publishTransaction(tx);
+
+                Response<ResponseBody> exe = call.execute();
+
+                SubmitPaymentListener listener = new SubmitPaymentListener(observableOnSubscribe);
+                if(exe.isSuccessful()) {
+                    listener.onSuccess(tx.getHashAsString());
+                } else {
+                    listener.onFail(exe.errorBody().string());
+                }
+
             } catch (Exception e) {
                 if (observableOnSubscribe != null && !observableOnSubscribe.isDisposed()) {
                     observableOnSubscribe.onError(e);
@@ -55,7 +70,7 @@ public class PaymentService {
         });
     }
 
-    private static class SubmitPaymentListener implements Payment.SubmitPaymentListener {
+    private static class SubmitPaymentListener {
 
         private final ObservableEmitter<? super String> subscriber;
 
@@ -63,7 +78,6 @@ public class PaymentService {
             this.subscriber = subscriber;
         }
 
-        @Override
         public void onSuccess(String s) {
             if (!subscriber.isDisposed()) {
                 subscriber.onNext(s);
@@ -71,7 +85,6 @@ public class PaymentService {
             }
         }
 
-        @Override
         public void onFail(String s) {
             if (!subscriber.isDisposed()) {
                 subscriber.onError(new Throwable(s));

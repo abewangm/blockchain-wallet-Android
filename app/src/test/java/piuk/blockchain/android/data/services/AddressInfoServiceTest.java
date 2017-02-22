@@ -1,6 +1,7 @@
 package piuk.blockchain.android.data.services;
 
 import info.blockchain.api.AddressInfo;
+import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.payload.LegacyAddress;
 
 import org.json.JSONObject;
@@ -21,7 +22,8 @@ import static piuk.blockchain.android.data.services.AddressInfoService.PARAMETER
 public class AddressInfoServiceTest extends RxTest {
 
     private AddressInfoService subject;
-    @Mock AddressInfo addressInfo;
+    @Mock
+    WalletApi addressInfo;
 
     @Before
     public void setUp() throws Exception {

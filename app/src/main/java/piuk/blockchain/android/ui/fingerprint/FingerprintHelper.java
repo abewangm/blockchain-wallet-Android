@@ -8,8 +8,6 @@ import android.util.Base64;
 
 import com.mtramin.rxfingerprint.RxFingerprint;
 
-import info.blockchain.wallet.util.CharSequenceX;
-
 import java.io.UnsupportedEncodingException;
 
 import io.reactivex.disposables.CompositeDisposable;
@@ -77,10 +75,10 @@ public class FingerprintHelper {
      * encrypt the data in any way, just obfuscates it.
      *
      * @param key  The key to write/retrieve the data to/from
-     * @param data The data to be stored, in the form of a {@link CharSequenceX}
+     * @param data The data to be stored
      * @return Returns true if data stored successfully
      */
-    public boolean storeEncryptedData(@NonNull String key, @NonNull CharSequenceX data) {
+    public boolean storeEncryptedData(@NonNull String key, @NonNull String data) {
         try {
             String base64 = Base64.encodeToString(data.toString().getBytes("UTF-8"), Base64.DEFAULT);
             prefsUtil.setValue(key, base64);
@@ -94,15 +92,15 @@ public class FingerprintHelper {
      * Retrieve previously saved encrypted data from shared preferences
      *
      * @param key The key of the item to be retrieved
-     * @return A {@link CharSequenceX} wrapping the saved String, or null if not found
+     * @return A {@link String} wrapping the saved String, or null if not found
      */
     @Nullable
-    public CharSequenceX getEncryptedData(@NonNull String key) {
+    public String getEncryptedData(@NonNull String key) {
         String encryptedData = prefsUtil.getValue(key, "");
         if (!encryptedData.isEmpty()) {
             try {
                 byte[] bytes = Base64.decode(encryptedData.getBytes("UTF-8"), Base64.DEFAULT);
-                return new CharSequenceX(new String(bytes, "UTF-8"));
+                return new String(bytes, "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 return null;
             }
@@ -165,7 +163,7 @@ public class FingerprintHelper {
                                     break;
                                 case AUTHENTICATED:
                                     String encrypted = encryptionResult.getEncrypted();
-                                    callback.onAuthenticated(new CharSequenceX(encrypted));
+                                    callback.onAuthenticated(encrypted);
                                     break;
                             }
                         }, throwable -> {
@@ -193,7 +191,7 @@ public class FingerprintHelper {
                                     break;
                                 case AUTHENTICATED:
                                     String decrypted = decryptionResult.getDecrypted();
-                                    callback.onAuthenticated(new CharSequenceX(decrypted));
+                                    callback.onAuthenticated(decrypted);
                                     break;
                             }
                         }, throwable -> {
@@ -222,7 +220,7 @@ public class FingerprintHelper {
 
         void onHelp(String message);
 
-        void onAuthenticated(@Nullable CharSequenceX data);
+        void onAuthenticated(@Nullable String data);
 
         void onKeyInvalidated();
 

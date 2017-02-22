@@ -161,28 +161,29 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(receiver, filter);
 
-        viewModel.updateAccountList();
-        viewModel.getFacilitatedTransactions();
-        viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
-
-        binding.rvTransactions.clearOnScrollListeners();
-        binding.rvTransactions.addOnScrollListener(new CollapseActionbarScrollListener() {
-            @Override
-            public void onMoved(int distance) {
-                setToolbarOffset(distance);
-            }
-        });
-
-        String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiat);
-
-        if (transactionAdapter != null) {
-            transactionAdapter.notifyAdapterDataSetChanged(lastPrice);
-        }
-
-        if (accountsAdapter != null) {
-            accountsAdapter.notifyFiatUnitsChanged(fiat, lastPrice);
-        }
+        // TODO: 22/02/2017
+//        viewModel.updateAccountList();
+//        viewModel.getFacilitatedTransactions();
+//        viewModel.updateBalanceAndTransactionList(null, accountSpinner.getSelectedItemPosition(), isBTC);
+//
+//        binding.rvTransactions.clearOnScrollListeners();
+//        binding.rvTransactions.addOnScrollListener(new CollapseActionbarScrollListener() {
+//            @Override
+//            public void onMoved(int distance) {
+//                setToolbarOffset(distance);
+//            }
+//        });
+//
+//        String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+//        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiat);
+//
+//        if (transactionAdapter != null) {
+//            transactionAdapter.notifyAdapterDataSetChanged(lastPrice);
+//        }
+//
+//        if (accountsAdapter != null) {
+//            accountsAdapter.notifyFiatUnitsChanged(fiat, lastPrice);
+//        }
     }
 
     @Override
@@ -391,7 +392,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         // drawerTitle account now that wallet has been created
         if (viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, "").length() > 0) {
-            viewModel.getPayloadManager().getPayload().getHdWallet().getAccounts().get(0).setLabel(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, ""));
+            viewModel.getPayloadManager().getPayload().getHdWallets().get(0).getAccounts().get(0).setLabel(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, ""));
             viewModel.getPrefsUtil().removeValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME);
             PayloadBridge.getInstance().remoteSaveThread(new PayloadBridge.PayloadSaveListener() {
                 @Override

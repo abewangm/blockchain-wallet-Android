@@ -52,7 +52,7 @@ public class BackupWalletActivity extends BaseAuthActivity {
 
     private boolean isBackedUp() {
         return PayloadManager.getInstance().getPayload() != null
-                && PayloadManager.getInstance().getPayload().getHdWallet() != null
-                && PayloadManager.getInstance().getPayload().getHdWallet().isMnemonicVerified();
+                && PayloadManager.getInstance().getPayload().getHdWallets() != null
+                && PayloadManager.getInstance().getPayload().getHdWallets().get(0).isMnemonicVerified();
     }
 }

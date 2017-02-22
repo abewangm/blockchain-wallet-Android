@@ -32,10 +32,11 @@ public class LauncherShortcutHelper {
 
     @RequiresApi(api = Build.VERSION_CODES.N_MR1)
     public void generateReceiveShortcuts() {
-        try {
-            int defaultAccountIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
-            String receiveAddress = payloadManager.getNextReceiveAddress(defaultAccountIndex);
-            String receiveAccountName = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultAccountIndex).getLabel();
+//        try {
+            int defaultAccountIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
+            // TODO: 21/02/2017
+            String receiveAddress = null;//payloadManager.getNextReceiveAddress(defaultAccountIndex);
+            String receiveAccountName = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultAccountIndex).getLabel();
 
             shortcutManager.removeAllDynamicShortcuts();
 
@@ -65,9 +66,10 @@ public class LauncherShortcutHelper {
 
             shortcutManager.setDynamicShortcuts(Arrays.asList(copyShortcut, qrShortcut));
 
-        } catch (AddressFormatException e) {
-            Log.e(getClass().getSimpleName(), "generateReceiveShortcuts: ", e);
-        }
+        // TODO: 21/02/2017
+//        } catch (AddressFormatException e) {
+//            Log.e(getClass().getSimpleName(), "generateReceiveShortcuts: ", e);
+//        }
     }
 
 }
