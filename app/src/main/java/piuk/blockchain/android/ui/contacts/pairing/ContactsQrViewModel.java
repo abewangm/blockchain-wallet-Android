@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
 
 import javax.inject.Inject;
 
@@ -19,7 +20,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 @SuppressWarnings("WeakerAccess")
 public class ContactsQrViewModel extends BaseViewModel {
 
-    private static final int DIMENSION_QR_CODE = 600;
+    @VisibleForTesting static final int DIMENSION_QR_CODE = 600;
 
     private DataListener dataListener;
     @Inject QrCodeDataManager qrCodeDataManager;
@@ -48,10 +49,11 @@ public class ContactsQrViewModel extends BaseViewModel {
     public void onViewReady() {
         subscribeToNotifications();
 
-        if (dataListener.getFragmentBundle() != null) {
-            String name = dataListener.getFragmentBundle().getString(ContactsInvitationBuilderQrFragment.ARGUMENT_NAME);
+        Bundle fragmentBundle = dataListener.getFragmentBundle();
+        if (fragmentBundle != null) {
+            String name = fragmentBundle.getString(ContactsInvitationBuilderQrFragment.ARGUMENT_NAME);
             dataListener.updateDisplayMessage(name);
-            String uri = dataListener.getFragmentBundle().getString(ContactsInvitationBuilderQrFragment.ARGUMENT_URI);
+            String uri = fragmentBundle.getString(ContactsInvitationBuilderQrFragment.ARGUMENT_URI);
 
             compositeDisposable.add(
                     qrCodeDataManager.generateQrCode(uri, DIMENSION_QR_CODE)

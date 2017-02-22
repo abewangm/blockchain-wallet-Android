@@ -373,7 +373,7 @@ public class ReceiveViewModelTest {
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected QrCodeDataManager provideReceiveDataManager() {
+        protected QrCodeDataManager provideQrDataManager() {
             return mDataManager;
         }
 
