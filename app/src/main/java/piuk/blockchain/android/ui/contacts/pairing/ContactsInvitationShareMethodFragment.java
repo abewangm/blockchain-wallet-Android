@@ -13,12 +13,12 @@ import android.view.ViewGroup;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentContactsInvitationBuilderShareMethodBinding;
 
-public class ContactsInvitationBuilderShareMethod extends Fragment {
+public class ContactsInvitationShareMethodFragment extends Fragment {
 
     private FragmentContactsInvitationBuilderShareMethodBinding binding;
     private FragmentInteractionListener listener;
 
-    public ContactsInvitationBuilderShareMethod() {
+    public ContactsInvitationShareMethodFragment() {
         // Required empty public constructor
     }
 

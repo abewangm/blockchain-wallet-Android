@@ -45,7 +45,7 @@ class ContactsListViewModelTest {
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyShouldHandleLinkSuccessfully() {
+    fun handleLinkSuccessful() {
         // Arrange
         val uri = "METADATA_URI"
         whenever(mockContactsManager.acceptInvitation(uri)).thenReturn(Observable.just(Contact()))
@@ -65,7 +65,7 @@ class ContactsListViewModelTest {
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyShouldHandleLinkFailure() {
+    fun handleLinkFailure() {
         // Arrange
         val uri = "METADATA_URI"
         whenever(mockContactsManager.acceptInvitation(uri)).thenReturn(Observable.error { Throwable() })
