@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.contacts.list
 
-import android.content.Intent
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.exceptions.DecryptionException
@@ -20,6 +19,7 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import kotlin.test.assertNull
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
@@ -47,28 +47,37 @@ class ContactsListViewModelTest {
     @Throws(Exception::class)
     fun onViewReadyShouldHandleLinkSuccessfully() {
         // Arrange
-        whenever(mockContactsManager.loadNodes()).thenReturn(Observable.error { Throwable() })
-        val intent = Intent()
         val uri = "METADATA_URI"
-        intent.putExtra(ContactsListActivity.EXTRA_METADATA_URI, uri)
-        whenever(mockActivity.pageIntent).thenReturn(intent)
         whenever(mockContactsManager.acceptInvitation(uri)).thenReturn(Observable.just(Contact()))
-        val contacts = listOf(Contact(), Contact(), Contact())
-        whenever(mockContactsManager.contactList).thenReturn(Observable.fromIterable(contacts))
-        whenever(mockContactsManager.contactsWithUnreadPaymentRequests).thenReturn(Observable.empty())
-        whenever(mockContactsManager.readInvitationSent(any())).thenReturn(Observable.just(true))
+        whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
+        whenever(mockContactsManager.contactList).thenReturn(Observable.empty())
         // Act
-        subject.onViewReady()
+        subject.handleLink(uri)
         // Assert
-        verify(mockActivity).pageIntent
-        verify(mockActivity).setUiState(ContactsListActivity.LOADING)
-        verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
         verify(mockActivity).showProgressDialog()
         verify(mockActivity).dismissProgressDialog()
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_OK))
-        verify(mockActivity).setUiState(ContactsListActivity.CONTENT)
-        verify(mockActivity).onContactsLoaded(any())
+        verify(mockContactsManager).acceptInvitation(uri)
+        verify(mockContactsManager).fetchContacts()
+        verify(mockContactsManager).contactList
+        assertNull(subject.link)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onViewReadyShouldHandleLinkFailure() {
+        // Arrange
+        val uri = "METADATA_URI"
+        whenever(mockContactsManager.acceptInvitation(uri)).thenReturn(Observable.error { Throwable() })
+        // Act
+        subject.handleLink(uri)
+        // Assert
+        verify(mockActivity).showProgressDialog()
+        verify(mockActivity).dismissProgressDialog()
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         verifyNoMoreInteractions(mockActivity)
+        verify(mockContactsManager).acceptInvitation(uri)
+        verifyNoMoreInteractions(mockContactsManager)
     }
 
     @Test
@@ -127,11 +136,13 @@ class ContactsListViewModelTest {
         // Arrange
         whenever(mockContactsManager.loadNodes()).thenReturn(Observable.just(true))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
-        val contacts = listOf(Contact(), Contact(), Contact())
+        val contacts = listOf(
+                Contact().apply { mdid = "mdid" },
+                Contact().apply { mdid = "mdid" },
+                Contact().apply { mdid = "mdid" })
         whenever(mockContactsManager.contactList).thenReturn(Observable.fromIterable(contacts))
         whenever(mockContactsManager.contactsWithUnreadPaymentRequests)
                 .thenReturn(Observable.fromIterable(listOf<Contact>()))
-        whenever(mockContactsManager.readInvitationSent(any())).thenReturn(Observable.just(true))
         // Act
         subject.onViewReady()
         // Assert
