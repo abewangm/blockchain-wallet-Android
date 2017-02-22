@@ -139,7 +139,7 @@ dependencies {
     compile 'com.neovisionaries:nv-websocket-client:1.19'
     compile('com.google.zxing:core:3.3.0') { transitive = true }
     compile 'com.github.mukeshsolanki:country-picker-android:1.1.7'
-    compile 'com.aurelhubert:ahbottomnavigation:2.0.2'
+    compile 'com.aurelhubert:ahbottomnavigation:2.0.5'
     // URL Builder
     compile "io.mikael:urlbuilder:2.0.8"
     // RxJava
@@ -186,7 +186,7 @@ dependencies {
     // Unit Tests in Kotlin
     testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testCompile 'com.nhaarman:mockito-kotlin:1.2.0'
+    testCompile 'com.nhaarman:mockito-kotlin:1.3.0'
 }
 
 buildscript {

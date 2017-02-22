@@ -81,11 +81,13 @@ public class DataManagerModule {
     @Provides
     @ViewModelScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
-                                                                           TransactionListStore transactionListStore) {
+                                                                           TransactionListStore transactionListStore,
+                                                                           MultiAddrFactory multiAddrFactory) {
         return new TransactionListDataManager(
                 payloadManager,
                 new TransactionDetailsService(new TransactionDetails()),
-                transactionListStore);
+                transactionListStore,
+                multiAddrFactory);
     }
 
     @Provides

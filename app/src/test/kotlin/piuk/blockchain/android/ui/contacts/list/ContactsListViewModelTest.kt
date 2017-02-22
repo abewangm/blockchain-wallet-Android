@@ -261,6 +261,23 @@ class ContactsListViewModelTest {
         verifyNoMoreInteractions(mockContactsManager)
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun checkStatusOfPendingContactsSuccess() {
+        // Arrange
+        whenever(mockContactsManager.readInvitationSent(any<Contact>())).thenReturn(Observable.just(true))
+        whenever(mockContactsManager.contactList).thenReturn(Observable.error { Throwable() })
+        // Act
+        subject.checkStatusOfPendingContacts(listOf(Contact(), Contact(), Contact()))
+        // Assert
+        verify(mockContactsManager, times(3)).readInvitationSent(any<Contact>())
+        verify(mockContactsManager, times(3)).contactList
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity, times(3)).setUiState(ContactsListActivity.LOADING)
+        verify(mockActivity, times(3)).setUiState(ContactsListActivity.FAILURE)
+        verifyNoMoreInteractions(mockActivity)
+    }
+
     inner class MockApiModule : ApiModule() {
         override fun providePayloadManager(): PayloadManager {
             return mockPayloadManager

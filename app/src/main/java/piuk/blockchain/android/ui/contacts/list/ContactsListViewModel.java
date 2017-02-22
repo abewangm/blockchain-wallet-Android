@@ -166,7 +166,8 @@ public class ContactsListViewModel extends BaseViewModel {
         return false;
     }
 
-    private void checkStatusOfPendingContacts(List<Contact> pending) {
+    @VisibleForTesting
+    void checkStatusOfPendingContacts(List<Contact> pending) {
         for (int i = 0; i < pending.size(); i++) {
             final Contact contact = pending.get(i);
             compositeDisposable.add(

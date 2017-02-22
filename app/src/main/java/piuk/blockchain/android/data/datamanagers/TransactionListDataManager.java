@@ -31,14 +31,17 @@ public class TransactionListDataManager {
     private PayloadManager payloadManager;
     private TransactionDetailsService transactionDetails;
     private TransactionListStore transactionListStore;
+    private MultiAddrFactory multiAddrFactory;
     private Subject<List<Tx>> listUpdateSubject;
 
     public TransactionListDataManager(PayloadManager payloadManager,
                                       TransactionDetailsService transactionDetails,
-                                      TransactionListStore transactionListStore) {
+                                      TransactionListStore transactionListStore,
+                                      MultiAddrFactory multiAddrFactory) {
         this.payloadManager = payloadManager;
         this.transactionDetails = transactionDetails;
         this.transactionListStore = transactionListStore;
+        this.multiAddrFactory = multiAddrFactory;
         listUpdateSubject = PublishSubject.create();
     }
 
@@ -204,17 +207,17 @@ public class TransactionListDataManager {
             if (payloadManager.getPayload().isUpgraded()) {
                 transactions.addAll(getAllXpubAndLegacyTxs());
             } else {
-                transactions.addAll(MultiAddrFactory.getInstance().getLegacyTxs());
+                transactions.addAll(multiAddrFactory.getLegacyTxs());
             }
 
         } else if (account.getRealIdx() == INDEX_IMPORTED_ADDRESSES) {
             // V3 - Imported Addresses
-            transactions.addAll(MultiAddrFactory.getInstance().getLegacyTxs());
+            transactions.addAll(multiAddrFactory.getLegacyTxs());
         } else {
             // V3 - Individual
             String xpub = account.getXpub();
-            if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(xpub)) {
-                ListUtil.addAllIfNotNull(transactions, MultiAddrFactory.getInstance().getXpubTxs().get(xpub));
+            if (multiAddrFactory.getXpubAmounts().containsKey(xpub)) {
+                ListUtil.addAllIfNotNull(transactions, multiAddrFactory.getXpubTxs().get(xpub));
             }
         }
 
@@ -228,13 +231,13 @@ public class TransactionListDataManager {
         // Remove duplicate txs
         HashMap<String, Tx> consolidatedTxsList = new HashMap<>();
 
-        List<Tx> allXpubTransactions = MultiAddrFactory.getInstance().getAllXpubTxs();
+        List<Tx> allXpubTransactions = multiAddrFactory.getAllXpubTxs();
         for (Tx tx : allXpubTransactions) {
             if (!consolidatedTxsList.containsKey(tx.getHash()))
                 consolidatedTxsList.put(tx.getHash(), tx);
         }
 
-        List<Tx> allLegacyTransactions = MultiAddrFactory.getInstance().getLegacyTxs();
+        List<Tx> allLegacyTransactions = multiAddrFactory.getLegacyTxs();
         for (Tx tx : allLegacyTransactions) {
             if (!consolidatedTxsList.containsKey(tx.getHash()))
                 consolidatedTxsList.put(tx.getHash(), tx);
