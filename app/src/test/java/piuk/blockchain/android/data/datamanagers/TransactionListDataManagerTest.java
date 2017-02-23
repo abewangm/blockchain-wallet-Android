@@ -16,7 +16,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,19 +40,24 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class TransactionListDataManagerTest extends RxTest {
 
-    @Mock PayloadManager mPayloadManager;
-    @Mock TransactionDetailsService mTransactionDetails;
-    private TransactionListStore mTransactionList;
-    private TransactionListDataManager mSubject;
+    @Mock PayloadManager payloadManager;
+    @Mock TransactionDetailsService transactionDetailsService;
+    @Mock MultiAddrFactory multiAddrFactory;
+    private TransactionListStore transactionListStore;
+    private TransactionListDataManager subject;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        mTransactionList = new TransactionListStore();
+        transactionListStore = new TransactionListStore();
 
-        mSubject = new TransactionListDataManager(mPayloadManager, mTransactionDetails, mTransactionList);
+        subject = new TransactionListDataManager(
+                payloadManager,
+                transactionDetailsService,
+                transactionListStore,
+                multiAddrFactory);
     }
 
     @Test
@@ -63,9 +67,9 @@ public class TransactionListDataManagerTest extends RxTest {
         account.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isUpgraded()).thenReturn(true);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
         // Act
-        mSubject.generateTransactionList(account);
+        subject.generateTransactionList(account);
         // Assert
 
     }
@@ -77,9 +81,9 @@ public class TransactionListDataManagerTest extends RxTest {
         account.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isUpgraded()).thenReturn(false);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
         // Act
-        mSubject.generateTransactionList(account);
+        subject.generateTransactionList(account);
         // Assert
 
     }
@@ -90,7 +94,7 @@ public class TransactionListDataManagerTest extends RxTest {
         Account account = new Account();
         account.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
         // Act
-        mSubject.generateTransactionList(account);
+        subject.generateTransactionList(account);
         // Assert
 
     }
@@ -102,7 +106,7 @@ public class TransactionListDataManagerTest extends RxTest {
         account.setXpub("test");
         MultiAddrFactory.getInstance().setXpubAmount("test", 0L);
         // Act
-        mSubject.generateTransactionList(account);
+        subject.generateTransactionList(account);
         // Assert
 
     }
@@ -113,7 +117,7 @@ public class TransactionListDataManagerTest extends RxTest {
         LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setAddress("addr");
         // Act
-        mSubject.generateTransactionList(legacyAddress);
+        subject.generateTransactionList(legacyAddress);
         // Assert
 
     }
@@ -123,20 +127,20 @@ public class TransactionListDataManagerTest extends RxTest {
         // Arrange
 
         // Act
-        List<Tx> value = mSubject.getTransactionList();
+        List<Tx> value = subject.getTransactionList();
         // Assert
-        assertEquals(mTransactionList.getList(), value);
+        assertEquals(transactionListStore.getList(), value);
         assertEquals(Collections.emptyList(), value);
     }
 
     @Test
     public void clearTransactionList() throws Exception {
         // Arrange
-        mTransactionList.getList().add(new Tx("", "", "", 0D, 0L, new HashMap<>()));
+        transactionListStore.getList().add(new Tx("", "", "", 0D, 0L, new HashMap<>()));
         // Act
-        mSubject.clearTransactionList();
+        subject.clearTransactionList();
         // Assert
-        assertEquals(Collections.emptyList(), mSubject.getTransactionList());
+        assertEquals(Collections.emptyList(), subject.getTransactionList());
     }
 
     @Test
@@ -144,7 +148,7 @@ public class TransactionListDataManagerTest extends RxTest {
         // Arrange
 
         // Act
-        Subject value = mSubject.getListUpdateSubject();
+        Subject value = subject.getListUpdateSubject();
         // Assert
         assertNotNull(value);
     }
@@ -156,9 +160,9 @@ public class TransactionListDataManagerTest extends RxTest {
         Tx tx1 = new Tx("", "", "", 0D, 500L, new HashMap<>());
         Tx tx2 = new Tx("", "", "", 0D, 1000L, new HashMap<>());
 
-        mTransactionList.insertTransactions(Arrays.asList(tx1, tx0));
+        transactionListStore.insertTransactions(Arrays.asList(tx1, tx0));
         // Act
-        List<Tx> value = mSubject.insertTransactionIntoListAndReturnSorted(tx2);
+        List<Tx> value = subject.insertTransactionIntoListAndReturnSorted(tx2);
         // Assert
         assertNotNull(value);
         assertEquals(tx2, value.get(0));
@@ -172,97 +176,128 @@ public class TransactionListDataManagerTest extends RxTest {
         Tx tx0 = new Tx("", "", "", 0D, 0L, new HashMap<>());
         Tx tx1 = new Tx("", "", "", 0D, 0L, new HashMap<>());
         tx1.setHash("hash");
-        MultiAddrFactory.getInstance().getXpubTxs().put("test", new ArrayList<Tx>() {{
-            add(tx0);
-            add(tx0);
-        }});
-        MultiAddrFactory.getInstance().getLegacyTxs().add(tx0);
-        MultiAddrFactory.getInstance().getLegacyTxs().add(tx1);
+        HashMap<String, List<Tx>> map = new HashMap<>();
+        map.put("test", Arrays.asList(tx0, tx0));
+        when(multiAddrFactory.getXpubTxs()).thenReturn(map);
+        when(multiAddrFactory.getLegacyTxs()).thenReturn(Arrays.asList(tx0, tx1));
         // Act
-        List<Tx> value = mSubject.getAllXpubAndLegacyTxs();
+        List<Tx> value = subject.getAllXpubAndLegacyTxs();
         // Assert
         assertNotNull(value);
         assertEquals(2, value.size());
     }
 
-    @Test()
+    @Test
     public void getBtcBalanceInvalidObject() throws Exception {
         // Arrange
 
         // Act
-        double value = mSubject.getBtcBalance(new Object());
+        double value = subject.getBtcBalance(new Object());
         // Assert
         assertEquals(0D, value, 0D);
     }
 
-    @Test()
+    @Test
     public void getBtcBalanceAccountTagAllUpgraded() throws Exception {
         // Arrange
         Account account = new Account();
         account.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isUpgraded()).thenReturn(true);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
         // Act
-        double value = mSubject.getBtcBalance(account);
+        double value = subject.getBtcBalance(account);
         // Assert
         assertEquals(0D, value, 0D);
     }
 
-    @Test()
+    @Test
     public void getBtcBalanceAccountTagAllNotUpgraded() throws Exception {
         // Arrange
         Account account = new Account();
         account.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.isUpgraded()).thenReturn(false);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
         // Act
-        double value = mSubject.getBtcBalance(account);
+        double value = subject.getBtcBalance(account);
         // Assert
         assertEquals(0D, value, 0D);
     }
 
-    @Test()
+    @Test
     public void getBtcBalanceAccountTagImported() throws Exception {
         // Arrange
         Account account = new Account();
         account.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
         // Act
-        double value = mSubject.getBtcBalance(account);
+        double value = subject.getBtcBalance(account);
         // Assert
         assertEquals(0D, value, 0D);
     }
 
-    @Test()
+    @Test
     public void getBtcBalanceAccountV3Individual() throws Exception {
         // Arrange
         Account account = new Account();
         account.setXpub("test");
         MultiAddrFactory.getInstance().getXpubAmounts().put("test", 0L);
         // Act
-        double value = mSubject.getBtcBalance(account);
+        double value = subject.getBtcBalance(account);
         // Assert
         assertEquals(0D, value, 0D);
     }
 
-    @Test()
+    @Test
     public void getBtcBalanceLegacyAddress() throws Exception {
         // Arrange
         LegacyAddress legacyAddress = new LegacyAddress();
         // Act
-        double value = mSubject.getBtcBalance(legacyAddress);
+        double value = subject.getBtcBalance(legacyAddress);
         // Assert
         assertEquals(0D, value, 0D);
+    }
+
+    @Test
+    public void getTxFromHashFound() {
+        // Arrange
+        String txHash = "TX_HASH";
+        Tx tx0 = new Tx("", null, null, 0L, 0, null);
+        Tx tx1 = new Tx("", null, null, 0L, 0, null);
+        Tx tx2 = new Tx(txHash, null, null, 0L, 0, null);
+        transactionListStore.insertTransactions(Arrays.asList(tx0, tx1, tx2));
+        // Act
+        TestObserver<Tx> testObserver = subject.getTxFromHash(txHash).test();
+        // Assert
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        assertEquals(tx2, testObserver.values().get(0));
+    }
+
+    @Test
+    public void getTxFromHashNotFound() {
+        // Arrange
+        String txHash = "TX_HASH";
+        Tx tx0 = new Tx("", null, null, 0L, 0, null);
+        Tx tx1 = new Tx("", null, null, 0L, 0, null);
+        Tx tx2 = new Tx("", null, null, 0L, 0, null);
+        transactionListStore.insertTransactions(Arrays.asList(tx0, tx1, tx2));
+        // Act
+        TestObserver<Tx> testObserver = subject.getTxFromHash(txHash).test();
+        // Assert
+        testObserver.assertTerminated();
+        testObserver.assertNoValues();
+        testObserver.assertError(NullPointerException.class);
     }
 
     @Test
     public void getTransactionFromHash() throws Exception {
         // Arrange
         Transaction mockTransaction = mock(Transaction.class);
-        when(mTransactionDetails.getTransactionDetailsFromHash(anyString())).thenReturn(Observable.just(mockTransaction));
+        when(transactionDetailsService.getTransactionDetailsFromHash(anyString()))
+                .thenReturn(Observable.just(mockTransaction));
         // Act
-        TestObserver<Transaction> observer = mSubject.getTransactionFromHash("hash").test();
+        TestObserver<Transaction> observer = subject.getTransactionFromHash("hash").test();
         // Assert
         assertEquals(mockTransaction, observer.values().get(0));
         observer.onComplete();
@@ -274,10 +309,10 @@ public class TransactionListDataManagerTest extends RxTest {
         // Arrange
         Payload mockPayload = mock(Payload.class);
         when(mockPayload.getTransactionNotesMap()).thenReturn(new HashMap<>());
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mPayloadManager.savePayloadToServer()).thenReturn(true);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.savePayloadToServer()).thenReturn(true);
         // Act
-        TestObserver<Boolean> observer = mSubject.updateTransactionNotes("hash", "notes").test();
+        TestObserver<Boolean> observer = subject.updateTransactionNotes("hash", "notes").test();
         // Assert
         assertEquals(true, observer.values().get(0));
         observer.assertComplete();

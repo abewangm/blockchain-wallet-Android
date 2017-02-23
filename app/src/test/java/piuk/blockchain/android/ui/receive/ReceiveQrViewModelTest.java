@@ -121,7 +121,7 @@ public class ReceiveQrViewModelTest {
 
     private class MockDataManagerModule extends DataManagerModule {
         @Override
-        protected QrCodeDataManager provideReceiveDataManager() {
+        protected QrCodeDataManager provideQrDataManager() {
             return qrCodeDataManager;
         }
     }

@@ -18,8 +18,10 @@ import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import kotlin.test.assertNull
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
@@ -45,36 +47,48 @@ class ContactsListViewModelTest {
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyShouldHandleLinkSuccessfully() {
+    fun handleLinkSuccessful() {
         // Arrange
-        whenever(mockContactsManager.loadNodes()).thenReturn(Observable.error { Throwable() })
-        val intent = Intent()
         val uri = "METADATA_URI"
-        intent.putExtra(ContactsListActivity.EXTRA_METADATA_URI, uri)
-        whenever(mockActivity.pageIntent).thenReturn(intent)
         whenever(mockContactsManager.acceptInvitation(uri)).thenReturn(Observable.just(Contact()))
-        val contacts = listOf(Contact(), Contact(), Contact())
-        whenever(mockContactsManager.contactList).thenReturn(Observable.fromIterable(contacts))
-        whenever(mockContactsManager.contactsWithUnreadPaymentRequests).thenReturn(Observable.empty())
-        whenever(mockContactsManager.readInvitationSent(any())).thenReturn(Observable.just(true))
+        whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
+        whenever(mockContactsManager.contactList).thenReturn(Observable.empty())
         // Act
-        subject.onViewReady()
+        subject.handleLink(uri)
         // Assert
-        verify(mockActivity).pageIntent
-        verify(mockActivity).setUiState(ContactsListActivity.LOADING)
-        verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
         verify(mockActivity).showProgressDialog()
         verify(mockActivity).dismissProgressDialog()
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_OK))
-        verify(mockActivity).setUiState(ContactsListActivity.CONTENT)
-        verify(mockActivity).onContactsLoaded(any())
+        verify(mockContactsManager).acceptInvitation(uri)
+        verify(mockContactsManager).fetchContacts()
+        verify(mockContactsManager).contactList
+        assertNull(subject.link)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun handleLinkFailure() {
+        // Arrange
+        val uri = "METADATA_URI"
+        whenever(mockContactsManager.acceptInvitation(uri)).thenReturn(Observable.error { Throwable() })
+        // Act
+        subject.handleLink(uri)
+        // Assert
+        verify(mockActivity).showProgressDialog()
+        verify(mockActivity).dismissProgressDialog()
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         verifyNoMoreInteractions(mockActivity)
+        verify(mockContactsManager).acceptInvitation(uri)
+        verifyNoMoreInteractions(mockContactsManager)
     }
 
     @Test
     @Throws(Exception::class)
     fun onViewReadyShouldShowSecondPasswordDialog() {
         // Arrange
+        val uri = "URI"
+        val intent = Intent().apply { putExtra(ContactsListActivity.EXTRA_METADATA_URI, uri) }
+        whenever(mockActivity.pageIntent).thenReturn(intent)
         whenever(mockContactsManager.loadNodes()).thenReturn(Observable.just(false))
         val mockPayload: Payload = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
@@ -87,6 +101,7 @@ class ContactsListViewModelTest {
         verify(mockActivity).showSecondPasswordDialog()
         verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
         verifyNoMoreInteractions(mockActivity)
+        subject.link equals uri
     }
 
     @Test
@@ -127,11 +142,20 @@ class ContactsListViewModelTest {
         // Arrange
         whenever(mockContactsManager.loadNodes()).thenReturn(Observable.just(true))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
-        val contacts = listOf(Contact(), Contact(), Contact())
+        val id = "ID"
+        val contacts = listOf(
+                Contact().apply { mdid = "mdid" },
+                Contact().apply { mdid = "mdid" },
+                Contact().apply {
+                    mdid = "mdid"
+                    this.id = id
+                })
         whenever(mockContactsManager.contactList).thenReturn(Observable.fromIterable(contacts))
         whenever(mockContactsManager.contactsWithUnreadPaymentRequests)
-                .thenReturn(Observable.fromIterable(listOf<Contact>()))
-        whenever(mockContactsManager.readInvitationSent(any())).thenReturn(Observable.just(true))
+                .thenReturn(Observable.fromIterable(listOf(Contact().apply {
+                    mdid = "mdid"
+                    this.id = id
+                })))
         // Act
         subject.onViewReady()
         // Assert
@@ -201,7 +225,7 @@ class ContactsListViewModelTest {
     fun initContactsServiceShouldThrowDecryptionException() {
         // Arrange
         val password = "PASSWORD"
-        whenever(mockContactsManager.generateNodes(password)).thenReturn(Completable.error { Throwable(DecryptionException()) })
+        whenever(mockContactsManager.generateNodes(password)).thenReturn(Completable.error { DecryptionException() })
         val mockNodeFactory: MetadataNodeFactory = mock()
         whenever(mockContactsManager.metadataNodeFactory).thenReturn(Observable.just(mockNodeFactory))
         whenever(mockNodeFactory.sharedMetadataNode).thenReturn(mock())
@@ -248,6 +272,40 @@ class ContactsListViewModelTest {
         verify(mockContactsManager).registerMdid()
         verify(mockContactsManager).publishXpub()
         verifyNoMoreInteractions(mockContactsManager)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun checkStatusOfPendingContactsSuccess() {
+        // Arrange
+        whenever(mockContactsManager.readInvitationSent(any<Contact>())).thenReturn(Observable.just(true))
+        whenever(mockContactsManager.contactList).thenReturn(Observable.error { Throwable() })
+        // Act
+        subject.checkStatusOfPendingContacts(listOf(Contact(), Contact(), Contact()))
+        // Assert
+        verify(mockContactsManager, times(3)).readInvitationSent(any<Contact>())
+        verify(mockContactsManager, times(3)).contactList
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity, times(3)).setUiState(ContactsListActivity.LOADING)
+        verify(mockActivity, times(3)).setUiState(ContactsListActivity.FAILURE)
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun refreshContactsFailure() {
+        // Arrange
+        whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
+        whenever(mockContactsManager.contactList).thenReturn(Observable.error { Throwable() })
+        // Act
+        subject.refreshContacts()
+        // Assert
+        verify(mockContactsManager).fetchContacts()
+        verify(mockContactsManager).contactList
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity).setUiState(ContactsListActivity.LOADING)
+        verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
+        verifyNoMoreInteractions(mockActivity)
     }
 
     inner class MockApiModule : ApiModule() {

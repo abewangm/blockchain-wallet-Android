@@ -15,7 +15,7 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
-import static piuk.blockchain.android.data.notifications.FcmCallbackService.EXTRA_CONTACTS_SERVICE;
+import static piuk.blockchain.android.data.notifications.FcmCallbackService.EXTRA_CONTACT_ACCEPTED;
 
 /**
  * Created by adambennett on 09/08/2016.
@@ -70,7 +70,7 @@ public class LauncherViewModel extends BaseViewModel {
             mPrefsUtil.setValue(PrefsUtil.KEY_METADATA_URI, intentData);
         }
 
-        if (intent.hasExtra(EXTRA_CONTACTS_SERVICE)) {
+        if (intent.hasExtra(EXTRA_CONTACT_ACCEPTED)) {
             mPrefsUtil.setValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION, true);
         }
 

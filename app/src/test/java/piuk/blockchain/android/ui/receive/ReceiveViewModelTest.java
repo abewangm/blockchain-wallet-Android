@@ -37,6 +37,7 @@ import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.account.ItemAccount;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -53,6 +54,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.receive.ReceiveViewModel.KEY_WARN_WATCH_ONLY_SPEND;
 
@@ -120,6 +122,31 @@ public class ReceiveViewModelTest {
         verify(mActivity).onAccountDataChanged();
         assertEquals(5, mSubject.accountMap.size());
         assertEquals(2, mSubject.spinnerIndexMap.size());
+    }
+
+    @Test
+    public void onSendToContactClickedInvalidAmount() throws Exception {
+        // Arrange
+        String errorString = "ERROR_STRING";
+        when(mStringUtils.getString(anyInt())).thenReturn(errorString);
+        // Act
+        mSubject.onSendToContactClicked("0.00");
+        // Assert
+        //noinspection WrongConstant
+        verify(mActivity).showToast(errorString, ToastCustom.TYPE_ERROR);
+        verifyZeroInteractions(mActivity);
+    }
+
+    @Test
+    public void onSendToContactClickedValidAmount() throws Exception {
+        // Arrange
+
+        // Act
+        mSubject.onSendToContactClicked("1.00");
+        // Assert
+        //noinspection WrongConstant
+        verify(mActivity).startContactSelectionActivity();
+        verifyZeroInteractions(mActivity);
     }
 
     @Test
@@ -373,7 +400,7 @@ public class ReceiveViewModelTest {
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected QrCodeDataManager provideReceiveDataManager() {
+        protected QrCodeDataManager provideQrDataManager() {
             return mDataManager;
         }
 

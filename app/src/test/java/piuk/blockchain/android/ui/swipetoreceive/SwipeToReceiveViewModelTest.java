@@ -121,7 +121,7 @@ public class SwipeToReceiveViewModelTest {
         }
 
         @Override
-        protected QrCodeDataManager provideReceiveDataManager() {
+        protected QrCodeDataManager provideQrDataManager() {
             return qrCodeDataManager;
         }
     }

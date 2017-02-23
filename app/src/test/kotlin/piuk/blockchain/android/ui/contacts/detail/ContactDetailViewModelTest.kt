@@ -297,6 +297,28 @@ class ContactDetailViewModelTest {
         verifyNoMoreInteractions(mockActivity)
     }
 
+    /**
+     * Only exists to get 100% coverage
+     */
+    @Test
+    @Throws(Exception::class)
+    fun onTransactionClickedShouldShowWaitingForAddressSecondBranch() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val contact = Contact()
+        subject.contact = contact
+        contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
+            id = fctxId
+            state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
+            role = FacilitatedTransaction.ROLE_PR_INITIATOR
+        })
+        // Act
+        subject.onTransactionClicked(fctxId)
+        // Assert
+        verify(mockActivity).showWaitingForAddressDialog()
+        verifyNoMoreInteractions(mockActivity)
+    }
+
     @Test
     @Throws(Exception::class)
     fun onTransactionClickedShouldShowWaitingForPayment() {
@@ -308,6 +330,28 @@ class ContactDetailViewModelTest {
             id = fctxId
             state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
             role = FacilitatedTransaction.ROLE_RPR_INITIATOR
+        })
+        // Act
+        subject.onTransactionClicked(fctxId)
+        // Assert
+        verify(mockActivity).showWaitingForPaymentDialog()
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    /**
+     * Only exists to get 100% coverage
+     */
+    @Test
+    @Throws(Exception::class)
+    fun onTransactionClickedShouldShowWaitingForPaymentSecondBranch() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val contact = Contact()
+        subject.contact = contact
+        contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
+            id = fctxId
+            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+            role = FacilitatedTransaction.ROLE_PR_INITIATOR
         })
         // Act
         subject.onTransactionClicked(fctxId)
@@ -373,7 +417,7 @@ class ContactDetailViewModelTest {
         contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
             id = fctxId
             state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-            role = FacilitatedTransaction.ROLE_PR_RECEIVER
+            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
         })
         val mockPayload: Payload = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
@@ -404,6 +448,42 @@ class ContactDetailViewModelTest {
             id = fctxId
             state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
             role = FacilitatedTransaction.ROLE_PR_RECEIVER
+            intendedAmount = 0L
+            address = ""
+        }
+        contact.addFacilitatedTransaction(facilitatedTransaction)
+        val mockPayload: Payload = mock()
+        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
+        val mockHdWallet: HDWallet = mock()
+        whenever(mockPayload.hdWallet).thenReturn(mockHdWallet)
+        val defaultIndex = 1337
+        whenever(mockHdWallet.defaultIndex).thenReturn(defaultIndex)
+        // Act
+        subject.onTransactionClicked(fctxId)
+        // Assert
+        verify(mockActivity).initiatePayment(
+                facilitatedTransaction.toBitcoinURI(),
+                contact.id,
+                contact.mdid,
+                fctxId,
+                defaultIndex)
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    /**
+     * Only exists to get 100% coverage
+     */
+    @Test
+    @Throws(Exception::class)
+    fun onTransactionClickedShouldInitiatePaymentSecondBranch() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val contact = Contact()
+        subject.contact = contact
+        val facilitatedTransaction = FacilitatedTransaction().apply {
+            id = fctxId
+            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
             intendedAmount = 0L
             address = ""
         }
