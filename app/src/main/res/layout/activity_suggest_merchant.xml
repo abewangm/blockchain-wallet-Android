@@ -132,7 +132,7 @@
 
         <TextView
             android:id="@+id/command_save"
-            style="@style/MegaButtonBlue"
+            style="@style/MegaButtonAccentBlue"
             android:layout_alignParentBottom="true"
             android:text="@string/save" />
 

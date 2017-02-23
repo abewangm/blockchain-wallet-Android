@@ -85,7 +85,7 @@
                 android:layout_marginRight="48dp"
                 android:layout_marginTop="16dp"
                 android:text="@string/retry"
-                android:theme="@style/ButtonBlueTheme" />
+                android:theme="@style/ButtonLightBlueTheme" />
 
         </RelativeLayout>
 

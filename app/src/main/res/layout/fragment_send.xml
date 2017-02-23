@@ -234,7 +234,7 @@
                     android:paddingLeft="32dp"
                     android:paddingRight="32dp"
                     android:text="@string/CONTINUE"
-                    android:theme="@style/ButtonBlueTheme" />
+                    android:theme="@style/ButtonLightBlueTheme" />
 
                 <TextView
                     android:id="@+id/unconfirmed_funds_warning"
