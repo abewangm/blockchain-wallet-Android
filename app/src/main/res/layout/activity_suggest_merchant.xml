@@ -118,7 +118,7 @@
                     android:gravity="center"
                     android:onClick="autoClicked"
                     android:text="@string/use_my_current_location"
-                    android:textColor="@color/primary_navy_medium"
+                    android:textColor="@color/primary_blue_accent"
                     android:textSize="12sp" />
             </LinearLayout>
 

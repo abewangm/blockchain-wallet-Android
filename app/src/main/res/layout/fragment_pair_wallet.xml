@@ -102,17 +102,27 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
+            <Button
                 android:id="@+id/command_scan"
-                style="@style/MegaButtonBlue"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:text="@string/command2" />
+                style="@style/ButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="32dp"
+                android:layout_marginRight="32dp"
+                android:text="@string/command2"
+                android:theme="@style/ButtonLightBlueTheme" />
 
             <TextView
                 android:id="@+id/command_manual"
-                style="@style/MegaButtonWhite"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:text="@string/command3" />
+                fontPath="fonts/Montserrat-Regular.ttf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="16dp"
+                android:text="@string/command3"
+                android:textColor="@color/primary_blue_accent"
+                android:textSize="14sp" />
 
         </LinearLayout>
 
