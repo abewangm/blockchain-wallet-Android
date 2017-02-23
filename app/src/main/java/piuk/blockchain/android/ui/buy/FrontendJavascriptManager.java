@@ -4,6 +4,8 @@ import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 /**
  * Created by justin on 2/22/17.
  */
@@ -29,12 +31,32 @@ public class FrontendJavascriptManager {
         executeScript(script);
     }
 
+    public void activateMobileBuyFromJson(String walletJson, String externalJson, String magicHash, String password) {
+        String script = FrontendJavascriptManager.createActivateFromJsonScript(walletJson, externalJson, magicHash, password);
+        executeScript(script);
+    }
+
     private void executeScript(String script) {
         Log.d(TAG, "Executing: " + script);
         webView.post(() -> webView.evaluateJavascript(script, frontendJavascript));
     }
 
     public static String createActivateScript(String uid, String sharedKey, String password) {
-        return String.format("activateMobileBuy('%s','%s','%s')", uid, sharedKey, password);
+        return String.format(
+                "activateMobileBuy('%s','%s','%s')",
+                StringEscapeUtils.escapeEcmaScript(uid),
+                StringEscapeUtils.escapeEcmaScript(sharedKey),
+                StringEscapeUtils.escapeEcmaScript(password)
+        );
+    }
+
+    public static String createActivateFromJsonScript(String walletJson, String externalJson, String magicHash, String password) {
+        return String.format(
+                "activateMobileBuyFromJson('%s','%s','%s','%s')",
+                StringEscapeUtils.escapeEcmaScript(walletJson),
+                StringEscapeUtils.escapeEcmaScript(externalJson),
+                StringEscapeUtils.escapeEcmaScript(magicHash),
+                StringEscapeUtils.escapeEcmaScript(password)
+        );
     }
 }
