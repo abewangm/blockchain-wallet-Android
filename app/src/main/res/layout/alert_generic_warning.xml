@@ -55,39 +55,23 @@
             android:orientation="horizontal"
             android:padding="16dp">
 
-            <TextView
+            <Button
                 android:id="@+id/confirm_keep"
-                fontPath="fonts/Montserrat-Regular.ttf"
-                android:layout_width="1dp"
-                android:layout_height="wrap_content"
+                style="@style/CustomDialogButton"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:minHeight="36dp"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
                 android:text="negative button"
-                android:textAllCaps="true"
-                android:textColor="@color/primary_gray_dark"
-                android:textSize="14sp" />
+                android:textColor="@color/primary_gray_dark" />
 
             <View
                 android:layout_width="16dp"
                 android:layout_height="match_parent" />
 
-            <TextView
+            <Button
                 android:id="@+id/confirm_change"
-                fontPath="fonts/Montserrat-Regular.ttf"
-                android:layout_width="1dp"
-                android:layout_height="wrap_content"
+                style="@style/CustomDialogButton"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:minHeight="36dp"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
                 android:text="positive button"
-                android:textAllCaps="true"
-                android:textColor="@color/primary_navy_medium"
-                android:textSize="14sp" />
+                android:textColor="@color/primary_blue_accent" />
 
         </LinearLayout>
     </LinearLayout>

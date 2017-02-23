@@ -4,7 +4,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/primary_navy_medium"
+        android:background="@color/white"
         android:orientation="vertical">
 
         <LinearLayout
@@ -20,26 +20,23 @@
                 android:paddingBottom="16dp"
                 android:paddingTop="32dp"
                 android:text="@string/backup_verify_heading"
-                android:textColor="@color/white"
+                android:textColor="@color/primary_gray_dark"
                 android:textSize="14sp" />
 
             <EditText
                 android:id="@+id/etFirstRequest"
-                style="@style/RecoveryPhraseEditText"
-                android:theme="@style/RecoveryPhraseTextCursorTheme">
+                style="@style/RecoveryPhraseEditText">
 
                 <requestFocus />
             </EditText>
 
             <EditText
                 android:id="@+id/etSecondRequest"
-                style="@style/RecoveryPhraseEditText"
-                android:theme="@style/RecoveryPhraseTextCursorTheme" />
+                style="@style/RecoveryPhraseEditText" />
 
             <EditText
                 android:id="@+id/etThirdRequest"
-                style="@style/RecoveryPhraseEditText"
-                android:theme="@style/RecoveryPhraseTextCursorTheme" />
+                style="@style/RecoveryPhraseEditText" />
 
         </LinearLayout>
 
@@ -53,7 +50,7 @@
             android:layout_marginRight="32dp"
             android:layout_marginTop="24dp"
             android:text="@string/verify"
-            android:theme="@style/ButtonWhiteTheme" />
+            android:theme="@style/ButtonLightBlueTheme" />
 
     </LinearLayout>
 </layout>

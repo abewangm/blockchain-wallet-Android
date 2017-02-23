@@ -7,9 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,7 +19,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -392,23 +389,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             upgradeMenuItem.setVisible(false);
             backUpMenuItem.setVisible(true);
         }
-
-        binding.navigationView.setItemIconTintList(null);
-        Drawable drawable = DrawableCompat.wrap(ContextCompat.getDrawable(this, R.drawable.vector_lock));
-        drawable.mutate();
-        if (viewModel.getPayloadManager().getPayload() != null &&
-                viewModel.getPayloadManager().getPayload().getHdWallet() != null &&
-                !viewModel.getPayloadManager().getPayload().getHdWallet().isMnemonicVerified()) {
-            // Not backed up
-            DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.product_red_medium));
-            DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_ATOP);
-        } else {
-            // Backed up
-            DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.product_green_medium));
-            DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_ATOP);
-        }
-
-        binding.navigationView.getMenu().findItem(R.id.nav_backup).setIcon(drawable);
 
         binding.navigationView.setNavigationItemSelectedListener(
                 menuItem -> {

@@ -52,7 +52,7 @@
                 android:id="@+id/confirm_send"
                 style="@style/CustomDialogButton"
                 android:text="@string/transfer"
-                android:textColor="@color/primary_navy_medium" />
+                android:textColor="@color/primary_blue_accent" />
 
         </LinearLayout>
     </LinearLayout>

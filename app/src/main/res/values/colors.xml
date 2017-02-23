@@ -47,5 +47,8 @@
     <color name="product_red_sent_50">#80f26c57</color>
     <color name="product_green_received">#0bbabc</color>
     <color name="product_green_received_50">#800bbabc</color>
+    <color name="product_gray_watch_only">#757575</color>
+    <color name="product_gray_headers">#4B4D4E</color>
+    <color name="product_gray_hint">#B0B0B0</color>
 
 </resources>

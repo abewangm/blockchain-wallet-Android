@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.transactions;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
@@ -33,7 +34,6 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 public class TransactionDetailActivity extends BaseAuthActivity implements TransactionDetailViewModel.DataListener {
 
-    public static final String KEY_TRANSACTION_URL = "key_transaction_url";
     @Thunk ActivityTransactionDetailsBinding mBinding;
     private TransactionDetailViewModel mViewModel;
 
@@ -152,8 +152,11 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
     @Override
     public void setStatus(String status, String hash) {
         mBinding.status.setText(status);
-        mBinding.buttonVerify.setOnClickListener(v ->
-                TransactionDetailWebViewActivity.start(this, "https://blockchain.info/tx/" + hash));
+        mBinding.buttonVerify.setOnClickListener(v -> {
+            Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+            viewIntent.setData(Uri.parse("https://blockchain.info/tx/" + mViewModel.getTransactionHash()));
+            startActivity(viewIntent);
+        });
     }
 
     @Override

@@ -49,7 +49,6 @@
                 android:layout_centerHorizontal="true"
                 android:gravity="center"
                 android:padding="16dp"
-                android:textAllCaps="true"
                 android:textColor="@color/primary_navy_medium"
                 android:textSize="20sp"
                 tools:text="My Bitcoin Wallet" />
