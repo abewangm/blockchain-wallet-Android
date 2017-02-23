@@ -93,7 +93,8 @@ public class ContactsListViewModel extends BaseViewModel {
                                 }));
     }
 
-    private void refreshContacts() {
+    @VisibleForTesting
+    void refreshContacts() {
         dataListener.setUiState(ContactsListActivity.LOADING);
         compositeDisposable.add(
                 contactsDataManager.fetchContacts()

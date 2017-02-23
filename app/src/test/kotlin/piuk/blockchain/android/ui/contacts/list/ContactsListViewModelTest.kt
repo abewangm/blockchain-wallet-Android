@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.contacts.list
 
+import android.content.Intent
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.exceptions.DecryptionException
@@ -17,6 +18,7 @@ import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import kotlin.test.assertNull
@@ -84,6 +86,9 @@ class ContactsListViewModelTest {
     @Throws(Exception::class)
     fun onViewReadyShouldShowSecondPasswordDialog() {
         // Arrange
+        val uri = "URI"
+        val intent = Intent().apply { putExtra(ContactsListActivity.EXTRA_METADATA_URI, uri) }
+        whenever(mockActivity.pageIntent).thenReturn(intent)
         whenever(mockContactsManager.loadNodes()).thenReturn(Observable.just(false))
         val mockPayload: Payload = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
@@ -96,6 +101,7 @@ class ContactsListViewModelTest {
         verify(mockActivity).showSecondPasswordDialog()
         verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
         verifyNoMoreInteractions(mockActivity)
+        subject.link equals uri
     }
 
     @Test
@@ -136,13 +142,20 @@ class ContactsListViewModelTest {
         // Arrange
         whenever(mockContactsManager.loadNodes()).thenReturn(Observable.just(true))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
+        val id = "ID"
         val contacts = listOf(
                 Contact().apply { mdid = "mdid" },
                 Contact().apply { mdid = "mdid" },
-                Contact().apply { mdid = "mdid" })
+                Contact().apply {
+                    mdid = "mdid"
+                    this.id = id
+                })
         whenever(mockContactsManager.contactList).thenReturn(Observable.fromIterable(contacts))
         whenever(mockContactsManager.contactsWithUnreadPaymentRequests)
-                .thenReturn(Observable.fromIterable(listOf<Contact>()))
+                .thenReturn(Observable.fromIterable(listOf(Contact().apply {
+                    mdid = "mdid"
+                    this.id = id
+                })))
         // Act
         subject.onViewReady()
         // Assert
@@ -212,7 +225,7 @@ class ContactsListViewModelTest {
     fun initContactsServiceShouldThrowDecryptionException() {
         // Arrange
         val password = "PASSWORD"
-        whenever(mockContactsManager.generateNodes(password)).thenReturn(Completable.error { Throwable(DecryptionException()) })
+        whenever(mockContactsManager.generateNodes(password)).thenReturn(Completable.error { DecryptionException() })
         val mockNodeFactory: MetadataNodeFactory = mock()
         whenever(mockContactsManager.metadataNodeFactory).thenReturn(Observable.just(mockNodeFactory))
         whenever(mockNodeFactory.sharedMetadataNode).thenReturn(mock())
@@ -275,6 +288,23 @@ class ContactsListViewModelTest {
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity, times(3)).setUiState(ContactsListActivity.LOADING)
         verify(mockActivity, times(3)).setUiState(ContactsListActivity.FAILURE)
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun refreshContactsFailure() {
+        // Arrange
+        whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
+        whenever(mockContactsManager.contactList).thenReturn(Observable.error { Throwable() })
+        // Act
+        subject.refreshContacts()
+        // Assert
+        verify(mockContactsManager).fetchContacts()
+        verify(mockContactsManager).contactList
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity).setUiState(ContactsListActivity.LOADING)
+        verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
         verifyNoMoreInteractions(mockActivity)
     }
 
