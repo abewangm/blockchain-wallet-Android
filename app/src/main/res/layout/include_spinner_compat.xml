@@ -3,9 +3,9 @@
 
     <android.support.v7.widget.AppCompatSpinner
         android:id="@+id/spinner"
-        android:background="?android:selectableItemBackground"
+        android:background="?attr/selectableItemBackground"
         android:divider="@null"
-        android:dropDownSelector="?android:selectableItemBackground"
+        android:dropDownSelector="?attr/selectableItemBackground"
         android:layout_width="match_parent"
         fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_height="match_parent" />
