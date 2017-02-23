@@ -3,6 +3,7 @@ package piuk.blockchain.android.data.datamanagers;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -50,30 +51,29 @@ public class TransferFundsDataManager {
      */
     public Observable<Triple<List<PendingTransaction>, Long, Long>> getTransferableFundTransactionList(
         int addressToReceiveIndex) {
-        throw new NotImplementedException("todo");
-        // TODO: 22/02/2017  
-//        return Observable.fromCallable(() -> {
-//
-//                BigInteger suggestedFeePerKb = new BigDecimal(
-//                    DynamicFeeCache.getInstance().getSuggestedFee().getDefaultFee().getFee())
-//                    .toBigInteger();
-//
-//                List<PendingTransaction> pendingTransactionList = new ArrayList<>();
-//                List<LegacyAddress> legacyAddresses = payloadManager.getPayload()
-//                    .getLegacyAddressList();
-//
-//                long totalToSend = 0L;
-//                long totalFee = 0L;
-//
-//                for (LegacyAddress legacyAddress : legacyAddresses) {
-//
-//                    if (!legacyAddress.isWatchOnly()
-//                        && multiAddrFactory.getLegacyBalance(legacyAddress.getAddress()) > 0) {
-//
-////                        JSONObject unspentResponse = unspentApi
-////                            .getUnspentOutputs(legacyAddress.getAddress());
-//                        Response<UnspentOutputs> coins = Payment.getUnspentCoins(Arrays.asList(legacyAddress.getAddress())).execute();
-//
+        return Observable.fromCallable(() -> {
+
+                BigInteger suggestedFeePerKb = new BigDecimal(
+                    DynamicFeeCache.getInstance().getSuggestedFee().getDefaultFee().getFee())
+                    .toBigInteger();
+
+                List<PendingTransaction> pendingTransactionList = new ArrayList<>();
+                List<LegacyAddress> legacyAddresses = payloadManager.getPayload()
+                    .getLegacyAddressList();
+
+                long totalToSend = 0L;
+                long totalFee = 0L;
+
+                for (LegacyAddress legacyAddress : legacyAddresses) {
+
+                    if (!legacyAddress.isWatchOnly()
+                        && multiAddrFactory.getLegacyBalance(legacyAddress.getAddress()) > 0) {
+
+//                        JSONObject unspentResponse = unspentApi
+//                            .getUnspentOutputs(legacyAddress.getAddress());
+                        Response<UnspentOutputs> coins = Payment.getUnspentCoins(Arrays.asList(legacyAddress.getAddress())).execute();
+
+                        // TODO: 22/02/2017
 //                        if (unspentResponse != null) {
 //
 //                            Pair<BigInteger, BigInteger> sweepableCoins = Payment
@@ -104,12 +104,12 @@ public class TransferFundsDataManager {
 //                                pendingTransactionList.add(pendingSpend);
 //                            }
 //                        }
-//                    }
-//                }
-//
-//                return Triple.of(pendingTransactionList, totalToSend, totalFee);
-//            }
-//        ).compose(RxUtil.applySchedulersToObservable());
+                    }
+                }
+
+                return Triple.of(pendingTransactionList, totalToSend, totalFee);
+            }
+        ).compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -217,7 +217,7 @@ public class TransferFundsDataManager {
     }
 
     /**
-     * Syncs the {@link info.blockchain.wallet.payload.Payload} to the server, for instance after
+     * Syncs the Wallet to the server, for instance after
      * archiving some addresses.
      *
      * @return boolean indicating success or not

@@ -36,6 +36,7 @@ import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.account.ImportedAccount;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -209,102 +210,96 @@ public class BalanceViewModel extends BaseViewModel {
 
         //"All" - total balance
         if (activeAccounts.size() > 1 || activeLegacyAddresses.size() > 0) {
-            // TODO: 21/02/2017
-//            if (payloadManager.getPayload().isUpgraded()) {
-//
-//                //Only V3 will display "All"
-//                Account all = new Account();
-//                all.setLabel(stringUtils.getString(R.string.all_accounts));
-//                all.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
-//                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(all));
-//                activeAccountAndAddressList.add(new ItemAccount(
-//                        all.getLabel(),
-//                        balance,
-//                        null,
-//                        Math.round(transactionListDataManager.getBtcBalance(all)),
-//                        null));
-//                activeAccountAndAddressBiMap.put(all, spinnerIndex);
-//                spinnerIndex++;
-//
-//            } else if (activeLegacyAddresses.size() > 1) {
-//
-//                //V2 "All" at top of accounts spinner if wallet contains multiple legacy addresses
-//                ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.total_funds),
-//                        payloadManager.getPayload().getLegacyAddressList(),
-//                        MultiAddrFactory.getInstance().getLegacyBalance());
-//                iAccount.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
-//                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
-//                activeAccountAndAddressList.add(new ItemAccount(
-//                        iAccount.getLabel(),
-//                        balance,
-//                        null,
-//                        Math.round(transactionListDataManager.getBtcBalance(iAccount)),
-//                        null));
-//                activeAccountAndAddressBiMap.put(iAccount, spinnerIndex);
-//                spinnerIndex++;
-//            }
+            if (payloadManager.getPayload().isUpgraded()) {
+
+                //Only V3 will display "All"
+                Account all = new Account();
+                all.setLabel(stringUtils.getString(R.string.all_accounts));
+                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(all));
+                activeAccountAndAddressList.add(new ItemAccount(
+                        all.getLabel(),
+                        balance,
+                        null,
+                        Math.round(transactionListDataManager.getBtcBalance(all)),
+                        null));
+                activeAccountAndAddressBiMap.put(all, spinnerIndex);
+                spinnerIndex++;
+
+            } else if (activeLegacyAddresses.size() > 1) {
+
+                //V2 "All" at top of accounts spinner if wallet contains multiple legacy addresses
+                ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.total_funds),
+                        payloadManager.getPayload().getLegacyAddressList(),
+                        MultiAddrFactory.getInstance().getLegacyBalance());
+                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
+                activeAccountAndAddressList.add(new ItemAccount(
+                        iAccount.getLabel(),
+                        balance,
+                        null,
+                        Math.round(transactionListDataManager.getBtcBalance(iAccount)),
+                        null));
+                activeAccountAndAddressBiMap.put(iAccount, spinnerIndex);
+                spinnerIndex++;
+            }
         }
 
         //Add accounts to map
         int accountIndex = 0;
-        // TODO: 21/02/2017  
-//        for (Account item : activeAccounts) {
-//
-//            //Give unlabeled account a label
-//            if (item.getLabel().trim().length() == 0) item.setLabel("Account: " + accountIndex);
-//            String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(item));
-//            activeAccountAndAddressList.add(new ItemAccount(
-//                    item.getLabel(),
-//                    balance,
-//                    null,
-//                    Math.round(transactionListDataManager.getBtcBalance(item)),
-//                    null));
-//            activeAccountAndAddressBiMap.put(item, spinnerIndex);
-//            spinnerIndex++;
-//            accountIndex++;
-//        }
+        for (Account item : activeAccounts) {
+
+            //Give unlabeled account a label
+            if (item.getLabel().trim().length() == 0) item.setLabel("Account: " + accountIndex);
+            String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(item));
+            activeAccountAndAddressList.add(new ItemAccount(
+                    item.getLabel(),
+                    balance,
+                    null,
+                    Math.round(transactionListDataManager.getBtcBalance(item)),
+                    null));
+            activeAccountAndAddressBiMap.put(item, spinnerIndex);
+            spinnerIndex++;
+            accountIndex++;
+        }
 
         //Add "Imported Addresses" or "Total Funds" to map
-        // TODO: 21/02/2017
-//        if (payloadManager.getPayload().isUpgraded() && activeLegacyAddresses.size() > 0) {
-//            //Only V3 - Consolidate and add Legacy addresses to "Imported Addresses" at bottom of accounts spinner
-//            ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
-//                    payloadManager.getPayload().getLegacyAddressList(),
-//                    MultiAddrFactory.getInstance().getLegacyBalance());
-//            iAccount.setRealIdx(TransactionListDataManager.INDEX_IMPORTED_ADDRESSES);
-//            String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
-//            activeAccountAndAddressList.add(new ItemAccount(
-//                    iAccount.getLabel(),
-//                    balance,
-//                    null,
-//                    Math.round(transactionListDataManager.getBtcBalance(iAccount)),
-//                    null));
-//            activeAccountAndAddressBiMap.put(iAccount, spinnerIndex);
-//            spinnerIndex++;
-//
-//        } else {
-//            for (LegacyAddress legacyAddress : activeLegacyAddresses) {
-//                //If address has no label, we'll display address
-//                String labelOrAddress = legacyAddress.getLabel() == null ||
-//                        legacyAddress.getLabel().trim().length() == 0 ?
-//                        legacyAddress.getAddress() : legacyAddress.getLabel();
-//
-//                //Prefix "watch-only"
-//                if (legacyAddress.isWatchOnly()) {
-//                    labelOrAddress = stringUtils.getString(R.string.watch_only_label) + " " + labelOrAddress;
-//                }
-//
-//                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(legacyAddress));
-//                activeAccountAndAddressList.add(new ItemAccount(
-//                        labelOrAddress,
-//                        balance,
-//                        null,
-//                        Math.round(transactionListDataManager.getBtcBalance(legacyAddress)),
-//                        null));
-//                activeAccountAndAddressBiMap.put(legacyAddress, spinnerIndex);
-//                spinnerIndex++;
-//            }
-//        }
+        if (payloadManager.getPayload().isUpgraded() && activeLegacyAddresses.size() > 0) {
+            //Only V3 - Consolidate and add Legacy addresses to "Imported Addresses" at bottom of accounts spinner
+            ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
+                    payloadManager.getPayload().getLegacyAddressList(),
+                    MultiAddrFactory.getInstance().getLegacyBalance());
+            String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount));
+            activeAccountAndAddressList.add(new ItemAccount(
+                    iAccount.getLabel(),
+                    balance,
+                    null,
+                    Math.round(transactionListDataManager.getBtcBalance(iAccount)),
+                    null));
+            activeAccountAndAddressBiMap.put(iAccount, spinnerIndex);
+            spinnerIndex++;
+
+        } else {
+            for (LegacyAddress legacyAddress : activeLegacyAddresses) {
+                //If address has no label, we'll display address
+                String labelOrAddress = legacyAddress.getLabel() == null ||
+                        legacyAddress.getLabel().trim().length() == 0 ?
+                        legacyAddress.getAddress() : legacyAddress.getLabel();
+
+                //Prefix "watch-only"
+                if (legacyAddress.isWatchOnly()) {
+                    labelOrAddress = stringUtils.getString(R.string.watch_only_label) + " " + labelOrAddress;
+                }
+
+                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(legacyAddress));
+                activeAccountAndAddressList.add(new ItemAccount(
+                        labelOrAddress,
+                        balance,
+                        null,
+                        Math.round(transactionListDataManager.getBtcBalance(legacyAddress)),
+                        null));
+                activeAccountAndAddressBiMap.put(legacyAddress, spinnerIndex);
+                spinnerIndex++;
+            }
+        }
 
         //If we have multiple accounts/addresses we will show dropdown in toolbar, otherwise we will only display a static text
         if (dataListener != null) dataListener.onRefreshAccounts();

@@ -115,8 +115,10 @@ public class TransactionListDataManager {
      */
     public double getBtcBalance(Object object) {
 
+        return 0.0;
+
         // TODO: 21/02/2017
-        throw new NotImplementedException("");
+//        throw new NotImplementedException("");
 
         // Update Balance
 //        double balance = 0.0D;
@@ -205,7 +207,7 @@ public class TransactionListDataManager {
     private List<Tx> getV3Transactions(Account account) {
 
         // TODO: 21/02/2017
-        throw new NotImplementedException("");
+        return new ArrayList<>();
 
 //        List<Tx> transactions = new ArrayList<>();
 //

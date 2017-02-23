@@ -46,7 +46,7 @@ public class ExchangeRateFactory {
 
     public enum Currency {
         AUD, BRL, CAD, CHF, CLP, CNY, DKK, EUR, GBP, HKD,
-            ISK, JPY, KRW, NZD, PLN, RUB, SEK, SGD, THB, TWD, USD
+        ISK, JPY, KRW, NZD, PLN, RUB, SEK, SGD, THB, TWD, USD
     }
 
     private ExchangeRateFactory() {
@@ -143,8 +143,12 @@ public class ExchangeRateFactory {
 
     public double getLastPrice(String currencyName) {
 
+        if(currencyName.isEmpty()) {
+            currencyName = Currency.USD.name();
+        }
+
         double lastPrice;
-        Currency currency = Currency.valueOf(currencyName);
+        Currency currency = Currency.valueOf(currencyName.toUpperCase().trim());
         double lastKnown = Double.parseDouble(mPrefsUtil.getValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency, "0.0"));
 
         if(tickerData == null) {
@@ -155,7 +159,7 @@ public class ExchangeRateFactory {
             lastPrice = tickerItem.getLast();
 
             if (lastPrice > 0.0) {
-                mPrefsUtil.setValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency.name(), Double.toString(lastPrice));
+                mPrefsUtil.setValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency.toString(), Double.toString(lastPrice));
             } else {
                 lastPrice = lastKnown;
             }
@@ -166,7 +170,11 @@ public class ExchangeRateFactory {
 
     public String getSymbol(String currencyName) {
 
-        Currency currency = Currency.valueOf(currencyName);
+        if(currencyName.isEmpty()) {
+            currencyName = Currency.USD.name();
+        }
+
+        Currency currency = Currency.valueOf(currencyName.toUpperCase().trim());
 
         TickerItem tickerItem = getTickerItem(currency);
         return tickerItem.getSymbol();
