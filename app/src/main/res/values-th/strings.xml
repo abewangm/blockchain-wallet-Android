@@ -103,7 +103,7 @@
 
     <string name="support">สนับสนุน</string>
     <string name="rate_us">ให้คะแนนเรา</string>
-    <string name="about">กระเป๋าเงิน Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">กระเป๋าเงิน Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">แอปร้านค้าฟรี</string>
     <string name="password_or_wipe">กรอกโดยใช้รหัสผ่านของคุณ หรือลืมกระเป๋าเงินนี้</string>
     <string name="use_password">ใช้รหัสผ่าน</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">กำลังถอดรหัสกระเป๋าเงิน...</string>
     <string name="password_unchanged">ไม่ได้เปลี่ยนรหัสผ่าน</string>
     <string name="password_changed">เปลี่ยนรหัสผ่านแล้ว</string>
-    <string name="verify_email2">ที่อยู่อีเมลซึ่งได้รับการยืนยันของคุณจะใช้เพื่อส่งรหัสล็อกอินเมื่อตรวจพบกิจกรรมที่ผิดปกติ เพื่อเตือนคุณถึง ID ล็อกอินกระเป๋าเงินของคุณ และเพื่อส่งการแจ้งเตือนการชำระเงิน bitcoin เมื่อคุณได้รับเงิน เราจะไม่ใช้ที่อยู่อีเมลของคุณสำหรับวัตถุประสงค์ทางการตลาด</string>
+    <string name="verify_email2">ที่อยู่อีเมลซึ่งได้รับการยืนยันของคุณจะใช้เพื่อส่งรหัสล็อกอินเมื่อตรวจพบกิจกรรมที่ผิดปกติ เพื่อเตือนคุณถึง ID ล็อกอินกระเป๋าเงินของคุณ และเพื่อส่งการแจ้งเตือนการชำระเงิน bitcoin เมื่อคุณได้รับเงิน</string>
     <string name="disable_root_warning">ปิดคำเตือนอุปกรณ์ที่ถูกรูท</string>
 
     <string name="show_balance">แสดงยอดคงเหลือ</string>

@@ -103,7 +103,7 @@
 
     <string name="support">支持</string>
     <string name="rate_us">给我们打分</string>
-    <string name="about">Blockchain 钱包 %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Blockchain 钱包 %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">免费商家应用程序</string>
     <string name="password_or_wipe">使用密码进入或忘记此钱包</string>
     <string name="use_password">使用密码</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">正在解密钱包...</string>
     <string name="password_unchanged">密码未更改</string>
     <string name="password_changed">密码已更改</string>
-    <string name="verify_email2">您的已验证邮箱地址被用于在检测到可疑或者不正常活动时发送登录码、提醒您钱包登录ID，以及在您收到资金时发送比特币支付提供。我们不会将您的电子邮件地址用于营销目的。</string>
+    <string name="verify_email2">您的已验证邮箱地址被用于在检测到可疑或者不正常活动时发送登录码、提醒您钱包登录ID，以及在您收到资金时发送比特币支付提供。</string>
     <string name="disable_root_warning">禁用已 Root 的设备警告</string>
 
     <string name="show_balance">显示余额</string>

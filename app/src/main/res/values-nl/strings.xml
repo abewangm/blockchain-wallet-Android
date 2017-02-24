@@ -103,7 +103,7 @@
 
     <string name="support">Ondersteuning</string>
     <string name="rate_us">Beoordeel ons</string>
-    <string name="about">Blockchain Portemonnee %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Blockchain Portemonnee %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Gratis handelaren-app</string>
     <string name="password_or_wipe">Ga van start met behulp van uw wachtwoord of vergeet deze portemonnee</string>
     <string name="use_password">Wachtwoord gebruiken</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Portemonnee aan het decoderen...</string>
     <string name="password_unchanged">Wachtwoord niet gewijzigd</string>
     <string name="password_changed">Wachtwoord gewijzigd</string>
-    <string name="verify_email2">Uw geverifieerde e-mailadres wordt gebruikt om inlogcodes te verzenden wanneer verdachte of ongebruikelijke activiteit wordt gedetecteerd, om u te herinneren aan uw portemonneelogin-ID, en om Bitcoin-betalingswaarschuwingen te verzenden wanneer u tegoeden ontvangt. Wij zullen uw e-mailadres niet gebruiken voor marketingdoeleinden.</string>
+    <string name="verify_email2">Uw geverifieerde e-mailadres wordt gebruikt om inlogcodes te verzenden wanneer verdachte of ongebruikelijke activiteit wordt gedetecteerd, om u te herinneren aan uw portemonneelogin-ID, en om Bitcoin-betalingswaarschuwingen te verzenden wanneer u tegoeden ontvangt.</string>
     <string name="disable_root_warning">Geroot waarschuwingssysteem uitschakelen</string>
 
     <string name="show_balance">Saldo tonen</string>

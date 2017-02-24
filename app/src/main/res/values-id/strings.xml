@@ -103,7 +103,7 @@
 
     <string name="support">Dukungan</string>
     <string name="rate_us">Beri kami nilai</string>
-    <string name="about">Dompet Rangkaian Blok %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Dompet Rangkaian Blok %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Aplikasi Gratis untuk Pedagang</string>
     <string name="password_or_wipe">Isikan menggunakan kata sandi Anda atau lupakan dompet ini</string>
     <string name="use_password">Gunakan kata sandi</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Mendekripsi Dompet...</string>
     <string name="password_unchanged">Kata sandi tidak diubah</string>
     <string name="password_changed">Kata sandi diubah</string>
-    <string name="verify_email2">Alamat surel Anda yang telah diverifikasi digunakan untuk mengirimkan kode masuk ketika ada aktivitas mencurigakan atau tidak biasa terdeteksi, untuk mengingatkan Anda tentang ID masuk dompet Anda, dan untuk mengirim peringatan pembayaran bitcoin bila Anda menerima dana. Kami tidak akan menggunakan alamat surel Anda untuk tujuan pemasaran.</string>
+    <string name="verify_email2">Alamat surel Anda yang telah diverifikasi digunakan untuk mengirimkan kode masuk ketika ada aktivitas mencurigakan atau tidak biasa terdeteksi, untuk mengingatkan Anda tentang ID masuk dompet Anda, dan untuk mengirim peringatan pembayaran bitcoin bila Anda menerima dana.</string>
     <string name="disable_root_warning">Menonaktifkan peringatan perangkat yang di root</string>
 
     <string name="show_balance">Tampilkan Saldo</string>

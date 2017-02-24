@@ -103,7 +103,7 @@
 
     <string name="support">지원</string>
     <string name="rate_us">우리에 대한 평가</string>
-    <string name="about">블록체인 지갑 %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">블록체인 지갑 %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">무료 상인(Merchant) 앱</string>
     <string name="password_or_wipe">귀하 암호로 들어가거나 이 지갑은 잊어버리세요</string>
     <string name="use_password">암호 사용</string>
@@ -249,7 +249,7 @@
     <string name="decrypting_wallet">지갑 해독 중...</string>
     <string name="password_unchanged">암호 안 바뀜</string>
     <string name="password_changed">암호 바뀜</string>
-    <string name="verify_email2">귀하의 확인된 이메일 주소는 의심스럽거나 비정상적인 활동이 탐지 되어 로그인 코드를 보낼 때, 지갑 로그인 아이디를 다시 알려줄 때, 자금을 받은 후 비트코인 지불을 하라고 알려줄 때 쓰입니다. 우리는 귀하 이메일 주소를 영업 목적으로 쓰지 않겠습니다.</string>
+    <string name="verify_email2">귀하의 확인된 이메일 주소는 의심스럽거나 비정상적인 활동이 탐지 되어 로그인 코드를 보낼 때, 지갑 로그인 아이디를 다시 알려줄 때, 자금을 받은 후 비트코인 지불을 하라고 알려줄 때 쓰입니다.</string>
     <string name="disable_root_warning">루팅 된 장치 경보 해제</string>
 
     <string name="show_balance">잔액 보여주기</string>

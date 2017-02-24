@@ -103,7 +103,7 @@
 
     <string name="support">Hỗ trợ</string>
     <string name="rate_us">Đánh giá</string>
-    <string name="about">Ví Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Ví Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Ứng dụng cổng thanh toán miễn phí</string>
     <string name="password_or_wipe">Nhập mật khẩu đang sử dụng hoặc quên ví này</string>
     <string name="use_password">Sử dụng mật khẩu</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Đang giải mã Ví...</string>
     <string name="password_unchanged">Mật khẩu không được thay đổi</string>
     <string name="password_changed">Mật khẩu đã được thay đổi</string>
-    <string name="verify_email2">Địa chỉ email đã xác minh của bạn được sử dụng để gửi các mã đăng nhập khi phát hiện có hành vi đáng ngờ hoặc bất thường, nhắc nhở bạn về ID đăng nhập ví của mình, và để gửi thông báo thanh toán bitcoin khi bạn nhận được tiền. Chúng tôi sẽ không sử dụng địa chỉ email của bạn cho các mục đích tiếp thị.</string>
+    <string name="verify_email2">Địa chỉ email đã xác minh của bạn được sử dụng để gửi các mã đăng nhập khi phát hiện có hành vi đáng ngờ hoặc bất thường, nhắc nhở bạn về ID đăng nhập ví của mình, và để gửi thông báo thanh toán bitcoin khi bạn nhận được tiền.</string>
     <string name="disable_root_warning">Tắt cảnh báo thiết bị đã được root</string>
 
     <string name="show_balance">Hiện số dư</string>

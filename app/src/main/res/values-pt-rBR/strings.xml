@@ -103,7 +103,7 @@
 
     <string name="support">Suporte</string>
     <string name="rate_us">Avalie-nos</string>
-    <string name="about">Carteira Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Carteira Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Merchant App gratuito</string>
     <string name="password_or_wipe">Entre utilizando sua senha ou descarte esta carteira.</string>
     <string name="use_password">Usar senha</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Decodificando Carteira...</string>
     <string name="password_unchanged">Senha não alterada</string>
     <string name="password_changed">Senha alterada</string>
-    <string name="verify_email2">Seu endereço de e-mail verificado recebe códigos de login, quando atividade suspeita ou incomum for detectada. Também é usado para lembrar-lhe de seu ID de Carteira e enviar-lhe alertas de pagamento Bitcoin quando você receber fundos. Não usaremos o seu endereço de e-mail para marketing.</string>
+    <string name="verify_email2">Seu endereço de e-mail verificado recebe códigos de login, quando atividade suspeita ou incomum for detectada. Também é usado para lembrar-lhe de seu ID de Carteira e enviar-lhe alertas de pagamento Bitcoin quando você receber fundos.</string>
     <string name="disable_root_warning">Desativar o aviso de dispositivos com root</string>
 
     <string name="show_balance">Exibir Saldo</string>

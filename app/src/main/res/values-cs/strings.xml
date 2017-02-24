@@ -103,7 +103,7 @@
 
     <string name="support">Podpora</string>
     <string name="rate_us">Ohodnoťte nás</string>
-    <string name="about">Peněženka Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Peněženka Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Bezplatná aplikace pro prodejce</string>
     <string name="password_or_wipe">Zadat pomocí hesla nebo zapomenout tuto peněženku</string>
     <string name="use_password">Použít heslo</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Dešifrování peněženky...</string>
     <string name="password_unchanged">Heslo nezměněno</string>
     <string name="password_changed">Heslo změněno</string>
-    <string name="verify_email2">Vaše ověřená e-mailová adresa se používá pro odesílání přihlašovacích kódů, pokud je zaznamenána podezřelá nebo neobvyklá aktivita, abychom Vám připomněli Vaše přihlašovací ID peněženky, a zasílání upozornění na bitcoinovou platbu v případě připsání prostředků. Vaši e-mailovou adresu nepoužijeme k marketingovým účelům.</string>
+    <string name="verify_email2">Vaše ověřená e-mailová adresa se používá pro odesílání přihlašovacích kódů, pokud je zaznamenána podezřelá nebo neobvyklá aktivita, abychom Vám připomněli Vaše přihlašovací ID peněženky, a zasílání upozornění na bitcoinovou platbu v případě připsání prostředků.</string>
     <string name="disable_root_warning">Deaktivovat varování před rootovaným zařízením</string>
 
     <string name="show_balance">Zobrazit zůstatek</string>
@@ -460,4 +460,5 @@
 
     <string name="survey_message">Chcete vyplnit krátký dotazník, abyste pomohli zlepšit svůj zážitek z peněženky?\n\nVážíme si vaší zpětné vazby!</string>
     <string name="survey_positive_button">Vyplnit dotazník</string>
+    <string name="backup_button_start"></string>
 </resources>

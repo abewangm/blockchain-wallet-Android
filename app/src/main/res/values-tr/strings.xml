@@ -103,7 +103,7 @@
 
     <string name="support">Destek</string>
     <string name="rate_us">Bize puan verin</string>
-    <string name="about">Blockchain Cüzdanı %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Blockchain Cüzdanı %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Ücretsiz Tacir yatırımı</string>
     <string name="password_or_wipe">Şifrenizi kullanarak giriş yapın veya bu cüzdanı unutun</string>
     <string name="use_password">Şifre kullan</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Cüzdan şifresi çözülüyor...</string>
     <string name="password_unchanged">Şifre değiştirilmedi</string>
     <string name="password_changed">Şifre değiştirildi</string>
-    <string name="verify_email2">Doğrulanmış e-posta adresiniz, şüpheli veya sıradışı etkinlikler belirlendiği zaman oturum açma kodları göndermek, cüzdan oturum açma kimliğinizi size hatırlatmak ve para aldığınız zaman size bitcoin ödeme uyarıları göndermek için kullanılır.  E-posta adresinizi pazarlama amaçları için kullanmayacağız.</string>
+    <string name="verify_email2">Doğrulanmış e-posta adresiniz, şüpheli veya sıradışı etkinlikler belirlendiği zaman oturum açma kodları göndermek, cüzdan oturum açma kimliğinizi size hatırlatmak ve para aldığınız zaman size bitcoin ödeme uyarıları göndermek için kullanılır.</string>
     <string name="disable_root_warning">Kök dizin cihaz uyarısını devre dışı bırak</string>
 
     <string name="show_balance">Bakiyeyi Göster</string>

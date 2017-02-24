@@ -103,7 +103,7 @@
 
     <string name="support">Поддержка</string>
     <string name="rate_us">Оцените нас</string>
-    <string name="about">Blockchain Кошелек %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Blockchain Кошелек %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Приложение Free Merchant</string>
     <string name="password_or_wipe">Войдите, используя свой пароль или удалите этот кошелек</string>
     <string name="use_password">Использовать пароль</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Идет расшифровка кошелька...</string>
     <string name="password_unchanged">Пароль не изменен</string>
     <string name="password_changed">Пароль изменен</string>
-    <string name="verify_email2">Ваш подтвержденный электронный адрес используется для отправки кодов входа в систему, при подозрительной или необычной активности, для напоминания ID для доступа к кошельку и отправления сообщений о поступлении средств на счет. Мы не будем использовать ваш электронный адрес в маркетинговых целях.</string>
+    <string name="verify_email2">Ваш подтвержденный электронный адрес используется для отправки кодов входа в систему, при подозрительной или необычной активности, для напоминания ID для доступа к кошельку и отправления сообщений о поступлении средств на счет.</string>
     <string name="disable_root_warning">Отключить предупреждение корневого устройства</string>
 
     <string name="show_balance">Показать баланс</string>

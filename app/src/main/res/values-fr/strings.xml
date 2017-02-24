@@ -103,7 +103,7 @@
 
     <string name="support">Aide</string>
     <string name="rate_us">Notez nous</string>
-    <string name="about">Portefeuille Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Portefeuille Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Application Marchand gratuite</string>
     <string name="password_or_wipe">Vous connecter en utilisant votre mot de passe ou oublier ce portefeuille</string>
     <string name="use_password">Utiliser le mot de passe</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Décryptage du portefeuille en cours...</string>
     <string name="password_unchanged">Mot de passe inchangé</string>
     <string name="password_changed">Mot de passe modifié</string>
-    <string name="verify_email2">Votre adresse e-mail vérifiée est utilisée pour vous envoyer des codes de connexion lorsque des activités suspectes ou inhabituelles sont détectées, pour vous rappeler votre identifiant de connexion au portefeuille et pour vous envoyer des notifications lorsque vous recevez des fonds en bitcoin. Nous n\'utiliserons pas votre adresse e-mail à des fins publicitaires.</string>
+    <string name="verify_email2">Votre adresse e-mail vérifiée est utilisée pour vous envoyer des codes de connexion lorsque des activités suspectes ou inhabituelles sont détectées, pour vous rappeler votre identifiant de connexion au portefeuille et pour vous envoyer des notifications lorsque vous recevez des fonds en bitcoin.</string>
     <string name="disable_root_warning">Désactiver l\’avertissement d\'appareil en mode root</string>
 
     <string name="show_balance">Afficher le solde</string>

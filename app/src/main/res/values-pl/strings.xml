@@ -103,7 +103,7 @@
 
     <string name="support">Wsparcie</string>
     <string name="rate_us">Oceń nas</string>
-    <string name="about">Portfel Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Portfel Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Darmowa aplikacja Merchant</string>
     <string name="password_or_wipe">Wejdź korzystając z hasła lub zapomnij ten portfel</string>
     <string name="use_password">Użyj hasła</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Odszyfrowywanie Portfela...</string>
     <string name="password_unchanged">Hasło nie zostało zmienione</string>
     <string name="password_changed">Hasło zostało zmienione</string>
-    <string name="verify_email2">Twój potwierdzony adres e-mail używany jest do przesyłania kodów do logowania, gdy wykryte zostanie podejrzane lub niecodzienne działanie na Twoim koncie, do przypominania Ci Twoich danych do logowania do portfela, a także wysyłania powiadomień, gdy otrzymasz płatność bitcoinami. Nie wykorzystamy Twojego adresu e-mail do potrzeb marketingowych.</string>
+    <string name="verify_email2">Twój potwierdzony adres e-mail używany jest do przesyłania kodów do logowania, gdy wykryte zostanie podejrzane lub niecodzienne działanie na Twoim koncie, do przypominania Ci Twoich danych do logowania do portfela, a także wysyłania powiadomień, gdy otrzymasz płatność bitcoinami.</string>
     <string name="disable_root_warning">Wyłącz ostrzeżenie o zrootowanym urządzeniu</string>
 
     <string name="show_balance">Pokaż saldo</string>

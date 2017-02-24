@@ -103,7 +103,7 @@
 
     <string name="support">Support</string>
     <string name="rate_us">Bewerten Sie uns</string>
-    <string name="about">Blockchain-Wallet %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Blockchain-Wallet %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Kostenlose Merchant-App</string>
     <string name="password_or_wipe">Anmeldung mithilfe des persönlichen Passworts oder diese Wallet vergessen</string>
     <string name="use_password">Passwort verwenden</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Wallet wird entschlüsselt ...</string>
     <string name="password_unchanged">Passwort wurde nicht geändert</string>
     <string name="password_changed">Passwort wurde geändert</string>
-    <string name="verify_email2">Ihre verifizierte E-Mail-Adresse wird bei Feststellung verdächtiger oder ungewöhnlicher Aktivitäten zur Übersendung von Anmeldecodes, aber auch zur Erinnerung an Ihre persönliche Wallet-Anmelde-ID und zum Versand von Bitcoin-Zahlungsbenachrichtigungen bei Eintreffen von Guthaben verwendet. Wir werden Ihre E-Mail-Adresse nicht zu Marketingzwecken benutzen.</string>
+    <string name="verify_email2">Ihre verifizierte E-Mail-Adresse wird bei Feststellung verdächtiger oder ungewöhnlicher Aktivitäten zur Übersendung von Anmeldecodes, aber auch zur Erinnerung an Ihre persönliche Wallet-Anmelde-ID und zum Versand von Bitcoin-Zahlungsbenachrichtigungen bei Eintreffen von Guthaben verwendet.</string>
     <string name="disable_root_warning">Warnmeldung des gerooteten Geräts deaktivieren</string>
 
     <string name="show_balance">Wallet-Stand anzeigen</string>

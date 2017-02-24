@@ -103,7 +103,7 @@
 
     <string name="support">Ayuda</string>
     <string name="rate_us">Califícanos</string>
-    <string name="about">Monedero Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Monedero Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Aplicación gratuita para comerciante</string>
     <string name="password_or_wipe">Entrar introduciendo tu contraseña u olvidar este monedero</string>
     <string name="use_password">Usar contraseña</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Descifrando el monedero...</string>
     <string name="password_unchanged">Contraseña sin cambios</string>
     <string name="password_changed">Contraseñada cambiada</string>
-    <string name="verify_email2">Tu dirección de correo electrónico verificada se utiliza para enviar códigos de inicio de sesión cuando se detecta actividad sospechosa o inusual, para recordarte tu ID de inicio de sesión de monedero y para enviar avisos de pago de Bitcoin cuando recibas los fondos. No utilizaremos tu dirección de correo electrónico para fines de mercadeo y/o publicidad.</string>
+    <string name="verify_email2">Tu dirección de correo electrónico verificada se utiliza para enviar códigos de inicio de sesión cuando se detecta actividad sospechosa o inusual, para recordarte tu ID de inicio de sesión de monedero y para enviar avisos de pago de Bitcoin cuando recibas los fondos.</string>
     <string name="disable_root_warning">Desactivar la advertencia de dispositivo con sistema operativo modificado</string>
 
     <string name="show_balance">Mostrar saldo</string>

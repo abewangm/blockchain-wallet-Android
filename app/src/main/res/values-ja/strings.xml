@@ -103,7 +103,7 @@
 
     <string name="support">サポート</string>
     <string name="rate_us">評価する</string>
-    <string name="about">ブロックチェーンウォレット %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">ブロックチェーンウォレット %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">無料商人アプリ</string>
     <string name="password_or_wipe">パスワードを使ってログインするかこの財布を忘れる</string>
     <string name="use_password">パスワードを使用</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">財布を復号化中...</string>
     <string name="password_unchanged">パスワードは変更されていません</string>
     <string name="password_changed">パスワードが変更されました</string>
-    <string name="verify_email2">認証されたメールアドレスは疑わしい、もしくは通常と異なったアクティビティが検出された際に、財布ログインIDのリマインダーおよびビットコイン資金の受信通知の送信のために使用されます。マーケティング目的でメールアドレスを使用することはありません。</string>
+    <string name="verify_email2">認証されたメールアドレスは疑わしい、もしくは通常と異なったアクティビティが検出された際に、財布ログインIDのリマインダーおよびビットコイン資金の受信通知の送信のために使用されます。</string>
     <string name="disable_root_warning">ルート化されたデバイスの警告を無効にする</string>
 
     <string name="show_balance">残高を表示</string>
