@@ -43,7 +43,7 @@ public class AccountDataManager {
      * @return An {@link Observable<Account>} wrapping the newly created Account
      */
     public Observable<Account> createNewAccount(String accountLabel, @Nullable String secondPassword) {
-        return Observable.fromCallable(() -> payloadManager.addAccount(accountLabel,
+        return Observable.fromCallable(() -> payloadManager.addAccount(0, accountLabel,
                 secondPassword != null ? secondPassword : null))
                 .compose(RxUtil.applySchedulersToObservable());
     }

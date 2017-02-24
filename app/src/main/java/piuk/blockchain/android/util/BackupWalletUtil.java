@@ -55,7 +55,8 @@ public class BackupWalletUtil {
     public List<String> getMnemonic(String secondPassword) {
 
         try {
-            return PayloadManager.getInstance().getPayload().getMnemonic(secondPassword);
+            PayloadManager.getInstance().getPayload().decryptHDWallet(0, secondPassword);
+            return PayloadManager.getInstance().getPayload().getHdWallets().get(0).getMnemonic();
         } catch (Exception e) {
             Log.e(BackupWalletUtil.class.getSimpleName(), "getMnemonic: ", e);
             return null;
