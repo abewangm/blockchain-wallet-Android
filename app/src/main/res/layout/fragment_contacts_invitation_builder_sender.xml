@@ -46,7 +46,7 @@
             android:paddingLeft="32dp"
             android:paddingRight="32dp"
             android:text="@string/next"
-            android:theme="@style/ButtonBlueTheme" />
+            android:theme="@style/ButtonLightBlueTheme" />
 
     </LinearLayout>
 </layout>

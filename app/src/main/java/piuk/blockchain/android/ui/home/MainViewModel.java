@@ -23,6 +23,7 @@ import info.blockchain.wallet.util.WebUtil;
 
 import java.io.IOException;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -50,7 +51,7 @@ import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
-import piuk.blockchain.android.util.ExchangeRateFactory.TickerListener;
+import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
@@ -65,6 +66,7 @@ public class MainViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     private OSUtil osUtil;
+    private MonetaryUtil monetaryUtil;
     @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
     @Inject protected AccessState accessState;
@@ -130,6 +132,7 @@ public class MainViewModel extends BaseViewModel {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
         osUtil = new OSUtil(applicationContext);
+        monetaryUtil = new MonetaryUtil(getCurrentBitcoinFormat());
     }
 
     @Override
@@ -483,11 +486,31 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private String getFormattedPriceString() {
+        monetaryUtil.updateUnit(getCurrentBitcoinFormat());
         String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
         double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiat);
         String fiatSymbol = ExchangeRateFactory.getInstance().getSymbol(fiat);
-        String args = fiatSymbol + lastPrice;
-        return stringUtils.getFormattedString(R.string.current_price, args);
+        DecimalFormat format = new DecimalFormat();
+        format.setMinimumFractionDigits(2);
+
+        switch (getCurrentBitcoinFormat()) {
+            case MonetaryUtil.MICRO_BTC:
+                return stringUtils.getFormattedString(
+                        R.string.current_price_bits,
+                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
+            case MonetaryUtil.MILLI_BTC:
+                return stringUtils.getFormattedString(
+                        R.string.current_price_millibits,
+                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
+            default:
+                return stringUtils.getFormattedString(
+                        R.string.current_price_btc,
+                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
+        }
+    }
+
+    private int getCurrentBitcoinFormat() {
+        return prefs.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
     }
 
     private void startWebSocketService() {

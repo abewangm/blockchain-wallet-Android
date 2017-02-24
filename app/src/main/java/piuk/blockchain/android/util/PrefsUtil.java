@@ -16,8 +16,9 @@ public class PrefsUtil implements PersistentPrefs {
     }
 
     @Override
-    public String getValue(String name, String value) {
-        return preferenceManager.getString(name, (value == null || value.isEmpty()) ? "" : value);
+    public String getValue(String name, String defaultValue) {
+        return preferenceManager.getString(name,
+                (defaultValue == null || defaultValue.isEmpty()) ? "" : defaultValue);
     }
 
     @Override
@@ -28,8 +29,8 @@ public class PrefsUtil implements PersistentPrefs {
     }
 
     @Override
-    public int getValue(String name, int value) {
-        return preferenceManager.getInt(name, 0);
+    public int getValue(String name, int defaultValue) {
+        return preferenceManager.getInt(name, defaultValue);
     }
 
     @Override
@@ -47,21 +48,21 @@ public class PrefsUtil implements PersistentPrefs {
     }
 
     @Override
-    public long getValue(String name, long value) {
+    public long getValue(String name, long defaultValue) {
 
         long result;
         try {
-            result = preferenceManager.getLong(name, 0L);
+            result = preferenceManager.getLong(name, defaultValue);
         } catch (Exception e) {
-            result = (long) preferenceManager.getInt(name, 0);
+            result = (long) preferenceManager.getInt(name, (int) defaultValue);
         }
 
         return result;
     }
 
     @Override
-    public boolean getValue(String name, boolean value) {
-        return preferenceManager.getBoolean(name, value);
+    public boolean getValue(String name, boolean defaultValue) {
+        return preferenceManager.getBoolean(name, defaultValue);
     }
 
     @Override

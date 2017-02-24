@@ -431,7 +431,7 @@ public class TransactionDetailViewModelTest extends RxTest {
 
     private class MockDataManagerModule extends DataManagerModule {
         @Override
-        protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager, TransactionListStore transactionListStore) {
+        protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager, TransactionListStore transactionListStore, MultiAddrFactory multiAddrFactory) {
             return mTransactionListDataManager;
         }
 

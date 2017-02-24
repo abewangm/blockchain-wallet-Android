@@ -35,24 +35,21 @@ class ContactsListItem {
     }
 
     @NonNull
-    public String getStatus() {
+    String getStatus() {
         return status;
     }
 
-    public long getInviteTime() {
+    long getInviteTime() {
         return inviteTime;
     }
 
-    public boolean requiresResponse() {
+    boolean requiresResponse() {
         return requiresResponse;
     }
 
     @SuppressWarnings("WeakerAccess")
     public static class Status {
-
         public static final String PENDING = "Pending";
-        public static final String ACCEPTED = "Accepted";
         public static final String TRUSTED = "Trusted";
-
     }
 }

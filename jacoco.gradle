@@ -22,7 +22,9 @@ task testDevDebugUnitTestCoverage(type: JacocoReport, dependsOn: "testDevDebugUn
             '**/*Adapter*.*',
             '**/*zxing**',
             '**/*customviews**',
-            '**/*databinding**'
+            '**/*databinding**',
+            '**/injection**',
+            '**/directory**'
     ]
     classDirectories = fileTree(
             dir: "${project.buildDir}/intermediates/classes/dev/debug",

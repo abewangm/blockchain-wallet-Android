@@ -26,7 +26,7 @@
                 android:layout_marginLeft="48dp"
                 android:layout_marginRight="48dp"
                 android:text="@string/contacts_scan_qr"
-                android:theme="@style/ButtonBlueTheme" />
+                android:theme="@style/ButtonLightBlueTheme" />
 
             <Button
                 android:id="@+id/button_sent_link"
@@ -38,7 +38,7 @@
                 android:layout_marginLeft="48dp"
                 android:layout_marginRight="48dp"
                 android:text="@string/contacts_sent_link"
-                android:theme="@style/ButtonBlueTheme" />
+                android:theme="@style/ButtonLightBlueTheme" />
 
         </LinearLayout>
     </RelativeLayout>

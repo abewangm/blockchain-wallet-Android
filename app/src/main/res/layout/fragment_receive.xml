@@ -137,7 +137,7 @@
                                     android:layout_marginLeft="6dp"
                                     android:layout_marginRight="2dp"
                                     android:layout_weight="0.1"
-                                    android:background="?android:selectableItemBackgroundBorderless"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
                                     android:divider="@null"
                                     android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
                             </LinearLayout>
@@ -163,7 +163,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="@string/contacts_request_money_receive"
-                        android:theme="@style/ButtonBlueTheme" />
+                        android:theme="@style/ButtonLightBlueTheme" />
                 </LinearLayout>
             </ScrollView>
             <!-- include keyboard -->

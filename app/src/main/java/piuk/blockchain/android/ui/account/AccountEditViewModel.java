@@ -226,7 +226,7 @@ public class AccountEditViewModel extends BaseViewModel {
         } else {
             accountModel.setDefaultAccountVisibility(View.VISIBLE);
             accountModel.setDefaultText(stringUtils.getString(R.string.make_default));
-            accountModel.setDefaultTextColor(R.color.primary_navy_medium);
+            accountModel.setDefaultTextColor(R.color.primary_blue_accent);
         }
     }
 

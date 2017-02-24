@@ -204,7 +204,7 @@
             android:layout_marginRight="32dp"
             android:layout_marginTop="16dp"
             android:text="@string/transfer_all"
-            android:theme="@style/ButtonBlueTheme" />
+            android:theme="@style/ButtonLightBlueTheme" />
 
     </LinearLayout>
 

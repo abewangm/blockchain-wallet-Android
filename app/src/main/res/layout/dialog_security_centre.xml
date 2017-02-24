@@ -71,7 +71,7 @@
             android:id="@+id/button_positive"
             style="@style/CustomDialogButton"
             android:layout_gravity="right"
-            android:textColor="@color/primary_navy_medium"
+            android:textColor="@color/primary_blue_accent"
             tools:text="@android:string/ok" />
 
     </LinearLayout>

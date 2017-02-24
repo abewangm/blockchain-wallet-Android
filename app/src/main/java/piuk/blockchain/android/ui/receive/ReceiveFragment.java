@@ -387,7 +387,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         super.onResume();
         setupToolbar();
         viewModel.updateAccountList();
-
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
     }
 

@@ -60,7 +60,7 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected QrCodeDataManager provideReceiveDataManager() {
+    protected QrCodeDataManager provideQrDataManager() {
         return new QrCodeDataManager();
     }
 
@@ -77,11 +77,17 @@ public class DataManagerModule {
     @Provides
     @ViewModelScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
-                                                                           TransactionListStore transactionListStore) {
+                                                                           TransactionListStore transactionListStore,
+                                                                           MultiAddrFactory multiAddrFactory) {
         return new TransactionListDataManager(
                 payloadManager,
                 new TransactionDetailsService(),
                 transactionListStore);
+//=======
+//                new TransactionDetailsService(new TransactionDetails()),
+//                transactionListStore,
+//                multiAddrFactory);
+//>>>>>>> 428273a595b0c99469865596015bbf9cd99d03cb
     }
 
     @Provides

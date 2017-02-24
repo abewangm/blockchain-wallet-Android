@@ -99,9 +99,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
         }
 
         if (PasswordUtil.getInstance().ddpw(payloadManager.getTempPassword()) || PasswordUtil.getInstance().getStrength(payloadManager.getTempPassword().toString()) < 50) {
-
-            LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-            final LinearLayout pwLayout = (LinearLayout) inflater.inflate(R.layout.modal_change_password, null);
+            final LinearLayout pwLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.modal_change_password, null);
 
             new Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
@@ -264,23 +262,24 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
 
     @Thunk
     void setSelectedPage(int position) {
-
-        setBackGround(binding.pageBox0, R.drawable.rounded_view_dark_blue);
-        setBackGround(binding.pageBox1, R.drawable.rounded_view_dark_blue);
-        setBackGround(binding.pageBox2, R.drawable.rounded_view_dark_blue);
-
         switch (position) {
             case 0:
                 binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_1));
-                setBackGround(binding.pageBox0, R.drawable.rounded_view_upgrade_wallet_blue);
+                setBackGround(binding.pageBox0, R.drawable.rounded_view_accent_blue);
+                setBackGround(binding.pageBox1, R.drawable.rounded_view_dark_blue);
+                setBackGround(binding.pageBox2, R.drawable.rounded_view_dark_blue);
                 break;
             case 1:
                 binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_2));
-                setBackGround(binding.pageBox1, R.drawable.rounded_view_upgrade_wallet_blue);
+                setBackGround(binding.pageBox0, R.drawable.rounded_view_dark_blue);
+                setBackGround(binding.pageBox1, R.drawable.rounded_view_accent_blue);
+                setBackGround(binding.pageBox2, R.drawable.rounded_view_dark_blue);
                 break;
             case 2:
                 binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_3));
-                setBackGround(binding.pageBox2, R.drawable.rounded_view_upgrade_wallet_blue);
+                setBackGround(binding.pageBox0, R.drawable.rounded_view_dark_blue);
+                setBackGround(binding.pageBox1, R.drawable.rounded_view_dark_blue);
+                setBackGround(binding.pageBox2, R.drawable.rounded_view_accent_blue);
                 break;
         }
     }

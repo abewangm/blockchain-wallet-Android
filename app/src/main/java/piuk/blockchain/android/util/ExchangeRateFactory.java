@@ -206,7 +206,9 @@ public class ExchangeRateFactory {
 
     private Observable<Double> parseStringValue(String value) {
         return Observable.fromCallable(() -> {
-            NumberFormat format = NumberFormat.getInstance(Locale.getDefault());
+            // Historic prices are in English format, using Locale.getDefault() will result in
+            // a parse exception in some regions
+            NumberFormat format = NumberFormat.getInstance(Locale.ENGLISH);
             Number number = format.parse(value);
             return number.doubleValue();
         });

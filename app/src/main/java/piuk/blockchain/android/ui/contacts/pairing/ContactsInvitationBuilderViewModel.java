@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.contacts.pairing;
 
 import android.content.Intent;
 import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.contacts.data.Contact;
 
@@ -18,10 +19,10 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 public class ContactsInvitationBuilderViewModel extends BaseViewModel {
 
     private DataListener dataListener;
-    private Contact recipient;
-    private Contact sender;
-    private String uri;
     @Inject ContactsDataManager contactManager;
+    @VisibleForTesting Contact recipient;
+    @VisibleForTesting Contact sender;
+    @VisibleForTesting String uri;
 
     interface DataListener {
 

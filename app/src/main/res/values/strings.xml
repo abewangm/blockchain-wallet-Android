@@ -3,7 +3,9 @@
 
     <string name="backup_wallet">Backup funds</string>
     <string name="upgrade_wallet">Upgrade</string>
-    <string name="current_price">1 BTC = %1$s</string>
+    <string name="current_price_btc">1 BTC = %1$s</string>
+    <string name="current_price_millibits">1 mBTC = %1$s</string>
+    <string name="current_price_bits">1 bit = %1$s</string>
 
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Settings</string>
@@ -124,7 +126,7 @@
     <string name="rate_us">Rate us</string>
     <string name="licenses">Licenses</string>
     <string name="email_chooser">Send e-mail…</string>
-    <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Free Merchant app</string>
     <string name="password_or_wipe">Enter using your password or forget this wallet</string>
     <string name="use_password">Use password</string>
@@ -419,6 +421,8 @@
     <string name="two_fa">2-step Verification</string>
     <string name="tor_requests">Block Tor Requests</string>
     <string name="tor_summary">Would you like to block IP addresses that are known to be part of the Tor anonymizing network from accessing your wallet? The Tor network is frequently used by hackers attempting to access Blockchain users wallets.</string>
+    <string name="enable_screenshots">Enable Screenshots</string>
+    <string name="enable_screenshots_warning">You\'re about to enable screenshots for the Blockchain app. Some screens within the application can display sensitive data. Other applications will be able to access these screenshots.</string>
     <string name="password_hint">Password Hint</string>
     <string name="password_hint_summary">Your Blockchain Wallet never communicates your password to our servers. This means we have no idea what your password is and we cannot reset it if you forget it. Create a memorable password hint that we can send to your verified email address in case you forget your password.</string>
     <string name="change_password">Change Password</string>
@@ -484,7 +488,6 @@
     <string name="transaction_detail_confirmed">Confirmed</string>
     <string name="transaction_detail_pending">Pending (%1$s/%2$s Confirmations)</string>
     <string name="transaction_detail_fee">"Transaction fee: %1$s"</string>
-    <string name="transaction_detail_tab_title">Details</string>
     <string name="transaction_detail_value_at_time_received">Value when received:\u0020</string>
     <string name="transaction_detail_value_at_time_transferred">Value when transferred:\u0020</string>
     <string name="transaction_detail_value_at_time_sent">Value when sent:\u0020</string>

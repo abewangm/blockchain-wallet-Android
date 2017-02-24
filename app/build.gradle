@@ -13,8 +13,8 @@ android {
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 25
-        versionCode 237
-        versionName "6.2.2"
+        versionCode 241
+        versionName "6.3.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
@@ -92,7 +92,7 @@ android {
     // Always show the result of every unit test, even if it passes.
     testOptions.unitTests.all {
         testLogging {
-            events 'passed', 'skipped', 'failed'
+            events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
         }
         reports.junitXml.destination = file('../build/test-results/')
         // This allows "unstable" builds on CI rather than straight failures
@@ -140,7 +140,7 @@ dependencies {
     compile 'com.neovisionaries:nv-websocket-client:1.19'
     compile('com.google.zxing:core:3.3.0') { transitive = true }
     compile 'com.github.mukeshsolanki:country-picker-android:1.1.7'
-    compile 'com.aurelhubert:ahbottomnavigation:2.0.2'
+    compile 'com.aurelhubert:ahbottomnavigation:2.0.5'
     // URL Builder
     compile "io.mikael:urlbuilder:2.0.8"
     // RxJava
@@ -187,7 +187,7 @@ dependencies {
     // Unit Tests in Kotlin
     testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testCompile 'com.nhaarman:mockito-kotlin:1.2.0'
+    testCompile 'com.nhaarman:mockito-kotlin:1.3.0'
 }
 
 buildscript {

@@ -32,6 +32,7 @@ public class TransactionListDataManager {
     private PayloadManager payloadManager;
     private TransactionDetailsService transactionDetails;
     private TransactionListStore transactionListStore;
+    private MultiAddrFactory multiAddrFactory;
     private Subject<List<Tx>> listUpdateSubject;
 
     public TransactionListDataManager(PayloadManager payloadManager,
@@ -40,6 +41,7 @@ public class TransactionListDataManager {
         this.payloadManager = payloadManager;
         this.transactionDetails = transactionDetails;
         this.transactionListStore = transactionListStore;
+        this.multiAddrFactory = multiAddrFactory;
         listUpdateSubject = PublishSubject.create();
     }
 
@@ -208,6 +210,25 @@ public class TransactionListDataManager {
 
         // TODO: 21/02/2017
         return new ArrayList<>();
+//=======
+//        if (account.getRealIdx() == INDEX_ALL_REAL) {
+//            if (payloadManager.getPayload().isUpgraded()) {
+//                transactions.addAll(getAllXpubAndLegacyTxs());
+//            } else {
+//                transactions.addAll(multiAddrFactory.getLegacyTxs());
+//            }
+//
+//        } else if (account.getRealIdx() == INDEX_IMPORTED_ADDRESSES) {
+//            // V3 - Imported Addresses
+//            transactions.addAll(multiAddrFactory.getLegacyTxs());
+//        } else {
+//            // V3 - Individual
+//            String xpub = account.getXpub();
+//            if (multiAddrFactory.getXpubAmounts().containsKey(xpub)) {
+//                ListUtil.addAllIfNotNull(transactions, multiAddrFactory.getXpubTxs().get(xpub));
+//            }
+//        }
+//>>>>>>> 428273a595b0c99469865596015bbf9cd99d03cb
 
 //        List<Tx> transactions = new ArrayList<>();
 //
@@ -239,13 +260,13 @@ public class TransactionListDataManager {
         // Remove duplicate txs
         HashMap<String, Tx> consolidatedTxsList = new HashMap<>();
 
-        List<Tx> allXpubTransactions = MultiAddrFactory.getInstance().getAllXpubTxs();
+        List<Tx> allXpubTransactions = multiAddrFactory.getAllXpubTxs();
         for (Tx tx : allXpubTransactions) {
             if (!consolidatedTxsList.containsKey(tx.getHash()))
                 consolidatedTxsList.put(tx.getHash(), tx);
         }
 
-        List<Tx> allLegacyTransactions = MultiAddrFactory.getInstance().getLegacyTxs();
+        List<Tx> allLegacyTransactions = multiAddrFactory.getLegacyTxs();
         for (Tx tx : allLegacyTransactions) {
             if (!consolidatedTxsList.containsKey(tx.getHash()))
                 consolidatedTxsList.put(tx.getHash(), tx);
