@@ -366,8 +366,6 @@
     <string name="two_fa">2段階認証</string>
     <string name="tor_requests">Torリクエストをブロック</string>
     <string name="tor_summary">Tor匿名ネットワークの一部として認識されているIPアドレスのあなたの財布へのアクセスをブロックしますか？Torネットワークはブロックチェーンユーザーの財布への不正アクセスに頻繁に利用されることが知られています。</string>
-    <string name="password_hint">パスワードヒント</string>
-    <string name="password_hint_summary">ブロックチェーンウォレットはサーバーにパスワードを伝達することはありません。当社ではお客様のパスワードを保管しておらず、忘れた場合でもこちらからリセットを行うことはできません。パスワードを忘れた場合にパスワードのヒントを送信できます。覚えやすいパスワードのヒントを作成してください。</string>
     <string name="change_password">パスワードを変更</string>
     <string name="change_password_summary">あなたのパスワードが当社サーバーに共有されることはありません。よって、パスワードを忘れた場合でも当社がリセットを行うことはできません。パスワードを紛失した場合にアクセスを復元するためのリカバリーフレーズを書き留めておいてください。</string>
     <string name="verify_email_notice">メールアドレスに認証リンクが送信されました。認証リンクをクリックしてメールアドレスを認証してください。</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">はい、ブロックチェーンウォレットを評価します</string>
     <string name="rate_no">いいえ、結構です</string>
     <string name="rate_later">後で通知する</string>
-    <string name="hint_reveals_password_error">メイン財布のパスワードをパスワードヒントに設定することはできません。</string>
     <string name="why_has_my_address_changed">なぜ私のアドレスが変更したのでしょうか？</string>
     <string name="learn_more">さらに詳しく</string>
 

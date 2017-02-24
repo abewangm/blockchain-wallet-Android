@@ -366,8 +366,6 @@
     <string name="two_fa">Validation en 2 étapes</string>
     <string name="tor_requests">Bloquer les requêtes de Tor</string>
     <string name="tor_summary">Souhaitez-vous bloquer les adresses IP connues pour faire partie du réseau anonyme Tor pour les empêcher d\'accéder à votre portefeuille ? Le réseau Tor est fréquemment utilisé par des hackers qui tentent d\'accéder aux portefeuilles des utilisateurs de Blockchain.</string>
-    <string name="password_hint">Indice pour le mot de passe</string>
-    <string name="password_hint_summary">Votre portefeuille Blockchain ne communique jamais votre mot de passe à nos serveurs. Cela signifie que nous ne connaissons pas du tout votre mot de passe et que nous ne pouvons pas le réinitialiser si vous l\'oubliez. Créez un indice de mot de passe facile à retenir que nous pouvons envoyer à votre adresse e-mail vérifiée au cas où vous oublieriez votre mot de passe.</string>
     <string name="change_password">Changer le mot de passe</string>
     <string name="change_password_summary">Votre mot de passe n\'est jamais partagé avec nos serveurs, ce qui signifie que nous ne pouvons pas vous aider à le réinitialiser si vous l\'oubliez. Assurez-vous d\’écrire votre phrase de récupération grâce à laquelle vous pouvez récupérer l\'accès à votre portefeuille en cas de perte de votre mot de passe.</string>
     <string name="verify_email_notice">Nous avons envoyé un lien de vérification à votre adresse e-mail. Cliquez sur le lien de vérification pour vérifier votre adresse e-mail.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Oui, évaluer le portefeuille Blockchain</string>
     <string name="rate_no">Non merci</string>
     <string name="rate_later">Rappelez-le moi plus tard</string>
-    <string name="hint_reveals_password_error">Vous ne pouvez pas choisir le mot de passe de votre portefeuille principal comme indice de mot de passe.</string>
     <string name="why_has_my_address_changed">Pourquoi mon adresse a-t-elle changé ?</string>
     <string name="learn_more">En savoir plus</string>
 

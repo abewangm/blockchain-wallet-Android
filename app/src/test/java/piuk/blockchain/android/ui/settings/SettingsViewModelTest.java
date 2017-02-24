@@ -239,18 +239,6 @@ public class SettingsViewModelTest {
     }
 
     @Test
-    public void getPasswordHint() throws Exception {
-        // Arrange
-        String hint = "hint";
-        subject.settings = mock(Settings.class);
-        when(subject.settings.getPasswordHint1()).thenReturn(hint);
-        // Act
-        String value = subject.getPasswordHint();
-        // Assert
-        assertEquals(hint, value);
-    }
-
-    @Test
     public void isSmsVerified() throws Exception {
         // Arrange
         subject.settings = mock(Settings.class);
@@ -420,41 +408,6 @@ public class SettingsViewModelTest {
         when(settingsDataManager.updateTor(anyBoolean())).thenReturn(Observable.just(false));
         // Act
         subject.updateTor(true);
-        // Assert
-        //noinspection WrongConstant
-        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
-        verifyNoMoreInteractions(activity);
-    }
-
-    @Test
-    public void updatePasswordHintInvalid() throws Exception {
-        // Arrange
-        String veryLongString = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
-        // Act
-        subject.updatePasswordHint(veryLongString);
-        // Assert
-        //noinspection WrongConstant
-        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
-        verifyNoMoreInteractions(activity);
-    }
-
-    @Test
-    public void updatePasswordHintSuccess() throws Exception {
-        // Arrange
-        when(settingsDataManager.updatePasswordHint(anyString())).thenReturn(Observable.just(true));
-        subject.settings = new Settings();
-        // Act
-        subject.updatePasswordHint("hint");
-        // Assert
-        verify(activity).setPasswordHintSummary(anyString());
-    }
-
-    @Test
-    public void updatePasswordHintFailed() throws Exception {
-        // Arrange
-        when(settingsDataManager.updatePasswordHint(anyString())).thenReturn(Observable.just(false));
-        // Act
-        subject.updatePasswordHint("hint");
         // Assert
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));

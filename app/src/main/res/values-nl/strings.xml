@@ -366,8 +366,6 @@
     <string name="two_fa">2-ledige verificatie</string>
     <string name="tor_requests">Tor-verzoeken blokkeren</string>
     <string name="tor_summary">Wilt u de toegang tot uw portemonnee blokkeren voor IP-adressen waarvan bekend is dat ze deel uitmaken van het anonieme Tor-netwerk. Het Tor-netwerk wordt vaak gebruikt door hackers om te proberen toegang te krijgen tot portemonnees van Blockchain-gebruikers.</string>
-    <string name="password_hint">Wachtwoordhint</string>
-    <string name="password_hint_summary">Uw Blockchain Portemonnee communiceert uw wachtwoord nooit naar onze servers. Dit betekent dat we geen idee hebben wat uw wachtwoord is en we het niet kunnen resetten als u het bent vergeten. Maak een goed te onthouden wachtwoordhint aan die we naar uw geverifieerde e-mailadres kunnen sturen wanneer u uw wachtwoord bent vergeten.</string>
     <string name="change_password">Wachtwoord wijzigen</string>
     <string name="change_password_summary">Uw wachtwoord wordt nooit gedeeld met onze servers, wat betekent dat we u niet kunnen helpen om uw wachtwoord te resetten als u het bent vergeten. Zorg ervoor dat u uw herstelregel opschrijft zodat de toegang tot uw portemonnee kan worden hersteld wanneer u uw wachtwoord kwijt bent.</string>
     <string name="verify_email_notice">We hebben een verificatielink naar uw e-mailadres gestuurd. Klik op de verificatielink om uw e-mailadres te verifiëren.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Ja, beoordeel Blockchain Portemonnee</string>
     <string name="rate_no">Nee, bedankt</string>
     <string name="rate_later">Herinner me later</string>
-    <string name="hint_reveals_password_error">U kunt het hoofdwachtwoord van uw portemonnee niet instellen als uw wachtwoordhint.</string>
     <string name="why_has_my_address_changed">Waarom is mijn adres gewijzigd?</string>
     <string name="learn_more">Kom meer te weten</string>
 

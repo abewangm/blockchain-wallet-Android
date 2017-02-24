@@ -95,22 +95,6 @@ public class SettingsServiceTest extends RxTest {
     }
 
     @Test
-    public void updatePasswordHint() throws Exception {
-        // Arrange
-        doAnswer(invocation -> {
-            ((Settings.ResultListener) invocation.getArguments()[1]).onSuccess();
-            return null;
-        }).when(settings).setPasswordHint1(
-                anyString(), any(Settings.ResultListener.class));
-        // Act
-        TestObserver<Boolean> observer = subject.updatePasswordHint("code").test();
-        // Assert
-        observer.assertComplete();
-        observer.assertNoErrors();
-        assertEquals(true, observer.values().get(0));
-    }
-
-    @Test
     public void disableNotificationsFailed() throws Exception {
         // Arrange
         doAnswer(invocation -> {

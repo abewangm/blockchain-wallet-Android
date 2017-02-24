@@ -366,8 +366,6 @@
     <string name="two_fa">Verificación de 2 pasos</string>
     <string name="tor_requests">Bloquear solicitudes de Tor</string>
     <string name="tor_summary">¿Te gustaría bloquear aquellas direcciones IP que son conocidas por formar parte de la red de anonimidad Tor, para evitar que accedan a tu monedero? La red Tor es usada con frecuencia por piratas informáticos que intentan acceder a los monederos de los usuarios de Blockchain.</string>
-    <string name="password_hint">Sugerencia para la contraseña</string>
-    <string name="password_hint_summary">Tu monedero Blockchain nunca comunica tu contraseña a nuestros servidores. Esto significa que no tenemos idea de cuál pueda ser tu contraseña y no podemos restablecerla si la olvidas. Crea una sugerencia de contraseña recordable que podamos enviar a tu dirección de correo verificada en caso de que olvides tu contraseña.</string>
     <string name="change_password">Cambiar contraseña</string>
     <string name="change_password_summary">Tu contraseña nunca es compartida con nuestros servidores, lo que significa que no podemos ayudarte a restablecerla si la olvidas. Asegúrate de anotar tu frase de recuperación para restaurar el acceso a tu monedero en caso de que pierdas tu contraseña.</string>
     <string name="verify_email_notice">Hemos enviado un enlace de verificación a tu dirección de correo electrónico. Haz clic en el enlace de verificación para verificar tu dirección de correo electrónico.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Si, calificar el monedero Blockchain</string>
     <string name="rate_no">No, gracias</string>
     <string name="rate_later">Recordarme más tarde</string>
-    <string name="hint_reveals_password_error">No se puede establecer la contraseña principal de la cartera como tu sugerencia de contraseña.</string>
     <string name="why_has_my_address_changed">¿Por qué ha cambiado mi dirección?</string>
     <string name="learn_more">Saber más</string>
 

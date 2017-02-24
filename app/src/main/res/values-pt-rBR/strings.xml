@@ -366,8 +366,6 @@
     <string name="two_fa">Verificação em 2 Passos</string>
     <string name="tor_requests">Bloquear solicitações Tor</string>
     <string name="tor_summary">Gostaria de bloquear IPs conhecidos por serem da rede anônima Tor de acessarem sua carteira? A rede Tor é frequentemente utilizada por hackers tentando acessar carteiras de usuários Blockchain.</string>
-    <string name="password_hint">Dica de Senha</string>
-    <string name="password_hint_summary">Sua Carteira Blockchain nunca informa a sua senha aos nossos servidores. Isso significa que nós não temos ideia de qual é a sua senha, e não podemos recuperá-la se você a esquecer. Crie uma dica de senha fácil de lembrar, que você receberá por e-mail se esquecer a senha.</string>
     <string name="change_password">Alterar Senha</string>
     <string name="change_password_summary">Sua senha nunca é compartilhada com os nossos servidores. Por isso, nós não poderemos ajudá-lo a redefinir a senha se você esquecê-la. Certifique-se de anotar sua Frase de Recuperação, que restaura o acesso a sua carteira em caso de perda da senha.</string>
     <string name="verify_email_notice">Enviamos ao seu e-mail um link de verificação. Clique no link de verificação para confirmar o seu endereço de e-mail.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Sim, avaliar a Carteira Blockchain</string>
     <string name="rate_no">Não, obrigado</string>
     <string name="rate_later">Lembrar mais tarde</string>
-    <string name="hint_reveals_password_error">A dica de senha não pode ser igual à senha principal da carteira.</string>
     <string name="why_has_my_address_changed">Por que meu endereço mudou?</string>
     <string name="learn_more">Saiba Mais</string>
 

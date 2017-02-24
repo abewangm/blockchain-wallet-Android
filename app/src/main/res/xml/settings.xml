@@ -47,9 +47,6 @@
         <piuk.blockchain.android.ui.settings.customprefs.CustomPreference
             android:key="change_pw"
             android:title="@string/change_password" />
-        <piuk.blockchain.android.ui.settings.customprefs.CustomPreference
-            android:key="pw_hint1"
-            android:title="@string/password_hint" />
         <piuk.blockchain.android.ui.settings.customprefs.CustomSwitchPreferenceCompat
             android:key="tor"
             android:title="@string/tor_requests" />

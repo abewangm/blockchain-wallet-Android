@@ -86,7 +86,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     // Security
     @Thunk SwitchPreferenceCompat fingerprintPref;
     private SwitchPreferenceCompat twoStepVerificationPref;
-    private Preference passwordHint1Pref;
     private SwitchPreferenceCompat torPref;
     private SwitchPreferenceCompat launcherShortcutPrefs;
     private SwitchPreferenceCompat swipeToReceivePrefs;
@@ -151,9 +150,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
         twoStepVerificationPref = (SwitchPreferenceCompat) findPreference("2fa");
         twoStepVerificationPref.setOnPreferenceClickListener(this);
-
-        passwordHint1Pref = findPreference("pw_hint1");
-        passwordHint1Pref.setOnPreferenceClickListener(this);
 
         Preference changePasswordPref = findPreference("change_pw");
         changePasswordPref.setOnPreferenceClickListener(this);
@@ -319,11 +315,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     @Override
-    public void setPasswordHintSummary(String summary) {
-        passwordHint1Pref.setSummary(summary);
-    }
-
-    @Override
     public void setTorBlocked(boolean blocked) {
         torPref.setChecked(blocked);
     }
@@ -444,9 +435,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 break;
             case "pin":
                 showDialogChangePin();
-                break;
-            case "pw_hint1":
-                showDialogPasswordHint();
                 break;
             case "change_pw":
                 showDialogChangePasswordWarning();
@@ -675,31 +663,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         dialog.show();
     }
 
-    private void showDialogPasswordHint() {
-        AppCompatEditText editText = new AppCompatEditText(getActivity());
-        editText.setText(viewModel.getPasswordHint());
-        editText.setSelection(viewModel.getPasswordHint().length());
-        editText.setSingleLine(true);
-        editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.password_hint)
-                .setMessage(R.string.password_hint_summary)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
-                .setCancelable(false)
-                .setPositiveButton(R.string.update, (dialogInterface, i) -> {
-                    String hint = editText.getText().toString();
-                    if (!hint.equals(viewModel.getTempPassword().toString())) {
-                        viewModel.updatePasswordHint(hint);
-                    } else {
-                        ToastCustom.makeText(getActivity(), getString(R.string.hint_reveals_password_error), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .create()
-                .show();
-    }
-
     private void showDialogChangePin() {
         Intent intent = new Intent(getActivity(), PinEntryActivity.class);
         intent.putExtra(KEY_VALIDATING_PIN_FOR_RESULT, true);
@@ -808,8 +771,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                         if (newPw.equals(newConfirmedPw)) {
                             if (newConfirmedPw.length() < 4 || newConfirmedPw.length() > 255) {
                                 ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                            } else if (newConfirmedPw.equals(viewModel.getPasswordHint())) {
-                                ToastCustom.makeText(getActivity(), getString(R.string.hint_reveals_password_error), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
                             } else if (pwStrength < 50) {
                                 new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                                         .setTitle(R.string.app_name)

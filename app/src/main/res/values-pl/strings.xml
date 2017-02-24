@@ -366,8 +366,6 @@
     <string name="two_fa">Uwierzytelnianie Dwustopniowe</string>
     <string name="tor_requests">Zablokuj żądania Tor</string>
     <string name="tor_summary">Czy chcesz blokować adresy IP powiązane z anonimową siecią Tor przed dostępem do Twojego portfela? Sieć Tor często jest wykorzystywana przez hakerów włamujących się na portfele użytkowników Blockchain.</string>
-    <string name="password_hint">Wskazówka hasła</string>
-    <string name="password_hint_summary">Twój Portfel Blockchain nigdy nie przesyła Twojego hasła na nasze serwery Oznacza to, że nie mamy pojęcia jakie jest Twoje hasło i nie możemy go zresetować, jeśli go zapomnisz.  Stwórz łatwą do zapamiętania wskazówkę hasła, którą wyślemy na Twój potwierdzony adres e-mail w razie, gdy zapomnisz swojego hasła.</string>
     <string name="change_password">Zmień hasło</string>
     <string name="change_password_summary">Twoje hasło nie jest przechowywane na naszych serwerach, co znaczy, że nie będziemy mogli Ci pomóc w jego zresetowaniu gdy go zapomnisz.  Zapisz sobie swój zwrot do odzyskiwania hasła, dzięki któremu możesz odzyskać dostęp do swojego portfela w razie zagubienia hasła.</string>
     <string name="verify_email_notice">Wysłaliśmy link weryfikacyjny pod Twój adres e-mail. Kliknij link weryfikacyjny, by zweryfikować swój adres e-mail.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Tak, oceń Portfel Blockchain</string>
     <string name="rate_no">Nie, dzięki</string>
     <string name="rate_later">Przypomnij mi później</string>
-    <string name="hint_reveals_password_error">Twoje główne hasło do portfela nie może być takie samo jak wskazówka hasła.</string>
     <string name="why_has_my_address_changed">Dlaczego mój adres uległ zmianie?</string>
     <string name="learn_more">Dowiedz się więcej</string>
 

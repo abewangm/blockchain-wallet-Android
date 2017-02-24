@@ -366,8 +366,6 @@
     <string name="two_fa">2-aşamalı Doğrulama</string>
     <string name="tor_requests">Tor Taleplerini Engelle</string>
     <string name="tor_summary">Tor anonimleştirme ağına ait olduğu bilinen IP adreslerinin cüzdanınıza erişimini engellemek ister misiniz? Tor ağı, Blochchain kullanıcı cüzdanlarına erişmek için korsanlar tarafından sıkça kullanılır.</string>
-    <string name="password_hint">Şifre İpucu</string>
-    <string name="password_hint_summary">Blockchain Cüzdanınız şifrenizi sunucularımıza asla sağlamaz. Bu da şifrenizin ne olduğunu bilmediğimiz ve unuttuğunuzda bunu yeniden ayarlamak için sıfırlayamadığımız anlamına gelir. Şifrenizi unutmanız durumunda doğrulanmış e-posta adresinize gönderebileceğimiz aklınızda kalacak bir şifre ipucu oluşturun.</string>
     <string name="change_password">Şifre Değiştir</string>
     <string name="change_password_summary">Şifreniz sunucularımızla asla paylaşılmaz, bu sebeple şifrenizi unuttuğunuz zaman sıfırlamanıza yardımcı olamıyoruz.  Şifrenin kaybolması durumunda cüzdanınıza erişimi sıfırlamak için kurtarma ifadenizi not ettiğinizden emin olun.</string>
     <string name="verify_email_notice">E-posta adresinize bir doğrulama bağlantısı gönderdik. E-posta adresinizi doğrulamak için lütfen gönderilen doğrulama bağlantısına tıklayın.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Evet, Blockchain Cüzdanına puan ver</string>
     <string name="rate_no">Hayır, teşekkürler</string>
     <string name="rate_later">Daha sonra hatırlat</string>
-    <string name="hint_reveals_password_error">Ana cüzdan şifrenizi şifre ipucunuz olarak ayarlayamazsınız.</string>
     <string name="why_has_my_address_changed">Adresim neden değişti?</string>
     <string name="learn_more">Daha Fazla Öğren</string>
 

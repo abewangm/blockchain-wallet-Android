@@ -366,8 +366,6 @@
     <string name="two_fa">Xác minh 2 bước</string>
     <string name="tor_requests">Chặn các yêu cầu từ Tor</string>
     <string name="tor_summary">Bạn có muốn chặn các địa chỉ IP, được biết đến là một phần của mạng ẩn danh Tor, khỏi việc truy cập vào ví của bạn? Mạng Tor được sử dụng thường xuyên bởi các hacker, những kẻ luôn cố gắng truy cập vào ví người dùng Blockchain.</string>
-    <string name="password_hint">Cụm từ gợi ý mật khẩu</string>
-    <string name="password_hint_summary">Ví Blockchain không bao giờ chia sẻ mật khẩu của bạn đến các máy chủ của chúng tôi. Điều này có nghĩa chúng tôi không có ý kiến gì về mật khẩu của bạn và chúng tôi không thể thiết lập lại mật khẩu nếu bạn quên. Tạo một cụm từ gợi ý mật khẩu dễ nhớ để chúng tôi có thể gửi đến địa chỉ email đã xác minh của bạn trong trường hợp bạn quên mật khẩu của mình.</string>
     <string name="change_password">Thay đổi mật khẩu</string>
     <string name="change_password_summary">Mật khẩu của bạn không bao giờ được chia sẻ với các máy chủ của chúng tôi, điều đó có nghĩa chúng tôi không thể hỗ trợ bạn thiết lập lại mật khẩu nếu bạn quên. Hãy chắc chắn bạn ghi lại nhóm từ khôi phục để có thể khôi phục truy cập ví trong trường hợp mất mật khẩu.</string>
     <string name="verify_email_notice">Chúng tôi đã gửi đến địa chỉ email của một bạn liên kết xác minh. Nhấn vào liên kết xác minh để xác minh địa chỉ email của bạn.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Có, đánh giá Ví Blockchain</string>
     <string name="rate_no">Không, cảm ơn</string>
     <string name="rate_later">Nhắc lại sau</string>
-    <string name="hint_reveals_password_error">Bạn không thể đặt mật khẩu chính của mình làm cụm từ gợi ý mật khẩu.</string>
     <string name="why_has_my_address_changed">Tại sao địa chỉ của tôi đã thay đổi?</string>
     <string name="learn_more">Tìm hiểu thêm</string>
 

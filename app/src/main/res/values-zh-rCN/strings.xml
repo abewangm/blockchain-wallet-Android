@@ -366,8 +366,6 @@
     <string name="two_fa">2 步验证</string>
     <string name="tor_requests">阻止 Tor 请求</string>
     <string name="tor_summary">您是否要阻止已知为 Tor 匿名网络一部分的 IP 地址访问您的钱包？Tor 网络经常被尝试访问 Blockchain 用户钱包的黑客利用。</string>
-    <string name="password_hint">密码提示</string>
-    <string name="password_hint_summary">您的 Blockchain 钱包决不会向们的服务器发送您的密码。这意味着我们无法知晓您的密码，因此，如果您忘记了密码，我们无法为您重置。请创建一个易记的密码提示，从而让我们可在您忘记密码的情况下将其发送到您经过验证的电子邮件地址。</string>
     <string name="change_password">更改密码</string>
     <string name="change_password_summary">您的密码不会在我们的服务器上共享，这意味着如果您忘记了密码，我们将无法帮助您重置。请记录下您的恢复密语，这将帮助您在丢失密码的情况下恢复钱包的访问权限。</string>
     <string name="verify_email_notice">我们已向您的电子邮件地址发送了验证连接。单击此验证连接，验证您的电子邮件地址。</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">是，给 Blockchain 钱包打分</string>
     <string name="rate_no">不，谢谢</string>
     <string name="rate_later">以后提醒我</string>
-    <string name="hint_reveals_password_error">不可将钱包主密码设置为密码提示。</string>
     <string name="why_has_my_address_changed">为什么我的地址改了？</string>
     <string name="learn_more">了解更多</string>
 

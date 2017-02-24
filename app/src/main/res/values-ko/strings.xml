@@ -363,8 +363,6 @@
     <string name="two_fa">2 단계 확인</string>
     <string name="tor_requests">Tor 요청 차단</string>
     <string name="tor_summary">Tor 익명 네트워크 일부로 알려진 IP 주소들을 차단해서 지갑을 열지 못하게 하겠습니까? 블록체인 사용자 지갑을 열려고 하는 해커들이 Tor 네트워크를 자주 씁니다.</string>
-    <string name="password_hint">암호 힌트</string>
-    <string name="password_hint_summary">귀하의 블록체인 지갑은 저희 서버와 암호에 대해 교신하지 않습니다. 즉 저희는 사용자 암호를 알 수 없고 잊어버렸을 때 재 설정도 못 합니다.  암호를 잊었을 때 우리가 귀하의 확인된 이메일 주소로 보낼 기억 가능한 암호를 만드세요.</string>
     <string name="change_password">암호 변경</string>
     <string name="change_password_summary">귀하 암호는 우리 서버와 공유되지 않습니다. 즉 저희는 잊어버린 암호 재 설정을 못 합니다.  암호를 잊었을 때 지갑 접근 복구를 할 수 있도록 귀하의 복구 구절을 반드시 적어 놓으세요</string>
     <string name="verify_email_notice">귀하 이메일 주소로 확인 링크를 보냈습니다. 귀하 이메일 주소 확인을 위해 확인 링크를 클릭하세요</string>
@@ -381,7 +379,6 @@
     <string name="rate_yes">네, 블록체인 지갑 평가를 하겠습니다.</string>
     <string name="rate_no">아니오, 괜찮습니다.</string>
     <string name="rate_later">나중에 다시 얘기해 주세요</string>
-    <string name="hint_reveals_password_error">사용자 주 지갑 암호는 암호 힌트로 설정할 수 없습니다.</string>
     <string name="why_has_my_address_changed">내 주소가 왜 바뀌었나요?</string>
     <string name="learn_more">더 배우기</string>
 

@@ -99,19 +99,6 @@ public class SettingsDataManagerTest extends RxTest {
     }
 
     @Test
-    public void updatePasswordHint() throws Exception {
-        // Arrange
-        when(settingsService.updatePasswordHint(anyString())).thenReturn(Observable.just(true));
-        // Act
-        TestObserver<Boolean> observer = subject.updatePasswordHint("hint").test();
-        // Assert
-        verify(settingsService).updatePasswordHint(anyString());
-        observer.assertComplete();
-        observer.assertNoErrors();
-        assertEquals(true, observer.values().get(0));
-    }
-
-    @Test
     public void updateNotificationsEnabled() throws Exception {
         // Arrange
         when(settingsService.enableNotifications(anyInt())).thenReturn(Observable.just(true));

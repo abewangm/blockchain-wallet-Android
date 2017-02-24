@@ -366,8 +366,6 @@
     <string name="two_fa">2-Schritt-Verifizierung</string>
     <string name="tor_requests">Tor-Anfragen sperren</string>
     <string name="tor_summary">Möchten Sie verhindern, dass bekannterweise dem Anonymisierungsnetzwerk Tor zugehörige IP-Adressen Zugang zu Ihrer Wallet erhalten? Hackers versuchen häufig mithilfe des Tor-Netzwerkes, Zugriff auf Wallets von Blockchain-Benutzern zu bekommen.</string>
-    <string name="password_hint">Passworthinweis</string>
-    <string name="password_hint_summary">Ihre Blockchain-Wallet teilt unseren Servern niemals Ihr Passwort mit. Deshalb haben wir auch keine Kenntnisse darüber und können Ihr Passwort - sollten Sie es vergessen - nicht zurücksetzen. Erstellen Sie einen einprägsamen Passworthinweis, den wir Ihnen an Ihre verifizierte E-Mail-Adresse zusenden können, falls Sie sich nicht mehr an Ihr Passwort erinnern.</string>
     <string name="change_password">Passwort ändern</string>
     <string name="change_password_summary">Ihr Passwort wird unseren Servern niemals mitgeteilt, weshalb wir Ihnen bei der Rücksetzung Ihres Passwortes - sollten Sie dieses vergessen - nicht behilflich sein können. Denken Sie daran, Ihr Wiederherstellungspasswort, das Ihnen im Falle eines Passwortverlustes einen erneuten Zugriff auf Ihre Wallet ermöglicht, aufzuschreiben.</string>
     <string name="verify_email_notice">Wir haben an Ihre E-Mail-Adresse einen Verifizierungslink gesandt. Zur Verifizierung Ihrer E-Mail-Adresse klicken Sie bitte auf den entsprechenden Link.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Ja, Blockchain Wallet bewerten</string>
     <string name="rate_no">Nein, danke</string>
     <string name="rate_later">Nochmal später daran erinnern</string>
-    <string name="hint_reveals_password_error">Sie können Ihr Wallet-Hauptpasswort nicht als Passworthinweis einsetzen.</string>
     <string name="why_has_my_address_changed">Warum hat sich meine Adresse geändert?</string>
     <string name="learn_more">Mehr dazu</string>
 
