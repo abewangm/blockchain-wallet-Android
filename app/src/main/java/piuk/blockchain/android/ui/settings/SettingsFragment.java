@@ -90,6 +90,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     private SwitchPreferenceCompat torPref;
     private SwitchPreferenceCompat launcherShortcutPrefs;
     private SwitchPreferenceCompat swipeToReceivePrefs;
+    private SwitchPreferenceCompat screenshotPref;
 
     @Thunk SettingsViewModel viewModel;
     private int pwStrength = 0;
@@ -160,6 +161,26 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
         torPref = (SwitchPreferenceCompat) findPreference("tor");
         torPref.setOnPreferenceClickListener(this);
+
+        screenshotPref = (SwitchPreferenceCompat) findPreference("screenshots_enabled");
+        screenshotPref.setOnPreferenceChangeListener((preference, newValue) -> {
+            if (((Boolean) newValue)) {
+                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                        .setTitle(R.string.enable_screenshots)
+                        .setMessage(R.string.enable_screenshots_warning)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) ->
+                                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, true))
+                        .setNegativeButton(android.R.string.cancel, (dialogInterface, i) ->
+                                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false))
+                        .create()
+                        .show();
+            } else {
+                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false);
+            }
+
+            return true;
+        });
 
         launcherShortcutPrefs = (SwitchPreferenceCompat) findPreference("receive_shortcuts_enabled");
         launcherShortcutPrefs.setOnPreferenceClickListener(this);
@@ -326,6 +347,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     @Override
     public void setTorBlocked(boolean blocked) {
         torPref.setChecked(blocked);
+    }
+
+    @Override
+    public void setScreenshotsEnabled(boolean enabled) {
+        screenshotPref.setChecked(enabled);
     }
 
     @Override
