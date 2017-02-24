@@ -21,6 +21,7 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ApplicationLifeCycle;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 
@@ -90,9 +91,12 @@ public class BaseAuthActivity extends AppCompatActivity {
      * @param title   The title for the page, as a String
      */
     public void setupToolbar(Toolbar toolbar, String title) {
-        toolbar.setTitle(CalligraphyUtils.applyTypefaceSpan(
-                title,
-                TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        // Fix for bug with formatted ActionBars https://android-review.googlesource.com/#/c/47831/
+        if (AndroidUtils.is18orHigher()) {
+            toolbar.setTitle(CalligraphyUtils.applyTypefaceSpan(
+                    title,
+                    TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        }
 
         setSupportActionBar(toolbar);
     }
@@ -106,9 +110,12 @@ public class BaseAuthActivity extends AppCompatActivity {
      * @param title     The title for the page, as a StringRes
      */
     public void setupToolbar(ActionBar actionBar, @StringRes int title) {
-        actionBar.setTitle(CalligraphyUtils.applyTypefaceSpan(
-                getString(title),
-                TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        // Fix for bug with formatted ActionBars https://android-review.googlesource.com/#/c/47831/
+        if (AndroidUtils.is18orHigher()) {
+            actionBar.setTitle(CalligraphyUtils.applyTypefaceSpan(
+                    getString(title),
+                    TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        }
     }
 
     @CallSuper

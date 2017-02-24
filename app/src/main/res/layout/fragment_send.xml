@@ -67,7 +67,7 @@
                                 android:layout_marginLeft="6dp"
                                 android:layout_marginRight="2dp"
                                 android:layout_weight="0.1"
-                                android:background="?android:selectableItemBackgroundBorderless"
+                                android:background="?attr/selectableItemBackgroundBorderless"
                                 android:divider="@null"
                                 android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
                         </LinearLayout>
@@ -121,7 +121,7 @@
                                 android:layout_marginLeft="6dp"
                                 android:layout_marginRight="2dp"
                                 android:layout_weight="0.1"
-                                android:background="?android:selectableItemBackgroundBorderless"
+                                android:background="?attr/selectableItemBackgroundBorderless"
                                 android:divider="@null"
                                 android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
                         </LinearLayout>
@@ -234,7 +234,7 @@
                     android:paddingLeft="32dp"
                     android:paddingRight="32dp"
                     android:text="@string/CONTINUE"
-                    android:theme="@style/ButtonBlueTheme" />
+                    android:theme="@style/ButtonLightBlueTheme" />
 
                 <TextView
                     android:id="@+id/unconfirmed_funds_warning"

@@ -69,7 +69,7 @@
 
         <TextView
             android:id="@+id/command_next"
-            style="@style/MegaButtonBlue"
+            style="@style/MegaButtonAccentBlue"
             android:layout_gravity="center_horizontal|center_vertical"
             android:text="@string/CONTINUE" />
 

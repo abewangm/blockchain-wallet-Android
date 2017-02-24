@@ -27,7 +27,7 @@
                 android:layout_marginRight="16dp"
                 android:layout_weight="1"
                 android:text="@string/contacts_rename"
-                android:theme="@style/ButtonBlueTheme" />
+                android:theme="@style/ButtonLightBlueTheme" />
 
             <Button
                 android:id="@+id/button_delete"
@@ -39,7 +39,7 @@
                 android:layout_marginRight="16dp"
                 android:layout_weight="1"
                 android:text="@string/contacts_delete"
-                android:theme="@style/ButtonBlueTheme" />
+                android:theme="@style/ButtonLightBlueTheme" />
         </LinearLayout>
 
         <TextView
