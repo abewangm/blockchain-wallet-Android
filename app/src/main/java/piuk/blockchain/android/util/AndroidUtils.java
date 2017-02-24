@@ -27,4 +27,5 @@ public class AndroidUtils {
     public static boolean is25orHigher() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1;
     }
+
 }
