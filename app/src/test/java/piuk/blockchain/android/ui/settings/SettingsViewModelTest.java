@@ -292,6 +292,16 @@ public class SettingsViewModelTest {
     }
 
     @Test
+    public void updatePreferencesBoolean() throws Exception {
+        // Arrange
+        subject.settings = new Settings();
+        // Act
+        subject.updatePreferences("key", true);
+        // Assert
+        verify(prefsUtil).setValue(anyString(), anyBoolean());
+    }
+
+    @Test
     public void updateEmailSuccess() throws Exception {
         // Arrange
         when(settingsDataManager.updateEmail(anyString())).thenReturn(Observable.just(true));

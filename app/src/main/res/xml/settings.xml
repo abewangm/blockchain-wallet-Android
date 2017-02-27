@@ -51,6 +51,11 @@
             android:key="tor"
             android:title="@string/tor_requests" />
         <piuk.blockchain.android.ui.settings.customprefs.CustomSwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="screenshots_enabled"
+            android:persistent="true"
+            android:title="@string/enable_screenshots" />
+        <piuk.blockchain.android.ui.settings.customprefs.CustomSwitchPreferenceCompat
             android:defaultValue="true"
             android:key="receive_shortcuts_enabled"
             android:persistent="true"

@@ -83,6 +83,8 @@ public class SettingsViewModel extends BaseViewModel {
 
         void setTorBlocked(boolean blocked);
 
+        void setScreenshotsEnabled(boolean enabled);
+
         void showDialogEmailVerification();
 
         void showDialogVerifySms();
@@ -202,6 +204,9 @@ public class SettingsViewModel extends BaseViewModel {
 
         // Tor
         dataListener.setTorBlocked(settings.isTorBlocked());
+
+        // Screenshots
+        dataListener.setScreenshotsEnabled(prefsUtil.getValue(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false));
 
         // Launcher shortcuts
         dataListener.setLauncherShortcutVisibility(AndroidUtils.is25orHigher());
@@ -370,6 +375,17 @@ public class SettingsViewModel extends BaseViewModel {
      * @param value The value to be stored as an int
      */
     void updatePreferences(String key, int value) {
+        prefsUtil.setValue(key, value);
+        updateUi();
+    }
+
+    /**
+     * Write key/value to {@link android.content.SharedPreferences}
+     *
+     * @param key   The key under which to store the data
+     * @param value The value to be stored as a boolean
+     */
+    void updatePreferences(String key, boolean value) {
         prefsUtil.setValue(key, value);
         updateUi();
     }
