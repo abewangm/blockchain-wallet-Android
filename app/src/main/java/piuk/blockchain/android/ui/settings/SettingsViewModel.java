@@ -81,8 +81,6 @@ public class SettingsViewModel extends BaseViewModel {
 
         void setTwoFaSummary(String summary);
 
-        void setPasswordHintSummary(String summary);
-
         void setTorBlocked(boolean blocked);
 
         void setScreenshotsEnabled(boolean enabled);
@@ -203,13 +201,6 @@ public class SettingsViewModel extends BaseViewModel {
         // 2FA
         dataListener.setTwoFaPreference(settings.getAuthType() != Settings.AUTH_TYPE_OFF);
         dataListener.setTwoFaSummary(getTwoFaSummary(settings.getAuthType()));
-
-        // Password hint
-        if (settings.getPasswordHint1() != null && !settings.getPasswordHint1().isEmpty()) {
-            dataListener.setPasswordHintSummary(settings.getPasswordHint1());
-        } else {
-            dataListener.setPasswordHintSummary("");
-        }
 
         // Tor
         dataListener.setTorBlocked(settings.isTorBlocked());
@@ -352,14 +343,6 @@ public class SettingsViewModel extends BaseViewModel {
     }
 
     /**
-     * @return the user's password hint or an empty string if not set
-     */
-    @NonNull
-    String getPasswordHint() {
-        return settings.getPasswordHint1() != null ? settings.getPasswordHint1() : "";
-    }
-
-    /**
      * @return is the user's phone number is verified
      */
     boolean isSmsVerified() {
@@ -486,27 +469,6 @@ public class SettingsViewModel extends BaseViewModel {
                                 throw Exceptions.propagate(new Throwable("Update TOR failed"));
                             }
                         }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
-    }
-
-    /**
-     * Updates the user's password hint
-     *
-     * @param hint The new password hint
-     */
-    void updatePasswordHint(String hint) {
-        if (!isStringValid(hint)) {
-            dataListener.showToast(R.string.settings_field_cant_be_empty, ToastCustom.TYPE_ERROR);
-        } else {
-            compositeDisposable.add(
-                    settingsDataManager.updatePasswordHint(hint)
-                            .subscribe(success -> {
-                                if (success) {
-                                    updateUi();
-                                } else {
-                                    throw Exceptions.propagate(new Throwable("Update password hint failed"));
-                                }
-                            }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
-        }
     }
 
     /**

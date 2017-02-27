@@ -67,16 +67,6 @@ public class SettingsService {
     }
 
     /**
-     * Update the user's password hint
-     *
-     * @param hint The user's password hint
-     * @return A {@link Observable<Boolean>}, where the boolean represents a successful save or not
-     */
-    public Observable<Boolean> updatePasswordHint(String hint) {
-        return Observable.create(subscriber -> settingsApi.setPasswordHint1(hint, new SettingsResultListener(subscriber)));
-    }
-
-    /**
      * Disable a specific notification type for a user
      *
      * @param notificationType The type of notification to disable

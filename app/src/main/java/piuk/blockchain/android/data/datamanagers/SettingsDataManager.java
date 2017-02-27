@@ -71,17 +71,6 @@ public class SettingsDataManager {
     }
 
     /**
-     * Update the user's password hint
-     *
-     * @param hint The user's password hint
-     * @return A {@link Observable<Boolean>}, where the boolean represents a successful save or not
-     */
-    public Observable<Boolean> updatePasswordHint(String hint) {
-        return settingsService.updatePasswordHint(hint)
-                .compose(RxUtil.applySchedulersToObservable());
-    }
-
-    /**
      * Update the user's notification preferences
      *
      * @param notificationType The type of notification to enable
