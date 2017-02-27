@@ -9,7 +9,6 @@ import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.payment.data.SuggestedFee;
 import info.blockchain.wallet.payment.data.UnspentOutputs;
 
-import org.bitcoinj.core.ECKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -27,9 +26,9 @@ import piuk.blockchain.android.data.services.UnspentService;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
@@ -78,7 +77,7 @@ public class AccountEditDataManagerTest extends RxTest {
         // Arrange
         when(paymentService.submitPayment(
                 any(SpendableUnspentOutputs.class),
-                anyListOf(ECKey.class),
+                anyList(),
                 anyString(),
                 anyString(),
                 any(BigInteger.class),

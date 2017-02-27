@@ -49,28 +49,18 @@
                     android:visibility="gone"
                     tools:visibility="visible">
 
-                    <LinearLayout
+                    <TextView
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:orientation="horizontal">
+                        android:drawableLeft="@drawable/ic_warning_white_24dp"
+                        android:drawablePadding="8dp"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="@string/transaction_detail_double_spend"
+                        android:textColor="@color/white" />
 
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:padding="8dp"
-                            app:srcCompat="@drawable/ic_warning_white_24dp" />
-
-                        <TextView
-                            fontPath="fonts/Montserrat-Regular.ttf"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="@string/transaction_detail_double_spend"
-                            android:textColor="@color/white" />
-
-                    </LinearLayout>
                 </LinearLayout>
 
                 <!-- MAIN DETAILS -->

@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.Nullable;
 
-import android.support.v4.media.MediaBrowserCompat;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
@@ -10,8 +9,8 @@ import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
-
 import info.blockchain.wallet.util.PrivateKeyFactory;
+
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 
@@ -120,6 +119,6 @@ public class AccountDataManager {
 
     public Observable<ECKey> getKeyFromImportedData(String format, String data) {
         return Observable.fromCallable(() -> new PrivateKeyFactory().getKey(format, data))
-            .compose(RxUtil.applySchedulersToObservable());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 }

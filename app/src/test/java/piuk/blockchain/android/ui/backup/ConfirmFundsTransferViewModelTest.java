@@ -49,7 +49,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -152,7 +151,7 @@ public class ConfirmFundsTransferViewModelTest {
     @Test
     public void sendPaymentAndArchive() throws Exception {
         // Arrange
-        when(mFundsDataManager.sendPayment(any(Payment.class), anyListOf(PendingTransaction.class), any(CharSequenceX.class))).thenReturn(Observable.just("hash"));
+        when(mFundsDataManager.sendPayment(any(Payment.class), anyList(), any(CharSequenceX.class))).thenReturn(Observable.just("hash"));
         when(mActivity.getIfArchiveChecked()).thenReturn(true);
         PendingTransaction transaction = new PendingTransaction();
         transaction.sendingObject = new ItemAccount("", "", null, null, null);
