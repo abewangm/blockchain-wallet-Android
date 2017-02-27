@@ -1,5 +1,7 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import android.annotation.SuppressLint;
+
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.LegacyAddress;
@@ -36,6 +38,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@SuppressLint("UseSparseArrays")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class TransactionListDataManagerTest extends RxTest {

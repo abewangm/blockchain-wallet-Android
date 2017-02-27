@@ -15,7 +15,6 @@ import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.util.CharSequenceX;
 
 import org.apache.commons.lang3.tuple.Triple;
-import org.bitcoinj.core.ECKey;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +38,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doAnswer;
@@ -155,7 +153,7 @@ public class TransferFundsDataManagerTest extends RxTest {
             return null;
         }).when(mockPayment).submitPayment(
                 any(SpendableUnspentOutputs.class),
-                anyListOf(ECKey.class),
+                anyList(),
                 anyString(),
                 anyString(),
                 any(BigInteger.class),
@@ -236,7 +234,7 @@ public class TransferFundsDataManagerTest extends RxTest {
                 .when(mockPayment)
                 .submitPayment(
                         any(SpendableUnspentOutputs.class),
-                        anyListOf(ECKey.class),
+                        anyList(),
                         anyString(),
                         anyString(),
                         any(BigInteger.class),

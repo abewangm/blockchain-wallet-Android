@@ -51,7 +51,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="padClicked"
                     android:orientation="vertical"
                     android:padding="@dimen/pinentry_padding"
                     android:tag="1">
@@ -74,7 +73,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="padClicked"
                     android:orientation="vertical"
                     android:tag="2">
 
@@ -96,7 +94,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="padClicked"
                     android:orientation="vertical"
                     android:tag="3">
 
@@ -118,7 +115,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="deleteClicked"
                     android:orientation="vertical"
                     android:padding="9dp">
 
@@ -146,7 +142,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="padClicked"
                     android:orientation="vertical"
                     android:padding="@dimen/pinentry_padding"
                     android:tag="4">
@@ -170,7 +165,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="padClicked"
                     android:orientation="vertical"
                     android:tag="5">
 
@@ -193,7 +187,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="padClicked"
                     android:orientation="vertical"
                     android:tag="6">
 
@@ -230,7 +223,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="padClicked"
                     android:orientation="vertical"
                     android:padding="@dimen/pinentry_padding"
                     android:tag="7">
@@ -253,7 +245,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="padClicked"
                     android:orientation="vertical"
                     android:tag="8">
 
@@ -275,7 +266,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="padClicked"
                     android:orientation="vertical"
                     android:tag="9">
 
@@ -310,7 +300,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="padClicked"
                     android:orientation="vertical"
                     android:padding="@dimen/pinentry_padding">
 
@@ -333,7 +322,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="padClicked"
                     android:orientation="vertical"
                     android:padding="9dp"
                     android:tag="0">
@@ -363,7 +351,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/selector_navy_blue"
                     android:gravity="center"
-                    android:onClick="deleteClicked"
                     android:orientation="vertical"
                     android:padding="9dp">
 

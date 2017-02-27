@@ -1,10 +1,7 @@
 package piuk.blockchain.android.ui.customviews;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -39,17 +36,8 @@ public class AnimatedPasswordInputLayout extends TextInputLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        setVectorDrawableIfRequired();
         setPasswordVisibilityToggleEnabled(true);
         initListener();
-    }
-
-    private void setVectorDrawableIfRequired() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Drawable drawable = ContextCompat.getDrawable(getContext(), R.drawable.asl_password_visibility);
-            drawable.setTint(ContextCompat.getColor(getContext(), R.color.primary_gray_medium));
-            setPasswordVisibilityToggleDrawable(drawable);
-        }
     }
 
     private void initListener() {

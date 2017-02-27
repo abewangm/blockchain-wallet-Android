@@ -117,7 +117,7 @@ public class CustomKeypad extends LinearLayout implements View.OnClickListener {
             bottomUp.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
-
+                    // No-op
                 }
 
                 @Override
@@ -127,7 +127,7 @@ public class CustomKeypad extends LinearLayout implements View.OnClickListener {
 
                 @Override
                 public void onAnimationRepeat(Animation animation) {
-
+                    // No-op
                 }
             });
             setVisibility(View.VISIBLE);
@@ -193,6 +193,7 @@ public class CustomKeypad extends LinearLayout implements View.OnClickListener {
         }
     }
 
+    @SuppressWarnings("Convert2streamapi")
     private void deleteFromFocusedView() {
         for (final EditText view : viewList) {
             if (view.hasFocus() && view.getText().length() > 0) {

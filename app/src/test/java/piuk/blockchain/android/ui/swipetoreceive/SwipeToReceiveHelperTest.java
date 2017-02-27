@@ -20,8 +20,8 @@ import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -77,7 +77,7 @@ public class SwipeToReceiveHelperTest extends RxTest {
         map.put("addr2", -10L);
         map.put("addr3", 0L);
         map.put("addr4", 0L);
-        when(multiAddrFactory.getAddressBalanceFromApi(anyListOf(String.class))).thenReturn(map);
+        when(multiAddrFactory.getAddressBalanceFromApi(anyList())).thenReturn(map);
         when(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, "")).thenReturn("addr0, addr1, addr2, addr3, addr4");
         // Act
         TestObserver<String> test = subject.getNextAvailableAddress().test();
@@ -96,7 +96,7 @@ public class SwipeToReceiveHelperTest extends RxTest {
         map.put("addr2", -10L);
         map.put("addr3", 1L);
         map.put("addr4", 1_000_000_000_000L);
-        when(multiAddrFactory.getAddressBalanceFromApi(anyListOf(String.class))).thenReturn(map);
+        when(multiAddrFactory.getAddressBalanceFromApi(anyList())).thenReturn(map);
         when(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, "")).thenReturn("addr0, addr1, addr2, addr3, addr4");
         // Act
         TestObserver<String> test = subject.getNextAvailableAddress().test();
