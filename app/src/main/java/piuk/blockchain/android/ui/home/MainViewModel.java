@@ -18,11 +18,9 @@ import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payment.Payment;
-import info.blockchain.wallet.settings.SettingsManager;
 import info.blockchain.wallet.util.WebUtil;
 
 import java.io.IOException;
-
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -350,9 +348,11 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private Observable<Response<Settings>> getSettingsApi() {
-        return Observable.fromCallable(() -> new SettingsManager(
-                payloadManager.getPayload().getGuid(),
-                payloadManager.getPayload().getSharedKey()).getInfo().execute());
+        // FIXME: 28/02/2017
+//        return Observable.fromCallable(() -> new SettingsManager(
+//                payloadManager.getPayload().getGuid(),
+//                payloadManager.getPayload().getSharedKey()).getInfo().execute());
+        return Observable.empty();
     }
 
     private void checkRooted() {

@@ -25,6 +25,7 @@ import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 
@@ -89,23 +90,35 @@ public class ApiModule {
 
     @Provides
     @Singleton
+    protected RxJava2CallAdapterFactory provideRxJavaCallAdapterFactory() {
+        return RxJava2CallAdapterFactory.create();
+    }
+
+    @Provides
+    @Singleton
     @Named("api")
-    protected Retrofit provideRetrofitApiInstance(OkHttpClient okHttpClient, JacksonConverterFactory converterFactory) {
+    protected Retrofit provideRetrofitApiInstance(OkHttpClient okHttpClient,
+                                                  JacksonConverterFactory converterFactory,
+                                                  RxJava2CallAdapterFactory rxJavaCallFactory) {
         return new Retrofit.Builder()
                 .baseUrl(PersistentUrls.getInstance().getCurrentBaseApiUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
+                .addCallAdapterFactory(rxJavaCallFactory)
                 .build();
     }
 
     @Provides
     @Singleton
     @Named("server")
-    protected Retrofit provideRetrofitBlockchainInstance(OkHttpClient okHttpClient, JacksonConverterFactory converterFactory) {
+    protected Retrofit provideRetrofitBlockchainInstance(OkHttpClient okHttpClient,
+                                                         JacksonConverterFactory converterFactory,
+                                                         RxJava2CallAdapterFactory rxJavaCallFactory) {
         return new Retrofit.Builder()
                 .baseUrl(PersistentUrls.getInstance().getCurrentBaseServerUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
+                .addCallAdapterFactory(rxJavaCallFactory)
                 .build();
     }
 

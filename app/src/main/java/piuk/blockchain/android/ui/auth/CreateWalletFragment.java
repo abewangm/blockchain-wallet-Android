@@ -103,7 +103,7 @@ public class CreateWalletFragment extends Fragment {
                             // Email and password can't be the same
                             pwStrength = 0;
                         } else {
-                            pwStrength = (int) Math.round(PasswordUtil.getInstance().getStrength(pw));
+                            pwStrength = (int) Math.round(PasswordUtil.getStrength(pw));
                         }
 
                         int pwStrengthLevel = 0;//red

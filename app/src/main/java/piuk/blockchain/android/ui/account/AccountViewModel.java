@@ -16,10 +16,11 @@ import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 import javax.inject.Inject;
 
@@ -120,7 +121,8 @@ public class AccountViewModel extends BaseViewModel {
     void createNewAccount(String accountLabel) {
         dataListener.showProgressDialog(R.string.please_wait);
         compositeDisposable.add(
-                accountDataManager.createNewAccount(accountLabel, doubleEncryptionPassword)
+                // TODO: 28/02/2017 Handle multiple HD wallets
+                accountDataManager.createNewAccount(0, accountLabel, doubleEncryptionPassword)
                         .subscribe(account -> {
                             dataListener.dismissProgressDialog();
                             dataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);

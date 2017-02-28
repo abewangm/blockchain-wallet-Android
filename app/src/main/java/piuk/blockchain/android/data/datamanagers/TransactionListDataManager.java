@@ -19,11 +19,9 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
-import org.apache.commons.lang3.NotImplementedException;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.TransactionDetailsService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
-import piuk.blockchain.android.util.ListUtil;
 
 public class TransactionListDataManager {
 

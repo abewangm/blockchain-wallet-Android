@@ -149,6 +149,7 @@ dependencies {
     // Retrofit
     compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
     compile "com.squareup.retrofit2:converter-jackson:$retrofitVersion"
+    compile "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
     // OkHttp
     compile "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
     compile "com.squareup.okhttp3:okhttp:$okHttpVersion"

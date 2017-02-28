@@ -2,14 +2,12 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
-import info.blockchain.wallet.api.data.Fees;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payment.Payment;
+import info.blockchain.wallet.settings.SettingsManager;
 
 import dagger.Module;
 import dagger.Provides;
-import info.blockchain.wallet.settings.SettingsManager;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
@@ -83,11 +81,6 @@ public class DataManagerModule {
                 payloadManager,
                 new TransactionDetailsService(),
                 transactionListStore);
-//=======
-//                new TransactionDetailsService(new TransactionDetails()),
-//                transactionListStore,
-//                multiAddrFactory);
-//>>>>>>> 428273a595b0c99469865596015bbf9cd99d03cb
     }
 
     @Provides

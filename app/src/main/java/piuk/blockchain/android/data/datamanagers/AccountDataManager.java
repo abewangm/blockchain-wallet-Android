@@ -2,26 +2,18 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.Nullable;
 
-import android.support.v4.media.MediaBrowserCompat;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
-import info.blockchain.wallet.util.DoubleEncryptionFactory;
-
 import info.blockchain.wallet.util.PrivateKeyFactory;
+
 import org.apache.commons.lang3.NotImplementedException;
-import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 
-import java.util.List;
-
 import io.reactivex.Observable;
-import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.AddressInfoService;
-
-import static piuk.blockchain.android.data.services.AddressInfoService.PARAMETER_FINAL_BALANCE;
 
 public class AccountDataManager {
 
@@ -38,13 +30,13 @@ public class AccountDataManager {
     /**
      * Derives new {@link Account} from the master seed
      *
+     * @param walletIndex The index of the HD Wallet from which you want to derive an Account
      * @param accountLabel   A label for the account
      * @param secondPassword An optional double encryption password
      * @return An {@link Observable<Account>} wrapping the newly created Account
      */
-    public Observable<Account> createNewAccount(String accountLabel, @Nullable String secondPassword) {
-        return Observable.fromCallable(() -> payloadManager.addAccount(accountLabel,
-                secondPassword != null ? secondPassword : null))
+    public Observable<Account> createNewAccount(int walletIndex, String accountLabel, @Nullable String secondPassword) {
+        return Observable.fromCallable(() -> payloadManager.addAccount(walletIndex, accountLabel, secondPassword))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 

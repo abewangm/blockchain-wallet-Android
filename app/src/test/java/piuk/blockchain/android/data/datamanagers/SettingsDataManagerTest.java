@@ -1,21 +1,11 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import io.reactivex.Observable;
-import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.services.SettingsService;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class SettingsDataManagerTest extends RxTest {
 

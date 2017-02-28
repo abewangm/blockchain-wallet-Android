@@ -38,6 +38,7 @@ import android.widget.TextView;
 import com.mukesh.countrypicker.fragments.CountryPicker;
 import com.mukesh.countrypicker.models.Country;
 
+import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PasswordUtil;
 
@@ -50,7 +51,6 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AndroidUtils;
-import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
 import piuk.blockchain.android.util.ViewUtils;
@@ -85,7 +85,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     // Security
     @Thunk SwitchPreferenceCompat fingerprintPref;
     private SwitchPreferenceCompat twoStepVerificationPref;
-    private Preference passwordHint1Pref;
     private SwitchPreferenceCompat torPref;
     private SwitchPreferenceCompat launcherShortcutPrefs;
     private SwitchPreferenceCompat swipeToReceivePrefs;
@@ -151,9 +150,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
         twoStepVerificationPref = (SwitchPreferenceCompat) findPreference("2fa");
         twoStepVerificationPref.setOnPreferenceClickListener(this);
-
-        passwordHint1Pref = findPreference("pw_hint1");
-        passwordHint1Pref.setOnPreferenceClickListener(this);
 
         Preference changePasswordPref = findPreference("change_pw");
         changePasswordPref.setOnPreferenceClickListener(this);
@@ -340,11 +336,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     @Override
-    public void setPasswordHintSummary(String summary) {
-        passwordHint1Pref.setSummary(summary);
-    }
-
-    @Override
     public void setTorBlocked(boolean blocked) {
         torPref.setChecked(blocked);
     }
@@ -360,20 +351,18 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void onFingerprintClicked() {
-        // TODO: 22/02/2017
-//        viewModel.onFingerprintClicked();
+        viewModel.onFingerprintClicked();
     }
 
     @Override
     public void showDisableFingerprintDialog() {
-        // TODO: 22/02/2017
-//        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                .setTitle(R.string.app_name)
-//                .setMessage(R.string.fingerprint_disable_message)
-//                .setCancelable(true)
-//                .setPositiveButton(R.string.yes, (dialog, which) -> viewModel.setFingerprintUnlockEnabled(false))
-//                .setNegativeButton(android.R.string.cancel, (dialog, which) -> updateFingerprintPreferenceStatus())
-//                .show();
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.fingerprint_disable_message)
+                .setCancelable(true)
+                .setPositiveButton(R.string.yes, (dialog, which) -> viewModel.setFingerprintUnlockEnabled(false))
+                .setNegativeButton(android.R.string.cancel, (dialog, which) -> updateFingerprintPreferenceStatus())
+                .show();
     }
 
     @Override
@@ -391,8 +380,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
     @Override
     public void updateFingerprintPreferenceStatus() {
-        // TODO: 22/02/2017
-//        fingerprintPref.setChecked(viewModel.getIfFingerprintUnlockEnabled());
+        fingerprintPref.setChecked(viewModel.getIfFingerprintUnlockEnabled());
     }
 
     @Override
@@ -404,23 +392,22 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
     @Override
     public void showFingerprintDialog(String pincode) {
-        // TODO: 22/02/2017
-//        FingerprintDialog dialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
-//        dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
-//            @Override
-//            public void onAuthenticated(String data) {
-//                dialog.dismiss();
-//                viewModel.setFingerprintUnlockEnabled(true);
-//            }
-//
-//            @Override
-//            public void onCanceled() {
-//                dialog.dismiss();
-//                viewModel.setFingerprintUnlockEnabled(false);
-//                fingerprintPref.setChecked(viewModel.getIfFingerprintUnlockEnabled());
-//            }
-//        });
-//        dialog.show(getFragmentManager(), FingerprintDialog.TAG);
+        FingerprintDialog dialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
+        dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
+            @Override
+            public void onAuthenticated(String data) {
+                dialog.dismiss();
+                viewModel.setFingerprintUnlockEnabled(true);
+            }
+
+            @Override
+            public void onCanceled() {
+                dialog.dismiss();
+                viewModel.setFingerprintUnlockEnabled(false);
+                fingerprintPref.setChecked(viewModel.getIfFingerprintUnlockEnabled());
+            }
+        });
+        dialog.show(getFragmentManager(), FingerprintDialog.TAG);
     }
 
     @Override
@@ -475,9 +462,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             case "pin":
                 showDialogChangePin();
                 break;
-            case "pw_hint1":
-                showDialogPasswordHint();
-                break;
             case "change_pw":
                 showDialogChangePasswordWarning();
                 break;
@@ -506,45 +490,43 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogTorEnable() {
-        // TODO: 22/02/2017
-//        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                .setTitle(R.string.tor_requests)
-//                .setMessage(R.string.tor_summary)
-//                .setCancelable(false)
-//                .setPositiveButton(R.string.block, (dialogInterface, i) -> viewModel.updateTor(true))
-//                .setNegativeButton(R.string.allow, (dialogInterface, i) -> viewModel.updateTor(false))
-//                .create()
-//                .show();
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.tor_requests)
+                .setMessage(R.string.tor_summary)
+                .setCancelable(false)
+                .setPositiveButton(R.string.block, (dialogInterface, i) -> viewModel.updateTor(true))
+                .setNegativeButton(R.string.allow, (dialogInterface, i) -> viewModel.updateTor(false))
+                .create()
+                .show();
     }
 
     private void showDialogEmail() {
-        // TODO: 22/02/2017
-//        AppCompatEditText editText = new AppCompatEditText(getActivity());
-//        editText.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-//        editText.setText(viewModel.getEmail());
-//        editText.setSelection(editText.getText().length());
-//
-//        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                .setTitle(email)
-//                .setMessage(R.string.verify_email2)
-//                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
-//                .setCancelable(false)
-//                .setPositiveButton(R.string.update, (dialogInterface, i) -> {
-//                    String email = editText.getText().toString();
-//
-//                    if (!FormatsUtil.getInstance().isValidEmailAddress(email)) {
-//                        ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-//                    } else {
-//                        viewModel.updateEmail(email);
-//                    }
-//                })
-//                .setNeutralButton(R.string.resend, (dialogInterface, i) -> {
-//                    // Resend verification code
-//                    viewModel.updateEmail(viewModel.getEmail());
-//                })
-//                .setNegativeButton(android.R.string.cancel, null)
-//                .create()
-//                .show();
+        AppCompatEditText editText = new AppCompatEditText(getActivity());
+        editText.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        editText.setText(viewModel.getEmail());
+        editText.setSelection(editText.getText().length());
+
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(email)
+                .setMessage(R.string.verify_email2)
+                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
+                .setCancelable(false)
+                .setPositiveButton(R.string.update, (dialogInterface, i) -> {
+                    String email = editText.getText().toString();
+
+                    if (!FormatsUtil.isValidEmailAddress(email)) {
+                        ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                    } else {
+                        viewModel.updateEmail(email);
+                    }
+                })
+                .setNeutralButton(R.string.resend, (dialogInterface, i) -> {
+                    // Resend verification code
+                    viewModel.updateEmail(viewModel.getEmail());
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
+                .show();
     }
 
     @Override
@@ -560,73 +542,72 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogMobile() {
-        // TODO: 22/02/2017
-//        if (viewModel.getAuthType() != Settings.AUTH_TYPE_OFF) {
-//            new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                    .setTitle(R.string.warning)
-//                    .setMessage(R.string.disable_2fa_first)
-//                    .setPositiveButton(android.R.string.ok, null)
-//                    .create()
-//                    .show();
-//        } else {
-//            LayoutInflater inflater = getActivity().getLayoutInflater();
-//            View smsPickerView = inflater.inflate(R.layout.include_sms_update, null);
-//            AppCompatEditText mobileNumber = (AppCompatEditText) smsPickerView.findViewById(R.id.etSms);
-//            TextView countryTextView = (TextView) smsPickerView.findViewById(R.id.tvCountry);
-//            TextView mobileNumberTextView = (TextView) smsPickerView.findViewById(R.id.tvSms);
-//
-//            CountryPicker picker = CountryPicker.newInstance(getString(R.string.select_country));
-//            Country country = picker.getUserCountryInfo(getActivity());
-//            if (country.getDialCode().equals("+93")) {
-//                setCountryFlag(countryTextView, "+1", R.drawable.flag_us);
-//            } else {
-//                setCountryFlag(countryTextView, country.getDialCode(), country.getFlag());
-//            }
-//
-//            countryTextView.setOnClickListener(v -> {
-//                picker.show(getFragmentManager(), "COUNTRY_PICKER");
-//                picker.setListener((name, code, dialCode, flagDrawableResID) -> {
-//                    setCountryFlag(countryTextView, dialCode, flagDrawableResID);
-//                    picker.dismiss();
-//                });
-//            });
-//
-//            if (!viewModel.getSms().isEmpty()) {
-//                mobileNumberTextView.setText(viewModel.getSms());
-//                mobileNumberTextView.setVisibility(View.VISIBLE);
-//            }
-//
-//            AlertDialog.Builder alertDialogSmsBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                    .setTitle(R.string.mobile)
-//                    .setMessage(getString(R.string.mobile_description))
-//                    .setView(smsPickerView)
-//                    .setCancelable(false)
-//                    .setPositiveButton(R.string.update, null)
-//                    .setNegativeButton(android.R.string.cancel, null);
-//
-//            if (!viewModel.isSmsVerified() && !viewModel.getSms().isEmpty()) {
-//                alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) -> {
-//                    viewModel.updateSms(viewModel.getSms());
-//                });
-//            }
-//
-//            AlertDialog dialog = alertDialogSmsBuilder.create();
-//            dialog.setOnShowListener(dialogInterface -> {
-//                Button positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-//                positive.setOnClickListener(view -> {
-//                    String sms = countryTextView.getText() + mobileNumber.getText().toString();
-//
-//                    if (!FormatsUtil.getInstance().isValidMobileNumber(sms)) {
-//                        ToastCustom.makeText(getActivity(), getString(R.string.invalid_mobile), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-//                    } else {
-//                        viewModel.updateSms(sms);
-//                        dialog.dismiss();
-//                    }
-//                });
-//            });
-//
-//            dialog.show();
-//        }
+        if (viewModel.getAuthType() != Settings.AUTH_TYPE_OFF) {
+            new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                    .setTitle(R.string.warning)
+                    .setMessage(R.string.disable_2fa_first)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .create()
+                    .show();
+        } else {
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            View smsPickerView = inflater.inflate(R.layout.include_sms_update, null);
+            AppCompatEditText mobileNumber = (AppCompatEditText) smsPickerView.findViewById(R.id.etSms);
+            TextView countryTextView = (TextView) smsPickerView.findViewById(R.id.tvCountry);
+            TextView mobileNumberTextView = (TextView) smsPickerView.findViewById(R.id.tvSms);
+
+            CountryPicker picker = CountryPicker.newInstance(getString(R.string.select_country));
+            Country country = picker.getUserCountryInfo(getActivity());
+            if (country.getDialCode().equals("+93")) {
+                setCountryFlag(countryTextView, "+1", R.drawable.flag_us);
+            } else {
+                setCountryFlag(countryTextView, country.getDialCode(), country.getFlag());
+            }
+
+            countryTextView.setOnClickListener(v -> {
+                picker.show(getFragmentManager(), "COUNTRY_PICKER");
+                picker.setListener((name, code, dialCode, flagDrawableResID) -> {
+                    setCountryFlag(countryTextView, dialCode, flagDrawableResID);
+                    picker.dismiss();
+                });
+            });
+
+            if (!viewModel.getSms().isEmpty()) {
+                mobileNumberTextView.setText(viewModel.getSms());
+                mobileNumberTextView.setVisibility(View.VISIBLE);
+            }
+
+            AlertDialog.Builder alertDialogSmsBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                    .setTitle(R.string.mobile)
+                    .setMessage(getString(R.string.mobile_description))
+                    .setView(smsPickerView)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.update, null)
+                    .setNegativeButton(android.R.string.cancel, null);
+
+            if (!viewModel.isSmsVerified() && !viewModel.getSms().isEmpty()) {
+                alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) -> {
+                    viewModel.updateSms(viewModel.getSms());
+                });
+            }
+
+            AlertDialog dialog = alertDialogSmsBuilder.create();
+            dialog.setOnShowListener(dialogInterface -> {
+                Button positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                positive.setOnClickListener(view -> {
+                    String sms = countryTextView.getText() + mobileNumber.getText().toString();
+
+                    if (!FormatsUtil.isValidMobileNumber(sms)) {
+                        ToastCustom.makeText(getActivity(), getString(R.string.invalid_mobile), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                    } else {
+                        viewModel.updateSms(sms);
+                        dialog.dismiss();
+                    }
+                });
+            });
+
+            dialog.show();
+        }
     }
 
     private void showDialogGuid() {
@@ -646,21 +627,20 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogBTCUnits() {
-        // TODO: 22/02/2017
-//        CharSequence[] units = viewModel.getBtcUnits();
-//        int sel = viewModel.getBtcUnitsPosition();
-//
-//        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                .setTitle(R.string.select_units)
-//                .setSingleChoiceItems(units, sel, (dialog, which) -> {
-//                    viewModel.updatePreferences(PrefsUtil.KEY_BTC_UNITS, which);
-//                    dialog.dismiss();
-//                })
-//                .show();
+        CharSequence[] units = viewModel.getBtcUnits();
+        int sel = viewModel.getBtcUnitsPosition();
+
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.select_units)
+                .setSingleChoiceItems(units, sel, (dialog, which) -> {
+                    viewModel.updatePreferences(PrefsUtil.KEY_BTC_UNITS, which);
+                    dialog.dismiss();
+                })
+                .show();
     }
 
     private void showDialogFiatUnits() {
-        // TODO: 22/02/2017
+        // TODO: 28/02/2017
 //        String[] currencies = ExchangeRateFactory.getInstance().getCurrencyLabels();
 //        String strCurrency = viewModel.getFiatUnits();
 //        int selected = 0;
@@ -682,59 +662,32 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
 
     @Override
     public void showDialogVerifySms() {
-        // TODO: 22/02/2017
-//        AppCompatEditText editText = new AppCompatEditText(getActivity());
-//        editText.setSingleLine(true);
-//
-//        AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                .setTitle(R.string.verify_mobile)
-//                .setMessage(R.string.verify_sms_summary)
-//                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
-//                .setCancelable(false)
-//                .setPositiveButton(R.string.verify, null)
-//                .setNegativeButton(android.R.string.cancel, null)
-//                .setNeutralButton(R.string.resend, (dialogInterface, i) -> viewModel.updateSms(viewModel.getSms()))
-//                .create();
-//
-//        dialog.setOnShowListener(dialogInterface -> {
-//            Button positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-//            positive.setOnClickListener(view -> {
-//                String codeS = editText.getText().toString();
-//                if (codeS.length() > 0) {
-//                    viewModel.verifySms(codeS);
-//                    dialog.dismiss();
-//                    ViewUtils.hideKeyboard(getActivity());
-//                }
-//            });
-//        });
-//
-//        dialog.show();
-    }
+        AppCompatEditText editText = new AppCompatEditText(getActivity());
+        editText.setSingleLine(true);
 
-    private void showDialogPasswordHint() {
-        // TODO: 22/02/2017
-//        AppCompatEditText editText = new AppCompatEditText(getActivity());
-//        editText.setText(viewModel.getPasswordHint());
-//        editText.setSelection(viewModel.getPasswordHint().length());
-//        editText.setSingleLine(true);
-//        editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-//
-//        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                .setTitle(R.string.password_hint)
-//                .setMessage(R.string.password_hint_summary)
-//                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
-//                .setCancelable(false)
-//                .setPositiveButton(R.string.update, (dialogInterface, i) -> {
-//                    String hint = editText.getText().toString();
-//                    if (!hint.equals(viewModel.getTempPassword().toString())) {
-//                        viewModel.updatePasswordHint(hint);
-//                    } else {
-//                        ToastCustom.makeText(getActivity(), getString(R.string.hint_reveals_password_error), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-//                    }
-//                })
-//                .setNegativeButton(android.R.string.cancel, null)
-//                .create()
-//                .show();
+        AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.verify_mobile)
+                .setMessage(R.string.verify_sms_summary)
+                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
+                .setCancelable(false)
+                .setPositiveButton(R.string.verify, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setNeutralButton(R.string.resend, (dialogInterface, i) -> viewModel.updateSms(viewModel.getSms()))
+                .create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Button positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            positive.setOnClickListener(view -> {
+                String codeS = editText.getText().toString();
+                if (codeS.length() > 0) {
+                    viewModel.verifySms(codeS);
+                    dialog.dismiss();
+                    ViewUtils.hideKeyboard(getActivity());
+                }
+            });
+        });
+
+        dialog.show();
     }
 
     private void showDialogChangePin() {
@@ -746,12 +699,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // TODO: 22/02/2017
-//        if (requestCode == REQUEST_CODE_VALIDATE_PIN && resultCode == RESULT_OK) {
-//            viewModel.pinCodeValidatedForChange();
-//        } else if (requestCode == REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT && resultCode == RESULT_OK) {
-//            viewModel.pinCodeValidatedForFingerprint(new CharSequenceX(data.getStringExtra(KEY_VALIDATED_PIN)));
-//        }
+        if (requestCode == REQUEST_CODE_VALIDATE_PIN && resultCode == RESULT_OK) {
+            viewModel.pinCodeValidatedForChange();
+        } else if (requestCode == REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT && resultCode == RESULT_OK) {
+            viewModel.pinCodeValidatedForFingerprint(data.getStringExtra(KEY_VALIDATED_PIN));
+        }
     }
 
     private void showDialogEmailNotifications() {
@@ -834,132 +786,126 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
 
-        // TODO: 22/02/2017
-//        alertDialog.setOnShowListener(dialog -> {
-//            Button buttonPositive = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-//            buttonPositive.setOnClickListener(view -> {
-//
-//                String currentPw = currentPassword.getText().toString();
-//                String newPw = newPassword.getText().toString();
-//                String newConfirmedPw = newPasswordConfirmation.getText().toString();
-//                CharSequenceX walletPassword = viewModel.getTempPassword();
-//
-//                if (!currentPw.equals(newPw)) {
-//                    if (currentPw.equals(walletPassword.toString())) {
-//                        if (newPw.equals(newConfirmedPw)) {
-//                            if (newConfirmedPw.length() < 4 || newConfirmedPw.length() > 255) {
-//                                ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-//                            } else if (newConfirmedPw.equals(viewModel.getPasswordHint())) {
-//                                ToastCustom.makeText(getActivity(), getString(R.string.hint_reveals_password_error), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-//                            } else if (pwStrength < 50) {
-//                                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                                        .setTitle(R.string.app_name)
-//                                        .setMessage(R.string.weak_password)
-//                                        .setCancelable(false)
-//                                        .setPositiveButton(R.string.yes, (dialog1, which) -> {
-//                                            newPasswordConfirmation.setText("");
-//                                            newPasswordConfirmation.requestFocus();
-//                                            newPassword.setText("");
-//                                            newPassword.requestFocus();
-//                                        })
-//                                        .setNegativeButton(R.string.polite_no, (dialog1, which) -> {
-//                                            alertDialog.dismiss();
-//                                            viewModel.updatePassword(new CharSequenceX(newConfirmedPw), walletPassword);
-//                                        })
-//                                        .show();
-//                            } else {
-//                                alertDialog.dismiss();
-//                                viewModel.updatePassword(new CharSequenceX(newConfirmedPw), walletPassword);
-//                            }
-//                        } else {
-//                            newPasswordConfirmation.setText("");
-//                            newPasswordConfirmation.requestFocus();
-//                            ToastCustom.makeText(getActivity(), getString(R.string.password_mismatch_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-//                        }
-//                    } else {
-//                        currentPassword.setText("");
-//                        currentPassword.requestFocus();
-//                        ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-//                    }
-//                } else {
-//                    newPassword.setText("");
-//                    newPasswordConfirmation.setText("");
-//                    newPassword.requestFocus();
-//                    ToastCustom.makeText(getActivity(), getString(R.string.change_password_new_matches_current), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-//                }
-//            });
-//        });
-//        alertDialog.show();
+        alertDialog.setOnShowListener(dialog -> {
+            Button buttonPositive = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            buttonPositive.setOnClickListener(view -> {
+
+                String currentPw = currentPassword.getText().toString();
+                String newPw = newPassword.getText().toString();
+                String newConfirmedPw = newPasswordConfirmation.getText().toString();
+                String walletPassword = viewModel.getTempPassword();
+
+                if (!currentPw.equals(newPw)) {
+                    if (currentPw.equals(walletPassword.toString())) {
+                        if (newPw.equals(newConfirmedPw)) {
+                            if (newConfirmedPw.length() < 4 || newConfirmedPw.length() > 255) {
+                                ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                            } else if (pwStrength < 50) {
+                                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                                        .setTitle(R.string.app_name)
+                                        .setMessage(R.string.weak_password)
+                                        .setCancelable(false)
+                                        .setPositiveButton(R.string.yes, (dialog1, which) -> {
+                                            newPasswordConfirmation.setText("");
+                                            newPasswordConfirmation.requestFocus();
+                                            newPassword.setText("");
+                                            newPassword.requestFocus();
+                                        })
+                                        .setNegativeButton(R.string.polite_no, (dialog1, which) -> {
+                                            alertDialog.dismiss();
+                                            viewModel.updatePassword(newConfirmedPw, walletPassword);
+                                        })
+                                        .show();
+                            } else {
+                                alertDialog.dismiss();
+                                viewModel.updatePassword(newConfirmedPw, walletPassword);
+                            }
+                        } else {
+                            newPasswordConfirmation.setText("");
+                            newPasswordConfirmation.requestFocus();
+                            ToastCustom.makeText(getActivity(), getString(R.string.password_mismatch_error), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                        }
+                    } else {
+                        currentPassword.setText("");
+                        currentPassword.requestFocus();
+                        ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+                    }
+                } else {
+                    newPassword.setText("");
+                    newPasswordConfirmation.setText("");
+                    newPassword.requestFocus();
+                    ToastCustom.makeText(getActivity(), getString(R.string.change_password_new_matches_current), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
+                }
+            });
+        });
+        alertDialog.show();
     }
 
     private void showDialogTwoFA() {
-        // TODO: 22/02/2017
-//        if (!viewModel.isSmsVerified()) {
-//            twoStepVerificationPref.setChecked(false);
-//            showDialogMobile();
-//        } else {
-//            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                    .setTitle(R.string.two_fa)
-//                    .setMessage(R.string.two_fa_summary)
-//                    .setNeutralButton(android.R.string.cancel, (dialogInterface, i) ->
-//                            twoStepVerificationPref.setChecked(viewModel.getAuthType() != Settings.AUTH_TYPE_OFF));
-//
-//            if (viewModel.getAuthType() != Settings.AUTH_TYPE_OFF) {
-//                alertDialogBuilder.setNegativeButton(R.string.disable, (dialogInterface, i) ->
-//                        viewModel.updateTwoFa(Settings.AUTH_TYPE_OFF));
-//            } else {
-//                alertDialogBuilder.setPositiveButton(R.string.enable, (dialogInterface, i) ->
-//                        viewModel.updateTwoFa(Settings.AUTH_TYPE_SMS));
-//            }
-//            alertDialogBuilder
-//                    .create()
-//                    .show();
-//        }
+        if (!viewModel.isSmsVerified()) {
+            twoStepVerificationPref.setChecked(false);
+            showDialogMobile();
+        } else {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                    .setTitle(R.string.two_fa)
+                    .setMessage(R.string.two_fa_summary)
+                    .setNeutralButton(android.R.string.cancel, (dialogInterface, i) ->
+                            twoStepVerificationPref.setChecked(viewModel.getAuthType() != Settings.AUTH_TYPE_OFF));
+
+            if (viewModel.getAuthType() != Settings.AUTH_TYPE_OFF) {
+                alertDialogBuilder.setNegativeButton(R.string.disable, (dialogInterface, i) ->
+                        viewModel.updateTwoFa(Settings.AUTH_TYPE_OFF));
+            } else {
+                alertDialogBuilder.setPositiveButton(R.string.enable, (dialogInterface, i) ->
+                        viewModel.updateTwoFa(Settings.AUTH_TYPE_SMS));
+            }
+            alertDialogBuilder
+                    .create()
+                    .show();
+        }
     }
 
     @Thunk
     void setPasswordStrength(TextView passStrengthVerdict, ProgressBar passStrengthBar, String pw) {
-        // TODO: 22/02/2017
-//        if (getActivity() != null && !getActivity().isFinishing()) {
-//            int[] strengthVerdicts = {R.string.strength_weak, R.string.strength_medium, R.string.strength_normal, R.string.strength_strong};
-//            int[] strengthColors = {R.drawable.progress_red, R.drawable.progress_orange, R.drawable.progress_blue, R.drawable.progress_green};
-//            pwStrength = (int) Math.round(PasswordUtil.getInstance().getStrength(pw));
-//
-//            if (pw.equals(viewModel.getEmail())) pwStrength = 0;
-//
-//            // red
-//            int pwStrengthLevel = 0;
-//
-//            if (pwStrength >= 75) {
-//                // green
-//                pwStrengthLevel = 3;
-//            } else if (pwStrength >= 50) {
-//                // green
-//                pwStrengthLevel = 2;
-//            } else if (pwStrength >= 25) {
-//                // orange
-//                pwStrengthLevel = 1;
-//            }
-//
-//            passStrengthBar.setProgress(pwStrength);
-//            passStrengthBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), strengthColors[pwStrengthLevel]));
-//            passStrengthVerdict.setText(getResources().getString(strengthVerdicts[pwStrengthLevel]));
-//        }
+        if (getActivity() != null && !getActivity().isFinishing()) {
+            int[] strengthVerdicts = {R.string.strength_weak, R.string.strength_medium, R.string.strength_normal, R.string.strength_strong};
+            int[] strengthColors = {R.drawable.progress_red, R.drawable.progress_orange, R.drawable.progress_blue, R.drawable.progress_green};
+            pwStrength = (int) Math.round(PasswordUtil.getStrength(pw));
+
+            if (pw.equals(viewModel.getEmail())) pwStrength = 0;
+
+            // red
+            int pwStrengthLevel = 0;
+
+            if (pwStrength >= 75) {
+                // green
+                pwStrengthLevel = 3;
+            } else if (pwStrength >= 50) {
+                // green
+                pwStrengthLevel = 2;
+            } else if (pwStrength >= 25) {
+                // orange
+                pwStrengthLevel = 1;
+            }
+
+            passStrengthBar.setProgress(pwStrength);
+            passStrengthBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), strengthColors[pwStrengthLevel]));
+            passStrengthVerdict.setText(getResources().getString(strengthVerdicts[pwStrengthLevel]));
+        }
     }
 
     private void setCountryFlag(TextView tvCountry, String dialCode, int flagResourceId) {
-        // TODO: 22/02/2017
-//        tvCountry.setText(dialCode);
-//        Drawable drawable = ContextCompat.getDrawable(getActivity(), flagResourceId);
-//        drawable.setAlpha(30);
-//
-//        int sdk = android.os.Build.VERSION.SDK_INT;
-//        if (sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-//            //noinspection deprecation
-//            tvCountry.setBackgroundDrawable(drawable);
-//        } else {
-//            tvCountry.setBackground(drawable);
-//        }
+        tvCountry.setText(dialCode);
+        Drawable drawable = ContextCompat.getDrawable(getActivity(), flagResourceId);
+        drawable.setAlpha(30);
+
+        int sdk = android.os.Build.VERSION.SDK_INT;
+        if (sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            //noinspection deprecation
+            tvCountry.setBackgroundDrawable(drawable);
+        } else {
+            tvCountry.setBackground(drawable);
+        }
     }
 
     @Override
