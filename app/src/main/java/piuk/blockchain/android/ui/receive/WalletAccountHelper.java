@@ -150,12 +150,17 @@ public class WalletAccountHelper {
         List<ItemAccount> itemAccountList = new ArrayList<>();
 
         List<AddressBook> addressBookEntries = payloadManager.getPayload().getAddressBook();
-        for (AddressBook addressBookEntry : addressBookEntries) {
+        if(addressBookEntries != null) {
+            for (AddressBook addressBookEntry : addressBookEntries) {
 
-            // If address has no label, we'll display address
-            String labelOrAddress = addressBookEntry.getLabel() == null || addressBookEntry.getLabel().length() == 0 ? addressBookEntry.getAddress() : addressBookEntry.getLabel();
+                // If address has no label, we'll display address
+                String labelOrAddress =
+                    addressBookEntry.getLabel() == null || addressBookEntry.getLabel().length() == 0
+                        ? addressBookEntry.getAddress() : addressBookEntry.getLabel();
 
-            itemAccountList.add(new ItemAccount(labelOrAddress, "", stringUtils.getString(R.string.address_book_label), null, addressBookEntry));
+                itemAccountList.add(new ItemAccount(labelOrAddress, "",
+                    stringUtils.getString(R.string.address_book_label), null, addressBookEntry));
+            }
         }
 
         return itemAccountList;

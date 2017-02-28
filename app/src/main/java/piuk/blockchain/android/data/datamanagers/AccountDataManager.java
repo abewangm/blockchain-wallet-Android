@@ -30,13 +30,12 @@ public class AccountDataManager {
     /**
      * Derives new {@link Account} from the master seed
      *
-     * @param walletIndex The index of the HD Wallet from which you want to derive an Account
      * @param accountLabel   A label for the account
      * @param secondPassword An optional double encryption password
      * @return An {@link Observable<Account>} wrapping the newly created Account
      */
-    public Observable<Account> createNewAccount(int walletIndex, String accountLabel, @Nullable String secondPassword) {
-        return Observable.fromCallable(() -> payloadManager.addAccount(walletIndex, accountLabel, secondPassword))
+    public Observable<Account> createNewAccount(String accountLabel, @Nullable String secondPassword) {
+        return Observable.fromCallable(() -> payloadManager.addAccount(accountLabel, secondPassword))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 

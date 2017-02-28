@@ -19,17 +19,10 @@ import android.util.Pair;
 import android.util.SparseIntArray;
 import android.webkit.MimeTypeMap;
 
-import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.api.data.MultiAddress;
-import info.blockchain.wallet.bip44.HDAccount;
-import info.blockchain.wallet.exceptions.HDWalletException;
-import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
-import java.util.Arrays;
-import org.apache.commons.lang3.NotImplementedException;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
 
@@ -48,6 +41,7 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
+import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -59,8 +53,6 @@ import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
-import retrofit2.Call;
-import retrofit2.Response;
 
 @SuppressWarnings("WeakerAccess")
 public class ReceiveViewModel extends BaseViewModel {
@@ -81,6 +73,7 @@ public class ReceiveViewModel extends BaseViewModel {
     @Inject WalletAccountHelper walletAccountHelper;
     @Inject SSLVerifyUtil sslVerifyUtil;
     @Inject Context applicationContext;
+    @Inject ReceiveDataManager receiveDataManager;
     @VisibleForTesting HashBiMap<Integer, Object> accountMap;
     @VisibleForTesting SparseIntArray spinnerIndexMap;
 
@@ -101,6 +94,8 @@ public class ReceiveViewModel extends BaseViewModel {
         void updateBtcTextField(String text);
 
         void startContactSelectionActivity();
+
+        void updateReceiveAddress(String address);
 
     }
 
@@ -255,43 +250,9 @@ public class ReceiveViewModel extends BaseViewModel {
     }
 
     @Nullable
-    String getV3ReceiveAddress(Account account) {
-
-//        String xpub = account.getXpub();
-//
-//        try {
-//            // TODO: 27/02/2017 this multiaddress call would have happened already - leverage that
-//            Call<MultiAddress> call = MultiAddressFactory
-//                .getMultiAddress(Arrays.asList(xpub), xpub, BlockExplorer.TX_FILTER_ALL, 1, 0);
-//
-//            Response<MultiAddress> exe = call.execute();
-//
-//            if(exe.isSuccessful()) {
-//
-//                MultiAddress multiAddress = exe.body();
-//
-//                int nextReceiveIndex = MultiAddressFactory
-//                    .getNextReceiveAddress(multiAddress, xpub);
-//
-//                HDAccount hdAccount = payloadManager.getPayload().getHdWallets().get(0)
-//                    .getHDAccountFromAccount(account);
-//
-//                return hdAccount.getReceive().getAddressAt(nextReceiveIndex).getAddressString();
-//
-//            } else {
-//                Log.e(TAG, exe.errorBody().string());
-//                return null;
-//            }
-//
-//        } catch (IOException e) {
-//            Log.e(TAG, "getV3ReceiveAddress: ", e);
-//            return null;
-//        } catch (HDWalletException e) {
-//            Log.e(TAG, "getV3ReceiveAddress: ", e);
-//            return null;
-//        }
-        // TODO: 28/02/2017
-        return null;
+    void getV3ReceiveAddress(Account account) {
+        receiveDataManager.getNextReceiveAddress(account)
+        .subscribe(receive -> dataListener.updateReceiveAddress(receive));
     }
 
     @Nullable

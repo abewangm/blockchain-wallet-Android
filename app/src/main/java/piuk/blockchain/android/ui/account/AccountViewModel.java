@@ -121,8 +121,7 @@ public class AccountViewModel extends BaseViewModel {
     void createNewAccount(String accountLabel) {
         dataListener.showProgressDialog(R.string.please_wait);
         compositeDisposable.add(
-                // TODO: 28/02/2017 Handle multiple HD wallets
-                accountDataManager.createNewAccount(0, accountLabel, doubleEncryptionPassword)
+                accountDataManager.createNewAccount(accountLabel, doubleEncryptionPassword)
                         .subscribe(account -> {
                             dataListener.dismissProgressDialog();
                             dataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);

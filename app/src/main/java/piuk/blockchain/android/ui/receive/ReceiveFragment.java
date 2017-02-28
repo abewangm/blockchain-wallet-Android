@@ -341,19 +341,25 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         // Disable send to contact button if not using HD account
         binding.buttonSendToContact.setEnabled(object instanceof Account);
 
-        String receiveAddress;
+        String receiveAddress = null;
         if (object instanceof LegacyAddress) {
             receiveAddress = ((LegacyAddress) object).getAddress();
             binding.destination.setText(((LegacyAddress) object).getLabel());
         } else {
-            receiveAddress = viewModel.getV3ReceiveAddress((Account) object);
+            viewModel.getV3ReceiveAddress((Account) object);
             binding.destination.setText(((Account) object).getLabel());
         }
+
+        updateReceiveAddress(receiveAddress);
+    }
+
+    @Override
+    public void updateReceiveAddress(String receiveAddress) {
 
         binding.receivingAddress.setText(receiveAddress);
 
         long amountLong = viewModel.getCurrencyHelper().getLongAmount(
-                binding.amountContainer.amountBtc.getText().toString());
+            binding.amountContainer.amountBtc.getText().toString());
 
         BigInteger amountBigInt = viewModel.getCurrencyHelper().getUndenominatedAmount(amountLong);
 
