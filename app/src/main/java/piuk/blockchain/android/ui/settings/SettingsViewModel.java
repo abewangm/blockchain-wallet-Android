@@ -6,6 +6,7 @@ import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.settings.SettingsManager;
 
 import javax.inject.Inject;
 
@@ -148,9 +149,7 @@ public class SettingsViewModel extends BaseViewModel {
         dataListener.setEmailSummary(emailAndStatus);
 
         // Phone
-        // FIXME: 28/02/2017
-//        String smsAndStatus = settings.getSms();
-        String smsAndStatus = "I AM BROKEN PLS FIX ME";
+        String smsAndStatus = settings.getSmsNumber();
         if (smsAndStatus == null || smsAndStatus.isEmpty()) {
             smsAndStatus = stringUtils.getString(R.string.not_specified);
         } else if (settings.isSmsVerified()) {
@@ -339,9 +338,7 @@ public class SettingsViewModel extends BaseViewModel {
      */
     @NonNull
     String getSms() {
-        // FIXME: 28/02/2017
-        return "I AM BROKEN PLS FIX ME";
-//        return settings.getSms() != null ? settings.getSms() : "";
+        return settings.getSmsNumber() != null ? settings.getSmsNumber() : "";
     }
 
     /**
@@ -477,22 +474,48 @@ public class SettingsViewModel extends BaseViewModel {
     }
 
     /**
-     * Updates the user's notification preferences
+     * Updates the user's notification preferences. Will not make any web requests if not necessary.
      *
-     * @param type    The notification type to be updated
-     * @param enabled Whether or not to enable the notification type
+     * @param type   The notification type to be updated
+     * @param enable Whether or not to enable the notification type
      * @see Settings
      */
-    void updateNotification(int type, boolean enabled) {
-//        compositeDisposable.add(
-//                settingsDataManager.updateNotifications(type, enabled)
-//                        .subscribe(success -> {
-//                            if (success) {
-//                                updateUi();
-//                            } else {
-//                                throw Exceptions.propagate(new Throwable("Update notification failed"));
-//                            }
-//                        }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+    void updateNotification(int type, boolean enable) {
+        if (enable && isNotificationTypeEnabled(type)) {
+            // No need to change
+            updateUi();
+            return;
+        } else if (!enable && isNotificationTypeDisabled(type)) {
+            // No need to change
+            updateUi();
+            return;
+        }
+
+        compositeDisposable.add(
+                Observable.just(enable)
+                        .flatMap(aBoolean -> {
+                            if (aBoolean) {
+                                return settingsDataManager.enableNotification(type, settings.getNotificationsType());
+                            } else {
+                                return settingsDataManager.disableNotification(type, settings.getNotificationsType());
+                            }
+                        })
+                        .subscribe(settings -> {
+                            this.settings = settings;
+                            updateUi();
+                        }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+    }
+
+    private boolean isNotificationTypeEnabled(int type) {
+        return settings.isNotificationsOn()
+                && (settings.getNotificationsType().contains(type)
+                || settings.getNotificationsType().contains(SettingsManager.NOTIFICATION_TYPE_ALL));
+    }
+
+    private boolean isNotificationTypeDisabled(int type) {
+        return settings.getNotificationsType().contains(SettingsManager.NOTIFICATION_TYPE_NONE)
+                || (!settings.getNotificationsType().contains(SettingsManager.NOTIFICATION_TYPE_ALL)
+                && !settings.getNotificationsType().contains(type));
     }
 
     /**
