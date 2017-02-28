@@ -1,9 +1,11 @@
 package piuk.blockchain.android.data.services;
 
-import info.blockchain.api.AddressInfo;
-import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.payload.LegacyAddress;
+import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.api.data.Address;
 
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import java.io.IOException;
+import junit.framework.Assert;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,24 +15,23 @@ import org.mockito.MockitoAnnotations;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 
-import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static piuk.blockchain.android.data.services.AddressInfoService.PARAMETER_FINAL_BALANCE;
 
 public class AddressInfoServiceTest extends RxTest {
 
-    private AddressInfoService subject;
+    private BlockExplorerService subject;
     @Mock
-    WalletApi addressInfo;
+    BlockExplorer blockExplorer;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        subject = new AddressInfoService(addressInfo);
+        subject = new BlockExplorerService(new BlockExplorer());
     }
 
     @Test
@@ -38,16 +39,18 @@ public class AddressInfoServiceTest extends RxTest {
         // Arrange
         LegacyAddress mockAddress = mock(LegacyAddress.class);
         when(mockAddress.getAddress()).thenReturn("1234567890");
-        when(addressInfo.getAddressInfo(anyString(), anyString())).thenReturn((new JSONObject(VALID_JSON)));
+        when(blockExplorer.getAddress(anyString(), anyInt(), anyInt()).execute().body()).thenReturn(getValidAddress());
         // Act
-        TestObserver<Long> observer = subject.getAddressBalance(mockAddress, PARAMETER_FINAL_BALANCE).test();
+        TestObserver<Address> observer = subject.getAddressBalance(mockAddress.getAddress(), 0, 0).test();
         // Assert
         observer.assertComplete();
         observer.assertNoErrors();
-        assertEquals(1000L, observer.values().get(0).longValue());
+        Assert.assertEquals(1000L, observer.values().get(0).getFinalBalance());
     }
 
-    private static final String VALID_JSON = "{\n" +
+    private Address getValidAddress() throws IOException {
+        return Address.fromJson("{\n" +
             "  \"final_balance\": 1000\n" +
-            "}";
+            "}");
+    }
 }

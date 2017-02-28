@@ -3,8 +3,6 @@ package piuk.blockchain.android.ui.fingerprint;
 import android.content.Context;
 import android.os.Bundle;
 
-import info.blockchain.wallet.util.CharSequenceX;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -146,7 +144,7 @@ public class FingerprintDialogViewModelTest {
         Bundle bundle = new Bundle();
         bundle.putString(KEY_BUNDLE_STAGE, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
         String pincode = "1234";
-        CharSequenceX data = new CharSequenceX("");
+        String data = new String("");
         bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
         when(activity.getBundle()).thenReturn(bundle);
         doAnswer(invocation -> {

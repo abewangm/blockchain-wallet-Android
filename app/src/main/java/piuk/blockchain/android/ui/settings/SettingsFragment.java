@@ -18,6 +18,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AlertDialog.Builder;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceCategory;
 import android.support.v7.preference.PreferenceFragmentCompat;
@@ -163,18 +164,19 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         screenshotPref = (SwitchPreferenceCompat) findPreference("screenshots_enabled");
         screenshotPref.setOnPreferenceChangeListener((preference, newValue) -> {
             if (((Boolean) newValue)) {
-                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                new Builder(getActivity(), R.style.AlertDialogStyle)
                         .setTitle(R.string.enable_screenshots)
                         .setMessage(R.string.enable_screenshots_warning)
                         .setCancelable(false)
-                        .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) ->
-                                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, true))
-                        .setNegativeButton(android.R.string.cancel, (dialogInterface, i) ->
-                                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false))
+                    // TODO: 27/02/2017  
+//                        .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) ->
+//                                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, true))
+//                        .setNegativeButton(android.R.string.cancel, (dialogInterface, i) ->
+//                                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false))
                         .create()
                         .show();
             } else {
-                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false);
+//                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false);
             }
 
             return true;

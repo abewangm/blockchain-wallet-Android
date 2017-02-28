@@ -10,8 +10,6 @@ import com.mtramin.rxfingerprint.data.FingerprintDecryptionResult;
 import com.mtramin.rxfingerprint.data.FingerprintEncryptionResult;
 import com.mtramin.rxfingerprint.data.FingerprintResult;
 
-import info.blockchain.wallet.util.CharSequenceX;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,7 +116,7 @@ public class FingerprintHelperTest {
         // Arrange
 
         // Act
-        boolean result = subject.storeEncryptedData("key", new CharSequenceX("data"));
+        boolean result = subject.storeEncryptedData("key", new String("data"));
         // Assert
         verify(prefsUtil).setValue("key", "ZGF0YQ==\n");
         assertTrue(result);
@@ -129,7 +127,7 @@ public class FingerprintHelperTest {
         // Arrange
         when(prefsUtil.getValue("key", "")).thenReturn("ZGF0YQ==\n");
         // Act
-        CharSequenceX result = subject.getEncryptedData("key");
+        String result = subject.getEncryptedData("key");
         // Assert
         verify(prefsUtil).getValue("key", "");
         assert result != null;
@@ -228,7 +226,7 @@ public class FingerprintHelperTest {
         // Act
         subject.encryptString("", "", mockAuthCallback);
         // Assert
-        verify(mockAuthCallback).onAuthenticated(any(CharSequenceX.class));
+        verify(mockAuthCallback).onAuthenticated(any(String.class));
     }
 
     @Test
@@ -276,7 +274,7 @@ public class FingerprintHelperTest {
         // Act
         subject.decryptString("", "", mockAuthCallback);
         // Assert
-        verify(mockAuthCallback).onAuthenticated(any(CharSequenceX.class));
+        verify(mockAuthCallback).onAuthenticated(any(String.class));
     }
 
     @Test

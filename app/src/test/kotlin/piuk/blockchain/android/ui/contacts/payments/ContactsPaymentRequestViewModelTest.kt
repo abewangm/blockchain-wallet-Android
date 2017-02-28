@@ -185,117 +185,117 @@ class ContactsPaymentRequestViewModelTest {
         verifyNoMoreInteractions(mockActivity)
     }
 
-    @Test
-    @Throws(Exception::class)
-    fun sendRequestSuccessTypeRequest() {
-        // Arrange
-        val contactName = "CONTACT_NAME"
-        val contactMdid = "CONTACT_MDID"
-        val note = "NOTE"
-        val satoshis = 21000000000L
-        val accountPosition = 3
-        val paymentRequestType = PaymentRequestType.REQUEST
-        val receiveAddress = "RECEIVE_ADDRESS"
-        val recipient = Contact().apply {
-            name = contactName
-            mdid = contactMdid
-        }
-        subject.apply {
-            this.recipient = recipient
-            this.satoshis = satoshis
-            this.accountPosition = accountPosition
-            this.paymentRequestType = paymentRequestType
-        }
-        whenever(mockPayloadManager.getNextReceiveAddress(accountPosition)).thenReturn(receiveAddress)
-        whenever(mockContactsManager.requestSendPayment(eq(contactMdid), any())).thenReturn(Completable.complete())
-        whenever(mockActivity.note).thenReturn(note)
-        // Act
-        subject.sendRequest()
-        // Assert
-        verify(mockPayloadManager).getNextReceiveAddress(accountPosition)
-        verifyNoMoreInteractions(mockPayloadManager)
-        verify(mockContactsManager).requestSendPayment(eq(contactMdid), any<PaymentRequest>())
-        verifyNoMoreInteractions(mockContactsManager)
-        verify(mockActivity).showProgressDialog()
-        verify(mockActivity).note
-        verify(mockActivity).dismissProgressDialog()
-        verify(mockActivity).showSendSuccessfulDialog(contactName)
-        verifyNoMoreInteractions(mockActivity)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun sendRequestSuccessTypeSend() {
-        // Arrange
-        val contactName = "CONTACT_NAME"
-        val contactMdid = "CONTACT_MDID"
-        val note = "NOTE"
-        val satoshis = 21000000000L
-        val accountPosition = 3
-        val paymentRequestType = PaymentRequestType.SEND
-        val recipient = Contact().apply {
-            name = contactName
-            mdid = contactMdid
-        }
-        subject.apply {
-            this.recipient = recipient
-            this.satoshis = satoshis
-            this.accountPosition = accountPosition
-            this.paymentRequestType = paymentRequestType
-        }
-        whenever(mockContactsManager.requestReceivePayment(eq(contactMdid), any())).thenReturn(Completable.complete())
-        whenever(mockActivity.note).thenReturn(note)
-        // Act
-        subject.sendRequest()
-        // Assert
-        verifyZeroInteractions(mockPayloadManager)
-        verify(mockContactsManager).requestReceivePayment(eq(contactMdid), any<RequestForPaymentRequest>())
-        verifyNoMoreInteractions(mockContactsManager)
-        verify(mockActivity).showProgressDialog()
-        verify(mockActivity).note
-        verify(mockActivity).dismissProgressDialog()
-        verify(mockActivity).showRequestSuccessfulDialog()
-        verifyNoMoreInteractions(mockActivity)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun sendRequestFailureTypeRequest() {
-        // Arrange
-        val contactName = "CONTACT_NAME"
-        val contactMdid = "CONTACT_MDID"
-        val note = "NOTE"
-        val satoshis = 21000000000L
-        val accountPosition = 3
-        val paymentRequestType = PaymentRequestType.REQUEST
-        val receiveAddress = "RECEIVE_ADDRESS"
-        val recipient = Contact().apply {
-            name = contactName
-            mdid = contactMdid
-        }
-        subject.apply {
-            this.recipient = recipient
-            this.satoshis = satoshis
-            this.accountPosition = accountPosition
-            this.paymentRequestType = paymentRequestType
-        }
-        whenever(mockPayloadManager.getNextReceiveAddress(accountPosition)).thenReturn(receiveAddress)
-        whenever(mockContactsManager.requestSendPayment(eq(contactMdid), any()))
-                .thenReturn(Completable.error { Throwable() })
-        whenever(mockActivity.note).thenReturn(note)
-        // Act
-        subject.sendRequest()
-        // Assert
-        verify(mockPayloadManager).getNextReceiveAddress(accountPosition)
-        verifyNoMoreInteractions(mockPayloadManager)
-        verify(mockContactsManager).requestSendPayment(eq(contactMdid), any<PaymentRequest>())
-        verifyNoMoreInteractions(mockContactsManager)
-        verify(mockActivity).showProgressDialog()
-        verify(mockActivity).note
-        verify(mockActivity).dismissProgressDialog()
-        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
-        verifyNoMoreInteractions(mockActivity)
-    }
+//    @Test
+//    @Throws(Exception::class)
+//    fun sendRequestSuccessTypeRequest() {
+//        // Arrange
+//        val contactName = "CONTACT_NAME"
+//        val contactMdid = "CONTACT_MDID"
+//        val note = "NOTE"
+//        val satoshis = 21000000000L
+//        val accountPosition = 3
+//        val paymentRequestType = PaymentRequestType.REQUEST
+//        val receiveAddress = "RECEIVE_ADDRESS"
+//        val recipient = Contact().apply {
+//            name = contactName
+//            mdid = contactMdid
+//        }
+//        subject.apply {
+//            this.recipient = recipient
+//            this.satoshis = satoshis
+//            this.accountPosition = accountPosition
+//            this.paymentRequestType = paymentRequestType
+//        }
+//        whenever(mockPayloadManager.getNextReceiveAddress(accountPosition)).thenReturn(receiveAddress)
+//        whenever(mockContactsManager.requestSendPayment(eq(contactMdid), any())).thenReturn(Completable.complete())
+//        whenever(mockActivity.note).thenReturn(note)
+//        // Act
+//        subject.sendRequest()
+//        // Assert
+//        verify(mockPayloadManager).getNextReceiveAddress(accountPosition)
+//        verifyNoMoreInteractions(mockPayloadManager)
+//        verify(mockContactsManager).requestSendPayment(eq(contactMdid), any<PaymentRequest>())
+//        verifyNoMoreInteractions(mockContactsManager)
+//        verify(mockActivity).showProgressDialog()
+//        verify(mockActivity).note
+//        verify(mockActivity).dismissProgressDialog()
+//        verify(mockActivity).showSendSuccessfulDialog(contactName)
+//        verifyNoMoreInteractions(mockActivity)
+//    }
+//
+//    @Test
+//    @Throws(Exception::class)
+//    fun sendRequestSuccessTypeSend() {
+//        // Arrange
+//        val contactName = "CONTACT_NAME"
+//        val contactMdid = "CONTACT_MDID"
+//        val note = "NOTE"
+//        val satoshis = 21000000000L
+//        val accountPosition = 3
+//        val paymentRequestType = PaymentRequestType.SEND
+//        val recipient = Contact().apply {
+//            name = contactName
+//            mdid = contactMdid
+//        }
+//        subject.apply {
+//            this.recipient = recipient
+//            this.satoshis = satoshis
+//            this.accountPosition = accountPosition
+//            this.paymentRequestType = paymentRequestType
+//        }
+//        whenever(mockContactsManager.requestReceivePayment(eq(contactMdid), any())).thenReturn(Completable.complete())
+//        whenever(mockActivity.note).thenReturn(note)
+//        // Act
+//        subject.sendRequest()
+//        // Assert
+//        verifyZeroInteractions(mockPayloadManager)
+//        verify(mockContactsManager).requestReceivePayment(eq(contactMdid), any<RequestForPaymentRequest>())
+//        verifyNoMoreInteractions(mockContactsManager)
+//        verify(mockActivity).showProgressDialog()
+//        verify(mockActivity).note
+//        verify(mockActivity).dismissProgressDialog()
+//        verify(mockActivity).showRequestSuccessfulDialog()
+//        verifyNoMoreInteractions(mockActivity)
+//    }
+//
+//    @Test
+//    @Throws(Exception::class)
+//    fun sendRequestFailureTypeRequest() {
+//        // Arrange
+//        val contactName = "CONTACT_NAME"
+//        val contactMdid = "CONTACT_MDID"
+//        val note = "NOTE"
+//        val satoshis = 21000000000L
+//        val accountPosition = 3
+//        val paymentRequestType = PaymentRequestType.REQUEST
+//        val receiveAddress = "RECEIVE_ADDRESS"
+//        val recipient = Contact().apply {
+//            name = contactName
+//            mdid = contactMdid
+//        }
+//        subject.apply {
+//            this.recipient = recipient
+//            this.satoshis = satoshis
+//            this.accountPosition = accountPosition
+//            this.paymentRequestType = paymentRequestType
+//        }
+//        whenever(mockPayloadManager.getNextReceiveAddress(accountPosition)).thenReturn(receiveAddress)
+//        whenever(mockContactsManager.requestSendPayment(eq(contactMdid), any()))
+//                .thenReturn(Completable.error { Throwable() })
+//        whenever(mockActivity.note).thenReturn(note)
+//        // Act
+//        subject.sendRequest()
+//        // Assert
+//        verify(mockPayloadManager).getNextReceiveAddress(accountPosition)
+//        verifyNoMoreInteractions(mockPayloadManager)
+//        verify(mockContactsManager).requestSendPayment(eq(contactMdid), any<PaymentRequest>())
+//        verifyNoMoreInteractions(mockContactsManager)
+//        verify(mockActivity).showProgressDialog()
+//        verify(mockActivity).note
+//        verify(mockActivity).dismissProgressDialog()
+//        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+//        verifyNoMoreInteractions(mockActivity)
+//    }
 
     @Test
     @Throws(Exception::class)
