@@ -11,7 +11,7 @@ import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.Balance;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.api.data.FeesList;
+import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -419,10 +419,9 @@ public class MainViewModel extends BaseViewModel {
 
     private void cacheDynamicFee() {
         try {
-            Response<FeesList> response = Payment.getDynamicFee().execute();
+            Response<FeeList> response = Payment.getDynamicFee().execute();
             if(response.isSuccessful()) {
-                FeesList body = response.body();
-                DynamicFeeCache.getInstance().setSuggestedFee(body);
+                DynamicFeeCache.getInstance().setCachedDynamicFee(response.body());
             }
         } catch (IOException e) {
             e.printStackTrace();

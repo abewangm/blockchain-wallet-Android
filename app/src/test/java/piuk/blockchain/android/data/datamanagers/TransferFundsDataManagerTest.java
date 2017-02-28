@@ -69,7 +69,7 @@ public class TransferFundsDataManagerTest extends RxTest {
 //        }};
 //        SuggestedFee suggestedFee = new SuggestedFee();
 //        suggestedFee.defaultFeePerKb = new BigInteger("100");
-//        DynamicFeeCache.getInstance().setSuggestedFee(suggestedFee);
+//        DynamicFeeCache.getInstance().setCachedDynamicFee(suggestedFee);
 //        MultiAddrFactory.getInstance().setLegacyBalance("address", 1000000L);
 //        when(payloadManager.getPayload()).thenReturn(mockPayload);
 //        HDWallet mockHdWallet = mock(HDWallet.class);

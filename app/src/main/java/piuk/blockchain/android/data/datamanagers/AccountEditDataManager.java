@@ -53,7 +53,7 @@ public class AccountEditDataManager {
 //
 //        return getUnspentOutputs(legacyAddress, payment)
 //                .flatMap(unspentOutputs -> {
-//                    BigInteger suggestedFeePerKb = new BigDecimal(DynamicFeeCache.getInstance().getSuggestedFee().getDefaultFee().getFee()).toBigInteger();
+//                    BigInteger suggestedFeePerKb = new BigDecimal(DynamicFeeCache.getInstance().getCachedDynamicFee().getDefaultFee().getFee()).toBigInteger();
 //
 //                    Pair<BigInteger, BigInteger> sweepableCoins = Payment
 //                        .getSweepableCoins(unspentOutputs, suggestedFeePerKb);

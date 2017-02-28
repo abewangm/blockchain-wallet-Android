@@ -20,7 +20,9 @@ class AddressBalanceHelper {
      * Returns the balance of an {@link Account} in Satoshis
      */
     long getAccountAbsoluteBalance(Account account) {
-        return multiAddrFactory.getXpubAmounts().get(account.getXpub());
+        return 0L;
+        // TODO: 28/02/2017
+//        return multiAddrFactory.getXpubAmounts().get(account.getXpub());
     }
 
     /**
@@ -28,14 +30,16 @@ class AddressBalanceHelper {
      */
     String getAccountBalance(Account account, boolean isBTC, double btcExchange, String fiatUnit, String btcUnit) {
 
-        long btcBalance = getAccountAbsoluteBalance(account);
-
-        if (!isBTC) {
-            double fiatBalance = btcExchange * (btcBalance / 1e8);
-            return "(" + monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance) + " " + fiatUnit + ")";
-        } else {
-            return "(" + monetaryUtil.getDisplayAmount(btcBalance) + " " + btcUnit + ")";
-        }
+        // TODO: 28/02/2017
+        return "(0.0 BTC)";
+//        long btcBalance = getAccountAbsoluteBalance(account);
+//
+//        if (!isBTC) {
+//            double fiatBalance = btcExchange * (btcBalance / 1e8);
+//            return "(" + monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance) + " " + fiatUnit + ")";
+//        } else {
+//            return "(" + monetaryUtil.getDisplayAmount(btcBalance) + " " + btcUnit + ")";
+//        }
     }
 
     /**

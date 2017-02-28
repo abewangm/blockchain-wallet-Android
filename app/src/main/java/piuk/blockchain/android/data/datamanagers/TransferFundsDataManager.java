@@ -12,10 +12,7 @@ import info.blockchain.wallet.payment.Payment;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.bitcoinj.core.ECKey;
-import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -24,7 +21,6 @@ import java.util.List;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.util.annotations.Thunk;
 import retrofit2.Response;
@@ -54,7 +50,7 @@ public class TransferFundsDataManager {
         return Observable.fromCallable(() -> {
 
                 BigInteger suggestedFeePerKb = new BigDecimal(
-                    DynamicFeeCache.getInstance().getSuggestedFee().getDefaultFee().getFee())
+                    DynamicFeeCache.getInstance().getCachedDynamicFee().getDefaultFee().getFee())
                     .toBigInteger();
 
                 List<PendingTransaction> pendingTransactionList = new ArrayList<>();

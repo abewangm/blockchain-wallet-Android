@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.receive;
 
 import android.support.annotation.NonNull;
 
+import android.util.Log;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -78,18 +79,20 @@ public class WalletAccountHelper {
             List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
             for (Account account : accounts) {
 
-                if (account.isArchived())
+                if (account.isArchived()) {
                     // Skip archived account
                     continue;
+                }
 
-                if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(account.getXpub())) {
+                // TODO: 28/02/2017  
+//                if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(account.getXpub())) {
                     accountArrayList.add(new ItemAccount(
                             account.getLabel(),
                             addressBalanceHelper.getAccountBalance(account, isBtc, btcExchangeRate, fiatUnit, btcUnit),
                             null,
                             addressBalanceHelper.getAccountAbsoluteBalance(account),
                             account));
-                }
+//                }
             }
         }
 

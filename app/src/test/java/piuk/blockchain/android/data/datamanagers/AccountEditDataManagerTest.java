@@ -52,7 +52,7 @@ public class AccountEditDataManagerTest extends RxTest {
 //        Payment payment = new Payment();
 //        SuggestedFee suggestedFee = new SuggestedFee();
 //        suggestedFee.defaultFeePerKb = BigInteger.valueOf(100);
-//        DynamicFeeCache.getInstance().setSuggestedFee(suggestedFee);
+//        DynamicFeeCache.getInstance().setCachedDynamicFee(suggestedFee);
 //        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
 //        when(mockPayload.getHdWallet().getDefaultIndex()).thenReturn(0);
 //        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));

@@ -1,7 +1,11 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import info.blockchain.api.data.UnspentOutputs;
+import info.blockchain.wallet.api.data.FeeList;
+import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
+import java.util.Arrays;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.BIP38PrivateKey;
@@ -13,6 +17,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.PaymentService;
+import retrofit2.Response;
 
 public class SendDataManager {
 
@@ -57,16 +62,33 @@ public class SendDataManager {
         }).compose(RxUtil.applySchedulersToObservable());
     }
 
-    // TODO: 22/02/2017  
-//    public Observable<SuggestedFee> getSuggestedFee() {
-//        return Observable.fromCallable(() -> dynamicFee.getDynamicFee())
-//                .compose(RxUtil.applySchedulersToObservable());
-//    }
-//
-    // TODO: 22/02/2017  
-//    public Observable<JSONObject> getUnspentOutputs(String address) {
-//        return Observable.fromCallable(() -> unspent.getUnspentOutputs(address))
-//                .compose(RxUtil.applySchedulersToObservable());
-//    }
+    public Observable<FeeList> getSuggestedFee() {
+        return Observable.fromCallable(() -> {
+
+            Response<FeeList> call = Payment
+                .getDynamicFee().execute();
+
+            if(call.isSuccessful()) {
+                return call.body();
+            } else {
+                throw new Exception("Dynamic fee api call failed.");
+            }
+        })
+        .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    public Observable<UnspentOutputs> getUnspentOutputs(String address) {
+        return Observable.fromCallable(() -> {
+            Response<UnspentOutputs> call = Payment.getUnspentCoins(Arrays.asList(address))
+                .execute();
+
+            if(call.isSuccessful()) {
+                return call.body();
+            } else {
+                throw new Exception("Unspent api call failed.");
+            }
+        })
+        .compose(RxUtil.applySchedulersToObservable());
+    }
 
 }

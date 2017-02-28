@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 /**
  * PayloadBridge.java : singleton class for remote save of payload
  */
+// TODO: 28/02/2017 Get rid of this class
 public class PayloadBridge {
 
     private static PayloadBridge instance;
