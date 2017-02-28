@@ -643,6 +643,7 @@
     <string name="contacts_sending_to_contact_waiting">Sending %1$s to %2$s\nWaiting for %2$s to accept</string>
     <string name="contacts_requesting_from_contact_waiting_for_payment">Requested %1$s from %2$s\nWaiting for payment</string>
     <string name="contacts_requesting_from_contact_waiting_to_accept">Requested %1$s from %2$s\nWaiting for %2$s to accept</string>
+    <string name="contacts_receiving_from_contact_waiting_to_accept">Receiving %1$s from %2$s\nWaiting for you to accept</string>
     <string name="contacts_send_complete">Sent %1$s to %2$s</string>
     <string name="contacts_receive_complete">Received %1$s from %2$s</string>
     <string name="contacts_received">Received from %1$s</string>

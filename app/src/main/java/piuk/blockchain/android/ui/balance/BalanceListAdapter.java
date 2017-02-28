@@ -144,7 +144,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
 
                 } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
                     Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_requesting_from_contact_waiting_to_accept),
+                            stringUtils.getString(R.string.contacts_receiving_from_contact_waiting_to_accept),
                             amountSpannable,
                             contactName);
                     fctxViewHolder.title.setText(display);
