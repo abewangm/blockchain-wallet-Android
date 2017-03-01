@@ -102,7 +102,7 @@ public class DataManagerModule {
     @ViewModelScope
     protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
                                                            MultiAddrFactory multiAddrFactory) {
-        return new AccountDataManager(payloadManager, multiAddrFactory, new AddressInfoService());
+        return new AccountDataManager(payloadManager, multiAddrFactory, new AddressInfoService(multiAddrFactory));
     }
 
     @Provides

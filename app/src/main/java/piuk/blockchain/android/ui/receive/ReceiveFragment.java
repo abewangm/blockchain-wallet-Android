@@ -38,10 +38,13 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.contacts.data.Contact;
 
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
+
+import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.uri.BitcoinURI;
 
@@ -370,7 +373,9 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
         if (receiveAddress != null) {
             if (!amountBigInt.equals(BigInteger.ZERO)) {
-                uri = BitcoinURI.convertToBitcoinURI(receiveAddress, Coin.valueOf(amountBigInt.longValue()), "", "");
+                uri = BitcoinURI.convertToBitcoinURI(
+                        Address.fromBase58(PersistentUrls.getInstance().getCurrentNetworkParams(), receiveAddress),
+                        Coin.valueOf(amountBigInt.longValue()), "", "");
             } else {
                 uri = "bitcoin:" + receiveAddress;
             }

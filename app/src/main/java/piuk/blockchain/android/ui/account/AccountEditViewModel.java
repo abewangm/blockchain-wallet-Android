@@ -22,14 +22,12 @@ import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
-import info.blockchain.wallet.util.Tools;
-import java.math.BigDecimal;
-import org.apache.commons.lang3.NotImplementedException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
 import org.bitcoinj.params.MainNetParams;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +35,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.exceptions.Exceptions;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
@@ -58,6 +55,8 @@ import piuk.blockchain.android.util.StringUtils;
 @SuppressWarnings("WeakerAccess")
 public class AccountEditViewModel extends BaseViewModel {
 
+    private static final String TAG = AccountEditViewModel.class.getSimpleName();
+
     private DataListener dataListener;
 
     @Inject protected PayloadManager payloadManager;
@@ -72,10 +71,8 @@ public class AccountEditViewModel extends BaseViewModel {
     // Visible for data binding
     public AccountEditModel accountModel;
 
-    @VisibleForTesting
-    LegacyAddress legacyAddress;
-    @VisibleForTesting
-    Account account;
+    @VisibleForTesting LegacyAddress legacyAddress;
+    @VisibleForTesting Account account;
     @VisibleForTesting String secondPassword;
     private MonetaryUtil monetaryUtil;
     private int accountIndex;
@@ -135,81 +132,80 @@ public class AccountEditViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        throw new NotImplementedException("todo");
-//        Intent intent = dataListener.getIntent();
-//
-//        int accountIndex = intent.getIntExtra("account_index", -1);
-//        int addressIndex = intent.getIntExtra("address_index", -1);
-//
-//        if (accountIndex >= 0) {
-//            // V3
-//            List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
-//
-//            // Remove "All"
-//            List<Account> accountClone = new ArrayList<>(accounts.size());
-//            accountClone.addAll(accounts);
-//
-//            if (accountClone.get(accountClone.size() - 1) instanceof ImportedAccount) {
-//                accountClone.remove(accountClone.size() - 1);
-//            }
-//
-//            account = accountClone.get(accountIndex);
-//
-//            accountModel.setLabel(account.getLabel());
-//            accountModel.setLabelHeader(stringUtils.getString(R.string.name));
-//            accountModel.setScanPrivateKeyVisibility(View.GONE);
-//            accountModel.setXpubDescriptionVisibility(View.VISIBLE);
-//            accountModel.setXpubText(stringUtils.getString(R.string.extended_public_key));
-//            accountModel.setTransferFundsVisibility(View.GONE);
-//            setArchive(account.isArchived());
-//            setDefault(isDefault(account));
-//
-//        } else if (addressIndex >= 0) {
-//            // V2
-//            ImportedAccount iAccount = null;
-//            if (payloadManager.getPayload().getLegacyAddressList().size() > 0) {
-//                iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
-//                        payloadManager.getPayload().getLegacyAddressList(),
-//                        MultiAddrFactory.getInstance().getLegacyBalance());
-//            }
-//
-//            if (iAccount != null) {
-//
-//                List<LegacyAddress> legacy = iAccount.getLegacyAddresses();
-//                legacyAddress = legacy.get(addressIndex);
-//
-//                accountModel.setLabel(legacyAddress.getLabel());
-//                accountModel.setLabelHeader(stringUtils.getString(R.string.name));
-//                accountModel.setXpubDescriptionVisibility(View.GONE);
-//                accountModel.setXpubText(stringUtils.getString(R.string.address));
-//                accountModel.setDefaultAccountVisibility(View.GONE);//No default for V2
-//                setArchive(legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS);
-//
-//                if (legacyAddress.isWatchOnly()) {
-//                    accountModel.setScanPrivateKeyVisibility(View.VISIBLE);
-//                    accountModel.setArchiveVisibility(View.GONE);
-//                } else {
-//                    accountModel.setScanPrivateKeyVisibility(View.GONE);
-//                    accountModel.setArchiveVisibility(View.VISIBLE);
-//                }
-//
-//                if (payloadManager.getPayload().isUpgraded()) {
-//                    long balance = multiAddrFactory.getLegacyBalance(legacyAddress.getAddress());
-//                    // Subtract fee
-//                    long balanceAfterFee = (balance - new BigDecimal(Payment.getDefaultFee().getFee()).longValue());
-//
-//                    if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
-//                        accountModel.setTransferFundsVisibility(View.VISIBLE);
-//                    } else {
-//                        // No need to show 'transfer' if funds are less than dust amount
-//                        accountModel.setTransferFundsVisibility(View.GONE);
-//                    }
-//                } else {
-//                    // No transfer option for V2
-//                    accountModel.setTransferFundsVisibility(View.GONE);
-//                }
-//            }
-//        }
+        Intent intent = dataListener.getIntent();
+
+        int accountIndex = intent.getIntExtra("account_index", -1);
+        int addressIndex = intent.getIntExtra("address_index", -1);
+
+        if (accountIndex >= 0) {
+            // V3
+            List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
+
+            // Remove "All"
+            List<Account> accountClone = new ArrayList<>(accounts.size());
+            accountClone.addAll(accounts);
+
+            if (accountClone.get(accountClone.size() - 1) instanceof ImportedAccount) {
+                accountClone.remove(accountClone.size() - 1);
+            }
+
+            account = accountClone.get(accountIndex);
+
+            accountModel.setLabel(account.getLabel());
+            accountModel.setLabelHeader(stringUtils.getString(R.string.name));
+            accountModel.setScanPrivateKeyVisibility(View.GONE);
+            accountModel.setXpubDescriptionVisibility(View.VISIBLE);
+            accountModel.setXpubText(stringUtils.getString(R.string.extended_public_key));
+            accountModel.setTransferFundsVisibility(View.GONE);
+            setArchive(account.isArchived());
+            setDefault(isDefault(account));
+
+        } else if (addressIndex >= 0) {
+            // V2
+            ImportedAccount iAccount = null;
+            if (payloadManager.getPayload().getLegacyAddressList().size() > 0) {
+                iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
+                        payloadManager.getPayload().getLegacyAddressList(),
+                        multiAddrFactory.getLegacyBalance());
+            }
+
+            if (iAccount != null) {
+
+                List<LegacyAddress> legacy = iAccount.getLegacyAddresses();
+                legacyAddress = legacy.get(addressIndex);
+
+                accountModel.setLabel(legacyAddress.getLabel());
+                accountModel.setLabelHeader(stringUtils.getString(R.string.name));
+                accountModel.setXpubDescriptionVisibility(View.GONE);
+                accountModel.setXpubText(stringUtils.getString(R.string.address));
+                accountModel.setDefaultAccountVisibility(View.GONE);//No default for V2
+                setArchive(legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS);
+
+                if (legacyAddress.isWatchOnly()) {
+                    accountModel.setScanPrivateKeyVisibility(View.VISIBLE);
+                    accountModel.setArchiveVisibility(View.GONE);
+                } else {
+                    accountModel.setScanPrivateKeyVisibility(View.GONE);
+                    accountModel.setArchiveVisibility(View.VISIBLE);
+                }
+
+                if (payloadManager.getPayload().isUpgraded()) {
+                    long balance = multiAddrFactory.getLegacyBalance(legacyAddress.getAddress());
+                    // Subtract fee
+                    long balanceAfterFee = (balance - new BigDecimal(Payment.getDefaultFee().getFee()).longValue());
+
+                    if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
+                        accountModel.setTransferFundsVisibility(View.VISIBLE);
+                    } else {
+                        // No need to show 'transfer' if funds are less than dust amount
+                        accountModel.setTransferFundsVisibility(View.GONE);
+                    }
+                } else {
+                    // No transfer option for V2
+                    accountModel.setTransferFundsVisibility(View.GONE);
+                }
+            }
+        }
     }
 
     public boolean areLauncherShortcutsEnabled() {
@@ -598,26 +594,23 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     void importUnmatchedPrivateKey(ECKey key) throws Exception {
+        if (payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(MainNetParams.get()).toString())) {
+            // Wallet contains address associated with this private key, find & save it with scanned key
+            String foundAddressString = key.toAddress(MainNetParams.get()).toString();
+            for (LegacyAddress legacyAddress : payloadManager.getPayload().getLegacyAddressList()) {
+                if (legacyAddress.getAddress().equals(foundAddressString)) {
+                    importAddressPrivateKey(key, legacyAddress, false);
+                }
+            }
+        } else {
+            // Create new address and store
+            final LegacyAddress legacyAddress = LegacyAddress.fromECKey(key);
 
-        throw new NotImplementedException("");
-        // TODO: 22/02/2017  
-//        if (payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(MainNetParams.get()).toString())) {
-//            // Wallet contains address associated with this private key, find & save it with scanned key
-//            String foundAddressString = key.toAddress(MainNetParams.get()).toString();
-//            for (LegacyAddress legacyAddress : payloadManager.getPayload().getLegacyAddressList()) {
-//                if (legacyAddress.getAddress().equals(foundAddressString)) {
-//                    importAddressPrivateKey(key, legacyAddress, false);
-//                }
-//            }
-//        } else {
-//            // Create new address and store
-//            final LegacyAddress legacyAddress = LegacyAddress.fromECKey(key);
-//
-//            setLegacyAddressKey(key, legacyAddress);
-//            remoteSaveUnmatchedPrivateKey(legacyAddress);
-//
-//            dataListener.privateKeyImportMismatch();
-//        }
+            setLegacyAddressKey(key, legacyAddress);
+            remoteSaveUnmatchedPrivateKey(legacyAddress);
+
+            dataListener.privateKeyImportMismatch();
+        }
     }
 
     void showAddressDetails() {
@@ -646,7 +639,7 @@ public class AccountEditViewModel extends BaseViewModel {
         try {
             bitmap = qrCodeEncoder.encodeAsBitmap();
         } catch (WriterException e) {
-            Log.e(AccountEditViewModel.class.getSimpleName(), "showAddressDetails: ", e);
+            Log.e(TAG, "showAddressDetails: ", e);
         }
 
         dataListener.showAddressDetails(heading, note, copy, bitmap, qrString);
@@ -656,7 +649,7 @@ public class AccountEditViewModel extends BaseViewModel {
         String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);
 
         try {
-            String format = privateKeyFactory.getFormat(scanData);
+            String format = PrivateKeyFactory.getFormat(scanData);
             if (format != null) {
                 if (!format.equals(PrivateKeyFactory.BIP38)) {
                     importNonBIP38Address(format, scanData);
@@ -669,7 +662,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
         } catch (Exception e) {
             dataListener.showToast(R.string.scan_not_recognized, ToastCustom.TYPE_ERROR);
-            Log.e(AccountEditViewModel.class.getSimpleName(), "handleIncomingScanIntent: ", e);
+            Log.e(TAG, "handleIncomingScanIntent: ", e);
         }
     }
 
@@ -701,7 +694,7 @@ public class AccountEditViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
 
         try {
-            final ECKey key = privateKeyFactory.getKey(format, data);
+            final ECKey key = PrivateKeyFactory.getKey(format, data);
             if (key != null && key.hasPrivKey()) {
                 final String keyAddress = key.toAddress(MainNetParams.get()).toString();
                 if (!legacyAddress.getAddress().equals(keyAddress)) {
@@ -741,8 +734,37 @@ public class AccountEditViewModel extends BaseViewModel {
             }
         } catch (Exception e) {
             dataListener.showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR);
+            Log.e(TAG, "importBIP38Address: ", e);
         }
 
         dataListener.dismissProgressDialog();
     }
+
+    private void remoteSaveUnmatchedPrivateKey(final LegacyAddress legacyAddress) {
+        Wallet updatedPayload = payloadManager.getPayload();
+        List<LegacyAddress> updatedLegacyAddresses = updatedPayload.getLegacyAddressList();
+        updatedLegacyAddresses.add(legacyAddress);
+        payloadManager.getPayload().getLegacyAddressList().clear();
+        payloadManager.getPayload().getLegacyAddressList().addAll(updatedLegacyAddresses);
+
+        compositeDisposable.add(
+                accountEditDataManager.syncPayloadWithServer()
+                        .subscribe(success -> {
+                            if (success) {
+                                List<String> legacyAddressList = payloadManager.getPayload().getLegacyAddressStringList();
+                                try {
+                                    multiAddrFactory.refreshLegacyAddressData(legacyAddressList, false);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "remoteSaveUnmatchedPrivateKey: ", e);
+                                }
+
+                                // Subscribe to new address only if successfully created
+                                dataListener.sendBroadcast("address", legacyAddress.getAddress());
+                                dataListener.setActivityResult(Activity.RESULT_OK);
+                            } else {
+                                throw Exceptions.propagate(new Throwable("Remote save failed"));
+                            }
+                        }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
+    }
+
 }

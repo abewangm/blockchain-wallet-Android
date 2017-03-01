@@ -1,27 +1,31 @@
 package piuk.blockchain.android.data.services;
 
+import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.data.LegacyAddress;
-import org.apache.commons.lang3.NotImplementedException;
+
+import java.util.Collections;
+
 import io.reactivex.Observable;
+import piuk.blockchain.android.data.rxjava.RxUtil;
 
 public class AddressInfoService {
 
-    public static final String PARAMETER_FINAL_BALANCE = "&limit=0";
-    private static final String KEY_FINAL_BALANCE = "final_balance";
+    private MultiAddrFactory multiAddrFactory;
+
+    public AddressInfoService(MultiAddrFactory multiAddrFactory) {
+        this.multiAddrFactory = multiAddrFactory;
+    }
 
     /**
      * Returns the current balance for a given {@link LegacyAddress}
      *
-     * @param address   The {@link LegacyAddress} which you want to know the balance of
-     * @param parameter A URL parameter - this can allow you to get the balance at a specific point
-     *                  in time, or now using {@value PARAMETER_FINAL_BALANCE}
-     * @return          An {@link Observable<Long>} wrapping the balance of the address
+     * @param address The {@link LegacyAddress} which you want to know the balance of
+     * @return An {@link Observable<Long>} wrapping the balance of the address
      */
-    public Observable<Long> getAddressBalance(LegacyAddress address, String parameter) {
-        throw new NotImplementedException("todo");
-        // TODO: 22/02/2017
-//        return Observable.fromCallable(() -> addressInfo.getAddressInfo(address.getAddress(), parameter))
-//                .flatMap(response -> Observable.fromCallable(() -> response.getLong(KEY_FINAL_BALANCE)))
-//                .compose(RxUtil.applySchedulersToObservable());
+    public Observable<Long> getAddressBalance(LegacyAddress address) {
+        return Observable.fromCallable(() -> multiAddrFactory.getAddressBalanceFromApi(
+                Collections.singletonList(address.getAddress())))
+                .map(map -> map.get(address.getAddress()))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 }
