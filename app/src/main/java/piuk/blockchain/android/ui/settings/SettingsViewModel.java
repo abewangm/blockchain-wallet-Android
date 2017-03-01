@@ -536,8 +536,7 @@ public class SettingsViewModel extends BaseViewModel {
      */
     void updatePassword(@NonNull String password, @NonNull String fallbackPassword) {
         dataListener.showProgressDialog(R.string.please_wait);
-        // FIXME: 28/02/2017
-//        payloadManager.setTempPassword(password);
+        payloadManager.setTempPassword(password);
 
         compositeDisposable.add(
                 accessState.createPin(password, accessState.getPIN())
@@ -559,8 +558,7 @@ public class SettingsViewModel extends BaseViewModel {
     }
 
     private void showUpdatePasswordFailed(@NonNull String fallbackPassword) {
-        // FIXME: 28/02/2017
-//        payloadManager.setTempPassword(fallbackPassword);
+        payloadManager.setTempPassword(fallbackPassword);
 
         dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
         dataListener.showToast(R.string.password_unchanged, ToastCustom.TYPE_ERROR);
