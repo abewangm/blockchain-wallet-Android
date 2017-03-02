@@ -87,10 +87,13 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
     private void activateIfReady() {
         if (this.isReady()) {
             try {
+                String metadata = buyMetadata.getMetadata();
+                byte[] magicHash = buyMetadata.getMagicHash();
+
                 frontendJavascriptManager.activateMobileBuyFromJson(
                         payloadManager.getPayload().getDecryptedPayload(),
-                        buyMetadata.getMetadata(),
-                        Hex.toHexString(buyMetadata.getMagicHash()),
+                        metadata == null ? "" : metadata,
+                        magicHash == null ? "" : Hex.toHexString(magicHash),
                         payloadManager.getTempPassword().toString()
                 );
             } catch (Exception e) {
