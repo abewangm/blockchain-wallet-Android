@@ -14,10 +14,9 @@ import android.util.Log;
 
 import javax.inject.Inject;
 
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
@@ -29,12 +28,12 @@ public class FcmCallbackService extends FirebaseMessagingService {
     private static final String TAG = FcmCallbackService.class.getSimpleName();
 
     public static final String EXTRA_CONTACT_ACCEPTED = "contact_accepted";
-    public static final Subject<NotificationPayload> notificationSubject = PublishSubject.create();
     public static final int ID_BACKGROUND_NOTIFICATION = 1337;
     public static final int ID_FOREGROUND_NOTIFICATION = 1338;
 
     @Inject protected NotificationManager notificationManager;
     @Inject protected PrefsUtil prefsUtil;
+    @Inject protected RxBus rxBus;
 
     public FcmCallbackService() {
         Injector.getInstance().getAppComponent().inject(this);
@@ -48,13 +47,9 @@ public class FcmCallbackService extends FirebaseMessagingService {
 
             // Parse data, emit events
             NotificationPayload payload = new NotificationPayload(remoteMessage.getData());
-            notificationSubject.onNext(payload);
+            rxBus.emitEvent(NotificationPayload.class, payload);
             sendNotification(payload);
         }
-    }
-
-    public static Subject<NotificationPayload> getNotificationSubject() {
-        return notificationSubject;
     }
 
     private void sendNotification(NotificationPayload payload) {

@@ -42,17 +42,6 @@ class ContactsDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
-    fun getServiceInitSubject() {
-        // Arrange
-
-        // Act
-        val publishSubject = ContactsDataManager.getServiceInitSubject()
-        // Assert
-        publishSubject is PublishSubject<ContactsDataManager.ContactsEvent>
-    }
-
-    @Test
-    @Throws(Exception::class)
     fun loadNodes() {
         // Arrange
         val mockPayload: Payload = mock()
@@ -436,16 +425,11 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
         whenever(mockContactsService.publishXpub()).thenReturn(Completable.complete())
         // Act
-        val publishObserver = ContactsDataManager.getServiceInitSubject().test()
         val testObserver = subject.publishXpub().test()
         // Assert
         verify(mockContactsService).publishXpub()
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        // PublishSubject won't complete
-        publishObserver.assertNotComplete()
-        publishObserver.assertNoErrors()
-        publishObserver.values()[0] equals ContactsDataManager.ContactsEvent.INIT
     }
 
     @Test

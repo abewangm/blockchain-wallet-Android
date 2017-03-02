@@ -28,8 +28,8 @@ ext {
     daggerVersion = '2.9'
     retrofitVersion = '2.2.0'
     okHttpVersion = '3.6.0'
-    mockitoVersion = '2.7.11'
-    kotlinVersion = '1.0.6'
+    mockitoVersion = '2.7.13'
+    kotlinVersion = '1.1.0'
 }
 
 task clean(type: Delete) {

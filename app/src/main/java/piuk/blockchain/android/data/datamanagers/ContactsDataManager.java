@@ -21,7 +21,6 @@ import java.util.List;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
-import io.reactivex.subjects.PublishSubject;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.ContactsService;
@@ -49,16 +48,10 @@ import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 @SuppressWarnings({"WeakerAccess", "AnonymousInnerClassMayBeStatic"})
 public class ContactsDataManager {
 
-    private static PublishSubject<ContactsEvent> serviceInitSubject = PublishSubject.create();
-
     private ContactsService contactsService;
     private PayloadManager payloadManager;
     private PendingTransactionListStore pendingTransactionListStore;
     @VisibleForTesting HashMap<String, String> contactsTransactionMap = new HashMap<>();
-
-    public enum ContactsEvent {
-        INIT
-    }
 
     public ContactsDataManager(ContactsService contactsService,
                                PayloadManager payloadManager,
@@ -66,16 +59,6 @@ public class ContactsDataManager {
         this.contactsService = contactsService;
         this.payloadManager = payloadManager;
         this.pendingTransactionListStore = pendingTransactionListStore;
-    }
-
-    /**
-     * Returns a {@link PublishSubject} which emits an item when the contacts service has been fully
-     * and successfully initialised.
-     *
-     * @return A {@link PublishSubject}
-     */
-    public static PublishSubject<ContactsEvent> getServiceInitSubject() {
-        return serviceInitSubject;
     }
 
     /**
@@ -452,7 +435,6 @@ public class ContactsDataManager {
      */
     public Completable publishXpub() {
         return contactsService.publishXpub()
-                .doOnComplete(() -> getServiceInitSubject().onNext(ContactsEvent.INIT))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
