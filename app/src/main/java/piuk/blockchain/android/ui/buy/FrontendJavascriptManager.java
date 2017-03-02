@@ -26,6 +26,11 @@ public class FrontendJavascriptManager {
         frontendJavascript.onFrontendInitialized();
     }
 
+    @JavascriptInterface
+    public void buyCompleted() {
+        frontendJavascript.onBuyCompleted();
+    }
+
     public void activateMobileBuy(String uid, String sharedKey, String password) {
         String script = FrontendJavascriptManager.createActivateScript(uid, sharedKey, password);
         executeScript(script);

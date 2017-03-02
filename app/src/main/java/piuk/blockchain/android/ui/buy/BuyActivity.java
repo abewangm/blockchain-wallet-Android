@@ -31,6 +31,7 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
 
     private Metadata buyMetadata = null;
     private Boolean frontendInitialized = false;
+    private Boolean didBuyBitcoin = false;
 
     @Thunk
     ActivityBuyBinding binding;
@@ -60,6 +61,10 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
         frontendJavascriptManager.teardown();
         WebView webView = binding.webview;
         webView.removeJavascriptInterface(JS_INTERFACE_NAME);
+
+        if (didBuyBitcoin) {
+            // Should reload buy metadata, watch for new trade
+        }
     }
 
     private Metadata getBuyMetadata() throws IOException, MetadataException, NoSuchAlgorithmException {
@@ -95,6 +100,11 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
         Log.d(TAG, "onFrontendInitialized: done");
         this.frontendInitialized = true;
         activateIfReady();
+    }
+
+    public void onBuyCompleted() {
+        Log.d(TAG, "onBuyCompleted: done");
+        this.didBuyBitcoin = true;
     }
 
     private void activateIfReady() {
