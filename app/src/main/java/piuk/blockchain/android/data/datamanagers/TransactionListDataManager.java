@@ -17,8 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.TransactionDetailsService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
@@ -32,17 +31,18 @@ public class TransactionListDataManager {
     private TransactionDetailsService transactionDetails;
     private TransactionListStore transactionListStore;
     private MultiAddrFactory multiAddrFactory;
-    private Subject<List<Tx>> listUpdateSubject;
+    private RxBus rxBus;
 
     public TransactionListDataManager(PayloadManager payloadManager,
                                       TransactionDetailsService transactionDetails,
                                       TransactionListStore transactionListStore,
-                                      MultiAddrFactory multiAddrFactory) {
+                                      MultiAddrFactory multiAddrFactory,
+                                      RxBus rxBus) {
         this.payloadManager = payloadManager;
         this.transactionDetails = transactionDetails;
         this.transactionListStore = transactionListStore;
         this.multiAddrFactory = multiAddrFactory;
-        listUpdateSubject = PublishSubject.create();
+        this.rxBus = rxBus;
     }
 
     /**
@@ -65,8 +65,7 @@ public class TransactionListDataManager {
         }
 
         transactionListStore.sort(new TxMostRecentDateComparator());
-        listUpdateSubject.onNext(transactionListStore.getList());
-        listUpdateSubject.onComplete();
+        rxBus.emitEvent(List.class, transactionListStore.getList());
     }
 
     /**
@@ -96,17 +95,6 @@ public class TransactionListDataManager {
     public List<Tx> insertTransactionIntoListAndReturnSorted(Tx transaction) {
         transactionListStore.insertTransactionIntoListAndSort(transaction);
         return transactionListStore.getList();
-    }
-
-    /**
-     * Returns a subject that lets ViewModels subscribe to changes in the transaction list -
-     * specifically this subject will return the transaction list when it's first updated and then
-     * call onCompleted()
-     *
-     * @return The list of transactions after initial sync
-     */
-    public Subject<List<Tx>> getListUpdateSubject() {
-        return listUpdateSubject;
     }
 
     /**

@@ -54,6 +54,7 @@ public class BalanceViewModel extends BaseViewModel {
 
     private Observable<ContactsEvent> contactsEventObservable;
     private Observable<NotificationPayload> notificationObservable;
+    private Observable<List> txListObservable;
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
     private List<Tx> transactionList;
@@ -132,8 +133,10 @@ public class BalanceViewModel extends BaseViewModel {
             prefsUtil.setValue(PrefsUtil.KEY_FIRST_RUN, false);
         } else {
             // Check from this point forwards
+            txListObservable = rxBus.register(List.class);
+
             compositeDisposable.add(
-                    transactionListDataManager.getListUpdateSubject()
+                    txListObservable
                             .compose(RxUtil.applySchedulersToObservable())
                             .subscribe(txs -> {
                                 if (hasTransactions()) {
@@ -664,6 +667,7 @@ public class BalanceViewModel extends BaseViewModel {
     public void destroy() {
         rxBus.unregister(ContactsEvent.class, contactsEventObservable);
         rxBus.unregister(NotificationPayload.class, notificationObservable);
+        rxBus.unregister(List.class, txListObservable);
         super.destroy();
     }
 }
