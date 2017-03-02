@@ -93,7 +93,8 @@ public class ApplicationModule {
     }
 
     @Provides
+    @Singleton
     protected RxBus provideRxBus() {
-        return RxBus.getInstance();
+        return new RxBus();
     }
 }

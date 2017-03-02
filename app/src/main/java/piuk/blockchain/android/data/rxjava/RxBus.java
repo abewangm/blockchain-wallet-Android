@@ -1,6 +1,8 @@
 package piuk.blockchain.android.data.rxjava;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,26 +14,23 @@ import io.reactivex.subjects.Subject;
 
 /**
  * A class that allows callers to register {@link PublishSubject} objects by passing in the class
- * type that you wish to emit as an event.
+ * type that you wish to emit as an event. It is intended to be instantiated as a Singleton via
+ * Dagger2.
  */
 public class RxBus {
 
-    private static RxBus instance;
+    private static final String TAG = RxBus.class.getSimpleName();
 
     /**
      * A threadsafe map of lists of {@link PublishSubject} objects, where their type is used as the
      * key for lookups.
      */
-    private ConcurrentHashMap<Object, List<Subject>> subjectsMap = new ConcurrentHashMap<>();
+    @SuppressWarnings("WeakerAccess")
+    @VisibleForTesting
+    ConcurrentHashMap<Object, List<Subject>> subjectsMap = new ConcurrentHashMap<>();
 
-    private RxBus() {
-        // Constructor intentionally private
-    }
-
-    public static RxBus getInstance() {
-        if (instance == null)
-            instance = new RxBus();
-        return instance;
+    public RxBus() {
+        // Constructor intentionally empty for injection
     }
 
     /**
@@ -72,6 +71,8 @@ public class RxBus {
             if (subjects.isEmpty()) {
                 subjectsMap.remove(type);
             }
+        } else {
+            Log.e(TAG, "unregister of type " + type.getSimpleName() + " failed, as no PublishSubject with a matching type was found");
         }
     }
 
@@ -90,6 +91,8 @@ public class RxBus {
             for (Subject subject : subjects) {
                 subject.onNext(content);
             }
+        } else {
+            Log.e(TAG, "emitEvent of type " + type.getSimpleName() + " failed, as no PublishSubject was registered");
         }
     }
 }

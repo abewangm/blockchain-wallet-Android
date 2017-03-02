@@ -90,7 +90,10 @@ public class ContactDetailViewModel extends BaseViewModel {
     @Override
     public void onViewReady() {
         subscribeToNotifications();
+        setupViewModel();
+    }
 
+    private void setupViewModel() {
         Bundle bundle = dataListener.getPageBundle();
         if (bundle != null && bundle.getString(KEY_BUNDLE_CONTACT_ID) != null) {
             String id = bundle.getString(KEY_BUNDLE_CONTACT_ID);
@@ -235,7 +238,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                 contactsDataManager.getContactFromFctxId(fctxId)
                         .flatMapCompletable(contact -> contactsDataManager.deleteFacilitatedTransaction(contact.getMdid(), fctxId))
                         .doOnError(throwable -> contactsDataManager.fetchContacts())
-                        .doAfterTerminate(this::onViewReady)
+                        .doAfterTerminate(this::setupViewModel)
                         .subscribe(
                                 () -> dataListener.showToast(R.string.contacts_pending_transaction_delete_success, ToastCustom.TYPE_OK),
                                 throwable -> dataListener.showToast(R.string.contacts_pending_transaction_delete_failure, ToastCustom.TYPE_ERROR)));
@@ -257,7 +260,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                         .subscribe(
                                 () -> {
                                     dataListener.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK);
-                                    onViewReady();
+                                    setupViewModel();
                                 },
                                 throwable -> dataListener.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
 
@@ -272,7 +275,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                                 notificationPayload -> {
                                     if (notificationPayload.getType() != null
                                             && notificationPayload.getType().equals(NotificationPayload.NotificationType.PAYMENT)) {
-                                        onViewReady();
+                                        setupViewModel();
                                     }
                                 },
                                 throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));

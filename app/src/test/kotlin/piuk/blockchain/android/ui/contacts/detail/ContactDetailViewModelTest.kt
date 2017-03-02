@@ -12,6 +12,7 @@ import info.blockchain.wallet.payload.Payload
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,6 +22,8 @@ import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.notifications.NotificationPayload
+import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID
@@ -36,6 +39,7 @@ class ContactDetailViewModelTest {
     private val mockContactsManager: ContactsDataManager = mock()
     private val mockPayloadManager: PayloadManager = mock()
     private val mockPrefsUtil: PrefsUtil = mock()
+    private val mockRxBus: RxBus = mock()
 
     @Before
     @Throws(Exception::class)
@@ -54,7 +58,8 @@ class ContactDetailViewModelTest {
     @Throws(Exception::class)
     fun onViewReadyShouldFinishPage() {
         // Arrange
-
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         // Act
         subject.onViewReady()
         // Assert
@@ -70,6 +75,8 @@ class ContactDetailViewModelTest {
         // Arrange
         val contactId = "CONTACT_ID"
         val bundle = Bundle()
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         bundle.putString(KEY_BUNDLE_CONTACT_ID, contactId)
         whenever(mockActivity.pageBundle).thenReturn(bundle)
         whenever(mockContactsManager.contactList)
@@ -89,6 +96,8 @@ class ContactDetailViewModelTest {
         // Arrange
         val contactId = "CONTACT_ID"
         val bundle = Bundle()
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         bundle.putString(KEY_BUNDLE_CONTACT_ID, contactId)
         whenever(mockActivity.pageBundle).thenReturn(bundle)
         val contactName = "CONTACT_NAME"
@@ -112,6 +121,75 @@ class ContactDetailViewModelTest {
         verify(mockContactsManager).fetchContacts()
         verifyNoMoreInteractions(mockContactsManager)
         subject.contact equals contact2
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onViewReadySubscribeAndEmitEvent() {
+        // Arrange
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        val notificationPayload: NotificationPayload = mock()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
+        whenever(notificationPayload.type).thenReturn(NotificationPayload.NotificationType.PAYMENT)
+        // Act
+        subject.onViewReady()
+        notificationObservable.onNext(notificationPayload)
+        // Assert
+        verify(mockActivity, times(2)).pageBundle
+        verify(mockActivity, times(2)).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        verify(mockActivity, times(2)).finishPage()
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onViewReadySubscribeAndEmitUnwantedEvent() {
+        // Arrange
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        val notificationPayload: NotificationPayload = mock()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
+        whenever(notificationPayload.type).thenReturn(NotificationPayload.NotificationType.CONTACT_REQUEST)
+        // Act
+        subject.onViewReady()
+        notificationObservable.onNext(notificationPayload)
+        // Assert
+        verify(mockActivity).pageBundle
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        verify(mockActivity).finishPage()
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onViewReadySubscribeAndEmitNullEvent() {
+        // Arrange
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        val notificationPayload: NotificationPayload = mock()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
+        // Act
+        subject.onViewReady()
+        notificationObservable.onNext(notificationPayload)
+        // Assert
+        verify(mockActivity).pageBundle
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        verify(mockActivity).finishPage()
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onViewReadySubscribeAndEmitErrorEvent() {
+        // Arrange
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
+        // Act
+        subject.onViewReady()
+        notificationObservable.onError(Throwable())
+        // Assert
+        verify(mockActivity).pageBundle
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        verify(mockActivity).finishPage()
+        verifyNoMoreInteractions(mockActivity)
     }
 
     @Test
@@ -624,9 +702,24 @@ class ContactDetailViewModelTest {
         verifyNoMoreInteractions(mockContactsManager)
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun destroy() {
+        // Arrange
+
+        // Act
+        subject.destroy()
+        // Assert
+        verify(mockRxBus).unregister(eq(NotificationPayload::class.java), anyOrNull())
+    }
+
     inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
         override fun providePrefsUtil(): PrefsUtil {
             return mockPrefsUtil
+        }
+
+        override fun provideRxBus(): RxBus {
+            return mockRxBus
         }
     }
 
