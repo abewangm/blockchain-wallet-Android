@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.buy;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.webkit.WebView;
 
@@ -39,6 +40,9 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_buy);
 
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar_general);
+        setupToolbar(toolbar, R.string.buy);
+
         WebView webView = binding.webview;
         frontendJavascriptManager = new FrontendJavascriptManager(this, webView);
         payloadManager = PayloadManager.getInstance();
@@ -49,7 +53,15 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
 
         loadBuyMetadata();
     }
-    
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        frontendJavascriptManager.teardown();
+        WebView webView = binding.webview;
+        webView.removeJavascriptInterface(JS_INTERFACE_NAME);
+    }
+
     private Metadata getBuyMetadata() throws IOException, MetadataException, NoSuchAlgorithmException {
         DeterministicKey metadataHDNode = MetadataUtil.deriveMetadataNode(payloadManager.getMasterKey());
         return new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXTERNAL).build();
@@ -105,5 +117,11 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
 
     public boolean isReady() {
         return this.frontendInitialized && this.buyMetadata != null;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

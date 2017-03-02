@@ -36,6 +36,10 @@ public class FrontendJavascriptManager {
         executeScript(script);
     }
 
+    public void teardown() {
+        executeScript("teardown()");
+    }
+
     private void executeScript(String script) {
         Log.d(TAG, "Executing: " + script);
         webView.post(() -> webView.evaluateJavascript(script, frontendJavascript));
