@@ -2,12 +2,14 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
+import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.settings.SettingsManager;
 
 import dagger.Module;
 import dagger.Provides;
+import java.io.IOException;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
@@ -19,11 +21,9 @@ import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
-import piuk.blockchain.android.data.services.AddressInfoService;
+import piuk.blockchain.android.data.services.BlockExplorerService;
 import piuk.blockchain.android.data.services.PaymentService;
 import piuk.blockchain.android.data.services.SettingsService;
-import piuk.blockchain.android.data.services.TransactionDetailsService;
-import piuk.blockchain.android.data.services.UnspentService;
 import piuk.blockchain.android.data.services.WalletPayloadService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
@@ -68,41 +68,38 @@ public class DataManagerModule {
     protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager,
                                                              PrefsUtil prefsUtil,
                                                              StringUtils stringUtils,
-                                                             ExchangeRateFactory exchangeRateFactory,
-                                                             MultiAddrFactory multiAddrFactory) {
-        return new WalletAccountHelper(payloadManager, prefsUtil, stringUtils, exchangeRateFactory, multiAddrFactory);
+                                                             ExchangeRateFactory exchangeRateFactory) {
+        return new WalletAccountHelper(payloadManager, prefsUtil, stringUtils, exchangeRateFactory);
     }
 
     @Provides
     @ViewModelScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
-                                                                           TransactionListStore transactionListStore,
-                                                                           MultiAddrFactory multiAddrFactory) {
+                                                                           TransactionListStore transactionListStore) {
         return new TransactionListDataManager(
-                payloadManager,
-                new TransactionDetailsService(),
-                transactionListStore);
+            payloadManager,
+            new BlockExplorerService(
+                new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(),
+                    BlockchainFramework.getApiCode())),
+            transactionListStore);
     }
 
     @Provides
     @ViewModelScope
-    protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager,
-                                                                       MultiAddrFactory multiAddrFactory) {
-        return new TransferFundsDataManager(payloadManager, multiAddrFactory);
+    protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager) {
+        return new TransferFundsDataManager(payloadManager);
     }
 
     @Provides
     @ViewModelScope
-    protected TransactionHelper provideTransactionHelper(PayloadManager payloadManager,
-                                                         MultiAddrFactory multiAddrFactory) {
-        return new TransactionHelper(payloadManager, multiAddrFactory);
+    protected TransactionHelper provideTransactionHelper(PayloadManager payloadManager) {
+        return new TransactionHelper(payloadManager);
     }
 
     @Provides
     @ViewModelScope
-    protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
-                                                           MultiAddrFactory multiAddrFactory) {
-        return new AccountDataManager(payloadManager, multiAddrFactory, new AddressInfoService());
+    protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager) {
+        return new AccountDataManager(payloadManager);
     }
 
     @Provides
@@ -122,7 +119,6 @@ public class DataManagerModule {
     @ViewModelScope
     protected AccountEditDataManager provideAccountEditDataManager(PayloadManager payloadManager) {
         return new AccountEditDataManager(
-                new UnspentService(),
                 new PaymentService(),
                 payloadManager);
     }
@@ -130,9 +126,8 @@ public class DataManagerModule {
     @Provides
     @ViewModelScope
     protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager,
-                                                               MultiAddrFactory multiAddrFactory,
                                                                PrefsUtil prefsUtil) {
-        return new SwipeToReceiveHelper(payloadManager, multiAddrFactory, prefsUtil);
+        return new SwipeToReceiveHelper(payloadManager, prefsUtil);
     }
 
     @Provides

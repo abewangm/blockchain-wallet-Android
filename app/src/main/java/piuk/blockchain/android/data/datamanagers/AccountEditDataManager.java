@@ -21,18 +21,15 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.PaymentService;
-import piuk.blockchain.android.data.services.UnspentService;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
 public class AccountEditDataManager {
 
-    private UnspentService unspentService;
     private PaymentService paymentService;
     private PayloadManager payloadManager;
 
-    public AccountEditDataManager(UnspentService unspentService, PaymentService paymentService, PayloadManager payloadManager) {
-        this.unspentService = unspentService;
+    public AccountEditDataManager(PaymentService paymentService, PayloadManager payloadManager) {
         this.paymentService = paymentService;
         this.payloadManager = payloadManager;
     }

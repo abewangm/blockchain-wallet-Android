@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.Nullable;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -13,18 +12,13 @@ import org.bitcoinj.core.ECKey;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.services.AddressInfoService;
 
 public class AccountDataManager {
 
     private PayloadManager payloadManager;
-    private MultiAddrFactory multiAddrFactory;
-    private AddressInfoService addressInfoService;
 
-    public AccountDataManager(PayloadManager payload, MultiAddrFactory addrFactory, AddressInfoService addressService) {
+    public AccountDataManager(PayloadManager payload) {
         payloadManager = payload;
-        multiAddrFactory = addrFactory;
-        addressInfoService = addressService;
     }
 
     /**
@@ -65,8 +59,7 @@ public class AccountDataManager {
     }
 
     /**
-     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link info.blockchain.wallet.payload.data.Wallet} and
-     * the {@link MultiAddrFactory}
+     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link info.blockchain.wallet.payload.data.Wallet}
      *
      * @param legacyAddress The updated address
      * @return {@link Observable<Boolean>} representing a successful save

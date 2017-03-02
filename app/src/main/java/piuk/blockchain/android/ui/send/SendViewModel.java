@@ -5,14 +5,13 @@ import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import info.blockchain.api.data.MultiAddress;
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.exceptions.HDWalletException;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.AddressBook;
@@ -101,7 +100,6 @@ public class SendViewModel extends BaseViewModel {
     @Inject StringUtils stringUtils;
     @Inject ContactsDataManager contactsDataManager;
     @Inject SendDataManager sendDataManager;
-    @Inject MultiAddrFactory multiAddrFactory;
 
     SendViewModel(SendContract.DataListener dataListener, Locale locale) {
         Injector.getInstance().getDataManagerComponent().inject(this);
@@ -1039,18 +1037,31 @@ public class SendViewModel extends BaseViewModel {
         BigInteger totalSent = sendModel.pendingTransaction.bigIntAmount.add(sendModel.pendingTransaction.bigIntFee);
         if (sendModel.pendingTransaction.isHD()) {
             Account account = (Account) sendModel.pendingTransaction.sendingObject.accountObject;
-            long updatedBalance = multiAddrFactory.getXpubBalance() - totalSent.longValue();
 
-            // Set total balance
-            multiAddrFactory.setXpubBalance(updatedBalance);
+            // Set balance for 'All'
+            MultiAddress multiAddressAll = payloadManager
+                .getMultiAddress(PayloadManager.MULTI_ADDRESS_ALL);
+            BigInteger updatedBalance = multiAddressAll.getWallet().getFinalBalance()
+                .subtract(totalSent);
+            multiAddressAll.getWallet().setFinalBalance(updatedBalance);
 
             // Set individual xpub balance
-            multiAddrFactory.setXpubAmount(
-                    account.getXpub(),
-                    multiAddrFactory.getXpubAmounts().get(account.getXpub()) - totalSent.longValue());
+            MultiAddress multiAddress = payloadManager
+                .getMultiAddress(account.getXpub());
+            updatedBalance = multiAddress.getWallet().getFinalBalance().subtract(totalSent);
+            multiAddress.getWallet().setFinalBalance(updatedBalance);
 
         } else {
-            multiAddrFactory.setLegacyBalance(multiAddrFactory.getLegacyBalance() - totalSent.longValue());
+
+            // Set balance for 'All'
+            MultiAddress multiAddressAll = payloadManager
+                .getMultiAddress(PayloadManager.MULTI_ADDRESS_ALL_LEGACY);
+            BigInteger updatedBalance = multiAddressAll.getWallet().getFinalBalance()
+                .subtract(totalSent);
+            multiAddressAll.getWallet().setFinalBalance(updatedBalance);
+
+            // Set individual address balance
+            // TODO: 02/03/2017 This was never here but might have been overlooked
         }
     }
 

@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.receive;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -9,11 +7,9 @@ import piuk.blockchain.android.util.MonetaryUtil;
 class AddressBalanceHelper {
 
     private MonetaryUtil monetaryUtil;
-    private MultiAddrFactory multiAddrFactory;
 
-    AddressBalanceHelper(MonetaryUtil monetaryUtil, MultiAddrFactory multiAddrFactory) {
+    AddressBalanceHelper(MonetaryUtil monetaryUtil) {
         this.monetaryUtil = monetaryUtil;
-        this.multiAddrFactory = multiAddrFactory;
     }
 
     /**
@@ -46,7 +42,7 @@ class AddressBalanceHelper {
      * Returns the balance of a {@link LegacyAddress} in Satoshis
      */
     long getAddressAbsoluteBalance(LegacyAddress legacyAddress) {
-        return multiAddrFactory.getLegacyBalance(legacyAddress.getAddress());
+        return 0;//multiAddrFactory.getLegacyBalance(legacyAddress.getAddress());
     }
 
     /**

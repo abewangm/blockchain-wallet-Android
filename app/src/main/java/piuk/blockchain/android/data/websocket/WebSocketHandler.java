@@ -178,15 +178,13 @@ class WebSocketHandler {
     }
 
     private Completable updateBalancesAndTxs() {
-        // TODO: 21/02/2017
-        throw new NotImplementedException("");
-//        return Completable.fromCallable(() -> {
-//            payloadManager.updateBalancesAndTransactions();
-//            return Void.TYPE;
-//        }).doAfterTerminate(() -> {
-//            Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
-//            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-//        }).compose(RxUtil.applySchedulersToCompletable());
+        return Completable.fromCallable(() -> {
+            payloadManager.updateMultiAddress(null, 50, 0);
+            return Void.TYPE;
+        }).doAfterTerminate(() -> {
+            Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     private Completable connectToWebSocket() {
@@ -292,6 +290,7 @@ class WebSocketHandler {
                     triggerNotification(title, marquee, text);
                 }
 
+                //Websocket tells us which xpub/address has updated - no need to refreshh all
                 updateBalancesAndTransactions();
 
             } else if (op.equals("on_change")) {
@@ -310,7 +309,6 @@ class WebSocketHandler {
                         //noinspection ThrowableResultOfMethodCallIgnored
                         downloadChangedPayload().blockingGet();
                         showToast().subscribeOn(AndroidSchedulers.mainThread());
-                        updateBalancesAndTransactions();
                     }
 
                     onChangeHashSet.add(message);

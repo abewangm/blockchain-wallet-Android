@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.chooser
 import android.app.Application
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
-import info.blockchain.wallet.multiaddr.MultiAddrFactory
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Observable
 import org.junit.Before

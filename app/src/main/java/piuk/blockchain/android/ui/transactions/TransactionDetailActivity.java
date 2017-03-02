@@ -19,8 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-
+import info.blockchain.api.data.Transaction.Direction;
 import java.util.List;
 import java.util.Locale;
 
@@ -83,16 +82,16 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
     }
 
     @Override
-    public void setTransactionType(String type) {
+    public void setTransactionType(Direction type) {
         switch (type) {
-            case MultiAddrFactory.MOVED:
+            case TRANSFERRED:
                 mBinding.transactionType.setText(getResources().getString(R.string.MOVED));
                 break;
-            case MultiAddrFactory.RECEIVED:
+            case RECEIVED:
                 mBinding.transactionType.setText(getResources().getString(R.string.RECEIVED));
                 mBinding.transactionFee.setVisibility(View.GONE);
                 break;
-            case MultiAddrFactory.SENT:
+            case SENT:
                 mBinding.transactionType.setText(getResources().getString(R.string.SENT));
                 break;
         }

@@ -1,33 +1,19 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payment.Payment;
 
-import org.bitcoinj.core.ECKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.math.BigInteger;
-import java.util.List;
-
-import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
-import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.services.PaymentService;
-import piuk.blockchain.android.data.services.UnspentService;
-import piuk.blockchain.android.ui.send.PendingTransaction;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class AccountEditDataManagerTest extends RxTest {
 

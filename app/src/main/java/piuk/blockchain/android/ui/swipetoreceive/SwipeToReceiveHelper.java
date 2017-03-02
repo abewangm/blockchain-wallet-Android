@@ -3,9 +3,9 @@ package piuk.blockchain.android.ui.swipetoreceive;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.bitcoinj.core.AddressFormatException;
 
 import java.util.Arrays;
@@ -25,12 +25,10 @@ public class SwipeToReceiveHelper {
     private static final String TAG = SwipeToReceiveHelper.class.getSimpleName();
 
     private PayloadManager payloadManager;
-    private MultiAddrFactory multiAddrFactory;
     private PrefsUtil prefsUtil;
 
-    public SwipeToReceiveHelper(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory, PrefsUtil prefsUtil) {
+    public SwipeToReceiveHelper(PayloadManager payloadManager, PrefsUtil prefsUtil) {
         this.payloadManager = payloadManager;
-        this.multiAddrFactory = multiAddrFactory;
         this.prefsUtil = prefsUtil;
     }
 
@@ -107,8 +105,10 @@ public class SwipeToReceiveHelper {
     }
 
     private Observable<LinkedHashMap<String, Long>> getBalanceOfAddresses(List<String> addresses) {
-        return Observable.fromCallable(() -> multiAddrFactory.getAddressBalanceFromApi(addresses))
-                .compose(RxUtil.applySchedulersToObservable());
+        // TODO: 02/03/2017
+        throw new NotImplementedException("");
+//        return Observable.fromCallable(() -> multiAddrFactory.getAddressBalanceFromApi(addresses))
+//                .compose(RxUtil.applySchedulersToObservable());
     }
 
     private void storeAddresses(String addresses) {

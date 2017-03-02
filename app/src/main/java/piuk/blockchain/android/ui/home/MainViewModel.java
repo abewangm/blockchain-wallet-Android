@@ -14,7 +14,6 @@ import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payment.Payment;
@@ -42,6 +41,7 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.services.BlockExplorerService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -72,7 +72,6 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected ContactsDataManager contactsDataManager;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
     @Inject protected NotificationTokenManager notificationTokenManager;
-    @Inject protected MultiAddrFactory multiAddrFactory;
     @Inject protected Context applicationContext;
     @Inject protected StringUtils stringUtils;
 
@@ -241,7 +240,6 @@ public class MainViewModel extends BaseViewModel {
     void unpair() {
         dataListener.clearAllDynamicShortcuts();
         payloadManager.wipe();
-        multiAddrFactory.wipe();
         prefs.logOut();
         appUtil.restartApp();
         accessState.setPIN(null);
@@ -387,13 +385,6 @@ public class MainViewModel extends BaseViewModel {
             new Thread(() -> {
 
                 Looper.prepare();
-
-                // TODO: 21/02/2017 MultiAddress
-//                try {
-//                    payloadManager.updateBalancesAndTransactions();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
 
                 storeSwipeReceiveAddresses();
 

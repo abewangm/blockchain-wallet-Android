@@ -10,7 +10,6 @@ import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.transaction.Tx;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
@@ -568,7 +567,7 @@ public class ContactsDataManager {
     /**
      * Returns a Map of Contact names keyed to transaction hashes.
      *
-     * @return A {@link HashMap} where the key is a {@link Tx#getHash()}, and the value is a {@link
+     * @return A {@link HashMap} where the key is a {@link info.blockchain.api.data.Transaction#getHash()}, and the value is a {@link
      * Contact#getName()}
      */
     public HashMap<String, String> getContactsTransactionMap() {

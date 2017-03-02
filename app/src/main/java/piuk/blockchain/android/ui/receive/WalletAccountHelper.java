@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.receive;
 import android.support.annotation.NonNull;
 
 import android.util.Log;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import info.blockchain.wallet.payload.data.Account;
@@ -32,8 +31,7 @@ public class WalletAccountHelper {
             PayloadManager payloadManager,
             PrefsUtil prefsUtil,
             StringUtils stringUtils,
-            ExchangeRateFactory exchangeRateFactory,
-            MultiAddrFactory multiAddrFactory) {
+            ExchangeRateFactory exchangeRateFactory) {
         this.payloadManager = payloadManager;
         this.stringUtils = stringUtils;
         int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
@@ -42,7 +40,7 @@ public class WalletAccountHelper {
         fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         btcExchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
 
-        addressBalanceHelper = new AddressBalanceHelper(monetaryUtil, multiAddrFactory);
+        addressBalanceHelper = new AddressBalanceHelper(monetaryUtil);
     }
 
     /**

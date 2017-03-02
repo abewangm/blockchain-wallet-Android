@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payment.Payment;
@@ -29,11 +28,9 @@ import retrofit2.Response;
 public class TransferFundsDataManager {
 
     @Thunk PayloadManager payloadManager;
-    @Thunk MultiAddrFactory multiAddrFactory;
 
-    public TransferFundsDataManager(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
+    public TransferFundsDataManager(PayloadManager payloadManager) {
         this.payloadManager = payloadManager;
-        this.multiAddrFactory = multiAddrFactory;
     }
 
     /**
@@ -62,12 +59,12 @@ public class TransferFundsDataManager {
 
                 for (LegacyAddress legacyAddress : legacyAddresses) {
 
-                    if (!legacyAddress.isWatchOnly()
-                        && multiAddrFactory.getLegacyBalance(legacyAddress.getAddress()) > 0) {
+//                    if (!legacyAddress.isWatchOnly()
+//                        && multiAddrFactory.getLegacyBalance(legacyAddress.getAddress()) > 0) {
 
 //                        JSONObject unspentResponse = unspentApi
 //                            .getUnspentOutputs(legacyAddress.getAddress());
-                        Response<UnspentOutputs> coins = Payment.getUnspentCoins(Arrays.asList(legacyAddress.getAddress())).execute();
+//                        Response<UnspentOutputs> coins = Payment.getUnspentCoins(Arrays.asList(legacyAddress.getAddress())).execute();
 
                         // TODO: 22/02/2017
 //                        if (unspentResponse != null) {
@@ -100,7 +97,7 @@ public class TransferFundsDataManager {
 //                                pendingTransactionList.add(pendingSpend);
 //                            }
 //                        }
-                    }
+//                    }
                 }
 
                 return Triple.of(pendingTransactionList, totalToSend, totalFee);

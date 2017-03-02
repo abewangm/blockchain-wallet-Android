@@ -12,7 +12,6 @@ import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.View;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.HDWallet;
@@ -64,7 +63,6 @@ public class AccountEditViewModel extends BaseViewModel {
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected StringUtils stringUtils;
     @Inject protected AccountEditDataManager accountEditDataManager;
-    @Inject protected MultiAddrFactory multiAddrFactory;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
     @Inject protected PrivateKeyFactory privateKeyFactory;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
@@ -420,9 +418,14 @@ public class AccountEditViewModel extends BaseViewModel {
                             dataListener.showTransactionSuccess();
 
                             // Update V2 balance immediately after spend - until refresh from server
-                            long currentBalance = multiAddrFactory.getLegacyBalance();
+                            long currentBalance = payloadManager
+                                .getMultiAddress(PayloadManager.MULTI_ADDRESS_ALL_LEGACY)
+                                .getWallet().getFinalBalance().longValue();
                             long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
-                            multiAddrFactory.setLegacyBalance(currentBalance - spentAmount);
+
+                            payloadManager.getMultiAddress(PayloadManager.MULTI_ADDRESS_ALL_LEGACY)
+                                .getWallet().setFinalBalance(BigInteger.valueOf(currentBalance - spentAmount));
+
                             accountEditDataManager.syncPayloadWithServer().subscribe(new IgnorableDefaultObserver<>());
 
                             accountModel.setTransferFundsVisibility(View.GONE);

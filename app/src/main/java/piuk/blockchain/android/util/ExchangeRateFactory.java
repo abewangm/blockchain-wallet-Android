@@ -51,14 +51,9 @@ public class ExchangeRateFactory {
 
     private ExchangeRateFactory() {
         Injector.getInstance().getAppComponent().inject(this);
-        try {
-            api = new ExchangeRates(
-                BlockchainFramework.getRetrofitServerInstance(),
-                BlockchainFramework.getApiCode());
-
-        } catch (IOException e) {
-            Log.e(TAG, "ExchangeRateFactory: ", e);
-        }
+        api = new ExchangeRates(
+            BlockchainFramework.getRetrofitServerInstance(),
+            BlockchainFramework.getApiCode());
     }
 
     public static ExchangeRateFactory getInstance() {
