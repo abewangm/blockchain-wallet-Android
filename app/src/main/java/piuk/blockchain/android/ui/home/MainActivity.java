@@ -29,6 +29,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
@@ -93,6 +94,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public static final String EXTRA_MDID = "mdid";
     public static final String EXTRA_FCTX_ID = "fctx_id";
     public static final String EXTRA_DEFAULT_INDEX = "default_index";
+    public static final String WEB_VIEW_STATE_KEY = "web_view_state";
     public static final int SCAN_URI = 2007;
 
     @Thunk boolean drawerIsOpen = false;
@@ -108,6 +110,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private Toolbar toolbar;
     private boolean paymentToContactMade = false;
     private Typeface typeface;
+    private WebView buyWebView;
 
     @SuppressLint("NewApi")
     @Override
@@ -193,6 +196,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
             return true;
         });
+
+        // Setup buy WebView
+        buyWebView = new WebView(this);
+        buyWebView.getSettings().setJavaScriptEnabled(true);
+        buyWebView.loadUrl("http://localhost:8080/wallet/#/intermediate");
 
         handleIncomingIntent();
         applyFontToNavDrawer();
@@ -342,6 +350,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         startSendFragment(strResult, scanRoute);
     }
 
+    private Intent putWebViewState (Intent intent) {
+        Bundle state = new Bundle();
+        buyWebView.saveState(state);
+        return intent.putExtra(WEB_VIEW_STATE_KEY, state);
+    }
+
     public void selectDrawerItem(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.nav_backup:
@@ -351,7 +365,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 startActivity(new Intent(MainActivity.this, AccountActivity.class));
                 break;
             case R.id.nav_buy:
-                startActivity(new Intent(MainActivity.this, BuyActivity.class));
+                startActivity(putWebViewState(new Intent(MainActivity.this, BuyActivity.class)));
                 break;
             case R.id.nav_contacts:
                 ContactsListActivity.start(this, null);

@@ -18,6 +18,7 @@ import info.blockchain.wallet.util.MetadataUtil;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityBuyBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<String> {
@@ -44,7 +45,7 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
 
         webView.addJavascriptInterface(frontendJavascriptManager, JS_INTERFACE_NAME);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl("http://localhost:8080/wallet/#/intermediate");
+        webView.restoreState(getIntent().getParcelableExtra(MainActivity.WEB_VIEW_STATE_KEY));
 
         loadBuyMetadata();
     }
