@@ -26,7 +26,7 @@ public class RxBus {
      * key for lookups.
      */
     @SuppressWarnings("WeakerAccess")
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     ConcurrentHashMap<Object, List<Subject>> subjectsMap = new ConcurrentHashMap<>();
 
     public RxBus() {
