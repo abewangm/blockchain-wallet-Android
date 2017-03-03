@@ -25,17 +25,20 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
-import io.reactivex.subjects.Subject;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.services.TransactionDetailsService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressLint("UseSparseArrays")
@@ -46,6 +49,7 @@ public class TransactionListDataManagerTest extends RxTest {
     @Mock PayloadManager payloadManager;
     @Mock TransactionDetailsService transactionDetailsService;
     @Mock MultiAddrFactory multiAddrFactory;
+    @Mock RxBus rxBus;
     private TransactionListStore transactionListStore;
     private TransactionListDataManager subject;
 
@@ -60,7 +64,8 @@ public class TransactionListDataManagerTest extends RxTest {
                 payloadManager,
                 transactionDetailsService,
                 transactionListStore,
-                multiAddrFactory);
+                multiAddrFactory,
+                rxBus);
     }
 
     @Test
@@ -74,7 +79,7 @@ public class TransactionListDataManagerTest extends RxTest {
         // Act
         subject.generateTransactionList(account);
         // Assert
-
+        verify(rxBus).emitEvent(eq(List.class), any());
     }
 
     @Test
@@ -88,7 +93,7 @@ public class TransactionListDataManagerTest extends RxTest {
         // Act
         subject.generateTransactionList(account);
         // Assert
-
+        verify(rxBus).emitEvent(eq(List.class), any());
     }
 
     @Test
@@ -99,7 +104,7 @@ public class TransactionListDataManagerTest extends RxTest {
         // Act
         subject.generateTransactionList(account);
         // Assert
-
+        verify(rxBus).emitEvent(eq(List.class), any());
     }
 
     @Test
@@ -111,7 +116,7 @@ public class TransactionListDataManagerTest extends RxTest {
         // Act
         subject.generateTransactionList(account);
         // Assert
-
+        verify(rxBus).emitEvent(eq(List.class), any());
     }
 
     @Test
@@ -122,7 +127,7 @@ public class TransactionListDataManagerTest extends RxTest {
         // Act
         subject.generateTransactionList(legacyAddress);
         // Assert
-
+        verify(rxBus).emitEvent(eq(List.class), any());
     }
 
     @Test
@@ -144,16 +149,6 @@ public class TransactionListDataManagerTest extends RxTest {
         subject.clearTransactionList();
         // Assert
         assertEquals(Collections.emptyList(), subject.getTransactionList());
-    }
-
-    @Test
-    public void getListUpdateSubject() throws Exception {
-        // Arrange
-
-        // Act
-        Subject value = subject.getListUpdateSubject();
-        // Assert
-        assertNotNull(value);
     }
 
     @Test

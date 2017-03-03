@@ -24,6 +24,7 @@ import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.services.AddressInfoService;
 import piuk.blockchain.android.data.services.PaymentService;
 import piuk.blockchain.android.data.services.SettingsService;
@@ -82,12 +83,14 @@ public class DataManagerModule {
     @ViewModelScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
                                                                            TransactionListStore transactionListStore,
-                                                                           MultiAddrFactory multiAddrFactory) {
+                                                                           MultiAddrFactory multiAddrFactory,
+                                                                           RxBus rxBus) {
         return new TransactionListDataManager(
                 payloadManager,
                 new TransactionDetailsService(new TransactionDetails()),
                 transactionListStore,
-                multiAddrFactory);
+                multiAddrFactory,
+                rxBus);
     }
 
     @Provides

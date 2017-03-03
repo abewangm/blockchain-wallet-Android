@@ -23,8 +23,8 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.FctxDateComparator;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
-import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -40,10 +40,12 @@ public class ContactDetailViewModel extends BaseViewModel {
     private static final String TAG = ContactDetailViewModel.class.getSimpleName();
 
     private DataListener dataListener;
+    private Observable<NotificationPayload> notificationObservable;
     @VisibleForTesting Contact contact;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadManager payloadManager;
     @Inject PrefsUtil prefsUtil;
+    @Inject RxBus rxBus;
 
     interface DataListener {
 
@@ -88,7 +90,10 @@ public class ContactDetailViewModel extends BaseViewModel {
     @Override
     public void onViewReady() {
         subscribeToNotifications();
+        setupViewModel();
+    }
 
+    private void setupViewModel() {
         Bundle bundle = dataListener.getPageBundle();
         if (bundle != null && bundle.getString(KEY_BUNDLE_CONTACT_ID) != null) {
             String id = bundle.getString(KEY_BUNDLE_CONTACT_ID);
@@ -233,7 +238,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                 contactsDataManager.getContactFromFctxId(fctxId)
                         .flatMapCompletable(contact -> contactsDataManager.deleteFacilitatedTransaction(contact.getMdid(), fctxId))
                         .doOnError(throwable -> contactsDataManager.fetchContacts())
-                        .doAfterTerminate(this::onViewReady)
+                        .doAfterTerminate(this::setupViewModel)
                         .subscribe(
                                 () -> dataListener.showToast(R.string.contacts_pending_transaction_delete_success, ToastCustom.TYPE_OK),
                                 throwable -> dataListener.showToast(R.string.contacts_pending_transaction_delete_failure, ToastCustom.TYPE_ERROR)));
@@ -255,21 +260,22 @@ public class ContactDetailViewModel extends BaseViewModel {
                         .subscribe(
                                 () -> {
                                     dataListener.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK);
-                                    onViewReady();
+                                    setupViewModel();
                                 },
                                 throwable -> dataListener.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
 
     }
 
     private void subscribeToNotifications() {
+        notificationObservable = rxBus.register(NotificationPayload.class);
         compositeDisposable.add(
-                FcmCallbackService.getNotificationSubject()
+                notificationObservable
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(
                                 notificationPayload -> {
                                     if (notificationPayload.getType() != null
                                             && notificationPayload.getType().equals(NotificationPayload.NotificationType.PAYMENT)) {
-                                        onViewReady();
+                                        setupViewModel();
                                     }
                                 },
                                 throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
@@ -307,4 +313,9 @@ public class ContactDetailViewModel extends BaseViewModel {
         return payloadManager.getPayload().getHdWallet().getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
+    @Override
+    public void destroy() {
+        rxBus.unregister(NotificationPayload.class, notificationObservable);
+        super.destroy();
+    }
 }

@@ -8,10 +8,12 @@ import android.support.annotation.VisibleForTesting;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -23,8 +25,10 @@ public class ContactsQrViewModel extends BaseViewModel {
     @VisibleForTesting static final int DIMENSION_QR_CODE = 600;
 
     private DataListener dataListener;
+    private Observable<NotificationPayload> notificationObservable;
     @Inject QrCodeDataManager qrCodeDataManager;
     @Inject NotificationManager notificationManager;
+    @Inject RxBus rxBus;
 
     interface DataListener {
 
@@ -67,8 +71,9 @@ public class ContactsQrViewModel extends BaseViewModel {
     }
 
     private void subscribeToNotifications() {
+        notificationObservable = rxBus.register(NotificationPayload.class);
         compositeDisposable.add(
-                FcmCallbackService.getNotificationSubject()
+                notificationObservable
                         .subscribe(
                                 notificationPayload -> {
                                     if (notificationPayload.getType() != null
@@ -82,5 +87,11 @@ public class ContactsQrViewModel extends BaseViewModel {
                                     // No-op
                                 }
                         ));
+    }
+
+    @Override
+    public void destroy() {
+        rxBus.unregister(NotificationPayload.class, notificationObservable);
+        super.destroy();
     }
 }

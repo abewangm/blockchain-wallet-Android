@@ -30,10 +30,11 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
+import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
-import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
@@ -51,6 +52,9 @@ public class BalanceViewModel extends BaseViewModel {
 
     private DataListener dataListener;
 
+    private Observable<ContactsEvent> contactsEventObservable;
+    private Observable<NotificationPayload> notificationObservable;
+    private Observable<List> txListObservable;
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
     private List<Tx> transactionList;
@@ -60,6 +64,7 @@ public class BalanceViewModel extends BaseViewModel {
     @Inject StringUtils stringUtils;
     @Inject TransactionListDataManager transactionListDataManager;
     @Inject ContactsDataManager contactsDataManager;
+    @Inject RxBus rxBus;
 
     public interface DataListener {
 
@@ -128,8 +133,10 @@ public class BalanceViewModel extends BaseViewModel {
             prefsUtil.setValue(PrefsUtil.KEY_FIRST_RUN, false);
         } else {
             // Check from this point forwards
+            txListObservable = rxBus.register(List.class);
+
             compositeDisposable.add(
-                    transactionListDataManager.getListUpdateSubject()
+                    txListObservable
                             .compose(RxUtil.applySchedulersToObservable())
                             .subscribe(txs -> {
                                 if (hasTransactions()) {
@@ -162,10 +169,11 @@ public class BalanceViewModel extends BaseViewModel {
                             }, Throwable::printStackTrace));
         }
 
-        ContactsDataManager.getServiceInitSubject()
-                .subscribe(contactsEvent -> refreshFacilitatedTransactions());
+        contactsEventObservable = rxBus.register(ContactsEvent.class);
+        contactsEventObservable.subscribe(contactsEvent -> refreshFacilitatedTransactions());
 
-        FcmCallbackService.getNotificationSubject()
+        notificationObservable = rxBus.register(NotificationPayload.class);
+        notificationObservable
                 .subscribe(notificationPayload -> {
                     if (notificationPayload.getType() != null
                             && notificationPayload.getType().equals(NotificationPayload.NotificationType.PAYMENT)) {
@@ -655,4 +663,11 @@ public class BalanceViewModel extends BaseViewModel {
         }
     }
 
+    @Override
+    public void destroy() {
+        rxBus.unregister(ContactsEvent.class, contactsEventObservable);
+        rxBus.unregister(NotificationPayload.class, notificationObservable);
+        rxBus.unregister(List.class, txListObservable);
+        super.destroy();
+    }
 }

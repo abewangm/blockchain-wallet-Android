@@ -35,10 +35,12 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
+import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
-import piuk.blockchain.android.data.notifications.FcmCallbackService;
+import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
@@ -61,6 +63,7 @@ public class MainViewModel extends BaseViewModel {
     private DataListener dataListener;
     private OSUtil osUtil;
     private MonetaryUtil monetaryUtil;
+    private Observable<NotificationPayload> notificationObservable;
     @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
     @Inject protected AccessState accessState;
@@ -71,6 +74,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected MultiAddrFactory multiAddrFactory;
     @Inject protected Context applicationContext;
     @Inject protected StringUtils stringUtils;
+    @Inject protected RxBus rxBus;
 
     public interface DataListener {
 
@@ -252,8 +256,10 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void subscribeToNotifications() {
+        notificationObservable = rxBus.register(NotificationPayload.class);
+
         compositeDisposable.add(
-                FcmCallbackService.getNotificationSubject()
+                notificationObservable
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(
                                 notificationPayload -> checkForMessages(),
@@ -298,6 +304,7 @@ public class MainViewModel extends BaseViewModel {
                                 metadataNodeFactory.getSharedMetadataNode()))
                         .andThen(contactsDataManager.registerMdid())
                         .andThen(contactsDataManager.publishXpub())
+                        .doOnComplete(() -> rxBus.emitEvent(ContactsEvent.class, ContactsEvent.INIT))
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(() -> {
                             if (finalUri != null) {
@@ -434,6 +441,7 @@ public class MainViewModel extends BaseViewModel {
     @Override
     public void destroy() {
         super.destroy();
+        rxBus.unregister(NotificationPayload.class, notificationObservable);
         appUtil.deleteQR();
         DynamicFeeCache.getInstance().destroy();
     }
