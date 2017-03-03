@@ -154,7 +154,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
             });
 
             HANDLER.postDelayed(() -> {
-                if (!getActivity().isFinishing() && !isPaused) {
+                if (getActivity() != null && !getActivity().isFinishing() && !isPaused) {
                     fingerprintDialog.show(getActivity().getSupportFragmentManager(), FingerprintDialog.TAG);
                 } else {
                     fingerprintDialog = null;
@@ -345,7 +345,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
             materialProgressDialog.setMessage(getString(messageId));
         }
 
-        if (!getActivity().isFinishing()) materialProgressDialog.show();
+        if (getActivity() != null && !getActivity().isFinishing()) materialProgressDialog.show();
     }
 
     @Override
