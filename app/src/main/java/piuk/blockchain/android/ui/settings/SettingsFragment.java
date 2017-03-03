@@ -396,13 +396,13 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
             @Override
             public void onAuthenticated(CharSequenceX data) {
-                dialog.dismiss();
+                dialog.dismissAllowingStateLoss();
                 viewModel.setFingerprintUnlockEnabled(true);
             }
 
             @Override
             public void onCanceled() {
-                dialog.dismiss();
+                dialog.dismissAllowingStateLoss();
                 viewModel.setFingerprintUnlockEnabled(false);
                 fingerprintPref.setChecked(viewModel.getIfFingerprintUnlockEnabled());
             }
