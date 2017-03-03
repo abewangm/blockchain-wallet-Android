@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
+import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -259,10 +260,10 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
         ImportedAccount importedAccount = null;
         if (payloadManager.getPayload().getLegacyAddressList().size() > 0) {
+
             importedAccount = new ImportedAccount(getString(R.string.imported_addresses),
                 payloadManager.getPayload().getLegacyAddressList(),
-                payloadManager.getMultiAddress(PayloadManager.MULTI_ADDRESS_ALL_LEGACY).getWallet()
-                    .getFinalBalance().longValue());
+                payloadManager.getImportedAddressesBalance().longValue());
         }
 
         if (importedAccount != null) {
@@ -318,7 +319,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     private String getAccountBalance(int index) {
         String address = payloadManager.getXpubFromAccountIndex(index);
-        Long amount = payloadManager.getMultiAddress(address).getWallet().getFinalBalance().longValue();
+        Long amount = payloadManager.getAddressBalance(address).longValue();
         if (amount == null) amount = 0L;
 
         String unit = (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
@@ -328,7 +329,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     private String getAddressBalance(int index) {
         String address = legacy.get(index).getAddress();
-        Long amount = payloadManager.getMultiAddress(address).getWallet().getFinalBalance().longValue();
+        Long amount = payloadManager.getAddressBalance(address).longValue();
         String unit = (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
 
         return monetaryUtil.getDisplayAmount(amount) + " " + unit;

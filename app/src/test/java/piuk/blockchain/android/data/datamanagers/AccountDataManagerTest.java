@@ -106,7 +106,7 @@ public class AccountDataManagerTest extends RxTest {
 //        when(mockPayload.getLegacyAddressStringList()).thenReturn(new ArrayList<>());
 //        when(payloadManager.getPayload()).thenReturn(mockPayload);
 //        when(payloadManager.addLegacyAddress(anyString(), anyString())).thenReturn(true);
-//        when(addressInfoService.getAddressBalance(any(LegacyAddress.class), anyString())).thenReturn(Observable.just(0L));
+//        when(addressInfoService.getAddress(any(LegacyAddress.class), anyString())).thenReturn(Observable.just(0L));
 //        // Act
 //        TestObserver<Boolean> observer = subject.updateLegacyAddress(mockLegacyAddress).test();
 //        // Assert

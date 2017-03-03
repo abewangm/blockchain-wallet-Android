@@ -28,7 +28,7 @@ public class BlockExplorerService {
      * @param offset
      * @return          An {@link Observable <Address>}
      */
-    public Observable<Address> getAddressBalance(String address, int limit, int offset) {
+    public Observable<Address> getAddress(String address, int limit, int offset) {
         return Observable.fromCallable(() -> blockExplorer.getAddress(address, limit, offset))
                 .flatMap(call -> Observable.fromCallable(() -> call.execute().body()))
                 .compose(RxUtil.applySchedulersToObservable());

@@ -38,6 +38,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -74,6 +75,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected NotificationTokenManager notificationTokenManager;
     @Inject protected Context applicationContext;
     @Inject protected StringUtils stringUtils;
+    @Inject protected SettingsDataManager settingsDataManager;
 
     public interface DataListener {
 
@@ -277,7 +279,8 @@ public class MainViewModel extends BaseViewModel {
         }
 
         final String finalUri = uri;
-        if (finalUri != null || fromNotification) dataListener.showProgressDialog(R.string.please_wait);
+        if (finalUri != null || fromNotification)
+            dataListener.showProgressDialog(R.string.please_wait);
 
         final boolean finalFromNotification = fromNotification;
 
@@ -326,31 +329,24 @@ public class MainViewModel extends BaseViewModel {
             compositeDisposable.add(
                     getSettingsApi()
                             .compose(RxUtil.applySchedulersToObservable())
-                            .subscribe(call -> {
-
-                                if(call.isSuccessful()) {
-                                    Settings settings = call.body();
-                                    if (settings.isEmailVerified()) {
-                                        appUtil.setNewlyCreated(false);
-                                        String email = settings.getEmail();
-                                        if (email != null && !email.isEmpty()) {
-                                            dataListener.showEmailVerificationDialog(email);
-                                        } else {
-                                            dataListener.showAddEmailDialog();
-                                        }
+                            .subscribe(settings -> {
+                                if (settings.isEmailVerified()) {
+                                    appUtil.setNewlyCreated(false);
+                                    String email = settings.getEmail();
+                                    if (email != null && !email.isEmpty()) {
+                                        dataListener.showEmailVerificationDialog(email);
+                                    } else {
+                                        dataListener.showAddEmailDialog();
                                     }
                                 }
-
                             }, Throwable::printStackTrace));
         }
     }
 
-    private Observable<Response<Settings>> getSettingsApi() {
-        // FIXME: 28/02/2017
-//        return Observable.fromCallable(() -> new SettingsManager(
-//                payloadManager.getPayload().getGuid(),
-//                payloadManager.getPayload().getSharedKey()).getInfo().execute());
-        return Observable.empty();
+    private Observable<Settings> getSettingsApi() {
+        return settingsDataManager.initSettings(
+                payloadManager.getPayload().getGuid(),
+                payloadManager.getPayload().getSharedKey());
     }
 
     private void checkRooted() {
@@ -411,7 +407,7 @@ public class MainViewModel extends BaseViewModel {
     private void cacheDynamicFee() {
         try {
             Response<FeeList> response = Payment.getDynamicFee().execute();
-            if(response.isSuccessful()) {
+            if (response.isSuccessful()) {
                 DynamicFeeCache.getInstance().setCachedDynamicFee(response.body());
             }
         } catch (IOException e) {
@@ -431,13 +427,13 @@ public class MainViewModel extends BaseViewModel {
             try {
                 // TODO: 22/02/2017 quick fix. can be improved
                 Response<UnspentOutputs> response = new BlockExplorer(
-                    BlockchainFramework.getRetrofitServerInstance(),
-                    BlockchainFramework.getApiCode())
-                .getUnspentOutputs(Arrays.asList(xpub)).execute();
+                        BlockchainFramework.getRetrofitServerInstance(),
+                        BlockchainFramework.getApiCode())
+                        .getUnspentOutputs(Arrays.asList(xpub)).execute();
 
-                if(response.isSuccessful()) {
+                if (response.isSuccessful()) {
                     DefaultAccountUnspentCache.getInstance()
-                        .setUnspentApiResponse(xpub, response.body());
+                            .setUnspentApiResponse(xpub, response.body());
                 } else {
                     Log.e(TAG, "Failed to set DefaultAccountUnspentCache. Might not have free outputs to spend.");
                 }
@@ -464,7 +460,7 @@ public class MainViewModel extends BaseViewModel {
             try {
                 //Start ticker that will refresh btc exchange rate every 5 min
                 ExchangeRateFactory.getInstance().startTicker(
-                    () -> dataListener.updateCurrentPrice(getFormattedPriceString()));
+                        () -> dataListener.updateCurrentPrice(getFormattedPriceString()));
 
             } catch (Exception e) {
                 Log.e(TAG, "exchangeRateThread: ", e);
@@ -526,15 +522,15 @@ public class MainViewModel extends BaseViewModel {
 
             // TODO: 21/02/2017 Quick fix. This should be tested thoroughly
             Call<HashMap<String, Balance>> call = new BlockExplorer(
-                BlockchainFramework.getRetrofitServerInstance(),
-                BlockchainFramework.getApiCode())
-                .getBalance(activeLegacyAddressStrings, BlockExplorer.TX_FILTER_ALL);
+                    BlockchainFramework.getRetrofitServerInstance(),
+                    BlockchainFramework.getApiCode())
+                    .getBalance(activeLegacyAddressStrings, BlockExplorer.TX_FILTER_ALL);
 
             Response<HashMap<String, Balance>> exe = call.execute();
 
-            if(exe.isSuccessful()) {
+            if (exe.isSuccessful()) {
 
-                for(String address : activeLegacyAddressStrings) {
+                for (String address : activeLegacyAddressStrings) {
                     Balance balance = exe.body().get(address);
                     handler.logLegacyEvent(balance.getFinalBalance().longValue() > 0L);
                     break;

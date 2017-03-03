@@ -85,6 +85,18 @@ public class SettingsService {
     }
 
     /**
+     * Enable or disable all notifications
+     *
+     * @param enable Whether or not to enable notifications
+     * @return An {@link Observable<ResponseBody>} containing the response from the server
+     * @see Settings
+     */
+    public Observable<ResponseBody> enableNotifications(boolean enable) {
+        return settingsApi.updateSetting(SettingsManager.METHOD_UPDATE_NOTIFICATION_ON,
+                enable ? SettingsManager.NOTIFICATION_ON : SettingsManager.NOTIFICATION_OFF);
+    }
+
+    /**
      * Update the user's two factor status
      *
      * @param authType The auth type being used for 2FA

@@ -6,7 +6,6 @@ import info.blockchain.api.data.Address;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import java.io.IOException;
 import junit.framework.Assert;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -41,7 +40,7 @@ public class AddressInfoServiceTest extends RxTest {
         when(mockAddress.getAddress()).thenReturn("1234567890");
         when(blockExplorer.getAddress(anyString(), anyInt(), anyInt()).execute().body()).thenReturn(getValidAddress());
         // Act
-        TestObserver<Address> observer = subject.getAddressBalance(mockAddress.getAddress(), 0, 0).test();
+        TestObserver<Address> observer = subject.getAddress(mockAddress.getAddress(), 0, 0).test();
         // Assert
         observer.assertComplete();
         observer.assertNoErrors();

@@ -90,17 +90,7 @@ public class TransactionListDataManager {
      * @return
      */
     public double getBtcBalance(String address) {
-
-        double balance = 0.0;
-
-        MultiAddress multiAddress = payloadManager
-            .getMultiAddress(address);
-
-        if(multiAddress != null) {
-            balance = multiAddress.getWallet().getFinalBalance().doubleValue();
-        }
-
-        return balance;
+        return payloadManager.getAddressBalance(address).doubleValue();
     }
 
     /**

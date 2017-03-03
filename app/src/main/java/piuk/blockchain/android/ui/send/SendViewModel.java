@@ -12,6 +12,7 @@ import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.AddressBook;
@@ -996,7 +997,12 @@ public class SendViewModel extends BaseViewModel {
 //            ((Account) sendModel.pendingTransaction.sendingObject.accountObject).incChange();
         }
 
-        updateInternalBalances();
+        try {
+            payloadManager.updateMultiAddress(null, 50, 0);
+        } catch (IOException | ApiException e) {
+            e.printStackTrace();
+        }
+
         PayloadBridge.getInstance().remoteSaveThread(null);
         if (dataListener != null) {
             dataListener.onShowTransactionSuccess(contactMdid, hash, fctxId, sendModel.pendingTransaction.bigIntAmount.longValue());
@@ -1033,35 +1039,15 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Update balance immediately after spend - until refresh from server
      */
-    private void updateInternalBalances() {
+    private void updateInternalBalances() throws Exception {
         BigInteger totalSent = sendModel.pendingTransaction.bigIntAmount.add(sendModel.pendingTransaction.bigIntFee);
         if (sendModel.pendingTransaction.isHD()) {
             Account account = (Account) sendModel.pendingTransaction.sendingObject.accountObject;
-
-            // Set balance for 'All'
-            MultiAddress multiAddressAll = payloadManager
-                .getMultiAddress(PayloadManager.MULTI_ADDRESS_ALL);
-            BigInteger updatedBalance = multiAddressAll.getWallet().getFinalBalance()
-                .subtract(totalSent);
-            multiAddressAll.getWallet().setFinalBalance(updatedBalance);
-
-            // Set individual xpub balance
-            MultiAddress multiAddress = payloadManager
-                .getMultiAddress(account.getXpub());
-            updatedBalance = multiAddress.getWallet().getFinalBalance().subtract(totalSent);
-            multiAddress.getWallet().setFinalBalance(updatedBalance);
+            payloadManager.subtractAmountFromAddressBalance(account.getXpub(), totalSent);
 
         } else {
-
-            // Set balance for 'All'
-            MultiAddress multiAddressAll = payloadManager
-                .getMultiAddress(PayloadManager.MULTI_ADDRESS_ALL_LEGACY);
-            BigInteger updatedBalance = multiAddressAll.getWallet().getFinalBalance()
-                .subtract(totalSent);
-            multiAddressAll.getWallet().setFinalBalance(updatedBalance);
-
-            // Set individual address balance
-            // TODO: 02/03/2017 This was never here but might have been overlooked
+            LegacyAddress address = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
+            payloadManager.subtractAmountFromAddressBalance(address.getAddress(), totalSent);
         }
     }
 

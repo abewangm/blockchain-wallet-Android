@@ -4,12 +4,10 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.exceptions.EncryptionException;
-import info.blockchain.wallet.exceptions.HDWalletException;
-import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -18,9 +16,6 @@ import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
-
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 
 import javax.inject.Inject;
 
@@ -39,6 +34,8 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 @SuppressWarnings("WeakerAccess")
 public class AccountViewModel extends BaseViewModel {
+
+    private static final String TAG = AccountViewModel.class.getSimpleName();
 
     public static final String KEY_WARN_TRANSFER_ALL = "WARN_TRANSFER_ALL";
     public static final String KEY_XPUB = "xpub";
@@ -152,17 +149,13 @@ public class AccountViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.saving_address);
         compositeDisposable.add(
                 accountDataManager.updateLegacyAddress(address)
-                        .subscribe(success -> {
-                            if (success) {
-                                dataListener.dismissProgressDialog();
-                                dataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
-                                Intent intent = new Intent(WebSocketService.ACTION_INTENT);
-                                intent.putExtra(KEY_ADDRESS, address.getAddress());
-                                dataListener.broadcastIntent(intent);
-                                dataListener.onUpdateAccountsList();
-                            } else {
-                                throw Exceptions.propagate(new Throwable("Result was false"));
-                            }
+                        .subscribe(() -> {
+                            dataListener.dismissProgressDialog();
+                            dataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
+                            Intent intent = new Intent(WebSocketService.ACTION_INTENT);
+                            intent.putExtra(KEY_ADDRESS, address.getAddress());
+                            dataListener.broadcastIntent(intent);
+                            dataListener.onUpdateAccountsList();
                         }, throwable -> {
                             dataListener.dismissProgressDialog();
                             dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
@@ -194,6 +187,7 @@ public class AccountViewModel extends BaseViewModel {
 
             handlePrivateKey(key, doubleEncryptionPassword);
         } catch (Exception e) {
+            Log.e(TAG, "importBip38Address: ", e);
             dataListener.showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR);
         } finally {
             dataListener.dismissProgressDialog();
@@ -207,7 +201,7 @@ public class AccountViewModel extends BaseViewModel {
      */
     void onAddressScanned(String data) {
         try {
-            String format = privateKeyFactory.getFormat(data);
+            String format = PrivateKeyFactory.getFormat(data);
             if (format != null) {
                 // Private key scanned
                 if (!format.equals(PrivateKeyFactory.BIP38)) {
@@ -240,7 +234,7 @@ public class AccountViewModel extends BaseViewModel {
     }
 
     private void importWatchOnlyAddress(String address) {
-        
+
         address = correctAddressFormatting(address);
 
         if (!FormatsUtil.isValidBitcoinAddress(address)) {
@@ -270,35 +264,34 @@ public class AccountViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
 
         compositeDisposable.add(
-            accountDataManager.getKeyFromImportedData(format, data)
-                .subscribe(key -> {
-                    handlePrivateKey(key, secondPassword);
-                    dataListener.dismissProgressDialog();
-                }, throwable -> { dataListener
-                    .showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
-                    dataListener.dismissProgressDialog();}));
+                accountDataManager.getKeyFromImportedData(format, data)
+                        .subscribe(key -> {
+                            handlePrivateKey(key, secondPassword);
+                            dataListener.dismissProgressDialog();
+                        }, throwable -> {
+                            dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
+                            dataListener.dismissProgressDialog();
+                        }));
     }
 
     @VisibleForTesting
-    void handlePrivateKey(ECKey key, @Nullable String secondPassword)
-        throws NoSuchAlgorithmException, EncryptionException, DecryptionException, IOException, NoSuchAddressException, HDWalletException {
-
+    void handlePrivateKey(ECKey key, @Nullable String secondPassword) {
         if (key != null && key.hasPrivKey()) {
             try {
                 // A private key to an existing address has been scanned
                 compositeDisposable.add(
-                    accountDataManager.setKeyForLegacyAddress(key, secondPassword)
-                        .subscribe(legacyAddress -> {
-                            if (legacyAddress != null) {
-                                dataListener.showToast(R.string.private_key_successfully_imported, ToastCustom.TYPE_OK);
-                                dataListener.onUpdateAccountsList();
-                                dataListener.showRenameImportedAddressDialog(legacyAddress);
-                            } else {
-                                throw Exceptions.propagate(new Throwable("Save unsuccessful"));
-                            }
-                        }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
+                        accountDataManager.setKeyForLegacyAddress(key, secondPassword)
+                                .subscribe(legacyAddress -> {
+                                    if (legacyAddress != null) {
+                                        dataListener.showToast(R.string.private_key_successfully_imported, ToastCustom.TYPE_OK);
+                                        dataListener.onUpdateAccountsList();
+                                        dataListener.showRenameImportedAddressDialog(legacyAddress);
+                                    } else {
+                                        throw Exceptions.propagate(new Throwable("Save unsuccessful"));
+                                    }
+                                }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "handlePrivateKey: ", e);
                 dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
             }
         } else {

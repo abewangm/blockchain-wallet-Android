@@ -99,7 +99,7 @@ public class DataManagerModule {
     @Provides
     @ViewModelScope
     protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager) {
-        return new AccountDataManager(payloadManager);
+        return new AccountDataManager(payloadManager, new BlockExplorerService(new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode())));
     }
 
     @Provides

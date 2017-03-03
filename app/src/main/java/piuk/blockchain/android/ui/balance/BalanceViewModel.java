@@ -252,17 +252,9 @@ public class BalanceViewModel extends BaseViewModel {
         if (payloadManager.getPayload().isUpgraded() && activeLegacyAddresses.size() > 0) {
             //Only V3 - Consolidate and add Legacy addresses to "Imported Addresses" at bottom of accounts spinner
 
-            MultiAddress multiAddress = payloadManager
-                .getMultiAddress(PayloadManager.MULTI_ADDRESS_ALL_LEGACY);
-
-            long balanceL = 0;
-            if(multiAddress != null) {
-                balanceL = multiAddress.getWallet().getFinalBalance().longValue();
-            }
-
             ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
                     payloadManager.getPayload().getLegacyAddressList(),
-                balanceL);
+                    payloadManager.getWalletBalance().longValue());
             iAccount.setXpub(PayloadManager.MULTI_ADDRESS_ALL_LEGACY);
             String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount.getXpub()));
             activeAccountAndAddressList.add(new ItemAccount(
