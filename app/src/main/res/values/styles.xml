@@ -29,10 +29,16 @@
         <!-- Only exists to prevent issues with pre-21 devices, see values-v21 -->
     </style>
 
-    <style name="NoDisplay" parent="@android:style/Theme.NoDisplay">
+    <style name="NoDisplay" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primary_navy_medium</item>
         <item name="colorPrimaryDark">@color/primary_navy_medium</item>
         <item name="colorAccent">@color/primary_navy_medium</item>
+        <item name="android:windowBackground">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowNoDisplay">true</item>
     </style>
 
     <style name="AppTheme.ReceiveQrWindow">

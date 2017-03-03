@@ -7,20 +7,21 @@ import android.net.NetworkInfo;
 public class ConnectivityStatus {
 
     ConnectivityStatus() {
+        // No-op
     }
 
-    public static boolean hasConnectivity(Context ctx) {
-        boolean ret = false;
-
-        ConnectivityManager cm = (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm != null) {
-            NetworkInfo neti = cm.getActiveNetworkInfo();
-            if (neti != null && neti.isConnectedOrConnecting()) {
-                ret = true;
+    public static boolean hasConnectivity(Context context) {
+        if (context != null) {
+            ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (manager != null) {
+                NetworkInfo info = manager.getActiveNetworkInfo();
+                if (info != null && info.isConnectedOrConnecting()) {
+                    return true;
+                }
             }
-        }
 
-        return ret;
+        }
+        return false;
     }
 
 }
