@@ -317,18 +317,18 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
 
     @Override
     public void onLocationChanged(Location location) {
+        if (!isFinishing() && map != null) {
 
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
-        currLocation = location;
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, map.getCameraPosition().zoom);
-        map.animateCamera(cameraUpdate);
-        // TODO: 04/08/2016 This needs permission checking, if only for Lint checks
-        locationManager.removeUpdates(this);
+            currLocation = location;
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, map.getCameraPosition().zoom);
+            map.animateCamera(cameraUpdate);
+            // TODO: 04/08/2016 This needs permission checking, if only for Lint checks
+            locationManager.removeUpdates(this);
 
-        setProperZoomLevel(latLng, radius, 1);
-//		drawData(true, null, null);
-
+            setProperZoomLevel(latLng, radius, 1);
+        }
     }
 
     @Override
