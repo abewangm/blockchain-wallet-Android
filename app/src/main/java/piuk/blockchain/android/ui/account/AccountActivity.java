@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.account;
 
+import android.support.v7.app.AlertDialog.Builder;
 import com.google.zxing.BarcodeFormat;
 
 import android.Manifest;
@@ -27,7 +28,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
-import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.apache.commons.lang3.NotImplementedException;
+import java.util.Locale;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityAccountsBinding;
@@ -46,8 +46,11 @@ import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
+import piuk.blockchain.android.ui.transactions.TransactionDetailViewModel;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.ui.zxing.Intents;
+import piuk.blockchain.android.util.DateUtil;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -226,7 +229,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         List<Account> accountClone = new ArrayList<>(accounts.size());
         accountClone.addAll(accounts);
 
-        if (accountClone.get(accountClone.size() - 1) instanceof ImportedAccount) {
+        if (accountClone.get(accountClone.size() - 1) instanceof ConsolidatedAccount) {
             accountClone.remove(accountClone.size() - 1);
         }
 
@@ -258,16 +261,16 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         // Import Address button at first position after wallets
         accountsAndImportedList.add(new AccountItem(AccountItem.TYPE_IMPORT_ADDRESS_BUTTON));
 
-        ImportedAccount importedAccount = null;
+        ConsolidatedAccount consolidatedAccount = null;
         if (payloadManager.getPayload().getLegacyAddressList().size() > 0) {
 
-            importedAccount = new ImportedAccount(getString(R.string.imported_addresses),
+            consolidatedAccount = new ConsolidatedAccount(getString(R.string.imported_addresses),
                 payloadManager.getPayload().getLegacyAddressList(),
                 payloadManager.getImportedAddressesBalance().longValue());
         }
 
-        if (importedAccount != null) {
-            legacy = importedAccount.getLegacyAddresses();
+        if (consolidatedAccount != null) {
+            legacy = consolidatedAccount.getLegacyAddresses();
             for (int j = 0; j < legacy.size(); j++) {
 
                 String label = legacy.get(j).getLabel();

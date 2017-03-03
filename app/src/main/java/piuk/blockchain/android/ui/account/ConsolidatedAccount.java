@@ -6,21 +6,22 @@ import info.blockchain.wallet.payload.data.LegacyAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImportedAccount extends Account {
+public class ConsolidatedAccount extends Account {
 
-    private final String KEY_LABEL = "label";
-    private final String KEY_AMOUNT = "amount";
-    private final String KEY_ARCHIVED = "archived";
+    public enum Type {
+        ALL_ACCOUNTS, ALL_IMPORTED_ADDRESSES
+    }
 
     private List<LegacyAddress> legacyAddresses = null;
     private long amount;
+    private Type type;
 
-    public ImportedAccount() {
+    public ConsolidatedAccount() {
         super();
         this.legacyAddresses = new ArrayList<LegacyAddress>();
     }
 
-    public ImportedAccount(String label, List<LegacyAddress> legacyAddresses, long amount) {
+    public ConsolidatedAccount(String label, List<LegacyAddress> legacyAddresses, long amount) {
         setArchived(false);
         setLabel(label);
         setLegacyAddresses(legacyAddresses);
@@ -41,5 +42,13 @@ public class ImportedAccount extends Account {
 
     public void setAmount(long amount) {
         this.amount = amount;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 }

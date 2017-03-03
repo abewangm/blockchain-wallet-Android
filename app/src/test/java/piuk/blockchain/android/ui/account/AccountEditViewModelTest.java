@@ -103,7 +103,7 @@ public class AccountEditViewModelTest {
 //        intent.putExtra("account_index", 0);
 //        when(activity.getIntent()).thenReturn(intent);
 //        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
-//        Account importedAccount = new ImportedAccount();
+//        Account importedAccount = new ConsolidatedAccount();
 //        Account account = new Account();
 //        when(mockPayload.getHdWallet().getAccounts()).thenReturn(Arrays.asList(account, importedAccount));
 //        when(payloadManager.getPayload()).thenReturn(mockPayload);
@@ -127,7 +127,7 @@ public class AccountEditViewModelTest {
 //        intent.putExtra("account_index", 0);
 //        when(activity.getIntent()).thenReturn(intent);
 //        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
-//        Account importedAccount = new ImportedAccount();
+//        Account importedAccount = new ConsolidatedAccount();
 //        Account account = new Account();
 //        account.setArchived(true);
 //        when(mockPayload.getHdWallet().getAccounts()).thenReturn(Arrays.asList(account, importedAccount));

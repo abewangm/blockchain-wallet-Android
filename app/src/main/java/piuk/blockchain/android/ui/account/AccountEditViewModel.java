@@ -12,7 +12,6 @@ import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.View;
 
-import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.HDWallet;
@@ -144,7 +143,7 @@ public class AccountEditViewModel extends BaseViewModel {
             List<Account> accountClone = new ArrayList<>(accounts.size());
             accountClone.addAll(accounts);
 
-            if (accountClone.get(accountClone.size() - 1) instanceof ImportedAccount) {
+            if (accountClone.get(accountClone.size() - 1) instanceof ConsolidatedAccount) {
                 accountClone.remove(accountClone.size() - 1);
             }
 
@@ -161,10 +160,10 @@ public class AccountEditViewModel extends BaseViewModel {
 
         } else if (addressIndex >= 0) {
             // V2
-            ImportedAccount iAccount = null;
+            ConsolidatedAccount iAccount = null;
             if (payloadManager.getPayload().getLegacyAddressList().size() > 0) {
 
-                iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
+                iAccount = new ConsolidatedAccount(stringUtils.getString(R.string.imported_addresses),
                         payloadManager.getPayload().getLegacyAddressList(),
                         payloadManager.getImportedAddressesBalance().longValue());
             }

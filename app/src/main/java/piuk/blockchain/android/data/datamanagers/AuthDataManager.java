@@ -133,12 +133,10 @@ public class AuthDataManager {
     private Completable getUpdatePayloadObservable(String sharedKey, String guid, String password) {
         return Completable.defer(() -> Completable.create(subscriber -> {
             try {
-                Log.d("vos", "getUpdatePayloadObservable: 1");
                 payloadManager.initializeAndDecrypt(
                     sharedKey,
                     guid,
                     password);
-                Log.d("vos", "getUpdatePayloadObservable: 2");
                 subscriber.onComplete();
             } catch (Exception e) {
                 if (!subscriber.isDisposed()) {

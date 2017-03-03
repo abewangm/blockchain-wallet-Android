@@ -1,13 +1,12 @@
 package piuk.blockchain.android.ui.balance;
 
+import android.util.Log;
 import com.google.common.collect.HashBiMap;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
-import info.blockchain.api.data.MultiAddress;
 import info.blockchain.api.data.Transaction;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
@@ -16,6 +15,7 @@ import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.settings.SettingsManager;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,7 +36,8 @@ import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.account.ImportedAccount;
+import piuk.blockchain.android.ui.account.ConsolidatedAccount;
+import piuk.blockchain.android.ui.account.ConsolidatedAccount.Type;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -213,14 +214,18 @@ public class BalanceViewModel extends BaseViewModel {
             if (payloadManager.getPayload().isUpgraded()) {
 
                 //Only V3 will display "All"
-                Account all = new Account();
+                ConsolidatedAccount all = new ConsolidatedAccount();
                 all.setLabel(stringUtils.getString(R.string.all_accounts));
-                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(all.getXpub()));
+                all.setType(Type.ALL_ACCOUNTS);
+
+                BigInteger bal = payloadManager.getWalletBalance();
+                String balance = getBalanceString(true, bal.longValue());
+                Log.d("vos", "updateAccountList all: "+balance);
                 activeAccountAndAddressList.add(new ItemAccount(
                         all.getLabel(),
                         balance,
                         null,
-                        Math.round(transactionListDataManager.getBtcBalance(all.getXpub())),
+                        bal.longValue(),
                         null));
                 activeAccountAndAddressBiMap.put(all, spinnerIndex);
                 spinnerIndex++;
@@ -236,12 +241,16 @@ public class BalanceViewModel extends BaseViewModel {
 
             //Give unlabeled account a label
             if (item.getLabel().trim().length() == 0) item.setLabel("Account: " + accountIndex);
-            String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(item.getXpub()));
+
+            BigInteger bal = payloadManager.getAddressBalance(item.getXpub());
+            String balanceString = getBalanceString(true, bal.longValue());
+
+            Log.d("vos", "updateAccountList Account: "+balanceString+" - "+item.getXpub());
             activeAccountAndAddressList.add(new ItemAccount(
                     item.getLabel(),
-                    balance,
+                    balanceString,
                     null,
-                    Math.round(transactionListDataManager.getBtcBalance(item.getXpub())),
+                    bal.longValue(),
                     null));
             activeAccountAndAddressBiMap.put(item, spinnerIndex);
             spinnerIndex++;
@@ -249,45 +258,26 @@ public class BalanceViewModel extends BaseViewModel {
         }
 
         //Add "Imported Addresses" or "Total Funds" to map
-        if (payloadManager.getPayload().isUpgraded() && activeLegacyAddresses.size() > 0) {
+        if (activeLegacyAddresses.size() > 0) {
             //Only V3 - Consolidate and add Legacy addresses to "Imported Addresses" at bottom of accounts spinner
 
-            ImportedAccount iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
-                    payloadManager.getPayload().getLegacyAddressList(),
-                    payloadManager.getWalletBalance().longValue());
-            iAccount.setXpub(PayloadManager.MULTI_ADDRESS_ALL_LEGACY);
-            String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(iAccount.getXpub()));
+            ConsolidatedAccount importedAddresses = new ConsolidatedAccount();
+            importedAddresses.setLabel(stringUtils.getString(R.string.imported_addresses));
+            importedAddresses.setType(Type.ALL_IMPORTED_ADDRESSES);
+
+            BigInteger bal = payloadManager.getImportedAddressesBalance();
+            String balance = getBalanceString(true, bal.longValue());
+
+            Log.d("vos", "updateAccountList importedAddresses: "+balance);
             activeAccountAndAddressList.add(new ItemAccount(
-                    iAccount.getLabel(),
-                    balance,
-                    null,
-                    Math.round(transactionListDataManager.getBtcBalance(iAccount.getXpub())),
-                    null));
-            activeAccountAndAddressBiMap.put(iAccount, spinnerIndex);
+                importedAddresses.getLabel(),
+                balance,
+                null,
+                bal.longValue(),
+                null));
+            activeAccountAndAddressBiMap.put(importedAddresses, spinnerIndex);
             spinnerIndex++;
 
-        } else {
-            for (LegacyAddress legacyAddress : activeLegacyAddresses) {
-                //If address has no label, we'll display address
-                String labelOrAddress = legacyAddress.getLabel() == null ||
-                        legacyAddress.getLabel().trim().length() == 0 ?
-                        legacyAddress.getAddress() : legacyAddress.getLabel();
-
-                //Prefix "watch-only"
-                if (legacyAddress.isWatchOnly()) {
-                    labelOrAddress = stringUtils.getString(R.string.watch_only_label) + " " + labelOrAddress;
-                }
-
-                String balance = getBalanceString(true, transactionListDataManager.getBtcBalance(legacyAddress.getAddress()));
-                activeAccountAndAddressList.add(new ItemAccount(
-                        labelOrAddress,
-                        balance,
-                        null,
-                        Math.round(transactionListDataManager.getBtcBalance(legacyAddress.getAddress())),
-                        null));
-                activeAccountAndAddressBiMap.put(legacyAddress, spinnerIndex);
-                spinnerIndex++;
-            }
         }
 
         //If we have multiple accounts/addresses we will show dropdown in toolbar, otherwise we will only display a static text
@@ -325,25 +315,11 @@ public class BalanceViewModel extends BaseViewModel {
             object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);
         }
 
-        // TODO: 02/03/2017 Get rid of this object thing, is so bad
         transactionListDataManager.clearTransactionList();
-
-        double btcBalance = 0.0;
-
-        if(object instanceof Account) {
-            transactionListDataManager.generateTransactionList(((Account) object).getXpub());
-            btcBalance = transactionListDataManager.getBtcBalance(((Account) object).getXpub());
-        } else if(object instanceof LegacyAddress) {
-            transactionListDataManager.generateTransactionList(((LegacyAddress) object).getAddress());
-            btcBalance = transactionListDataManager.getBtcBalance(((LegacyAddress) object).getAddress());
-        } else if(object instanceof ImportedAccount) {
-            transactionListDataManager.generateTransactionList(((Account) object).getXpub());
-            btcBalance = transactionListDataManager.getBtcBalance(((Account) object).getXpub());
-        }
-
-//        transactionListDataManager.generateTransactionList(object);
-
+        transactionListDataManager.generateTransactionList(object);
         transactionList = transactionListDataManager.getTransactionList();
+
+        double btcBalance = transactionListDataManager.getBtcBalance(object);
 
         // Returning from SendFragment the following will happen
         // After sending btc we create a "placeholder" tx until websocket handler refreshes list
