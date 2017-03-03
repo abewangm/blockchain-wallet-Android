@@ -30,6 +30,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -552,7 +553,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         } else {
             LayoutInflater inflater = getActivity().getLayoutInflater();
             View smsPickerView = inflater.inflate(R.layout.include_sms_update, null);
-            AppCompatEditText mobileNumber = (AppCompatEditText) smsPickerView.findViewById(R.id.etSms);
+            EditText mobileNumber = (EditText) smsPickerView.findViewById(R.id.etSms);
             TextView countryTextView = (TextView) smsPickerView.findViewById(R.id.tvCountry);
             TextView mobileNumberTextView = (TextView) smsPickerView.findViewById(R.id.tvSms);
 
