@@ -33,7 +33,6 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
@@ -417,31 +416,31 @@ public class MainViewModel extends BaseViewModel {
 
     private void cacheDefaultAccountUnspentData() {
 
-        if (payloadManager.getPayload().getHdWallets() != null) {
-
-            int defaultAccountIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
-
-            Account defaultAccount = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultAccountIndex);
-            String xpub = defaultAccount.getXpub();
-
-            try {
-                // TODO: 22/02/2017 quick fix. can be improved
-                Response<UnspentOutputs> response = new BlockExplorer(
-                        BlockchainFramework.getRetrofitServerInstance(),
-                        BlockchainFramework.getApiCode())
-                        .getUnspentOutputs(Arrays.asList(xpub)).execute();
-
-                if (response.isSuccessful()) {
-                    DefaultAccountUnspentCache.getInstance()
-                            .setUnspentApiResponse(xpub, response.body());
-                } else {
-                    Log.e(TAG, "Failed to set DefaultAccountUnspentCache. Might not have free outputs to spend.");
-                }
-
-            } catch (IOException e) {
-                Log.e(TAG, "cacheDefaultAccountUnspentData: ", e);
-            }
-        }
+//        if (payloadManager.getPayload().getHdWallets() != null) {
+//
+//            int defaultAccountIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
+//
+//            Account defaultAccount = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultAccountIndex);
+//            String xpub = defaultAccount.getXpub();
+//
+//            try {
+//                // TODO: 22/02/2017 quick fix. can be improved
+//                Response<UnspentOutputs> response = new BlockExplorer(
+//                        BlockchainFramework.getRetrofitServerInstance(),
+//                        BlockchainFramework.getApiCode())
+//                        .getUnspentOutputs(Arrays.asList(xpub)).execute();
+//
+//                if (response.isSuccessful()) {
+//                    DefaultAccountUnspentCache.getInstance()
+//                            .setUnspentApiResponse(xpub, response.body());
+//                } else {
+//                    Log.e(TAG, "Failed to set DefaultAccountUnspentCache. Might not have free outputs to spend.");
+//                }
+//
+//            } catch (IOException e) {
+//                Log.e(TAG, "cacheDefaultAccountUnspentData: ", e);
+//            }
+//        }
     }
 
     @Override

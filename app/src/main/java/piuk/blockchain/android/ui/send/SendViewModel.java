@@ -5,6 +5,7 @@ import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import info.blockchain.api.data.Address;
 import info.blockchain.api.data.MultiAddress;
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 
@@ -43,11 +45,12 @@ import javax.inject.Inject;
 
 import io.reactivex.disposables.Disposable;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.payload.PayloadBridge;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -101,6 +104,8 @@ public class SendViewModel extends BaseViewModel {
     @Inject StringUtils stringUtils;
     @Inject ContactsDataManager contactsDataManager;
     @Inject SendDataManager sendDataManager;
+    @Inject ReceiveDataManager receiveDataManager;
+    @Inject AccountDataManager accountDataManager;
 
     SendViewModel(SendContract.DataListener dataListener, Locale locale) {
         Injector.getInstance().getDataManagerComponent().inject(this);
@@ -109,6 +114,7 @@ public class SendViewModel extends BaseViewModel {
 
         sendModel = new SendModel();
         sendModel.pendingTransaction = new PendingTransaction();
+        sendModel.unspentApiResponses = new HashMap<>();
         getSuggestedFee();
 
         sslVerifyUtil.validateSSL();
@@ -460,7 +466,6 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Payment will use suggested dynamic fee
      */
-    // TODO: 21/02/2017
     private void suggestedFeePayment(final UnspentOutputs coins, BigInteger amountToSend, boolean spendAll)
         throws UnsupportedEncodingException {
         if (sendModel.dynamicFeeList != null) {
@@ -560,20 +565,23 @@ public class SendViewModel extends BaseViewModel {
      */
     private Observable<UnspentOutputs> getUnspentApiResponse(String address) {
 
-        // TODO: 28/02/2017  
-//        if (sendModel.unspentApiResponses.containsKey(address)) {
-//            return Observable.just(sendModel.unspentApiResponses.get(address));
-//        } else {
-            // Get cache if is default account
-            DefaultAccountUnspentCache cache = DefaultAccountUnspentCache.getInstance();
-            if (payloadManager.getPayload().getHdWallets() != null && address.equals(cache.getXpub())) {
-                // Refresh default account cache
-                return sendDataManager.getUnspentOutputs(address);
-            } else {
-                return sendDataManager.getUnspentOutputs(address)
-                        .doOnNext(jsonObject -> sendModel.unspentApiResponses.put(address, jsonObject));
-            }
-//        }
+        if (sendModel.unspentApiResponses.containsKey(address)) {
+            return Observable.just(sendModel.unspentApiResponses.get(address));
+        } else {
+
+            return sendDataManager.getUnspentOutputs(address);
+
+            // TODO: 06/03/2017  
+//            // Get cache if is default account
+//            DefaultAccountUnspentCache cache = DefaultAccountUnspentCache.getInstance();
+//            if (payloadManager.getPayload().getHdWallets() != null && address.equals(cache.getXpub())) {
+//                // Refresh default account cache
+//                return sendDataManager.getUnspentOutputs(address);
+//            } else {
+//                return sendDataManager.getUnspentOutputs(address)
+//                        .doOnNext(jsonObject -> sendModel.unspentApiResponses.put(address, jsonObject));
+//            }
+        }
     }
 
     /**
@@ -651,6 +659,7 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void sendClicked(boolean bypassFeeCheck, String address) {
+
         checkClipboardPaste(address);
         if (FormatsUtil.isValidBitcoinAddress(address)) {
             //Receiving address manual or scanned input
@@ -716,7 +725,7 @@ public class SendViewModel extends BaseViewModel {
 
         if (feeList != null && feeList.getEstimate() != null) {
 
-            if (sendModel.pendingTransaction.bigIntFee.doubleValue() > feeList.getEstimate().get(0).getFee()) {
+            if (sendModel.pendingTransaction.bigIntFee.doubleValue() > sendModel.absoluteSuggestedFeeEstimates[0].doubleValue()) {
 
                 String message = String.format(stringUtils.getString(R.string.high_fee_not_necessary_info),
                         monetaryUtil.getDisplayAmount(sendModel.pendingTransaction.bigIntFee.longValue()) + " " + sendModel.btcUnit,
@@ -732,7 +741,7 @@ public class SendViewModel extends BaseViewModel {
                 return false;
             }
 
-            if (sendModel.pendingTransaction.bigIntFee.doubleValue() < feeList.getEstimate().get(5).getFee()) {
+            if (sendModel.pendingTransaction.bigIntFee.doubleValue() < sendModel.absoluteSuggestedFeeEstimates[5].doubleValue()) {
 
                 String message = String.format(stringUtils.getString(R.string.low_fee_suggestion),
                         monetaryUtil.getDisplayAmount(sendModel.pendingTransaction.bigIntFee.longValue()) + " " + sendModel.btcUnit,
@@ -887,12 +896,13 @@ public class SendViewModel extends BaseViewModel {
             if (selectedItem.accountObject instanceof Account) {
                 //V3
                 Account account = ((Account) selectedItem.accountObject);
-                
-                try {
-                    sendModel.pendingTransaction.receivingAddress = payloadManager.getNextReceiveAddress(account);
-                } catch (Exception e) {
-                    Log.e(TAG, "setReceivingAddress: ", e);
-                }
+
+                compositeDisposable.add(
+                    receiveDataManager.getNextReceiveAddress(account)
+                        .subscribe(
+                            address -> {
+                                sendModel.pendingTransaction.receivingAddress = address;
+                            }, throwable -> showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
 
             } else if (selectedItem.accountObject instanceof LegacyAddress) {
                 //V2
@@ -991,19 +1001,10 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void handleSuccessfulPayment(String hash) {
-        if (sendModel.pendingTransaction.isHD()) {
-            // increment change address counter
-            // TODO: 28/02/2017  
-//            ((Account) sendModel.pendingTransaction.sendingObject.accountObject).incChange();
-        }
 
-        try {
-            payloadManager.updateMultiAddress(null, 50, 0);
-        } catch (IOException | ApiException e) {
-            e.printStackTrace();
-        }
+        accountDataManager.updateMultiAddress();
+        accountDataManager.save();
 
-        PayloadBridge.getInstance().remoteSaveThread(null);
         if (dataListener != null) {
             dataListener.onShowTransactionSuccess(contactMdid, hash, fctxId, sendModel.pendingTransaction.bigIntAmount.longValue());
         }
@@ -1012,6 +1013,7 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void logAddressInputMetric() {
+        // TODO: 06/03/2017 WebUtil???????????
         EventLogHandler handler = new EventLogHandler(prefsUtil, WebUtil.getInstance());
         if (metricInputFlag != null) handler.logAddressInputEvent(metricInputFlag);
     }
@@ -1024,16 +1026,17 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void clearUnspentResponseCache() {
-        DefaultAccountUnspentCache.getInstance().destroy();
 
-        // TODO: 28/02/2017  
-//        if (sendModel.pendingTransaction.isHD()) {
-//            Account account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);
-//            sendModel.unspentApiResponse.remove(account.getXpub());
-//        } else {
-//            LegacyAddress legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
-//            sendModel.unspentApiResponse.remove(legacyAddress.getAddress());
-//        }
+        // TODO: 06/03/2017  
+//        DefaultAccountUnspentCache.getInstance().destroy();
+
+        if (sendModel.pendingTransaction.isHD()) {
+            Account account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);
+            sendModel.unspentApiResponses.remove(account.getXpub());
+        } else {
+            LegacyAddress legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
+            sendModel.unspentApiResponses.remove(legacyAddress.getAddress());
+        }
     }
 
     /**

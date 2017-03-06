@@ -2,9 +2,12 @@ package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.api.data.FeeList;
+import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
+import io.reactivex.Completable;
+import java.io.IOException;
 import java.util.Arrays;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
@@ -15,6 +18,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import io.reactivex.Observable;
+import piuk.blockchain.android.data.payload.PayloadBridge;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.PaymentService;
 import retrofit2.Response;
@@ -84,6 +88,9 @@ public class SendDataManager {
 
             if(call.isSuccessful()) {
                 return call.body();
+            } else if(call.errorBody().string().equals("No free outputs to spend")) {
+                //If no unspent outputs available server responds with 500?
+                return UnspentOutputs.fromJson("{\"unspent_outputs\":[]}");
             } else {
                 throw new Exception("Unspent api call failed.");
             }
