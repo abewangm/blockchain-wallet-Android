@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
-import android.util.Log;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -21,7 +20,7 @@ import io.reactivex.exceptions.Exceptions;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.services.PinStoreService;
+import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.ui.auth.LogoutActivity;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.util.AESUtilWrapper;
@@ -34,7 +33,7 @@ public class AccessState {
     public static final String LOGOUT_ACTION = "info.blockchain.wallet.LOGOUT";
 
     private PrefsUtil prefs;
-    private PinStoreService pinStore;
+    private WalletService walletService;
     private AppUtil appUtil;
     private String mPin;
     private boolean isLoggedIn = false;
@@ -43,9 +42,9 @@ public class AccessState {
     private static final Subject<AuthEvent> authEventSubject = PublishSubject.create();
 
 
-    public void initAccessState(Context context, PrefsUtil prefs, PinStoreService pinStore, AppUtil appUtil) {
+    public void initAccessState(Context context, PrefsUtil prefs, WalletService walletService, AppUtil appUtil) {
         this.prefs = prefs;
-        this.pinStore = pinStore;
+        this.walletService = walletService;
         this.appUtil = appUtil;
 
         Intent intent = new Intent(context, LogoutActivity.class);
@@ -71,7 +70,7 @@ public class AccessState {
         String key = prefs.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
         String encryptedPassword = prefs.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
 
-        return pinStore.validateAccess(key, passedPin)
+        return walletService.validateAccess(key, passedPin)
             .flatMap(response -> {
                 if (response.isSuccessful()) {
                     try {
@@ -93,7 +92,7 @@ public class AccessState {
             .compose(RxUtil.applySchedulersToObservable());
     }
 
-    // TODO: 14/10/2016 This should be moved elsewhere in the
+    // TODO: 14/10/2016 This should be moved elsewhere
     public Observable<Boolean> syncPayloadToServer() {
         return Observable.fromCallable(() -> PayloadManager.getInstance().save())
                 .compose(RxUtil.applySchedulersToObservable());
@@ -116,7 +115,7 @@ public class AccessState {
                 random.nextBytes(bytes);
                 String value = new String(Hex.encode(bytes), "UTF-8");
 
-                pinStore.setAccessKey(key, value, passedPin)
+                walletService.setAccessKey(key, value, passedPin)
                         .subscribe(call -> {
 
                             if(call.isSuccessful()) {

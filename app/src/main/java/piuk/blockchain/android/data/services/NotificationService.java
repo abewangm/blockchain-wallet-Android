@@ -6,6 +6,12 @@ import io.reactivex.schedulers.Schedulers;
 
 public class NotificationService {
 
+    private WalletApi walletApi;
+
+    public NotificationService(WalletApi walletApi) {
+        this.walletApi = walletApi;
+    }
+
     /**
      * Sends the updated Firebase token to the server along with the GUID and Shared Key
      *
@@ -16,10 +22,7 @@ public class NotificationService {
      * returning void.
      */
     public Completable sendNotificationToken(String token, String guid, String sharedKey) {
-
-        return Completable.fromCallable(() -> {
-            WalletApi.updateFirebaseNotificationToken(token, guid, sharedKey);
-            return Void.TYPE;
-        }).subscribeOn(Schedulers.io());
+        return Completable.fromObservable(observer -> walletApi.updateFirebaseNotificationToken(token, guid, sharedKey))
+                .subscribeOn(Schedulers.io());
     }
 }

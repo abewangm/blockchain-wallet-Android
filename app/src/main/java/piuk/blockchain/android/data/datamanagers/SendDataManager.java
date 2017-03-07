@@ -5,13 +5,12 @@ import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
-import java.util.Arrays;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.BIP38PrivateKey;
-import org.json.JSONObject;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -39,20 +38,20 @@ public class SendDataManager {
      * @return An {@link Observable<String>} where the String is the transaction hash
      */
     public Observable<String> submitPayment(SpendableUnspentOutputs unspentOutputBundle,
-        List<ECKey> keys,
-        String toAddress,
-        String changeAddress,
-        BigInteger bigIntFee,
-        BigInteger bigIntAmount) {
+                                            List<ECKey> keys,
+                                            String toAddress,
+                                            String changeAddress,
+                                            BigInteger bigIntFee,
+                                            BigInteger bigIntAmount) {
 
         return paymentService.submitPayment(
-            unspentOutputBundle,
-            keys,
-            toAddress,
-            changeAddress,
-            bigIntFee,
-            bigIntAmount)
-            .compose(RxUtil.applySchedulersToObservable());
+                unspentOutputBundle,
+                keys,
+                toAddress,
+                changeAddress,
+                bigIntFee,
+                bigIntAmount)
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     public Observable<ECKey> getEcKeyFromBip38(String password, String scanData, NetworkParameters networkParameters) {
@@ -63,32 +62,22 @@ public class SendDataManager {
     }
 
     public Observable<FeeList> getSuggestedFee() {
-        return Observable.fromCallable(() -> {
-
-            Response<FeeList> call = Payment
-                .getDynamicFee().execute();
-
-            if(call.isSuccessful()) {
-                return call.body();
-            } else {
-                throw new Exception("Dynamic fee api call failed.");
-            }
-        })
-        .compose(RxUtil.applySchedulersToObservable());
+        return Payment.getDynamicFee().
+                compose(RxUtil.applySchedulersToObservable());
     }
 
     public Observable<UnspentOutputs> getUnspentOutputs(String address) {
         return Observable.fromCallable(() -> {
             Response<UnspentOutputs> call = Payment.getUnspentCoins(Arrays.asList(address))
-                .execute();
+                    .execute();
 
-            if(call.isSuccessful()) {
+            if (call.isSuccessful()) {
                 return call.body();
             } else {
                 throw new Exception("Unspent api call failed.");
             }
         })
-        .compose(RxUtil.applySchedulersToObservable());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
 }

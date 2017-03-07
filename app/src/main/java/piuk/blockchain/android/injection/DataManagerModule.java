@@ -4,12 +4,12 @@ import android.content.Context;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.settings.SettingsManager;
 
 import dagger.Module;
 import dagger.Provides;
-import java.io.IOException;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
@@ -24,7 +24,7 @@ import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
 import piuk.blockchain.android.data.services.BlockExplorerService;
 import piuk.blockchain.android.data.services.PaymentService;
 import piuk.blockchain.android.data.services.SettingsService;
-import piuk.blockchain.android.data.services.WalletPayloadService;
+import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
@@ -50,7 +50,7 @@ public class DataManagerModule {
         return new AuthDataManager(
                 payloadManager,
                 prefsUtil,
-                new WalletPayloadService(),
+                new WalletService(new WalletApi()),
                 appUtil,
                 aesUtilWrapper,
                 accessState,

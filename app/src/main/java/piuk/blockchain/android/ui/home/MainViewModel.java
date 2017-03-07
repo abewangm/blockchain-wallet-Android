@@ -11,7 +11,6 @@ import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.Balance;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -42,7 +41,6 @@ import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.services.BlockExplorerService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -405,14 +403,11 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void cacheDynamicFee() {
-        try {
-            Response<FeeList> response = Payment.getDynamicFee().execute();
-            if (response.isSuccessful()) {
-                DynamicFeeCache.getInstance().setCachedDynamicFee(response.body());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        compositeDisposable.add(
+                Payment.getDynamicFee()
+                .compose(RxUtil.applySchedulersToObservable())
+                .subscribe(feeList -> DynamicFeeCache.getInstance().setCachedDynamicFee(feeList),
+                        Throwable::printStackTrace));
     }
 
     private void cacheDefaultAccountUnspentData() {

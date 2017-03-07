@@ -16,7 +16,7 @@ public class WalletPayloadServiceTest extends RxTest {
 
 //    private static final String STRING_TO_RETURN = "string_to_return";
 //
-//    private WalletPayloadService subject;
+//    private WalletService subject;
 //    @Mock WalletPayload walletPayload;
 //
 //    @Before
@@ -24,7 +24,7 @@ public class WalletPayloadServiceTest extends RxTest {
 //        super.setUp();
 //        MockitoAnnotations.initMocks(this);
 //
-//        subject = new WalletPayloadService(walletPayload);
+//        subject = new WalletService(walletPayload);
 //    }
 //
 //    @Test
