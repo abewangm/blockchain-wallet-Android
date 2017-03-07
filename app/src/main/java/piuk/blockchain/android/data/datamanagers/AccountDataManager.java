@@ -82,4 +82,18 @@ public class AccountDataManager {
         return Observable.fromCallable(() -> PrivateKeyFactory.getKey(format, data))
                 .compose(RxUtil.applySchedulersToObservable());
     }
+
+    public Completable updateMultiAddress() {
+        return Completable.fromCallable(() -> {
+            payloadManager.updateMultiAddress(null, 50, 0);
+            return Void.TYPE;
+        });
+    }
+
+    public Completable save() {
+        return Completable.fromCallable(() -> {
+            payloadManager.save();
+            return Void.TYPE;
+        });
+    }
 }

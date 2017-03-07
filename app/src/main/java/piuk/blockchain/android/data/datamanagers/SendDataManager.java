@@ -11,6 +11,7 @@ import org.bitcoinj.crypto.BIP38PrivateKey;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -68,11 +69,14 @@ public class SendDataManager {
 
     public Observable<UnspentOutputs> getUnspentOutputs(String address) {
         return Observable.fromCallable(() -> {
-            Response<UnspentOutputs> call = Payment.getUnspentCoins(Arrays.asList(address))
+            Response<UnspentOutputs> call = Payment.getUnspentCoins(Collections.singletonList(address))
                     .execute();
 
             if (call.isSuccessful()) {
                 return call.body();
+            } else if (call.errorBody().string().equals("No free outputs to spend")) {
+                //If no unspent outputs available server responds with 500?
+                return UnspentOutputs.fromJson("{\"unspent_outputs\":[]}");
             } else {
                 throw new Exception("Unspent api call failed.");
             }

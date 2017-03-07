@@ -23,4 +23,15 @@ public class ItemAccount {
         this.absoluteBalance = absoluteBalance;
         this.accountObject = accountObject;
     }
+
+    @Override
+    public String toString() {
+        return "ItemAccount{" +
+            "label='" + label + '\'' +
+            ", displayBalance='" + displayBalance + '\'' +
+            ", tag='" + tag + '\'' +
+            ", absoluteBalance=" + absoluteBalance +
+            ", accountObject=" + accountObject +
+            '}';
+    }
 }

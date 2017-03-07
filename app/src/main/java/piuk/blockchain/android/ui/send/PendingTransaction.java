@@ -25,14 +25,16 @@ public class PendingTransaction {
     @Override
     public String toString() {
         return "PendingTransaction{" +
-                "unspentOutputBundle=" + unspentOutputBundle +
-                ", sendingObject=" + sendingObject +
-                ", receivingObject=" + receivingObject +
-                ", note='" + note + '\'' +
-                ", receivingAddress='" + receivingAddress + '\'' +
-                ", bigIntFee=" + bigIntFee +
-                ", bigIntAmount=" + bigIntAmount +
-                ", addressToReceiveIndex=" + addressToReceiveIndex +
+                "\nunspentOutputBundle.getAbsoluteFee()=" + unspentOutputBundle.getAbsoluteFee() +
+                "\nunspentOutputBundle.getConsumedAmount()=" + unspentOutputBundle.getConsumedAmount() +
+                "\nunspentOutputBundle.getSpendableOutputs().size()=" + unspentOutputBundle.getSpendableOutputs().size() +
+                ",\nsendingObject=" + sendingObject +
+                ",\nreceivingObject=" + receivingObject +
+                ",\nnote='" + note + '\'' +
+                ",\nreceivingAddress='" + receivingAddress + '\'' +
+                ",\nbigIntFee=" + bigIntFee +
+                ",\nbigIntAmount=" + bigIntAmount +
+                ",\naddressToReceiveIndex=" + addressToReceiveIndex +
                 '}';
     }
 }

@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.receive;
 import android.support.annotation.NonNull;
 
 import android.util.Log;
+import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import info.blockchain.wallet.payload.data.Account;
@@ -40,7 +41,7 @@ public class WalletAccountHelper {
         fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         btcExchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
 
-        addressBalanceHelper = new AddressBalanceHelper(monetaryUtil);
+        addressBalanceHelper = new AddressBalanceHelper(monetaryUtil, payloadManager);
     }
 
     /**
@@ -82,15 +83,17 @@ public class WalletAccountHelper {
                     continue;
                 }
 
-                // TODO: 28/02/2017  
-//                if (MultiAddrFactory.getInstance().getXpubAmounts().containsKey(account.getXpub())) {
+                MultiAddress multiAddress = payloadManager
+                    .getMultiAddress(account.getXpub());
+
+                if(multiAddress != null) {
                     accountArrayList.add(new ItemAccount(
                             account.getLabel(),
                             addressBalanceHelper.getAccountBalance(account, isBtc, btcExchangeRate, fiatUnit, btcUnit),
                             null,
                             addressBalanceHelper.getAccountAbsoluteBalance(account),
                             account));
-//                }
+                }
             }
         }
 
