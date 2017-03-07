@@ -183,7 +183,7 @@ public class AccountViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
         try {
             BIP38PrivateKey bip38 = new BIP38PrivateKey(PersistentUrls.getInstance().getCurrentNetworkParams(), data);
-            ECKey key = bip38.decrypt(password.toString());
+            ECKey key = bip38.decrypt(password);
 
             handlePrivateKey(key, doubleEncryptionPassword);
         } catch (Exception e) {

@@ -383,7 +383,7 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     private boolean isLargeTransaction(PendingTransaction pendingTransaction) {
-        int txSize = sendDataManager.estimatedSize(pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
+        int txSize = sendDataManager.estimateSize(pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = pendingTransaction.bigIntFee.doubleValue() / pendingTransaction.bigIntAmount.doubleValue() * 100.0;
 
         return pendingTransaction.bigIntFee.longValue() > SendModel.LARGE_TX_FEE

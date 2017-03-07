@@ -52,6 +52,14 @@ public class SendDataManager {
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
+    /**
+     * Returns an Elliptic Curve Key from a BIP38 private key.
+     *
+     * @param password          The password for the BIP-38 encrypted key
+     * @param scanData          A private key in Base-58
+     * @param networkParameters The current Network Parameters
+     * @return An {@link ECKey}
+     */
     public Observable<ECKey> getEcKeyFromBip38(String password, String scanData, NetworkParameters networkParameters) {
         return Observable.fromCallable(() -> {
             BIP38PrivateKey bip38 = new BIP38PrivateKey(networkParameters, scanData);
@@ -135,8 +143,8 @@ public class SendDataManager {
      * @param outputs The number of outputs
      * @return The estimated size of the transaction in kB
      */
-    public int estimatedSize(int inputs, int outputs) {
-        return paymentService.estimatedSize(inputs, outputs);
+    public int estimateSize(int inputs, int outputs) {
+        return paymentService.estimateSize(inputs, outputs);
     }
 
     /**
@@ -149,7 +157,7 @@ public class SendDataManager {
      * @return A {@link BigInteger} representing the absolute fee
      */
     public BigInteger estimatedFee(int inputs, int outputs, BigInteger feePerKb) {
-        return paymentService.estimatedFee(inputs, outputs, feePerKb);
+        return paymentService.estimateFee(inputs, outputs, feePerKb);
     }
 
 }

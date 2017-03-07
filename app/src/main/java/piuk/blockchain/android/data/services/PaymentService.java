@@ -2,6 +2,7 @@ package piuk.blockchain.android.data.services;
 
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.api.data.FeeList;
+import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
@@ -45,34 +46,27 @@ public class PaymentService {
                                             BigInteger bigIntAmount) {
 
         return Observable.create(observableOnSubscribe -> {
-            try {
-                HashMap<String, BigInteger> receivers = new HashMap<>();
-                receivers.put(toAddress, bigIntAmount);
+            HashMap<String, BigInteger> receivers = new HashMap<>();
+            receivers.put(toAddress, bigIntAmount);
 
-                Transaction tx = payment.makeTransaction(
-                        unspentOutputBundle.getSpendableOutputs(),
-                        receivers,
-                        bigIntFee,
-                        changeAddress);
+            Transaction tx = payment.makeTransaction(
+                    unspentOutputBundle.getSpendableOutputs(),
+                    receivers,
+                    bigIntFee,
+                    changeAddress);
 
-                payment.signTransaction(tx, keys);
+            payment.signTransaction(tx, keys);
 
-                Response<ResponseBody> exe = payment.publishTransaction(tx).execute();
+            Response<ResponseBody> exe = payment.publishTransaction(tx).execute();
 
-                if (exe.isSuccessful()) {
-                    if (!observableOnSubscribe.isDisposed()) {
-                        observableOnSubscribe.onNext(tx.getHashAsString());
-                        observableOnSubscribe.onComplete();
-                    }
-                } else {
-                    if (!observableOnSubscribe.isDisposed()) {
-                        observableOnSubscribe.onError(new Throwable(exe.code() + ": " + exe.errorBody()));
-                    }
+            if (exe.isSuccessful()) {
+                if (!observableOnSubscribe.isDisposed()) {
+                    observableOnSubscribe.onNext(tx.getHashAsString());
+                    observableOnSubscribe.onComplete();
                 }
-
-            } catch (Exception e) {
-                if (observableOnSubscribe != null && !observableOnSubscribe.isDisposed()) {
-                    observableOnSubscribe.onError(e);
+            } else {
+                if (!observableOnSubscribe.isDisposed()) {
+                    observableOnSubscribe.onError(new Throwable(exe.code() + ": " + exe.errorBody()));
                 }
             }
         });
@@ -105,7 +99,7 @@ public class PaymentService {
                 // If no unspent outputs available server responds with 500
                 return UnspentOutputs.fromJson("{\"unspent_outputs\":[]}");
             } else {
-                throw new Exception("Unspent api call failed.");
+                throw new ApiException("Unspent API call failed.");
             }
         });
     }
@@ -163,7 +157,7 @@ public class PaymentService {
      * @param outputs The number of outputs
      * @return The estimated size of the transaction in kB
      */
-    public int estimatedSize(int inputs, int outputs) {
+    public int estimateSize(int inputs, int outputs) {
         return payment.estimatedSize(inputs, outputs);
     }
 
@@ -176,7 +170,7 @@ public class PaymentService {
      * @param feePerKb The current fee per kB om the network
      * @return A {@link BigInteger} representing the absolute fee
      */
-    public BigInteger estimatedFee(int inputs, int outputs, BigInteger feePerKb) {
+    public BigInteger estimateFee(int inputs, int outputs, BigInteger feePerKb) {
         return payment.estimatedFee(inputs, outputs, feePerKb);
     }
 }
