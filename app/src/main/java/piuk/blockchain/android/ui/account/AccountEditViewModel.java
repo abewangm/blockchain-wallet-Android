@@ -26,7 +26,6 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
 import org.bitcoinj.params.MainNetParams;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,9 @@ import javax.inject.Inject;
 
 import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
+import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -63,6 +64,7 @@ public class AccountEditViewModel extends BaseViewModel {
     @Inject protected StringUtils stringUtils;
     @Inject protected AccountEditDataManager accountEditDataManager;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
+    @Inject protected SendDataManager sendDataManager;
     @Inject protected PrivateKeyFactory privateKeyFactory;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
 
@@ -191,7 +193,13 @@ public class AccountEditViewModel extends BaseViewModel {
                 if (payloadManager.getPayload().isUpgraded()) {
 
                     // Subtract fee
-                    long balanceAfterFee = (payloadManager.getAddressBalance(legacyAddress.getAddress()).longValue() - new BigDecimal(Payment.getDefaultFee().getFee()).longValue());
+                    long balanceAfterFee = payloadManager.getAddressBalance(
+                            legacyAddress.getAddress()).longValue() -
+                            sendDataManager.estimatedFee(1, 1, new BigInteger(
+                                    String.valueOf(DynamicFeeCache.getInstance()
+                                            .getCachedDynamicFee()
+                                            .getDefaultFee())))
+                                    .longValue();
 
                     if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
                         accountModel.setTransferFundsVisibility(View.VISIBLE);
@@ -375,7 +383,7 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     private boolean isLargeTransaction(PendingTransaction pendingTransaction) {
-        int txSize = Payment.estimatedSize(pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
+        int txSize = sendDataManager.estimatedSize(pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = pendingTransaction.bigIntFee.doubleValue() / pendingTransaction.bigIntAmount.doubleValue() * 100.0;
 
         return pendingTransaction.bigIntFee.longValue() > SendModel.LARGE_TX_FEE
@@ -418,12 +426,12 @@ public class AccountEditViewModel extends BaseViewModel {
                             long currentBalance = payloadManager.getImportedAddressesBalance().longValue();
                             long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
 
-                            if(pendingTransaction.sendingObject.accountObject instanceof Account) {
+                            if (pendingTransaction.sendingObject.accountObject instanceof Account) {
                                 payloadManager.subtractAmountFromAddressBalance(
-                                    ((Account)pendingTransaction.sendingObject.accountObject).getXpub(), BigInteger.valueOf(spentAmount));
+                                        ((Account) pendingTransaction.sendingObject.accountObject).getXpub(), BigInteger.valueOf(spentAmount));
                             } else {
                                 payloadManager.subtractAmountFromAddressBalance(
-                                    ((LegacyAddress)pendingTransaction.sendingObject.accountObject).getAddress(), BigInteger.valueOf(spentAmount));
+                                        ((LegacyAddress) pendingTransaction.sendingObject.accountObject).getAddress(), BigInteger.valueOf(spentAmount));
                             }
 
                             accountEditDataManager.syncPayloadWithServer().subscribe(new IgnorableDefaultObserver<>());

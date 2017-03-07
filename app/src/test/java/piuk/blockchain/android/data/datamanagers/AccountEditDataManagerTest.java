@@ -11,15 +11,11 @@ import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.services.PaymentService;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-
 public class AccountEditDataManagerTest extends RxTest {
 
     private AccountEditDataManager subject;
     @Mock PayloadManager payloadManager;
-    @Mock UnspentService unspentService;
+//    @Mock UnspentService unspentService;
     @Mock PaymentService paymentService;
 
     @Before
@@ -27,7 +23,7 @@ public class AccountEditDataManagerTest extends RxTest {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        subject = new AccountEditDataManager(unspentService, paymentService, payloadManager);
+//        subject = new AccountEditDataManager(unspentService, paymentService, payloadManager);
     }
 
 //    @Test

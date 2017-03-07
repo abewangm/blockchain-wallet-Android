@@ -5,15 +5,11 @@ import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
-import info.blockchain.api.data.Address;
-import info.blockchain.api.data.MultiAddress;
-import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.AddressBook;
@@ -24,25 +20,24 @@ import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.WebUtil;
 
-import io.reactivex.Observable;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
@@ -52,7 +47,6 @@ import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
-import piuk.blockchain.android.data.payload.PayloadBridge;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
@@ -420,7 +414,7 @@ public class SendViewModel extends BaseViewModel {
     private BigInteger getSuggestedAbsoluteFee(final UnspentOutputs coins, BigInteger amountToSend)
         throws UnsupportedEncodingException {
         if (sendModel.dynamicFeeList != null) {
-            SpendableUnspentOutputs spendableCoins = Payment.getSpendableCoins(coins, amountToSend,
+            SpendableUnspentOutputs spendableCoins = sendDataManager.getSpendableCoins(coins, amountToSend,
                 new BigDecimal(sendModel.dynamicFeeList.getDefaultFee().getFee()).toBigInteger());
             return spendableCoins.getAbsoluteFee();
         } else {
@@ -435,7 +429,7 @@ public class SendViewModel extends BaseViewModel {
      */
     private void customFeePayment(final UnspentOutputs coins, BigInteger amountToSend, BigInteger customFee, boolean spendAll)
         throws UnsupportedEncodingException {
-        Pair<BigInteger, BigInteger> sweepBundle = Payment.getSweepableCoins(coins, BigInteger.ZERO);
+        Pair<BigInteger, BigInteger> sweepBundle = sendDataManager.getSweepableCoins(coins, BigInteger.ZERO);
         BigInteger sweepableAmount = sweepBundle.getLeft();
         BigInteger feeRequiredForSweep = sweepBundle.getRight();
         long balanceAfterFee = sweepBundle.getLeft().longValue() - customFee.longValue();
@@ -450,7 +444,7 @@ public class SendViewModel extends BaseViewModel {
 
         validateCustomFee(amountToSend.add(customFee), sweepableAmount);
 
-        SpendableUnspentOutputs unspentOutputBundle = Payment.getSpendableCoins(coins,
+        SpendableUnspentOutputs unspentOutputBundle = sendDataManager.getSpendableCoins(coins,
                 amountToSend.add(customFee),
                 BigInteger.ZERO);
 
@@ -469,7 +463,7 @@ public class SendViewModel extends BaseViewModel {
     private void suggestedFeePayment(final UnspentOutputs coins, BigInteger amountToSend, boolean spendAll)
         throws UnsupportedEncodingException {
         if (sendModel.dynamicFeeList != null) {
-            Pair<BigInteger, BigInteger> sweepBundle = Payment.getSweepableCoins(coins,
+            Pair<BigInteger, BigInteger> sweepBundle = sendDataManager.getSweepableCoins(coins,
                 new BigDecimal(sendModel.dynamicFeeList.getDefaultFee().getFee()).toBigInteger());
             BigInteger sweepableAmount = sweepBundle.getLeft();
             BigInteger feeRequiredForSweep = sweepBundle.getRight();
@@ -486,7 +480,7 @@ public class SendViewModel extends BaseViewModel {
 
             BigInteger feePerKb = new BigDecimal(sendModel.dynamicFeeList.getDefaultFee().getFee()).toBigInteger();
 
-            SpendableUnspentOutputs unspentOutputBundle = Payment.getSpendableCoins(coins,
+            SpendableUnspentOutputs unspentOutputBundle = sendDataManager.getSpendableCoins(coins,
                     amountToSend,
                     feePerKb);
 
@@ -547,7 +541,7 @@ public class SendViewModel extends BaseViewModel {
 
         for (int i = 0; i < absoluteFeeSuggestedEstimates.length; i++) {
             BigInteger feePerKb = new BigDecimal(estimates.get(i).getFee()).toBigInteger();
-            SpendableUnspentOutputs unspentOutputBundle = Payment.getSpendableCoins(coins, amountToSend, feePerKb);
+            SpendableUnspentOutputs unspentOutputBundle = sendDataManager.getSpendableCoins(coins, amountToSend, feePerKb);
 
             if (unspentOutputBundle != null) {
                 absoluteFeeSuggestedEstimates[i] = unspentOutputBundle.getAbsoluteFee();
@@ -571,7 +565,7 @@ public class SendViewModel extends BaseViewModel {
 
             return sendDataManager.getUnspentOutputs(address);
 
-            // TODO: 06/03/2017  
+//            // TODO: 06/03/2017
 //            // Get cache if is default account
 //            DefaultAccountUnspentCache cache = DefaultAccountUnspentCache.getInstance();
 //            if (payloadManager.getPayload().getHdWallets() != null && address.equals(cache.getXpub())) {
@@ -714,7 +708,7 @@ public class SendViewModel extends BaseViewModel {
 
         //Push tx endpoint only accepts > 10000 per kb fees
         if (outputBundle != null && outputBundle.getSpendableOutputs() != null
-                && !Payment.isAdequateFee(outputBundle.getSpendableOutputs().size(),
+                && !sendDataManager.isAdequateFee(outputBundle.getSpendableOutputs().size(),
                 2,//assume change
                 sendModel.pendingTransaction.bigIntFee)) {
             showToast(R.string.insufficient_fee, ToastCustom.TYPE_ERROR);
@@ -809,7 +803,7 @@ public class SendViewModel extends BaseViewModel {
      * total
      */
     boolean isLargeTransaction() {
-        int txSize = Payment.estimatedSize(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
+        int txSize = sendDataManager.estimatedSize(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = sendModel.absoluteSuggestedFee.doubleValue() / sendModel.pendingTransaction.bigIntAmount.doubleValue() * 100.0;
 
         return sendModel.absoluteSuggestedFee.longValue() > SendModel.LARGE_TX_FEE

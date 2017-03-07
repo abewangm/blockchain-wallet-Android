@@ -9,18 +9,13 @@ import android.util.Log;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.Balance;
-import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payload.data.Account;
-import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.util.WebUtil;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,6 +31,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
@@ -69,6 +65,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected PayloadManager payloadManager;
     @Inject protected ContactsDataManager contactsDataManager;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
+    @Inject protected SendDataManager sendDataManager;
     @Inject protected NotificationTokenManager notificationTokenManager;
     @Inject protected Context applicationContext;
     @Inject protected StringUtils stringUtils;
@@ -403,10 +400,10 @@ public class MainViewModel extends BaseViewModel {
 
     private void cacheDynamicFee() {
         compositeDisposable.add(
-                Payment.getDynamicFee()
-                .compose(RxUtil.applySchedulersToObservable())
-                .subscribe(feeList -> DynamicFeeCache.getInstance().setCachedDynamicFee(feeList),
-                        Throwable::printStackTrace));
+                sendDataManager.getSuggestedFee()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(feeList -> DynamicFeeCache.getInstance().setCachedDynamicFee(feeList),
+                                Throwable::printStackTrace));
     }
 
     private void cacheDefaultAccountUnspentData() {

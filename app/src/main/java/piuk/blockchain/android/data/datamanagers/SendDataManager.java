@@ -2,22 +2,19 @@ package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.api.data.FeeList;
-import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.BIP38PrivateKey;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.PaymentService;
-import retrofit2.Response;
 
 public class SendDataManager {
 
@@ -62,26 +59,97 @@ public class SendDataManager {
         }).compose(RxUtil.applySchedulersToObservable());
     }
 
+    /**
+     * Returns a {@link FeeList} object containing an ArrayList of the current suggested fees based
+     * on network congestion and the global fee average.
+     *
+     * @return An {@link Observable<FeeList>}
+     */
     public Observable<FeeList> getSuggestedFee() {
-        return Payment.getDynamicFee().
-                compose(RxUtil.applySchedulersToObservable());
+        return paymentService.getSuggestedFee()
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
+    /**
+     * Returns an {@link UnspentOutputs} object containing all the unspent outputs for a given
+     * address.
+     *
+     * @param address The addess you wish to query, as a String
+     * @return An {@link Observable<UnspentOutputs>}
+     */
     public Observable<UnspentOutputs> getUnspentOutputs(String address) {
-        return Observable.fromCallable(() -> {
-            Response<UnspentOutputs> call = Payment.getUnspentCoins(Collections.singletonList(address))
-                    .execute();
-
-            if (call.isSuccessful()) {
-                return call.body();
-            } else if (call.errorBody().string().equals("No free outputs to spend")) {
-                //If no unspent outputs available server responds with 500?
-                return UnspentOutputs.fromJson("{\"unspent_outputs\":[]}");
-            } else {
-                throw new Exception("Unspent api call failed.");
-            }
-        })
+        return paymentService.getUnspentOutputs(address)
                 .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Returns a {@link SpendableUnspentOutputs} object from a given {@link UnspentOutputs} object,
+     * given the payment amount and the current fee per kB. This method selects the minimum number
+     * of inputs necessary to allow a successful payment by selecting from the largest inputs
+     * first.
+     *
+     * @param unspentCoins  The addresses' {@link UnspentOutputs}
+     * @param paymentAmount The amount you wish to send, as a {@link BigInteger}
+     * @param feePerKb      The current fee per kB, as a {@link BigInteger}
+     * @return An {@link SpendableUnspentOutputs} object, which wraps a list of spendable outputs
+     * for the given inputs
+     */
+    public SpendableUnspentOutputs getSpendableCoins(UnspentOutputs unspentCoins,
+                                                     BigInteger paymentAmount,
+                                                     BigInteger feePerKb) {
+        return paymentService.getSpendableCoins(unspentCoins, paymentAmount, feePerKb);
+    }
+
+    /**
+     * Calculates the total amount of bitcoin that can be swept from an {@link UnspentOutputs}
+     * object and returns the amount that can be recovered, along with the fee (in absolute terms)
+     * necessary to sweep those coins.
+     *
+     * @param unspentCoins An {@link UnspentOutputs} object that you wish to sweep
+     * @param feePerKb     The current fee per kB on the network
+     * @return A {@link Pair} object, where left = the sweepable amount as a {@link BigInteger},
+     * right = the absolute fee needed to sweep those coins, also as a {@link BigInteger}
+     */
+    public Pair<BigInteger, BigInteger> getSweepableCoins(UnspentOutputs unspentCoins,
+                                                          BigInteger feePerKb) {
+        return paymentService.getSweepableCoins(unspentCoins, feePerKb);
+    }
+
+    /**
+     * Returns true if the {@code absoluteFee} is adequate for the number of inputs/outputs in the
+     * transaction.
+     *
+     * @param inputs      The number of inputs
+     * @param outputs     The number of outputs
+     * @param absoluteFee The absolute fee as a {@link BigInteger}
+     * @return True if the fee is adequate, false if not
+     */
+    public boolean isAdequateFee(int inputs, int outputs, BigInteger absoluteFee) {
+        return paymentService.isAdequateFee(inputs, outputs, absoluteFee);
+    }
+
+    /**
+     * Returns the estimated size of the transaction in kB.
+     *
+     * @param inputs  The number of inputs
+     * @param outputs The number of outputs
+     * @return The estimated size of the transaction in kB
+     */
+    public int estimatedSize(int inputs, int outputs) {
+        return paymentService.estimatedSize(inputs, outputs);
+    }
+
+    /**
+     * Returns an estimated absolute fee in satoshis (as a {@link BigInteger} for a given number of
+     * inputs and outputs.
+     *
+     * @param inputs   The number of inputs
+     * @param outputs  The number of outputs
+     * @param feePerKb The current fee per kB om the network
+     * @return A {@link BigInteger} representing the absolute fee
+     */
+    public BigInteger estimatedFee(int inputs, int outputs, BigInteger feePerKb) {
+        return paymentService.estimatedFee(inputs, outputs, feePerKb);
     }
 
 }
