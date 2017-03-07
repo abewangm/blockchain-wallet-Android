@@ -17,12 +17,6 @@ public class TransferFundsDataManagerTest extends RxTest {
 //        subject = new TransferFundsDataManager(payloadManager, multiAddrFactory, unspentApi, payment);
 //    }
 //
-//    @After
-//    public void tearDown() throws Exception {
-//        super.tearDown();
-//        Mockito.validateMockitoUsage();
-//    }
-//
 //    @Test
 //    public void getTransferableFundTransactionListForDefaultAccount() throws Exception {
 //        // Arrange

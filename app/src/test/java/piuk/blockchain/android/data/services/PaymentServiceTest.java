@@ -68,9 +68,8 @@ public class PaymentServiceTest extends RxTest {
         when(payment.makeTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress)))
                 .thenReturn(mockTx);
         Call<ResponseBody> mockCall = mock(Call.class);
-        Response mockResponse = mock(Response.class);
-        when(mockCall.execute()).thenReturn(mockResponse);
-        when(mockResponse.isSuccessful()).thenReturn(true);
+        Response response = Response.success(mock(ResponseBody.class));
+        when(mockCall.execute()).thenReturn(response);
         when(payment.publishTransaction(mockTx)).thenReturn(mockCall);
         // Act
         TestObserver<String> testObserver = subject.submitPayment(mockOutputBundle,
@@ -107,11 +106,8 @@ public class PaymentServiceTest extends RxTest {
         when(payment.makeTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress)))
                 .thenReturn(mockTx);
         Call<ResponseBody> mockCall = mock(Call.class);
-        Response mockResponse = mock(Response.class);
-        when(mockCall.execute()).thenReturn(mockResponse);
-        when(mockResponse.isSuccessful()).thenReturn(false);
-        when(mockResponse.code()).thenReturn(500);
-        when(mockResponse.errorBody()).thenReturn(mock(ResponseBody.class));
+        Response response = Response.error(500, mock(ResponseBody.class));
+        when(mockCall.execute()).thenReturn(response);
         when(payment.publishTransaction(mockTx)).thenReturn(mockCall);
         // Act
         TestObserver<String> testObserver = subject.submitPayment(mockOutputBundle,
@@ -185,11 +181,9 @@ public class PaymentServiceTest extends RxTest {
         // Arrange
         String address = "ADDRESS";
         Call<UnspentOutputs> mockCall = mock(Call.class);
-        Response<UnspentOutputs> mockResponse = mock(Response.class);
-        when(mockCall.execute()).thenReturn(mockResponse);
-        when(mockResponse.isSuccessful()).thenReturn(true);
         UnspentOutputs mockOutputs = mock(UnspentOutputs.class);
-        when(mockResponse.body()).thenReturn(mockOutputs);
+        Response<UnspentOutputs> response = Response.success(mockOutputs);
+        when(mockCall.execute()).thenReturn(response);
         when(payment.getUnspentCoins(Collections.singletonList(address))).thenReturn(mockCall);
         // Act
         TestObserver<UnspentOutputs> testObserver = subject.getUnspentOutputs(address).test();
@@ -207,10 +201,8 @@ public class PaymentServiceTest extends RxTest {
         // Arrange
         String address = "ADDRESS";
         Call<UnspentOutputs> mockCall = mock(Call.class);
-        Response<UnspentOutputs> mockResponse = mock(Response.class);
-        when(mockCall.execute()).thenReturn(mockResponse);
-        when(mockResponse.isSuccessful()).thenReturn(false);
-        when(mockResponse.code()).thenReturn(500);
+        Response<UnspentOutputs> response = Response.error(500, mock(ResponseBody.class));
+        when(mockCall.execute()).thenReturn(response);
         when(payment.getUnspentCoins(Collections.singletonList(address))).thenReturn(mockCall);
         // Act
         TestObserver<UnspentOutputs> testObserver = subject.getUnspentOutputs(address).test();
@@ -228,10 +220,8 @@ public class PaymentServiceTest extends RxTest {
         // Arrange
         String address = "ADDRESS";
         Call<UnspentOutputs> mockCall = mock(Call.class);
-        Response<UnspentOutputs> mockResponse = mock(Response.class);
-        when(mockCall.execute()).thenReturn(mockResponse);
-        when(mockResponse.isSuccessful()).thenReturn(false);
-        when(mockResponse.code()).thenReturn(404);
+        Response<UnspentOutputs> response = Response.error(404, mock(ResponseBody.class));
+        when(mockCall.execute()).thenReturn(response);
         when(payment.getUnspentCoins(Collections.singletonList(address))).thenReturn(mockCall);
         // Act
         TestObserver<UnspentOutputs> testObserver = subject.getUnspentOutputs(address).test();
