@@ -3,16 +3,16 @@ package piuk.blockchain.android.data.services;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
-import java.util.HashMap;
-import okhttp3.ResponseBody;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.Transaction;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
-import org.bitcoinj.core.Transaction;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -39,7 +39,7 @@ public class PaymentService {
         return Observable.create(observableOnSubscribe -> {
             try {
 
-                HashMap<String, BigInteger> receivers = new HashMap<String, BigInteger>();
+                HashMap<String, BigInteger> receivers = new HashMap<>();
                 receivers.put(toAddress, bigIntAmount);
 
                 Transaction tx = Payment.makeTransaction(

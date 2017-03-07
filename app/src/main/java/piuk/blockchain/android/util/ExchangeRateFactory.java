@@ -8,21 +8,18 @@ import info.blockchain.api.data.TickerItem;
 import info.blockchain.api.exchangerates.ExchangeRates;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
-import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
-import okhttp3.ResponseBody;
-import org.apache.commons.lang3.NotImplementedException;
 
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
-import io.reactivex.Observable;
-import retrofit2.Call;
 import retrofit2.Response;
 
 /**
@@ -40,7 +37,7 @@ public class ExchangeRateFactory {
     private Ticker tickerData;
     private final int UPDATE_INTERVAL_MIN = 5;
 
-    @Inject protected PrefsUtil mPrefsUtil;
+    @Inject protected PrefsUtil prefsUtil;
 
     private static ExchangeRateFactory instance = null;
 
@@ -52,8 +49,8 @@ public class ExchangeRateFactory {
     private ExchangeRateFactory() {
         Injector.getInstance().getAppComponent().inject(this);
         api = new ExchangeRates(
-            BlockchainFramework.getRetrofitServerInstance(),
-            BlockchainFramework.getApiCode());
+                BlockchainFramework.getRetrofitServerInstance(),
+                BlockchainFramework.getApiCode());
     }
 
     public static ExchangeRateFactory getInstance() {
@@ -74,7 +71,7 @@ public class ExchangeRateFactory {
     }
 
     public void stopTicker() {
-        if(timer != null) {
+        if (timer != null) {
             timer.cancel();
         }
     }
@@ -87,7 +84,7 @@ public class ExchangeRateFactory {
                 try {
                     Response<Ticker> execute = api.getTicker().execute();
 
-                    if(execute.isSuccessful()) {
+                    if (execute.isSuccessful()) {
 
                         Log.d(TAG, "Refreshing exchange rate");
                         tickerData = execute.body();
@@ -109,28 +106,71 @@ public class ExchangeRateFactory {
         TickerItem item;
 
         switch (currency) {
-            case AUD: item = tickerData.getAUD(); break;
-            case BRL: item = tickerData.getBRL(); break;
-            case CAD: item = tickerData.getCAD(); break;
-            case CHF: item = tickerData.getCHF(); break;
-            case CLP: item = tickerData.getCLP(); break;
-            case CNY: item = tickerData.getCNY(); break;
-            case DKK: item = tickerData.getDKK(); break;
-            case EUR: item = tickerData.getEUR(); break;
-            case GBP: item = tickerData.getGBP(); break;
-            case HKD: item = tickerData.getHKD(); break;
-            case ISK: item = tickerData.getISK(); break;
-            case JPY: item = tickerData.getJPY(); break;
-            case KRW: item = tickerData.getKRW(); break;
-            case NZD: item = tickerData.getNZD(); break;
-            case PLN: item = tickerData.getPLN(); break;
-            case RUB: item = tickerData.getRUB(); break;
-            case SEK: item = tickerData.getSEK(); break;
-            case SGD: item = tickerData.getSGD(); break;
-            case THB: item = tickerData.getTHB(); break;
-            case TWD: item = tickerData.getTWD(); break;
-            case USD: item = tickerData.getUSD(); break;
-            default: item = tickerData.getUSD();
+            case AUD:
+                item = tickerData.getAUD();
+                break;
+            case BRL:
+                item = tickerData.getBRL();
+                break;
+            case CAD:
+                item = tickerData.getCAD();
+                break;
+            case CHF:
+                item = tickerData.getCHF();
+                break;
+            case CLP:
+                item = tickerData.getCLP();
+                break;
+            case CNY:
+                item = tickerData.getCNY();
+                break;
+            case DKK:
+                item = tickerData.getDKK();
+                break;
+            case EUR:
+                item = tickerData.getEUR();
+                break;
+            case GBP:
+                item = tickerData.getGBP();
+                break;
+            case HKD:
+                item = tickerData.getHKD();
+                break;
+            case ISK:
+                item = tickerData.getISK();
+                break;
+            case JPY:
+                item = tickerData.getJPY();
+                break;
+            case KRW:
+                item = tickerData.getKRW();
+                break;
+            case NZD:
+                item = tickerData.getNZD();
+                break;
+            case PLN:
+                item = tickerData.getPLN();
+                break;
+            case RUB:
+                item = tickerData.getRUB();
+                break;
+            case SEK:
+                item = tickerData.getSEK();
+                break;
+            case SGD:
+                item = tickerData.getSGD();
+                break;
+            case THB:
+                item = tickerData.getTHB();
+                break;
+            case TWD:
+                item = tickerData.getTWD();
+                break;
+            case USD:
+                item = tickerData.getUSD();
+                break;
+            default:
+                item = tickerData.getUSD();
         }
 
         return item;
@@ -138,15 +178,15 @@ public class ExchangeRateFactory {
 
     public double getLastPrice(String currencyName) {
 
-        if(currencyName.isEmpty()) {
+        if (currencyName.isEmpty()) {
             currencyName = Currency.USD.name();
         }
 
         double lastPrice;
         Currency currency = Currency.valueOf(currencyName.toUpperCase().trim());
-        double lastKnown = Double.parseDouble(mPrefsUtil.getValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency, "0.0"));
+        double lastKnown = Double.parseDouble(prefsUtil.getValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency, "0.0"));
 
-        if(tickerData == null) {
+        if (tickerData == null) {
             lastPrice = lastKnown;
         } else {
             TickerItem tickerItem = getTickerItem(currency);
@@ -154,7 +194,7 @@ public class ExchangeRateFactory {
             lastPrice = tickerItem.getLast();
 
             if (lastPrice > 0.0) {
-                mPrefsUtil.setValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency.toString(), Double.toString(lastPrice));
+                prefsUtil.setValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency, Double.toString(lastPrice));
             } else {
                 lastPrice = lastKnown;
             }
@@ -165,7 +205,7 @@ public class ExchangeRateFactory {
 
     public String getSymbol(String currencyName) {
 
-        if(currencyName.isEmpty()) {
+        if (currencyName.isEmpty()) {
             currencyName = Currency.USD.name();
         }
 
@@ -184,19 +224,10 @@ public class ExchangeRateFactory {
      * @param timeInMillis The time at which to get the price, in milliseconds since epoch
      * @return A double value
      */
-    public Observable<Double> getHistoricPrice(long satoshis, String currency, long timeInMillis)
-        throws Exception {
-
-        Response<ResponseBody> execute = WalletApi
-            .getHistoricPrice(satoshis, currency, timeInMillis).execute();
-
-        if(execute.isSuccessful()) {
-            return Observable.just(execute.body().string())
-                .flatMap(this::parseStringValue)
+    public Observable<Double> getHistoricPrice(long satoshis, String currency, long timeInMillis) throws Exception {
+        return new WalletApi().getHistoricPrice(satoshis, currency, timeInMillis)
+                .flatMap(responseBody -> parseStringValue(responseBody.string()))
                 .compose(RxUtil.applySchedulersToObservable());
-        } else {
-            throw new Exception("Error fetching historic price.");
-        }
     }
 
     private Observable<Double> parseStringValue(String value) {
@@ -213,6 +244,6 @@ public class ExchangeRateFactory {
      * Parse the data supplied to this instance.
      */
     public void setData(Ticker data) {
-        this.tickerData = data;
+        tickerData = data;
     }
 }

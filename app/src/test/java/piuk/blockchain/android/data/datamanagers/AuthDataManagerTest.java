@@ -1,10 +1,5 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.exceptions.HDWalletException;
-import info.blockchain.wallet.exceptions.InvalidCredentialsException;
-import info.blockchain.wallet.exceptions.PayloadException;
-import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import info.blockchain.wallet.payload.data.Wallet;
@@ -19,7 +14,7 @@ import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.services.WalletPayloadService;
+import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -28,7 +23,6 @@ import piuk.blockchain.android.util.StringUtils;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -44,7 +38,7 @@ public class AuthDataManagerTest extends RxTest {
 
     @Mock private PayloadManager mPayloadManager;
     @Mock private PrefsUtil mPrefsUtil;
-    @Mock private WalletPayloadService mWalletPayloadService;
+    @Mock private WalletService mWalletService;
     @Mock private AppUtil mAppUtil;
     @Mock private AESUtilWrapper mAesUtils;
     @Mock private AccessState mAccessState;
@@ -60,11 +54,11 @@ public class AuthDataManagerTest extends RxTest {
 //    @Test
 //    public void getEncryptedPayload() throws Exception {
 //        // Arrange
-//        when(mWalletPayloadService.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
+//        when(mWalletService.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
 //        // Act
 //        TestObserver<String> observer = mSubject.getEncryptedPayload("1234567890", "1234567890").test();
 //        // Assert
-//        verify(mWalletPayloadService).getEncryptedPayload(anyString(), anyString());
+//        verify(mWalletService).getEncryptedPayload(anyString(), anyString());
 //        observer.assertComplete();
 //        observer.onNext(STRING_TO_RETURN);
 //        observer.assertNoErrors();
@@ -73,11 +67,11 @@ public class AuthDataManagerTest extends RxTest {
 //    @Test
 //    public void getSessionId() throws Exception {
 //        // Arrange
-//        when(mWalletPayloadService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
+//        when(mWalletService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
 //        // Act
 //        TestObserver<String> observer = mSubject.getSessionId("1234567890").test();
 //        // Assert
-//        verify(mWalletPayloadService).getSessionId(anyString());
+//        verify(mWalletService).getSessionId(anyString());
 //        observer.assertComplete();
 //        observer.onNext(STRING_TO_RETURN);
 //        observer.assertNoErrors();
@@ -174,13 +168,13 @@ public class AuthDataManagerTest extends RxTest {
     @Test
     public void startPollingAuthStatusSuccess() throws Exception {
 //         Arrange
-//        when(mWalletPayloadService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
-//        when(mWalletPayloadService.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
+//        when(mWalletService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
+//        when(mWalletService.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
 //         Act
 //        TestObserver<String> observer = mSubject.startPollingAuthStatus("1234567890").test();
 //         Assert
-//        verify(mWalletPayloadService).getSessionId(anyString());
-//        verify(mWalletPayloadService).getEncryptedPayload(anyString(), anyString());
+//        verify(mWalletService).getSessionId(anyString());
+//        verify(mWalletService).getEncryptedPayload(anyString(), anyString());
 //        assertEquals(STRING_TO_RETURN, observer.values().get(0));
 //        observer.assertComplete();
 //        observer.assertNoErrors();
@@ -194,13 +188,13 @@ public class AuthDataManagerTest extends RxTest {
     @Test
     public void startPollingAuthStatusError() throws Exception {
 //        // Arrange
-//        when(mWalletPayloadService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
-//        when(mWalletPayloadService.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.error(new Throwable()));
+//        when(mWalletService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
+//        when(mWalletService.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.error(new Throwable()));
 //        // Act
 //        TestObserver<String> observer = mSubject.startPollingAuthStatus("1234567890").test();
 //        // Assert
-//        verify(mWalletPayloadService).getSessionId(anyString());
-//        verify(mWalletPayloadService).getEncryptedPayload(anyString(), anyString());
+//        verify(mWalletService).getSessionId(anyString());
+//        verify(mWalletService).getEncryptedPayload(anyString(), anyString());
 //        observer.assertComplete();
 //        observer.onNext(WalletPayload.KEY_AUTH_REQUIRED);
 //        observer.assertNoErrors();
@@ -213,8 +207,8 @@ public class AuthDataManagerTest extends RxTest {
     @Test
     public void startPollingAuthStatusAccessRequired() throws Exception {
 //        // Arrange
-//        when(mWalletPayloadService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
-//        when(mWalletPayloadService.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
+//        when(mWalletService.getSessionId(anyString())).thenReturn(Observable.just(STRING_TO_RETURN));
+//        when(mWalletService.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
 //        // Act
 //        TestObserver<String> observer = mSubject.startPollingAuthStatus("1234567890").test();
 //        // Assert

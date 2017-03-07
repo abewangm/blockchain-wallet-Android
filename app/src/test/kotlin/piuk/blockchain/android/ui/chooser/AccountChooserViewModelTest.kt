@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.chooser
 import android.app.Application
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
+import info.blockchain.wallet.multiaddress.MultiAddressFactory
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Observable
 import org.junit.Before
@@ -184,8 +185,7 @@ class AccountChooserViewModelTest {
         override fun provideWalletAccountHelper(payloadManager: PayloadManager?,
                                                 prefsUtil: PrefsUtil?,
                                                 stringUtils: StringUtils?,
-                                                exchangeRateFactory: ExchangeRateFactory?,
-                                                multiAddrFactory: MultiAddrFactory?): WalletAccountHelper {
+                                                exchangeRateFactory: ExchangeRateFactory?): WalletAccountHelper {
             return mockWalletAccountHelper
         }
     }

@@ -13,6 +13,8 @@ import android.util.Log;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
+import info.blockchain.wallet.api.WalletApi;
+
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import javax.inject.Inject;
@@ -22,7 +24,7 @@ import dagger.Lazy;
 import io.reactivex.plugins.RxJavaPlugins;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityManager;
-import piuk.blockchain.android.data.services.PinStoreService;
+import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
@@ -81,7 +83,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
         AccessState.getInstance().initAccessState(this,
                 new PrefsUtil(this),
-                new PinStoreService(),
+                new WalletService(new WalletApi()),
                 appUtil);
 
         // Apply PRNG fixes on app start if needed
