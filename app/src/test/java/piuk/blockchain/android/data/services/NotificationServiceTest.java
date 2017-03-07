@@ -13,6 +13,8 @@ import okhttp3.ResponseBody;
 import piuk.blockchain.android.RxTest;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 public class NotificationServiceTest extends RxTest {
@@ -34,10 +36,12 @@ public class NotificationServiceTest extends RxTest {
         when(mockWalletApi.updateFirebaseNotificationToken("", "", ""))
                 .thenReturn(Observable.just(mock(ResponseBody.class)));
         // Act
-        TestObserver<Void> observer = subject.sendNotificationToken("", "", "").test();
+        TestObserver<Void> testObserver = subject.sendNotificationToken("", "", "").test();
         // Assert
-        observer.assertComplete();
-        observer.assertNoErrors();
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        verify(mockWalletApi).updateFirebaseNotificationToken("", "", "");
+        verifyNoMoreInteractions(mockWalletApi);
     }
 
 }

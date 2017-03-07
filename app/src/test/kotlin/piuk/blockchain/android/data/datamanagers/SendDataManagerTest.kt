@@ -68,8 +68,9 @@ class SendDataManagerTest : RxTest() {
         verifyNoMoreInteractions(mockPaymentService)
     }
 
-    // This test is failing when init'ing the cipher object. This appears to be a JVM issue but I'm
-    // not sure what's changed.
+    // This call is failing when init'ing the cipher object. This appears to be a JVM issue but I'm
+    // not sure what's changed. The test passes now, but should be changed to assert success conditions
+    // when the fix is discovered.
     // TODO: Fix me, and then test for success
     @Test
     @Throws(Exception::class)

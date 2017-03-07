@@ -10,6 +10,7 @@ import info.blockchain.wallet.payload.PayloadManager;
 
 import info.blockchain.wallet.payload.data.Wallet;
 import io.reactivex.Completable;
+import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.NotificationService;
@@ -99,6 +100,7 @@ public class NotificationTokenManager {
 
         // TODO: 09/11/2016 Decide what to do if sending fails, perhaps retry?
         notificationService.sendNotificationToken(refreshedToken, guid, sharedKey)
+                .subscribeOn(Schedulers.io())
                 .subscribe(() -> Log.d(TAG, "sendFirebaseToken: success"), Throwable::printStackTrace);
     }
 
