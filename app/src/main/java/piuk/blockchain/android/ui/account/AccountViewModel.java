@@ -46,6 +46,7 @@ public class AccountViewModel extends BaseViewModel {
     @Inject PrefsUtil prefsUtil;
     @Inject AppUtil appUtil;
     @Inject PrivateKeyFactory privateKeyFactory;
+    @Inject PersistentUrls persistentUrls;
     @VisibleForTesting CharSequenceX doubleEncryptionPassword;
 
     AccountViewModel(DataListener dataListener) {
@@ -184,7 +185,7 @@ public class AccountViewModel extends BaseViewModel {
     void importBip38Address(String data, CharSequenceX password) {
         dataListener.showProgressDialog(R.string.please_wait);
         try {
-            BIP38PrivateKey bip38 = new BIP38PrivateKey(PersistentUrls.getInstance().getCurrentNetworkParams(), data);
+            BIP38PrivateKey bip38 = new BIP38PrivateKey(persistentUrls.getCurrentNetworkParams(), data);
             ECKey key = bip38.decrypt(password.toString());
 
             handlePrivateKey(key, doubleEncryptionPassword);
@@ -278,18 +279,18 @@ public class AccountViewModel extends BaseViewModel {
     @VisibleForTesting
     void handlePrivateKey(ECKey key, @Nullable CharSequenceX secondPassword) {
         if (key != null && key.hasPrivKey()
-                && payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
+                && payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(persistentUrls.getCurrentNetworkParams()).toString())) {
 
             // A private key to an existing address has been scanned
             setPrivateECKey(key, secondPassword);
 
         } else if (key != null && key.hasPrivKey()
-                && !payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
+                && !payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(persistentUrls.getCurrentNetworkParams()).toString())) {
             LegacyAddress legacyAddress =
                     new LegacyAddress(
                             null,
                             System.currentTimeMillis() / 1000L,
-                            key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString(),
+                            key.toAddress(persistentUrls.getCurrentNetworkParams()).toString(),
                             "",
                             0L,
                             "android",
