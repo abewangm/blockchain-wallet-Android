@@ -18,7 +18,9 @@ import piuk.blockchain.android.ui.balance.BalanceFragment;
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 class ConnectionStateMonitor extends ConnectivityManager.NetworkCallback {
 
+    private static final long COOL_DOWN_INTERVAL = 1000 * 30L;
     private final NetworkRequest networkRequest;
+    private long lastBroadcastTime;
     private Context context;
 
     ConnectionStateMonitor(Context context) {
@@ -37,7 +39,11 @@ class ConnectionStateMonitor extends ConnectivityManager.NetworkCallback {
 
     @Override
     public void onAvailable(Network network) {
-        broadcastOnMainThread().subscribe(new IgnorableDefaultObserver<>());
+        // Sends max of one broadcast every 30s if network connection is spotty
+        if (System.currentTimeMillis() - lastBroadcastTime > COOL_DOWN_INTERVAL) {
+            broadcastOnMainThread().subscribe(new IgnorableDefaultObserver<>());
+            lastBroadcastTime = System.currentTimeMillis();
+        }
     }
 
     private Completable broadcastOnMainThread() {
