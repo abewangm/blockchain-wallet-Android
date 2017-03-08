@@ -5,23 +5,19 @@
 
 Next-generation HD (BIP32, BIP39, BIP44) bitcoin wallet. 
 
+![Blockchain Wallet for Android](.github/feature_graphic.png)
+
 ## Getting started
 
 Install Android Studio: https://developer.android.com/sdk/index.html
 
 Import as Android Studio project.
 
+Run the bootstrap script from terminal via `scripts/bootstrap.sh`. This will install the Google code style and remove any file header templates. The script may indicate that you need to restart Android Studio for it's changes to take affect.
+
 Build -> Make Project
 
 If there are build errors, in Android Studio go to Tools -> Android -> SDK Manager and install any available updates.
-
-## Code style
-
-To install the Google Java Style in Android Studio, copy the IntelliJ codestyle from here:
-
-https://raw.githubusercontent.com/google/styleguide/gh-pages/intellij-java-google-style.xml
-
-to `~/Library/Preferences/AndroidStudiox.x/codestyles/` (on Mac OS X).
 
 ### Notes
 
