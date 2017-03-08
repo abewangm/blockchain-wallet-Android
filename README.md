@@ -5,8 +5,6 @@
 
 Next-generation HD (BIP32, BIP39, BIP44) bitcoin wallet. 
 
-![Blockchain Wallet for Android](.github/feature_graphic.jpg)
-
 ## Getting started
 
 Install Android Studio: https://developer.android.com/sdk/index.html
