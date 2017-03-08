@@ -5,7 +5,7 @@
 
 Next-generation HD (BIP32, BIP39, BIP44) bitcoin wallet. 
 
-![Blockchain Wallet for Android](.github/feature_graphic.png)
+![Blockchain Wallet for Android](.github/feature_graphic.jpg)
 
 ## Getting started
 
