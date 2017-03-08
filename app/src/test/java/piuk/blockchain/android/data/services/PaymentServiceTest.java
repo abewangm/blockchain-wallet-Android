@@ -23,6 +23,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
+@SuppressWarnings("unchecked")
 public class PaymentServiceTest extends RxTest {
 
     private PaymentService subject;

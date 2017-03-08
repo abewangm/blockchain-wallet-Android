@@ -22,7 +22,7 @@ import info.blockchain.wallet.util.CharSequenceX;
 
 import org.spongycastle.crypto.InvalidCipherTextException;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -506,13 +506,7 @@ public class PinEntryViewModel extends BaseViewModel {
     }
 
     private boolean isPinCommon(String pin) {
-        List<String> commonPins = new ArrayList<String>() {{
-            add("1234");
-            add("1111");
-            add("1212");
-            add("7777");
-            add("1004");
-        }};
+        List<String> commonPins = Arrays.asList("1234", "1111", "1212", "7777", "1004");
         return commonPins.contains(pin);
     }
 

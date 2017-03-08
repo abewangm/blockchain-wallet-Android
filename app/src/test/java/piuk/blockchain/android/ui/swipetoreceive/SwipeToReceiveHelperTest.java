@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ACCOUNT_NAME;
 import static piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ADDRESSES;
 
+@SuppressWarnings("unchecked")
 public class SwipeToReceiveHelperTest extends RxTest {
 
     private SwipeToReceiveHelper subject;

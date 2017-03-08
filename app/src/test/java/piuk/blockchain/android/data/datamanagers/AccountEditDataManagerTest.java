@@ -34,6 +34,7 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("unchecked")
 public class AccountEditDataManagerTest extends RxTest {
 
     private AccountEditDataManager subject;

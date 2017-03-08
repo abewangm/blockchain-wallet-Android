@@ -171,6 +171,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         verify(mActivity).onDataLoaded();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void onViewReadyKeyValidTransactionFound() throws Exception {
         // Arrange

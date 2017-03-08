@@ -19,7 +19,6 @@ package piuk.blockchain.android.ui.zxing;
 import com.google.zxing.ResultPoint;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -66,7 +65,6 @@ public final class ViewfinderView extends View {
 
     // Initialize these once for performance rather than calling them every time in onDraw().
     paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    Resources resources = getResources();
     maskColor = ContextCompat.getColor(context, R.color.barcode_viewfinder_mask);
     resultColor = ContextCompat.getColor(context, R.color.barcode_result_view);
     laserColor = ContextCompat.getColor(context, R.color.barcode_viewfinder_laser);

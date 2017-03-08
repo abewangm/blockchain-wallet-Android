@@ -57,7 +57,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
+@SuppressWarnings({"PrivateMemberAccessBetweenOuterAndInnerClass", "unchecked", "AnonymousInnerClassMayBeStatic"})
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class ConfirmFundsTransferViewModelTest {
