@@ -567,7 +567,7 @@ public class ContactsDataManager {
     /**
      * Returns a Map of Contact names keyed to transaction hashes.
      *
-     * @return A {@link HashMap} where the key is a {@link info.blockchain.api.data.Transaction#getHash()}, and the value is a {@link
+     * @return A {@link HashMap} where the key is a {@link info.blockchain.wallet.multiaddress.TransactionSummary#getHash()}, and the value is a {@link
      * Contact#getName()}
      */
     public HashMap<String, String> getContactsTransactionMap() {

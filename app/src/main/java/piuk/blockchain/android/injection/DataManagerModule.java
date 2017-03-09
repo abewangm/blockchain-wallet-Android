@@ -29,7 +29,7 @@ import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
-import piuk.blockchain.android.ui.transactions.TransactionHelper;
+import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -78,9 +78,6 @@ public class DataManagerModule {
                                                                            TransactionListStore transactionListStore) {
         return new TransactionListDataManager(
             payloadManager,
-            new BlockExplorerService(
-                new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(),
-                    BlockchainFramework.getApiCode())),
             transactionListStore);
     }
 
@@ -92,8 +89,8 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected TransactionHelper provideTransactionHelper(PayloadManager payloadManager) {
-        return new TransactionHelper(payloadManager);
+    protected PayloadDataManager provideTransactionHelper(PayloadManager payloadManager) {
+        return new PayloadDataManager(payloadManager);
     }
 
     @Provides

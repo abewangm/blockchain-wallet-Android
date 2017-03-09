@@ -85,7 +85,7 @@ public class AccountDataManager {
 
     public Completable updateMultiAddress() {
         return Completable.fromCallable(() -> {
-            payloadManager.updateMultiAddress(null, 50, 0);
+            payloadManager.updateAllTransactions();
             return Void.TYPE;
         });
     }

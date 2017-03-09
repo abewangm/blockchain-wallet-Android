@@ -179,7 +179,7 @@ class WebSocketHandler {
 
     private Completable updateBalancesAndTxs() {
         return Completable.fromCallable(() -> {
-            payloadManager.updateMultiAddress(null, 50, 0);
+            payloadManager.updateAllTransactions();
             return Void.TYPE;
         }).doAfterTerminate(() -> {
             Intent intent = new Intent(BalanceFragment.ACTION_INTENT);

@@ -4,6 +4,7 @@ import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
+import java.math.BigInteger;
 import piuk.blockchain.android.util.MonetaryUtil;
 
 class AddressBalanceHelper {
@@ -20,13 +21,7 @@ class AddressBalanceHelper {
      * Returns the balance of an {@link Account} in Satoshis
      */
     long getAccountAbsoluteBalance(Account account) {
-        MultiAddress multiAddress = payloadManager.getMultiAddress(account.getXpub());
-
-        if(multiAddress != null) {
-            return multiAddress.getWallet().getFinalBalance().longValue();
-        } else {
-            return 0l;
-        }
+        return payloadManager.getAddressBalance(account.getXpub()).longValue();
     }
 
     /**
@@ -48,14 +43,7 @@ class AddressBalanceHelper {
      * Returns the balance of a {@link LegacyAddress} in Satoshis
      */
     long getAddressAbsoluteBalance(LegacyAddress legacyAddress) {
-
-        MultiAddress multiAddress = payloadManager.getMultiAddress(legacyAddress.getAddress());
-
-        if(multiAddress != null) {
-            return multiAddress.getWallet().getFinalBalance().longValue();
-        } else {
-            return 0l;
-        }
+        return payloadManager.getAddressBalance(legacyAddress.getAddress()).longValue();
     }
 
     /**

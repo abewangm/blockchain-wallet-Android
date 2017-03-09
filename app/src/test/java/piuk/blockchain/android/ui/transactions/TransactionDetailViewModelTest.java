@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.transactions;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Intent;
-import android.support.v4.util.Pair;
 
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -22,7 +21,6 @@ import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.Observable;
-import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
@@ -42,9 +40,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -62,7 +57,8 @@ public class TransactionDetailViewModelTest extends RxTest {
     @Mock TransactionListDataManager mTransactionListDataManager;
     @Mock TransactionDetailViewModel.DataListener mActivity;
     @Mock ExchangeRateFactory mExchangeRateFactory;
-    @Mock TransactionHelper mTransactionHelper;
+    @Mock
+    PayloadDataManager mPayloadDataManager;
     private TransactionDetailViewModel mSubject;
 
     // Transactions
@@ -188,9 +184,9 @@ public class TransactionDetailViewModelTest extends RxTest {
 //        inputs.put("addr1", 1000L);
 //        outputs.put("addr2", 2000L);
 //        Pair pair = new Pair<>(inputs, outputs);
-//        when(mTransactionHelper.filterNonChangeAddresses(any(Transaction.class), any(Tx.class))).thenReturn(pair);
-//        when(mTransactionHelper.addressToLabel("addr1")).thenReturn("account1");
-//        when(mTransactionHelper.addressToLabel("addr2")).thenReturn("account2");
+//        when(mPayloadDataManager.filterNonChangeAddresses(any(Transaction.class), any(Tx.class))).thenReturn(pair);
+//        when(mPayloadDataManager.addressToLabel("addr1")).thenReturn("account1");
+//        when(mPayloadDataManager.addressToLabel("addr2")).thenReturn("account2");
 //        double price = 1000.00D;
 //        when(mExchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
 //        when(mStringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
@@ -435,8 +431,8 @@ public class TransactionDetailViewModelTest extends RxTest {
         }
 
         @Override
-        protected TransactionHelper provideTransactionHelper(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
-            return mTransactionHelper;
+        protected PayloadDataManager provideTransactionHelper(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
+            return mPayloadDataManager;
         }
     }
 }

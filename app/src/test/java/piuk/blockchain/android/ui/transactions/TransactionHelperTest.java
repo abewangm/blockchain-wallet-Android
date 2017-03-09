@@ -29,12 +29,12 @@ public class TransactionHelperTest {
 
 //    @Mock PayloadManager mPayloadManager;
 //    @Mock MultiAddrFactory multiAddrFactory;
-//    private TransactionHelper mSubject;
+//    private PayloadDataManager mSubject;
 //
 //    @Before
 //    public void setUp() throws Exception {
 //        MockitoAnnotations.initMocks(this);
-//        mSubject = new TransactionHelper(mPayloadManager, multiAddrFactory);
+//        mSubject = new PayloadDataManager(mPayloadManager, multiAddrFactory);
 //    }
 //
 //    @Test

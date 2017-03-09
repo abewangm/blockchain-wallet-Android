@@ -19,7 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import info.blockchain.api.data.Transaction.Direction;
+import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import java.util.List;
 import java.util.Locale;
 

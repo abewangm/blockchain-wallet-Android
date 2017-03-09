@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.services;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.Address;
-import info.blockchain.api.data.Transaction;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payment.Payment;
@@ -32,18 +31,6 @@ public class BlockExplorerService {
         return Observable.fromCallable(() -> blockExplorer.getAddress(address, limit, offset))
                 .flatMap(call -> Observable.fromCallable(() -> call.execute().body()))
                 .compose(RxUtil.applySchedulersToObservable());
-    }
-
-    /**
-     * Returns the transaction details for a given hash
-     *
-     * @param hash   The transaction hash
-     * @return          An {@link Observable <Transaction>}
-     */
-    public Observable<Transaction> getTransactionDetailsFromHash(String hash) {
-        return Observable.fromCallable(() -> blockExplorer.getTransactionDetails(hash))
-            .flatMap(call -> Observable.fromCallable(() -> call.execute().body()))
-            .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**

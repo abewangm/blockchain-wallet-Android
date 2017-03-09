@@ -83,17 +83,12 @@ public class WalletAccountHelper {
                     continue;
                 }
 
-                MultiAddress multiAddress = payloadManager
-                    .getMultiAddress(account.getXpub());
-
-                if(multiAddress != null) {
-                    accountArrayList.add(new ItemAccount(
-                            account.getLabel(),
-                            addressBalanceHelper.getAccountBalance(account, isBtc, btcExchangeRate, fiatUnit, btcUnit),
-                            null,
-                            addressBalanceHelper.getAccountAbsoluteBalance(account),
-                            account));
-                }
+                accountArrayList.add(new ItemAccount(
+                        account.getLabel(),
+                        addressBalanceHelper.getAccountBalance(account, isBtc, btcExchangeRate, fiatUnit, btcUnit),
+                        null,
+                        addressBalanceHelper.getAccountAbsoluteBalance(account),
+                        account));
             }
         }
 

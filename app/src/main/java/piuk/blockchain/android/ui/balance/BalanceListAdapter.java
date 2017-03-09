@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.balance;
 
-import static info.blockchain.api.data.Transaction.Direction.TRANSFERRED;
-
 import android.graphics.Color;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
@@ -17,10 +15,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import info.blockchain.api.data.Transaction;
-import info.blockchain.api.data.Transaction.Direction;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 
+import info.blockchain.wallet.multiaddress.TransactionSummary;
+import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -209,10 +207,11 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     }
 
     private void bindTxView(RecyclerView.ViewHolder holder, int position) {
+
         final TxViewHolder txViewHolder = (TxViewHolder) holder;
-        final Transaction tx = (Transaction) objects.get(position);
+        final TransactionSummary tx = (TransactionSummary) objects.get(position);
         String fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double btcBalance = tx.getResult().longValue() / 1e8;
+        double btcBalance = tx.getTotal().longValue() / 1e8;
         double fiatBalance = btcExchangeRate * btcBalance;
 
         txViewHolder.result.setTextColor(Color.WHITE);
@@ -245,16 +244,16 @@ class BalanceListAdapter extends RecyclerView.Adapter {
                 break;
         }
 
-        txViewHolder.result.setText(getDisplaySpannable(tx.getResult().longValue(), fiatBalance, fiatString));
+        txViewHolder.result.setText(getDisplaySpannable(tx.getTotal().longValue(), fiatBalance, fiatString));
 
-        if (tx.getDirection() == TRANSFERRED) {
+        if (tx.getDirection() == Direction.TRANSFERRED) {
             txViewHolder.result.setBackgroundResource(
                     getColorForConfirmations(tx, R.drawable.rounded_view_transferred_50, R.drawable.rounded_view_transferred));
 
             txViewHolder.direction.setTextColor(ContextCompat.getColor(txViewHolder.direction.getContext(),
                     getColorForConfirmations(tx, R.color.product_gray_transferred_50, R.color.product_gray_transferred)));
 
-        } else if (btcBalance < 0.0) {
+        } else if (tx.getDirection() == Direction.SENT) {
             txViewHolder.result.setBackgroundResource(
                     getColorForConfirmations(tx, R.drawable.rounded_view_red_50, R.drawable.rounded_view_red));
 
@@ -318,7 +317,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
             return VIEW_TYPE_HEADER;
         } else if (objects.get(position) instanceof ContactTransactionModel) {
             return VIEW_TYPE_FCTX;
-        } else if (objects.get(position) instanceof Transaction) {
+        } else if (objects.get(position) instanceof TransactionSummary) {
             return VIEW_TYPE_TRANSACTION;
         } else {
             throw new IllegalArgumentException(
@@ -329,7 +328,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     private int getRealTxPosition(int position) {
         int totalTransactions = 0;
         for (Object object : objects) {
-            if (object instanceof Transaction) {
+            if (object instanceof TransactionSummary) {
                 totalTransactions++;
             }
         }
@@ -338,7 +337,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         return position - diff;
     }
 
-    private int getColorForConfirmations(Transaction tx, @DrawableRes int colorLight, @DrawableRes int colorDark) {
+    private int getColorForConfirmations(TransactionSummary tx, @DrawableRes int colorLight, @DrawableRes int colorDark) {
         return tx.getConfirmations() < 3 ? colorLight : colorDark;
     }
 

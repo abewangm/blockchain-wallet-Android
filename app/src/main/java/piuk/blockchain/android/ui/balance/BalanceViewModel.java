@@ -7,9 +7,9 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
-import info.blockchain.api.data.Transaction;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
+import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -55,7 +55,7 @@ public class BalanceViewModel extends BaseViewModel {
 
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
-    private List<Transaction> transactionList;
+    private List<TransactionSummary> transactionList;
     private List<Object> displayList;
     @Inject PrefsUtil prefsUtil;
     @Inject PayloadManager payloadManager;
@@ -342,7 +342,7 @@ public class BalanceViewModel extends BaseViewModel {
         Iterator iterator = displayList.iterator();
         while (iterator.hasNext()) {
             Object element = iterator.next();
-            if (element instanceof Transaction) {
+            if (element instanceof TransactionSummary) {
                 iterator.remove();
             }
         }
@@ -620,7 +620,7 @@ public class BalanceViewModel extends BaseViewModel {
         Iterator iterator = displayList.iterator();
         while (iterator.hasNext()) {
             Object element = iterator.next();
-            if (!(element instanceof Transaction)) {
+            if (!(element instanceof TransactionSummary)) {
                 iterator.remove();
             }
         }

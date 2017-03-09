@@ -1,22 +1,19 @@
 package piuk.blockchain.android.data.stores;
 
-import info.blockchain.api.data.Transaction;
-import info.blockchain.wallet.multiaddress.MultiAddressFactory;
-
+import info.blockchain.wallet.multiaddress.TransactionSummary;
 import java.util.List;
 
-public class TransactionListStore extends ListStore<Transaction> {
+public class TransactionListStore extends ListStore<TransactionSummary> {
 
     public TransactionListStore() {
         // Empty constructor
     }
 
-    public void insertTransactionIntoListAndSort(Transaction transaction) {
+    public void insertTransactionIntoListAndSort(TransactionSummary transaction) {
         insertObjectIntoList(transaction);
-        sort(new MultiAddressFactory.TxMostRecentDateComparator());
     }
 
-    public void insertTransactions(List<Transaction> transactions) {
+    public void insertTransactions(List<TransactionSummary> transactions) {
         insertBulk(transactions);
     }
 }
