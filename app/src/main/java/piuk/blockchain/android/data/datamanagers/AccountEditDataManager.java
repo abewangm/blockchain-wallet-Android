@@ -120,7 +120,8 @@ public class AccountEditDataManager {
      */
     public Completable updateBalancesAndTransactions() {
         return Completable.fromCallable(() -> {
-            payloadManager.updateAllTransactions();
+            // TODO: 09/03/2017
+            payloadManager.updateAllTransactions(50, 0, null);
             return Void.TYPE;
         }).subscribeOn(Schedulers.io());
     }

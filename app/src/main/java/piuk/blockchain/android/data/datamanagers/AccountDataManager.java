@@ -95,7 +95,8 @@ public class AccountDataManager {
     @SuppressWarnings("ConstantConditions")
     public Completable updateMultiAddress() {
         return Completable.fromCallable(() -> {
-            payloadManager.updateAllTransactions();
+            // TODO: 09/03/2017  
+            payloadManager.updateAllTransactions(50, 0, null);
             return Void.TYPE;
         });
     }
