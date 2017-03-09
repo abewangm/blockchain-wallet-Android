@@ -17,9 +17,11 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 public class AccountDataManager {
 
     private PayloadManager payloadManager;
+    private PrivateKeyFactory privateKeyFactory;
 
-    public AccountDataManager(PayloadManager payload) {
-        payloadManager = payload;
+    public AccountDataManager(PayloadManager payloadManager, PrivateKeyFactory privateKeyFactory) {
+        this.payloadManager = payloadManager;
+        this.privateKeyFactory = privateKeyFactory;
     }
 
     /**
@@ -81,7 +83,7 @@ public class AccountDataManager {
      * @see PrivateKeyFactory
      */
     public Observable<ECKey> getKeyFromImportedData(String format, String data) {
-        return Observable.fromCallable(() -> PrivateKeyFactory.getKey(format, data))
+        return Observable.fromCallable(() -> privateKeyFactory.getKey(format, data))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 

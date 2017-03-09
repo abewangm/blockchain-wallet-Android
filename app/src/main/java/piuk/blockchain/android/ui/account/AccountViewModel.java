@@ -201,7 +201,7 @@ public class AccountViewModel extends BaseViewModel {
      */
     void onAddressScanned(String data) {
         try {
-            String format = PrivateKeyFactory.getFormat(data);
+            String format = privateKeyFactory.getFormat(data);
             if (format != null) {
                 // Private key scanned
                 if (!format.equals(PrivateKeyFactory.BIP38)) {

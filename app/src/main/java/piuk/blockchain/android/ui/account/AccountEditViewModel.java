@@ -163,7 +163,7 @@ public class AccountEditViewModel extends BaseViewModel {
         } else if (addressIndex >= 0) {
             // V2
             ConsolidatedAccount iAccount = null;
-            if (payloadManager.getPayload().getLegacyAddressList().size() > 0) {
+            if (!payloadManager.getPayload().getLegacyAddressList().isEmpty()) {
 
                 iAccount = new ConsolidatedAccount(stringUtils.getString(R.string.imported_addresses),
                         payloadManager.getPayload().getLegacyAddressList(),
@@ -445,7 +445,7 @@ public class AccountEditViewModel extends BaseViewModel {
     void updateAccountLabel(String newLabel) {
         newLabel = newLabel.trim();
 
-        if (newLabel.length() > 0) {
+        if (!newLabel.isEmpty()) {
             String finalNewLabel = newLabel;
             String revertLabel;
 
@@ -664,7 +664,7 @@ public class AccountEditViewModel extends BaseViewModel {
         String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);
 
         try {
-            String format = PrivateKeyFactory.getFormat(scanData);
+            String format = privateKeyFactory.getFormat(scanData);
             if (format != null) {
                 if (!format.equals(PrivateKeyFactory.BIP38)) {
                     importNonBIP38Address(format, scanData);
@@ -709,7 +709,7 @@ public class AccountEditViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
 
         try {
-            final ECKey key = PrivateKeyFactory.getKey(format, data);
+            final ECKey key = privateKeyFactory.getKey(format, data);
             if (key != null && key.hasPrivKey()) {
                 final String keyAddress = key.toAddress(MainNetParams.get()).toString();
                 if (!legacyAddress.getAddress().equals(keyAddress)) {

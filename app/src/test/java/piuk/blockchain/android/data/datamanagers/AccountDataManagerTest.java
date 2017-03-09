@@ -3,6 +3,7 @@ package piuk.blockchain.android.data.datamanagers;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import org.bitcoinj.core.ECKey;
 import org.junit.Before;
@@ -26,13 +27,14 @@ public class AccountDataManagerTest extends RxTest {
 
     private AccountDataManager subject;
     @Mock PayloadManager payloadManager;
+    @Mock PrivateKeyFactory privateKeyFactory;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        subject = new AccountDataManager(payloadManager);
+        subject = new AccountDataManager(payloadManager, privateKeyFactory);
     }
 
     @Test
@@ -111,12 +113,15 @@ public class AccountDataManagerTest extends RxTest {
     @Test
     public void getKeyFromImportedData() throws Exception {
         // Arrange
-        String data = "L2VTRAkmzg4TiWETYYCTw5RMftEmc7JA2gL2rJT3LhSWW4FHJhyd";
+        String data = "DATA";
+        ECKey mockEcKey = mock(ECKey.class);
+        when(privateKeyFactory.getKey(BASE58, data)).thenReturn(mockEcKey);
         // Act
         TestObserver<ECKey> testObserver = subject.getKeyFromImportedData(BASE58, data).test();
         // Assert
         testObserver.assertComplete();
         testObserver.assertNoErrors();
+        testObserver.assertValue(mockEcKey);
     }
 
     @SuppressWarnings("ConstantConditions")

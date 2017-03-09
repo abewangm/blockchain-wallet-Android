@@ -3,18 +3,16 @@ package piuk.blockchain.android.ui.transactions;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 
-import info.blockchain.api.data.Input;
 import info.blockchain.api.data.Transaction;
-import info.blockchain.api.data.Transaction.Direction;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.HDWallet;
-import info.blockchain.wallet.payload.data.Wallet;
+
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.commons.lang3.NotImplementedException;
 
 public class TransactionHelper {
 

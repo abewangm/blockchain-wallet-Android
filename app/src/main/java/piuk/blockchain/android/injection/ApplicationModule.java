@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 
 import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import javax.inject.Singleton;
@@ -62,6 +63,11 @@ public class ApplicationModule {
     @Provides
     protected StringUtils provideStringUtils() {
         return new StringUtils(mApplication);
+    }
+
+    @Provides
+    protected MultiAddressFactory provideMultiAddrFactory() {
+        return new MultiAddressFactory();
     }
 
     @Provides

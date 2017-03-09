@@ -8,6 +8,7 @@ import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.settings.SettingsManager;
+import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import dagger.Module;
 import dagger.Provides;
@@ -99,8 +100,9 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager) {
-        return new AccountDataManager(payloadManager);
+    protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
+                                                           PrivateKeyFactory privateKeyFactory) {
+        return new AccountDataManager(payloadManager, privateKeyFactory);
     }
 
     @Provides

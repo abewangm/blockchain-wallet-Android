@@ -1,12 +1,10 @@
 package piuk.blockchain.android.ui.swipetoreceive;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import info.blockchain.wallet.payload.PayloadManager;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.bitcoinj.core.AddressFormatException;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
-import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
 public class SwipeToReceiveHelper {
@@ -106,7 +103,7 @@ public class SwipeToReceiveHelper {
 
     private Observable<LinkedHashMap<String, Long>> getBalanceOfAddresses(List<String> addresses) {
         // TODO: 02/03/2017
-        throw new NotImplementedException("");
+        return Observable.error(new NotImplementedException(""));
 //        return Observable.fromCallable(() -> multiAddrFactory.getAddressBalanceFromApi(addresses))
 //                .compose(RxUtil.applySchedulersToObservable());
     }
