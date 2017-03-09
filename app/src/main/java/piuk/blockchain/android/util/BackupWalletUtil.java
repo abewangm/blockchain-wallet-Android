@@ -28,7 +28,7 @@ public class BackupWalletUtil {
         SecureRandom random = new SecureRandom();
         List<Integer> seen = new ArrayList<>();
 
-        int sel = 0;
+        int sel;
         int i = 0;
         while (i < 3) {
             sel = random.nextInt(s.length);

@@ -460,5 +460,4 @@
 
     <string name="survey_message">Chcete vyplnit krátký dotazník, abyste pomohli zlepšit svůj zážitek z peněženky?\n\nVážíme si vaší zpětné vazby!</string>
     <string name="survey_positive_button">Vyplnit dotazník</string>
-    <string name="backup_button_start"></string>
 </resources>

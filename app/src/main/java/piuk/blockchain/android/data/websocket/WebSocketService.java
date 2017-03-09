@@ -10,6 +10,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import javax.inject.Inject;
@@ -26,6 +27,7 @@ public class WebSocketService extends Service {
     @Inject protected PayloadManager payloadManager;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected NotificationManager notificationManager;
+    @Inject protected PersistentUrls persistentUrls;
     @Thunk WebSocketHandler webSocketHandler;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -65,6 +67,7 @@ public class WebSocketService extends Service {
                 getApplicationContext(),
                 payloadManager,
                 notificationManager,
+                persistentUrls,
                 new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
                 payloadManager.getPayload().getGuid(),
                 xpubs,

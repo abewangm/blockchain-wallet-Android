@@ -55,6 +55,7 @@ class WebSocketHandler {
     @Thunk WebSocket connection;
     @Thunk HashSet<String> subHashSet = new HashSet<>();
     @Thunk HashSet<String> onChangeHashSet = new HashSet<>();
+    @Thunk PersistentUrls persistentUrls;
     @Thunk MonetaryUtil monetaryUtil;
     @Thunk PayloadManager payloadManager;
     @Thunk Context context;
@@ -63,6 +64,7 @@ class WebSocketHandler {
     public WebSocketHandler(Context context,
                             PayloadManager payloadManager,
                             NotificationManager notificationManager,
+                            PersistentUrls persistentUrls,
                             MonetaryUtil monetaryUtil,
                             String guid,
                             String[] xpubs,
@@ -71,6 +73,7 @@ class WebSocketHandler {
         this.context = context;
         this.payloadManager = payloadManager;
         this.notificationManager = notificationManager;
+        this.persistentUrls = persistentUrls;
         this.monetaryUtil = monetaryUtil;
         this.guid = guid;
         this.xpubs = xpubs;
@@ -191,7 +194,7 @@ class WebSocketHandler {
             subHashSet.clear();
 
             connection = new WebSocketFactory()
-                    .createSocket(PersistentUrls.getInstance().getCurrentWebsocketUrl())
+                    .createSocket(persistentUrls.getCurrentWebsocketUrl())
                     .addHeader("Origin", "https://blockchain.info")
                     .setPingInterval(PING_INTERVAL)
                     .addListener(new WebSocketAdapter() {

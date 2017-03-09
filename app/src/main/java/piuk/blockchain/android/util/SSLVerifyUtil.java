@@ -99,9 +99,7 @@ public class SSLVerifyUtil {
                             listener.onServerDown();
                         }
                     }
-                }, throwable -> {
-                    listener.onServerDown();
-                });
+                }, throwable -> listener.onServerDown());
     }
 
     private Observable<HttpsURLConnection> getPinnedConnection() {

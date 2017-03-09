@@ -56,7 +56,6 @@ public class DateUtil {
         } else {
             //this year
             String month = calThen.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
-            String day = calThen.getDisplayName(Calendar.DAY_OF_MONTH, Calendar.LONG, Locale.getDefault());
             ret = month + " " + thenDay;
         }
 

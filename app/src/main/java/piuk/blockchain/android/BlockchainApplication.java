@@ -95,6 +95,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
+        //noinspection AnonymousInnerClassMayBeStatic
         ApplicationLifeCycle.getInstance().addListener(new ApplicationLifeCycle.LifeCycleListener() {
             @Override
             public void onBecameForeground() {

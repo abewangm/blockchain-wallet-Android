@@ -16,10 +16,10 @@ public class EventLogHandler {
 
     private static final String TAG = EventLogHandler.class.getSimpleName();
 
-    public static final String URL_EVENT_BASE = "https://blockchain.info/event?name=";
-    public static final String URL_EVENT_2ND_PW = URL_EVENT_BASE + "wallet_login_second_password_";
-    public static final String URL_EVENT_LEGACY = URL_EVENT_BASE + "wallet_login_legacy_use_";
-    public static final String URL_EVENT_BACKUP = URL_EVENT_BASE + "wallet_login_android_recovery_phrase_";
+    private static final String URL_EVENT_BASE = "https://blockchain.info/event?name=";
+    static final String URL_EVENT_2ND_PW = URL_EVENT_BASE + "wallet_login_second_password_";
+    static final String URL_EVENT_LEGACY = URL_EVENT_BASE + "wallet_login_legacy_use_";
+    static final String URL_EVENT_BACKUP = URL_EVENT_BASE + "wallet_login_android_recovery_phrase_";
 
     public static final String URL_EVENT_TX_INPUT_FROM_QR = URL_EVENT_BASE + "wallet_android_tx_from_qr";
     public static final String URL_EVENT_TX_INPUT_FROM_PASTE = URL_EVENT_BASE + "wallet_android_tx_from_paste";

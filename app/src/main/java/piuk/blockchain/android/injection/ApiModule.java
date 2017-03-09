@@ -91,9 +91,11 @@ public class ApiModule {
     @Provides
     @Singleton
     @Named("api")
-    protected Retrofit provideRetrofitApiInstance(OkHttpClient okHttpClient, JacksonConverterFactory converterFactory) {
+    protected Retrofit provideRetrofitApiInstance(OkHttpClient okHttpClient,
+                                                  JacksonConverterFactory converterFactory,
+                                                  PersistentUrls persistentUrls) {
         return new Retrofit.Builder()
-                .baseUrl(PersistentUrls.getInstance().getCurrentBaseApiUrl())
+                .baseUrl(persistentUrls.getCurrentBaseApiUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .build();
@@ -102,9 +104,11 @@ public class ApiModule {
     @Provides
     @Singleton
     @Named("server")
-    protected Retrofit provideRetrofitBlockchainInstance(OkHttpClient okHttpClient, JacksonConverterFactory converterFactory) {
+    protected Retrofit provideRetrofitBlockchainInstance(OkHttpClient okHttpClient,
+                                                         JacksonConverterFactory converterFactory,
+                                                         PersistentUrls persistentUrls) {
         return new Retrofit.Builder()
-                .baseUrl(PersistentUrls.getInstance().getCurrentBaseServerUrl())
+                .baseUrl(persistentUrls.getCurrentBaseServerUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .build();

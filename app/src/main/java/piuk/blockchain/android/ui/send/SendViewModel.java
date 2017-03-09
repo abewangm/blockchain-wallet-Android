@@ -105,6 +105,7 @@ public class SendViewModel extends BaseViewModel {
     @Inject ContactsDataManager contactsDataManager;
     @Inject SendDataManager sendDataManager;
     @Inject MultiAddrFactory multiAddrFactory;
+    @Inject PersistentUrls persistentUrls;
 
     SendViewModel(SendContract.DataListener dataListener, Locale locale) {
         Injector.getInstance().getDataManagerComponent().inject(this);
@@ -1079,7 +1080,7 @@ public class SendViewModel extends BaseViewModel {
 
     void spendFromWatchOnlyBIP38(String pw, String scanData) {
         compositeDisposable.add(
-                sendDataManager.getEcKeyFromBip38(pw, scanData, PersistentUrls.getInstance().getCurrentNetworkParams())
+                sendDataManager.getEcKeyFromBip38(pw, scanData, persistentUrls.getCurrentNetworkParams())
                         .subscribe(ecKey -> {
                             LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
                             setTempLegacyAddressPrivateKey(legacyAddress, ecKey);
@@ -1088,12 +1089,12 @@ public class SendViewModel extends BaseViewModel {
 
     private void setTempLegacyAddressPrivateKey(LegacyAddress legacyAddress, ECKey key) {
         if (key != null && key.hasPrivKey() && legacyAddress.getAddress().equals(key.toAddress(
-                PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
+                persistentUrls.getCurrentNetworkParams()).toString())) {
 
             //Create copy, otherwise pass by ref will override private key in wallet payload
             LegacyAddress tempLegacyAddress = new LegacyAddress();
             tempLegacyAddress.setEncryptedKeyBytes(key.getPrivKeyBytes());
-            tempLegacyAddress.setAddress(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
+            tempLegacyAddress.setAddress(key.toAddress(persistentUrls.getCurrentNetworkParams()).toString());
             tempLegacyAddress.setLabel(legacyAddress.getLabel());
             tempLegacyAddress.setWatchOnly(true);
             sendModel.pendingTransaction.sendingObject.accountObject = tempLegacyAddress;

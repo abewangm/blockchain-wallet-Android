@@ -144,7 +144,6 @@ public class WalletAccountHelper {
      *
      * @return Returns a list of {@link ItemAccount} objects
      */
-    @Deprecated
     @NonNull
     public List<ItemAccount> getAddressBookEntries() {
         List<ItemAccount> itemAccountList = new ArrayList<>();
