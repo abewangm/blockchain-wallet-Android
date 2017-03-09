@@ -6,7 +6,9 @@ import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.settings.SettingsManager;
+import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import dagger.Module;
 import dagger.Provides;
@@ -95,8 +97,9 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager) {
-        return new AccountDataManager(payloadManager, new BlockExplorerService(new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode())));
+    protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
+                                                           PrivateKeyFactory privateKeyFactory) {
+        return new AccountDataManager(payloadManager, privateKeyFactory);
     }
 
     @Provides
@@ -116,7 +119,7 @@ public class DataManagerModule {
     @ViewModelScope
     protected AccountEditDataManager provideAccountEditDataManager(PayloadManager payloadManager) {
         return new AccountEditDataManager(
-                new PaymentService(),
+                new PaymentService(new Payment()),
                 payloadManager);
     }
 
@@ -130,7 +133,7 @@ public class DataManagerModule {
     @Provides
     @ViewModelScope
     protected SendDataManager provideSendDataManager() {
-        return new SendDataManager(new PaymentService());
+        return new SendDataManager(new PaymentService(new Payment()));
     }
 
     @Provides

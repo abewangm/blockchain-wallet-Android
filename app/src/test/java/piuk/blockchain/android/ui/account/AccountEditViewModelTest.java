@@ -2,12 +2,10 @@ package piuk.blockchain.android.ui.account;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
+import info.blockchain.wallet.multiaddress.MultiAddressFactory;
+import info.blockchain.wallet.payload.PayloadManager;
 
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.NetworkParameters;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,83 +15,61 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import io.reactivex.Completable;
-import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
-import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
-import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
-import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class AccountEditViewModelTest {
 
-//    private AccountEditViewModel subject;
-//    @Mock AccountEditViewModel.DataListener activity;
-//    @Mock PayloadManager payloadManager;
-//    @Mock PrefsUtil prefsUtil;
-//    @Mock StringUtils stringUtils;
-//    @Mock AccountEditDataManager accountEditDataManager;
-//    @Mock MultiAddrFactory multiAddrFactory;
-//    @Mock ExchangeRateFactory exchangeRateFactory;
-//    @Mock AccountEditModel accountEditModel;
-//    @Mock SwipeToReceiveHelper swipeToReceiveHelper;
-//
-//    @Before
-//    public void setUp() throws Exception {
-//        MockitoAnnotations.initMocks(this);
-//
-//        InjectorTestUtils.initApplicationComponent(
-//                Injector.getInstance(),
-//                new MockApplicationModule(RuntimeEnvironment.application),
-//                new MockApiModule(),
-//                new MockDataManagerModule());
-//
-//        subject = new AccountEditViewModel(accountEditModel, activity);
-//    }
-//
-//    @Test
-//    public void setAccountModel() throws Exception {
-//        // Arrange
-//        AccountEditModel newModel = new AccountEditModel(mock(Context.class));
-//        // Act
-//        subject.setAccountModel(newModel);
-//        // Assert
-//        assertEquals(newModel, subject.accountModel);
-//    }
+    private AccountEditViewModel subject;
+    @Mock AccountEditViewModel.DataListener activity;
+    @Mock PayloadManager payloadManager;
+    @Mock PrefsUtil prefsUtil;
+    @Mock StringUtils stringUtils;
+    @Mock AccountEditDataManager accountEditDataManager;
+    @Mock MultiAddressFactory multiAddrFactory;
+    @Mock ExchangeRateFactory exchangeRateFactory;
+    @Mock AccountEditModel accountEditModel;
+    @Mock SwipeToReceiveHelper swipeToReceiveHelper;
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        InjectorTestUtils.initApplicationComponent(
+                Injector.getInstance(),
+                new MockApplicationModule(RuntimeEnvironment.application),
+                new MockApiModule(),
+                new MockDataManagerModule());
+
+        subject = new AccountEditViewModel(accountEditModel, activity);
+    }
+
+
+    @Test
+    public void setAccountModel() throws Exception {
+        // Arrange
+        AccountEditModel newModel = new AccountEditModel(mock(Context.class));
+        // Act
+        subject.setAccountModel(newModel);
+        // Assert
+        assertEquals(newModel, subject.accountModel);
+    }
 //
 //    @SuppressWarnings("WrongConstant")
 //    @Test
@@ -782,48 +758,43 @@ public class AccountEditViewModelTest {
 //        verify(activity).privateKeyImportMismatch();
 //    }
 //
-//    private class MockApplicationModule extends ApplicationModule {
-//        public MockApplicationModule(Application application) {
-//            super(application);
-//        }
-//
-//        @Override
-//        protected StringUtils provideStringUtils() {
-//            return stringUtils;
-//        }
-//
-//        @Override
-//        protected PrefsUtil providePrefsUtil() {
-//            return prefsUtil;
-//        }
-//
-//        @Override
-//        protected MultiAddrFactory provideMultiAddrFactory() {
-//            return multiAddrFactory;
-//        }
-//
-//        @Override
-//        protected ExchangeRateFactory provideExchangeRateFactory() {
-//            return exchangeRateFactory;
-//        }
-//    }
-//
-//    private class MockApiModule extends ApiModule {
-//        @Override
-//        protected PayloadManager providePayloadManager() {
-//            return payloadManager;
-//        }
-//    }
-//
-//    private class MockDataManagerModule extends DataManagerModule {
-//        @Override
-//        protected AccountEditDataManager provideAccountEditDataManager(PayloadManager payloadManager) {
-//            return accountEditDataManager;
-//        }
-//
-//        @Override
-//        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory, PrefsUtil prefsUtil) {
-//            return swipeToReceiveHelper;
-//        }
-//    }
+    private class MockApplicationModule extends ApplicationModule {
+        public MockApplicationModule(Application application) {
+            super(application);
+        }
+
+        @Override
+        protected StringUtils provideStringUtils() {
+            return stringUtils;
+        }
+
+        @Override
+        protected PrefsUtil providePrefsUtil() {
+            return prefsUtil;
+        }
+
+        @Override
+        protected ExchangeRateFactory provideExchangeRateFactory() {
+            return exchangeRateFactory;
+        }
+    }
+
+    private class MockApiModule extends ApiModule {
+        @Override
+        protected PayloadManager providePayloadManager() {
+            return payloadManager;
+        }
+    }
+
+    private class MockDataManagerModule extends DataManagerModule {
+        @Override
+        protected AccountEditDataManager provideAccountEditDataManager(PayloadManager payloadManager) {
+            return accountEditDataManager;
+        }
+
+        @Override
+        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager, PrefsUtil prefsUtil) {
+            return swipeToReceiveHelper;
+        }
+    }
 }

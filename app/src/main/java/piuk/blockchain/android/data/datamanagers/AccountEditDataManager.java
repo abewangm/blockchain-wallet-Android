@@ -6,9 +6,7 @@ import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
-import java.math.BigDecimal;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 
 import java.math.BigInteger;
@@ -17,11 +15,9 @@ import java.util.List;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
-import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.PaymentService;
-import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
 public class AccountEditDataManager {
@@ -110,9 +106,8 @@ public class AccountEditDataManager {
     }
 
     private Observable<String> getNextReceiveAddress(int defaultIndex) {
-        // TODO: 21/02/2017
-        throw new NotImplementedException("");
-//        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
+        Account account = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultIndex);
+        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account));
     }
 
     /**
@@ -121,15 +116,13 @@ public class AccountEditDataManager {
      * effects.
      *
      * @return {@link Completable}
-     * @see {@link IgnorableDefaultObserver}
+     * @see IgnorableDefaultObserver
      */
     public Completable updateBalancesAndTransactions() {
-        // TODO: 21/02/2017
-        throw new NotImplementedException("");
-//        return Completable.fromCallable(() -> {
-//            payloadManager.updateBalancesAndTransactions();
-//            return Void.TYPE;
-//        }).subscribeOn(Schedulers.io());
+        return Completable.fromCallable(() -> {
+            payloadManager.updateAllTransactions();
+            return Void.TYPE;
+        }).subscribeOn(Schedulers.io());
     }
 
     // TODO: 21/02/2017

@@ -1,19 +1,6 @@
 package piuk.blockchain.android.data.services;
 
-import info.blockchain.wallet.transaction.Transaction;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class TransactionDetailsServiceTest extends RxTest {
 

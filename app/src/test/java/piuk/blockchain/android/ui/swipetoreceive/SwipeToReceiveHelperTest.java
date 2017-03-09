@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.swipetoreceive;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import org.junit.Before;
@@ -17,11 +16,6 @@ import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ACCOUNT_NAME;
 import static piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ADDRESSES;
@@ -30,7 +24,7 @@ public class SwipeToReceiveHelperTest extends RxTest {
 
     private SwipeToReceiveHelper subject;
     @Mock PayloadManager payloadManager;
-    @Mock MultiAddrFactory multiAddrFactory;
+//    @Mock MultiAddrFactory multiAddrFactory;
     @Mock PrefsUtil prefsUtil;
 
     @Before
@@ -38,7 +32,7 @@ public class SwipeToReceiveHelperTest extends RxTest {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        subject = new SwipeToReceiveHelper(payloadManager, multiAddrFactory, prefsUtil);
+//        subject = new SwipeToReceiveHelper(payloadManager, multiAddrFactory, prefsUtil);
     }
 
 //    @Test
@@ -74,7 +68,7 @@ public class SwipeToReceiveHelperTest extends RxTest {
         map.put("addr2", -10L);
         map.put("addr3", 0L);
         map.put("addr4", 0L);
-        when(multiAddrFactory.getAddressBalanceFromApi(anyListOf(String.class))).thenReturn(map);
+//        when(multiAddrFactory.getAddressBalanceFromApi(anyListOf(String.class))).thenReturn(map);
         when(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, "")).thenReturn("addr0, addr1, addr2, addr3, addr4");
         // Act
         TestObserver<String> test = subject.getNextAvailableAddress().test();
@@ -93,7 +87,7 @@ public class SwipeToReceiveHelperTest extends RxTest {
         map.put("addr2", -10L);
         map.put("addr3", 1L);
         map.put("addr4", 1_000_000_000_000L);
-        when(multiAddrFactory.getAddressBalanceFromApi(anyListOf(String.class))).thenReturn(map);
+//        when(multiAddrFactory.getAddressBalanceFromApi(anyListOf(String.class))).thenReturn(map);
         when(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, "")).thenReturn("addr0, addr1, addr2, addr3, addr4");
         // Act
         TestObserver<String> test = subject.getNextAvailableAddress().test();

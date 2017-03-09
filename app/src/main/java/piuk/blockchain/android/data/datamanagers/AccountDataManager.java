@@ -2,7 +2,7 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.Nullable;
 
-import info.blockchain.api.data.MultiAddress;
+import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -10,21 +10,18 @@ import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import org.bitcoinj.core.ECKey;
 
-import java.util.List;
-
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.services.BlockExplorerService;
 
 public class AccountDataManager {
 
     private PayloadManager payloadManager;
-    private BlockExplorerService blockExplorerService;
+    private PrivateKeyFactory privateKeyFactory;
 
-    public AccountDataManager(PayloadManager payload, BlockExplorerService blockExplorer) {
-        payloadManager = payload;
-        blockExplorerService = blockExplorer;
+    public AccountDataManager(PayloadManager payloadManager, PrivateKeyFactory privateKeyFactory) {
+        this.payloadManager = payloadManager;
+        this.privateKeyFactory = privateKeyFactory;
     }
 
     /**
@@ -64,25 +61,38 @@ public class AccountDataManager {
     }
 
     /**
-     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link info.blockchain.wallet.payload.data.Wallet}
+     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link
+     * info.blockchain.wallet.payload.data.Wallet}
      *
      * @param legacyAddress The updated address
      * @return {@link Observable<Boolean>} representing a successful save
      */
     public Completable updateLegacyAddress(LegacyAddress legacyAddress) {
-
         return Completable.fromCallable(() -> {
             payloadManager.addLegacyAddress(legacyAddress);
             return Void.TYPE;
         });
     }
 
-
+    /**
+     * Returns an Elliptic Curve key for a given private key
+     *
+     * @param format The format of the private key
+     * @param data   The private key from which to derive the ECKey
+     * @return An {@link ECKey}
+     * @see PrivateKeyFactory
+     */
     public Observable<ECKey> getKeyFromImportedData(String format, String data) {
-        return Observable.fromCallable(() -> PrivateKeyFactory.getKey(format, data))
+        return Observable.fromCallable(() -> privateKeyFactory.getKey(format, data))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
+    /**
+     * Prompts {@link MultiAddressFactory} to update it's list of addresses and balances.
+     *
+     * @return A {@link Completable} object
+     */
+    @SuppressWarnings("ConstantConditions")
     public Completable updateMultiAddress() {
         return Completable.fromCallable(() -> {
             payloadManager.updateAllTransactions();
@@ -90,6 +100,11 @@ public class AccountDataManager {
         });
     }
 
+    /**
+     * Forces the {@link PayloadManager} to sync the wallet.
+     *
+     * @return A {@link Completable} object
+     */
     public Completable save() {
         return Completable.fromCallable(() -> {
             payloadManager.save();

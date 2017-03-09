@@ -9,11 +9,11 @@ import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import org.apache.commons.lang3.NotImplementedException;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
@@ -137,9 +137,8 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
     }
 
     private Observable<String> getNextReceiveAddress(int defaultIndex) {
-        // TODO: 21/02/2017
-        throw new NotImplementedException("");
-//        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
+        Account account = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultIndex);
+        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account));
     }
 
 }

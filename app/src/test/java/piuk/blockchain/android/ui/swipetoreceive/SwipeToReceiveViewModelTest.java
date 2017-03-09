@@ -3,9 +3,6 @@ package piuk.blockchain.android.ui.swipetoreceive;
 import android.app.Application;
 import android.graphics.Bitmap;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.PayloadManager;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +25,6 @@ import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
-import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -113,12 +109,12 @@ public class SwipeToReceiveViewModelTest {
         MockDataManagerModule() {
         }
 
-        @Override
-        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager,
-                                                            MultiAddrFactory multiAddrFactory,
-                                                            PrefsUtil prefsUtil) {
-            return swipeToReceiveHelper;
-        }
+//        @Override
+//        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager,
+//                                                            MultiAddrFactory multiAddrFactory,
+//                                                            PrefsUtil prefsUtil) {
+//            return swipeToReceiveHelper;
+//        }
 
         @Override
         protected QrCodeDataManager provideQrDataManager() {

@@ -1,39 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-
-import org.apache.commons.lang3.tuple.Triple;
-import org.bitcoinj.core.ECKey;
-import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
-import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
-import piuk.blockchain.android.data.cache.DynamicFeeCache;
-import piuk.blockchain.android.ui.account.ItemAccount;
-import piuk.blockchain.android.ui.send.PendingTransaction;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class TransferFundsDataManagerTest extends RxTest {
 
@@ -48,12 +15,6 @@ public class TransferFundsDataManagerTest extends RxTest {
 //        super.setUp();
 //        MockitoAnnotations.initMocks(this);
 //        subject = new TransferFundsDataManager(payloadManager, multiAddrFactory, unspentApi, payment);
-//    }
-//
-//    @After
-//    public void tearDown() throws Exception {
-//        super.tearDown();
-//        Mockito.validateMockitoUsage();
 //    }
 //
 //    @Test

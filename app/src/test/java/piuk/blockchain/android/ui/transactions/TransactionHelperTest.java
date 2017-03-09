@@ -1,30 +1,5 @@
 package piuk.blockchain.android.ui.transactions;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-
-import android.annotation.SuppressLint;
-import android.support.v4.util.Pair;
-
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.transaction.Transaction;
-import info.blockchain.wallet.transaction.Tx;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class TransactionHelperTest {
 
 //    @Mock PayloadManager mPayloadManager;

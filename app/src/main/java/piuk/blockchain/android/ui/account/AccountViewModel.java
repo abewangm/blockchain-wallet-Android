@@ -183,7 +183,7 @@ public class AccountViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
         try {
             BIP38PrivateKey bip38 = new BIP38PrivateKey(PersistentUrls.getInstance().getCurrentNetworkParams(), data);
-            ECKey key = bip38.decrypt(password.toString());
+            ECKey key = bip38.decrypt(password);
 
             handlePrivateKey(key, doubleEncryptionPassword);
         } catch (Exception e) {
@@ -201,7 +201,7 @@ public class AccountViewModel extends BaseViewModel {
      */
     void onAddressScanned(String data) {
         try {
-            String format = PrivateKeyFactory.getFormat(data);
+            String format = privateKeyFactory.getFormat(data);
             if (format != null) {
                 // Private key scanned
                 if (!format.equals(PrivateKeyFactory.BIP38)) {
