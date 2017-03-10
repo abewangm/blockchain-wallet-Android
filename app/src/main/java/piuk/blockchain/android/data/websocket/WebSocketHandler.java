@@ -180,7 +180,7 @@ class WebSocketHandler {
     private Completable updateBalancesAndTxs() {
         return Completable.fromCallable(() -> {
             // TODO: 09/03/2017  
-            payloadManager.updateAllTransactions(50, 0, null);
+            payloadManager.updateAllTransactions(50, 0);
             return Void.TYPE;
         }).doAfterTerminate(() -> {
             Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
