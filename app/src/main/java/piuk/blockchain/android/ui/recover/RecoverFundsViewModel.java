@@ -40,7 +40,7 @@ public class RecoverFundsViewModel extends BaseViewModel {
 
     }
 
-    public RecoverFundsViewModel(DataListener listener) {
+    RecoverFundsViewModel(DataListener listener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
         mDataListener = listener;
     }
@@ -50,7 +50,7 @@ public class RecoverFundsViewModel extends BaseViewModel {
         // No-op
     }
 
-    public void onContinueClicked() {
+    void onContinueClicked() {
         String recoveryPhrase = mDataListener.getRecoveryPhrase();
         if (recoveryPhrase == null || recoveryPhrase.isEmpty()) {
             mDataListener.showToast(R.string.invalid_recovery_phrase, ToastCustom.TYPE_ERROR);
@@ -84,11 +84,9 @@ public class RecoverFundsViewModel extends BaseViewModel {
 
         mAuthDataManager.restoreHdWallet(email, password, recoveryPhrase)
                 .doAfterTerminate(() -> mDataListener.dismissProgressDialog())
-                .subscribe(payload -> {
-                    mDataListener.goToPinEntryPage();
-                }, throwable -> {
-                    mDataListener.showToast(R.string.restore_failed, ToastCustom.TYPE_ERROR);
-                });
+                .subscribe(
+                        payload -> mDataListener.goToPinEntryPage(),
+                        throwable -> mDataListener.showToast(R.string.restore_failed, ToastCustom.TYPE_ERROR));
     }
 
     public AppUtil getAppUtil() {

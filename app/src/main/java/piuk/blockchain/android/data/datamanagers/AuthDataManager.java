@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.VisibleForTesting;
 
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import java.util.concurrent.TimeUnit;
@@ -10,14 +9,13 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.exceptions.Exceptions;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.WalletService;
-import piuk.blockchain.android.util.AESUtilWrapper;
+import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
@@ -28,27 +26,24 @@ import retrofit2.Response;
 public class AuthDataManager {
 
     private WalletService walletService;
-    private PayloadManager payloadManager;
     private AppUtil appUtil;
-    private AESUtilWrapper aesUtilWrapper;
     private AccessState accessState;
     private StringUtils stringUtils;
+    private PayloadDataManager payloadDataManager;
     @Thunk PrefsUtil prefsUtil;
     @VisibleForTesting protected int timer;
 
-    public AuthDataManager(PayloadManager payloadManager,
+    public AuthDataManager(PayloadDataManager payloadDataManager,
                            PrefsUtil prefsUtil,
                            WalletService walletService,
                            AppUtil appUtil,
-                           AESUtilWrapper aesUtilWrapper,
                            AccessState accessState,
                            StringUtils stringUtils) {
 
-        this.payloadManager = payloadManager;
+        this.payloadDataManager = payloadDataManager;
         this.prefsUtil = prefsUtil;
         this.walletService = walletService;
         this.appUtil = appUtil;
-        this.aesUtilWrapper = aesUtilWrapper;
         this.accessState = accessState;
         this.stringUtils = stringUtils;
     }
@@ -64,7 +59,7 @@ public class AuthDataManager {
     }
 
     public Completable updatePayload(String sharedKey, String guid, String password) {
-        return getUpdatePayloadObservable(sharedKey, guid, password)
+        return payloadDataManager.initializeAndDecrypt(sharedKey, guid, password)
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -78,7 +73,7 @@ public class AuthDataManager {
     }
 
     public Observable<Wallet> createHdWallet(String password, String walletName, String email) {
-        return Observable.fromCallable(() -> payloadManager.create(walletName, email, password))
+        return payloadDataManager.createHdWallet(walletName, email, password)
                 .compose(RxUtil.applySchedulersToObservable())
                 .doOnNext(payload -> {
                     // Successfully created and saved
@@ -89,16 +84,15 @@ public class AuthDataManager {
     }
 
     public Observable<Wallet> restoreHdWallet(String email, String password, String mnemonic) {
-        return Observable.fromCallable(() -> payloadManager.recoverFromMnemonic(
-                mnemonic, stringUtils.getString(R.string.default_wallet_name), email, password))
+        return payloadDataManager.restoreHdWallet(
+                mnemonic,
+                stringUtils.getString(R.string.default_wallet_name),
+                email,
+                password)
                 .doOnNext(payload -> {
-                    if (payload == null) {
-                        throw Exceptions.propagate(new Throwable("Save failed"));
-                    } else {
-                        appUtil.setNewlyCreated(true);
-                        prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
-                        appUtil.setSharedKey(payload.getSharedKey());
-                    }
+                    appUtil.setNewlyCreated(true);
+                    prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
+                    appUtil.setSharedKey(payload.getSharedKey());
                 })
                 .compose(RxUtil.applySchedulersToObservable());
     }
@@ -122,22 +116,6 @@ public class AuthDataManager {
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    private Completable getUpdatePayloadObservable(String sharedKey, String guid, String password) {
-        return Completable.defer(() -> Completable.create(subscriber -> {
-            try {
-                payloadManager.initializeAndDecrypt(
-                        sharedKey,
-                        guid,
-                        password);
-                subscriber.onComplete();
-            } catch (Exception e) {
-                if (!subscriber.isDisposed()) {
-                    subscriber.onError(e);
-                }
-            }
-        }));
-    }
-
     public Observable<Integer> createCheckEmailTimer() {
         timer = 2 * 60;
 
@@ -148,14 +126,12 @@ public class AuthDataManager {
     }
 
     public Completable initializeFromPayload(String payload, String password) {
-        return Completable.fromCallable(() -> {
-            payloadManager.initializeAndDecryptFromPayload(payload, password);
-            return Void.TYPE;
-        }).doOnComplete(() -> {
-            prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadManager.getPayload().getGuid());
-            appUtil.setSharedKey(payloadManager.getPayload().getSharedKey());
-            prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
-        }).compose(RxUtil.applySchedulersToCompletable());
+        return payloadDataManager.initializeFromPayload(payload, password)
+                .doOnComplete(() -> {
+                    prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.getWallet().getGuid());
+                    appUtil.setSharedKey(payloadDataManager.getWallet().getSharedKey());
+                    prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
+                }).compose(RxUtil.applySchedulersToCompletable());
     }
 
 }

@@ -30,7 +30,6 @@ import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.ui.transactions.PayloadDataManager;
-import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -41,18 +40,16 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected AuthDataManager provideAuthDataManager(PayloadManager payloadManager,
+    protected AuthDataManager provideAuthDataManager(PayloadDataManager payloadDataManager,
                                                      PrefsUtil prefsUtil,
                                                      AppUtil appUtil,
-                                                     AESUtilWrapper aesUtilWrapper,
                                                      AccessState accessState,
                                                      StringUtils stringUtils) {
         return new AuthDataManager(
-                payloadManager,
+                payloadDataManager,
                 prefsUtil,
                 new WalletService(new WalletApi()),
                 appUtil,
-                aesUtilWrapper,
                 accessState,
                 stringUtils);
     }
