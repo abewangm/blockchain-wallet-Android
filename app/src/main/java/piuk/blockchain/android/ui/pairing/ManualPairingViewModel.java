@@ -7,6 +7,9 @@ import android.support.annotation.UiThread;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
+
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
@@ -76,16 +79,18 @@ public class ManualPairingViewModel extends BaseViewModel {
         mDataListener.showProgressDialog(R.string.validating_password, null, false);
 
         mWaitingForAuth = true;
+        final String[] finalSessionId = new String[1];
 
         compositeDisposable.add(
                 mAuthDataManager.getSessionId(guid)
+                        .doOnNext(s -> finalSessionId[0] = s)
                         .flatMap(sessionId -> mAuthDataManager.getEncryptedPayload(guid, sessionId))
                         .subscribe(response -> {
                             if (response.errorBody().string().contains(KEY_AUTH_REQUIRED)) {
                                 showCheckEmailDialog();
 
                                 compositeDisposable.add(
-                                        mAuthDataManager.startPollingAuthStatus(guid)
+                                        mAuthDataManager.startPollingAuthStatus(guid, finalSessionId[0])
                                                 .subscribe(payloadResponse -> {
                                                     mWaitingForAuth = false;
 
@@ -94,7 +99,7 @@ public class ManualPairingViewModel extends BaseViewModel {
                                                         return;
 
                                                     }
-                                                    attemptDecryptPayload(password, guid, payloadResponse);
+                                                    attemptDecryptPayload(password, payloadResponse);
 
                                                 }, throwable -> {
                                                     Log.e(TAG, "verifyPassword: ", throwable);
@@ -103,7 +108,7 @@ public class ManualPairingViewModel extends BaseViewModel {
                                                 }));
                             } else {
                                 mWaitingForAuth = false;
-                                attemptDecryptPayload(password, guid, response.message());
+                                attemptDecryptPayload(password, response.message());
                             }
                         }, throwable -> {
                             Log.e(TAG, "verifyPassword: ", throwable);
@@ -111,28 +116,19 @@ public class ManualPairingViewModel extends BaseViewModel {
                         }));
     }
 
-    private void attemptDecryptPayload(String password, String guid, String payload) {
-        mAuthDataManager.attemptDecryptPayload(password, guid, payload, new AuthDataManager.DecryptPayloadListener() {
-            @Override
-            public void onSuccess() {
-                mDataListener.goToPinPage();
-            }
-
-            @Override
-            public void onPairFail() {
-                showErrorToast(R.string.pairing_failed);
-            }
-
-            @Override
-            public void onAuthFail() {
-                showErrorToast(R.string.auth_failed);
-            }
-
-            @Override
-            public void onFatalError() {
-                showErrorToastAndRestartApp(R.string.auth_failed);
-            }
-        });
+    private void attemptDecryptPayload(String password, String payload) {
+        compositeDisposable.add(
+                mAuthDataManager.initializeFromPayload(payload, password)
+                        .subscribe(() -> mDataListener.goToPinPage(),
+                                throwable -> {
+                                    if (throwable instanceof HDWalletException) {
+                                        showErrorToast(R.string.pairing_failed);
+                                    } else if (throwable instanceof DecryptionException) {
+                                        showErrorToast(R.string.auth_failed);
+                                    } else {
+                                        showErrorToastAndRestartApp(R.string.auth_failed);
+                                    }
+                                }));
     }
 
     private void showCheckEmailDialog() {

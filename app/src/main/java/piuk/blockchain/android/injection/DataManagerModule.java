@@ -2,8 +2,6 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
-import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
@@ -13,6 +11,7 @@ import info.blockchain.wallet.util.PrivateKeyFactory;
 import dagger.Module;
 import dagger.Provides;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
@@ -23,7 +22,6 @@ import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
-import piuk.blockchain.android.data.services.BlockExplorerService;
 import piuk.blockchain.android.data.services.PaymentService;
 import piuk.blockchain.android.data.services.SettingsService;
 import piuk.blockchain.android.data.services.WalletService;
@@ -117,10 +115,12 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected AccountEditDataManager provideAccountEditDataManager(PayloadManager payloadManager) {
+    protected AccountEditDataManager provideAccountEditDataManager(PayloadDataManager payloadDataManager,
+                                                                   DynamicFeeCache dynamicFeeCache) {
         return new AccountEditDataManager(
                 new PaymentService(new Payment()),
-                payloadManager);
+                payloadDataManager,
+                dynamicFeeCache);
     }
 
     @Provides

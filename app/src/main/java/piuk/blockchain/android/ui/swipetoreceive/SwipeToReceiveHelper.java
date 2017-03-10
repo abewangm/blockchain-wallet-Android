@@ -34,27 +34,32 @@ public class SwipeToReceiveHelper {
      * the account name in SharedPrefs. Only stores addresses if enabled in SharedPrefs.
      */
     public void updateAndStoreAddresses() {
-        if (getIfSwipeEnabled()) {
-            int numOfAddresses = 5;
-
-            int defaultAccountIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
-            String receiveAccountName = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultAccountIndex).getLabel();
-            storeAccountName(receiveAccountName);
-
-            StringBuilder stringBuilder = new StringBuilder();
-
-            // TODO: 21/02/2017
+//        if (getIfSwipeEnabled()) {
+//            int numOfAddresses = 5;
+//
+//            int defaultAccountIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
+//            Account defaultAccount = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultAccountIndex);
+//            String receiveAccountName = defaultAccount.getLabel();
+//            storeAccountName(receiveAccountName);
+//
+//            StringBuilder stringBuilder = new StringBuilder();
+//
 //            for (int i = 0; i < numOfAddresses; i++) {
 //                try {
-//                    String receiveAddress = payloadManager.getReceiveAddressAtPosition(defaultAccountIndex, i);
+//                    String receiveAddress = payloadManager.getReceiveAddressAtPosition(defaultAccount, i);
+//                    if (receiveAddress == null) {
+//                        // Likely not initialized yet
+//                        break;
+//                    }
+//
 //                    stringBuilder.append(receiveAddress).append(",");
-//                } catch (AddressFormatException e) {
+//                } catch (HDWalletException e) {
 //                    Log.e(TAG, "updateAndStoreAddresses: ", e);
 //                }
 //            }
-
-            storeAddresses(stringBuilder.toString());
-        }
+//
+//            storeAddresses(stringBuilder.toString());
+//        }
     }
 
     /**

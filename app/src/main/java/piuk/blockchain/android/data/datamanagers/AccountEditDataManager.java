@@ -1,33 +1,36 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
-import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
-import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
-import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
-import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
+import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.PaymentService;
+import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
+import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 
 public class AccountEditDataManager {
 
+    private PayloadDataManager payloadDataManager;
     private PaymentService paymentService;
-    private PayloadManager payloadManager;
+    private DynamicFeeCache dynamicFeeCache;
 
-    public AccountEditDataManager(PaymentService paymentService, PayloadManager payloadManager) {
+    public AccountEditDataManager(PaymentService paymentService,
+                                  PayloadDataManager payloadDataManager,
+                                  DynamicFeeCache dynamicFeeCache) {
         this.paymentService = paymentService;
-        this.payloadManager = payloadManager;
+        this.payloadDataManager = payloadDataManager;
+        this.dynamicFeeCache = dynamicFeeCache;
     }
 
     /**
@@ -35,40 +38,39 @@ public class AccountEditDataManager {
      * the default account in the user's wallet
      *
      * @param legacyAddress The {@link LegacyAddress} you wish to transfer funds from
-     * @param payment       A new {@link Payment} object
      * @return An {@link Observable<PendingTransaction>}
      */
-    public Observable<PendingTransaction> getPendingTransactionForLegacyAddress(LegacyAddress legacyAddress,
-                                                                                Payment payment) {
-        // TODO: 21/02/2017
-        throw new NotImplementedException("");
-//        PendingTransaction pendingTransaction = new PendingTransaction();
-//
-//        return getUnspentOutputs(legacyAddress, payment)
-//                .flatMap(unspentOutputs -> {
-//                    BigInteger suggestedFeePerKb = new BigDecimal(DynamicFeeCache.getInstance().getCachedDynamicFee().getDefaultFee().getFee()).toBigInteger();
-//
-//                    Pair<BigInteger, BigInteger> sweepableCoins = Payment
-//                        .getSweepableCoins(unspentOutputs, suggestedFeePerKb);
-//                    BigInteger sweepAmount = sweepableCoins.getLeft();
-//                    BigInteger absFeeForSweep = sweepableCoins.getRight();
-//
-//                    // To default account
-//                    int defaultIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
-//                    Account defaultAccount = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultIndex);
-//                    pendingTransaction.sendingObject = new ItemAccount(legacyAddress.getLabel(), sweepAmount.toString(), "", sweepAmount.longValue(), legacyAddress);
-//                    pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", sweepAmount.longValue(), defaultAccount);
-//                    pendingTransaction.unspentOutputBundle = Payment.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
-//                    pendingTransaction.bigIntAmount = sweepAmount;
-//                    pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee();
-//
-//                    return getNextReceiveAddress(defaultIndex);
-//                })
-//                .map(receivingAddress -> {
-//                    pendingTransaction.receivingAddress = receivingAddress;
-//                    return pendingTransaction;
-//                })
-//                .compose(RxUtil.applySchedulersToObservable());
+    public Observable<PendingTransaction> getPendingTransactionForLegacyAddress(LegacyAddress legacyAddress) {
+        PendingTransaction pendingTransaction = new PendingTransaction();
+
+        return paymentService.getUnspentOutputs(legacyAddress.getAddress())
+                .flatMap(unspentOutputs -> {
+                    BigInteger suggestedFeePerKb =
+                            new BigDecimal(dynamicFeeCache.getCachedDynamicFee()
+                                    .getDefaultFee()
+                                    .getFee())
+                                    .toBigInteger();
+
+                    Pair<BigInteger, BigInteger> sweepableCoins = paymentService
+                            .getSweepableCoins(unspentOutputs, suggestedFeePerKb);
+                    BigInteger sweepAmount = sweepableCoins.getLeft();
+
+                    // To default account
+                    int defaultIndex = payloadDataManager.getDefaultAccountIndex();
+                    Account defaultAccount = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().get(defaultIndex);
+                    pendingTransaction.sendingObject = new ItemAccount(legacyAddress.getLabel(), sweepAmount.toString(), "", sweepAmount.longValue(), legacyAddress);
+                    pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", sweepAmount.longValue(), defaultAccount);
+                    pendingTransaction.unspentOutputBundle = paymentService.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
+                    pendingTransaction.bigIntAmount = sweepAmount;
+                    pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee();
+
+                    return payloadDataManager.getNextReceiveAddress(defaultIndex);
+                })
+                .map(receivingAddress -> {
+                    pendingTransaction.receivingAddress = receivingAddress;
+                    return pendingTransaction;
+                })
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -99,35 +101,4 @@ public class AccountEditDataManager {
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    // TODO: 21/10/2016 Move all PayloadManager methods out of here
-    public Observable<Boolean> syncPayloadWithServer() {
-        return Observable.fromCallable(() -> payloadManager.save())
-                .compose(RxUtil.applySchedulersToObservable());
-    }
-
-    private Observable<String> getNextReceiveAddress(int defaultIndex) {
-        Account account = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultIndex);
-        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account));
-    }
-
-    /**
-     * Returns {@link Completable} which updates balances and transactions in the PayloadManager.
-     * Completable returns no value, and is used to call functions that return void but have side
-     * effects.
-     *
-     * @return {@link Completable}
-     * @see IgnorableDefaultObserver
-     */
-    public Completable updateBalancesAndTransactions() {
-        return Completable.fromCallable(() -> {
-            // TODO: 09/03/2017
-            payloadManager.updateAllTransactions(50, 0);
-            return Void.TYPE;
-        }).subscribeOn(Schedulers.io());
-    }
-
-    // TODO: 21/02/2017
-//    private Observable<UnspentOutputs> getUnspentOutputs(LegacyAddress legacyAddress, Payment payment) {
-//        return unspentService.getUnspentOutputs(legacyAddress.getAddress(), payment);
-//    }
 }

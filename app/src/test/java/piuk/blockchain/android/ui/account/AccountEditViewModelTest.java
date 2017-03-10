@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.account;
 import android.app.Application;
 import android.content.Context;
 
-import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import org.junit.Before;
@@ -24,6 +23,7 @@ import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
+import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
@@ -38,11 +38,10 @@ public class AccountEditViewModelTest {
 
     private AccountEditViewModel subject;
     @Mock AccountEditViewModel.DataListener activity;
-    @Mock PayloadManager payloadManager;
+    @Mock PayloadDataManager payloadDataManager;
     @Mock PrefsUtil prefsUtil;
     @Mock StringUtils stringUtils;
     @Mock AccountEditDataManager accountEditDataManager;
-    @Mock MultiAddressFactory multiAddrFactory;
     @Mock ExchangeRateFactory exchangeRateFactory;
     @Mock AccountEditModel accountEditModel;
     @Mock SwipeToReceiveHelper swipeToReceiveHelper;
@@ -54,7 +53,7 @@ public class AccountEditViewModelTest {
         InjectorTestUtils.initApplicationComponent(
                 Injector.getInstance(),
                 new MockApplicationModule(RuntimeEnvironment.application),
-                new MockApiModule(),
+                new ApiModule(),
                 new MockDataManagerModule());
 
         subject = new AccountEditViewModel(accountEditModel, activity);
@@ -70,7 +69,8 @@ public class AccountEditViewModelTest {
         // Assert
         assertEquals(newModel, subject.accountModel);
     }
-//
+
+    //
 //    @SuppressWarnings("WrongConstant")
 //    @Test
 //    public void onViewReadyV3() throws Exception {
@@ -82,7 +82,7 @@ public class AccountEditViewModelTest {
 //        Account importedAccount = new ConsolidatedAccount();
 //        Account account = new Account();
 //        when(mockPayload.getHdWallet().getAccounts()).thenReturn(Arrays.asList(account, importedAccount));
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(stringUtils.getString(anyInt())).thenReturn("string resource");
 //        // Act
 //        subject.onViewReady();
@@ -107,7 +107,7 @@ public class AccountEditViewModelTest {
 //        Account account = new Account();
 //        account.setArchived(true);
 //        when(mockPayload.getHdWallet().getAccounts()).thenReturn(Arrays.asList(account, importedAccount));
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(stringUtils.getString(anyInt())).thenReturn("string resource");
 //        // Act
 //        subject.onViewReady();
@@ -130,7 +130,7 @@ public class AccountEditViewModelTest {
 //        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
 //        LegacyAddress legacyAddress = new LegacyAddress();
 //        when(mockPayload.getLegacyAddressList()).thenReturn(Collections.singletonList(legacyAddress));
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
 //        when(stringUtils.getString(anyInt())).thenReturn("string resource");
 //        // Act
@@ -155,7 +155,7 @@ public class AccountEditViewModelTest {
 //        LegacyAddress legacyAddress = new LegacyAddress();
 //        legacyAddress.setWatchOnly(true);
 //        when(mockPayload.getLegacyAddressList()).thenReturn(Collections.singletonList(legacyAddress));
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(mockPayload.isUpgraded()).thenReturn(true);
 //        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
 //        when(stringUtils.getString(anyInt())).thenReturn("string resource");
@@ -243,7 +243,7 @@ public class AccountEditViewModelTest {
 //        pendingTransaction.unspentOutputBundle = new SpendableUnspentOutputs();
 //        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
 //        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(accountEditDataManager.submitPayment(
 //                any(SpendableUnspentOutputs.class),
 //                anyList(),
@@ -273,7 +273,7 @@ public class AccountEditViewModelTest {
 //        pendingTransaction.unspentOutputBundle = new SpendableUnspentOutputs();
 //        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
 //        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(accountEditDataManager.submitPayment(
 //                any(SpendableUnspentOutputs.class),
 //                anyList(),
@@ -299,7 +299,7 @@ public class AccountEditViewModelTest {
 //        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress);
 //        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
 //        when(mockPayload.isDoubleEncrypted()).thenReturn(true);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        // Act
 //        subject.submitPayment(pendingTransaction);
 //        // Assert
@@ -384,7 +384,7 @@ public class AccountEditViewModelTest {
 //        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
 //        when(mockPayload.getHdWallet().getDefaultIndex()).thenReturn(0);
 //        when(mockPayload.getHdWallet().getAccounts()).thenReturn(Collections.singletonList(new Account()));
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(true));
 //        // Act
 //        subject.onClickDefault(null);
@@ -403,7 +403,7 @@ public class AccountEditViewModelTest {
 //        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
 //        when(mockPayload.getHdWallet().getDefaultIndex()).thenReturn(0);
 //        when(mockPayload.getHdWallet().getAccounts()).thenReturn(Collections.singletonList(new Account()));
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(false));
 //        // Act
 //        subject.onClickDefault(null);
@@ -421,7 +421,7 @@ public class AccountEditViewModelTest {
 //        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
 //        when(mockPayload.getHdWallet().getDefaultIndex()).thenReturn(0);
 //        when(mockPayload.getHdWallet().getAccounts()).thenReturn(Collections.singletonList(new Account()));
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.error(new Throwable()));
 //        // Act
 //        subject.onClickDefault(null);
@@ -438,7 +438,7 @@ public class AccountEditViewModelTest {
 //        subject.legacyAddress = new LegacyAddress();
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        // Act
 //        subject.onClickScanXpriv(null);
 //        // Assert
@@ -451,7 +451,7 @@ public class AccountEditViewModelTest {
 //        subject.legacyAddress = new LegacyAddress();
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.isDoubleEncrypted()).thenReturn(true);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(stringUtils.getString(R.string.watch_only_spend_instructionss)).thenReturn("%1$s");
 //        // Act
 //        subject.onClickScanXpriv(null);
@@ -634,7 +634,7 @@ public class AccountEditViewModelTest {
 //        // Arrange
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        ECKey mockEcKey = mock(ECKey.class);
 //        when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
 //        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(true));
@@ -657,7 +657,7 @@ public class AccountEditViewModelTest {
 //        Options mockOptions = mock(Options.class);
 //        when(mockOptions.getIterations()).thenReturn(1);
 //        when(mockPayload.getOptions()).thenReturn(mockOptions);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        ECKey mockEcKey = mock(ECKey.class);
 //        when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
 //        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(true));
@@ -679,7 +679,7 @@ public class AccountEditViewModelTest {
 //        Options mockOptions = mock(Options.class);
 //        when(mockOptions.getIterations()).thenReturn(1);
 //        when(mockPayload.getOptions()).thenReturn(mockOptions);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        ECKey mockEcKey = mock(ECKey.class);
 //        when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
 //        when(accountEditDataManager.syncPayloadWithServer()).thenReturn(Observable.just(false));
@@ -699,7 +699,7 @@ public class AccountEditViewModelTest {
 //        when(mockPayload.getLegacyAddressStringList()).thenReturn(legacyStrings);
 //        List<LegacyAddress> legacyAddresses = Collections.singletonList(new LegacyAddress("", 0L, "addr0", "", 0L, "", ""));
 //        when(mockPayload.getLegacyAddressList()).thenReturn(legacyAddresses);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        ECKey mockEcKey = mock(ECKey.class);
 //        when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
 //        org.bitcoinj.core.Address mockAddress = mock(org.bitcoinj.core.Address.class);
@@ -721,7 +721,7 @@ public class AccountEditViewModelTest {
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
 //        when(mockPayload.getLegacyAddressList()).thenReturn(new ArrayList<>());
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        ECKey mockEcKey = mock(ECKey.class);
 //        when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
 //        org.bitcoinj.core.Address mockAddress = mock(org.bitcoinj.core.Address.class);
@@ -744,7 +744,7 @@ public class AccountEditViewModelTest {
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
 //        when(mockPayload.getLegacyAddressList()).thenReturn(new ArrayList<>());
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        ECKey mockEcKey = mock(ECKey.class);
 //        when(mockEcKey.getPrivKeyBytes()).thenReturn("privkey".getBytes());
 //        org.bitcoinj.core.Address mockAddress = mock(org.bitcoinj.core.Address.class);
@@ -779,17 +779,11 @@ public class AccountEditViewModelTest {
         }
     }
 
-    private class MockApiModule extends ApiModule {
-        @Override
-        protected PayloadManager providePayloadManager() {
-            return payloadManager;
-        }
-    }
-
     private class MockDataManagerModule extends DataManagerModule {
+
         @Override
-        protected AccountEditDataManager provideAccountEditDataManager(PayloadManager payloadManager) {
-            return accountEditDataManager;
+        protected PayloadDataManager provideTransactionHelper(PayloadManager payloadManager) {
+            return payloadDataManager;
         }
 
         @Override

@@ -3,12 +3,12 @@ package piuk.blockchain.android.ui.auth;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.annotation.UiThread;
 import android.support.annotation.VisibleForTesting;
+
+import org.apache.commons.lang3.NotImplementedException;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.NotImplementedException;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
@@ -123,27 +123,28 @@ public class PasswordRequiredViewModel extends BaseViewModel {
     }
 
     private void attemptDecryptPayload(String password, String guid, String payload) {
-        mAuthDataManager.attemptDecryptPayload(password, guid, payload, new AuthDataManager.DecryptPayloadListener() {
-            @Override
-            public void onSuccess() {
-                mDataListener.goToPinPage();
-            }
-
-            @Override
-            public void onPairFail() {
-                showErrorToast(R.string.pairing_failed);
-            }
-
-            @Override
-            public void onAuthFail() {
-                showErrorToast(R.string.auth_failed);
-            }
-
-            @Override
-            public void onFatalError() {
-                showErrorToastAndRestartApp(R.string.auth_failed);
-            }
-        });
+        throw new NotImplementedException("Fix me");
+//        mAuthDataManager.attemptDecryptPayload(password, guid, payload, new AuthDataManager.DecryptPayloadListener() {
+//            @Override
+//            public void onSuccess() {
+//                mDataListener.goToPinPage();
+//            }
+//
+//            @Override
+//            public void onPairFail() {
+//                showErrorToast(R.string.pairing_failed);
+//            }
+//
+//            @Override
+//            public void onAuthFail() {
+//                showErrorToast(R.string.auth_failed);
+//            }
+//
+//            @Override
+//            public void onFatalError() {
+//                showErrorToastAndRestartApp(R.string.auth_failed);
+//            }
+//        });
     }
 
     private void showCheckEmailDialog() {
@@ -169,14 +170,12 @@ public class PasswordRequiredViewModel extends BaseViewModel {
         destroy();
     }
 
-    @UiThread
     private void showErrorToast(@StringRes int message) {
         mDataListener.dismissProgressDialog();
         mDataListener.resetPasswordField();
         mDataListener.showToast(message, ToastCustom.TYPE_ERROR);
     }
 
-    @UiThread
     private void showErrorToastAndRestartApp(@StringRes int message) {
         mDataListener.resetPasswordField();
         mDataListener.dismissProgressDialog();

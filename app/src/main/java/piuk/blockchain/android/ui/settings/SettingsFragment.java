@@ -164,15 +164,14 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                         .setTitle(R.string.enable_screenshots)
                         .setMessage(R.string.enable_screenshots_warning)
                         .setCancelable(false)
-                    // TODO: 27/02/2017  
-//                        .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) ->
-//                                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, true))
-//                        .setNegativeButton(android.R.string.cancel, (dialogInterface, i) ->
-//                                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false))
+                        .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) ->
+                                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, true))
+                        .setNegativeButton(android.R.string.cancel, (dialogInterface, i) ->
+                                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false))
                         .create()
                         .show();
             } else {
-//                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false);
+                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false);
             }
 
             return true;

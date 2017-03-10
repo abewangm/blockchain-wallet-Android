@@ -60,7 +60,7 @@ public class AccountDataManagerTest extends RxTest {
         // Act
         TestObserver<LegacyAddress> observer = subject.setPrivateKey(mockECKey, null).test();
         // Assert
-        verify(payloadManager).setKeyForLegacyAddress(mockECKey, isNull());
+        verify(payloadManager).setKeyForLegacyAddress(eq(mockECKey), isNull());
         observer.assertNoErrors();
         observer.assertComplete();
         assertEquals(mockLegacyAddress, observer.values().get(0));
@@ -124,7 +124,6 @@ public class AccountDataManagerTest extends RxTest {
         testObserver.assertValue(mockEcKey);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void updateMultiAddress() throws Exception {
         // Arrange
@@ -132,7 +131,7 @@ public class AccountDataManagerTest extends RxTest {
         // Act
         TestObserver<Void> testObserver = subject.updateMultiAddress().test();
         // Assert
-        verify(payloadManager).updateMultiAddress(null, 50, 0);
+        verify(payloadManager).updateAllTransactions(50, 0, null);
         testObserver.assertComplete();
         testObserver.assertNoErrors();
     }

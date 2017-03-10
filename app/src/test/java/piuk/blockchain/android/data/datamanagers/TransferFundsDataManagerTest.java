@@ -5,7 +5,7 @@ import piuk.blockchain.android.RxTest;
 public class TransferFundsDataManagerTest extends RxTest {
 
 //    private TransferFundsDataManager subject;
-//    @Mock PayloadManager payloadManager;
+//    @Mock PayloadManager payloadDataManager;
 //    @Mock Unspent unspentApi;
 //    @Mock Payment payment;
 //    @Mock MultiAddrFactory multiAddrFactory;
@@ -14,7 +14,7 @@ public class TransferFundsDataManagerTest extends RxTest {
 //    public void setUp() throws Exception {
 //        super.setUp();
 //        MockitoAnnotations.initMocks(this);
-//        subject = new TransferFundsDataManager(payloadManager, multiAddrFactory, unspentApi, payment);
+//        subject = new TransferFundsDataManager(payloadDataManager, multiAddrFactory, unspentApi, payment);
 //    }
 //
 //    @Test
@@ -32,7 +32,7 @@ public class TransferFundsDataManagerTest extends RxTest {
 //        suggestedFee.defaultFeePerKb = new BigInteger("100");
 //        DynamicFeeCache.getInstance().setCachedDynamicFee(suggestedFee);
 //        MultiAddrFactory.getInstance().setLegacyBalance("address", 1000000L);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        HDWallet mockHdWallet = mock(HDWallet.class);
 //        when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
 //        when(mockHdWallet.getDefaultIndex()).thenReturn(0);
@@ -81,11 +81,11 @@ public class TransferFundsDataManagerTest extends RxTest {
 //            add(transaction1);
 //            add(transaction1);
 //        }};
-//        when(payloadManager.savePayloadToServer()).thenReturn(true);
+//        when(payloadDataManager.savePayloadToServer()).thenReturn(true);
 //        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
 //        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
 //        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //
 //        // Act
 //        TestObserver<String> observer = subject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
@@ -122,12 +122,12 @@ public class TransferFundsDataManagerTest extends RxTest {
 //            add(transaction1);
 //            add(transaction1);
 //        }};
-//        when(payloadManager.savePayloadToServer()).thenReturn(true);
+//        when(payloadDataManager.savePayloadToServer()).thenReturn(true);
 //        Payload mockPayload = mock(Payload.class);
 //        // For now, this method will cause an exception to be thrown
 //        // In the future, this should be testable and this particular setup should be successful
 //        when(mockPayload.isDoubleEncrypted()).thenReturn(true);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //
 //        // Act
 //        TestObserver<String> observer = subject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
@@ -163,11 +163,11 @@ public class TransferFundsDataManagerTest extends RxTest {
 //            add(transaction1);
 //            add(transaction1);
 //        }};
-//        when(payloadManager.savePayloadToServer()).thenReturn(true);
+//        when(payloadDataManager.savePayloadToServer()).thenReturn(true);
 //        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
 //        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
 //        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //
 //        // Act
 //        TestObserver<String> observer = subject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
@@ -201,7 +201,7 @@ public class TransferFundsDataManagerTest extends RxTest {
 //            add(transaction1);
 //            add(transaction1);
 //        }};
-//        when(payloadManager.savePayloadToServer()).thenReturn(true);
+//        when(payloadDataManager.savePayloadToServer()).thenReturn(true);
 //
 //        // Act
 //        TestObserver<String> observer = subject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
@@ -214,7 +214,7 @@ public class TransferFundsDataManagerTest extends RxTest {
 //    @Test
 //    public void savePayloadToServer() throws Exception {
 //        // Arrange
-//        when(payloadManager.savePayloadToServer()).thenReturn(true);
+//        when(payloadDataManager.savePayloadToServer()).thenReturn(true);
 //        // Act
 //        TestObserver<Boolean> observer = subject.savePayloadToServer().test();
 //        // Assert

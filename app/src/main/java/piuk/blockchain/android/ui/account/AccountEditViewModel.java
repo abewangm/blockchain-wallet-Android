@@ -32,7 +32,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
@@ -44,6 +43,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.ui.send.SendModel;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
+import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.ui.zxing.Contents;
 import piuk.blockchain.android.ui.zxing.encode.QRCodeEncoder;
@@ -63,6 +63,7 @@ public class AccountEditViewModel extends BaseViewModel {
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected StringUtils stringUtils;
     @Inject protected AccountEditDataManager accountEditDataManager;
+    @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
     @Inject protected SendDataManager sendDataManager;
     @Inject protected PrivateKeyFactory privateKeyFactory;
@@ -325,7 +326,7 @@ public class AccountEditViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
 
         compositeDisposable.add(
-                accountEditDataManager.getPendingTransactionForLegacyAddress(legacyAddress, new Payment())
+                accountEditDataManager.getPendingTransactionForLegacyAddress(legacyAddress)
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(pendingTransaction -> {
                             if (pendingTransaction != null && pendingTransaction.bigIntAmount.compareTo(BigInteger.ZERO) == 1) {
@@ -423,7 +424,6 @@ public class AccountEditViewModel extends BaseViewModel {
                             dataListener.showTransactionSuccess();
 
                             // Update V2 balance immediately after spend - until refresh from server
-                            long currentBalance = payloadManager.getImportedAddressesBalance().longValue();
                             long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
 
                             if (pendingTransaction.sendingObject.accountObject instanceof Account) {
@@ -434,7 +434,7 @@ public class AccountEditViewModel extends BaseViewModel {
                                         ((LegacyAddress) pendingTransaction.sendingObject.accountObject).getAddress(), BigInteger.valueOf(spentAmount));
                             }
 
-                            accountEditDataManager.syncPayloadWithServer().subscribe(new IgnorableDefaultObserver<>());
+                            payloadDataManager.syncPayloadWithServer().subscribe(new IgnorableDefaultObserver<>());
 
                             accountModel.setTransferFundsVisibility(View.GONE);
                             dataListener.setActivityResult(Activity.RESULT_OK);
@@ -460,15 +460,11 @@ public class AccountEditViewModel extends BaseViewModel {
             dataListener.showProgressDialog(R.string.please_wait);
 
             compositeDisposable.add(
-                    accountEditDataManager.syncPayloadWithServer()
+                    payloadDataManager.syncPayloadWithServer()
                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                            .subscribe(success -> {
-                                if (success) {
-                                    accountModel.setLabel(finalNewLabel);
-                                    dataListener.setActivityResult(Activity.RESULT_OK);
-                                } else {
-                                    revertLabelAndShowError(revertLabel);
-                                }
+                            .subscribe(() -> {
+                                accountModel.setLabel(finalNewLabel);
+                                dataListener.setActivityResult(Activity.RESULT_OK);
                             }, throwable -> revertLabelAndShowError(revertLabel)));
         } else {
             dataListener.showToast(R.string.label_cant_be_empty, ToastCustom.TYPE_ERROR);
@@ -499,17 +495,13 @@ public class AccountEditViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
 
         compositeDisposable.add(
-                accountEditDataManager.syncPayloadWithServer()
+                payloadDataManager.syncPayloadWithServer()
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                        .subscribe(success -> {
-                            if (success) {
-                                setDefault(isDefault(account));
-                                updateSwipeToReceiveAddresses();
-                                dataListener.updateAppShortcuts();
-                                dataListener.setActivityResult(Activity.RESULT_OK);
-                            } else {
-                                revertDefaultAndShowError(revertDefault);
-                            }
+                        .subscribe(() -> {
+                            setDefault(isDefault(account));
+                            updateSwipeToReceiveAddresses();
+                            dataListener.updateAppShortcuts();
+                            dataListener.setActivityResult(Activity.RESULT_OK);
                         }, throwable -> revertDefaultAndShowError(revertDefault)));
     }
 
@@ -575,20 +567,16 @@ public class AccountEditViewModel extends BaseViewModel {
         setLegacyAddressKey(key, address);
 
         compositeDisposable.add(
-                accountEditDataManager.syncPayloadWithServer()
-                        .subscribe(success -> {
-                            if (success) {
-                                dataListener.setActivityResult(Activity.RESULT_OK);
-                                accountModel.setScanPrivateKeyVisibility(View.GONE);
-                                accountModel.setArchiveVisibility(View.VISIBLE);
+                payloadDataManager.syncPayloadWithServer()
+                        .subscribe(() -> {
+                            dataListener.setActivityResult(Activity.RESULT_OK);
+                            accountModel.setScanPrivateKeyVisibility(View.GONE);
+                            accountModel.setArchiveVisibility(View.VISIBLE);
 
-                                if (matchesIntendedAddress) {
-                                    dataListener.privateKeyImportSuccess();
-                                } else {
-                                    dataListener.privateKeyImportMismatch();
-                                }
+                            if (matchesIntendedAddress) {
+                                dataListener.privateKeyImportSuccess();
                             } else {
-                                throw Exceptions.propagate(new Throwable("Remote save failed"));
+                                dataListener.privateKeyImportMismatch();
                             }
                         }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
@@ -690,18 +678,14 @@ public class AccountEditViewModel extends BaseViewModel {
 
         boolean isArchived = toggleArchived();
         compositeDisposable.add(
-                accountEditDataManager.syncPayloadWithServer()
+                payloadDataManager.syncPayloadWithServer()
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                        .subscribe(success -> {
-                            if (success) {
-                                accountEditDataManager.updateBalancesAndTransactions()
-                                        .subscribe(new IgnorableDefaultObserver<>());
+                        .subscribe(() -> {
+                            payloadDataManager.updateBalancesAndTransactions()
+                                    .subscribe(new IgnorableDefaultObserver<>());
 
-                                setArchive(isArchived);
-                                dataListener.setActivityResult(Activity.RESULT_OK);
-                            } else {
-                                dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-                            }
+                            setArchive(isArchived);
+                            dataListener.setActivityResult(Activity.RESULT_OK);
                         }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
@@ -763,15 +747,11 @@ public class AccountEditViewModel extends BaseViewModel {
         payloadManager.getPayload().getLegacyAddressList().addAll(updatedLegacyAddresses);
 
         compositeDisposable.add(
-                accountEditDataManager.syncPayloadWithServer()
-                        .subscribe(success -> {
-                            if (success) {
-                                // Subscribe to new address only if successfully created
-                                dataListener.sendBroadcast("address", legacyAddress.getAddress());
-                                dataListener.setActivityResult(Activity.RESULT_OK);
-                            } else {
-                                throw Exceptions.propagate(new Throwable("Remote save failed"));
-                            }
+                payloadDataManager.syncPayloadWithServer()
+                        .subscribe(() -> {
+                            // Subscribe to new address only if successfully created
+                            dataListener.sendBroadcast("address", legacyAddress.getAddress());
+                            dataListener.setActivityResult(Activity.RESULT_OK);
                         }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 

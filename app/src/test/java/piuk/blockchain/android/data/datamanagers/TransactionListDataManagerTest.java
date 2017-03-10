@@ -12,7 +12,7 @@ import piuk.blockchain.android.RxTest;
 @RunWith(RobolectricTestRunner.class)
 public class TransactionListDataManagerTest extends RxTest {
 
-//    @Mock PayloadManager payloadManager;
+//    @Mock PayloadManager payloadDataManager;
 //    @Mock TransactionDetailsService transactionDetailsService;
 //    @Mock MultiAddrFactory multiAddrFactory;
 //    private TransactionListStore transactionListStore;
@@ -26,7 +26,7 @@ public class TransactionListDataManagerTest extends RxTest {
 //        transactionListStore = new TransactionListStore();
 //
 //        subject = new TransactionListDataManager(
-//                payloadManager,
+//                payloadDataManager,
 //                transactionDetailsService,
 //                transactionListStore,
 //                multiAddrFactory);
@@ -39,7 +39,7 @@ public class TransactionListDataManagerTest extends RxTest {
 //        account.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.isUpgraded()).thenReturn(true);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        // Act
 //        subject.generateTransactionList(account);
 //        // Assert
@@ -53,7 +53,7 @@ public class TransactionListDataManagerTest extends RxTest {
 //        account.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.isUpgraded()).thenReturn(false);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        // Act
 //        subject.generateTransactionList(account);
 //        // Assert
@@ -176,7 +176,7 @@ public class TransactionListDataManagerTest extends RxTest {
 //        account.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.isUpgraded()).thenReturn(true);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        // Act
 //        double value = subject.getBtcBalance(account);
 //        // Assert
@@ -190,7 +190,7 @@ public class TransactionListDataManagerTest extends RxTest {
 //        account.setRealIdx(TransactionListDataManager.INDEX_ALL_REAL);
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.isUpgraded()).thenReturn(false);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        // Act
 //        double value = subject.getBtcBalance(account);
 //        // Assert
@@ -281,8 +281,8 @@ public class TransactionListDataManagerTest extends RxTest {
 //        // Arrange
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.getTransactionNotesMap()).thenReturn(new HashMap<>());
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
-//        when(payloadManager.savePayloadToServer()).thenReturn(true);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.savePayloadToServer()).thenReturn(true);
 //        // Act
 //        TestObserver<Boolean> observer = subject.updateTransactionNotes("hash", "notes").test();
 //        // Assert

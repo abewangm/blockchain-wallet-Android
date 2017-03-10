@@ -40,7 +40,11 @@ public class ApiModule {
 
     private static final int API_TIMEOUT = 30;
 
+    /**
+     * This should be phased out for {@link piuk.blockchain.android.ui.transactions.PayloadDataManager}
+     */
     @Provides
+    @Deprecated
     protected PayloadManager providePayloadManager() {
         return PayloadManager.getInstance();
     }
