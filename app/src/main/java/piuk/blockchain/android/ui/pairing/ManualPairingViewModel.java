@@ -19,8 +19,6 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-import static android.support.annotation.VisibleForTesting.PRIVATE;
-
 @SuppressWarnings("WeakerAccess")
 public class ManualPairingViewModel extends BaseViewModel {
 
@@ -30,7 +28,7 @@ public class ManualPairingViewModel extends BaseViewModel {
     @Inject protected AppUtil appUtil;
     @Inject protected AuthDataManager authDataManager;
     private DataListener dataListener;
-    @VisibleForTesting(otherwise = PRIVATE) boolean waitingForAuth = false;
+    @VisibleForTesting boolean waitingForAuth = false;
 
     public interface DataListener {
 

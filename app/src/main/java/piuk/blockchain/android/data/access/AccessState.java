@@ -82,8 +82,7 @@ public class AccessState {
 
                         return Observable.just(decryptedPassword);
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        throw Exceptions.propagate(new Throwable("Validate access failed"));
+                        throw Exceptions.propagate(new Throwable("Validate access failed", e));
                     }
                 } else {
                     throw Exceptions.propagate(new Throwable("Validate access failed"));

@@ -26,7 +26,6 @@ public class PayloadDataManager {
     // AUTH METHODS
     ///////////////////////////////////////////////////////////////////////////
 
-
     /**
      * Decrypts and initializes a wallet from a payload String. Handles both V3 and V1 wallets. Will
      * return a {@link DecryptionException} if the password isincorrect, otherwise can return a
@@ -106,6 +105,7 @@ public class PayloadDataManager {
      *
      * @return A {@link Completable} object
      */
+    // TODO: 10/03/2017 Remove schedulers, let viewmodels handle it
     public Completable syncPayloadWithServer() {
         return Completable.fromCallable(() -> {
             payloadManager.save();
@@ -121,6 +121,7 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      * @see IgnorableDefaultObserver
      */
+    // TODO: 10/03/2017 Remove schedulers, let viewmodels handle it
     public Completable updateBalancesAndTransactions() {
         return Completable.fromCallable(() -> {
             payloadManager.updateAllTransactions(50, 0);
@@ -140,7 +141,7 @@ public class PayloadDataManager {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // HELPER METHODS
+    // CONVENIENCE METHODS
     ///////////////////////////////////////////////////////////////////////////
 
     public Wallet getWallet() {

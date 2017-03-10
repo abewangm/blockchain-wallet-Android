@@ -24,7 +24,7 @@ import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
-import piuk.blockchain.android.util.AESUtilWrapper;
+import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
@@ -229,10 +229,9 @@ public class RecoverFundsViewModelTest {
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected AuthDataManager provideAuthDataManager(PayloadManager payloadManager,
+        protected AuthDataManager provideAuthDataManager(PayloadDataManager payloadDataManager,
                                                          PrefsUtil prefsUtil,
                                                          AppUtil appUtil,
-                                                         AESUtilWrapper aesUtilWrapper,
                                                          AccessState accessState,
                                                          StringUtils stringUtils) {
             return mAuthDataManager;
