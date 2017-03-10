@@ -1,14 +1,19 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
+
 import android.support.annotation.NonNull;
 
 import android.util.Log;
+import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -33,34 +38,39 @@ public class TransactionListDataManager {
         listUpdateSubject = PublishSubject.create();
     }
 
-    public void generateTransactionList(Object object) {
+    public void insertTransactionList(List<TransactionSummary> txList)
+        throws IOException, ApiException {
         transactionListStore.clearList();
-
-        if(object instanceof ConsolidatedAccount) {
-
-            ConsolidatedAccount consolidate = (ConsolidatedAccount)object;
-
-            if(consolidate.getType() == Type.ALL_ACCOUNTS) {
-                transactionListStore.insertTransactions(payloadManager.getWalletTransactions());
-            } else  if (consolidate.getType() == Type.ALL_IMPORTED_ADDRESSES) {
-                transactionListStore.insertTransactions(payloadManager.getImportedAddressesTransactions());
-            } else {
-                Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
-                return;
-            }
-        } else if (object instanceof Account) {
-            // V3
-            transactionListStore.insertTransactions(payloadManager.getAddressTransactions(((Account) object).getXpub()));
-        } else if (object instanceof LegacyAddress) {
-            // V2
-            transactionListStore.insertTransactions(payloadManager.getAddressTransactions(((LegacyAddress) object).getAddress()));
-        } else {
-            Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
-            return;
-        }
-
+        transactionListStore.insertTransactions(txList);
         listUpdateSubject.onNext(transactionListStore.getList());
         listUpdateSubject.onComplete();
+    }
+
+    public Observable<List<TransactionSummary>> fetchTransactions(Object object, int limit, int offset) {
+
+        return Observable.fromCallable(() -> {
+            List<TransactionSummary> result = new ArrayList<>();
+
+            if(object instanceof ConsolidatedAccount) {
+
+                ConsolidatedAccount consolidate = (ConsolidatedAccount)object;
+
+                if(consolidate.getType() == Type.ALL_ACCOUNTS) {
+                    result = payloadManager.getAllTransactions(limit, offset);
+                } else  if (consolidate.getType() == Type.ALL_IMPORTED_ADDRESSES) {
+                    result = payloadManager.getImportedAddressesTransactions(limit, offset);
+                } else {
+                    Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
+                }
+            } else if (object instanceof Account) {
+                // V3
+                result = payloadManager.getAccountTransactions(((Account) object).getXpub(), limit, offset);
+            } else {
+                Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
+            }
+
+            return result;
+        }).compose(RxUtil.applySchedulersToObservable());
     }
 
     /**

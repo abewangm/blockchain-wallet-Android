@@ -96,7 +96,7 @@ public class AccountDataManager {
     public Completable updateMultiAddress() {
         return Completable.fromCallable(() -> {
             // TODO: 09/03/2017  
-            payloadManager.updateAllTransactions(50, 0);
+            payloadManager.getAllTransactions(50, 0);
             return Void.TYPE;
         });
     }
