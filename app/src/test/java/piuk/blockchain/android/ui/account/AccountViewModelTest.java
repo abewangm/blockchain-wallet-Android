@@ -14,7 +14,7 @@ public class AccountViewModelTest {
 
 //    private AccountViewModel subject;
 //    @Mock AccountViewModel.DataListener activity;
-//    @Mock PayloadManager payloadManager;
+//    @Mock PayloadManager payloadDataManager;
 //    @Mock AccountDataManager accountDataManager;
 //    @Mock TransferFundsDataManager fundsDataManager;
 //    @Mock PrefsUtil prefsUtil;
@@ -62,7 +62,7 @@ public class AccountViewModelTest {
 //        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.just(triple));
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.isUpgraded()).thenReturn(true);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true)).thenReturn(true);
 //        // Act
 //        subject.checkTransferableLegacyFunds(false, true);
@@ -82,7 +82,7 @@ public class AccountViewModelTest {
 //        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.just(triple));
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.isUpgraded()).thenReturn(true);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true)).thenReturn(true);
 //        // Act
 //        subject.checkTransferableLegacyFunds(false, false);
@@ -99,7 +99,7 @@ public class AccountViewModelTest {
 //        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.just(triple));
 //        Payload mockPayload = mock(Payload.class);
 //        when(mockPayload.isUpgraded()).thenReturn(true);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        // Act
 //        subject.checkTransferableLegacyFunds(true, true);
 //        // Assert
@@ -325,7 +325,7 @@ public class AccountViewModelTest {
 //        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
 //        //noinspection SuspiciousMethodCalls
 //        when(mockPayload.getLegacyAddressStringList().contains(any())).thenReturn(true);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        // Act
 //        subject.onAddressScanned("17UovdU9ZvepPe75igTQwxqNME1HbnvMB7");
 //        // Assert
@@ -340,7 +340,7 @@ public class AccountViewModelTest {
 //        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
 //        //noinspection SuspiciousMethodCalls
 //        when(mockPayload.getLegacyAddressStringList().contains(any())).thenReturn(false);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        // Act
 //        subject.onAddressScanned("17UovdU9ZvepPe75igTQwxqNME1HbnvMB7");
 //        // Assert
@@ -382,7 +382,7 @@ public class AccountViewModelTest {
 //        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
 //        //noinspection SuspiciousMethodCalls
 //        when(mockPayload.getLegacyAddressStringList().contains(any())).thenReturn(true);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(accountDataManager.setPrivateKey(mockECKey, null)).thenReturn(Observable.just(true));
 //        // Act
 //        subject.handlePrivateKey(mockECKey, null);
@@ -402,7 +402,7 @@ public class AccountViewModelTest {
 //        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
 //        //noinspection SuspiciousMethodCalls
 //        when(mockPayload.getLegacyAddressStringList().contains(any())).thenReturn(true);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(accountDataManager.setPrivateKey(mockECKey, null)).thenReturn(Observable.just(false));
 //        // Act
 //        subject.handlePrivateKey(mockECKey, null);
@@ -421,7 +421,7 @@ public class AccountViewModelTest {
 //        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
 //        //noinspection SuspiciousMethodCalls
 //        when(mockPayload.getLegacyAddressStringList().contains(any())).thenReturn(false);
-//        when(payloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        // Act
 //        subject.handlePrivateKey(mockECKey, null);
 //        // Assert
@@ -448,12 +448,12 @@ public class AccountViewModelTest {
 //
 //    private class MockDataManagerModule extends DataManagerModule {
 //        @Override
-//        protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
+//        protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadDataManager, MultiAddrFactory multiAddrFactory) {
 //            return fundsDataManager;
 //        }
 //
 //        @Override
-//        protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
+//        protected AccountDataManager provideAccountDataManager(PayloadManager payloadDataManager, MultiAddrFactory multiAddrFactory) {
 //            return accountDataManager;
 //        }
 //    }
@@ -461,7 +461,7 @@ public class AccountViewModelTest {
 //    private class MockApiModule extends ApiModule {
 //        @Override
 //        protected PayloadManager providePayloadManager() {
-//            return payloadManager;
+//            return payloadDataManager;
 //        }
 //    }
 }

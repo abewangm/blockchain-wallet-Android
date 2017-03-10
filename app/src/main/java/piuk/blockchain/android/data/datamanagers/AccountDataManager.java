@@ -92,7 +92,6 @@ public class AccountDataManager {
      *
      * @return A {@link Completable} object
      */
-    @SuppressWarnings("ConstantConditions")
     public Completable updateMultiAddress() {
         return Completable.fromCallable(() -> {
             // TODO: 09/03/2017  

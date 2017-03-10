@@ -118,7 +118,9 @@ afterEvaluate {
 
 dependencies {
     compile files('libs/MyWalletHD.jar')
-    compile group: 'info.blockchain', name: 'api-client', version: '0.1.12-SNAPSHOT'
+    compile (group: 'info.blockchain', name: 'api-client', version: '0.1.12-SNAPSHOT') {
+        exclude group: 'org.json', module: 'json'
+    }
     compile "com.android.support:appcompat-v7:$supportVersion"
     compile "com.android.support:recyclerview-v7:$supportVersion"
     compile "com.android.support:cardview-v7:$supportVersion"

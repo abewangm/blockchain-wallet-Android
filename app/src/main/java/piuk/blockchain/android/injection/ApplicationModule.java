@@ -5,7 +5,6 @@ import android.app.NotificationManager;
 import android.content.Context;
 
 import info.blockchain.wallet.api.PersistentUrls;
-import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import javax.inject.Singleton;
@@ -13,6 +12,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -66,8 +66,8 @@ public class ApplicationModule {
     }
 
     @Provides
-    protected MultiAddressFactory provideMultiAddrFactory() {
-        return new MultiAddressFactory();
+    protected DynamicFeeCache provideDynamicFeeCache() {
+        return DynamicFeeCache.getInstance();
     }
 
     @Provides
