@@ -6,11 +6,11 @@ import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
-import java.io.UnsupportedEncodingException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Transaction;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,20 +87,20 @@ public class PaymentService {
      * Returns an {@link UnspentOutputs} object containing all the unspent outputs for a given
      * address.
      *
-     * @param address The addess you wish to query, as a String
+     * @param address The address you wish to query, as a String
      * @return An {@link Observable<UnspentOutputs>}
      */
     public Observable<UnspentOutputs> getUnspentOutputs(String address) {
         return Observable.fromCallable(() -> {
-            Response<UnspentOutputs> call = payment.getUnspentCoins(Collections.singletonList(address)).execute();
+            Response<UnspentOutputs> response = payment.getUnspentCoins(Collections.singletonList(address)).execute();
 
-            if (call.isSuccessful()) {
-                return call.body();
-            } else if (call.code() == 500) {
+            if (response.isSuccessful()) {
+                return response.body();
+            } else if (response.code() == 500) {
                 // If no unspent outputs available server responds with 500
                 return UnspentOutputs.fromJson("{\"unspent_outputs\":[]}");
             } else {
-                throw new ApiException("Unspent API call failed.");
+                throw new ApiException(response.code() + ": " + response.errorBody());
             }
         });
     }
@@ -119,8 +119,7 @@ public class PaymentService {
      */
     public SpendableUnspentOutputs getSpendableCoins(UnspentOutputs unspentCoins,
                                                      BigInteger paymentAmount,
-                                                     BigInteger feePerKb)
-        throws UnsupportedEncodingException {
+                                                     BigInteger feePerKb) throws UnsupportedEncodingException {
         return payment.getSpendableCoins(unspentCoins, paymentAmount, feePerKb);
     }
 

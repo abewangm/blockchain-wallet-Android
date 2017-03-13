@@ -1,14 +1,13 @@
 package piuk.blockchain.android.ui.balance;
 
-import android.app.Activity;
-import android.util.Log;
-import android.view.View;
 import com.google.common.collect.HashBiMap;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.util.Log;
 
+import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.exceptions.ApiException;
@@ -16,9 +15,7 @@ import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
-import info.blockchain.wallet.settings.SettingsManager;
 
-import io.reactivex.exceptions.Exceptions;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -29,13 +26,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.Completable;
-import io.reactivex.Observable;
-import org.apache.commons.lang3.NotImplementedException;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
@@ -46,6 +41,7 @@ import piuk.blockchain.android.ui.account.ConsolidatedAccount.Type;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -68,6 +64,8 @@ public class BalanceViewModel extends BaseViewModel {
     @Inject StringUtils stringUtils;
     @Inject TransactionListDataManager transactionListDataManager;
     @Inject ContactsDataManager contactsDataManager;
+    @Inject PayloadDataManager payloadDataManager;
+    @Inject SettingsDataManager settingsDataManager;
 
     public interface DataListener {
 
@@ -150,21 +148,21 @@ public class BalanceViewModel extends BaseViewModel {
                                             storeTimeOfLastSecurityPrompt();
                                         }
                                     } else if (isBackedUp() && !getIfNeverPrompt2Fa()) {
-                                        throw new NotImplementedException("todo");
-                                        // TODO: 22/02/2017  
-//                                        compositeDisposable.add(
-//                                                getSettingsApi()
-//                                                        .compose(RxUtil.applySchedulersToObservable())
-//                                                        .subscribe(settings -> {
-//                                                            if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
-//                                                                // Show dialog for 2FA, store date of dialog launch
-//                                                                if (getTimeOfLastSecurityPrompt() == 0L
-//                                                                        || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-//                                                                    dataListener.show2FaDialog();
-//                                                                    storeTimeOfLastSecurityPrompt();
-//                                                                }
-//                                                            }
-//                                                        }, Throwable::printStackTrace));
+                                        compositeDisposable.add(
+                                                settingsDataManager.initSettings(
+                                                        payloadDataManager.getWallet().getGuid(),
+                                                        payloadDataManager.getWallet().getSharedKey())
+                                                        .compose(RxUtil.applySchedulersToObservable())
+                                                        .subscribe(settings -> {
+                                                            if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
+                                                                // Show dialog for 2FA, store date of dialog launch
+                                                                if (getTimeOfLastSecurityPrompt() == 0L
+                                                                        || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
+                                                                    dataListener.show2FaDialog();
+                                                                    storeTimeOfLastSecurityPrompt();
+                                                                }
+                                                            }
+                                                        }, Throwable::printStackTrace));
                                     }
                                 }
 
@@ -215,7 +213,7 @@ public class BalanceViewModel extends BaseViewModel {
         }
 
         //"All" - total balance
-        if (activeAccounts.size() > 1 || activeLegacyAddresses.size() > 0) {
+        if (activeAccounts.size() > 1 || !activeLegacyAddresses.isEmpty()) {
             if (payloadManager.getPayload().isUpgraded()) {
 
                 //Only V3 will display "All"
@@ -244,7 +242,7 @@ public class BalanceViewModel extends BaseViewModel {
         for (Account item : activeAccounts) {
 
             //Give unlabeled account a label
-            if (item.getLabel().trim().length() == 0) item.setLabel("Account: " + accountIndex);
+            if (item.getLabel().trim().isEmpty()) item.setLabel("Account: " + accountIndex);
 
             BigInteger bal = payloadManager.getAddressBalance(item.getXpub());
             String balanceString = getBalanceString(true, bal.longValue());
@@ -261,7 +259,7 @@ public class BalanceViewModel extends BaseViewModel {
         }
 
         //Add "Imported Addresses" or "Total Funds" to map
-        if (activeLegacyAddresses.size() > 0) {
+        if (!activeLegacyAddresses.isEmpty()) {
             //Only V3 - Consolidate and add Legacy addresses to "Imported Addresses" at bottom of accounts spinner
 
             ConsolidatedAccount importedAddresses = new ConsolidatedAccount();
@@ -272,11 +270,11 @@ public class BalanceViewModel extends BaseViewModel {
             String balance = getBalanceString(true, bal.longValue());
 
             activeAccountAndAddressList.add(new ItemAccount(
-                importedAddresses.getLabel(),
-                balance,
-                null,
-                bal.longValue(),
-                null));
+                    importedAddresses.getLabel(),
+                    balance,
+                    null,
+                    bal.longValue(),
+                    null));
             activeAccountAndAddressBiMap.put(importedAddresses, spinnerIndex);
             spinnerIndex++;
 
@@ -297,7 +295,7 @@ public class BalanceViewModel extends BaseViewModel {
     void onTransactionListRefreshed() {
         dataListener.setShowRefreshing(true);
         compositeDisposable.add(
-                updateBalancesAndTransactions()
+                payloadDataManager.updateBalancesAndTransactions()
                         .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
                         .subscribe(() -> {
                             updateAccountList();
@@ -328,8 +326,9 @@ public class BalanceViewModel extends BaseViewModel {
 
         //Update transactions
         compositeDisposable.add(transactionListDataManager.fetchTransactions(object, 50, 0)
-            .subscribe(txList -> insertTransactionsAndDisplay(txList)
-                ,throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
+                .subscribe(
+                        this::insertTransactionsAndDisplay,
+                        throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
 
         // TODO: 02/03/2017
         // Returning from SendFragment the following will happen
@@ -479,7 +478,7 @@ public class BalanceViewModel extends BaseViewModel {
                             paymentRequest.setId(fctxId);
 
                             compositeDisposable.add(
-                                    getNextReceiveAddress(getCorrectedAccountIndex(accountPosition))
+                                    payloadDataManager.getNextReceiveAddress(getCorrectedAccountIndex(accountPosition))
                                             .doOnNext(paymentRequest::setAddress)
                                             .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
                                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())
@@ -569,26 +568,6 @@ public class BalanceViewModel extends BaseViewModel {
 
     private boolean getIfNeverPrompt2Fa() {
         return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER, false);
-    }
-
-    private Observable<SettingsManager> getSettingsApi() {
-        return Observable.fromCallable(() -> new SettingsManager(
-                payloadManager.getPayload().getGuid(),
-                payloadManager.getPayload().getSharedKey()));
-    }
-
-    private Completable updateBalancesAndTransactions() {
-        return Completable.fromCallable(() -> {
-            // TODO: 22/02/2017  
-//            payloadManager.updateBalancesAndTransactions();
-            return Void.TYPE;
-        }).compose(RxUtil.applySchedulersToCompletable());
-    }
-
-    private Observable<String> getNextReceiveAddress(int defaultIndex) {
-        // TODO: 21/02/2017
-        throw new NotImplementedException("");
-//        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
     }
 
     private int getCorrectedAccountIndex(int accountIndex) {

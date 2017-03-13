@@ -73,15 +73,15 @@ public class DataManagerModule {
     @ViewModelScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
                                                                            TransactionListStore transactionListStore) {
-        return new TransactionListDataManager(
-            payloadManager,
-            transactionListStore);
+        return new TransactionListDataManager(payloadManager, transactionListStore);
     }
 
     @Provides
     @ViewModelScope
-    protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager) {
-        return new TransferFundsDataManager(payloadManager);
+    protected TransferFundsDataManager provideTransferFundsDataManager(PayloadDataManager payloadDataManager,
+                                                                       SendDataManager sendDataManager,
+                                                                       DynamicFeeCache dynamicFeeCache) {
+        return new TransferFundsDataManager(payloadDataManager, sendDataManager, dynamicFeeCache);
     }
 
     @Provides

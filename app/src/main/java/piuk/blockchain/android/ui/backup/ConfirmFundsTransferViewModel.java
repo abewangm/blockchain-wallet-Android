@@ -14,7 +14,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.injection.Injector;
@@ -140,22 +139,22 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
         boolean archiveAll = mDataListener.getIfArchiveChecked();
         mDataListener.setPaymentButtonEnabled(false);
         mDataListener.showProgressDialog();
-        // TODO: 21/02/2017  
-//        compositeDisposable.add(
-//                mFundsDataManager.sendPayment(new Payment(), mPendingTransactions, secondPassword)
-//                        .subscribe(s -> {
-//                            mDataListener.hideProgressDialog();
-//                            mDataListener.showToast(R.string.transfer_confirmed, ToastCustom.TYPE_OK);
-//                            if (archiveAll) {
-//                                archiveAll();
-//                            } else {
-//                                mDataListener.dismissDialog();
-//                            }
-//                        }, throwable -> {
-//                            mDataListener.hideProgressDialog();
-//                            mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-//                            mDataListener.dismissDialog();
-//                        }));
+
+        compositeDisposable.add(
+                mFundsDataManager.sendPayment(new Payment(), mPendingTransactions, secondPassword)
+                        .doAfterTerminate(() -> mDataListener.hideProgressDialog())
+                        .subscribe(s -> {
+                            mDataListener.hideProgressDialog();
+                            mDataListener.showToast(R.string.transfer_confirmed, ToastCustom.TYPE_OK);
+                            if (archiveAll) {
+                                archiveAll();
+                            } else {
+                                mDataListener.dismissDialog();
+                            }
+                        }, throwable -> {
+                            mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                            mDataListener.dismissDialog();
+                        }));
     }
 
     /**
@@ -187,20 +186,13 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
 
         compositeDisposable.add(
                 mFundsDataManager.savePayloadToServer()
-                        .subscribe(aBoolean -> {
-                            if (aBoolean) {
-                                mDataListener.hideProgressDialog();
-                                mDataListener.showToast(R.string.transfer_archive, ToastCustom.TYPE_OK);
-                                mDataListener.dismissDialog();
-                            } else {
-                                throw Exceptions.propagate(new Throwable("Syncing Payload failed"));
-                            }
-
-                        }, throwable -> {
+                        .doAfterTerminate(() -> {
                             mDataListener.hideProgressDialog();
-                            mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
                             mDataListener.dismissDialog();
                         })
+                        .subscribe(
+                                () -> mDataListener.showToast(R.string.transfer_archive, ToastCustom.TYPE_OK),
+                                throwable -> mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR))
         );
     }
 

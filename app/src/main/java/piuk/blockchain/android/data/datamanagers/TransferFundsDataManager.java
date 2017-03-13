@@ -1,36 +1,43 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payment.Payment;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.bitcoinj.core.ECKey;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
+import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.annotations.Thunk;
-import retrofit2.Response;
 
 @SuppressWarnings("WeakerAccess")
 public class TransferFundsDataManager {
 
-    @Thunk PayloadManager payloadManager;
+    @Thunk PayloadDataManager payloadDataManager;
+    private SendDataManager sendDataManager;
+    private DynamicFeeCache dynamicFeeCache;
 
-    public TransferFundsDataManager(PayloadManager payloadManager) {
-        this.payloadManager = payloadManager;
+    public TransferFundsDataManager(PayloadDataManager payloadDataManager,
+                                    SendDataManager sendDataManager,
+                                    DynamicFeeCache dynamicFeeCache) {
+        this.payloadDataManager = payloadDataManager;
+        this.sendDataManager = sendDataManager;
+        this.dynamicFeeCache = dynamicFeeCache;
     }
 
     /**
@@ -42,67 +49,56 @@ public class TransferFundsDataManager {
      * @return Returns a Map which bundles together the List of {@link PendingTransaction} objects,
      * as well as a Pair which contains the total to send and the total fees, in that order.
      */
-    public Observable<Triple<List<PendingTransaction>, Long, Long>> getTransferableFundTransactionList(
-        int addressToReceiveIndex) {
+    public Observable<Triple<List<PendingTransaction>, Long, Long>> getTransferableFundTransactionList(int addressToReceiveIndex) {
         return Observable.fromCallable(() -> {
 
-                BigInteger suggestedFeePerKb = new BigDecimal(
-                    DynamicFeeCache.getInstance().getCachedDynamicFee().getDefaultFee().getFee())
+            BigInteger suggestedFeePerKb = BigDecimal.valueOf(
+                    dynamicFeeCache.getCachedDynamicFee().getDefaultFee().getFee())
                     .toBigInteger();
 
-                List<PendingTransaction> pendingTransactionList = new ArrayList<>();
-                List<LegacyAddress> legacyAddresses = payloadManager.getPayload()
-                    .getLegacyAddressList();
+            List<PendingTransaction> pendingTransactionList = new ArrayList<>();
+            List<LegacyAddress> legacyAddresses = payloadDataManager.getWallet().getLegacyAddressList();
 
-                long totalToSend = 0L;
-                long totalFee = 0L;
+            long totalToSend = 0L;
+            long totalFee = 0L;
 
-                for (LegacyAddress legacyAddress : legacyAddresses) {
+            for (LegacyAddress legacyAddress : legacyAddresses) {
 
-//                    if (!legacyAddress.isWatchOnly()
-//                        && multiAddrFactory.getLegacyBalance(legacyAddress.getAddress()) > 0) {
+                if (!legacyAddress.isWatchOnly()
+                        && payloadDataManager.getAddressBalance(legacyAddress.getAddress())
+                        .compareTo(BigInteger.ZERO) == 1) {
 
-//                        JSONObject unspentResponse = unspentApi
-//                            .getUnspentOutputs(legacyAddress.getAddress());
-//                        Response<UnspentOutputs> coins = Payment.getUnspentCoins(Arrays.asList(legacyAddress.getAddress())).execute();
+                    UnspentOutputs unspentOutputs =
+                            sendDataManager.getUnspentOutputs(legacyAddress.getAddress())
+                                    .blockingFirst();
+                    Pair<BigInteger, BigInteger> sweepableCoins =
+                            sendDataManager.getSweepableCoins(unspentOutputs, suggestedFeePerKb);
+                    BigInteger sweepAmount = sweepableCoins.getLeft();
 
-                        // TODO: 22/02/2017
-//                        if (unspentResponse != null) {
-//
-//                            Pair<BigInteger, BigInteger> sweepableCoins = Payment
-//                                .getSweepableCoins(unspentOutputs, suggestedFeePerKb);
-//                            BigInteger sweepAmount = sweepableCoins.getLeft();
-//                            BigInteger absFeeForSweep = sweepableCoins.getRight();
-//
-//
-//                            UnspentOutputs coins = Payment.getUnspentCoins(unspentResponse);
-//                            SweepBundle sweepBundle = payment.getSweepBundle(coins, suggestedFeePerKb);
-//
-//                            // Don't sweep if there are still unconfirmed funds in address
-//                            if (coins.getNotice() == null
-//                                && sweepBundle.getSweepAmount().compareTo(SendCoins.bDust) == 1) {
-//
-//                                PendingTransaction pendingSpend = new PendingTransaction();
-//                                pendingSpend.unspentOutputBundle = payment
-//                                    .getSpendableCoins(coins, sweepBundle.getSweepAmount(),
-//                                        suggestedFeePerKb);
-//                                pendingSpend.sendingObject = new ItemAccount(legacyAddress.getLabel(),
-//                                    "", "", null, legacyAddress);
-//                                pendingSpend.bigIntFee = pendingSpend.unspentOutputBundle
-//                                    .getAbsoluteFee();
-//                                pendingSpend.bigIntAmount = sweepBundle.getSweepAmount();
-//                                pendingSpend.addressToReceiveIndex = addressToReceiveIndex;
-//                                totalToSend += pendingSpend.bigIntAmount.longValue();
-//                                totalFee += pendingSpend.bigIntFee.longValue();
-//                                pendingTransactionList.add(pendingSpend);
-//                            }
-//                        }
-//                    }
+                    // Don't sweep if there are still unconfirmed funds in address
+                    if (unspentOutputs.getNotice() == null && sweepAmount.compareTo(Payment.DUST) == 1) {
+
+                        PendingTransaction pendingSpend = new PendingTransaction();
+                        pendingSpend.unspentOutputBundle = sendDataManager
+                                .getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
+                        pendingSpend.sendingObject = new ItemAccount(
+                                legacyAddress.getLabel(),
+                                "",
+                                "",
+                                null,
+                                legacyAddress);
+                        pendingSpend.bigIntFee = pendingSpend.unspentOutputBundle.getAbsoluteFee();
+                        pendingSpend.bigIntAmount = sweepAmount;
+                        pendingSpend.addressToReceiveIndex = addressToReceiveIndex;
+                        totalToSend += pendingSpend.bigIntAmount.longValue();
+                        totalFee += pendingSpend.bigIntFee.longValue();
+                        pendingTransactionList.add(pendingSpend);
+                    }
                 }
-
-                return Triple.of(pendingTransactionList, totalToSend, totalFee);
             }
-        ).compose(RxUtil.applySchedulersToObservable());
+
+            return Triple.of(pendingTransactionList, totalToSend, totalFee);
+        }).compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -113,7 +109,7 @@ public class TransferFundsDataManager {
      * objects, as well as the total to send and the total fees, in that order.
      */
     public Observable<Triple<List<PendingTransaction>, Long, Long>> getTransferableFundTransactionListForDefaultAccount() {
-        return getTransferableFundTransactionList(payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
+        return getTransferableFundTransactionList(payloadDataManager.getWallet().getHdWallets().get(0).getDefaultAccountIdx());
     }
 
     /**
@@ -121,102 +117,78 @@ public class TransferFundsDataManager {
      * which is the Tx hash for each successful payment, and calls onCompleted when all
      * PendingTransactions have been finished successfully.
      *
-     * @param payment             A new {@link Payment} object
      * @param pendingTransactions A list of {@link PendingTransaction} objects
      * @param secondPassword      The double encryption password if necessary
      * @return An {@link Observable<String>}
      */
-    public Observable<String> sendPayment(@NonNull Payment payment,
-                                          @NonNull List<PendingTransaction> pendingTransactions,
+    public Observable<String> sendPayment(List<PendingTransaction> pendingTransactions,
                                           @Nullable String secondPassword) {
-        return getPaymentObservable(payment, pendingTransactions, secondPassword)
+        return getPaymentObservable(pendingTransactions, secondPassword)
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    private Observable<String> getPaymentObservable(Payment payment, List<PendingTransaction> pendingTransactions, String secondPassword) {
-        throw new NotImplementedException("todo");
-        // TODO: 22/02/2017  
-//        return Observable.create(subscriber -> {
-//            for (int i = 0; i < pendingTransactions.size(); i++) {
-//                PendingTransaction pendingTransaction = pendingTransactions.get(i);
+    private Observable<String> getPaymentObservable(List<PendingTransaction> pendingTransactions, String secondPassword) {
+        return Observable.create(subscriber -> {
+            for (int i = 0; i < pendingTransactions.size(); i++) {
+                PendingTransaction pendingTransaction = pendingTransactions.get(i);
+
+                final int finalI = i;
+                LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
+                String changeAddress = legacyAddress.getAddress();
+                String receivingAddress =
+                        payloadDataManager.getNextReceiveAddress(pendingTransaction.addressToReceiveIndex)
+                                .blockingFirst();
+
+                List<ECKey> keys = new ArrayList<>();
+                keys.add(payloadDataManager.getAddressECKey(legacyAddress, secondPassword));
+
+                sendDataManager.submitPayment(
+                        pendingTransaction.unspentOutputBundle,
+                        keys,
+                        receivingAddress,
+                        changeAddress,
+                        pendingTransaction.bigIntFee,
+                        pendingTransaction.bigIntAmount)
+                        .blockingSubscribe(s -> {
+                            if (!subscriber.isDisposed()) {
+                                subscriber.onNext(s);
+                            }
+                            // TODO: 13/03/2017 These steps need completing but aren't currently available
+//                            payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().get(pendingTransaction.addressToReceiveIndex).incReceive();
 //
-//                final int finalI = i;
-//                try {
+//                            long currentTotalBalance = payloadDataManager.getImportedAddressesBalance().longValue();
+//                            long currentAddressBalance = payloadDataManager.getAddressBalance(legacyAddress.getAddress()).longValue();
+//                            long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
 //
-//                    LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
-//                    String changeAddress = legacyAddress.getAddress();
-//                    String receivingAddress = payloadManager.getNextReceiveAddress(pendingTransaction.addressToReceiveIndex);
-//
-//                    List<ECKey> keys = new ArrayList<>();
-//                    if (payloadManager.getPayload().isDoubleEncrypted()) {
-//                        ECKey walletKey = legacyAddress.getECKey(secondPassword);
-//                        keys.add(walletKey);
-//                    } else {
-//                        ECKey walletKey = legacyAddress.getECKey();
-//                        keys.add(walletKey);
-//                    }
-//
-//                    payment.submitPayment(
-//                            pendingTransaction.unspentOutputBundle,
-//                            keys,
-//                            receivingAddress,
-//                            changeAddress,
-//                            pendingTransaction.bigIntFee,
-//                            pendingTransaction.bigIntAmount,
-//                            new Payment.SubmitPaymentListener() {
-//                                @Override
-//                                public void onSuccess(String s) {
-//                                    if (!subscriber.isDisposed()) {
-//                                        subscriber.onNext(s);
-//                                    }
-//
-//                                    payloadManager.getPayload().getHdWallet().getAccounts().get(pendingTransaction.addressToReceiveIndex).incReceive();
-//
-//                                    long currentTotalBalance = multiAddrFactory.getLegacyBalance();
-//                                    long currentAddressBalance = multiAddrFactory.getLegacyBalance(legacyAddress.getAddress());
-//                                    long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
-//
-//                                    // Update Balances temporarily rather than wait for sync
-//                                    multiAddrFactory.setLegacyBalance(currentTotalBalance - spentAmount);
-//                                    multiAddrFactory.setLegacyBalance(
-//                                            legacyAddress.getAddress(),
-//                                            currentAddressBalance - spentAmount);
-//
-//                                    if (finalI == pendingTransactions.size() - 1) {
-//                                        savePayloadToServer()
-//                                                .blockingSubscribe(
-//                                                        aBoolean -> {},
-//                                                        Throwable::printStackTrace);
-//                                        if (!subscriber.isDisposed()) {
-//                                            subscriber.onComplete();
-//                                        }
-//                                    }
-//                                }
-//
-//                                @Override
-//                                public void onFail(String error) {
-//                                    if (!subscriber.isDisposed()) {
-//                                        subscriber.onError(new Throwable(error));
-//                                    }
-//                                }
-//                            });
-//                } catch (Exception e) {
-//                    if (!subscriber.isDisposed()) {
-//                        subscriber.onError(e);
-//                    }
-//                }
-//            }
-//        });
+//                             Update Balances temporarily rather than wait for sync
+//                            multiAddrFactory.setLegacyBalance(currentTotalBalance - spentAmount);
+//                            multiAddrFactory.setLegacyBalance(legacyAddress.getAddress(), currentAddressBalance - spentAmount);
+
+                            if (finalI == pendingTransactions.size() - 1) {
+                                savePayloadToServer().subscribe(new IgnorableDefaultObserver<>());
+
+                                if (!subscriber.isDisposed()) {
+                                    subscriber.onComplete();
+                                }
+                            }
+
+                        }, throwable -> {
+                            if (!subscriber.isDisposed()) {
+                                subscriber.onError(new Throwable(throwable));
+                            }
+                        });
+            }
+        });
     }
 
     /**
      * Syncs the Wallet to the server, for instance after
      * archiving some addresses.
      *
-     * @return boolean indicating success or not
+     * @return A {@link Completable} object
      */
-    public Observable<Boolean> savePayloadToServer() {
-        return Observable.fromCallable(() -> payloadManager.save())
-                .compose(RxUtil.applySchedulersToObservable());
+    public Completable savePayloadToServer() {
+        return payloadDataManager.syncPayloadWithServer()
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 }

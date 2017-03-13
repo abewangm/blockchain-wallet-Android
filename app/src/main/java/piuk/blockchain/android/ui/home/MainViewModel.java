@@ -70,6 +70,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected Context applicationContext;
     @Inject protected StringUtils stringUtils;
     @Inject protected SettingsDataManager settingsDataManager;
+    @Inject protected DynamicFeeCache dynamicFeeCache;
 
     public interface DataListener {
 
@@ -402,7 +403,7 @@ public class MainViewModel extends BaseViewModel {
         compositeDisposable.add(
                 sendDataManager.getSuggestedFee()
                         .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(feeList -> DynamicFeeCache.getInstance().setCachedDynamicFee(feeList),
+                        .subscribe(feeList -> dynamicFeeCache.setCachedDynamicFee(feeList),
                                 Throwable::printStackTrace));
     }
 
@@ -439,7 +440,7 @@ public class MainViewModel extends BaseViewModel {
     public void destroy() {
         super.destroy();
         appUtil.deleteQR();
-        DynamicFeeCache.getInstance().destroy();
+        dynamicFeeCache.destroy();
         ExchangeRateFactory.getInstance().stopTicker();
     }
 

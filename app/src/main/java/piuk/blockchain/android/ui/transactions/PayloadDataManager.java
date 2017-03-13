@@ -6,7 +6,16 @@ import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
+
+import org.bitcoinj.core.ECKey;
+import org.spongycastle.crypto.InvalidCipherTextException;
+
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+
+import javax.annotation.Nullable;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -140,6 +149,32 @@ public class PayloadDataManager {
         return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account));
     }
 
+    /**
+     * Returns an {@link ECKey} for a given {@link LegacyAddress}, optionally with a second password
+     * should the private key be encrypted.
+     *
+     * @param legacyAddress  The {@link  LegacyAddress} to generate an Elliptic Curve Key for
+     * @param secondPassword An optional second password, necessary if the private key is encrypted
+     * @return An Elliptic Curve Key object {@link ECKey}
+     * @throws UnsupportedEncodingException Thrown if the private key is formatted incorrectly
+     * @throws DecryptionException          Thrown if the supplied password is wrong
+     * @throws InvalidCipherTextException   Thrown if there's an issue decrypting the private key
+     * @see LegacyAddress#isPrivateKeyEncrypted()
+     */
+    public ECKey getAddressECKey(LegacyAddress legacyAddress, @Nullable String secondPassword)
+            throws UnsupportedEncodingException, DecryptionException, InvalidCipherTextException {
+        return payloadManager.getAddressECKey(legacyAddress, secondPassword);
+    }
+
+    /**
+     * Returns the balance for all imported addresses
+     *
+     * @return A {@link BigInteger} object
+     */
+    public BigInteger getImportedAddressesBalance() {
+        return payloadManager.getImportedAddressesBalance();
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // CONVENIENCE METHODS
     ///////////////////////////////////////////////////////////////////////////
@@ -152,4 +187,16 @@ public class PayloadDataManager {
         return getWallet().getHdWallets().get(0).getDefaultAccountIdx();
     }
 
+    /**
+     * Returns the balance of an address. If the address isn't found in the address map object, the
+     * method will return {@link BigInteger#ZERO} instead of a null object.
+     *
+     * @param address The address whose balance you wish to query
+     * @return A {@link BigInteger} representing the total funds in the address
+     */
+    @NonNull
+    public BigInteger getAddressBalance(String address) {
+        return payloadManager.getAddressBalance(address) != null
+                ? payloadManager.getAddressBalance(address) : BigInteger.ZERO;
+    }
 }

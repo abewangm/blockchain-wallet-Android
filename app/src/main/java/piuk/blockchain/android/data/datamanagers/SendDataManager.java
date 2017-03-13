@@ -4,12 +4,12 @@ import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
-import java.io.UnsupportedEncodingException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.BIP38PrivateKey;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.List;
 

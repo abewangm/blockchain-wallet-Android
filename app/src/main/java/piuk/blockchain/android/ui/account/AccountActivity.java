@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.account;
 
-import android.support.v7.app.AlertDialog.Builder;
 import com.google.zxing.BarcodeFormat;
 
 import android.Manifest;
@@ -32,11 +31,11 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import java.util.Locale;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityAccountsBinding;
@@ -46,11 +45,8 @@ import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
-import piuk.blockchain.android.ui.transactions.TransactionDetailViewModel;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.ui.zxing.Intents;
-import piuk.blockchain.android.util.DateUtil;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -201,7 +197,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 .setView(ViewUtils.getAlertDialogEditTextLayout(this, editText))
                 .setCancelable(false)
                 .setPositiveButton(R.string.save_name, (dialog, whichButton) -> {
-                    if (editText.getText().toString().trim().length() > 0) {
+                    if (!editText.getText().toString().trim().isEmpty()) {
                         addAccount(editText.getText().toString().trim());
                     } else {
                         ToastCustom.makeText(AccountActivity.this, getResources().getString(R.string.label_cant_be_empty), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
@@ -243,9 +239,10 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             String label = accountClone.get(i).getLabel();
             String balance = getAccountBalance(i);
 
-            if (label != null && label.length() > ADDRESS_LABEL_MAX_LENGTH)
+            if (label != null && label.length() > ADDRESS_LABEL_MAX_LENGTH) {
                 label = label.substring(0, ADDRESS_LABEL_MAX_LENGTH) + "...";
-            if (label == null || label.length() == 0) label = "";
+            }
+            if (label == null || label.isEmpty()) label = "";
 
             accountsAndImportedList.add(new AccountItem(correctedPosition,
                     label,
@@ -262,11 +259,11 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         accountsAndImportedList.add(new AccountItem(AccountItem.TYPE_IMPORT_ADDRESS_BUTTON));
 
         ConsolidatedAccount consolidatedAccount = null;
-        if (payloadManager.getPayload().getLegacyAddressList().size() > 0) {
+        if (!payloadManager.getPayload().getLegacyAddressList().isEmpty()) {
 
             consolidatedAccount = new ConsolidatedAccount(getString(R.string.imported_addresses),
-                payloadManager.getPayload().getLegacyAddressList(),
-                payloadManager.getImportedAddressesBalance().longValue());
+                    payloadManager.getPayload().getLegacyAddressList(),
+                    payloadManager.getImportedAddressesBalance().longValue());
         }
 
         if (consolidatedAccount != null) {
@@ -279,8 +276,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
                 if (label != null && label.length() > ADDRESS_LABEL_MAX_LENGTH)
                     label = label.substring(0, ADDRESS_LABEL_MAX_LENGTH) + "...";
-                if (label == null || label.length() == 0) label = "";
-                if (address == null || address.length() == 0) address = "";
+                if (label == null || label.isEmpty()) label = "";
+                if (address == null || address.isEmpty()) address = "";
 
                 accountsAndImportedList.add(new AccountItem(correctedPosition,
                         label,
@@ -322,8 +319,9 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     private String getAccountBalance(int index) {
         String address = payloadManager.getXpubFromAccountIndex(index);
-        Long amount = payloadManager.getAddressBalance(address).longValue();
-        if (amount == null) amount = 0L;
+        BigInteger addressBalance = payloadManager.getAddressBalance(address);
+        // Archived addresses/xPubs aren't parsed, so balance will be null
+        Long amount = addressBalance != null ? addressBalance.longValue() : 0L;
 
         String unit = (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
 
@@ -402,7 +400,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 .setCancelable(false)
                 .setPositiveButton(R.string.save_name, (dialog, whichButton) -> {
                     String label = editText.getText().toString();
-                    if (label.trim().length() > 0) {
+                    if (!label.trim().isEmpty()) {
                         address.setLabel(label);
                     } else {
                         address.setLabel(address.getAddress());
@@ -486,6 +484,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         transferFundsMenuItem.setVisible(visible);
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {

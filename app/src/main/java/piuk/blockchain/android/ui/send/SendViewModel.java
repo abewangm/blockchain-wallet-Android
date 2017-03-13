@@ -100,6 +100,7 @@ public class SendViewModel extends BaseViewModel {
     @Inject SendDataManager sendDataManager;
     @Inject ReceiveDataManager receiveDataManager;
     @Inject AccountDataManager accountDataManager;
+    @Inject DynamicFeeCache dynamicFeeCache;
 
     SendViewModel(SendContract.DataListener dataListener, Locale locale) {
         Injector.getInstance().getDataManagerComponent().inject(this);
@@ -325,13 +326,13 @@ public class SendViewModel extends BaseViewModel {
      * Get cached dynamic fee from Bci dynamic fee API
      */
     private void getSuggestedFee() {
-        sendModel.dynamicFeeList = DynamicFeeCache.getInstance().getCachedDynamicFee();
+        sendModel.dynamicFeeList = dynamicFeeCache.getCachedDynamicFee();
 
         // Refresh fee cache
         compositeDisposable.add(
                 sendDataManager.getSuggestedFee()
-                        .doAfterTerminate(() -> sendModel.dynamicFeeList = DynamicFeeCache.getInstance().getCachedDynamicFee())
-                        .subscribe(suggestedFee -> DynamicFeeCache.getInstance().setCachedDynamicFee(suggestedFee)));
+                        .doAfterTerminate(() -> sendModel.dynamicFeeList = dynamicFeeCache.getCachedDynamicFee())
+                        .subscribe(suggestedFee -> dynamicFeeCache.setCachedDynamicFee(suggestedFee)));
     }
 
     /**
