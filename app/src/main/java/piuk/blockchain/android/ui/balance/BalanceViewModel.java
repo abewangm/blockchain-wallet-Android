@@ -41,6 +41,7 @@ import piuk.blockchain.android.ui.account.ConsolidatedAccount.Type;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -66,6 +67,7 @@ public class BalanceViewModel extends BaseViewModel {
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadDataManager payloadDataManager;
     @Inject SettingsDataManager settingsDataManager;
+    @Inject SwipeToReceiveHelper swipeToReceiveHelper;
 
     public interface DataListener {
 
@@ -179,6 +181,18 @@ public class BalanceViewModel extends BaseViewModel {
                         refreshFacilitatedTransactions();
                     }
                 });
+    }
+
+    boolean areLauncherShortcutsEnabled() {
+        return prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true);
+    }
+
+    public PayloadDataManager getPayloadDataManager() {
+        return payloadDataManager;
+    }
+
+    void storeSwipeReceiveAddresses() {
+        swipeToReceiveHelper.updateAndStoreAddresses();
     }
 
     @SuppressWarnings("Convert2streamapi")

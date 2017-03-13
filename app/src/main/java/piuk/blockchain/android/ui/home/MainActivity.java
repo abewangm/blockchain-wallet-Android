@@ -59,7 +59,6 @@ import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
-import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AndroidUtils;
@@ -203,17 +202,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     protected void onResume() {
         super.onResume();
         appUtil.deleteQR();
-        viewModel.storeSwipeReceiveAddresses();
         resetNavigationDrawer();
-
-        if (AndroidUtils.is25orHigher() && viewModel.areLauncherShortcutsEnabled()) {
-            LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(
-                    this,
-                    viewModel.getPayloadDataManager(),
-                    getSystemService(ShortcutManager.class));
-
-            launcherShortcutHelper.generateReceiveShortcuts();
-        }
     }
 
     @Override

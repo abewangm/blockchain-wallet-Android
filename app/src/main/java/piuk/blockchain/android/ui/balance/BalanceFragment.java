@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
@@ -44,7 +45,9 @@ import piuk.blockchain.android.ui.home.SecurityPromptDialog;
 import piuk.blockchain.android.ui.home.TransactionSelectedListener;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.settings.SettingsFragment;
+import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
+import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.DateUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.ListUtil;
@@ -139,7 +142,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         if (viewModel.getActiveAccountAndAddressList().size() > 1) {
             accountSpinner.setVisibility(View.VISIBLE);
-        } else if (viewModel.getActiveAccountAndAddressList().size() > 0) {
+        } else if (!viewModel.getActiveAccountAndAddressList().isEmpty()) {
             accountSpinner.setSelection(0);
             accountSpinner.setVisibility(View.GONE);
         }
@@ -390,7 +393,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         }
 
         // drawerTitle account now that wallet has been created
-        if (viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, "").length() > 0) {
+        if (!viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, "").isEmpty()) {
             viewModel.getPayloadManager().getPayload().getHdWallets().get(0).getAccounts().get(0).setLabel(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, ""));
             viewModel.getPrefsUtil().removeValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME);
             PayloadBridge.getInstance().remoteSaveThread(new PayloadBridge.PayloadSaveListener() {
@@ -471,7 +474,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.balanceLayout.post(() -> setToolbarOffset(0));
 
         //Display help text to user if no transactionList on selected account/address
-        if (viewModel.getTransactionList().size() > 0) {
+        if (!viewModel.getTransactionList().isEmpty()) {
             binding.rvTransactions.setVisibility(View.VISIBLE);
             binding.noTransactionMessage.noTxMessage.setVisibility(View.GONE);
         } else {
@@ -487,6 +490,17 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         accountsAdapter.notifyBtcChanged(isBTC);
         binding.rvTransactions.scrollToPosition(0);
+
+        viewModel.storeSwipeReceiveAddresses();
+
+        if (AndroidUtils.is25orHigher() && viewModel.areLauncherShortcutsEnabled()) {
+            LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(
+                    getActivity(),
+                    viewModel.getPayloadDataManager(),
+                    getActivity().getSystemService(ShortcutManager.class));
+
+            launcherShortcutHelper.generateReceiveShortcuts();
+        }
     }
 
     @Override

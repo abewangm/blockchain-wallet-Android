@@ -39,7 +39,6 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
-import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.EventLogHandler;
@@ -66,7 +65,6 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected PayloadManager payloadManager;
     @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected ContactsDataManager contactsDataManager;
-    @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
     @Inject protected SendDataManager sendDataManager;
     @Inject protected NotificationTokenManager notificationTokenManager;
     @Inject protected Context applicationContext;
@@ -210,10 +208,6 @@ public class MainViewModel extends BaseViewModel {
                                 throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
     }
 
-    void storeSwipeReceiveAddresses() {
-        swipeToReceiveHelper.updateAndStoreAddresses();
-    }
-
     void checkIfShouldShowSurvey() {
         if (!prefs.getValue(PrefsUtil.KEY_SURVEY_COMPLETED, false)) {
             int visitsToPageThisSession = prefs.getValue(PrefsUtil.KEY_SURVEY_VISITS, 0);
@@ -245,16 +239,8 @@ public class MainViewModel extends BaseViewModel {
         accessState.setPIN(null);
     }
 
-    boolean areLauncherShortcutsEnabled() {
-        return prefs.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true);
-    }
-
     PayloadManager getPayloadManager() {
         return payloadManager;
-    }
-
-    PayloadDataManager getPayloadDataManager() {
-        return payloadDataManager;
     }
 
     private void subscribeToNotifications() {

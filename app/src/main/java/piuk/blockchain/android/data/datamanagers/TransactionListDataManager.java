@@ -61,6 +61,9 @@ public class TransactionListDataManager {
             } else {
                 Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
             }
+            transactionListStore.clearList();
+            transactionListStore.insertTransactions(result);
+            transactionListStore.sort(new TransactionSummary.TxMostRecentDateComparator());
 
             return result;
         }).compose(RxUtil.applySchedulersToObservable());

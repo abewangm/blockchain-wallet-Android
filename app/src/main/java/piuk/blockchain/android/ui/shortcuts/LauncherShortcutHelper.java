@@ -7,7 +7,6 @@ import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
 
 import java.util.Arrays;
 
@@ -16,8 +15,6 @@ import piuk.blockchain.android.ui.receive.ReceiveQrActivity;
 import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 
 public class LauncherShortcutHelper {
-
-    private static final String TAG = LauncherShortcutHelper.class.getSimpleName();
 
     private Context context;
     private PayloadDataManager payloadDataManager;
@@ -34,7 +31,6 @@ public class LauncherShortcutHelper {
         String receiveAccountName = payloadDataManager.getDefaultAccount().getLabel();
         payloadDataManager.getNextReceiveAddress(payloadDataManager.getDefaultAccountIndex())
                 .subscribe(receiveAddress -> {
-                    Log.d(TAG, "generateReceiveShortcuts: " + receiveAddress);
                     shortcutManager.removeAllDynamicShortcuts();
 
                     Intent copyIntent = new Intent();

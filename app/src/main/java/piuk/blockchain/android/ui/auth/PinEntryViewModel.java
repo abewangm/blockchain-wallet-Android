@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.UiThread;
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -20,7 +19,6 @@ import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.payload.PayloadManager;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.spongycastle.crypto.InvalidCipherTextException;
 
 import java.util.ArrayList;
@@ -146,7 +144,7 @@ public class PinEntryViewModel extends BaseViewModel {
                     mValidatingPinForResult = extras.getBoolean(KEY_VALIDATING_PIN_FOR_RESULT);
                 }
 
-                if (mPassword != null && mPassword.length() > 0 && mEmail != null && !mEmail.isEmpty()) {
+                if (mPassword != null && !mPassword.isEmpty() && mEmail != null && !mEmail.isEmpty()) {
                     // Previous page was CreateWalletFragment
                     bAllowExit = false;
 
@@ -194,7 +192,7 @@ public class PinEntryViewModel extends BaseViewModel {
     }
 
     public void onDeleteClicked() {
-        if (mUserEnteredPin.length() > 0) {
+        if (!mUserEnteredPin.isEmpty()) {
             // Remove last char from pin string
             mUserEnteredPin = mUserEnteredPin.substring(0, mUserEnteredPin.length() - 1);
 
