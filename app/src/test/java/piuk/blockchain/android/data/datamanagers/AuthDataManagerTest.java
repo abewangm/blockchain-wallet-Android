@@ -8,9 +8,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.TimeUnit;
+
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
+import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.access.AccessState;
@@ -188,4 +191,60 @@ public class AuthDataManagerTest extends RxTest {
         testObserver.assertComplete();
         testObserver.assertNoErrors();
     }
+
+    /**
+     * Getting encrypted payload returns error, should be caught by Observable and transformed into
+     * {@link AuthDataManager#AUTHORIZATION_REQUIRED}
+     */
+    @Test
+    public void startPollingAuthStatusError() throws Exception {
+        // Arrange
+        String sessionId = "SESSION_ID";
+        String guid = "GUID";
+        when(walletService.getEncryptedPayload(guid, sessionId)).thenReturn(Observable.error(new Throwable()));
+        // Act
+        TestObserver<String> testObserver = subject.startPollingAuthStatus(guid, sessionId).test();
+        getTestScheduler().advanceTimeBy(3, TimeUnit.SECONDS);
+        // Assert
+        verify(walletService).getEncryptedPayload(guid, sessionId);
+        testObserver.assertComplete();
+        testObserver.assertValue(AuthDataManager.AUTHORIZATION_REQUIRED);
+        testObserver.assertNoErrors();
+    }
+
+    /**
+     * Getting encrypted payload returns Auth Required, should be filtered out and emit no values.
+     */
+    @Test
+    public void startPollingAuthStatusAccessRequired() throws Exception {
+        // Arrange
+        String sessionId = "SESSION_ID";
+        String guid = "GUID";
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), ERROR_BODY);
+        when(walletService.getEncryptedPayload(guid, sessionId))
+                .thenReturn(Observable.just(Response.error(500, responseBody)));
+        // Act
+        TestObserver<String> testObserver = subject.startPollingAuthStatus(guid, sessionId).test();
+        getTestScheduler().advanceTimeBy(2, TimeUnit.SECONDS);
+        // Assert
+        verify(walletService).getEncryptedPayload(guid, sessionId);
+        testObserver.assertNotComplete();
+        testObserver.assertNoValues();
+        testObserver.assertNoErrors();
+    }
+
+    @Test
+    public void createCheckEmailTimer() throws Exception {
+        // Arrange
+
+        // Act
+        TestObserver<Integer> testObserver = subject.createCheckEmailTimer().take(1).test();
+        subject.timer = 1;
+        getTestScheduler().advanceTimeBy(2, TimeUnit.SECONDS);
+        // Assert
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        testObserver.assertValue(1);
+    }
+
 }
