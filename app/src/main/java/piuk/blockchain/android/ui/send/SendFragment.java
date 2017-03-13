@@ -50,6 +50,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import org.apache.commons.lang3.StringUtils;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
@@ -279,11 +280,21 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 } else if (object instanceof Account) {
                     Account account = ((Account) object);
                     viewModel.setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account));
-                    binding.destination.setText(account.getLabel());
+
+                    String label = account.getLabel();
+                    if(label.isEmpty()){
+                        label = account.getXpub();
+                    }
+                    binding.destination.setText(StringUtils.abbreviate(label, 32));
                 } else if (object instanceof LegacyAddress) {
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
                     viewModel.setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress));
-                    binding.destination.setText(legacyAddress.getLabel());
+
+                    String label = legacyAddress.getLabel();
+                    if(label.isEmpty()){
+                        label = legacyAddress.getAddress();
+                    }
+                    binding.destination.setText(StringUtils.abbreviate(label, 32));
                 }
 
             } catch (ClassNotFoundException e) {
@@ -302,13 +313,25 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 if (object instanceof Account) {
                     Account account = ((Account) object);
                     chosenItem = new ItemAccount(account.getLabel(), null, null, null, account);
+
+                    String label = chosenItem.label;
+                    if(label.isEmpty()){
+                        label = account.getXpub();
+                    }
+                    binding.from.setText(StringUtils.abbreviate(label, 32));
+
                 } else if (object instanceof LegacyAddress) {
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
                     chosenItem = new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress);
+
+                    String label = chosenItem.label;
+                    if(label.isEmpty()){
+                        label = legacyAddress.getAddress();
+                    }
+                    binding.from.setText(StringUtils.abbreviate(label, 32));
                 }
 
                 viewModel.setSendingAddress(chosenItem);
-                binding.from.setText(chosenItem.label);
 
                 viewModel.calculateTransactionAmounts(chosenItem,
                         binding.amountRow.amountBtc.getText().toString(),
