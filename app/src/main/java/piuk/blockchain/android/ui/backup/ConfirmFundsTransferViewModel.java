@@ -141,7 +141,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
         mDataListener.showProgressDialog();
 
         compositeDisposable.add(
-                mFundsDataManager.sendPayment(new Payment(), mPendingTransactions, secondPassword)
+                mFundsDataManager.sendPayment(mPendingTransactions, secondPassword)
                         .doAfterTerminate(() -> mDataListener.hideProgressDialog())
                         .subscribe(s -> {
                             mDataListener.hideProgressDialog();

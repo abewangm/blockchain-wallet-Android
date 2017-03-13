@@ -20,7 +20,6 @@ import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.services.BlockExplorerService;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.account.ConsolidatedAccount;
 import piuk.blockchain.android.ui.account.ConsolidatedAccount.Type;
