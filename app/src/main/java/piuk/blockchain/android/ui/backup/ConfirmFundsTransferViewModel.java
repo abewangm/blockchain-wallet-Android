@@ -7,7 +7,6 @@ import android.support.annotation.VisibleForTesting;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
-import info.blockchain.wallet.payment.Payment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,7 +140,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
         mDataListener.showProgressDialog();
 
         compositeDisposable.add(
-                mFundsDataManager.sendPayment(new Payment(), mPendingTransactions, secondPassword)
+                mFundsDataManager.sendPayment(mPendingTransactions, secondPassword)
                         .doAfterTerminate(() -> mDataListener.hideProgressDialog())
                         .subscribe(s -> {
                             mDataListener.hideProgressDialog();

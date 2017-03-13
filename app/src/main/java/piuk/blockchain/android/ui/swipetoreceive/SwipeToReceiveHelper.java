@@ -2,30 +2,31 @@ package piuk.blockchain.android.ui.swipetoreceive;
 
 import android.support.annotation.NonNull;
 
-import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.api.data.Balance;
+import info.blockchain.wallet.payload.data.Account;
 
-import org.apache.commons.lang3.NotImplementedException;
-
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.PrefsUtil;
 
 public class SwipeToReceiveHelper {
 
     public static final String KEY_SWIPE_RECEIVE_ADDRESSES = "swipe_receive_addresses";
     public static final String KEY_SWIPE_RECEIVE_ACCOUNT_NAME = "swipe_receive_account_name";
-    private static final String TAG = SwipeToReceiveHelper.class.getSimpleName();
 
-    private PayloadManager payloadManager;
+    private PayloadDataManager payloadDataManager;
     private PrefsUtil prefsUtil;
 
-    public SwipeToReceiveHelper(PayloadManager payloadManager, PrefsUtil prefsUtil) {
-        this.payloadManager = payloadManager;
+    public SwipeToReceiveHelper(PayloadDataManager payloadDataManager, PrefsUtil prefsUtil) {
+        this.payloadDataManager = payloadDataManager;
         this.prefsUtil = prefsUtil;
     }
 
@@ -34,32 +35,27 @@ public class SwipeToReceiveHelper {
      * the account name in SharedPrefs. Only stores addresses if enabled in SharedPrefs.
      */
     public void updateAndStoreAddresses() {
-//        if (getIfSwipeEnabled()) {
-//            int numOfAddresses = 5;
-//
-//            int defaultAccountIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
-//            Account defaultAccount = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultAccountIndex);
-//            String receiveAccountName = defaultAccount.getLabel();
-//            storeAccountName(receiveAccountName);
-//
-//            StringBuilder stringBuilder = new StringBuilder();
-//
-//            for (int i = 0; i < numOfAddresses; i++) {
-//                try {
-//                    String receiveAddress = payloadManager.getReceiveAddressAtPosition(defaultAccount, i);
-//                    if (receiveAddress == null) {
-//                        // Likely not initialized yet
-//                        break;
-//                    }
-//
-//                    stringBuilder.append(receiveAddress).append(",");
-//                } catch (HDWalletException e) {
-//                    Log.e(TAG, "updateAndStoreAddresses: ", e);
-//                }
-//            }
-//
-//            storeAddresses(stringBuilder.toString());
-//        }
+        if (getIfSwipeEnabled()) {
+            int numOfAddresses = 5;
+
+            Account defaultAccount = payloadDataManager.getDefaultAccount();
+            String receiveAccountName = defaultAccount.getLabel();
+            storeAccountName(receiveAccountName);
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for (int i = 0; i < numOfAddresses; i++) {
+                String receiveAddress = payloadDataManager.getReceiveAddressAtPosition(defaultAccount, i);
+                if (receiveAddress == null) {
+                    // Likely not initialized yet
+                    break;
+                }
+
+                stringBuilder.append(receiveAddress).append(",");
+            }
+
+            storeAddresses(stringBuilder.toString());
+        }
     }
 
     /**
@@ -68,11 +64,11 @@ public class SwipeToReceiveHelper {
      */
     Observable<String> getNextAvailableAddress() {
         return getBalanceOfAddresses(getReceiveAddresses())
-                .map(linkedHashMap -> {
-                    for (Map.Entry<String, Long> entry : linkedHashMap.entrySet()) {
+                .map(map -> {
+                    for (Map.Entry<String, Balance> entry : map.entrySet()) {
                         String address = entry.getKey();
-                        Long balance = entry.getValue();
-                        if (balance == 0L) {
+                        BigInteger balance = entry.getValue().getFinalBalance();
+                        if (balance.compareTo(BigInteger.ZERO) == 0) {
                             return address;
                         }
                     }
@@ -106,11 +102,9 @@ public class SwipeToReceiveHelper {
         return prefsUtil.getValue(PrefsUtil.KEY_SWIPE_TO_RECEIVE_ENABLED, true);
     }
 
-    private Observable<LinkedHashMap<String, Long>> getBalanceOfAddresses(List<String> addresses) {
-        // TODO: 02/03/2017
-        return Observable.error(new NotImplementedException(""));
-//        return Observable.fromCallable(() -> multiAddrFactory.getAddressBalanceFromApi(addresses))
-//                .compose(RxUtil.applySchedulersToObservable());
+    private Observable<HashMap<String, Balance>> getBalanceOfAddresses(List<String> addresses) {
+        return payloadDataManager.getBalanceOfAddresses(addresses)
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     private void storeAddresses(String addresses) {
