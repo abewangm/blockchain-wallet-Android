@@ -1,7 +1,9 @@
 package piuk.blockchain.android.ui.transactions;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
+import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -14,12 +16,11 @@ import org.spongycastle.crypto.InvalidCipherTextException;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-
-import javax.annotation.Nullable;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 
@@ -135,7 +136,7 @@ public class PayloadDataManager {
         return Completable.fromCallable(() -> {
             payloadManager.getAllTransactions(50, 0);
             return Void.TYPE;
-        }).subscribeOn(Schedulers.io());
+        }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
@@ -187,6 +188,10 @@ public class PayloadDataManager {
         return getWallet().getHdWallets().get(0).getDefaultAccountIdx();
     }
 
+    public Account getDefaultAccount() {
+        return getWallet().getHdWallets().get(0).getAccount(getDefaultAccountIndex());
+    }
+
     /**
      * Returns the balance of an address. If the address isn't found in the address map object, the
      * method will return {@link BigInteger#ZERO} instead of a null object.
@@ -199,4 +204,30 @@ public class PayloadDataManager {
         return payloadManager.getAddressBalance(address) != null
                 ? payloadManager.getAddressBalance(address) : BigInteger.ZERO;
     }
+
+    /**
+     * Allows you to generate a receive address at an arbitrary number of positions on the chain
+     * from the next valid unused address. For example, the passing 5 as the position will generate
+     * an address which correlates with the next available address + 5 positions.
+     *
+     * @param account  The {@link Account} you wish to generate an address from
+     * @param position Represents how many positions on the chain beyond what is already used that
+     *                 you wish to generate
+     * @return A bitcoin address
+     */
+    @Nullable
+    public String getReceiveAddressAtPosition(Account account, int position) {
+        return payloadManager.getReceiveAddressAtPosition(account, position);
+    }
+
+    /**
+     * Returns a {@link LinkedHashMap} of {@link Balance} objects keyed to their addresses.
+     *
+     * @param addresses A List of addresses as Strings
+     * @return A {@link LinkedHashMap}
+     */
+    public Observable<LinkedHashMap<String, Balance>> getBalanceOfAddresses(List<String> addresses) {
+        return Observable.fromCallable(() -> payloadManager.getBalanceOfAddresses(addresses));
+    }
+
 }

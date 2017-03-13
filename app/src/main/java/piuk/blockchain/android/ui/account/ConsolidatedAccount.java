@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.account;
 
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,23 +18,22 @@ public class ConsolidatedAccount extends Account {
     private Type type;
 
     public ConsolidatedAccount() {
-        super();
-        this.legacyAddresses = new ArrayList<LegacyAddress>();
+        legacyAddresses = new ArrayList<>();
     }
 
     public ConsolidatedAccount(String label, List<LegacyAddress> legacyAddresses, long amount) {
         setArchived(false);
         setLabel(label);
         setLegacyAddresses(legacyAddresses);
-       setAmount(amount);
+        setAmount(amount);
     }
 
     public List<LegacyAddress> getLegacyAddresses() {
-        return this.legacyAddresses;
+        return legacyAddresses;
     }
 
     public void setLegacyAddresses(List<LegacyAddress> addrs) {
-        this.legacyAddresses = addrs;
+        legacyAddresses = addrs;
     }
 
     public long getAmount() {

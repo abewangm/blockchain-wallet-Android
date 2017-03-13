@@ -7,7 +7,6 @@ import android.support.annotation.VisibleForTesting;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
-import info.blockchain.wallet.payment.Payment;
 
 import java.util.ArrayList;
 import java.util.List;

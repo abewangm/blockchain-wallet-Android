@@ -100,7 +100,7 @@ public class PaymentService {
                 // If no unspent outputs available server responds with 500
                 return UnspentOutputs.fromJson("{\"unspent_outputs\":[]}");
             } else {
-                throw new ApiException(response.code() + ": " + response.errorBody());
+                throw new ApiException(response.code() + ": " + response.errorBody().string());
             }
         });
     }

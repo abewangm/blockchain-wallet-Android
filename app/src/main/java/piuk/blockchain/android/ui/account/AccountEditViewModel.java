@@ -758,4 +758,7 @@ public class AccountEditViewModel extends BaseViewModel {
                         }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
+    public PayloadDataManager getPayloadDataManager() {
+        return payloadDataManager;
+    }
 }

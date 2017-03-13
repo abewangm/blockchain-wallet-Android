@@ -40,6 +40,7 @@ import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
+import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -63,6 +64,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected AppUtil appUtil;
     @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
+    @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected ContactsDataManager contactsDataManager;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
     @Inject protected SendDataManager sendDataManager;
@@ -71,6 +73,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected StringUtils stringUtils;
     @Inject protected SettingsDataManager settingsDataManager;
     @Inject protected DynamicFeeCache dynamicFeeCache;
+    @Inject protected ExchangeRateFactory exchangeRateFactory;
 
     public interface DataListener {
 
@@ -250,6 +253,10 @@ public class MainViewModel extends BaseViewModel {
         return payloadManager;
     }
 
+    PayloadDataManager getPayloadDataManager() {
+        return payloadDataManager;
+    }
+
     private void subscribeToNotifications() {
         compositeDisposable.add(
                 FcmCallbackService.getNotificationSubject()
@@ -263,7 +270,7 @@ public class MainViewModel extends BaseViewModel {
         String uri = null;
         boolean fromNotification = false;
 
-        if (prefs.getValue(PrefsUtil.KEY_METADATA_URI, "").length() > 0) {
+        if (!prefs.getValue(PrefsUtil.KEY_METADATA_URI, "").isEmpty()) {
             uri = prefs.getValue(PrefsUtil.KEY_METADATA_URI, "");
             prefs.removeValue(PrefsUtil.KEY_METADATA_URI);
         }
@@ -362,29 +369,28 @@ public class MainViewModel extends BaseViewModel {
     private void preLaunchChecks() {
         exchangeRateThread();
 
-        if (AccessState.getInstance().isLoggedIn()) {
+        if (accessState.isLoggedIn()) {
             dataListener.onFetchTransactionsStart();
 
             new Thread(() -> {
                 Looper.prepare();
+
                 cacheDynamicFee();
                 cacheDefaultAccountUnspentData();
                 logEvents();
+
                 Looper.loop();
             }).start();
 
             new Thread(() -> {
-
                 Looper.prepare();
-
-                storeSwipeReceiveAddresses();
 
                 if (dataListener != null) {
                     dataListener.onFetchTransactionCompleted();
                     dataListener.onStartBalanceFragment(false);
                 }
 
-                if (prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").length() > 0) {
+                if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
                     String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
                     prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
                     dataListener.onScanInput(strUri);
@@ -441,7 +447,7 @@ public class MainViewModel extends BaseViewModel {
         super.destroy();
         appUtil.deleteQR();
         dynamicFeeCache.destroy();
-        ExchangeRateFactory.getInstance().stopTicker();
+        exchangeRateFactory.stopTicker();
     }
 
     private void exchangeRateThread() {
@@ -451,7 +457,7 @@ public class MainViewModel extends BaseViewModel {
 
             try {
                 //Start ticker that will refresh btc exchange rate every 5 min
-                ExchangeRateFactory.getInstance().startTicker(
+                exchangeRateFactory.startTicker(
                         () -> dataListener.updateCurrentPrice(getFormattedPriceString()));
 
             } catch (Exception e) {
@@ -466,8 +472,8 @@ public class MainViewModel extends BaseViewModel {
     private String getFormattedPriceString() {
         monetaryUtil.updateUnit(getCurrentBitcoinFormat());
         String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
-        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiat);
-        String fiatSymbol = ExchangeRateFactory.getInstance().getSymbol(fiat);
+        double lastPrice = exchangeRateFactory.getLastPrice(fiat);
+        String fiatSymbol = exchangeRateFactory.getSymbol(fiat);
         DecimalFormat format = new DecimalFormat();
         format.setMinimumFractionDigits(2);
 
@@ -525,6 +531,7 @@ public class MainViewModel extends BaseViewModel {
                 for (String address : activeLegacyAddressStrings) {
                     Balance balance = exe.body().get(address);
                     handler.logLegacyEvent(balance.getFinalBalance().longValue() > 0L);
+                    // TODO: 13/03/2017 This doesn't actually loop?
                     break;
                 }
             }

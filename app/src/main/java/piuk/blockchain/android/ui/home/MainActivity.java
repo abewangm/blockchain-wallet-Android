@@ -35,8 +35,6 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
-import info.blockchain.wallet.payload.PayloadManager;
-
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -211,7 +209,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         if (AndroidUtils.is25orHigher() && viewModel.areLauncherShortcutsEnabled()) {
             LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(
                     this,
-                    PayloadManager.getInstance(),
+                    viewModel.getPayloadDataManager(),
                     getSystemService(ShortcutManager.class));
 
             launcherShortcutHelper.generateReceiveShortcuts();
