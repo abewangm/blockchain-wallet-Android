@@ -154,18 +154,26 @@ public class TransactionDetailViewModel extends BaseViewModel {
         setFee(transactionSummary.getFee());
 
         // From address
-        String inputMapString = StringUtils.join(transactionSummary.getInputsMap().keySet().toArray(), "\n");
+        List<String> labelList = new ArrayList();
+        for(String address : transactionSummary.getInputsMap().keySet()) {
+            labelList.add(mPayloadManager.getLabelFromAddress(address));
+        }
+        String inputMapString = StringUtils.join(labelList, "\n");
         if (inputMapString.isEmpty()) {
             inputMapString = mStringUtils.getString(R.string.transaction_detail_coinbase);
         }
         mDataListener.setFromAddress(inputMapString);
+
+        compositeDisposable.add(
+            getTransactionValueString(mFiatType, transactionSummary)
+                .subscribe(value -> mDataListener.setTransactionValueFiat(value)));
 
         // To Address
         ArrayList<RecipientModel> recipients = new ArrayList<>();
 
         Set<Entry<String, BigInteger>> set = transactionSummary.getOutputsMap().entrySet();
         for(Entry<String, BigInteger> item : set) {
-            String label = item.getKey();
+            String label = mPayloadManager.getLabelFromAddress(item.getKey());
             BigInteger amount = item.getValue();
 
             RecipientModel recipientModel = new RecipientModel(
