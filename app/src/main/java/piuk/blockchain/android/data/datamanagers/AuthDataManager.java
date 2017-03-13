@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
@@ -24,6 +23,8 @@ import retrofit2.Response;
 
 @SuppressWarnings("WeakerAccess")
 public class AuthDataManager {
+
+    @VisibleForTesting static final String AUTHORIZATION_REQUIRED = "Authorization Required";
 
     private WalletService walletService;
     private AppUtil appUtil;
@@ -103,11 +104,11 @@ public class AuthDataManager {
                 // For each emission from the timer, try to get the payload
                 .map(tick -> getEncryptedPayload(guid, sessionId).blockingFirst())
                 // If auth not required, emit payload
-                .filter(s -> s.errorBody() == null || !s.errorBody().string().contains("Authorization Required"))
+                .filter(s -> s.errorBody() == null || !s.errorBody().string().contains(AUTHORIZATION_REQUIRED))
                 // Return message in response
                 .map(responseBodyResponse -> responseBodyResponse.body().string())
                 // If error called, emit Auth Required
-                .onErrorReturn(throwable -> "Authorization Required")
+                .onErrorReturn(throwable -> AUTHORIZATION_REQUIRED)
                 // Only emit the first object
                 .firstElement()
                 // As Observable rather than Maybe
@@ -119,7 +120,7 @@ public class AuthDataManager {
     public Observable<Integer> createCheckEmailTimer() {
         timer = 2 * 60;
 
-        return Observable.interval(0, 1, TimeUnit.SECONDS, Schedulers.io())
+        return Observable.interval(0, 1, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(aLong -> timer--)
                 .takeUntil(aLong -> timer < 0);

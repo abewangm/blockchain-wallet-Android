@@ -21,8 +21,6 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
 
-import static android.support.annotation.VisibleForTesting.PRIVATE;
-
 @SuppressWarnings("WeakerAccess")
 public class PasswordRequiredViewModel extends BaseViewModel {
 
@@ -34,7 +32,7 @@ public class PasswordRequiredViewModel extends BaseViewModel {
     @Inject protected AuthDataManager authDataManager;
     @Inject protected AccessState accessState;
     private DataListener dataListener;
-    @VisibleForTesting(otherwise = PRIVATE) boolean waitingForAuth = false;
+    @VisibleForTesting boolean waitingForAuth = false;
 
     public interface DataListener {
 
