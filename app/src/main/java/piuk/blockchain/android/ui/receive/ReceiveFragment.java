@@ -44,6 +44,7 @@ import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.uri.BitcoinURI;
@@ -344,15 +345,25 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         // Disable send to contact button if not using HD account
         binding.buttonSendToContact.setEnabled(object instanceof Account);
 
+        String label = "";
         String receiveAddress = null;
         if (object instanceof LegacyAddress) {
-            receiveAddress = ((LegacyAddress) object).getAddress();
-            binding.destination.setText(((LegacyAddress) object).getLabel());
+            LegacyAddress legacyAddress = (LegacyAddress) object;
+            receiveAddress = legacyAddress.getAddress();
+            label = legacyAddress.getLabel();
+            if(label.isEmpty()){
+                label = receiveAddress;
+            }
         } else {
-            viewModel.getV3ReceiveAddress((Account) object);
-            binding.destination.setText(((Account) object).getLabel());
+            Account account = (Account) object;
+            viewModel.getV3ReceiveAddress(account);
+            label = account.getLabel();
+            if(label.isEmpty()){
+                label = account.getXpub();
+            }
         }
 
+        binding.destination.setText(StringUtils.abbreviate(label, 32));
         updateReceiveAddress(receiveAddress);
     }
 
