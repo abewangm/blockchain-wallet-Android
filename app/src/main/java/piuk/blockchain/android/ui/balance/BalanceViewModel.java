@@ -1,6 +1,8 @@
 package piuk.blockchain.android.ui.balance;
 
+import android.app.Activity;
 import android.util.Log;
+import android.view.View;
 import com.google.common.collect.HashBiMap;
 
 import android.content.Intent;
@@ -9,12 +11,15 @@ import android.support.annotation.StringRes;
 
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
+import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.settings.SettingsManager;
 
+import io.reactivex.exceptions.Exceptions;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,13 +54,14 @@ import piuk.blockchain.android.util.StringUtils;
 @SuppressWarnings("WeakerAccess")
 public class BalanceViewModel extends BaseViewModel {
 
+    private final String TAG = getClass().getName();
+
     private static final long ONE_MONTH = 28 * 24 * 60 * 60 * 1000L;
 
     private DataListener dataListener;
 
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
-    private List<TransactionSummary> transactionList;
     private List<Object> displayList;
     @Inject PrefsUtil prefsUtil;
     @Inject PayloadManager payloadManager;
@@ -119,7 +125,6 @@ public class BalanceViewModel extends BaseViewModel {
 
         activeAccountAndAddressList = new ArrayList<>();
         activeAccountAndAddressBiMap = HashBiMap.create();
-        transactionList = new ArrayList<>();
         displayList = new ArrayList<>();
     }
 
@@ -220,7 +225,6 @@ public class BalanceViewModel extends BaseViewModel {
 
                 BigInteger bal = payloadManager.getWalletBalance();
                 String balance = getBalanceString(true, bal.longValue());
-                Log.d("vos", "updateAccountList all: "+balance);
                 activeAccountAndAddressList.add(new ItemAccount(
                         all.getLabel(),
                         balance,
@@ -245,7 +249,6 @@ public class BalanceViewModel extends BaseViewModel {
             BigInteger bal = payloadManager.getAddressBalance(item.getXpub());
             String balanceString = getBalanceString(true, bal.longValue());
 
-            Log.d("vos", "updateAccountList Account: "+balanceString+" - "+item.getXpub());
             activeAccountAndAddressList.add(new ItemAccount(
                     item.getLabel(),
                     balanceString,
@@ -268,7 +271,6 @@ public class BalanceViewModel extends BaseViewModel {
             BigInteger bal = payloadManager.getImportedAddressesBalance();
             String balance = getBalanceString(true, bal.longValue());
 
-            Log.d("vos", "updateAccountList importedAddresses: "+balance);
             activeAccountAndAddressList.add(new ItemAccount(
                 importedAddresses.getLabel(),
                 balance,
@@ -307,6 +309,7 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     void updateBalanceAndTransactionList(Intent intent, int accountSpinnerPosition, boolean isBTC) {
+
         Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);//the current selected item in dropdown (Account or Legacy Address)
 
         //If current selected item gets edited by another platform object might become null
@@ -315,16 +318,23 @@ public class BalanceViewModel extends BaseViewModel {
             object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);
         }
 
-        transactionListDataManager.clearTransactionList();
-        transactionListDataManager.generateTransactionList(object);
-        transactionList = transactionListDataManager.getTransactionList();
-
+        //Update balance
         double btcBalance = transactionListDataManager.getBtcBalance(object);
+        String balanceTotal = getBalanceString(isBTC, btcBalance);
 
+        if (dataListener != null) {
+            dataListener.updateBalance(balanceTotal);
+        }
+
+        //Update transactions
+        compositeDisposable.add(transactionListDataManager.fetchTransactions(object, 50, 0)
+            .subscribe(txList -> insertTransactionsAndDisplay(txList)
+                ,throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
+
+        // TODO: 02/03/2017
         // Returning from SendFragment the following will happen
         // After sending btc we create a "placeholder" tx until websocket handler refreshes list
-        if (intent != null && intent.getExtras() != null) {
-            // TODO: 02/03/2017
+//        if (intent != null && intent.getExtras() != null) {
 //            long amount = intent.getLongExtra("queued_bamount", 0);
 //            String strNote = intent.getStringExtra("queued_strNote");
 //            String direction = intent.getStringExtra("queued_direction");
@@ -334,9 +344,14 @@ public class BalanceViewModel extends BaseViewModel {
 //            Tx tx = new Tx("", strNote, direction, amount, time, new HashMap<>());
 //
 //            transactionList = transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);
-        } else if (transactionList.size() > 0) {
-            if (transactionList.get(0).getHash().isEmpty()) transactionList.remove(0);
-        }
+//        } else if (transactionList.size() > 0) {
+//            if (transactionList.get(0).getHash().isEmpty()) transactionList.remove(0);
+//        }
+    }
+
+    private void insertTransactionsAndDisplay(List<TransactionSummary> txList) throws IOException, ApiException {
+        transactionListDataManager.clearTransactionList();
+        transactionListDataManager.insertTransactionList(txList);
 
         // Remove current transactions but keep headers and pending transactions
         Iterator iterator = displayList.iterator();
@@ -347,12 +362,9 @@ public class BalanceViewModel extends BaseViewModel {
             }
         }
 
-        displayList.addAll(transactionList);
-
-        String balanceTotal = getBalanceString(isBTC, btcBalance);
+        displayList.addAll(txList);
 
         if (dataListener != null) {
-            dataListener.updateBalance(balanceTotal);
             dataListener.onRefreshBalanceAndTransactions();
         }
     }

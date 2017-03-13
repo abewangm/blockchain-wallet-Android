@@ -14,7 +14,6 @@ import com.neovisionaries.ws.client.WebSocketFrame;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.payload.PayloadManager;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -179,8 +178,7 @@ class WebSocketHandler {
 
     private Completable updateBalancesAndTxs() {
         return Completable.fromCallable(() -> {
-            // TODO: 09/03/2017  
-            payloadManager.updateAllTransactions(50, 0);
+            payloadManager.updateAllBalances();
             return Void.TYPE;
         }).doAfterTerminate(() -> {
             Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
@@ -291,7 +289,6 @@ class WebSocketHandler {
                     triggerNotification(title, marquee, text);
                 }
 
-                //Websocket tells us which xpub/address has updated - no need to refreshh all
                 updateBalancesAndTransactions();
 
             } else if (op.equals("on_change")) {

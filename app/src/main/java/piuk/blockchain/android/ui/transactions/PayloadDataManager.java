@@ -124,7 +124,7 @@ public class PayloadDataManager {
     // TODO: 10/03/2017 Remove schedulers, let viewmodels handle it
     public Completable updateBalancesAndTransactions() {
         return Completable.fromCallable(() -> {
-            payloadManager.updateAllTransactions(50, 0);
+            payloadManager.getAllTransactions(50, 0);
             return Void.TYPE;
         }).subscribeOn(Schedulers.io());
     }
