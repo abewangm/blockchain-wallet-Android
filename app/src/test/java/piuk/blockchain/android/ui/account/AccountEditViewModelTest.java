@@ -782,7 +782,7 @@ public class AccountEditViewModelTest {
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected PayloadDataManager provideTransactionHelper(PayloadManager payloadManager) {
+        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager) {
             return payloadDataManager;
         }
 

@@ -59,7 +59,7 @@ public class TransactionHelper {
                         inputXpubList.add(xpub);
                     }
                 } else {
-                    // Legacy Address we own
+                    // Legacy Address or someone else's address
                     inputMap.put(inputAddress, inputValue);
                 }
             }
@@ -89,12 +89,12 @@ public class TransactionHelper {
                 // If output address belongs to a legacy address we own - we have to check if it's change
                 // If it goes back to same address AND if it's not the total amount sent
                 // (inputs x and y could send to output y in which case y is not receiving change, but rather the total amount)
-                if (inputMap.containsKey(outputAddress) && outputValue.compareTo(transactionSummary.getTotal()) != 0) {
+                if (inputMap.containsKey(outputAddress) && outputValue.abs().compareTo(transactionSummary.getTotal()) != 0) {
                     continue;// change back to same input address
                 }
 
                 // Output more than tx amount - change
-                if (outputValue.compareTo(transactionSummary.getTotal()) == 1) {
+                if (outputValue.abs().compareTo(transactionSummary.getTotal()) == 1) {
                     continue;
                 }
 
