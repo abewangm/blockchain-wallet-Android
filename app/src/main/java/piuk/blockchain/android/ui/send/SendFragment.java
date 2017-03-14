@@ -72,7 +72,7 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.EventLogHandler;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -260,7 +260,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
 
             viewModel.handleIncomingQRScan(data.getStringExtra(CaptureActivity.SCAN_RESULT),
-                    EventLogHandler.URL_EVENT_TX_INPUT_FROM_QR);
+                    EventService.EVENT_TX_INPUT_FROM_QR);
 
         } else if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
             final String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);

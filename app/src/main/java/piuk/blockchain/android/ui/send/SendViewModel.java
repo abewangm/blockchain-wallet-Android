@@ -7,6 +7,7 @@ import android.util.Log;
 
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.contacts.data.Contact;
@@ -18,7 +19,6 @@ import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
-import info.blockchain.wallet.util.WebUtil;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
@@ -55,7 +55,7 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
-import piuk.blockchain.android.util.EventLogHandler;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -916,7 +916,7 @@ public class SendViewModel extends BaseViewModel {
                 sendModel.pendingTransaction.receivingAddress = addressBook.getAddress();
             }
 
-            metricInputFlag = EventLogHandler.URL_EVENT_TX_INPUT_FROM_DROPDOWN;
+            metricInputFlag = EventService.EVENT_TX_INPUT_FROM_DROPDOWN;
         } else {
             sendModel.pendingTransaction.receivingAddress = "";
         }
@@ -1008,15 +1008,14 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void logAddressInputMetric() {
-        // TODO: 06/03/2017 WebUtil???????????
-        EventLogHandler handler = new EventLogHandler(prefsUtil, WebUtil.getInstance());
+        EventService handler = new EventService(prefsUtil, new WalletApi());
         if (metricInputFlag != null) handler.logAddressInputEvent(metricInputFlag);
     }
 
     private void checkClipboardPaste(String address) {
         String contents = dataListener.getClipboardContents();
         if (contents != null && contents.equals(address)) {
-            metricInputFlag = EventLogHandler.URL_EVENT_TX_INPUT_FROM_PASTE;
+            metricInputFlag = EventService.EVENT_TX_INPUT_FROM_PASTE;
         }
     }
 

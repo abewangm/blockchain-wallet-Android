@@ -131,7 +131,7 @@ public class AccountDataManagerTest extends RxTest {
         // Act
         TestObserver<Void> testObserver = subject.updateMultiAddress().test();
         // Assert
-        verify(payloadManager).updateAllTransactions(50, 0);
+        verify(payloadManager).getAllTransactions(50, 0);
         testObserver.assertComplete();
         testObserver.assertNoErrors();
     }

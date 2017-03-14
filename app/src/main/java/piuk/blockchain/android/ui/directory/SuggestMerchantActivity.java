@@ -29,8 +29,6 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import info.blockchain.wallet.util.WebUtil;
-
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
