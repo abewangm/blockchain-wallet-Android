@@ -133,6 +133,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setShowRefreshing(true);
         viewModel.onViewReady();
     }
 
@@ -501,6 +502,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
             launcherShortcutHelper.generateReceiveShortcuts();
         }
+
+        setShowRefreshing(false);
     }
 
     @Override

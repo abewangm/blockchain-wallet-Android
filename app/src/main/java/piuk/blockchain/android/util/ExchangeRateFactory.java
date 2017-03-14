@@ -69,9 +69,11 @@ public class ExchangeRateFactory {
         void onTickerUpdate();
     }
 
+    // TODO: 14/03/2017 Decide if this is strictly necessary. Simply updating the exchange rate
+    // onResume in MainActivity would probably be enough for the average app session
     public void startTicker(TickerListener listener) {
         timer = new Timer();
-        timer.scheduleAtFixedRate(tickerTask(listener), 0, 60000 * UPDATE_INTERVAL_MIN);
+        timer.scheduleAtFixedRate(tickerTask(listener), 0, 60 * 1000 * UPDATE_INTERVAL_MIN);
     }
 
     public void stopTicker() {
@@ -80,8 +82,9 @@ public class ExchangeRateFactory {
         }
     }
 
+    // TODO: 14/03/2017 This is very likely a memory leak. Make me static and extend TimerTask - or
+    // remove me completely.
     private TimerTask tickerTask(TickerListener listener) {
-
         return new TimerTask() {
             @Override
             public void run() {

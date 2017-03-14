@@ -31,8 +31,9 @@ public class SwipeToReceiveHelper {
     }
 
     /**
-     * Derives 5 addresses from the current point on the receive chain. Stores them alongside
-     * the account name in SharedPrefs. Only stores addresses if enabled in SharedPrefs.
+     * Derives 5 addresses from the current point on the receive chain. Stores them alongside the
+     * account name in SharedPrefs. Only stores addresses if enabled in SharedPrefs. This should be
+     * called on a Computation thread as it can take up to 2 seconds on a mid-range device.
      */
     public void updateAndStoreAddresses() {
         if (getIfSwipeEnabled()) {

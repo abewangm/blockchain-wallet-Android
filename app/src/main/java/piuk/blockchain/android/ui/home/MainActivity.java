@@ -109,8 +109,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appUtil = new AppUtil(this);
-
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         appUtil = new AppUtil(this);

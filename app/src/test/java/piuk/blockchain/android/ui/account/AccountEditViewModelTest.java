@@ -36,39 +36,39 @@ import static org.mockito.Mockito.mock;
 @RunWith(RobolectricTestRunner.class)
 public class AccountEditViewModelTest {
 
-//    private AccountEditViewModel subject;
-//    @Mock AccountEditViewModel.DataListener activity;
-//    @Mock PayloadDataManager payloadDataManager;
-//    @Mock PrefsUtil prefsUtil;
-//    @Mock StringUtils stringUtils;
-//    @Mock AccountEditDataManager accountEditDataManager;
-//    @Mock ExchangeRateFactory exchangeRateFactory;
-//    @Mock AccountEditModel accountEditModel;
-//    @Mock SwipeToReceiveHelper swipeToReceiveHelper;
-//
-//    @Before
-//    public void setUp() throws Exception {
-//        MockitoAnnotations.initMocks(this);
-//
-//        InjectorTestUtils.initApplicationComponent(
-//                Injector.getInstance(),
-//                new MockApplicationModule(RuntimeEnvironment.application),
-//                new ApiModule(),
-//                new MockDataManagerModule());
-//
-//        subject = new AccountEditViewModel(accountEditModel, activity);
-//    }
-//
-//
-//    @Test
-//    public void setAccountModel() throws Exception {
-//        // Arrange
-//        AccountEditModel newModel = new AccountEditModel(mock(Context.class));
-//        // Act
-//        subject.setAccountModel(newModel);
-//        // Assert
-//        assertEquals(newModel, subject.accountModel);
-//    }
+    private AccountEditViewModel subject;
+    @Mock AccountEditViewModel.DataListener activity;
+    @Mock PayloadDataManager payloadDataManager;
+    @Mock PrefsUtil prefsUtil;
+    @Mock StringUtils stringUtils;
+    @Mock AccountEditDataManager accountEditDataManager;
+    @Mock ExchangeRateFactory exchangeRateFactory;
+    @Mock AccountEditModel accountEditModel;
+    @Mock SwipeToReceiveHelper swipeToReceiveHelper;
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        InjectorTestUtils.initApplicationComponent(
+                Injector.getInstance(),
+                new MockApplicationModule(RuntimeEnvironment.application),
+                new ApiModule(),
+                new MockDataManagerModule());
+
+        subject = new AccountEditViewModel(accountEditModel, activity);
+    }
+
+
+    @Test
+    public void setAccountModel() throws Exception {
+        // Arrange
+        AccountEditModel newModel = new AccountEditModel(mock(Context.class));
+        // Act
+        subject.setAccountModel(newModel);
+        // Assert
+        assertEquals(newModel, subject.accountModel);
+    }
 
     //
 //    @SuppressWarnings("WrongConstant")
@@ -758,37 +758,38 @@ public class AccountEditViewModelTest {
 //        verify(activity).privateKeyImportMismatch();
 //    }
 //
-//    private class MockApplicationModule extends ApplicationModule {
-//        public MockApplicationModule(Application application) {
-//            super(application);
-//        }
-//
-//        @Override
-//        protected StringUtils provideStringUtils() {
-//            return stringUtils;
-//        }
-//
-//        @Override
-//        protected PrefsUtil providePrefsUtil() {
-//            return prefsUtil;
-//        }
-//
-//        @Override
-//        protected ExchangeRateFactory provideExchangeRateFactory() {
-//            return exchangeRateFactory;
-//        }
-//    }
-//
-//    private class MockDataManagerModule extends DataManagerModule {
-//
-//        @Override
-//        protected PayloadDataManager provideTransactionHelper(PayloadManager payloadManager) {
-//            return payloadDataManager;
-//        }
-//
-//        @Override
-//        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager, PrefsUtil prefsUtil) {
-//            return swipeToReceiveHelper;
-//        }
-//    }
+    private class MockApplicationModule extends ApplicationModule {
+        public MockApplicationModule(Application application) {
+            super(application);
+        }
+
+        @Override
+        protected StringUtils provideStringUtils() {
+            return stringUtils;
+        }
+
+        @Override
+        protected PrefsUtil providePrefsUtil() {
+            return prefsUtil;
+        }
+
+        @Override
+        protected ExchangeRateFactory provideExchangeRateFactory() {
+            return exchangeRateFactory;
+        }
+    }
+
+    private class MockDataManagerModule extends DataManagerModule {
+
+        @Override
+        protected PayloadDataManager provideTransactionHelper(PayloadManager payloadManager) {
+            return payloadDataManager;
+        }
+
+        @Override
+        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadDataManager payloadDataManager, PrefsUtil prefsUtil) {
+            return swipeToReceiveHelper;
+        }
+    }
+
 }
