@@ -3,6 +3,7 @@ package piuk.blockchain.android.data.datamanagers;
 import android.support.annotation.Nullable;
 
 import info.blockchain.api.data.UnspentOutputs;
+import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payment.Payment;
 
@@ -153,18 +154,20 @@ public class TransferFundsDataManager {
                             if (!subscriber.isDisposed()) {
                                 subscriber.onNext(s);
                             }
-                            // TODO: 13/03/2017 These steps need completing but aren't currently available
-//                            payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().get(pendingTransaction.addressToReceiveIndex).incReceive();
-//
-//                            long currentTotalBalance = payloadDataManager.getImportedAddressesBalance().longValue();
-//                            long currentAddressBalance = payloadDataManager.getAddressBalance(legacyAddress.getAddress()).longValue();
-//                            long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
-//
-//                             Update Balances temporarily rather than wait for sync
-//                            multiAddrFactory.setLegacyBalance(currentTotalBalance - spentAmount);
-//                            multiAddrFactory.setLegacyBalance(legacyAddress.getAddress(), currentAddressBalance - spentAmount);
+                            // Increment index on receive chain
+                            Account account = payloadDataManager.getWallet()
+                                    .getHdWallets()
+                                    .get(0)
+                                    .getAccounts()
+                                    .get(pendingTransaction.addressToReceiveIndex);
+                            payloadDataManager.incrementReceiveAddress(account);
+
+                            // Update Balances temporarily rather than wait for sync
+                            long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
+                            payloadDataManager.subtractAmountFromAddressBalance(legacyAddress, spentAmount);
 
                             if (finalI == pendingTransactions.size() - 1) {
+                                // Sync once transactions are completed
                                 savePayloadToServer().subscribe(new IgnorableDefaultObserver<>());
 
                                 if (!subscriber.isDisposed()) {

@@ -230,4 +230,26 @@ public class PayloadDataManager {
         return Observable.fromCallable(() -> payloadManager.getBalanceOfAddresses(addresses));
     }
 
+    /**
+     * Updates the balance of the address as well as that of the entire wallet. To be called after a
+     * successful sweep to ensure that balances are displayed correctly before syncing the wallet.
+     *
+     * @param legacyAddress A {@link LegacyAddress} object from which you've just spent funds
+     * @param spentAmount   The spent amount as a long
+     * @throws Exception Thrown if the address isn't found
+     */
+    public void subtractAmountFromAddressBalance(LegacyAddress legacyAddress, long spentAmount) throws Exception {
+        payloadManager.subtractAmountFromAddressBalance(
+                legacyAddress.getAddress(),
+                BigInteger.valueOf(spentAmount));
+    }
+
+    /**
+     * Increments the index on the receive chain for an {@link Account} object.
+     *
+     * @param account The {@link Account} you wish to increment
+     */
+    public void incrementReceiveAddress(Account account) {
+        payloadManager.incrementNextReceiveAddress(account);
+    }
 }
