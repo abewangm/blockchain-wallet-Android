@@ -355,7 +355,6 @@ public class MainViewModel extends BaseViewModel {
             compositeDisposable.add(
                     Completable.fromCallable(() -> {
                         cacheDynamicFee();
-                        cacheDefaultAccountUnspentData();
                         logEvents();
                         return Void.TYPE;
                     }).compose(RxUtil.applySchedulersToCompletable())
@@ -383,36 +382,6 @@ public class MainViewModel extends BaseViewModel {
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(feeList -> dynamicFeeCache.setCachedDynamicFee(feeList),
                                 Throwable::printStackTrace));
-    }
-
-    private void cacheDefaultAccountUnspentData() {
-        // TODO: 14/03/2017 ???
-//        if (payloadManager.getPayload().getHdWallets() != null) {
-//
-//            int defaultAccountIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
-//
-//            Account defaultAccount = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultAccountIndex);
-//            String xpub = defaultAccount.getXpub();
-//
-//            try {
-//                // TODO: 22/02/2017 quick fix. can be improved
-//                Response<UnspentOutputs> response = new BlockExplorer(
-//                        BlockchainFramework.getRetrofitServerInstance(),
-//                        BlockchainFramework.getApiCode())
-//                        .getUnspentOutputs(Collections.singletonList(xpub))
-//                        .execute();
-//
-//                if (response.isSuccessful()) {
-//                    DefaultAccountUnspentCache.getInstance()
-//                            .setUnspentApiResponse(xpub, response.body());
-//                } else {
-//                    Log.e(TAG, "Failed to set DefaultAccountUnspentCache. Might not have free outputs to spend.");
-//                }
-//
-//            } catch (IOException e) {
-//                Log.e(TAG, "cacheDefaultAccountUnspentData: ", e);
-//            }
-//        }
     }
 
     @Override

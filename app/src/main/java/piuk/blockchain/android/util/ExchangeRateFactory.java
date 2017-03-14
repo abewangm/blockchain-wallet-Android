@@ -11,13 +11,17 @@ import info.blockchain.wallet.api.WalletApi;
 
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import org.apache.commons.lang3.EnumUtils;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import retrofit2.Response;
@@ -248,5 +252,9 @@ public class ExchangeRateFactory {
      */
     public void setData(Ticker data) {
         tickerData = data;
+    }
+
+    public String[] getCurrencyLabels() {
+        return EnumUtils.getEnumMap(Currency.class).keySet().toArray(new String[0]);
     }
 }
