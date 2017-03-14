@@ -29,7 +29,7 @@ import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
-import piuk.blockchain.android.ui.transactions.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.ui.transactions.TransactionHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;

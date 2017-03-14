@@ -6,7 +6,6 @@ import org.mockito.MockitoAnnotations;
 
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.services.PaymentService;
-import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 
 public class AccountEditDataManagerTest extends RxTest {
 

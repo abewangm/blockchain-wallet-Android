@@ -23,7 +23,6 @@ import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
-import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 @SuppressWarnings("WeakerAccess")

@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;

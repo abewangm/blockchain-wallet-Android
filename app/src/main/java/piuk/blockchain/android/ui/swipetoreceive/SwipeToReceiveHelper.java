@@ -14,7 +14,7 @@ import java.util.Map;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.ui.transactions.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.util.PrefsUtil;
 
 public class SwipeToReceiveHelper {

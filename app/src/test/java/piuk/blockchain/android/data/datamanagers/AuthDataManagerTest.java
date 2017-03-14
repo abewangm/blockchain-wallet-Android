@@ -18,7 +18,6 @@ import okhttp3.ResponseBody;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.services.WalletService;
-import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;

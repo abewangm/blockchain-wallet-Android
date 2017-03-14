@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.transactions;
+package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
