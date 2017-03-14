@@ -791,4 +791,5 @@ public class AccountEditViewModelTest {
             return swipeToReceiveHelper;
         }
     }
+
 }

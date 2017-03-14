@@ -9,11 +9,12 @@ import android.util.Log;
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.WebUtil;
 
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -40,7 +41,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.EventLogHandler;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.OSUtil;
@@ -477,29 +478,14 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void logEvents() {
-        EventLogHandler handler = new EventLogHandler(prefs, WebUtil.getInstance());
+        EventService handler = new EventService(prefs, new WalletApi());
         handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncryption());
         handler.logBackupEvent(payloadManager.getPayload().getHdWallets().get(0).isMnemonicVerified());
 
         try {
-            List<String> activeLegacyAddressStrings = PayloadManager.getInstance().getPayload().getLegacyAddressStringList();
-
-            // TODO: 21/02/2017 Quick fix. This should be tested thoroughly
-            Call<HashMap<String, Balance>> call = new BlockExplorer(
-                    BlockchainFramework.getRetrofitServerInstance(),
-                    BlockchainFramework.getApiCode())
-                    .getBalance(activeLegacyAddressStrings, BlockExplorer.TX_FILTER_ALL);
-
-            Response<HashMap<String, Balance>> exe = call.execute();
-
-            if (exe.isSuccessful()) {
-
-                for (String address : activeLegacyAddressStrings) {
-                    Balance balance = exe.body().get(address);
-                    handler.logLegacyEvent(balance.getFinalBalance().longValue() > 0L);
-                    // TODO: 13/03/2017 This doesn't actually loop?
-                    break;
-                }
+            BigInteger importedAddressesBalance = payloadManager.getImportedAddressesBalance();
+            if(importedAddressesBalance != null) {
+                handler.logLegacyEvent(importedAddressesBalance.longValue() > 0L);
             }
         } catch (Exception e) {
             Log.e(TAG, "logEvents: ", e);

@@ -63,7 +63,7 @@ import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.EventLogHandler;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
@@ -71,7 +71,7 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
 import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
-import static piuk.blockchain.android.util.EventLogHandler.URL_EVENT_TX_INPUT_FROM_CONTACTS;
+import static piuk.blockchain.android.data.services.EventService.EVENT_TX_INPUT_FROM_CONTACTS;
 
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.OnFragmentInteractionListener,
         MainViewModel.DataListener,
@@ -267,7 +267,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         if (resultCode == RESULT_OK && requestCode == SCAN_URI
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
             String strResult = data.getStringExtra(CaptureActivity.SCAN_RESULT);
-            doScanInput(strResult, EventLogHandler.URL_EVENT_TX_INPUT_FROM_QR);
+            doScanInput(strResult, EventService.EVENT_TX_INPUT_FROM_QR);
 
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_BACKUP) {
             resetNavigationDrawer();
@@ -643,7 +643,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void onScanInput(String strUri) {
-        doScanInput(strUri, EventLogHandler.URL_EVENT_TX_INPUT_FROM_URI);
+        doScanInput(strUri, EventService.EVENT_TX_INPUT_FROM_URI);
     }
 
     @Override
@@ -813,7 +813,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     private void startSendFragmentFromIntent(String uri, String recipientId, String mdid, String fctxId, int accountPosition) {
-        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, URL_EVENT_TX_INPUT_FROM_CONTACTS, accountPosition);
+        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId,
+            EVENT_TX_INPUT_FROM_CONTACTS, accountPosition);
         replaceFragmentWithAnimation(sendFragment);
         binding.bottomNavigation.restoreBottomNavigation();
     }
