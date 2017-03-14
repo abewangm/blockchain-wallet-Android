@@ -51,6 +51,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AndroidUtils;
+import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
 import piuk.blockchain.android.util.ViewUtils;
@@ -639,24 +640,23 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     private void showDialogFiatUnits() {
-        // TODO: 28/02/2017
-//        String[] currencies = ExchangeRateFactory.getInstance().getCurrencyLabels();
-//        String strCurrency = viewModel.getFiatUnits();
-//        int selected = 0;
-//        for (int i = 0; i < currencies.length; i++) {
-//            if (currencies[i].endsWith(strCurrency)) {
-//                selected = i;
-//                break;
-//            }
-//        }
-//
-//        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                .setTitle(R.string.select_currency)
-//                .setSingleChoiceItems(currencies, selected, (dialog, which) -> {
-//                    viewModel.updatePreferences(PrefsUtil.KEY_SELECTED_FIAT, currencies[which].substring(currencies[which].length() - 3));
-//                    dialog.dismiss();
-//                })
-//                .show();
+        String[] currencies = ExchangeRateFactory.getInstance().getCurrencyLabels();
+        String strCurrency = viewModel.getFiatUnits();
+        int selected = 0;
+        for (int i = 0; i < currencies.length; i++) {
+            if (currencies[i].endsWith(strCurrency)) {
+                selected = i;
+                break;
+            }
+        }
+
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.select_currency)
+                .setSingleChoiceItems(currencies, selected, (dialog, which) -> {
+                    viewModel.updatePreferences(PrefsUtil.KEY_SELECTED_FIAT, currencies[which].substring(currencies[which].length() - 3));
+                    dialog.dismiss();
+                })
+                .show();
     }
 
     @Override
