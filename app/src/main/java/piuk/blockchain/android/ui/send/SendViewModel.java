@@ -15,6 +15,7 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.AddressBook;
 import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payment.InsufficientMoneyException;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 import info.blockchain.wallet.util.FormatsUtil;
@@ -554,28 +555,17 @@ public class SendViewModel extends BaseViewModel {
 
     /**
      * Retrieves unspent api data in memory. If not in memory yet, it will be retrieved and added.
-     * Default account will be retrieved from cache to speed up loading
-     *
-     * TODO - can speed up by checking if multi_address balance > 0 before calling unspent_api
      */
     private Observable<UnspentOutputs> getUnspentApiResponse(String address) {
 
-        if (sendModel.unspentApiResponses.containsKey(address)) {
-            return Observable.just(sendModel.unspentApiResponses.get(address));
+        if(payloadManager.getAddressBalance(address).longValue() > 0) {
+            if (sendModel.unspentApiResponses.containsKey(address)) {
+                return Observable.just(sendModel.unspentApiResponses.get(address));
+            } else {
+                return sendDataManager.getUnspentOutputs(address);
+            }
         } else {
-
-            return sendDataManager.getUnspentOutputs(address);
-
-//            // TODO: 06/03/2017
-//            // Get cache if is default account
-//            DefaultAccountUnspentCache cache = DefaultAccountUnspentCache.getInstance();
-//            if (payloadManager.getPayload().getHdWallets() != null && address.equals(cache.getXpub())) {
-//                // Refresh default account cache
-//                return sendDataManager.getUnspentOutputs(address);
-//            } else {
-//                return sendDataManager.getUnspentOutputs(address)
-//                        .doOnNext(jsonObject -> sendModel.unspentApiResponses.put(address, jsonObject));
-//            }
+            return Observable.error(new Throwable("No funds - skipping call to unspent API"));
         }
     }
 
