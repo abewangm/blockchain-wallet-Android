@@ -787,7 +787,7 @@ public class AccountEditViewModelTest {
         }
 
         @Override
-        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager, PrefsUtil prefsUtil) {
+        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadDataManager payloadDataManager, PrefsUtil prefsUtil) {
             return swipeToReceiveHelper;
         }
     }

@@ -10,6 +10,7 @@ import android.support.annotation.RequiresApi;
 
 import java.util.Arrays;
 
+import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.receive.ReceiveQrActivity;
 import piuk.blockchain.android.ui.transactions.PayloadDataManager;
@@ -30,6 +31,8 @@ public class LauncherShortcutHelper {
     public void generateReceiveShortcuts() {
         String receiveAccountName = payloadDataManager.getDefaultAccount().getLabel();
         payloadDataManager.getNextReceiveAddress(payloadDataManager.getDefaultAccountIndex())
+                .subscribeOn(Schedulers.computation())
+                .observeOn(Schedulers.newThread())
                 .subscribe(receiveAddress -> {
                     shortcutManager.removeAllDynamicShortcuts();
 

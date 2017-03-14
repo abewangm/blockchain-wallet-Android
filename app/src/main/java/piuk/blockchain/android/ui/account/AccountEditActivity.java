@@ -347,6 +347,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         }
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {

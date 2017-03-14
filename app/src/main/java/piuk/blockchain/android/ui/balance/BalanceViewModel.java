@@ -26,6 +26,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
+import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
@@ -192,7 +194,15 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     void storeSwipeReceiveAddresses() {
-        swipeToReceiveHelper.updateAndStoreAddresses();
+        // Defer to background thread as deriving addresses is quite processor intensive
+        compositeDisposable.add(
+                Completable.fromCallable(() -> {
+                    swipeToReceiveHelper.updateAndStoreAddresses();
+                    return Void.TYPE;
+                }).subscribeOn(Schedulers.computation())
+                        .subscribe(() -> {
+                           // No-op
+                        }, Throwable::printStackTrace));
     }
 
     @SuppressWarnings("Convert2streamapi")
@@ -291,11 +301,12 @@ public class BalanceViewModel extends BaseViewModel {
                     null));
             activeAccountAndAddressBiMap.put(importedAddresses, spinnerIndex);
             spinnerIndex++;
-
         }
 
         //If we have multiple accounts/addresses we will show dropdown in toolbar, otherwise we will only display a static text
-        if (dataListener != null) dataListener.onRefreshAccounts();
+        if (dataListener != null) {
+            dataListener.onRefreshAccounts();
+        }
     }
 
     List<Object> getTransactionList() {
@@ -363,9 +374,6 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     private void insertTransactionsAndDisplay(List<TransactionSummary> txList) throws IOException, ApiException {
-        transactionListDataManager.clearTransactionList();
-        transactionListDataManager.insertTransactionList(txList);
-
         // Remove current transactions but keep headers and pending transactions
         Iterator iterator = displayList.iterator();
         while (iterator.hasNext()) {

@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.home;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.util.Log;
@@ -356,34 +355,27 @@ public class MainViewModel extends BaseViewModel {
         exchangeRateThread();
 
         if (accessState.isLoggedIn()) {
+            dataListener.onStartBalanceFragment(false);
             dataListener.onFetchTransactionsStart();
 
-            new Thread(() -> {
-                Looper.prepare();
+            compositeDisposable.add(
+                    Completable.fromCallable(() -> {
+                        cacheDynamicFee();
+                        cacheDefaultAccountUnspentData();
+                        logEvents();
+                        return Void.TYPE;
+                    }).compose(RxUtil.applySchedulersToCompletable())
+                            .subscribe(() -> {
+                                if (dataListener != null) {
+                                    dataListener.onFetchTransactionCompleted();
+                                }
 
-                cacheDynamicFee();
-                cacheDefaultAccountUnspentData();
-                logEvents();
-
-                Looper.loop();
-            }).start();
-
-            new Thread(() -> {
-                Looper.prepare();
-
-                if (dataListener != null) {
-                    dataListener.onFetchTransactionCompleted();
-                    dataListener.onStartBalanceFragment(false);
-                }
-
-                if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
-                    String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
-                    prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
-                    dataListener.onScanInput(strUri);
-                }
-
-                Looper.loop();
-            }).start();
+                                if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
+                                    String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
+                                    prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
+                                    dataListener.onScanInput(strUri);
+                                }
+                            }));
         } else {
             // This should never happen, but handle the scenario anyway by starting the launcher
             // activity, which handles all login/auth/corruption scenarios itself
@@ -400,7 +392,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void cacheDefaultAccountUnspentData() {
-
+        // TODO: 14/03/2017 ???
 //        if (payloadManager.getPayload().getHdWallets() != null) {
 //
 //            int defaultAccountIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
@@ -413,7 +405,8 @@ public class MainViewModel extends BaseViewModel {
 //                Response<UnspentOutputs> response = new BlockExplorer(
 //                        BlockchainFramework.getRetrofitServerInstance(),
 //                        BlockchainFramework.getApiCode())
-//                        .getUnspentOutputs(Arrays.asList(xpub)).execute();
+//                        .getUnspentOutputs(Collections.singletonList(xpub))
+//                        .execute();
 //
 //                if (response.isSuccessful()) {
 //                    DefaultAccountUnspentCache.getInstance()
@@ -437,22 +430,9 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void exchangeRateThread() {
-
-        new Thread(() -> {
-            Looper.prepare();
-
-            try {
-                //Start ticker that will refresh btc exchange rate every 5 min
-                exchangeRateFactory.startTicker(
-                        () -> dataListener.updateCurrentPrice(getFormattedPriceString()));
-
-            } catch (Exception e) {
-                Log.e(TAG, "exchangeRateThread: ", e);
-            }
-
-            Looper.loop();
-
-        }).start();
+        //Start ticker that will refresh btc exchange rate every 5 min
+        exchangeRateFactory.startTicker(
+                () -> dataListener.updateCurrentPrice(getFormattedPriceString()));
     }
 
     private String getFormattedPriceString() {
@@ -525,4 +505,5 @@ public class MainViewModel extends BaseViewModel {
             Log.e(TAG, "logEvents: ", e);
         }
     }
+
 }

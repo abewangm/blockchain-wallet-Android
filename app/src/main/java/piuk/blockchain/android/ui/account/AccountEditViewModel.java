@@ -33,6 +33,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
+import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
@@ -509,7 +511,15 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     private void updateSwipeToReceiveAddresses() {
-        swipeToReceiveHelper.updateAndStoreAddresses();
+        // Defer to background thread as deriving addresses is quite processor intensive
+        compositeDisposable.add(
+                Completable.fromCallable(() -> {
+                    swipeToReceiveHelper.updateAndStoreAddresses();
+                    return Void.TYPE;
+                }).subscribeOn(Schedulers.computation())
+                        .subscribe(() -> {
+                            // No-op
+                        }, Throwable::printStackTrace));
     }
 
     private void revertDefaultAndShowError(int revertDefault) {

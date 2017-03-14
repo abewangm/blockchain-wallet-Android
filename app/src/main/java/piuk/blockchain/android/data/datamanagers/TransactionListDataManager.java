@@ -34,10 +34,10 @@ public class TransactionListDataManager {
         listUpdateSubject = PublishSubject.create();
     }
 
-    public void insertTransactionList(List<TransactionSummary> txList)
-            throws IOException, ApiException {
-        transactionListStore.clearList();
+    public void insertTransactionList(List<TransactionSummary> txList) throws IOException, ApiException {
+        clearTransactionList();
         transactionListStore.insertTransactions(txList);
+        transactionListStore.sort(new TransactionSummary.TxMostRecentDateComparator());
         listUpdateSubject.onNext(transactionListStore.getList());
         listUpdateSubject.onComplete();
     }
@@ -61,9 +61,8 @@ public class TransactionListDataManager {
             } else {
                 Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
             }
-            transactionListStore.clearList();
-            transactionListStore.insertTransactions(result);
-            transactionListStore.sort(new TransactionSummary.TxMostRecentDateComparator());
+            insertTransactionList(result);
+
 
             return result;
         }).compose(RxUtil.applySchedulersToObservable());

@@ -63,7 +63,9 @@ import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATED_PIN
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.REQUEST_CODE_VALIDATE_PIN;
 
-public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceClickListener, SettingsViewModel.DataListener {
+public class SettingsFragment extends PreferenceFragmentCompat
+        implements Preference.OnPreferenceClickListener,
+        SettingsViewModel.DataListener {
 
     public static final String EXTRA_SHOW_TWO_FA_DIALOG = "show_two_fa_dialog";
     public static final String EXTRA_SHOW_ADD_EMAIL_DIALOG = "show_add_email_dialog";

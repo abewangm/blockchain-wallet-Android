@@ -175,7 +175,7 @@ public class SettingsViewModel extends BaseViewModel {
         dataListener.setEmailNotificationPref(false);
         dataListener.setSmsNotificationPref(false);
 
-        if (settings.isNotificationsOn() && settings.getNotificationsType().size() > 0) {
+        if (settings.isNotificationsOn() && !settings.getNotificationsType().isEmpty()) {
             for (int type : settings.getNotificationsType()) {
                 if (type == Settings.NOTIFICATION_TYPE_EMAIL) {
                     dataListener.setEmailNotificationPref(true);
