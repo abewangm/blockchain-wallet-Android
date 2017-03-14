@@ -30,6 +30,7 @@ import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.ui.transactions.PayloadDataManager;
+import piuk.blockchain.android.ui.transactions.TransactionHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -86,7 +87,7 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected PayloadDataManager provideTransactionHelper(PayloadManager payloadManager) {
+    protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager) {
         return new PayloadDataManager(payloadManager);
     }
 
@@ -137,5 +138,11 @@ public class DataManagerModule {
     @ViewModelScope
     protected ReceiveDataManager provideReceiveDataManager(PayloadManager payloadManager) {
         return new ReceiveDataManager(payloadManager);
+    }
+
+    @Provides
+    @ViewModelScope
+    protected TransactionHelper provideTransactionHelper(PayloadDataManager payloadDataManager) {
+        return new TransactionHelper(payloadDataManager);
     }
 }

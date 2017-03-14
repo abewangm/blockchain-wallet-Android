@@ -6,9 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.util.Log;
 
-import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.api.data.Balance;
-import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
@@ -18,8 +15,6 @@ import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -36,20 +31,18 @@ import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
 import piuk.blockchain.android.util.StringUtils;
-import retrofit2.Call;
-import retrofit2.Response;
 
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
@@ -484,7 +477,7 @@ public class MainViewModel extends BaseViewModel {
 
         try {
             BigInteger importedAddressesBalance = payloadManager.getImportedAddressesBalance();
-            if(importedAddressesBalance != null) {
+            if (importedAddressesBalance != null) {
                 handler.logLegacyEvent(importedAddressesBalance.longValue() > 0L);
             }
         } catch (Exception e) {

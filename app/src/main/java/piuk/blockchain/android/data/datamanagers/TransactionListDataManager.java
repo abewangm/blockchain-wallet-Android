@@ -113,9 +113,9 @@ public class TransactionListDataManager {
      * Get total BTC balance from an {@link Account} or {@link LegacyAddress}.
      *
      * @param object Either a {@link Account} or a {@link LegacyAddress}
-     * @return A BTC value as a double.
+     * @return A BTC value as a long.
      */
-    public double getBtcBalance(Object object) {
+    public long getBtcBalance(Object object) {
 
         long result = 0;
 
@@ -139,18 +139,7 @@ public class TransactionListDataManager {
             Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
         }
 
-        // TODO: 03/03/2017  long to double, why?
-        return (double) result;
-    }
-
-    public double getWalletBalance() {
-        // TODO: 03/03/2017  long to double, why?
-        return (double) payloadManager.getWalletBalance().longValue();
-    }
-
-    public double getImportedAddressesBalance() {
-        // TODO: 03/03/2017  long to double, why?
-        return (double) payloadManager.getImportedAddressesBalance().longValue();
+        return result;
     }
 
     /**

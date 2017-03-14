@@ -252,4 +252,26 @@ public class PayloadDataManager {
     public void incrementReceiveAddress(Account account) {
         payloadManager.incrementNextReceiveAddress(account);
     }
+
+    /**
+     * Returns an xPub from an address if the address belongs to this wallet.
+     *
+     * @param address The address you want to query as a String
+     * @return An xPub as a String
+     */
+    @Nullable
+    public String getXpubFromAddress(String address) {
+        return payloadManager.getXpubFromAddress(address);
+    }
+
+    /**
+     * Returns true if the supplied address belongs to the user's wallet.
+     *
+     * @param address The address you want to query as a String
+     * @return true if the address belongs to the user
+     */
+    public boolean isOwnHDAddress(String address) {
+        return payloadManager.isOwnHDAddress(address);
+    }
+
 }

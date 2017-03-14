@@ -4,17 +4,15 @@ import android.content.Intent;
 import android.support.annotation.ColorRes;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
-import android.support.v4.util.Pair;
 
-import info.blockchain.api.data.Transaction;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.PayloadManager;
 
-import java.math.BigInteger;
-import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,7 +20,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -48,8 +46,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     private DataListener mDataListener;
     private MonetaryUtil mMonetaryUtil;
-    @Inject
-    PayloadDataManager mPayloadDataManager;
+    @Inject TransactionHelper transactionHelper;
     @Inject PrefsUtil mPrefsUtil;
     @Inject PayloadManager mPayloadManager;
     @Inject piuk.blockchain.android.util.StringUtils mStringUtils;
@@ -115,7 +112,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
                 mDataListener.pageFinish();
             } else {
                 mTransaction = mTransactionListDataManager.getTransactionList()
-                    .get(transactionPosition);
+                        .get(transactionPosition);
                 updateUiFromTransaction(mTransaction);
             }
         } else if (pageIntent != null && pageIntent.hasExtra(KEY_TRANSACTION_HASH)) {
@@ -144,7 +141,6 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
 
     private void updateUiFromTransaction(TransactionSummary transactionSummary) {
-
         mDataListener.setTransactionType(transactionSummary.getDirection());
         setTransactionColor(transactionSummary);
         setTransactionAmountInBtc(transactionSummary.getTotal());
@@ -153,33 +149,36 @@ public class TransactionDetailViewModel extends BaseViewModel {
         setDate(transactionSummary.getTime());
         setFee(transactionSummary.getFee());
 
-        // From address
-        List<String> labelList = new ArrayList();
-        for(String address : transactionSummary.getInputsMap().keySet()) {
-            labelList.add(mPayloadManager.getLabelFromAddress(address));
+        Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> pair =
+                transactionHelper.filterNonChangeAddresses(transactionSummary);
+
+        // From Address
+        HashMap<String, BigInteger> inputMap = pair.getLeft();
+        ArrayList<String> labelList = new ArrayList<>();
+        Set<Entry<String, BigInteger>> entrySet = inputMap.entrySet();
+        for (Entry<String, BigInteger> set : entrySet) {
+            String label = mPayloadManager.getLabelFromAddress(set.getKey());
+            if (!labelList.contains(label))
+                labelList.add(label);
         }
-        String inputMapString = StringUtils.join(labelList, "\n");
+
+        String inputMapString = StringUtils.join(labelList.toArray(), "\n\n");
         if (inputMapString.isEmpty()) {
             inputMapString = mStringUtils.getString(R.string.transaction_detail_coinbase);
         }
+
+        // TODO: 14/03/2017 Change this to dropdown like outputs, as a list of addresses looks terrible
         mDataListener.setFromAddress(inputMapString);
 
-        compositeDisposable.add(
-            getTransactionValueString(mFiatType, transactionSummary)
-                .subscribe(value -> mDataListener.setTransactionValueFiat(value)));
-
         // To Address
+        HashMap<String, BigInteger> outputMap = pair.getRight();
         ArrayList<RecipientModel> recipients = new ArrayList<>();
 
-        Set<Entry<String, BigInteger>> set = transactionSummary.getOutputsMap().entrySet();
-        for(Entry<String, BigInteger> item : set) {
-            String label = mPayloadManager.getLabelFromAddress(item.getKey());
-            BigInteger amount = item.getValue();
-
+        for (Entry<String, BigInteger> item : outputMap.entrySet()) {
             RecipientModel recipientModel = new RecipientModel(
-                label,
-                mMonetaryUtil.getDisplayAmountWithFormatting(amount.longValue()),
-                getDisplayUnits());
+                    mPayloadManager.getLabelFromAddress(item.getKey()),
+                    mMonetaryUtil.getDisplayAmountWithFormatting(item.getValue().longValue()),
+                    getDisplayUnits());
 
             if (mContactsDataManager.getContactsTransactionMap().containsKey(transactionSummary.getHash())) {
                 String contactName = mContactsDataManager.getContactsTransactionMap().get(transactionSummary.getHash());
@@ -188,11 +187,14 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
             recipients.add(recipientModel);
         }
+
         mDataListener.setToAddresses(recipients);
 
         compositeDisposable.add(
-            getTransactionValueString(mFiatType, transactionSummary)
-                .subscribe(value -> mDataListener.setTransactionValueFiat(value)));
+                getTransactionValueString(mFiatType, transactionSummary)
+                        .subscribe(
+                                value -> mDataListener.setTransactionValueFiat(value),
+                                throwable -> mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
 
         mDataListener.onDataLoaded();
         mDataListener.setIsDoubleSpend(transactionSummary.isDoubleSpend());
@@ -206,7 +208,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private void setTransactionAmountInBtc(BigInteger total) {
         String amountBtc = (
                 mMonetaryUtil.getDisplayAmountWithFormatting(
-                    total.abs().longValue())
+                        total.abs().longValue())
                         + " "
                         + getDisplayUnits());
 

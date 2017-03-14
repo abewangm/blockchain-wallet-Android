@@ -33,8 +33,7 @@ public class TransactionDetailViewModelTest extends RxTest {
     @Mock TransactionListDataManager mTransactionListDataManager;
     @Mock TransactionDetailViewModel.DataListener mActivity;
     @Mock ExchangeRateFactory mExchangeRateFactory;
-    @Mock
-    PayloadDataManager mPayloadDataManager;
+    @Mock PayloadDataManager mPayloadDataManager;
     private TransactionDetailViewModel mSubject;
 
 //    // Transactions

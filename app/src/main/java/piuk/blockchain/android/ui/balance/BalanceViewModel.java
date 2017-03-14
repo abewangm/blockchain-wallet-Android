@@ -342,7 +342,7 @@ public class BalanceViewModel extends BaseViewModel {
         }
 
         //Update balance
-        double btcBalance = transactionListDataManager.getBtcBalance(object);
+        long btcBalance = transactionListDataManager.getBtcBalance(object);
         String balanceTotal = getBalanceString(isBTC, btcBalance);
 
         if (dataListener != null) {
@@ -514,18 +514,14 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     @NonNull
-    private String getBalanceString(boolean isBTC, double btcBalance) {
+    private String getBalanceString(boolean isBTC, long btcBalance) {
         double fiatBalance;
         String strFiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(strFiat);
         fiatBalance = lastPrice * (btcBalance / 1e8);
 
-        String balanceTotal;
-        balanceTotal =
-                isBTC ? getMonetaryUtil().getDisplayAmountWithFormatting(btcBalance) + " " + getDisplayUnits()
-                        : getMonetaryUtil().getFiatFormat(strFiat).format(fiatBalance) + " " + strFiat;
-
-        return balanceTotal;
+        return isBTC ? getMonetaryUtil().getDisplayAmountWithFormatting(btcBalance) + " " + getDisplayUnits()
+                : getMonetaryUtil().getFiatFormat(strFiat).format(fiatBalance) + " " + strFiat;
     }
 
     public String getDisplayUnits() {
