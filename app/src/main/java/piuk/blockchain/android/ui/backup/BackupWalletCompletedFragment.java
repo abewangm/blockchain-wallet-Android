@@ -21,13 +21,16 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.AlertPromptTransferFundsBinding;
 import piuk.blockchain.android.databinding.FragmentBackupCompleteBinding;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.annotations.Thunk;
 
-public class BackupWalletCompletedFragment extends Fragment {
+public class BackupWalletCompletedFragment extends Fragment implements BackupWalletViewModel.DataListener{
 
     public static final String TAG = BackupWalletCompletedFragment.class.getSimpleName();
     private static final String KEY_CHECK_TRANSFER = "check_transfer";
 
     private CompositeDisposable compositeDisposable;
+
+    @Thunk BackupWalletViewModel viewModel;
 
     public static BackupWalletCompletedFragment newInstance(boolean checkTransfer) {
         Bundle args = new Bundle();
@@ -42,6 +45,8 @@ public class BackupWalletCompletedFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FragmentBackupCompleteBinding dataBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_backup_complete, container, false);
         compositeDisposable = new CompositeDisposable();
+
+        viewModel = new BackupWalletViewModel(this);
 
         long lastBackup = new PrefsUtil(getActivity()).getValue(BackupWalletActivity.BACKUP_DATE_KEY, 0);
 
@@ -63,27 +68,15 @@ public class BackupWalletCompletedFragment extends Fragment {
                     .commit();
         });
 
-        // TODO: 21/02/2017  
-//        if (getArguments() != null && getArguments().getBoolean(KEY_CHECK_TRANSFER)) {
-//            TransferFundsDataManager fundsHelper =
-//                    new TransferFundsDataManager(
-//                            PayloadManager.getInstance(),
-//                            MultiAddrFactory.getInstance(),
-//                            new Unspent(),
-//                            new Payment());
-//            compositeDisposable.add(
-//                    fundsHelper.getTransferableFundTransactionListForDefaultAccount()
-//                            .subscribe(triple -> {
-//                                if (!triple.getLeft().isEmpty()) {
-//                                    showTransferFundsPrompt();
-//                                }
-//                            }, Throwable::printStackTrace));
-//        }
+        if (getArguments() != null && getArguments().getBoolean(KEY_CHECK_TRANSFER)) {
+            viewModel.checkTransferableFunds();
+        }
 
         return dataBinding.getRoot();
     }
 
-    private void showTransferFundsPrompt() {
+    @Override
+    public void showTransferFundsPrompt() {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle);
         AlertPromptTransferFundsBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(getActivity()),
                 R.layout.alert_prompt_transfer_funds, null, false);

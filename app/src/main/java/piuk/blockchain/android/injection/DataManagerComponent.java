@@ -5,6 +5,7 @@ import piuk.blockchain.android.ui.account.AccountEditViewModel;
 import piuk.blockchain.android.ui.account.AccountViewModel;
 import piuk.blockchain.android.ui.auth.PasswordRequiredViewModel;
 import piuk.blockchain.android.ui.auth.PinEntryViewModel;
+import piuk.blockchain.android.ui.backup.BackupWalletViewModel;
 import piuk.blockchain.android.ui.backup.ConfirmFundsTransferViewModel;
 import piuk.blockchain.android.ui.balance.BalanceViewModel;
 import piuk.blockchain.android.ui.chooser.AccountChooserViewModel;
@@ -85,4 +86,6 @@ public interface DataManagerComponent {
     void inject(ContactsPaymentRequestViewModel contactsPaymentRequestViewModel);
 
     void inject(AccountChooserViewModel accountChooserViewModel);
+
+    void inject(BackupWalletViewModel backupWalletViewModel);
 }
