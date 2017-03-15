@@ -81,10 +81,8 @@ public class LauncherViewModel extends BaseViewModel {
 
         boolean hasLoggedOut = mPrefsUtil.getValue(PrefsUtil.LOGGED_OUT, false);
 
-        // No GUID? Treat as new installation
         if (mPrefsUtil.getValue(PrefsUtil.KEY_GUID, "").isEmpty()) {
-            // TODO: 21/02/2017 why set temp pw here? wipe rather?
-//            mPayloadManager.setTempPassword("");
+            // No GUID? Treat as new installation
             mDataListener.onNoGuid();
 
         } else if (hasLoggedOut) {
@@ -101,7 +99,6 @@ public class LauncherViewModel extends BaseViewModel {
 
         } else if (isPinValidated && !mPayloadManager.getPayload().isUpgraded()) {
             // Legacy app has not been prompted for upgrade
-
             mAccessState.setIsLoggedIn(true);
             mDataListener.onRequestUpgrade();
 
@@ -118,4 +115,5 @@ public class LauncherViewModel extends BaseViewModel {
     public AppUtil getAppUtil() {
         return mAppUtil;
     }
+
 }

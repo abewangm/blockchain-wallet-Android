@@ -24,7 +24,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 @SuppressWarnings("WeakerAccess")
 public class PasswordRequiredViewModel extends BaseViewModel {
 
-    private static final String KEY_AUTH_REQUIRED = "Authorization Required";
+    @VisibleForTesting static final String KEY_AUTH_REQUIRED = "Authorization Required";
     private static final String TAG = PasswordRequiredViewModel.class.getSimpleName();
 
     @Inject protected AppUtil appUtil;

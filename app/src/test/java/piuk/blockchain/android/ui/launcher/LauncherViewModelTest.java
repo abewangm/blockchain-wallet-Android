@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Wallet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +28,6 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -38,267 +38,256 @@ import static piuk.blockchain.android.ui.launcher.LauncherViewModel.INTENT_EXTRA
 /**
  * Created by adambennett on 09/08/2016.
  */
+@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = piuk.blockchain.android.BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class LauncherViewModelTest {
 
-//    private LauncherViewModel mSubject;
-//
-//    @Mock private LauncherActivity mLauncherActivity;
-//    @Mock private PrefsUtil mPrefsUtil;
-//    @Mock private AppUtil mAppUtil;
-//    @Mock private PayloadManager mPayloadManager;
-//    @Mock private AccessState mAccessState;
-//    @Mock private Intent mIntent;
-//    @Mock private Bundle mExtras;
-//    @Mock private Payload mPayload;
-//
-//    @Before
-//    public void setUp() throws Exception {
-//        MockitoAnnotations.initMocks(this);
-//
-//        InjectorTestUtils.initApplicationComponent(
-//                Injector.getInstance(),
-//                new MockApplicationModule(RuntimeEnvironment.application),
-//                new MockApiModule(),
-//                new DataManagerModule());
-//
-//        mSubject = new LauncherViewModel(mLauncherActivity);
-//    }
-//
-//    /**
-//     * Everything is good. Expected output is {@link LauncherActivity#onStartMainActivity()}
-//     */
-//    @Test
-//    public void onViewReadyVerified() throws Exception {
-//        // Arrange
-//        when(mLauncherActivity.getPageIntent()).thenReturn(mIntent);
-//        when(mIntent.getExtras()).thenReturn(mExtras);
-//        when(mExtras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(true);
-//        when(mExtras.getBoolean(INTENT_EXTRA_VERIFIED)).thenReturn(true);
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
-//        when(mPrefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
-//        when(mAppUtil.isSane()).thenReturn(true);
-//        when(mPayloadManager.getPayload()).thenReturn(mPayload);
-//        when(mPayload.isUpgraded()).thenReturn(true);
-//        when(mAccessState.isLoggedIn()).thenReturn(true);
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        verify(mLauncherActivity).onStartMainActivity();
-//    }
-//
-//    /**
-//     * Bitcoin URI is found, expected to step into Bitcoin branch and call {@link
-//     * LauncherActivity#onStartMainActivity()}
-//     */
-//    @Test
-//    public void onViewReadyBitcoinUri() throws Exception {
-//        // Arrange
-//        when(mLauncherActivity.getPageIntent()).thenReturn(mIntent);
-//        when(mIntent.getAction()).thenReturn(Intent.ACTION_VIEW);
-//        when(mIntent.getScheme()).thenReturn("bitcoin");
-//        when(mIntent.getData()).thenReturn(Uri.parse("bitcoin uri"));
-//        when(mIntent.getExtras()).thenReturn(mExtras);
-//        when(mExtras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(true);
-//        when(mExtras.getBoolean(INTENT_EXTRA_VERIFIED)).thenReturn(true);
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
-//        when(mPrefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
-//        when(mAppUtil.isSane()).thenReturn(true);
-//        when(mPayloadManager.getPayload()).thenReturn(mPayload);
-//        when(mPayload.isUpgraded()).thenReturn(true);
-//        when(mAccessState.isLoggedIn()).thenReturn(true);
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        verify(mPrefsUtil).setValue(PrefsUtil.KEY_SCHEME_URL, "bitcoin uri");
-//        verify(mLauncherActivity).onStartMainActivity();
-//    }
-//
-//    /**
-//     * Everything is fine, but PIN not validated. Expected output is {@link
-//     * LauncherActivity#onRequestPin()}
-//     */
-//    @Test
-//    public void onViewReadyNotVerified() throws Exception {
-//        // Arrange
-//        when(mLauncherActivity.getPageIntent()).thenReturn(mIntent);
-//        when(mIntent.getExtras()).thenReturn(mExtras);
-//        when(mExtras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(false);
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
-//        when(mPrefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
-//        when(mAppUtil.isSane()).thenReturn(true);
-//        when(mPayloadManager.getPayload()).thenReturn(mPayload);
-//        when(mPayload.isUpgraded()).thenReturn(true);
-//        when(mAccessState.isLoggedIn()).thenReturn(false);
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        verify(mLauncherActivity).onRequestPin();
-//    }
-//
-//    /**
-//     * Everything is fine, but PIN not validated. However, {@link AccessState} returns logged in.
-//     * Expected output is {@link LauncherActivity#onStartMainActivity()}
-//     */
-//    @Test
-//    public void onViewReadyPinNotValidatedButLoggedInt() throws Exception {
-//        // Arrange
-//        when(mLauncherActivity.getPageIntent()).thenReturn(mIntent);
-//        when(mIntent.getExtras()).thenReturn(mExtras);
-//        when(mExtras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(false);
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
-//        when(mPrefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
-//        when(mAppUtil.isSane()).thenReturn(true);
-//        when(mPayloadManager.getPayload()).thenReturn(mPayload);
-//        when(mPayload.isUpgraded()).thenReturn(true);
-//        when(mAccessState.isLoggedIn()).thenReturn(true);
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        verify(mAccessState).setIsLoggedIn(true);
-//        verify(mLauncherActivity).onStartMainActivity();
-//    }
-//
-//    /**
-//     * GUID not found, expected output is {@link LauncherActivity#onNoGuid()}
-//     */
-//    @Test
-//    public void onViewReadyNoGuid() throws Exception {
-//        // Arrange
-//        when(mLauncherActivity.getPageIntent()).thenReturn(mIntent);
-//        when(mIntent.getExtras()).thenReturn(mExtras);
-//        when(mExtras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(false);
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("");
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        verify(mLauncherActivity).onNoGuid();
-//    }
-//
-//    /**
-//     * Pin not found, expected output is {@link LauncherActivity#onRequestPin()}
-//     */
-//    @Test
-//    public void onViewReadyNoPin() throws Exception {
-//        // Arrange
-//        when(mLauncherActivity.getPageIntent()).thenReturn(mIntent);
-//        when(mIntent.getExtras()).thenReturn(mExtras);
-//        when(mExtras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(false);
-//        when(mPrefsUtil.getValue(eq(PrefsUtil.KEY_GUID), anyString())).thenReturn("1234567890");
-//        when(mPrefsUtil.getValue(eq(PrefsUtil.KEY_PIN_IDENTIFIER), anyString())).thenReturn("");
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        verify(mLauncherActivity).onRequestPin();
-//    }
-//
-//    /**
-//     * AppUtil returns not sane. Expected output is {@link LauncherActivity#onCorruptPayload()}
-//     */
-//    @Test
-//    public void onViewReadyNotSane() throws Exception {
-//        // Arrange
-//        when(mLauncherActivity.getPageIntent()).thenReturn(mIntent);
-//        when(mIntent.getExtras()).thenReturn(mExtras);
-//        when(mExtras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(false);
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
-//        when(mAppUtil.isSane()).thenReturn(false);
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        verify(mLauncherActivity).onCorruptPayload();
-//    }
-//
-//    /**
-//     * Everything is fine, but not upgraded. Expected output is {@link
-//     * LauncherActivity#onRequestUpgrade()}
-//     */
-//    @Test
-//    public void onViewReadyNotUpgraded() throws Exception {
-//        // Arrange
-//        when(mLauncherActivity.getPageIntent()).thenReturn(mIntent);
-//        when(mIntent.getExtras()).thenReturn(mExtras);
-//        when(mExtras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(true);
-//        when(mExtras.getBoolean(INTENT_EXTRA_VERIFIED)).thenReturn(true);
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
-//        when(mPrefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
-//        when(mAppUtil.isSane()).thenReturn(true);
-//        when(mPayloadManager.getPayload()).thenReturn(mPayload);
-//        when(mPayload.isUpgraded()).thenReturn(false);
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        verify(mLauncherActivity).onRequestUpgrade();
-//    }
-//
-//    /**
-//     * GUID exists, Shared Key exists but user logged out. Expected output is {@link
-//     * LauncherActivity#onReEnterPassword()}
-//     */
-//    @Test
-//    public void onViewReadyUserLoggedOut() throws Exception {
-//        // Arrange
-//        when(mLauncherActivity.getPageIntent()).thenReturn(mIntent);
-//        when(mIntent.getExtras()).thenReturn(mExtras);
-//        when(mExtras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(false);
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
-//        when(mPrefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(true);
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        verify(mLauncherActivity).onReEnterPassword();
-//    }
-//
-//    /**
-//     * For 100% coverage
-//     */
-//    @Test
-//    public void destroy() {
-//        // Arrange
-//
-//        // Act
-//        mSubject.destroy();
-//        // Assert
-//        assertTrue(true);
-//    }
-//
-//    @Test
-//    public void getAppUtil() throws Exception {
-//        // Arrange
-//
-//        // Act
-//        AppUtil util = mSubject.getAppUtil();
-//        // Assert
-//        assertEquals(util, mAppUtil);
-//    }
-//
-//    private class MockApplicationModule extends ApplicationModule {
-//
-//        MockApplicationModule(Application application) {
-//            super(application);
-//        }
-//
-//        @Override
-//        protected PrefsUtil providePrefsUtil() {
-//            return mPrefsUtil;
-//        }
-//
-//        @Override
-//        protected AppUtil provideAppUtil() {
-//            return mAppUtil;
-//        }
-//
-//        @Override
-//        protected AccessState provideAccessState() {
-//            return mAccessState;
-//        }
-//    }
-//
-//    private class MockApiModule extends ApiModule {
-//        @Override
-//        protected PayloadManager providePayloadManager() {
-//            return mPayloadManager;
-//        }
-//    }
+    private LauncherViewModel subject;
+
+    @Mock private LauncherActivity launcherActivity;
+    @Mock private PrefsUtil prefsUtil;
+    @Mock private AppUtil appUtil;
+    @Mock private PayloadManager payloadManager;
+    @Mock private AccessState accessState;
+    @Mock private Intent intent;
+    @Mock private Bundle extras;
+    @Mock private Wallet wallet;
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        InjectorTestUtils.initApplicationComponent(
+                Injector.getInstance(),
+                new MockApplicationModule(RuntimeEnvironment.application),
+                new MockApiModule(),
+                new DataManagerModule());
+
+        subject = new LauncherViewModel(launcherActivity);
+    }
+
+    /**
+     * Everything is good. Expected output is {@link LauncherActivity#onStartMainActivity()}
+     */
+    @Test
+    public void onViewReadyVerified() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
+        when(appUtil.isSane()).thenReturn(true);
+        when(payloadManager.getPayload()).thenReturn(wallet);
+        when(wallet.isUpgraded()).thenReturn(true);
+        when(accessState.isLoggedIn()).thenReturn(true);
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(launcherActivity).onStartMainActivity();
+    }
+
+    /**
+     * Bitcoin URI is found, expected to step into Bitcoin branch and call {@link
+     * LauncherActivity#onStartMainActivity()}
+     */
+    @Test
+    public void onViewReadyBitcoinUri() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getAction()).thenReturn(Intent.ACTION_VIEW);
+        when(intent.getScheme()).thenReturn("bitcoin");
+        when(intent.getData()).thenReturn(Uri.parse("bitcoin uri"));
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
+        when(appUtil.isSane()).thenReturn(true);
+        when(payloadManager.getPayload()).thenReturn(wallet);
+        when(wallet.isUpgraded()).thenReturn(true);
+        when(accessState.isLoggedIn()).thenReturn(true);
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(prefsUtil).setValue(PrefsUtil.KEY_SCHEME_URL, "bitcoin uri");
+        verify(launcherActivity).onStartMainActivity();
+    }
+
+    /**
+     * Everything is fine, but PIN not validated. Expected output is {@link
+     * LauncherActivity#onRequestPin()}
+     */
+    @Test
+    public void onViewReadyNotVerified() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(false);
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
+        when(appUtil.isSane()).thenReturn(true);
+        when(payloadManager.getPayload()).thenReturn(wallet);
+        when(wallet.isUpgraded()).thenReturn(true);
+        when(accessState.isLoggedIn()).thenReturn(false);
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(launcherActivity).onRequestPin();
+    }
+
+    /**
+     * Everything is fine, but PIN not validated. However, {@link AccessState} returns logged in.
+     * Expected output is {@link LauncherActivity#onStartMainActivity()}
+     */
+    @Test
+    public void onViewReadyPinNotValidatedButLoggedIn() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(false);
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
+        when(appUtil.isSane()).thenReturn(true);
+        when(payloadManager.getPayload()).thenReturn(wallet);
+        when(wallet.isUpgraded()).thenReturn(true);
+        when(accessState.isLoggedIn()).thenReturn(true);
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(accessState).setIsLoggedIn(true);
+        verify(launcherActivity).onStartMainActivity();
+    }
+
+    /**
+     * GUID not found, expected output is {@link LauncherActivity#onNoGuid()}
+     */
+    @Test
+    public void onViewReadyNoGuid() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(false);
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("");
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(launcherActivity).onNoGuid();
+    }
+
+    /**
+     * Pin not found, expected output is {@link LauncherActivity#onRequestPin()}
+     */
+    @Test
+    public void onViewReadyNoPin() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(false);
+        when(prefsUtil.getValue(eq(PrefsUtil.KEY_GUID), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(eq(PrefsUtil.KEY_PIN_IDENTIFIER), anyString())).thenReturn("");
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(launcherActivity).onRequestPin();
+    }
+
+    /**
+     * AppUtil returns not sane. Expected output is {@link LauncherActivity#onCorruptPayload()}
+     */
+    @Test
+    public void onViewReadyNotSane() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(false);
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(appUtil.isSane()).thenReturn(false);
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(launcherActivity).onCorruptPayload();
+    }
+
+    /**
+     * Everything is fine, but not upgraded. Expected output is {@link
+     * LauncherActivity#onRequestUpgrade()}
+     */
+    @Test
+    public void onViewReadyNotUpgraded() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
+        when(appUtil.isSane()).thenReturn(true);
+        when(payloadManager.getPayload()).thenReturn(wallet);
+        when(wallet.isUpgraded()).thenReturn(false);
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(launcherActivity).onRequestUpgrade();
+    }
+
+    /**
+     * GUID exists, Shared Key exists but user logged out. Expected output is {@link
+     * LauncherActivity#onReEnterPassword()}
+     */
+    @Test
+    public void onViewReadyUserLoggedOut() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(false);
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(true);
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(launcherActivity).onReEnterPassword();
+    }
+
+    @Test
+    public void getAppUtil() throws Exception {
+        // Arrange
+
+        // Act
+        AppUtil util = subject.getAppUtil();
+        // Assert
+        assertEquals(util, appUtil);
+    }
+
+    private class MockApplicationModule extends ApplicationModule {
+
+        MockApplicationModule(Application application) {
+            super(application);
+        }
+
+        @Override
+        protected PrefsUtil providePrefsUtil() {
+            return prefsUtil;
+        }
+
+        @Override
+        protected AppUtil provideAppUtil() {
+            return appUtil;
+        }
+
+        @Override
+        protected AccessState provideAccessState() {
+            return accessState;
+        }
+    }
+
+    private class MockApiModule extends ApiModule {
+        @Override
+        protected PayloadManager providePayloadManager() {
+            return payloadManager;
+        }
+    }
+
 }

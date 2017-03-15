@@ -9,6 +9,7 @@ import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.metadata.data.Message;
+import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import org.bitcoinj.crypto.DeterministicKey;
@@ -86,7 +87,7 @@ public class ContactsDataManager {
      */
     public Observable<Boolean> loadNodes() {
         return Observable.fromCallable(() -> payloadManager.loadNodes())
-            .compose(RxUtil.applySchedulersToObservable());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -146,7 +147,7 @@ public class ContactsDataManager {
     public Completable unregisterMdid() {
         return Completable.fromCallable(() -> {
             payloadManager.unregisterMdid(
-                payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
+                    payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }
@@ -567,8 +568,8 @@ public class ContactsDataManager {
     /**
      * Returns a Map of Contact names keyed to transaction hashes.
      *
-     * @return A {@link HashMap} where the key is a {@link info.blockchain.wallet.multiaddress.TransactionSummary#getHash()}, and the value is a {@link
-     * Contact#getName()}
+     * @return A {@link HashMap} where the key is a {@link TransactionSummary#getHash()}, and the
+     * value is a {@link Contact#getName()}
      */
     public HashMap<String, String> getContactsTransactionMap() {
         return contactsTransactionMap;

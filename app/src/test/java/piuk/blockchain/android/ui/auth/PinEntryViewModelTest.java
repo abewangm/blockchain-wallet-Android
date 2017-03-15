@@ -1,11 +1,22 @@
 package piuk.blockchain.android.ui.auth;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.view.View;
 import android.widget.ImageView;
 
+import info.blockchain.wallet.exceptions.AccountLockedException;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.exceptions.PayloadException;
+import info.blockchain.wallet.exceptions.ServerConnectionException;
+import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.HDWallet;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import org.junit.Before;
@@ -16,49 +27,66 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.spongycastle.crypto.InvalidCipherTextException;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
+import io.reactivex.Completable;
+import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
 
 import static io.reactivex.Observable.just;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_EMAIL;
 import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_PASSWORD;
+import static piuk.blockchain.android.ui.auth.LandingActivity.KEY_INTENT_RECOVERING_FUNDS;
+import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 
 @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class PinEntryViewModelTest {
 
-    private PinEntryViewModel mSubject;
+    private PinEntryViewModel subject;
 
-    @Mock private PinEntryViewModel.DataListener mActivity;
-    @Mock private AuthDataManager mAuthDataManager;
-    @Mock private AppUtil mAppUtil;
-    @Mock private PrefsUtil mPrefsUtil;
-    @Mock private PayloadManager mPayloadManager;
-    @Mock private StringUtils mStringUtils;
-    @Mock private FingerprintHelper mFingerprintHelper;
-    @Mock private AccessState mAccessState;
-    @Mock private SSLVerifyUtil mSslVerifyUtil;
+    @Mock private PinEntryViewModel.DataListener activity;
+    @Mock private AuthDataManager authDataManager;
+    @Mock private AppUtil appUtil;
+    @Mock private PrefsUtil prefsUtil;
+    @Mock private PayloadManager payloadManager;
+    @Mock private StringUtils stringUtils;
+    @Mock private FingerprintHelper fingerprintHelper;
+    @Mock private AccessState accessState;
+    @Mock private SSLVerifyUtil sslVerifyUtil;
 
     @Before
     public void setUp() throws Exception {
@@ -71,10 +99,11 @@ public class PinEntryViewModelTest {
                 new MockDataManagerModule());
 
         ImageView mockImageView = mock(ImageView.class);
-        when(mActivity.getPinBoxArray()).thenReturn(new ImageView[]{mockImageView, mockImageView, mockImageView, mockImageView});
-        when(mStringUtils.getString(anyInt())).thenReturn("string resource");
+        when(activity.getPinBoxArray())
+                .thenReturn(new ImageView[]{mockImageView, mockImageView, mockImageView, mockImageView});
+        when(stringUtils.getString(anyInt())).thenReturn("string resource");
 
-        mSubject = new PinEntryViewModel(mActivity);
+        subject = new PinEntryViewModel(activity);
     }
 
     @Test
@@ -85,747 +114,770 @@ public class PinEntryViewModelTest {
         Intent intent = new Intent();
         intent.putExtra(KEY_INTENT_EMAIL, email);
         intent.putExtra(KEY_INTENT_PASSWORD, password);
-        when(mActivity.getPageIntent()).thenReturn(intent);
-        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn("");
-        when(mAuthDataManager.createHdWallet(anyString(), anyString(), email)).thenReturn(just(new Wallet()));
+        when(activity.getPageIntent()).thenReturn(intent);
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(fingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn("");
+        when(authDataManager.createHdWallet(anyString(), anyString(), eq(email)))
+                .thenReturn(just(new Wallet()));
         // Act
-        mSubject.onViewReady();
+        subject.onViewReady();
         // Assert
-        assertEquals(false, mSubject.allowExit());
-        verify(mActivity).showProgressDialog(anyInt(), anyString());
-        verify(mActivity).dismissProgressDialog();
-        verify(mPrefsUtil).setValue(PrefsUtil.KEY_EMAIL, email);
-//        verify(mPayloadManager).setEmail(email);
-//        verify(mPayloadManager).setTempPassword(password);
+        assertEquals(false, subject.allowExit());
+        verify(authDataManager).createHdWallet(anyString(), anyString(), eq(email));
+        verify(activity).showProgressDialog(anyInt(), anyString());
+        verify(activity).dismissProgressDialog();
+        verify(prefsUtil).setValue(PrefsUtil.KEY_EMAIL, email);
     }
-//
-//    @Test
-//    public void onViewReadyValidatingPinForResult() throws Exception {
-//        // Arrange
-//        Intent intent = new Intent();
-//        intent.putExtra(KEY_VALIDATING_PIN_FOR_RESULT, true);
-//        when(mActivity.getPageIntent()).thenReturn(intent);
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        assertEquals(true, mSubject.isForValidatingPinForResult());
-//    }
-//
-//    @Test
-//    public void onViewReadyEmailAndPasswordInIntentCreateWalletThrowsError() throws Exception {
-//        // Arrange
-//        String email = "example@email.com";
-//        String password = "1234567890";
-//        Intent intent = new Intent();
-//        intent.putExtra(KEY_INTENT_EMAIL, email);
-//        intent.putExtra(KEY_INTENT_PASSWORD, password);
-//        when(mActivity.getPageIntent()).thenReturn(intent);
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-//        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(new CharSequenceX(""));
-//        when(mAuthDataManager.createHdWallet(anyString(), anyString())).thenReturn(Observable.error(new Throwable()));
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        assertEquals(false, mSubject.allowExit());
-//        verify(mActivity).showProgressDialog(anyInt(), anyString());
-//        verify(mActivity, times(2)).dismissProgressDialog();
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//    }
-//
-//    @Test
-//    public void onViewReadyRecoveringFunds() throws Exception {
-//        // Arrange
-//        String email = "example@email.com";
-//        String password = "1234567890";
-//        Intent intent = new Intent();
-//        intent.putExtra(KEY_INTENT_EMAIL, email);
-//        intent.putExtra(KEY_INTENT_PASSWORD, password);
-//        intent.putExtra(KEY_INTENT_RECOVERING_FUNDS, true);
-//        when(mActivity.getPageIntent()).thenReturn(intent);
-//        when(mAuthDataManager.createHdWallet(anyString(), anyString())).thenReturn(just(new Payload()));
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        assertEquals(false, mSubject.allowExit());
-//        verify(mPrefsUtil).setValue(PrefsUtil.KEY_EMAIL, email);
-//        verify(mPayloadManager).setEmail(email);
-//        verify(mPayloadManager).setTempPassword(new CharSequenceX(password));
-//        verifyNoMoreInteractions(mPayloadManager);
-//    }
-//
-//    @Test
-//    public void onViewReadyMaxAttemptsExceeded() throws Exception {
-//        // Arrange
-//        when(mActivity.getPageIntent()).thenReturn(new Intent());
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_FAILS, 0)).thenReturn(4);
-//        when(mPayloadManager.getPayload()).thenReturn(mock(Payload.class));
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-//        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(new CharSequenceX(""));
-//        // Act
-//        mSubject.onViewReady();
-//        // Assert
-//        assertEquals(true, mSubject.allowExit());
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        verify(mActivity).showMaxAttemptsDialog();
-//    }
-//
-//    @Test
-//    public void checkFingerprintStatusShouldShowDialog() throws Exception {
-//        // Arrange
-//        mSubject.mValidatingPinForResult = false;
-//        mSubject.mRecoveringFunds = false;
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234");
-//        when(mFingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(true);
-//        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(null);
-//        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(new CharSequenceX(""));
-//        // Act
-//        mSubject.checkFingerprintStatus();
-//        // Assert
-//        verify(mActivity).showFingerprintDialog(any(CharSequenceX.class));
-//    }
-//
-//    @Test
-//    public void checkFingerprintStatusDontShow() throws Exception {
-//        // Arrange
-//        mSubject.mValidatingPinForResult = true;
-//        // Act
-//        mSubject.checkFingerprintStatus();
-//        // Assert
-//        verify(mActivity).showKeyboard();
-//    }
-//
-//    @Test
-//    public void canShowFingerprintDialog() throws Exception {
-//        // Arrange
-//        mSubject.mCanShowFingerprintDialog = true;
-//        // Act
-//        boolean value = mSubject.canShowFingerprintDialog();
-//        // Assert
-//        assertEquals(true, value);
-//    }
-//
-//    @Test
-//    public void loginWithDecryptedPin() throws Exception {
-//        // Arrange
-//        CharSequenceX pincode = new CharSequenceX("1234");
-//        when(mAuthDataManager.validatePin(pincode.toString())).thenReturn(just(new CharSequenceX("password")));
-//        // Act
-//        mSubject.loginWithDecryptedPin(pincode);
-//        // Assert
-//        verify(mActivity).getPinBoxArray();
-//        assertEquals(false, mSubject.canShowFingerprintDialog());
-//    }
-//
-//    @Test
-//    public void onDeleteClicked() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "1234";
-//        // Act
-//        mSubject.onDeleteClicked();
-//        // Assert
-//        assertEquals("123", mSubject.mUserEnteredPin);
-//        verify(mActivity).getPinBoxArray();
-//    }
-//
-//    @Test
-//    public void padClickedPinAlreadyFourDigits() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "0000";
-//        // Act
-//        mSubject.onPadClicked("0");
-//        // Assert
-//        verifyZeroInteractions(mActivity);
-//    }
-//
-//    @Test
-//    public void padClickedAllZeros() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "000";
-//        // Act
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-//        when(mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(new CharSequenceX(""));
-//        mSubject.onPadClicked("0");
-//        // Assert
-//        verify(mActivity).clearPinBoxes();
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        assertEquals("", mSubject.mUserEnteredPin);
-//        assertEquals(null, mSubject.mUserEnteredConfirmationPin);
-//    }
-//
-//    @Test
-//    public void padClickedShowCommonPinWarning() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "123";
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("");
-//        // Act
-//        mSubject.onPadClicked("4");
-//        // Assert
-//        verify(mActivity).showCommonPinWarning(any(DialogButtonCallback.class));
-//    }
-//
-//    @Test
-//    public void padClickedShowCommonPinWarningAndClickRetry() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "123";
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("");
-//        doAnswer(invocation -> {
-//            ((DialogButtonCallback) invocation.getArguments()[0]).onPositiveClicked();
-//            return null;
-//        }).when(mActivity).showCommonPinWarning(any(DialogButtonCallback.class));
-//        // Act
-//        mSubject.onPadClicked("4");
-//        // Assert
-//        verify(mActivity).showCommonPinWarning(any(DialogButtonCallback.class));
-//        verify(mActivity).clearPinBoxes();
-//        assertEquals("", mSubject.mUserEnteredPin);
-//        assertEquals(null, mSubject.mUserEnteredConfirmationPin);
-//    }
-//
-//    @Test
-//    public void padClickedShowCommonPinWarningAndClickContinue() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "123";
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("");
-//        doAnswer(invocation -> {
-//            ((DialogButtonCallback) invocation.getArguments()[0]).onNegativeClicked();
-//            return null;
-//        }).when(mActivity).showCommonPinWarning(any(DialogButtonCallback.class));
-//        // Act
-//        mSubject.onPadClicked("4");
-//        // Assert
-//        verify(mActivity).showCommonPinWarning(any(DialogButtonCallback.class));
-//        assertEquals("", mSubject.mUserEnteredPin);
-//        assertEquals("1234", mSubject.mUserEnteredConfirmationPin);
-//    }
-//
-//    @Test
-//    public void padClickedShowPinReuseWarning() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "258";
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("");
-//        when(mAccessState.getPIN()).thenReturn("2580");
-//        // Act
-//        mSubject.onPadClicked("0");
-//        // Assert
-//        verify(mActivity).dismissProgressDialog();
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
-//        verify(mActivity).clearPinBoxes();
-//    }
-//
-//    @Test
-//    public void padClickedVerifyPinValidateCalled() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "133";
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
-//        when(mAuthDataManager.validatePin(anyString())).thenReturn(just(new CharSequenceX("")));
-//        // Act
-//        mSubject.onPadClicked("7");
-//        // Assert
-//        verify(mActivity).setTitleVisibility(View.INVISIBLE);
-//        verify(mActivity, times(2)).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).validatePin(anyString());
-//    }
-//
-//    @Test
-//    public void padClickedVerifyPinForResultReturnsValidPassword() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "133";
-//        mSubject.mValidatingPinForResult = true;
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
-//        when(mAuthDataManager.validatePin(anyString())).thenReturn(just(new CharSequenceX("")));
-//        // Act
-//        mSubject.onPadClicked("7");
-//        // Assert
-//        verify(mActivity).setTitleVisibility(View.INVISIBLE);
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mActivity).dismissProgressDialog();
-//        verify(mAuthDataManager).validatePin(anyString());
-//        verify(mActivity).finishWithResultOk("1337");
-//    }
-//
-//    @Test
-//    public void padClickedVerifyPinValidateCalledReturnsErrorIncrementsFailureCount() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "133";
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
-//        when(mAuthDataManager.validatePin(anyString())).thenReturn(Observable.error(new InvalidCredentialsException()));
-//        // Act
-//        mSubject.onPadClicked("7");
-//        // Assert
-//        verify(mActivity).setTitleVisibility(View.INVISIBLE);
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).validatePin(anyString());
-//        verify(mPrefsUtil).setValue(anyString(), anyInt());
-//        verify(mPrefsUtil).getValue(anyString(), anyInt());
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        verify(mActivity).restartPageAndClearTop();
-//    }
-//
-//    @Test
-//    public void padClickedVerifyPinValidateCalledReturnsInvalidCipherText() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "133";
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
-//        when(mAuthDataManager.validatePin(anyString())).thenReturn(just(new CharSequenceX("")));
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new InvalidCipherTextException()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        // Act
-//        mSubject.onPadClicked("7");
-//        // Assert
-//        verify(mActivity).setTitleVisibility(View.INVISIBLE);
-//        verify(mActivity, times(2)).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).validatePin(anyString());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mPrefsUtil).setValue(anyString(), anyInt());
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        verify(mAccessState).setPIN(null);
-//        verify(mAppUtil).clearCredentialsAndRestart();
-//    }
-//
-//    @Test
-//    public void padClickedVerifyPinValidateCalledReturnsGenericException() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "133";
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
-//        when(mAuthDataManager.validatePin(anyString())).thenReturn(just(new CharSequenceX("")));
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new Exception()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        // Act
-//        mSubject.onPadClicked("7");
-//        // Assert
-//        verify(mActivity).setTitleVisibility(View.INVISIBLE);
-//        verify(mActivity, times(2)).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).validatePin(anyString());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mPrefsUtil).setValue(anyString(), anyInt());
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        verify(mAppUtil).clearCredentialsAndRestart();
-//    }
-//
-//    @Test
-//    public void padClickedCreatePinCreateSuccessful() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "133";
-//        mSubject.mUserEnteredConfirmationPin = "1337";
-//        when(mPayloadManager.getTempPassword()).thenReturn(new CharSequenceX("temp password"));
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-//        when(mAuthDataManager.createPin(any(CharSequenceX.class), anyString())).thenReturn(just(true));
-//        when(mAuthDataManager.validatePin(anyString())).thenReturn(just(new CharSequenceX("password")));
-//        // Act
-//        mSubject.onPadClicked("7");
-//        // Assert
-//        verify(mActivity, times(2)).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).createPin(any(CharSequenceX.class), anyString());
-//        verify(mFingerprintHelper).clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
-//        verify(mFingerprintHelper).setFingerprintUnlockEnabled(false);
-//    }
-//
-//    @Test
-//    public void padClickedCreatePinCreateFailed() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "133";
-//        mSubject.mUserEnteredConfirmationPin = "1337";
-//        when(mPayloadManager.getTempPassword()).thenReturn(new CharSequenceX("temp password"));
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-//        when(mAuthDataManager.createPin(any(CharSequenceX.class), anyString())).thenReturn(just(false));
-//        // Act
-//        mSubject.onPadClicked("7");
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).createPin(any(CharSequenceX.class), anyString());
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        verify(mPrefsUtil).clear();
-//        verify(mAppUtil).restartApp();
-//    }
-//
-//    @Test
-//    public void padClickedCreatePinWritesNewConfirmationValue() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "133";
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-//        when(mAuthDataManager.createPin(any(CharSequenceX.class), anyString())).thenReturn(just(true));
-//        // Act
-//        mSubject.onPadClicked("7");
-//        // Assert
-//        assertEquals("1337", mSubject.mUserEnteredConfirmationPin);
-//        assertEquals("", mSubject.mUserEnteredPin);
-//    }
-//
-//    @Test
-//    public void padClickedCreatePinMismatched() throws Exception {
-//        // Arrange
-//        mSubject.mUserEnteredPin = "133";
-//        mSubject.mUserEnteredConfirmationPin = "1234";
-//        when(mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-//        when(mAuthDataManager.createPin(any(CharSequenceX.class), anyString())).thenReturn(just(true));
-//        // Act
-//        mSubject.onPadClicked("7");
-//        // Assert
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        verify(mActivity).dismissProgressDialog();
-//    }
-//
-//    @Test
-//    public void clearPinBoxes() throws Exception {
-//        // Arrange
-//
-//        // Act
-//        mSubject.clearPinBoxes();
-//        // Assert
-//        verify(mActivity).clearPinBoxes();
-//        assertEquals("", mSubject.mUserEnteredPin);
-//    }
-//
-//    @Test
-//    public void validatePasswordSuccessful() throws Exception {
-//        // Arrange
-//        CharSequenceX password = new CharSequenceX("1234567890");
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.complete());
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        // Act
-//        mSubject.validatePassword(password);
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mPayloadManager).setTempPassword(new CharSequenceX(""));
-//        verify(mActivity).dismissProgressDialog();
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        verify(mPrefsUtil, times(2)).removeValue(anyString());
-//        verify(mActivity).restartPageAndClearTop();
-//    }
-//
-//    @Test
-//    public void validatePasswordThrowsGenericException() throws Exception {
-//        // Arrange
-//        CharSequenceX password = new CharSequenceX("1234567890");
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new Throwable()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        // Act
-//        mSubject.validatePassword(password);
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mPayloadManager).setTempPassword(new CharSequenceX(""));
-//        verify(mActivity, times(2)).dismissProgressDialog();
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        verify(mActivity).showValidationDialog();
-//    }
-//
-//    @Test
-//    public void validatePasswordThrowsServerConnectionException() throws Exception {
-//        // Arrange
-//        CharSequenceX password = new CharSequenceX("1234567890");
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new ServerConnectionException()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        // Act
-//        mSubject.validatePassword(password);
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mPayloadManager).setTempPassword(new CharSequenceX(""));
-//        verify(mActivity).dismissProgressDialog();
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//    }
-//
-//    @Test
-//    public void validatePasswordThrowsHDWalletExceptionException() throws Exception {
-//        // Arrange
-//        CharSequenceX password = new CharSequenceX("1234567890");
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new HDWalletException()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        // Act
-//        mSubject.validatePassword(password);
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mPayloadManager).setTempPassword(new CharSequenceX(""));
-//        verify(mActivity).dismissProgressDialog();
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        verify(mAppUtil).restartApp();
-//    }
-//
-//    @Test
-//    public void validatePasswordThrowsAccountLockedException() throws Exception {
-//        // Arrange
-//        CharSequenceX password = new CharSequenceX("1234567890");
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new AccountLockedException()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        // Act
-//        mSubject.validatePassword(password);
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mPayloadManager).setTempPassword(new CharSequenceX(""));
-//        verify(mActivity).dismissProgressDialog();
-//        verify(mActivity).showAccountLockedDialog();
-//    }
-//
-//    @Test
-//    public void updatePayloadInvalidCredentialsException() throws Exception {
-//        // Arrange
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new InvalidCredentialsException()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        Payload mockPayload = mock(Payload.class);
-//        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-//        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-//        // Act
-//        mSubject.updatePayload(new CharSequenceX(""));
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mActivity).goToPasswordRequiredActivity();
-//    }
-//
-//    @Test
-//    public void updatePayloadServerConnectionException() throws Exception {
-//        // Arrange
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new ServerConnectionException()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        Payload mockPayload = mock(Payload.class);
-//        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-//        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-//        // Act
-//        mSubject.updatePayload(new CharSequenceX(""));
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//    }
-//
-//    @Test
-//    public void updatePayloadDecryptionException() throws Exception {
-//        // Arrange
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new DecryptionException()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        Payload mockPayload = mock(Payload.class);
-//        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-//        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-//        // Act
-//        mSubject.updatePayload(new CharSequenceX(""));
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mActivity).goToPasswordRequiredActivity();
-//    }
-//
-//    @Test
-//    public void updatePayloadPayloadExceptionException() throws Exception {
-//        // Arrange
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new PayloadException()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        Payload mockPayload = mock(Payload.class);
-//        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-//        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-//        // Act
-//        mSubject.updatePayload(new CharSequenceX(""));
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        verify(mAppUtil).restartApp();
-//    }
-//
-//    @Test
-//    public void updatePayloadHDWalletException() throws Exception {
-//        // Arrange
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new HDWalletException()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        Payload mockPayload = mock(Payload.class);
-//        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-//        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-//        // Act
-//        mSubject.updatePayload(new CharSequenceX(""));
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        verify(mAppUtil).restartApp();
-//    }
-//
-//    @Test
-//    public void updatePayloadVersionNotSupported() throws Exception {
-//        // Arrange
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new UnsupportedVersionException()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        Payload mockPayload = mock(Payload.class);
-//        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-//        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-//        // Act
-//        mSubject.updatePayload(new CharSequenceX(""));
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mActivity).showWalletVersionNotSupportedDialog(isNull());
-//    }
-//
-//    @Test
-//    public void updatePayloadAccountLocked() throws Exception {
-//        // Arrange
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.error(new AccountLockedException()));
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        Payload mockPayload = mock(Payload.class);
-//        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-//        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-//        // Act
-//        mSubject.updatePayload(new CharSequenceX(""));
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mActivity).showAccountLockedDialog();
-//    }
-//
-//    @Test
-//    public void updatePayloadSuccessfulSetLabels() throws Exception {
-//        // Arrange
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.complete());
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        Payload mockPayload = mock(Payload.class);
-//        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-//        HDWallet mockHdWallet = mock(HDWallet.class);
-//        when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
-//        Account mockAccount = mock(Account.class);
-//        when(mockAccount.getLabel()).thenReturn(null);
-//        ArrayList<Account> accountsList = new ArrayList<>();
-//        accountsList.add(mockAccount);
-//        when(mockHdWallet.getAccounts()).thenReturn(accountsList);
-//        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-//        when(mockPayload.isUpgraded()).thenReturn(true);
-//        when(mAppUtil.isNewlyCreated()).thenReturn(true);
-//        // Act
-//        mSubject.updatePayload(new CharSequenceX(""));
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mAppUtil).setSharedKey(anyString());
-//        verify(mPayloadManager, times(5)).getPayload();
-//        verify(mStringUtils).getString(anyInt());
-//        verify(mActivity).dismissProgressDialog();
-//        assertEquals(true, mSubject.mCanShowFingerprintDialog);
-//    }
-//
-//    @Test
-//    public void updatePayloadSuccessfulUpgradeWallet() throws Exception {
-//        // Arrange
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.complete());
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        Payload mockPayload = mock(Payload.class);
-//        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-//        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-//        when(mockPayload.isUpgraded()).thenReturn(false);
-//        when(mAppUtil.isNewlyCreated()).thenReturn(false);
-//        // Act
-//        mSubject.updatePayload(new CharSequenceX(""));
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mAppUtil).setSharedKey(anyString());
-//        verify(mActivity).goToUpgradeWalletActivity();
-//        verify(mActivity).dismissProgressDialog();
-//        assertEquals(true, mSubject.mCanShowFingerprintDialog);
-//    }
-//
-//    @Test
-//    public void updatePayloadSuccessfulVerifyPin() throws Exception {
-//        // Arrange
-//        when(mAuthDataManager.updatePayload(anyString(), anyString(), any(CharSequenceX.class))).thenReturn(Completable.complete());
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-//        Payload mockPayload = mock(Payload.class);
-//        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-//        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-//        when(mockPayload.isUpgraded()).thenReturn(true);
-//        when(mAppUtil.isNewlyCreated()).thenReturn(false);
-//        // Act
-//        mSubject.updatePayload(new CharSequenceX(""));
-//        // Assert
-//        verify(mActivity).showProgressDialog(anyInt(), isNull());
-//        verify(mAuthDataManager).updatePayload(anyString(), anyString(), any(CharSequenceX.class));
-//        verify(mAppUtil).setSharedKey(anyString());
-//        verify(mAppUtil).restartAppWithVerifiedPin();
-//        verify(mActivity).dismissProgressDialog();
-//        assertEquals(true, mSubject.mCanShowFingerprintDialog);
-//    }
-//
-//    @Test
-//    public void incrementFailureCount() throws Exception {
-//        // Arrange
-//
-//        // Act
-//        mSubject.incrementFailureCountAndRestart();
-//        // Assert
-//        verify(mPrefsUtil).getValue(anyString(), anyInt());
-//        verify(mPrefsUtil).setValue(anyString(), anyInt());
-//        //noinspection WrongConstant
-//        verify(mActivity).showToast(anyInt(), anyString());
-//        verify(mActivity).restartPageAndClearTop();
-//    }
-//
-//    @Test
-//    public void resetApp() throws Exception {
-//        // Arrange
-//
-//        // Act
-//        mSubject.resetApp();
-//        // Assert
-//        verify(mAppUtil).clearCredentialsAndRestart();
-//    }
-//
-//    @Test
-//    public void allowExit() throws Exception {
-//        // Arrange
-//
-//        // Act
-//        boolean allowExit = mSubject.allowExit();
-//        // Assert
-//        assertEquals(mSubject.bAllowExit, allowExit);
-//    }
-//
-//    @Test
-//    public void isCreatingNewPin() throws Exception {
-//        // Arrange
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("");
-//        // Act
-//        boolean creatingNewPin = mSubject.isCreatingNewPin();
-//        // Assert
-//        assertEquals(true, creatingNewPin);
-//    }
-//
-//    @Test
-//    public void isNotCreatingNewPin() throws Exception {
-//        // Arrange
-//        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
-//        // Act
-//        boolean creatingNewPin = mSubject.isCreatingNewPin();
-//        // Assert
-//        assertEquals(false, creatingNewPin);
-//    }
-//
-//    @Test
-//    public void getAppUtil() throws Exception {
-//        // Arrange
-//
-//        // Act
-//        AppUtil util = mSubject.getAppUtil();
-//        // Assert
-//        assertEquals(util, mAppUtil);
-//    }
-//
+
+    @Test
+    public void onViewReadyValidatingPinForResult() throws Exception {
+        // Arrange
+        Intent intent = new Intent();
+        intent.putExtra(KEY_VALIDATING_PIN_FOR_RESULT, true);
+        when(activity.getPageIntent()).thenReturn(intent);
+        // Act
+        subject.onViewReady();
+        // Assert
+        assertEquals(true, subject.isForValidatingPinForResult());
+    }
+
+    @Test
+    public void onViewReadyEmailAndPasswordInIntentCreateWalletThrowsError() throws Exception {
+        // Arrange
+        String email = "example@email.com";
+        String password = "1234567890";
+        Intent intent = new Intent();
+        intent.putExtra(KEY_INTENT_EMAIL, email);
+        intent.putExtra(KEY_INTENT_PASSWORD, password);
+        when(activity.getPageIntent()).thenReturn(intent);
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(fingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn("");
+        when(authDataManager.createHdWallet(anyString(), anyString(), eq(email)))
+                .thenReturn(Observable.error(new Throwable()));
+        // Act
+        subject.onViewReady();
+        // Assert
+        assertEquals(false, subject.allowExit());
+        verify(activity).showProgressDialog(anyInt(), anyString());
+        verify(activity, times(2)).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+    }
+
+    @Test
+    public void onViewReadyRecoveringFunds() throws Exception {
+        // Arrange
+        String email = "example@email.com";
+        String password = "1234567890";
+        Intent intent = new Intent();
+        intent.putExtra(KEY_INTENT_EMAIL, email);
+        intent.putExtra(KEY_INTENT_PASSWORD, password);
+        intent.putExtra(KEY_INTENT_RECOVERING_FUNDS, true);
+        when(activity.getPageIntent()).thenReturn(intent);
+        when(authDataManager.createHdWallet(anyString(), anyString(), eq(email))).thenReturn(just(new Wallet()));
+        // Act
+        subject.onViewReady();
+        // Assert
+        assertEquals(false, subject.allowExit());
+        verifyNoMoreInteractions(payloadManager);
+    }
+
+    @Test
+    public void onViewReadyMaxAttemptsExceeded() throws Exception {
+        // Arrange
+        when(activity.getPageIntent()).thenReturn(new Intent());
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_FAILS, 0)).thenReturn(4);
+        when(payloadManager.getPayload()).thenReturn(mock(Wallet.class));
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(fingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn("");
+        // Act
+        subject.onViewReady();
+        // Assert
+        assertEquals(true, subject.allowExit());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).showMaxAttemptsDialog();
+    }
+
+    @Test
+    public void checkFingerprintStatusShouldShowDialog() throws Exception {
+        // Arrange
+        subject.mValidatingPinForResult = false;
+        subject.mRecoveringFunds = false;
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234");
+        when(fingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(true);
+        when(fingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(null);
+        when(fingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn("");
+        // Act
+        subject.checkFingerprintStatus();
+        // Assert
+        verify(activity).showFingerprintDialog(anyString());
+    }
+
+    @Test
+    public void checkFingerprintStatusDontShow() throws Exception {
+        // Arrange
+        subject.mValidatingPinForResult = true;
+        // Act
+        subject.checkFingerprintStatus();
+        // Assert
+        verify(activity).showKeyboard();
+    }
+
+    @Test
+    public void canShowFingerprintDialog() throws Exception {
+        // Arrange
+        subject.mCanShowFingerprintDialog = true;
+        // Act
+        boolean value = subject.canShowFingerprintDialog();
+        // Assert
+        assertEquals(true, value);
+    }
+
+    @Test
+    public void loginWithDecryptedPin() throws Exception {
+        // Arrange
+        String pincode = "1234";
+        when(authDataManager.validatePin(pincode)).thenReturn(just("password"));
+        // Act
+        subject.loginWithDecryptedPin(pincode);
+        // Assert
+        verify(authDataManager).validatePin(pincode);
+        verify(activity).getPinBoxArray();
+        assertEquals(false, subject.canShowFingerprintDialog());
+    }
+
+    @Test
+    public void onDeleteClicked() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "1234";
+        // Act
+        subject.onDeleteClicked();
+        // Assert
+        assertEquals("123", subject.mUserEnteredPin);
+        verify(activity).getPinBoxArray();
+    }
+
+    @Test
+    public void padClickedPinAlreadyFourDigits() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "0000";
+        // Act
+        subject.onPadClicked("0");
+        // Assert
+        verifyZeroInteractions(activity);
+    }
+
+    @Test
+    public void padClickedAllZeros() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "000";
+        // Act
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(fingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn("");
+        subject.onPadClicked("0");
+        // Assert
+        verify(activity).clearPinBoxes();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        assertEquals("", subject.mUserEnteredPin);
+        assertEquals(null, subject.mUserEnteredConfirmationPin);
+    }
+
+    @Test
+    public void padClickedShowCommonPinWarning() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "123";
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("");
+        // Act
+        subject.onPadClicked("4");
+        // Assert
+        verify(activity).showCommonPinWarning(any(DialogButtonCallback.class));
+    }
+
+    @Test
+    public void padClickedShowCommonPinWarningAndClickRetry() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "123";
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("");
+        doAnswer(invocation -> {
+            ((DialogButtonCallback) invocation.getArguments()[0]).onPositiveClicked();
+            return null;
+        }).when(activity).showCommonPinWarning(any(DialogButtonCallback.class));
+        // Act
+        subject.onPadClicked("4");
+        // Assert
+        verify(activity).showCommonPinWarning(any(DialogButtonCallback.class));
+        verify(activity).clearPinBoxes();
+        assertEquals("", subject.mUserEnteredPin);
+        assertEquals(null, subject.mUserEnteredConfirmationPin);
+    }
+
+    @Test
+    public void padClickedShowCommonPinWarningAndClickContinue() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "123";
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("");
+        doAnswer(invocation -> {
+            ((DialogButtonCallback) invocation.getArguments()[0]).onNegativeClicked();
+            return null;
+        }).when(activity).showCommonPinWarning(any(DialogButtonCallback.class));
+        // Act
+        subject.onPadClicked("4");
+        // Assert
+        verify(activity).showCommonPinWarning(any(DialogButtonCallback.class));
+        assertEquals("", subject.mUserEnteredPin);
+        assertEquals("1234", subject.mUserEnteredConfirmationPin);
+    }
+
+    @Test
+    public void padClickedShowPinReuseWarning() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "258";
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("");
+        when(accessState.getPIN()).thenReturn("2580");
+        // Act
+        subject.onPadClicked("0");
+        // Assert
+        verify(activity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verify(activity).clearPinBoxes();
+    }
+
+    @Test
+    public void padClickedVerifyPinValidateCalled() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "133";
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
+        when(authDataManager.validatePin(anyString())).thenReturn(just(""));
+        // Act
+        subject.onPadClicked("7");
+        // Assert
+        verify(activity).setTitleVisibility(View.INVISIBLE);
+        verify(activity, times(2)).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).validatePin(anyString());
+    }
+
+    @Test
+    public void padClickedVerifyPinForResultReturnsValidPassword() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "133";
+        subject.mValidatingPinForResult = true;
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
+        when(authDataManager.validatePin(anyString())).thenReturn(just(""));
+        // Act
+        subject.onPadClicked("7");
+        // Assert
+        verify(activity).setTitleVisibility(View.INVISIBLE);
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(activity).dismissProgressDialog();
+        verify(authDataManager).validatePin(anyString());
+        verify(activity).finishWithResultOk("1337");
+    }
+
+    @Test
+    public void padClickedVerifyPinValidateCalledReturnsErrorIncrementsFailureCount() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "133";
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
+        when(authDataManager.validatePin(anyString()))
+                .thenReturn(Observable.error(new InvalidCredentialsException()));
+        // Act
+        subject.onPadClicked("7");
+        // Assert
+        verify(activity).setTitleVisibility(View.INVISIBLE);
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).validatePin(anyString());
+        verify(prefsUtil).setValue(anyString(), anyInt());
+        verify(prefsUtil).getValue(anyString(), anyInt());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).restartPageAndClearTop();
+    }
+
+    @Test
+    public void padClickedVerifyPinValidateCalledReturnsInvalidCipherText() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "133";
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
+        when(authDataManager.validatePin(anyString())).thenReturn(just(""));
+        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+                .thenReturn(Completable.error(new InvalidCipherTextException()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        // Act
+        subject.onPadClicked("7");
+        // Assert
+        verify(activity).setTitleVisibility(View.INVISIBLE);
+        verify(activity, times(2)).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).validatePin(anyString());
+        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(prefsUtil).setValue(anyString(), anyInt());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(accessState).setPIN(null);
+        verify(appUtil).clearCredentialsAndRestart();
+    }
+
+    @Test
+    public void padClickedVerifyPinValidateCalledReturnsGenericException() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "133";
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
+        when(authDataManager.validatePin(anyString())).thenReturn(just(""));
+        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+                .thenReturn(Completable.error(new Exception()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        // Act
+        subject.onPadClicked("7");
+        // Assert
+        verify(activity).setTitleVisibility(View.INVISIBLE);
+        verify(activity, times(2)).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).validatePin(anyString());
+        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(prefsUtil).setValue(anyString(), anyInt());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(appUtil).clearCredentialsAndRestart();
+    }
+
+    @Test
+    public void padClickedCreatePinCreateSuccessful() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "133";
+        subject.mUserEnteredConfirmationPin = "1337";
+        when(payloadManager.getTempPassword()).thenReturn("temp password");
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(authDataManager.createPin(anyString(), anyString())).thenReturn(just(true));
+        when(authDataManager.validatePin(anyString())).thenReturn(just("password"));
+        // Act
+        subject.onPadClicked("7");
+        // Assert
+        verify(activity, times(2)).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).createPin(anyString(), anyString());
+        verify(fingerprintHelper).clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
+        verify(fingerprintHelper).setFingerprintUnlockEnabled(false);
+    }
+
+    @Test
+    public void padClickedCreatePinCreateFailed() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "133";
+        subject.mUserEnteredConfirmationPin = "1337";
+        when(payloadManager.getTempPassword()).thenReturn("temp password");
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(authDataManager.createPin(anyString(), anyString())).thenReturn(just(false));
+        // Act
+        subject.onPadClicked("7");
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).createPin(anyString(), anyString());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(prefsUtil).clear();
+        verify(appUtil).restartApp();
+    }
+
+    @Test
+    public void padClickedCreatePinWritesNewConfirmationValue() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "133";
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(authDataManager.createPin(anyString(), anyString())).thenReturn(just(true));
+        // Act
+        subject.onPadClicked("7");
+        // Assert
+        assertEquals("1337", subject.mUserEnteredConfirmationPin);
+        assertEquals("", subject.mUserEnteredPin);
+    }
+
+    @Test
+    public void padClickedCreatePinMismatched() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "133";
+        subject.mUserEnteredConfirmationPin = "1234";
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
+        when(authDataManager.createPin(anyString(), anyString())).thenReturn(just(true));
+        // Act
+        subject.onPadClicked("7");
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).dismissProgressDialog();
+    }
+
+    @Test
+    public void clearPinBoxes() throws Exception {
+        // Arrange
+
+        // Act
+        subject.clearPinBoxes();
+        // Assert
+        verify(activity).clearPinBoxes();
+        assertEquals("", subject.mUserEnteredPin);
+    }
+
+    @Test
+    public void validatePasswordSuccessful() throws Exception {
+        // Arrange
+        String password = "1234567890";
+        when(authDataManager.updatePayload(anyString(), anyString(), eq(password)))
+
+                .thenReturn(Completable.complete());
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        // Act
+        subject.validatePassword(password);
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), eq(password));
+        verify(activity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(prefsUtil, times(2)).removeValue(anyString());
+        verify(activity).restartPageAndClearTop();
+    }
+
+    @Test
+    public void validatePasswordThrowsGenericException() throws Exception {
+        // Arrange
+        String password = "1234567890";
+        when(authDataManager.updatePayload(anyString(), anyString(), eq(password)))
+                .thenReturn(Completable.error(new Throwable()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        // Act
+        subject.validatePassword(password);
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), eq(password));
+        verify(activity, times(2)).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).showValidationDialog();
+    }
+
+    @Test
+    public void validatePasswordThrowsServerConnectionException() throws Exception {
+        // Arrange
+        String password = "1234567890";
+        when(authDataManager.updatePayload(anyString(), anyString(), eq(password)))
+                .thenReturn(Completable.error(new ServerConnectionException()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        // Act
+        subject.validatePassword(password);
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), eq(password));
+        verify(activity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+    }
+
+    @Test
+    public void validatePasswordThrowsHDWalletExceptionException() throws Exception {
+        // Arrange
+        String password = "1234567890";
+        when(authDataManager.updatePayload(anyString(), anyString(), eq(password)))
+                .thenReturn(Completable.error(new HDWalletException()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        // Act
+        subject.validatePassword(password);
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), eq(password));
+        verify(activity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(appUtil).restartApp();
+    }
+
+    @Test
+    public void validatePasswordThrowsAccountLockedException() throws Exception {
+        // Arrange
+        String password = "1234567890";
+        when(authDataManager.updatePayload(anyString(), anyString(), eq(password)))
+                .thenReturn(Completable.error(new AccountLockedException()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        // Act
+        subject.validatePassword(password);
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), eq(password));
+        verify(activity).dismissProgressDialog();
+        verify(activity).showAccountLockedDialog();
+    }
+
+    @SuppressLint("VisibleForTests")
+    @Test
+    public void updatePayloadInvalidCredentialsException() throws Exception {
+        // Arrange
+        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+                .thenReturn(Completable.error(new InvalidCredentialsException()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        subject.updatePayload("");
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(activity).goToPasswordRequiredActivity();
+    }
+
+    @SuppressLint("VisibleForTests")
+    @Test
+    public void updatePayloadServerConnectionException() throws Exception {
+        // Arrange
+        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+                .thenReturn(Completable.error(new ServerConnectionException()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        subject.updatePayload("");
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+    }
+
+    @SuppressLint("VisibleForTests")
+    @Test
+    public void updatePayloadDecryptionException() throws Exception {
+        // Arrange
+        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+                .thenReturn(Completable.error(new DecryptionException()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        subject.updatePayload("");
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(activity).goToPasswordRequiredActivity();
+    }
+
+    @SuppressLint("VisibleForTests")
+    @Test
+    public void updatePayloadPayloadExceptionException() throws Exception {
+        // Arrange
+        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+                .thenReturn(Completable.error(new PayloadException()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        subject.updatePayload("");
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(appUtil).restartApp();
+    }
+
+    @SuppressLint("VisibleForTests")
+    @Test
+    public void updatePayloadHDWalletException() throws Exception {
+        // Arrange
+        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+                .thenReturn(Completable.error(new HDWalletException()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        subject.updatePayload("");
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(appUtil).restartApp();
+    }
+
+    @SuppressLint("VisibleForTests")
+    @Test
+    public void updatePayloadVersionNotSupported() throws Exception {
+        // Arrange
+        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+                .thenReturn(Completable.error(new UnsupportedVersionException()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        subject.updatePayload("");
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(activity).showWalletVersionNotSupportedDialog(isNull());
+    }
+
+    @SuppressLint("VisibleForTests")
+    @Test
+    public void updatePayloadAccountLocked() throws Exception {
+        // Arrange
+        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+                .thenReturn(Completable.error(new AccountLockedException()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        // Act
+        subject.updatePayload("");
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(activity).showAccountLockedDialog();
+    }
+
+    @SuppressLint("VisibleForTests")
+    @Test
+    public void updatePayloadSuccessfulSetLabels() throws Exception {
+        // Arrange
+        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+                .thenReturn(Completable.complete());
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        HDWallet mockHdWallet = mock(HDWallet.class);
+        when(mockPayload.getHdWallets()).thenReturn(Collections.singletonList(mockHdWallet));
+        Account mockAccount = mock(Account.class);
+        when(mockAccount.getLabel()).thenReturn(null);
+        ArrayList<Account> accountsList = new ArrayList<>();
+        accountsList.add(mockAccount);
+        when(mockHdWallet.getAccounts()).thenReturn(accountsList);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(mockPayload.isUpgraded()).thenReturn(true);
+        when(appUtil.isNewlyCreated()).thenReturn(true);
+        // Act
+        subject.updatePayload("");
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(appUtil).setSharedKey(anyString());
+        verify(payloadManager, times(5)).getPayload();
+        verify(stringUtils).getString(anyInt());
+        verify(activity).dismissProgressDialog();
+        assertEquals(true, subject.mCanShowFingerprintDialog);
+    }
+
+    @SuppressLint("VisibleForTests")
+    @Test
+    public void updatePayloadSuccessfulUpgradeWallet() throws Exception {
+        // Arrange
+        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+                .thenReturn(Completable.complete());
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(mockPayload.isUpgraded()).thenReturn(false);
+        when(appUtil.isNewlyCreated()).thenReturn(false);
+        // Act
+        subject.updatePayload("");
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(appUtil).setSharedKey(anyString());
+        verify(activity).goToUpgradeWalletActivity();
+        verify(activity).dismissProgressDialog();
+        assertEquals(true, subject.mCanShowFingerprintDialog);
+    }
+
+    @SuppressLint("VisibleForTests")
+    @Test
+    public void updatePayloadSuccessfulVerifyPin() throws Exception {
+        // Arrange
+        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+                .thenReturn(Completable.complete());
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockPayload.getSharedKey()).thenReturn("1234567890");
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(mockPayload.isUpgraded()).thenReturn(true);
+        when(appUtil.isNewlyCreated()).thenReturn(false);
+        // Act
+        subject.updatePayload("");
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(appUtil).setSharedKey(anyString());
+        verify(appUtil).restartAppWithVerifiedPin();
+        verify(activity).dismissProgressDialog();
+        assertEquals(true, subject.mCanShowFingerprintDialog);
+    }
+
+    @Test
+    public void incrementFailureCount() throws Exception {
+        // Arrange
+
+        // Act
+        subject.incrementFailureCountAndRestart();
+        // Assert
+        verify(prefsUtil).getValue(anyString(), anyInt());
+        verify(prefsUtil).setValue(anyString(), anyInt());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).restartPageAndClearTop();
+    }
+
+    @Test
+    public void resetApp() throws Exception {
+        // Arrange
+
+        // Act
+        subject.resetApp();
+        // Assert
+        verify(appUtil).clearCredentialsAndRestart();
+    }
+
+    @Test
+    public void allowExit() throws Exception {
+        // Arrange
+
+        // Act
+        boolean allowExit = subject.allowExit();
+        // Assert
+        assertEquals(subject.bAllowExit, allowExit);
+    }
+
+    @Test
+    public void isCreatingNewPin() throws Exception {
+        // Arrange
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("");
+        // Act
+        boolean creatingNewPin = subject.isCreatingNewPin();
+        // Assert
+        assertEquals(true, creatingNewPin);
+    }
+
+    @Test
+    public void isNotCreatingNewPin() throws Exception {
+        // Arrange
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        // Act
+        boolean creatingNewPin = subject.isCreatingNewPin();
+        // Assert
+        assertEquals(false, creatingNewPin);
+    }
+
+    @Test
+    public void getAppUtil() throws Exception {
+        // Arrange
+
+        // Act
+        AppUtil util = subject.getAppUtil();
+        // Assert
+        assertEquals(util, appUtil);
+    }
+
     private class MockApplicationModule extends ApplicationModule {
 
         MockApplicationModule(Application application) {
@@ -834,22 +886,22 @@ public class PinEntryViewModelTest {
 
         @Override
         protected AppUtil provideAppUtil() {
-            return mAppUtil;
+            return appUtil;
         }
 
         @Override
         protected PrefsUtil providePrefsUtil() {
-            return mPrefsUtil;
+            return prefsUtil;
         }
 
         @Override
         protected StringUtils provideStringUtils() {
-            return mStringUtils;
+            return stringUtils;
         }
 
         @Override
         protected AccessState provideAccessState() {
-            return mAccessState;
+            return accessState;
         }
     }
 
@@ -857,12 +909,12 @@ public class PinEntryViewModelTest {
 
         @Override
         protected PayloadManager providePayloadManager() {
-            return mPayloadManager;
+            return payloadManager;
         }
 
         @Override
         protected SSLVerifyUtil provideSSlVerifyUtil(Context context) {
-            return mSslVerifyUtil;
+            return sslVerifyUtil;
         }
     }
 
@@ -874,12 +926,12 @@ public class PinEntryViewModelTest {
                                                          AppUtil appUtil,
                                                          AccessState accessState,
                                                          StringUtils stringUtils) {
-            return mAuthDataManager;
+            return authDataManager;
         }
 
         @Override
         protected FingerprintHelper provideFingerprintHelper(Context applicationContext, PrefsUtil prefsUtil) {
-            return mFingerprintHelper;
+            return fingerprintHelper;
         }
     }
 

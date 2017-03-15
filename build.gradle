@@ -29,7 +29,7 @@ ext {
     retrofitVersion = '2.2.0'
     okHttpVersion = '3.6.0'
     mockitoVersion = '2.7.17'
-    kotlinVersion = '1.0.6'
+    kotlinVersion = '1.1.1'
 }
 
 task clean(type: Delete) {

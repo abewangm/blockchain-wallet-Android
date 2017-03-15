@@ -40,7 +40,7 @@ import static org.mockito.Mockito.when;
 public class PaymentServiceTest extends RxTest {
 
     private PaymentService subject;
-    @Mock Payment payment;
+    @Mock private Payment payment;
 
     @Before
     public void setUp() throws Exception {

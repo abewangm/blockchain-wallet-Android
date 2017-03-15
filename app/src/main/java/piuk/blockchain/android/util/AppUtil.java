@@ -34,7 +34,7 @@ public class AppUtil {
     public AppUtil(Context context) {
         Injector.getInstance().getAppComponent().inject(this);
         this.context = context;
-        this.receiveQRFileName = context.getExternalCacheDir() + File.separator + "qr.png";
+        receiveQRFileName = context.getExternalCacheDir() + File.separator + "qr.png";
     }
 
     public void clearCredentials() {
@@ -99,11 +99,7 @@ public class AppUtil {
         String encryptedPassword = prefs.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
         String pinID = prefs.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
 
-        if (encryptedPassword.length() == 0 || pinID.length() == 0) {
-            return false;
-        }
-
-        return true;
+        return !(encryptedPassword.isEmpty() || pinID.isEmpty());
     }
 
     public boolean isCameraOpen() {

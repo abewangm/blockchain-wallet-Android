@@ -3,13 +3,11 @@ package piuk.blockchain.android.data.datamanagers;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +21,8 @@ import piuk.blockchain.android.ui.account.ConsolidatedAccount.Type;
 
 public class TransactionListDataManager {
 
+    private static final String TAG = TransactionListDataManager.class.getSimpleName();
+
     private PayloadManager payloadManager;
     private TransactionListStore transactionListStore;
     private Subject<List<TransactionSummary>> listUpdateSubject;
@@ -32,14 +32,6 @@ public class TransactionListDataManager {
         this.payloadManager = payloadManager;
         this.transactionListStore = transactionListStore;
         listUpdateSubject = PublishSubject.create();
-    }
-
-    public void insertTransactionList(List<TransactionSummary> txList) throws IOException, ApiException {
-        clearTransactionList();
-        transactionListStore.insertTransactions(txList);
-        transactionListStore.sort(new TransactionSummary.TxMostRecentDateComparator());
-        listUpdateSubject.onNext(transactionListStore.getList());
-        listUpdateSubject.onComplete();
     }
 
     public Observable<List<TransactionSummary>> fetchTransactions(Object object, int limit, int offset) {
@@ -53,16 +45,16 @@ public class TransactionListDataManager {
                 } else if (consolidate.getType() == Type.ALL_IMPORTED_ADDRESSES) {
                     result = payloadManager.getImportedAddressesTransactions(limit, offset);
                 } else {
-                    Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
+                    throw new IllegalArgumentException("ConsolidatedAccount did not have a type set");
                 }
             } else if (object instanceof Account) {
                 // V3
                 result = payloadManager.getAccountTransactions(((Account) object).getXpub(), limit, offset);
             } else {
-                Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
+                throw new IllegalArgumentException("Cannot fetch transactions for object type: " + object.getClass().getSimpleName());
             }
-            insertTransactionList(result);
 
+            insertTransactionList(result);
 
             return result;
         }).compose(RxUtil.applySchedulersToObservable());
@@ -127,7 +119,7 @@ public class TransactionListDataManager {
             } else if (consolidate.getType() == Type.ALL_IMPORTED_ADDRESSES) {
                 result = payloadManager.getImportedAddressesBalance().longValue();
             } else {
-                Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
+                Log.e(TAG, "ConsolidatedAccount did not have a type set");
             }
         } else if (object instanceof Account) {
             // V3
@@ -136,7 +128,7 @@ public class TransactionListDataManager {
             // V2
             result = payloadManager.getAddressBalance(((LegacyAddress) object).getAddress()).longValue();
         } else {
-            Log.e(TransactionListDataManager.class.getSimpleName(), "getBtcBalance: " + object);
+            Log.e(TAG, "Cannot fetch transactions for object type: " + object.getClass().getSimpleName());
         }
 
         return result;
@@ -178,4 +170,13 @@ public class TransactionListDataManager {
         return Observable.fromCallable(() -> payloadManager.save())
                 .compose(RxUtil.applySchedulersToObservable());
     }
+
+    private void insertTransactionList(List<TransactionSummary> txList) {
+        clearTransactionList();
+        transactionListStore.insertTransactions(txList);
+        transactionListStore.sort(new TransactionSummary.TxMostRecentDateComparator());
+        listUpdateSubject.onNext(transactionListStore.getList());
+        listUpdateSubject.onComplete();
+    }
+
 }

@@ -493,9 +493,7 @@ public class PinEntryViewModel extends BaseViewModel {
                 mAuthDataManager.createHdWallet(mPassword, mStringUtils.getString(R.string.default_wallet_name), mEmail)
                         .doAfterTerminate(() -> mDataListener.dismissProgressDialog())
                         .subscribe(payload -> {
-                            if (payload == null) {
-                                showErrorToast(R.string.remote_save_ko);
-                            }
+                            // No-op
                         }, throwable -> showErrorToastAndRestartApp(R.string.hd_error)));
     }
 

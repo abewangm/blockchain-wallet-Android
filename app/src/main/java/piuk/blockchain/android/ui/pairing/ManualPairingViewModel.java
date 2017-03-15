@@ -22,12 +22,12 @@ import piuk.blockchain.android.util.annotations.Thunk;
 @SuppressWarnings("WeakerAccess")
 public class ManualPairingViewModel extends BaseViewModel {
 
-    private static final String KEY_AUTH_REQUIRED = "Authorization Required";
+    @VisibleForTesting static final String KEY_AUTH_REQUIRED = "Authorization Required";
     private static final String TAG = ManualPairingViewModel.class.getSimpleName();
 
+    private DataListener dataListener;
     @Inject protected AppUtil appUtil;
     @Inject protected AuthDataManager authDataManager;
-    private DataListener dataListener;
     @VisibleForTesting boolean waitingForAuth = false;
 
     public interface DataListener {
@@ -61,7 +61,6 @@ public class ManualPairingViewModel extends BaseViewModel {
     }
 
     void onContinueClicked() {
-
         String guid = dataListener.getGuid();
         String password = dataListener.getPassword();
 
@@ -173,4 +172,5 @@ public class ManualPairingViewModel extends BaseViewModel {
     AppUtil getAppUtil() {
         return appUtil;
     }
+
 }
