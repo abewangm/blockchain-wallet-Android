@@ -346,7 +346,6 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void preLaunchChecks() {
-        exchangeRateThread();
 
         if (accessState.isLoggedIn()) {
             dataListener.onStartBalanceFragment(false);
@@ -389,13 +388,12 @@ public class MainViewModel extends BaseViewModel {
         super.destroy();
         appUtil.deleteQR();
         dynamicFeeCache.destroy();
-        exchangeRateFactory.stopTicker();
     }
 
-    private void exchangeRateThread() {
-        //Start ticker that will refresh btc exchange rate every 5 min
-        exchangeRateFactory.startTicker(
-                () -> dataListener.updateCurrentPrice(getFormattedPriceString()));
+    public void updateTicker() {
+        compositeDisposable.add(exchangeRateFactory.updateTicker().subscribe(() ->
+                dataListener.updateCurrentPrice(getFormattedPriceString()),
+            Throwable::printStackTrace));
     }
 
     private String getFormattedPriceString() {
