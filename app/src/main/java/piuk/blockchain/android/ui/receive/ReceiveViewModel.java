@@ -20,9 +20,9 @@ import android.util.SparseIntArray;
 import android.webkit.MimeTypeMap;
 
 import info.blockchain.wallet.payload.PayloadManager;
-
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
+
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
 
@@ -40,8 +40,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -58,7 +58,7 @@ import piuk.blockchain.android.util.StringUtils;
 public class ReceiveViewModel extends BaseViewModel {
 
     public static final String TAG = ReceiveViewModel.class.getSimpleName();
-    public static final String KEY_WARN_WATCH_ONLY_SPEND = "warn_watch_only_spend";
+    private static final String KEY_WARN_WATCH_ONLY_SPEND = "warn_watch_only_spend";
 
     private static final int DIMENSION_QR_CODE = 600;
 
@@ -73,7 +73,7 @@ public class ReceiveViewModel extends BaseViewModel {
     @Inject WalletAccountHelper walletAccountHelper;
     @Inject SSLVerifyUtil sslVerifyUtil;
     @Inject Context applicationContext;
-    @Inject ReceiveDataManager receiveDataManager;
+    @Inject PayloadDataManager payloadDataManager;
     @VisibleForTesting HashBiMap<Integer, Object> accountMap;
     @VisibleForTesting SparseIntArray spinnerIndexMap;
 
@@ -249,10 +249,12 @@ public class ReceiveViewModel extends BaseViewModel {
         dataListener.updateBtcTextField(currencyHelper.getFormattedBtcString(btcAmount));
     }
 
-    @Nullable
     void getV3ReceiveAddress(Account account) {
-        receiveDataManager.getNextReceiveAddress(account)
-        .subscribe(receive -> dataListener.updateReceiveAddress(receive));
+        compositeDisposable.add(
+                payloadDataManager.getNextReceiveAddress(account)
+                        .subscribe(
+                                receive -> dataListener.updateReceiveAddress(receive),
+                                throwable -> dataListener.showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR)));
     }
 
     @Nullable

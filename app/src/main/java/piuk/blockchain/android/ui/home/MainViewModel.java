@@ -31,12 +31,12 @@ import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
-import piuk.blockchain.android.ui.transactions.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.OSUtil;
@@ -446,7 +446,7 @@ public class MainViewModel extends BaseViewModel {
 
         try {
             BigInteger importedAddressesBalance = payloadManager.getImportedAddressesBalance();
-            if(importedAddressesBalance != null) {
+            if (importedAddressesBalance != null) {
                 handler.logLegacyEvent(importedAddressesBalance.longValue() > 0L);
             }
         } catch (Exception e) {

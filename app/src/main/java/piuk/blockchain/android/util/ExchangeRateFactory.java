@@ -9,19 +9,17 @@ import info.blockchain.api.exchangerates.ExchangeRates;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 
+import org.apache.commons.lang3.EnumUtils;
+
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Locale;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import org.apache.commons.lang3.EnumUtils;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import retrofit2.Response;
@@ -231,7 +229,7 @@ public class ExchangeRateFactory {
      * @param timeInMillis The time at which to get the price, in milliseconds since epoch
      * @return A double value
      */
-    public Observable<Double> getHistoricPrice(long satoshis, String currency, long timeInMillis) throws Exception {
+    public Observable<Double> getHistoricPrice(long satoshis, String currency, long timeInMillis) {
         return new WalletApi().getHistoricPrice(satoshis, currency, timeInMillis)
                 .flatMap(responseBody -> parseStringValue(responseBody.string()))
                 .compose(RxUtil.applySchedulersToObservable());

@@ -13,7 +13,7 @@ import java.util.Arrays;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.receive.ReceiveQrActivity;
-import piuk.blockchain.android.ui.transactions.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 
 public class LauncherShortcutHelper {
 

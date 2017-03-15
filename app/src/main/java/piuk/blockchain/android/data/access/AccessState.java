@@ -12,7 +12,6 @@ import info.blockchain.wallet.payload.PayloadManager;
 
 import org.spongycastle.util.encoders.Hex;
 
-import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 
 import io.reactivex.Observable;
@@ -71,24 +70,24 @@ public class AccessState {
         String encryptedPassword = prefs.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
 
         return walletService.validateAccess(key, passedPin)
-            .flatMap(response -> {
-                if (response.isSuccessful()) {
-                    try {
-                        String decryptionKey = response.body().getSuccess();
+                .flatMap(response -> {
+                    if (response.isSuccessful()) {
+                        try {
+                            String decryptionKey = response.body().getSuccess();
 
-                        String decryptedPassword = AESUtil.decrypt(encryptedPassword,
-                            decryptionKey,
-                            AESUtil.PIN_PBKDF2_ITERATIONS);
+                            String decryptedPassword = AESUtil.decrypt(encryptedPassword,
+                                    decryptionKey,
+                                    AESUtil.PIN_PBKDF2_ITERATIONS);
 
-                        return Observable.just(decryptedPassword);
-                    } catch (Exception e) {
-                        throw Exceptions.propagate(new Throwable("Validate access failed", e));
+                            return Observable.just(decryptedPassword);
+                        } catch (Exception e) {
+                            throw Exceptions.propagate(new Throwable("Validate access failed", e));
+                        }
+                    } else {
+                        throw Exceptions.propagate(new Throwable("Validate access failed"));
                     }
-                } else {
-                    throw Exceptions.propagate(new Throwable("Validate access failed"));
-                }
-            })
-            .compose(RxUtil.applySchedulersToObservable());
+                })
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     // TODO: 14/10/2016 This should be moved elsewhere
@@ -106,55 +105,39 @@ public class AccessState {
         appUtil.applyPRNGFixes();
 
         return Observable.create(subscriber -> {
-            try {
-                byte[] bytes = new byte[16];
-                SecureRandom random = new SecureRandom();
-                random.nextBytes(bytes);
-                String key = new String(Hex.encode(bytes), "UTF-8");
-                random.nextBytes(bytes);
-                String value = new String(Hex.encode(bytes), "UTF-8");
+            byte[] bytes = new byte[16];
+            SecureRandom random = new SecureRandom();
+            random.nextBytes(bytes);
+            String key = new String(Hex.encode(bytes), "UTF-8");
+            random.nextBytes(bytes);
+            String value = new String(Hex.encode(bytes), "UTF-8");
 
-                walletService.setAccessKey(key, value, passedPin)
-                        .subscribe(call -> {
+            walletService.setAccessKey(key, value, passedPin)
+                    .subscribe(call -> {
+                        if (call.isSuccessful()) {
+                            String encryptionKey = Hex.toHexString(value.getBytes("UTF-8"));
 
-                            if(call.isSuccessful()) {
+                            String encryptedPassword = new AESUtilWrapper().encrypt(
+                                    password, encryptionKey, AESUtil.PIN_PBKDF2_ITERATIONS);
 
-                                String encryptedPassword = null;
-                                try {
+                            prefs.setValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD,
+                                    encryptedPassword);
+                            prefs.setValue(PrefsUtil.KEY_PIN_IDENTIFIER, key);
 
-                                    String encryptionKey = Hex.toHexString(value.getBytes("UTF-8"));
-
-                                    encryptedPassword = new AESUtilWrapper().encrypt(
-                                        password, encryptionKey, AESUtil.PIN_PBKDF2_ITERATIONS);
-
-                                    prefs.setValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD,
-                                        encryptedPassword);
-                                    prefs.setValue(PrefsUtil.KEY_PIN_IDENTIFIER, key);
-
-                                    if (!subscriber.isDisposed()) {
-                                        subscriber.onNext(true);
-                                        subscriber.onComplete();
-                                    }
-
-                                } catch (Exception e) {
-                                    throw Exceptions.propagate(e);
-                                }
-                            } else {
-                                throw Exceptions.propagate(new Throwable("Validate access failed: "+call.errorBody().string()));
-                            }
-
-                        }, throwable -> {
                             if (!subscriber.isDisposed()) {
-                                subscriber.onNext(false);
+                                subscriber.onNext(true);
                                 subscriber.onComplete();
                             }
-                        });
+                        } else {
+                            throw Exceptions.propagate(new Throwable("Validate access failed: " + call.errorBody().string()));
+                        }
 
-            } catch (UnsupportedEncodingException e) {
-                if (!subscriber.isDisposed()) {
-                    subscriber.onError(new Throwable(e));
-                }
-            }
+                    }, throwable -> {
+                        if (!subscriber.isDisposed()) {
+                            subscriber.onNext(false);
+                            subscriber.onComplete();
+                        }
+                    });
         });
     }
 

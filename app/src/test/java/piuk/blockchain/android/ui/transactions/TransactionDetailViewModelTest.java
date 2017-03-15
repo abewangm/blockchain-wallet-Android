@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
@@ -33,8 +34,7 @@ public class TransactionDetailViewModelTest extends RxTest {
     @Mock TransactionListDataManager mTransactionListDataManager;
     @Mock TransactionDetailViewModel.DataListener mActivity;
     @Mock ExchangeRateFactory mExchangeRateFactory;
-    @Mock
-    PayloadDataManager mPayloadDataManager;
+    @Mock PayloadDataManager mPayloadDataManager;
     private TransactionDetailViewModel mSubject;
 
 //    // Transactions
@@ -117,7 +117,7 @@ public class TransactionDetailViewModelTest extends RxTest {
 //        when(mockIntent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1)).thenReturn(0);
 //        when(mockPayload.getTransactionNotesMap()).thenReturn(new HashMap<>());
 //        when(mActivity.getPageIntent()).thenReturn(mockIntent);
-//        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(mTransactionListDataManager.getTransactionList()).thenReturn(mTxList);
 //        when(mStringUtils.getString(R.string.transaction_detail_pending)).thenReturn("Pending (%1$s/%2$s Confirmations)");
 //        when(mTransactionListDataManager.getTransactionFromHash(anyString())).thenReturn(Observable.error(new Throwable()));
@@ -151,7 +151,7 @@ public class TransactionDetailViewModelTest extends RxTest {
 //        when(mockIntent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1)).thenReturn(0);
 //        when(mockPayload.getTransactionNotesMap()).thenReturn(new HashMap<>());
 //        when(mActivity.getPageIntent()).thenReturn(mockIntent);
-//        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+//        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
 //        when(mTransactionListDataManager.getTransactionList()).thenReturn(mTxList);
 //        when(mStringUtils.getString(R.string.transaction_detail_pending)).thenReturn("Pending (%1$s/%2$s Confirmations)");
 //        when(mTransactionListDataManager.getTransactionFromHash(anyString())).thenReturn(Observable.just(mockTransaction));

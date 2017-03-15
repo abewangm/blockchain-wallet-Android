@@ -8,7 +8,7 @@ public class DynamicFeeCache {
 
     private FeeList feeList;
 
-    private DynamicFeeCache() {
+    public DynamicFeeCache() {
         // No-op
     }
 

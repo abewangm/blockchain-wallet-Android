@@ -18,6 +18,7 @@ import okhttp3.OkHttpClient;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.ApiInterceptor;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.services.ContactsService;
 import piuk.blockchain.android.data.services.NotificationService;
@@ -41,7 +42,7 @@ public class ApiModule {
     private static final int API_TIMEOUT = 30;
 
     /**
-     * This should be phased out for {@link piuk.blockchain.android.ui.transactions.PayloadDataManager}
+     * This should be phased out for {@link PayloadDataManager}
      */
     @Provides
     @Deprecated

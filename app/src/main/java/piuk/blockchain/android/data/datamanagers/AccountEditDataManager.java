@@ -17,7 +17,6 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.PaymentService;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
-import piuk.blockchain.android.ui.transactions.PayloadDataManager;
 
 public class AccountEditDataManager {
 

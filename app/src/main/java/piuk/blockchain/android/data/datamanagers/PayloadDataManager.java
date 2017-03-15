@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.transactions;
+package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -21,9 +21,12 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 
+@SuppressWarnings("WeakerAccess")
 public class PayloadDataManager {
 
     private PayloadManager payloadManager;
@@ -115,7 +118,6 @@ public class PayloadDataManager {
      *
      * @return A {@link Completable} object
      */
-    // TODO: 10/03/2017 Remove schedulers, let viewmodels handle it
     public Completable syncPayloadWithServer() {
         return Completable.fromCallable(() -> {
             payloadManager.save();
@@ -131,7 +133,6 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      * @see IgnorableDefaultObserver
      */
-    // TODO: 10/03/2017 Remove schedulers, let viewmodels handle it
     public Completable updateBalancesAndTransactions() {
         return Completable.fromCallable(() -> {
             payloadManager.getAllTransactions(50, 0);
@@ -147,7 +148,19 @@ public class PayloadDataManager {
      */
     public Observable<String> getNextReceiveAddress(int defaultIndex) {
         Account account = getWallet().getHdWallets().get(0).getAccounts().get(defaultIndex);
-        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account));
+        return getNextReceiveAddress(account);
+    }
+
+    /**
+     * Returns the next Receive address for a given {@link Account object}
+     *
+     * @param account The {@link Account} for which you want an address to be generated
+     * @return An {@link Observable} wrapping the receive address
+     */
+    public Observable<String> getNextReceiveAddress(Account account) {
+        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     /**
@@ -165,15 +178,6 @@ public class PayloadDataManager {
     public ECKey getAddressECKey(LegacyAddress legacyAddress, @Nullable String secondPassword)
             throws UnsupportedEncodingException, DecryptionException, InvalidCipherTextException {
         return payloadManager.getAddressECKey(legacyAddress, secondPassword);
-    }
-
-    /**
-     * Returns the balance for all imported addresses
-     *
-     * @return A {@link BigInteger} object
-     */
-    public BigInteger getImportedAddressesBalance() {
-        return payloadManager.getImportedAddressesBalance();
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -252,4 +256,26 @@ public class PayloadDataManager {
     public void incrementReceiveAddress(Account account) {
         payloadManager.incrementNextReceiveAddress(account);
     }
+
+    /**
+     * Returns an xPub from an address if the address belongs to this wallet.
+     *
+     * @param address The address you want to query as a String
+     * @return An xPub as a String
+     */
+    @Nullable
+    public String getXpubFromAddress(String address) {
+        return payloadManager.getXpubFromAddress(address);
+    }
+
+    /**
+     * Returns true if the supplied address belongs to the user's wallet.
+     *
+     * @param address The address you want to query as a String
+     * @return true if the address belongs to the user
+     */
+    public boolean isOwnHDAddress(String address) {
+        return payloadManager.isOwnHDAddress(address);
+    }
+
 }

@@ -44,7 +44,7 @@ import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
@@ -97,7 +97,7 @@ public class SendViewModel extends BaseViewModel {
     @Inject StringUtils stringUtils;
     @Inject ContactsDataManager contactsDataManager;
     @Inject SendDataManager sendDataManager;
-    @Inject ReceiveDataManager receiveDataManager;
+    @Inject PayloadDataManager payloadDataManager;
     @Inject AccountDataManager accountDataManager;
     @Inject DynamicFeeCache dynamicFeeCache;
 
@@ -889,11 +889,10 @@ public class SendViewModel extends BaseViewModel {
                 Account account = ((Account) selectedItem.accountObject);
 
                 compositeDisposable.add(
-                    receiveDataManager.getNextReceiveAddress(account)
+                    payloadDataManager.getNextReceiveAddress(account)
                         .subscribe(
-                            address -> {
-                                sendModel.pendingTransaction.receivingAddress = address;
-                            }, throwable -> showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+                            address -> sendModel.pendingTransaction.receivingAddress = address,
+                                throwable -> showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
 
             } else if (selectedItem.accountObject instanceof LegacyAddress) {
                 //V2
