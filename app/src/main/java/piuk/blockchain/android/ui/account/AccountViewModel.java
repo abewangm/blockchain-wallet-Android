@@ -19,7 +19,6 @@ import org.bitcoinj.crypto.BIP38PrivateKey;
 
 import javax.inject.Inject;
 
-import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
@@ -277,23 +276,14 @@ public class AccountViewModel extends BaseViewModel {
     @VisibleForTesting
     void handlePrivateKey(ECKey key, @Nullable String secondPassword) {
         if (key != null && key.hasPrivKey()) {
-            try {
-                // A private key to an existing address has been scanned
-                compositeDisposable.add(
-                        accountDataManager.setKeyForLegacyAddress(key, secondPassword)
-                                .subscribe(legacyAddress -> {
-                                    if (legacyAddress != null) {
-                                        dataListener.showToast(R.string.private_key_successfully_imported, ToastCustom.TYPE_OK);
-                                        dataListener.onUpdateAccountsList();
-                                        dataListener.showRenameImportedAddressDialog(legacyAddress);
-                                    } else {
-                                        throw Exceptions.propagate(new Throwable("Save unsuccessful"));
-                                    }
-                                }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
-            } catch (Exception e) {
-                Log.e(TAG, "handlePrivateKey: ", e);
-                dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
-            }
+            // A private key to an existing address has been scanned
+            compositeDisposable.add(
+                    accountDataManager.setKeyForLegacyAddress(key, secondPassword)
+                            .subscribe(legacyAddress -> {
+                                dataListener.showToast(R.string.private_key_successfully_imported, ToastCustom.TYPE_OK);
+                                dataListener.onUpdateAccountsList();
+                                dataListener.showRenameImportedAddressDialog(legacyAddress);
+                            }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
         } else {
             dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
         }

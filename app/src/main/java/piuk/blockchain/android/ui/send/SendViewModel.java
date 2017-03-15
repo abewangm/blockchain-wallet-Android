@@ -46,6 +46,7 @@ import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
@@ -684,10 +685,6 @@ public class SendViewModel extends BaseViewModel {
         confirmPayment();
     }
 
-    private BigInteger doubleToBigInteger(double value) {
-        return new BigDecimal(value).toBigInteger();
-    }
-
     /**
      * Checks that fee is not smaller than what push_tx api will accept. Checks and alerts if
      * customized fee is too small or too large.
@@ -839,7 +836,7 @@ public class SendViewModel extends BaseViewModel {
             return false;
         }
 
-        if (pendingTransaction.unspentOutputBundle.getSpendableOutputs().size() == 0) {
+        if (pendingTransaction.unspentOutputBundle.getSpendableOutputs().isEmpty()) {
             showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
             return false;
         }
@@ -991,9 +988,8 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void handleSuccessfulPayment(String hash) {
-
-        accountDataManager.updateMultiAddress();
-        accountDataManager.save();
+        payloadDataManager.updateBalancesAndTransactions().subscribe(new IgnorableDefaultObserver<>());
+        payloadDataManager.syncPayloadWithServer().subscribe(new IgnorableDefaultObserver<>());
 
         if (dataListener != null) {
             dataListener.onShowTransactionSuccess(contactMdid, hash, fctxId, sendModel.pendingTransaction.bigIntAmount.longValue());

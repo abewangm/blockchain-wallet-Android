@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.Nullable;
 
-import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -55,7 +54,7 @@ public class AccountDataManager {
      * @param key            The {@link ECKey} for the address
      * @param secondPassword An optional double encryption password
      */
-    public Observable<LegacyAddress> setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword) throws Exception {
+    public Observable<LegacyAddress> setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword) {
         return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword))
                 .compose(RxUtil.applySchedulersToObservable());
     }
@@ -87,28 +86,4 @@ public class AccountDataManager {
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    /**
-     * Prompts {@link MultiAddressFactory} to update it's list of addresses and balances.
-     *
-     * @return A {@link Completable} object
-     */
-    public Completable updateMultiAddress() {
-        return Completable.fromCallable(() -> {
-            // TODO: 09/03/2017  
-            payloadManager.getAllTransactions(50, 0);
-            return Void.TYPE;
-        });
-    }
-
-    /**
-     * Forces the {@link PayloadManager} to sync the wallet.
-     *
-     * @return A {@link Completable} object
-     */
-    public Completable save() {
-        return Completable.fromCallable(() -> {
-            payloadManager.save();
-            return Void.TYPE;
-        });
-    }
 }
