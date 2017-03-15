@@ -481,17 +481,17 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         binding.buttonSend.setOnClickListener(v -> {
             customKeypad.setNumpadVisibility(View.GONE);
             if (ConnectivityStatus.hasConnectivity(getActivity())) {
-                requestSendPayment(binding.amountRow.amountBtc.getText().toString());
+                requestSendPayment(false);
             } else {
                 showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
             }
         });
     }
 
-    private void requestSendPayment(String amount) {
+    private void requestSendPayment(boolean feeWarningSeen) {
         viewModel.onSendClicked(binding.customFee.getText().toString(),
-                amount,
-                false,
+            binding.amountRow.amountBtc.getText().toString(),
+                feeWarningSeen,
                 binding.destination.getText().toString());
     }
 
@@ -636,7 +636,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         if (getArguments() != null && getArguments().containsKey(ARGUMENT_LAUNCH_CONFIRMATION)) {
             // Skip straight to payment confirmation
-            requestSendPayment(binding.amountRow.amountBtc.getText().toString());
+            requestSendPayment(false);
         }
     }
 
@@ -1010,21 +1010,25 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public void onShowAlterFee(String absoluteFeeSuggested,
-                               String body,
-                               @StringRes int positiveAction,
-                               @StringRes int negativeAction) {
+    public void onShowAlterFee(String suggestedAbsoluteFee,
+        String body,
+        @StringRes int positiveAction,
+        @StringRes int negativeAction) {
 
         new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
-                .setTitle(R.string.warning)
-                .setMessage(body)
-                .setCancelable(false)
-                .setPositiveButton(positiveAction, (dialog, which) ->
-                        requestSendPayment(absoluteFeeSuggested))
-                .setNegativeButton(negativeAction, (dialog, which) ->
-                        requestSendPayment(binding.amountRow.amountBtc.getText().toString()))
-                .create()
-                .show();
+            .setTitle(R.string.warning)
+            .setMessage(body)
+            .setCancelable(false)
+            .setPositiveButton(positiveAction, (dialog, which) -> {
+                //Accept suggested fee
+                binding.customFee.setText(suggestedAbsoluteFee);
+                requestSendPayment(true);
+            })
+            .setNegativeButton(negativeAction, (dialog, which) ->
+                //User rejected suggested fee. Don't alter.
+                requestSendPayment(true))
+            .create()
+            .show();
     }
 
     private void alertCustomSpend(String btcFee, String btcFeeUnit) {

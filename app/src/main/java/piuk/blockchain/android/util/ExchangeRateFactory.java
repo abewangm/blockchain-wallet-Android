@@ -1,21 +1,16 @@
 package piuk.blockchain.android.util;
 
-
-import android.util.Log;
-
 import info.blockchain.api.data.Ticker;
 import info.blockchain.api.data.TickerItem;
 import info.blockchain.api.exchangerates.ExchangeRates;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 
+import io.reactivex.Completable;
 import org.apache.commons.lang3.EnumUtils;
 
-import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.inject.Inject;
 
@@ -27,17 +22,14 @@ import retrofit2.Response;
 /**
  * This class obtains info on the currencies communicated via https://blockchain.info/ticker
  */
-// TODO: 22/02/2017 tests
 public class ExchangeRateFactory {
 
     private String TAG = getClass().getName();
 
     private ExchangeRates api;
-    private Timer timer;
 
     //Regularly updated ticker data
     private Ticker tickerData;
-    private final int UPDATE_INTERVAL_MIN = 5;
 
     @Inject protected PrefsUtil prefsUtil;
 
@@ -63,47 +55,18 @@ public class ExchangeRateFactory {
         return instance;
     }
 
-    public interface TickerListener {
-        void onTickerUpdate();
-    }
+    public Completable updateTicker() {
 
-    // TODO: 14/03/2017 Decide if this is strictly necessary. Simply updating the exchange rate
-    // onResume in MainActivity would probably be enough for the average app session
-    public void startTicker(TickerListener listener) {
-        timer = new Timer();
-        timer.scheduleAtFixedRate(tickerTask(listener), 0, 60 * 1000 * UPDATE_INTERVAL_MIN);
-    }
+        return Completable.fromCallable(() -> {
+                Response<Ticker> call = api.getTicker().execute();
 
-    public void stopTicker() {
-        if (timer != null) {
-            timer.cancel();
-        }
-    }
-
-    // TODO: 14/03/2017 This is very likely a memory leak. Make me static and extend TimerTask - or
-    // remove me completely.
-    private TimerTask tickerTask(TickerListener listener) {
-        return new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    Response<Ticker> execute = api.getTicker().execute();
-
-                    if (execute.isSuccessful()) {
-
-                        Log.d(TAG, "Refreshing exchange rate");
-                        tickerData = execute.body();
-                        listener.onTickerUpdate();
-
-                    } else {
-                        Log.e(TAG, "Failed to refresh ticker");
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (call.isSuccessful()) {
+                    tickerData = call.body();
+                    return Void.TYPE;
+                } else {
+                    throw new Exception(call.errorBody().string());
                 }
-            }
-        };
+        }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     private TickerItem getTickerItem(Currency currency) {

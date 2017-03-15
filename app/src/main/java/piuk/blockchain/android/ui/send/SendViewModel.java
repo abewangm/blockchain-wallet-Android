@@ -9,7 +9,6 @@ import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Fee;
-import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
@@ -432,7 +431,6 @@ public class SendViewModel extends BaseViewModel {
         throws UnsupportedEncodingException {
         Pair<BigInteger, BigInteger> sweepBundle = sendDataManager.getSweepableCoins(coins, BigInteger.ZERO);
         BigInteger sweepableAmount = sweepBundle.getLeft();
-        BigInteger feeRequiredForSweep = sweepBundle.getRight();
         long balanceAfterFee = sweepBundle.getLeft().longValue() - customFee.longValue();
         updateMaxAvailable(balanceAfterFee);
 
@@ -464,10 +462,12 @@ public class SendViewModel extends BaseViewModel {
     private void suggestedFeePayment(final UnspentOutputs coins, BigInteger amountToSend, boolean spendAll)
         throws UnsupportedEncodingException {
         if (sendModel.dynamicFeeList != null) {
-            Pair<BigInteger, BigInteger> sweepBundle = sendDataManager.getSweepableCoins(coins,
-                new BigDecimal(sendModel.dynamicFeeList.getDefaultFee().getFee()).toBigInteger());
+
+            BigInteger feePerKb = new BigDecimal(sendModel.dynamicFeeList.getDefaultFee().getFee()).toBigInteger();
+
+            //Calculate sweepable amount to display max available
+            Pair<BigInteger, BigInteger> sweepBundle = sendDataManager.getSweepableCoins(coins, feePerKb);
             BigInteger sweepableAmount = sweepBundle.getLeft();
-            BigInteger feeRequiredForSweep = sweepBundle.getRight();
 
             long balanceAfterFee = sweepableAmount.longValue();
             updateMaxAvailable(balanceAfterFee);
@@ -478,8 +478,6 @@ public class SendViewModel extends BaseViewModel {
                     dataListener.onSetSpendAllAmount(getTextFromSatoshis(balanceAfterFee));
                 }
             }
-
-            BigInteger feePerKb = new BigDecimal(sendModel.dynamicFeeList.getDefaultFee().getFee()).toBigInteger();
 
             SpendableUnspentOutputs unspentOutputBundle = sendDataManager.getSpendableCoins(coins,
                     amountToSend,
@@ -652,8 +650,10 @@ public class SendViewModel extends BaseViewModel {
             sendModel.recipient = address;
         }
 
-        if (bypassFeeCheck || isFeeAdequate()) {
-            if (isValidSpend(sendModel.pendingTransaction, false)) {
+        if (isValidSpend(sendModel.pendingTransaction, false)) {
+
+            if (bypassFeeCheck || isFeeAdequate()) {
+
                 LegacyAddress legacyAddress = null;
 
                 if (!sendModel.pendingTransaction.isHD()) {
@@ -705,19 +705,24 @@ public class SendViewModel extends BaseViewModel {
             return false;
         }
 
-        FeeList feeList = sendModel.dynamicFeeList;
+        BigInteger usedFee = sendModel.pendingTransaction.bigIntFee;
+        BigInteger[] absoluteFeeList = sendModel.absoluteSuggestedFeeEstimates;
 
-        if (feeList != null && feeList.getEstimate() != null) {
+        if (absoluteFeeList != null) {
 
-            if (sendModel.pendingTransaction.bigIntFee.doubleValue() > sendModel.absoluteSuggestedFeeEstimates[0].doubleValue()) {
+            BigInteger firstBlockFee = absoluteFeeList[0];
+            BigInteger sixthBlockFee = absoluteFeeList[5];
+
+            //Used fee is bigger than fee needed to include tx in 1st block
+            if (usedFee.compareTo(firstBlockFee) == 1) {
 
                 String message = String.format(stringUtils.getString(R.string.high_fee_not_necessary_info),
-                        monetaryUtil.getDisplayAmount(sendModel.pendingTransaction.bigIntFee.longValue()) + " " + sendModel.btcUnit,
-                        monetaryUtil.getDisplayAmount(doubleToBigInteger(feeList.getEstimate().get(0).getFee()).longValue()) + " " + sendModel.btcUnit);
+                        monetaryUtil.getDisplayAmount(usedFee.longValue()) + " " + sendModel.btcUnit,
+                        monetaryUtil.getDisplayAmount(firstBlockFee.longValue()) + " " + sendModel.btcUnit);
 
                 if (dataListener != null)
                     dataListener.onShowAlterFee(
-                            getTextFromSatoshis((long)feeList.getEstimate().get(0).getFee()),
+                            getTextFromSatoshis(firstBlockFee.longValue()),
                             message,
                             R.string.lower_fee,
                             R.string.keep_high_fee);
@@ -725,15 +730,17 @@ public class SendViewModel extends BaseViewModel {
                 return false;
             }
 
-            if (sendModel.pendingTransaction.bigIntFee.doubleValue() < sendModel.absoluteSuggestedFeeEstimates[5].doubleValue()) {
+            //Used fee is smaller than fee needed to include tx in 6th block
+            //Chance of tx never getting confirmed
+            if (usedFee.compareTo(sixthBlockFee) == -1) {
 
                 String message = String.format(stringUtils.getString(R.string.low_fee_suggestion),
-                        monetaryUtil.getDisplayAmount(sendModel.pendingTransaction.bigIntFee.longValue()) + " " + sendModel.btcUnit,
-                        monetaryUtil.getDisplayAmount(doubleToBigInteger(feeList.getEstimate().get(5).getFee()).longValue()) + " " + sendModel.btcUnit);
+                        monetaryUtil.getDisplayAmount(usedFee.longValue()) + " " + sendModel.btcUnit,
+                        monetaryUtil.getDisplayAmount(sixthBlockFee.longValue()) + " " + sendModel.btcUnit);
 
                 if (dataListener != null)
                     dataListener.onShowAlterFee(
-                            getTextFromSatoshis(Math.round(sendModel.dynamicFeeList.getEstimate().get(5).getFee())),
+                            getTextFromSatoshis(sixthBlockFee.longValue()),
                             message,
                             R.string.raise_fee,
                             R.string.keep_low_fee);
@@ -1008,9 +1015,6 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void clearUnspentResponseCache() {
-
-        // TODO: 06/03/2017  
-//        DefaultAccountUnspentCache.getInstance().destroy();
 
         if (sendModel.pendingTransaction.isHD()) {
             Account account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);

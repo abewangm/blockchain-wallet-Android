@@ -200,6 +200,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     protected void onResume() {
         super.onResume();
         appUtil.deleteQR();
+        viewModel.updateTicker();
         resetNavigationDrawer();
     }
 

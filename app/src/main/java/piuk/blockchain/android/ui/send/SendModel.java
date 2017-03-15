@@ -28,14 +28,14 @@ public class SendModel {
     String fiatUnit;
     double exchangeRate;
 
+    FeeList dynamicFeeList;//Fee per kb list
+
+    PendingTransaction pendingTransaction;
+    BigInteger maxAvailable;
     /**
      * Currently selected <from address, unspent api response>, stored so we don't need to call API
      * repeatedly
      */
-    FeeList dynamicFeeList;
-
-    PendingTransaction pendingTransaction;
-    BigInteger maxAvailable;
     HashMap<String, UnspentOutputs> unspentApiResponses;
     public BigInteger[] absoluteSuggestedFeeEstimates;
 
