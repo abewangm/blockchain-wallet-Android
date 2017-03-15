@@ -230,7 +230,6 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     @VisibleForTesting
     void setConfirmationStatus(String txHash, long confirmations) {
-
         if (confirmations >= REQUIRED_CONFIRMATIONS) {
             mDataListener.setStatus(mStringUtils.getString(R.string.transaction_detail_confirmed), txHash);
         } else {
@@ -254,7 +253,6 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     @VisibleForTesting
     void setTransactionColor(TransactionSummary transaction) {
-        double btcBalance = transaction.getTotal().longValue() / 1e8;
         if (transaction.getDirection() == Direction.TRANSFERRED) {
             mDataListener.setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
                     ? R.color.product_gray_transferred_50 : R.color.product_gray_transferred);
@@ -270,30 +268,27 @@ public class TransactionDetailViewModel extends BaseViewModel {
     @VisibleForTesting
     Observable<String> getTransactionValueString(String currency, TransactionSummary transaction) {
         if (currency.equals("USD")) {
-            try {
-                return mExchangeRateFactory.getHistoricPrice(transaction.getTotal().abs().longValue(), mFiatType, transaction.getTime() * 1000)
-                        .map(aDouble -> {
-                            int stringId = -1;
-                            switch (transaction.getDirection()) {
-                                case TRANSFERRED:
-                                    stringId = R.string.transaction_detail_value_at_time_transferred;
-                                    break;
-                                case SENT:
-                                    stringId = R.string.transaction_detail_value_at_time_sent;
-                                    break;
-                                case RECEIVED:
-                                    stringId = R.string.transaction_detail_value_at_time_received;
-                                    break;
-                            }
-                            return mStringUtils.getString(stringId)
-                                    + mExchangeRateFactory.getSymbol(mFiatType)
-                                    + mMonetaryUtil.getFiatFormat(mFiatType).format(aDouble);
-                        });
-            } catch (Exception e) {
-                // TODO: 22/02/2017 catch exception?
-                e.printStackTrace();
-                return null;
-            }
+            return mExchangeRateFactory.getHistoricPrice(
+                    transaction.getTotal().abs().longValue(),
+                    mFiatType,
+                    transaction.getTime() * 1000)
+                    .map(aDouble -> {
+                        int stringId = -1;
+                        switch (transaction.getDirection()) {
+                            case TRANSFERRED:
+                                stringId = R.string.transaction_detail_value_at_time_transferred;
+                                break;
+                            case SENT:
+                                stringId = R.string.transaction_detail_value_at_time_sent;
+                                break;
+                            case RECEIVED:
+                                stringId = R.string.transaction_detail_value_at_time_received;
+                                break;
+                        }
+                        return mStringUtils.getString(stringId)
+                                + mExchangeRateFactory.getSymbol(mFiatType)
+                                + mMonetaryUtil.getFiatFormat(mFiatType).format(aDouble);
+                    });
         } else {
             return Observable.just(getTransactionValueFiat(transaction.getTotal()));
         }

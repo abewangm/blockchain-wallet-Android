@@ -21,9 +21,12 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 
+@SuppressWarnings("WeakerAccess")
 public class PayloadDataManager {
 
     private PayloadManager payloadManager;
@@ -115,7 +118,6 @@ public class PayloadDataManager {
      *
      * @return A {@link Completable} object
      */
-    // TODO: 10/03/2017 Remove schedulers, let viewmodels handle it
     public Completable syncPayloadWithServer() {
         return Completable.fromCallable(() -> {
             payloadManager.save();
@@ -131,7 +133,6 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      * @see IgnorableDefaultObserver
      */
-    // TODO: 10/03/2017 Remove schedulers, let viewmodels handle it
     public Completable updateBalancesAndTransactions() {
         return Completable.fromCallable(() -> {
             payloadManager.getAllTransactions(50, 0);
@@ -147,7 +148,19 @@ public class PayloadDataManager {
      */
     public Observable<String> getNextReceiveAddress(int defaultIndex) {
         Account account = getWallet().getHdWallets().get(0).getAccounts().get(defaultIndex);
-        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account));
+        return getNextReceiveAddress(account);
+    }
+
+    /**
+     * Returns the next Receive address for a given {@link Account object}
+     *
+     * @param account The {@link Account} for which you want an address to be generated
+     * @return An {@link Observable} wrapping the receive address
+     */
+    public Observable<String> getNextReceiveAddress(Account account) {
+        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     /**
@@ -165,15 +178,6 @@ public class PayloadDataManager {
     public ECKey getAddressECKey(LegacyAddress legacyAddress, @Nullable String secondPassword)
             throws UnsupportedEncodingException, DecryptionException, InvalidCipherTextException {
         return payloadManager.getAddressECKey(legacyAddress, secondPassword);
-    }
-
-    /**
-     * Returns the balance for all imported addresses
-     *
-     * @return A {@link BigInteger} object
-     */
-    public BigInteger getImportedAddressesBalance() {
-        return payloadManager.getImportedAddressesBalance();
     }
 
     ///////////////////////////////////////////////////////////////////////////

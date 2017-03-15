@@ -6,11 +6,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
 
-import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import io.reactivex.Observable;
-import org.apache.commons.lang3.NotImplementedException;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -53,7 +51,7 @@ public class SecondPasswordHandler {
 
                         String secondPassword = passwordField.getText().toString();
 
-                        if (secondPassword.length() > 0) {
+                        if (!secondPassword.isEmpty()) {
                             showProgressDialog(R.string.validating_password);
                             validateSecondPassword(secondPassword)
                                     .compose(RxUtil.applySchedulersToObservable())

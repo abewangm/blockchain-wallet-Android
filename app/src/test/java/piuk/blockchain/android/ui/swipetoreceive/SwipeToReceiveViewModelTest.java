@@ -19,12 +19,14 @@ import java.util.List;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
+import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -38,9 +40,9 @@ import static org.mockito.Mockito.when;
 public class SwipeToReceiveViewModelTest {
 
     private SwipeToReceiveViewModel subject;
-    @Mock SwipeToReceiveViewModel.DataListener activity;
-    @Mock SwipeToReceiveHelper swipeToReceiveHelper;
-    @Mock QrCodeDataManager qrCodeDataManager;
+    @Mock private SwipeToReceiveViewModel.DataListener activity;
+    @Mock private SwipeToReceiveHelper swipeToReceiveHelper;
+    @Mock private QrCodeDataManager qrCodeDataManager;
 
     @Before
     public void setUp() throws Exception {
@@ -106,15 +108,11 @@ public class SwipeToReceiveViewModelTest {
 
     private class MockDataManagerModule extends DataManagerModule {
 
-        MockDataManagerModule() {
+        @Override
+        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadDataManager payloadDataManager,
+                                                                   PrefsUtil prefsUtil) {
+            return swipeToReceiveHelper;
         }
-
-//        @Override
-//        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager,
-//                                                            MultiAddrFactory multiAddrFactory,
-//                                                            PrefsUtil prefsUtil) {
-//            return swipeToReceiveHelper;
-//        }
 
         @Override
         protected QrCodeDataManager provideQrDataManager() {

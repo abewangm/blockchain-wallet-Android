@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 
 public class TransactionHelperTest {
 
-    @Mock PayloadDataManager payloadDataManager;
+    @Mock private PayloadDataManager payloadDataManager;
     private TransactionHelper subject;
 
     @Before

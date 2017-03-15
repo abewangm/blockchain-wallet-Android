@@ -16,7 +16,6 @@ import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
@@ -132,12 +131,6 @@ public class DataManagerModule {
     @ViewModelScope
     protected SendDataManager provideSendDataManager() {
         return new SendDataManager(new PaymentService(new Payment()));
-    }
-
-    @Provides
-    @ViewModelScope
-    protected ReceiveDataManager provideReceiveDataManager(PayloadManager payloadManager) {
-        return new ReceiveDataManager(payloadManager);
     }
 
     @Provides

@@ -2,13 +2,11 @@ package piuk.blockchain.android.ui.receive;
 
 import android.support.annotation.NonNull;
 
-import android.util.Log;
-import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.payload.PayloadManager;
-
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.AddressBook;
 import info.blockchain.wallet.payload.data.LegacyAddress;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,7 +141,6 @@ public class WalletAccountHelper {
      *
      * @return Returns a list of {@link ItemAccount} objects
      */
-    @Deprecated
     @NonNull
     public List<ItemAccount> getAddressBookEntries() {
         List<ItemAccount> itemAccountList = new ArrayList<>();
@@ -154,7 +151,7 @@ public class WalletAccountHelper {
 
                 // If address has no label, we'll display address
                 String labelOrAddress =
-                    addressBookEntry.getLabel() == null || addressBookEntry.getLabel().length() == 0
+                    addressBookEntry.getLabel() == null || addressBookEntry.getLabel().isEmpty()
                         ? addressBookEntry.getAddress() : addressBookEntry.getLabel();
 
                 itemAccountList.add(new ItemAccount(labelOrAddress, "",
