@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.balance;
 
+import android.annotation.SuppressLint;
 import com.google.common.collect.HashBiMap;
 
 import android.content.Intent;
@@ -12,6 +13,7 @@ import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
+import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -325,13 +327,13 @@ public class BalanceViewModel extends BaseViewModel {
                         .subscribe(() -> {
                             updateAccountList();
                             refreshFacilitatedTransactions();
-                            updateBalanceAndTransactionList(null, dataListener.getSelectedItemPosition(), dataListener.isBtc());
+                            updateBalanceAndTransactionList(dataListener.getSelectedItemPosition(), dataListener.isBtc());
                         }, throwable -> {
                             // No-op
                         }));
     }
 
-    void updateBalanceAndTransactionList(Intent intent, int accountSpinnerPosition, boolean isBTC) {
+    void updateBalanceAndTransactionList(int accountSpinnerPosition, boolean isBTC) {
 
         Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);//the current selected item in dropdown (Account or Legacy Address)
 
@@ -351,26 +353,10 @@ public class BalanceViewModel extends BaseViewModel {
 
         //Update transactions
         compositeDisposable.add(transactionListDataManager.fetchTransactions(object, 50, 0)
-                .subscribe(
-                        this::insertTransactionsAndDisplay,
-                        throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
-
-        // TODO: 02/03/2017
-        // Returning from SendFragment the following will happen
-        // After sending btc we create a "placeholder" tx until websocket handler refreshes list
-//        if (intent != null && intent.getExtras() != null) {
-//            long amount = intent.getLongExtra("queued_bamount", 0);
-//            String strNote = intent.getStringExtra("queued_strNote");
-//            String direction = intent.getStringExtra("queued_direction");
-//            long time = intent.getLongExtra("queued_time", System.currentTimeMillis() / 1000);
-//
-//            @SuppressLint("UseSparseArrays")
-//            Tx tx = new Tx("", strNote, direction, amount, time, new HashMap<>());
-//
-//            transactionList = transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);
-//        } else if (transactionList.size() > 0) {
-//            if (transactionList.get(0).getHash().isEmpty()) transactionList.remove(0);
-//        }
+            .subscribe(transactionSummaries -> {
+                    insertTransactionsAndDisplay(transactionSummaries);
+                },
+                throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
     }
 
     private void insertTransactionsAndDisplay(List<TransactionSummary> txList) throws IOException, ApiException {

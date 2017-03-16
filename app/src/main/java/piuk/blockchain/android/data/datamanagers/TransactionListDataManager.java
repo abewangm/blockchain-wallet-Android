@@ -8,7 +8,10 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
+import info.blockchain.wallet.util.Hash;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -56,7 +59,7 @@ public class TransactionListDataManager {
 
             insertTransactionList(result);
 
-            return result;
+            return transactionListStore.getList();
         }).compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -172,11 +175,37 @@ public class TransactionListDataManager {
     }
 
     private void insertTransactionList(List<TransactionSummary> txList) {
+
+        List<TransactionSummary> pendingTxs = getRemainingPendingTransactionList(txList);
         clearTransactionList();
+        txList.addAll(pendingTxs);
         transactionListStore.insertTransactions(txList);
         transactionListStore.sort(new TransactionSummary.TxMostRecentDateComparator());
         listUpdateSubject.onNext(transactionListStore.getList());
         listUpdateSubject.onComplete();
     }
 
+    public List<TransactionSummary> getRemainingPendingTransactionList(List<TransactionSummary> newlyFetchedTxs) {
+
+        HashMap<String, TransactionSummary> pendingMap = new HashMap<>();
+        for(TransactionSummary transactionSummary : transactionListStore.getList()) {
+            if(transactionSummary.isPending()) {
+                pendingMap.put(transactionSummary.getHash(), transactionSummary);
+            }
+        }
+
+        if(!pendingMap.isEmpty()) {
+            filterProcessed(newlyFetchedTxs, pendingMap);
+        }
+
+        return new ArrayList<>(pendingMap.values());
+    }
+
+    private void filterProcessed(List<TransactionSummary> newlyFetchedTxs, HashMap<String, TransactionSummary> pendingMap) {
+        for(TransactionSummary tx : newlyFetchedTxs) {
+            if(pendingMap.containsKey(tx.getHash())) {
+                pendingMap.remove(pendingMap.get(tx.getHash()));
+            }
+        }
+    }
 }
