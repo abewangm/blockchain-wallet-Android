@@ -15,7 +15,6 @@ import info.blockchain.wallet.util.PrivateKeyFactory;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.ECKey;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -332,7 +331,6 @@ public class AccountViewModelTest {
         verifyNoMoreInteractions(activity);
     }
 
-    @Ignore
     @Test
     public void onAddressScannedNonBip38() throws Exception {
         // Arrange

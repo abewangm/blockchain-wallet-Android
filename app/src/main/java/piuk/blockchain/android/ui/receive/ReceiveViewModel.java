@@ -19,7 +19,6 @@ import android.util.Pair;
 import android.util.SparseIntArray;
 import android.webkit.MimeTypeMap;
 
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
@@ -58,14 +57,12 @@ import piuk.blockchain.android.util.StringUtils;
 public class ReceiveViewModel extends BaseViewModel {
 
     public static final String TAG = ReceiveViewModel.class.getSimpleName();
-    private static final String KEY_WARN_WATCH_ONLY_SPEND = "warn_watch_only_spend";
-
+    @VisibleForTesting static final String KEY_WARN_WATCH_ONLY_SPEND = "warn_watch_only_spend";
     private static final int DIMENSION_QR_CODE = 600;
 
     private DataListener dataListener;
     private ReceiveCurrencyHelper currencyHelper;
 
-    @Inject PayloadManager payloadManager;
     @Inject AppUtil appUtil;
     @Inject PrefsUtil prefsUtil;
     @Inject StringUtils stringUtils;
@@ -164,7 +161,7 @@ public class ReceiveViewModel extends BaseViewModel {
     int getCorrectedAccountIndex(int accountIndex) {
         // Filter accounts by active
         List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
+        List<Account> accounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts();
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
             if (!account.isArchived()) {
@@ -173,7 +170,7 @@ public class ReceiveViewModel extends BaseViewModel {
         }
 
         // Find corrected position
-        return payloadManager.getPayload().getHdWallets().get(0).getAccounts().indexOf(activeAccounts.get(accountIndex));
+        return payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
     void updateAccountList() {
@@ -181,7 +178,7 @@ public class ReceiveViewModel extends BaseViewModel {
         spinnerIndexMap.clear();
         int spinnerIndex = 0;
         // V3
-        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
+        List<Account> accounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts();
         int accountIndex = 0;
         for (Account item : accounts) {
             spinnerIndexMap.put(spinnerIndex, accountIndex);
@@ -195,7 +192,7 @@ public class ReceiveViewModel extends BaseViewModel {
         }
 
         // Legacy Addresses
-        List<LegacyAddress> legacyAddresses = payloadManager.getPayload().getLegacyAddressList();
+        List<LegacyAddress> legacyAddresses = payloadDataManager.getWallet().getLegacyAddressList();
         for (LegacyAddress legacyAddress : legacyAddresses) {
             if (legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS)
                 // Skip archived address
@@ -253,7 +250,7 @@ public class ReceiveViewModel extends BaseViewModel {
         compositeDisposable.add(
                 payloadDataManager.getNextReceiveAddress(account)
                         .subscribe(
-                                receive -> dataListener.updateReceiveAddress(receive),
+                                address -> dataListener.updateReceiveAddress(address),
                                 throwable -> dataListener.showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR)));
     }
 
@@ -398,8 +395,7 @@ public class ReceiveViewModel extends BaseViewModel {
     }
 
     private Account getDefaultAccount() {
-        return payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(
-                payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
+        return payloadDataManager.getDefaultAccount();
     }
 
     /**

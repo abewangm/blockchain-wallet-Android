@@ -27,10 +27,9 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-@SuppressWarnings("WeakerAccess")
 public class ConfirmFundsTransferViewModel extends BaseViewModel {
 
-    @Thunk DataListener mDataListener;
+    private DataListener mDataListener;
     @Inject WalletAccountHelper mWalletAccountHelper;
     @Inject TransferFundsDataManager mFundsDataManager;
     @Inject PayloadManager mPayloadManager;
@@ -66,7 +65,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
         void onUiUpdated();
     }
 
-    public ConfirmFundsTransferViewModel(DataListener listener) {
+    ConfirmFundsTransferViewModel(DataListener listener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
         mDataListener = listener;
     }
@@ -76,7 +75,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
         updateToAddress(mPayloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
     }
 
-    public void accountSelected(int position) {
+    void accountSelected(int position) {
         updateToAddress(getAdjustedAccountPosition(position));
     }
 
@@ -134,7 +133,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
      *
      * @param secondPassword The user's double encryption password if necessary
      */
-    public void sendPayment(@Nullable String secondPassword) {
+    void sendPayment(@Nullable String secondPassword) {
         boolean archiveAll = mDataListener.getIfArchiveChecked();
         mDataListener.setPaymentButtonEnabled(false);
         mDataListener.showProgressDialog();
@@ -143,7 +142,6 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
                 mFundsDataManager.sendPayment(mPendingTransactions, secondPassword)
                         .doAfterTerminate(() -> mDataListener.hideProgressDialog())
                         .subscribe(s -> {
-                            mDataListener.hideProgressDialog();
                             mDataListener.showToast(R.string.transfer_confirmed, ToastCustom.TYPE_OK);
                             if (archiveAll) {
                                 archiveAll();
@@ -161,10 +159,8 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
      *
      * @return {@link List<ItemAccount>}
      */
-    public List<ItemAccount> getReceiveToList() {
-        return new ArrayList<ItemAccount>() {{
-            addAll(mWalletAccountHelper.getHdAccounts(true));
-        }};
+    List<ItemAccount> getReceiveToList() {
+        return mWalletAccountHelper.getHdAccounts(true);
     }
 
     /**
@@ -172,7 +168,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
      *
      * @return int account position in list of non-archived accounts
      */
-    public int getDefaultAccount() {
+    int getDefaultAccount() {
         return Math.max(getCorrectedAccountIndex(mPayloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx()), 0);
     }
 
