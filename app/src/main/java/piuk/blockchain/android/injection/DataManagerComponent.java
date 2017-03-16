@@ -1,6 +1,7 @@
 package piuk.blockchain.android.injection;
 
 import dagger.Subcomponent;
+import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.account.AccountEditViewModel;
 import piuk.blockchain.android.ui.account.AccountViewModel;
 import piuk.blockchain.android.ui.auth.PasswordRequiredViewModel;
@@ -88,4 +89,6 @@ public interface DataManagerComponent {
     void inject(AccountChooserViewModel accountChooserViewModel);
 
     void inject(BackupWalletViewModel backupWalletViewModel);
+
+    void inject(WebSocketService webSocketService);
 }

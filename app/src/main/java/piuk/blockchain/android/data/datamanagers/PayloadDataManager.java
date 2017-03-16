@@ -196,6 +196,14 @@ public class PayloadDataManager {
         return getWallet().getHdWallets().get(0).getAccount(getDefaultAccountIndex());
     }
 
+    public String getPayloadChecksum() {
+        return payloadManager.getPayloadChecksum();
+    }
+
+    public String getTempPassword() {
+        return payloadManager.getTempPassword();
+    }
+
     /**
      * Returns the balance of an address. If the address isn't found in the address map object, the
      * method will return {@link BigInteger#ZERO} instead of a null object.
