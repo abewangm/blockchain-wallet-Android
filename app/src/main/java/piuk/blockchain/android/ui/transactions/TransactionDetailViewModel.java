@@ -9,7 +9,6 @@ import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.PayloadManager;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.math.BigInteger;
@@ -35,6 +34,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.StringUtils;
 
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
@@ -49,7 +49,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     @Inject TransactionHelper transactionHelper;
     @Inject PrefsUtil mPrefsUtil;
     @Inject PayloadManager mPayloadManager;
-    @Inject piuk.blockchain.android.util.StringUtils mStringUtils;
+    @Inject StringUtils mStringUtils;
     @Inject TransactionListDataManager mTransactionListDataManager;
     @Inject ExchangeRateFactory mExchangeRateFactory;
     @Inject ContactsDataManager mContactsDataManager;
@@ -106,14 +106,12 @@ public class TransactionDetailViewModel extends BaseViewModel {
     public void onViewReady() {
         Intent pageIntent = mDataListener.getPageIntent();
         if (pageIntent != null && pageIntent.hasExtra(KEY_TRANSACTION_LIST_POSITION)) {
-
             int transactionPosition = pageIntent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1);
-            if (transactionPosition == -1) {
-                mDataListener.pageFinish();
-            } else {
-                mTransaction = mTransactionListDataManager.getTransactionList()
-                        .get(transactionPosition);
+            if (transactionPosition != -1) {
+                mTransaction = mTransactionListDataManager.getTransactionList().get(transactionPosition);
                 updateUiFromTransaction(mTransaction);
+            } else {
+                mDataListener.pageFinish();
             }
         } else if (pageIntent != null && pageIntent.hasExtra(KEY_TRANSACTION_HASH)) {
             compositeDisposable.add(
@@ -162,7 +160,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
                 labelList.add(label);
         }
 
-        String inputMapString = StringUtils.join(labelList.toArray(), "\n\n");
+        String inputMapString = org.apache.commons.lang3.StringUtils.join(labelList.toArray(), "\n\n");
         if (inputMapString.isEmpty()) {
             inputMapString = mStringUtils.getString(R.string.transaction_detail_coinbase);
         }

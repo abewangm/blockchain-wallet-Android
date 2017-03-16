@@ -124,28 +124,4 @@ public class AccountDataManagerTest extends RxTest {
         testObserver.assertValue(mockEcKey);
     }
 
-    @Test
-    public void updateMultiAddress() throws Exception {
-        // Arrange
-
-        // Act
-        TestObserver<Void> testObserver = subject.updateMultiAddress().test();
-        // Assert
-        verify(payloadManager).getAllTransactions(50, 0);
-        testObserver.assertComplete();
-        testObserver.assertNoErrors();
-    }
-
-    @Test
-    public void save() throws Exception {
-        // Arrange
-
-        // Act
-        TestObserver<Void> testObserver = subject.save().test();
-        // Assert
-        verify(payloadManager).save();
-        testObserver.assertComplete();
-        testObserver.assertNoErrors();
-    }
-
 }
