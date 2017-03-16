@@ -971,28 +971,25 @@ public class SendViewModel extends BaseViewModel {
 
         dataListener.showProgressDialog();
 
-//        compositeDisposable.add(
-//                sendDataManager.submitPayment(
-//                        sendModel.pendingTransaction.unspentOutputBundle,
-//                        keys,
-//                        sendModel.pendingTransaction.receivingAddress,
-//                        changeAddress,
-//                        sendModel.pendingTransaction.bigIntFee,
-//                        sendModel.pendingTransaction.bigIntAmount)
-//                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-//                        .subscribe(
-//                                hash -> {
-//                                    clearUnspentResponseCache();
-//
+        compositeDisposable.add(
+                sendDataManager.submitPayment(
+                        sendModel.pendingTransaction.unspentOutputBundle,
+                        keys,
+                        sendModel.pendingTransaction.receivingAddress,
+                        changeAddress,
+                        sendModel.pendingTransaction.bigIntFee,
+                        sendModel.pendingTransaction.bigIntAmount)
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .subscribe(
+                                hash -> {
+                                    clearUnspentResponseCache();
+
                                     if (alertDialog != null && alertDialog.isShowing()) {
                                         alertDialog.dismiss();
                                     }
-//
-//                                    handleSuccessfulPayment(hash);
-//                                }, throwable -> showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)));
 
-        handleSuccessfulPayment("somehashhere");
-        dataListener.dismissProgressDialog();
+                                    handleSuccessfulPayment(hash);
+                                }, throwable -> showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)));
     }
 
     private void handleSuccessfulPayment(String hash) {
