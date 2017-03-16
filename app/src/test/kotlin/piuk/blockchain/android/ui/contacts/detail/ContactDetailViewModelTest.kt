@@ -524,8 +524,10 @@ class ContactDetailViewModelTest {
         // Arrange
         val fctxId = "FCTX_ID"
         val contact = Contact()
-        whenever(mockContactsManager.getContactFromFctxId(fctxId)).thenReturn(Observable.just(contact))
-        whenever(mockContactsManager.deleteFacilitatedTransaction(contact.mdid, fctxId)).thenReturn(Completable.complete())
+        whenever(mockContactsManager.getContactFromFctxId(fctxId))
+                .thenReturn(Observable.just(contact))
+        whenever(mockContactsManager.deleteFacilitatedTransaction(contact.mdid, fctxId))
+                .thenReturn(Completable.complete())
         // Act
         subject.confirmDeleteFacilitatedTransaction(fctxId)
         // Assert
@@ -541,7 +543,8 @@ class ContactDetailViewModelTest {
         // Arrange
         val fctxId = "FCTX_ID"
         val contact = Contact()
-        whenever(mockContactsManager.getContactFromFctxId(fctxId)).thenReturn(Observable.just(contact))
+        whenever(mockContactsManager.getContactFromFctxId(fctxId))
+                .thenReturn(Observable.just(contact))
         whenever(mockContactsManager.deleteFacilitatedTransaction(contact.mdid, fctxId))
                 .thenReturn(Completable.error { Throwable() })
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())

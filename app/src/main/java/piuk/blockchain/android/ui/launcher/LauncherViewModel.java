@@ -4,11 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import info.blockchain.wallet.payload.PayloadManager;
-
 import javax.inject.Inject;
 
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.util.AppUtil;
@@ -16,9 +15,6 @@ import piuk.blockchain.android.util.PrefsUtil;
 
 import static piuk.blockchain.android.data.notifications.FcmCallbackService.EXTRA_CONTACT_ACCEPTED;
 
-/**
- * Created by adambennett on 09/08/2016.
- */
 
 @SuppressWarnings("WeakerAccess")
 public class LauncherViewModel extends BaseViewModel {
@@ -26,7 +22,7 @@ public class LauncherViewModel extends BaseViewModel {
     public static final String INTENT_EXTRA_VERIFIED = "verified";
 
     @Inject protected AppUtil mAppUtil;
-    @Inject protected PayloadManager mPayloadManager;
+    @Inject protected PayloadDataManager mPayloadDataManager;
     @Inject protected PrefsUtil mPrefsUtil;
     @Inject protected AccessState mAccessState;
     private DataListener mDataListener;
@@ -97,7 +93,7 @@ public class LauncherViewModel extends BaseViewModel {
             // Installed app, check sanity
             mDataListener.onCorruptPayload();
 
-        } else if (isPinValidated && !mPayloadManager.getPayload().isUpgraded()) {
+        } else if (isPinValidated && !mPayloadDataManager.getWallet().isUpgraded()) {
             // Legacy app has not been prompted for upgrade
             mAccessState.setIsLoggedIn(true);
             mDataListener.onRequestUpgrade();

@@ -25,8 +25,8 @@ public class AccountEditDataManager {
     private DynamicFeeCache dynamicFeeCache;
 
     public AccountEditDataManager(PaymentService paymentService,
-        PayloadDataManager payloadDataManager,
-        DynamicFeeCache dynamicFeeCache) {
+                                  PayloadDataManager payloadDataManager,
+                                  DynamicFeeCache dynamicFeeCache) {
         this.paymentService = paymentService;
         this.payloadDataManager = payloadDataManager;
         this.dynamicFeeCache = dynamicFeeCache;
@@ -43,33 +43,32 @@ public class AccountEditDataManager {
         PendingTransaction pendingTransaction = new PendingTransaction();
 
         return paymentService.getUnspentOutputs(legacyAddress.getAddress())
-            .flatMap(unspentOutputs -> {
-                BigInteger suggestedFeePerKb =
-                    new BigDecimal(dynamicFeeCache.getCachedDynamicFee()
-                        .getDefaultFee()
-                        .getFee())
-                        .toBigInteger();
+                .flatMap(unspentOutputs -> {
+                    BigInteger suggestedFeePerKb =
+                            new BigDecimal(dynamicFeeCache.getCachedDynamicFee()
+                                    .getDefaultFee()
+                                    .getFee())
+                                    .toBigInteger();
 
-                Pair<BigInteger, BigInteger> sweepableCoins = paymentService
-                    .getSweepableCoins(unspentOutputs, suggestedFeePerKb);
-                BigInteger sweepAmount = sweepableCoins.getLeft();
+                    Pair<BigInteger, BigInteger> sweepableCoins = paymentService
+                            .getSweepableCoins(unspentOutputs, suggestedFeePerKb);
+                    BigInteger sweepAmount = sweepableCoins.getLeft();
 
-                // To default account
-                int defaultIndex = payloadDataManager.getDefaultAccountIndex();
-                Account defaultAccount = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().get(defaultIndex);
-                pendingTransaction.sendingObject = new ItemAccount(legacyAddress.getLabel(), sweepAmount.toString(), "", sweepAmount.longValue(), legacyAddress);
-                pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", sweepAmount.longValue(), defaultAccount);
-                pendingTransaction.unspentOutputBundle = paymentService.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
-                pendingTransaction.bigIntAmount = sweepAmount;
-                pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee();
+                    // To default account
+                    Account defaultAccount = payloadDataManager.getDefaultAccount();
+                    pendingTransaction.sendingObject = new ItemAccount(legacyAddress.getLabel(), sweepAmount.toString(), "", sweepAmount.longValue(), legacyAddress);
+                    pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", sweepAmount.longValue(), defaultAccount);
+                    pendingTransaction.unspentOutputBundle = paymentService.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
+                    pendingTransaction.bigIntAmount = sweepAmount;
+                    pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee();
 
-                return payloadDataManager.getNextReceiveAddress(defaultIndex);
-            })
-            .map(receivingAddress -> {
-                pendingTransaction.receivingAddress = receivingAddress;
-                return pendingTransaction;
-            })
-            .compose(RxUtil.applySchedulersToObservable());
+                    return payloadDataManager.getNextReceiveAddress(defaultAccount);
+                })
+                .map(receivingAddress -> {
+                    pendingTransaction.receivingAddress = receivingAddress;
+                    return pendingTransaction;
+                })
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -84,20 +83,20 @@ public class AccountEditDataManager {
      * @return An {@link Observable<String>} where the String is the transaction hash
      */
     public Observable<String> submitPayment(SpendableUnspentOutputs unspentOutputBundle,
-        List<ECKey> keys,
-        String toAddress,
-        String changeAddress,
-        BigInteger bigIntFee,
-        BigInteger bigIntAmount) {
+                                            List<ECKey> keys,
+                                            String toAddress,
+                                            String changeAddress,
+                                            BigInteger bigIntFee,
+                                            BigInteger bigIntAmount) {
 
         return paymentService.submitPayment(
-            unspentOutputBundle,
-            keys,
-            toAddress,
-            changeAddress,
-            bigIntFee,
-            bigIntAmount)
-            .compose(RxUtil.applySchedulersToObservable());
+                unspentOutputBundle,
+                keys,
+                toAddress,
+                changeAddress,
+                bigIntFee,
+                bigIntAmount)
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
 }

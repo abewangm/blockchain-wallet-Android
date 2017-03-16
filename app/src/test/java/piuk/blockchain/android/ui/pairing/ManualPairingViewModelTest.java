@@ -358,9 +358,11 @@ public class ManualPairingViewModelTest {
         Response response = Response.error(500, responseBody);
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
-        when(mAuthDataManager.startPollingAuthStatus(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
+        when(mAuthDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
-        when(mAuthDataManager.initializeFromPayload(anyString(), anyString())).thenReturn(Completable.complete());
+        when(mAuthDataManager.initializeFromPayload(anyString(), anyString()))
+                .thenReturn(Completable.complete());
         // Act
         mSubject.onContinueClicked();
         // Assert
@@ -382,9 +384,12 @@ public class ManualPairingViewModelTest {
         Response response = Response.error(500, responseBody);
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
-        when(mAuthDataManager.startPollingAuthStatus(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.error(new Throwable()));
-        when(mAuthDataManager.initializeFromPayload(anyString(), anyString())).thenReturn(Completable.complete());
+        when(mAuthDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
+        when(mAuthDataManager.createCheckEmailTimer())
+                .thenReturn(Observable.error(new Throwable()));
+        when(mAuthDataManager.initializeFromPayload(anyString(), anyString()))
+                .thenReturn(Completable.complete());
         // Act
         mSubject.onContinueClicked();
         // Assert

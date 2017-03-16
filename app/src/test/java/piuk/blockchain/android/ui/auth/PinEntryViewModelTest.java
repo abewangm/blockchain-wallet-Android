@@ -174,7 +174,8 @@ public class PinEntryViewModelTest {
         intent.putExtra(KEY_INTENT_PASSWORD, password);
         intent.putExtra(KEY_INTENT_RECOVERING_FUNDS, true);
         when(activity.getPageIntent()).thenReturn(intent);
-        when(authDataManager.createHdWallet(anyString(), anyString(), eq(email))).thenReturn(just(new Wallet()));
+        when(authDataManager.createHdWallet(anyString(), anyString(), eq(email)))
+                .thenReturn(just(new Wallet()));
         // Act
         subject.onViewReady();
         // Assert
@@ -349,7 +350,8 @@ public class PinEntryViewModelTest {
     public void padClickedVerifyPinValidateCalled() throws Exception {
         // Arrange
         subject.mUserEnteredPin = "133";
-        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, ""))
+                .thenReturn("1234567890");
         when(authDataManager.validatePin(anyString())).thenReturn(just(""));
         // Act
         subject.onPadClicked("7");
@@ -364,7 +366,8 @@ public class PinEntryViewModelTest {
         // Arrange
         subject.mUserEnteredPin = "133";
         subject.mValidatingPinForResult = true;
-        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, ""))
+                .thenReturn("1234567890");
         when(authDataManager.validatePin(anyString())).thenReturn(just(""));
         // Act
         subject.onPadClicked("7");
@@ -380,7 +383,8 @@ public class PinEntryViewModelTest {
     public void padClickedVerifyPinValidateCalledReturnsErrorIncrementsFailureCount() throws Exception {
         // Arrange
         subject.mUserEnteredPin = "133";
-        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, ""))
+                .thenReturn("1234567890");
         when(authDataManager.validatePin(anyString()))
                 .thenReturn(Observable.error(new InvalidCredentialsException()));
         // Act
@@ -400,7 +404,8 @@ public class PinEntryViewModelTest {
     public void padClickedVerifyPinValidateCalledReturnsInvalidCipherText() throws Exception {
         // Arrange
         subject.mUserEnteredPin = "133";
-        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, ""))
+                .thenReturn("1234567890");
         when(authDataManager.validatePin(anyString())).thenReturn(just(""));
         when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.error(new InvalidCipherTextException()));
@@ -423,7 +428,8 @@ public class PinEntryViewModelTest {
     public void padClickedVerifyPinValidateCalledReturnsGenericException() throws Exception {
         // Arrange
         subject.mUserEnteredPin = "133";
-        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, ""))
+                .thenReturn("1234567890");
         when(authDataManager.validatePin(anyString())).thenReturn(just(""));
         when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.error(new Exception()));

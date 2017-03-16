@@ -69,7 +69,7 @@ public class ConfirmFundsTransferViewModelTest {
     @Mock private ConfirmFundsTransferViewModel.DataListener activity;
     @Mock private WalletAccountHelper walletAccountHelper;
     @Mock private TransferFundsDataManager transferFundsDataManager;
-    @Mock private PayloadManager payloadManager;
+    @Mock private PayloadDataManager payloadDataManager;
     @Mock private PrefsUtil prefsUtil;
     @Mock private StringUtils stringUtils;
     @Mock private ExchangeRateFactory exchangeRateFactory;
@@ -81,7 +81,7 @@ public class ConfirmFundsTransferViewModelTest {
         InjectorTestUtils.initApplicationComponent(
                 Injector.getInstance(),
                 new MockApplicationModule(RuntimeEnvironment.application),
-                new MockApiModule(),
+                new ApiModule(),
                 new MockDataManagerModule());
 
         subject = new ConfirmFundsTransferViewModel(activity);
@@ -91,7 +91,7 @@ public class ConfirmFundsTransferViewModelTest {
     public void onViewReady() throws Exception {
         // Arrange
         Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(mockPayload.getHdWallets().get(0).getDefaultAccountIdx()).thenReturn(0);
         PendingTransaction transaction = new PendingTransaction();
         List<PendingTransaction> transactions = Arrays.asList(transaction, transaction);
@@ -109,7 +109,7 @@ public class ConfirmFundsTransferViewModelTest {
     public void accountSelectedError() throws Exception {
         // Arrange
         Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         Account account1 = new Account();
         account1.setArchived(true);
         Account account2 = new Account();
@@ -160,7 +160,7 @@ public class ConfirmFundsTransferViewModelTest {
         transaction.sendingObject = new ItemAccount("", "", null, null, null);
         transaction.sendingObject.accountObject = new LegacyAddress();
         subject.mPendingTransactions = Collections.singletonList(transaction);
-        when(transferFundsDataManager.savePayloadToServer()).thenReturn(Completable.complete());
+        when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.complete());
         // Act
         subject.sendPayment("password");
         // Assert
@@ -229,8 +229,8 @@ public class ConfirmFundsTransferViewModelTest {
     public void getDefaultAccount() throws Exception {
         // Arrange
         Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        when(payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx()).thenReturn(1);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
+        when(mockPayload.getHdWallets().get(0).getDefaultAccountIdx()).thenReturn(1);
         Account account1 = new Account();
         account1.setArchived(true);
         Account account2 = new Account();
@@ -249,7 +249,7 @@ public class ConfirmFundsTransferViewModelTest {
         transaction.sendingObject = new ItemAccount("", "", null, null, null);
         transaction.sendingObject.accountObject = new LegacyAddress();
         subject.mPendingTransactions = Collections.singletonList(transaction);
-        when(transferFundsDataManager.savePayloadToServer()).thenReturn(Completable.complete());
+        when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.complete());
         // Act
         subject.archiveAll();
         // Assert
@@ -268,7 +268,7 @@ public class ConfirmFundsTransferViewModelTest {
         transaction.sendingObject = new ItemAccount("", "", null, null, null);
         transaction.sendingObject.accountObject = new LegacyAddress();
         subject.mPendingTransactions = Collections.singletonList(transaction);
-        when(transferFundsDataManager.savePayloadToServer()).thenReturn(Completable.error(new Throwable()));
+        when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.error(new Throwable()));
         // Act
         subject.archiveAll();
         // Assert
@@ -317,12 +317,11 @@ public class ConfirmFundsTransferViewModelTest {
                                                                  ExchangeRateFactory exchangeRateFactory) {
             return walletAccountHelper;
         }
-    }
 
-    private class MockApiModule extends ApiModule {
         @Override
-        protected PayloadManager providePayloadManager() {
-            return payloadManager;
+        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager) {
+            return payloadDataManager;
         }
     }
+
 }

@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.chooser
 import android.app.Application
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
-import info.blockchain.wallet.multiaddress.MultiAddressFactory
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Observable
 import org.junit.Before
@@ -71,7 +70,8 @@ class AccountChooserViewModelTest {
         val contact1 = Contact()
         contact1.mdid = "mdid"
         val contact2 = Contact()
-        whenever(mockContactsManager.contactList).thenReturn(Observable.just(contact0, contact1, contact2))
+        whenever(mockContactsManager.contactList)
+                .thenReturn(Observable.just(contact0, contact1, contact2))
         // Act
         subject.onViewReady()
         // Assert
@@ -90,7 +90,8 @@ class AccountChooserViewModelTest {
         val contact0 = Contact()
         val contact1 = Contact()
         val contact2 = Contact()
-        whenever(mockContactsManager.contactList).thenReturn(Observable.just(contact0, contact1, contact2))
+        whenever(mockContactsManager.contactList)
+                .thenReturn(Observable.just(contact0, contact1, contact2))
         // Act
         subject.onViewReady()
         // Assert
@@ -106,8 +107,10 @@ class AccountChooserViewModelTest {
         val itemAccount0 = ItemAccount("", "", null, null, null)
         val itemAccount1 = ItemAccount("", "", null, null, null)
         val itemAccount2 = ItemAccount("", "", null, null, null)
-        whenever(mockWalletAccountHelper.getHdAccounts(any())).thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
-        whenever(mockWalletAccountHelper.getLegacyAddresses(any())).thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        whenever(mockWalletAccountHelper.getHdAccounts(any()))
+                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        whenever(mockWalletAccountHelper.getLegacyAddresses(any()))
+                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
         // Act
         subject.onViewReady()
         // Assert
@@ -130,12 +133,15 @@ class AccountChooserViewModelTest {
         val contact1 = Contact()
         contact1.mdid = "mdid"
         val contact2 = Contact()
-        whenever(mockContactsManager.contactList).thenReturn(Observable.just(contact0, contact1, contact2))
+        whenever(mockContactsManager.contactList)
+                .thenReturn(Observable.just(contact0, contact1, contact2))
         val itemAccount0 = ItemAccount("", "", null, null, null)
         val itemAccount1 = ItemAccount("", "", null, null, null)
         val itemAccount2 = ItemAccount("", "", null, null, null)
-        whenever(mockWalletAccountHelper.getHdAccounts(any())).thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
-        whenever(mockWalletAccountHelper.getLegacyAddresses(any())).thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        whenever(mockWalletAccountHelper.getHdAccounts(any()))
+                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        whenever(mockWalletAccountHelper.getLegacyAddresses(any()))
+                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
         // Act
         subject.onViewReady()
         // Assert
@@ -157,8 +163,10 @@ class AccountChooserViewModelTest {
         val itemAccount0 = ItemAccount("", "", null, null, null)
         val itemAccount1 = ItemAccount("", "", null, null, null)
         val itemAccount2 = ItemAccount("", "", null, null, null)
-        whenever(mockWalletAccountHelper.getHdAccounts(any())).thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
-        whenever(mockWalletAccountHelper.getLegacyAddresses(any())).thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        whenever(mockWalletAccountHelper.getHdAccounts(any()))
+                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        whenever(mockWalletAccountHelper.getLegacyAddresses(any()))
+                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
         // Act
         subject.onViewReady()
         // Assert

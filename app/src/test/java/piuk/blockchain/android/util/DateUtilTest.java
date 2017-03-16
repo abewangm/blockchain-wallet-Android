@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -22,10 +23,10 @@ import static org.hamcrest.junit.MatcherAssert.assertThat;
 @RunWith(RobolectricTestRunner.class)
 public class DateUtilTest {
 
-    @Mock Context mMockContext;
+    @Mock private Context mMockContext;
 
     @Test
-    public void dateFormatTest() {
+    public void dateFormatTest() throws Exception {
         DateUtil dateUtil = new DateUtil(mMockContext);
 
         //unit test for 'Today' and 'Yesterday' uses android framework (code unchanged)
@@ -48,14 +49,8 @@ public class DateUtilTest {
         assertThat(dateUtil.formatted(parseDateTime("2015-04-15 23:59:59")), is("April 15, 2015"));
     }
 
-    @SuppressWarnings("EmptyCatchBlock")
     @SuppressLint("SimpleDateFormat")
-    private long parseDateTime(String time) {
-        try {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time).getTime() / 1000;
-        } catch (Exception e) {
-            // No-op
-        }
-        return 0;
+    private long parseDateTime(String time) throws ParseException {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time).getTime() / 1000;
     }
 }

@@ -1,6 +1,5 @@
 package piuk.blockchain.android.data.services;
 
-import android.util.Log;
 import info.blockchain.wallet.api.WalletApi;
 
 import io.reactivex.schedulers.Schedulers;
@@ -8,8 +7,6 @@ import piuk.blockchain.android.util.PrefsUtil;
 
 
 public class EventService {
-
-    private static final String TAG = EventService.class.getSimpleName();
 
     public static final String EVENT_2ND_PW = "wallet_login_second_password_";
     public static final String EVENT_LEGACY = "wallet_login_legacy_use_";
@@ -48,10 +45,7 @@ public class EventService {
     }
 
     private String getBoolean(boolean active) {
-        if (active)
-            return "1";
-        else
-            return "0";
+        return active ? "1" : "0";
     }
 
     private void logEvent(String eventName) {
@@ -59,10 +53,7 @@ public class EventService {
         walletApi.logEvent(eventName)
                 .subscribeOn(Schedulers.io())
                 .subscribe(response -> {
-                    if (response != null) {
-                        //success
-                    } else {
-                    }
+                    // No-op
                 }, Throwable::printStackTrace);
     }
 
@@ -70,12 +61,9 @@ public class EventService {
         if (!prefsUtil.getValue(key, false)) {
             walletApi.logEvent(eventName)
                     .subscribeOn(Schedulers.io())
-                    .subscribe(response -> {
-
-                        if (response != null) {
-                            prefsUtil.setValue(key, true);
-                        }
-                    }, Throwable::printStackTrace);
+                    .subscribe(
+                            response -> prefsUtil.setValue(key, true),
+                            Throwable::printStackTrace);
         }
     }
 }

@@ -38,9 +38,9 @@ import static org.mockito.Mockito.when;
 public class FingerprintHelperTest {
 
     private FingerprintHelper subject;
-    @Mock Context applicationContext;
-    @Mock PrefsUtil prefsUtil;
-    @Mock FingerprintAuth fingerprintAuth;
+    @Mock private Context applicationContext;
+    @Mock private PrefsUtil prefsUtil;
+    @Mock private FingerprintAuth fingerprintAuth;
 
     @Before
     public void setUp() throws Exception {

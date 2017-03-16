@@ -65,7 +65,7 @@ public class AccountViewModelTest {
 
     private AccountViewModel subject;
     @Mock private AccountViewModel.DataListener activity;
-    @Mock private PayloadManager payloadDataManager;
+    @Mock private PayloadDataManager payloadDataManager;
     @Mock private AccountDataManager accountDataManager;
     @Mock private TransferFundsDataManager fundsDataManager;
     @Mock private PrefsUtil prefsUtil;
@@ -78,7 +78,7 @@ public class AccountViewModelTest {
         InjectorTestUtils.initApplicationComponent(
                 Injector.getInstance(),
                 new MockApplicationModule(RuntimeEnvironment.application),
-                new MockApiModule(),
+                new ApiModule(),
                 new MockDataManagerModule());
 
         subject = new AccountViewModel(activity);
@@ -113,7 +113,7 @@ public class AccountViewModelTest {
                 .thenReturn(Observable.just(triple));
         Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.isUpgraded()).thenReturn(true);
-        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true)).thenReturn(true);
         // Act
         subject.checkTransferableLegacyFunds(false, true);
@@ -133,7 +133,7 @@ public class AccountViewModelTest {
                 .thenReturn(Observable.just(triple));
         Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.isUpgraded()).thenReturn(true);
-        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true)).thenReturn(true);
         // Act
         subject.checkTransferableLegacyFunds(false, false);
@@ -152,7 +152,7 @@ public class AccountViewModelTest {
                 .thenReturn(Observable.just(triple));
         Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.isUpgraded()).thenReturn(true);
-        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.checkTransferableLegacyFunds(true, true);
         // Assert
@@ -391,7 +391,7 @@ public class AccountViewModelTest {
         Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
         //noinspection SuspiciousMethodCalls
         when(mockPayload.getLegacyAddressStringList().contains(any())).thenReturn(true);
-        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.onAddressScanned("17UovdU9ZvepPe75igTQwxqNME1HbnvMB7");
         // Assert
@@ -406,7 +406,7 @@ public class AccountViewModelTest {
         Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
         //noinspection SuspiciousMethodCalls
         when(mockPayload.getLegacyAddressStringList().contains(any())).thenReturn(false);
-        when(payloadDataManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.onAddressScanned("17UovdU9ZvepPe75igTQwxqNME1HbnvMB7");
         // Assert
@@ -427,6 +427,7 @@ public class AccountViewModelTest {
         verifyNoMoreInteractions(activity);
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void handlePrivateKeyWhenKeyIsNull() throws Exception {
         // Arrange
@@ -503,11 +504,9 @@ public class AccountViewModelTest {
                                                                PrivateKeyFactory privateKeyFactory) {
             return accountDataManager;
         }
-    }
 
-    private class MockApiModule extends ApiModule {
         @Override
-        protected PayloadManager providePayloadManager() {
+        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager) {
             return payloadDataManager;
         }
     }

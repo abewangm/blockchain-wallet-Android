@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 public class NotificationServiceTest extends RxTest {
 
     private NotificationService subject;
-    @Mock WalletApi mockWalletApi;
+    @Mock private WalletApi mockWalletApi;
 
     @Before
     public void setUp() throws Exception {

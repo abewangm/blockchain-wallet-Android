@@ -348,9 +348,11 @@ public class PasswordRequiredViewModelTest extends RxTest {
         Response response = Response.error(500, responseBody);
         when(authDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
-        when(authDataManager.startPollingAuthStatus(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
         when(authDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
-        when(authDataManager.initializeFromPayload(anyString(), anyString())).thenReturn(Completable.complete());
+        when(authDataManager.initializeFromPayload(anyString(), anyString()))
+                .thenReturn(Completable.complete());
         // Act
         subject.onContinueClicked();
         // Assert
@@ -372,9 +374,12 @@ public class PasswordRequiredViewModelTest extends RxTest {
         Response response = Response.error(500, responseBody);
         when(authDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
-        when(authDataManager.startPollingAuthStatus(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
-        when(authDataManager.createCheckEmailTimer()).thenReturn(Observable.error(new Throwable()));
-        when(authDataManager.initializeFromPayload(anyString(), anyString())).thenReturn(Completable.complete());
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
+        when(authDataManager.createCheckEmailTimer())
+                .thenReturn(Observable.error(new Throwable()));
+        when(authDataManager.initializeFromPayload(anyString(), anyString()))
+                .thenReturn(Completable.complete());
         // Act
         subject.onContinueClicked();
         // Assert
