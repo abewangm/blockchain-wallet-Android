@@ -28,6 +28,7 @@ import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
@@ -547,9 +548,9 @@ public class TransactionDetailViewModelTest extends RxTest {
 
     private class MockDataManagerModule extends DataManagerModule {
         @Override
-        protected TransactionListDataManager provideTransactionListDataManager(
-                PayloadManager payloadManager,
-                TransactionListStore transactionListStore) {
+        protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
+                                                                               TransactionListStore transactionListStore,
+                                                                               RxBus rxBus) {
             return transactionListDataManager;
         }
 

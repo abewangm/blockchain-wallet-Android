@@ -55,12 +55,12 @@ public class DebugSettings {
 
     @NonNull
     public String getBaseServerUrl() {
-        return PersistentUrls.getInstance().getCurrentBaseServerUrl();
+        return persistentUrls.getCurrentBaseServerUrl();
     }
 
     @NonNull
     public String getBaseApiUrl() {
-        return PersistentUrls.getInstance().getCurrentBaseApiUrl();
+        return persistentUrls.getCurrentBaseApiUrl();
     }
 
     /**

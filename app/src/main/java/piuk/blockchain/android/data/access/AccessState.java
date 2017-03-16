@@ -38,6 +38,7 @@ public class AccessState {
     private boolean isLoggedIn = false;
     private PendingIntent logoutPendingIntent;
     private static AccessState instance;
+    // TODO: 02/03/2017 Refactor me out of here
     private static final Subject<AuthEvent> authEventSubject = PublishSubject.create();
 
 

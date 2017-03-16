@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.base;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import piuk.blockchain.android.util.SSLVerifyUtil;
 /**
  * A base Activity for all activities which need auth timeouts & screenshot prevention
  */
+@SuppressLint("Registered")
 public class BaseAuthActivity extends AppCompatActivity {
 
     private AlertDialog mAlertDialog;

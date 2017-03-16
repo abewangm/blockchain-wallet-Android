@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.observers.TestObserver;
-import io.reactivex.subjects.Subject;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.account.ConsolidatedAccount;
 
@@ -39,7 +39,8 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class TransactionListDataManagerTest extends RxTest {
 
-    @Mock PayloadManager payloadManager;
+    @Mock private PayloadManager payloadManager;
+    @Mock private RxBus rxBus;
     private TransactionListStore transactionListStore;
     private TransactionListDataManager subject;
 
@@ -52,7 +53,8 @@ public class TransactionListDataManagerTest extends RxTest {
 
         subject = new TransactionListDataManager(
                 payloadManager,
-                transactionListStore);
+                transactionListStore,
+                rxBus);
     }
 
     @Test
@@ -166,16 +168,6 @@ public class TransactionListDataManagerTest extends RxTest {
         assertEquals(tx2, value.get(0));
         assertEquals(tx1, value.get(1));
         assertEquals(tx0, value.get(2));
-    }
-
-    @Test
-    public void getListUpdateSubject() throws Exception {
-        // Arrange
-
-        // Act
-        Subject value = subject.getListUpdateSubject();
-        // Assert
-        assertNotNull(value);
     }
 
     @Test

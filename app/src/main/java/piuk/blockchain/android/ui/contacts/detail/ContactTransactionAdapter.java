@@ -94,7 +94,7 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
 
                 } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
                     Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_requesting_from_contact_waiting_to_accept),
+                            stringUtils.getString(R.string.contacts_receiving_from_contact_waiting_to_accept),
                             amountSpannable,
                             contactName);
                     holder.title.setText(display);

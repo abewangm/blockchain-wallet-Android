@@ -103,7 +103,7 @@
 
     <string name="support">Assistenza</string>
     <string name="rate_us">Votaci</string>
-    <string name="about">Portafoglio Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Portafoglio Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">App Merchant gratuita </string>
     <string name="password_or_wipe">Inserisci usando la tua password o abbandona questo portafoglio</string>
     <string name="use_password">Usa la password</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">In fase di decifrazione del Portafoglio...</string>
     <string name="password_unchanged">Password non cambiata</string>
     <string name="password_changed">Password cambiata</string>
-    <string name="verify_email2">Il tuo indirizzo email verificato viene utilizzato per inviare i codici di accesso quando viene rilevata un\'attività sospetta o inusuale, per ricordare l\'ID di accesso al portafoglio, e per inviare avvisi di pagamento sui bitcoin quando ricevi dei fondi. Non useremo il tuo indirizzo email per finalità di marketing.</string>
+    <string name="verify_email2">Il tuo indirizzo email verificato viene utilizzato per inviare i codici di accesso quando viene rilevata un\'attività sospetta o inusuale, per ricordare l\'ID di accesso al portafoglio, e per inviare avvisi di pagamento sui bitcoin quando ricevi dei fondi.</string>
     <string name="disable_root_warning">Disattiva l\'avviso di dispositivo rooted</string>
 
     <string name="show_balance">Mostra il saldo</string>
@@ -368,8 +368,6 @@
     <string name="two_fa">Verifica in 2 fasi</string>
     <string name="tor_requests">Blocca le richieste da Tor</string>
     <string name="tor_summary">Vuoi bloccare l\'accesso al portafoglio agli indirizzi IP che sono conosciuti come parte della rete anonima Tor? La rete Tor è usata spesso dagli hacker che tentano di accedere ai portafogli Blockchain degli utenti</string>
-    <string name="password_hint">Suggerimento per la password</string>
-    <string name="password_hint_summary">Il tuo portafoglio Blockchain non comunicherà mai la tua password ai nostri server. Ciò significa che non abbiamo idea di quale sia la tua password e non potremo ripristinarla se la dimentichi. Ti invieremo al tuo indirizzo email verificato un consiglio per una password facilmente memorizzabile nel caso in cui dimentichi la tua password.</string>
     <string name="change_password">Modifica la password</string>
     <string name="change_password_summary">La tua password non sarà mai condivisa con i nostri server, e ciò significa che non potremo aiutarti a ripristinare la tua password se la dimentichi. Assicurati di scrivere la tua frase di recupero per ripristinare l\'accesso al tuo portafoglio in caso dimenticassi la password.</string>
     <string name="verify_email_notice">Abbiamo inviato al tuo indirizzo email un link per la verifica. Clicca sul link di verifica per verificare il tuo indirizzo email.</string>
@@ -389,7 +387,6 @@
     <string name="rate_yes">Sì, vota il Portafoglio Blockchain</string>
     <string name="rate_no">No, grazie</string>
     <string name="rate_later">Ricordamelo più tardi</string>
-    <string name="hint_reveals_password_error">Non puoi impostare la tua password portafoglio principale come la tua password suggerita.</string>
     <string name="why_has_my_address_changed">Perchè è stato cambiato il mio indirizzo?</string>
     <string name="learn_more">Maggiori dettagli</string>
 

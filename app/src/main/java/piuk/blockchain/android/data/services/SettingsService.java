@@ -74,7 +74,7 @@ public class SettingsService {
     }
 
     /**
-     * Enable a specific notification type for a user
+     * Enable or disable a specific notification type for a user/
      *
      * @param notificationType The type of notification to enable
      * @return An {@link Observable<ResponseBody>} containing the response from the server

@@ -8,15 +8,12 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
-import info.blockchain.wallet.util.Hash;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.account.ConsolidatedAccount;
@@ -28,18 +25,19 @@ public class TransactionListDataManager {
 
     private PayloadManager payloadManager;
     private TransactionListStore transactionListStore;
-    private Subject<List<TransactionSummary>> listUpdateSubject;
+    private RxBus rxBus;
 
     public TransactionListDataManager(PayloadManager payloadManager,
-                                      TransactionListStore transactionListStore) {
+                                      TransactionListStore transactionListStore,
+                                      RxBus rxBus) {
         this.payloadManager = payloadManager;
         this.transactionListStore = transactionListStore;
-        listUpdateSubject = PublishSubject.create();
+        this.rxBus = rxBus;
     }
 
     public Observable<List<TransactionSummary>> fetchTransactions(Object object, int limit, int offset) {
         return Observable.fromCallable(() -> {
-            List<TransactionSummary> result = new ArrayList<>();
+            List<TransactionSummary> result;
 
             if (object instanceof ConsolidatedAccount) {
                 ConsolidatedAccount consolidate = (ConsolidatedAccount) object;
@@ -91,17 +89,6 @@ public class TransactionListDataManager {
     public List<TransactionSummary> insertTransactionIntoListAndReturnSorted(TransactionSummary transaction) {
         transactionListStore.insertTransactionIntoListAndSort(transaction);
         return transactionListStore.getList();
-    }
-
-    /**
-     * Returns a subject that lets ViewModels subscribe to changes in the transaction list -
-     * specifically this subject will return the transaction list when it's first updated and then
-     * call onCompleted()
-     *
-     * @return The list of transactions after initial sync
-     */
-    public Subject<List<TransactionSummary>> getListUpdateSubject() {
-        return listUpdateSubject;
     }
 
     /**
@@ -175,26 +162,23 @@ public class TransactionListDataManager {
     }
 
     private void insertTransactionList(List<TransactionSummary> txList) {
-
         List<TransactionSummary> pendingTxs = getRemainingPendingTransactionList(txList);
         clearTransactionList();
         txList.addAll(pendingTxs);
         transactionListStore.insertTransactions(txList);
         transactionListStore.sort(new TransactionSummary.TxMostRecentDateComparator());
-        listUpdateSubject.onNext(transactionListStore.getList());
-        listUpdateSubject.onComplete();
+        rxBus.emitEvent(List.class, transactionListStore.getList());
     }
 
-    public List<TransactionSummary> getRemainingPendingTransactionList(List<TransactionSummary> newlyFetchedTxs) {
-
+    private List<TransactionSummary> getRemainingPendingTransactionList(List<TransactionSummary> newlyFetchedTxs) {
         HashMap<String, TransactionSummary> pendingMap = new HashMap<>();
-        for(TransactionSummary transactionSummary : transactionListStore.getList()) {
-            if(transactionSummary.isPending()) {
+        for (TransactionSummary transactionSummary : transactionListStore.getList()) {
+            if (transactionSummary.isPending()) {
                 pendingMap.put(transactionSummary.getHash(), transactionSummary);
             }
         }
 
-        if(!pendingMap.isEmpty()) {
+        if (!pendingMap.isEmpty()) {
             filterProcessed(newlyFetchedTxs, pendingMap);
         }
 
@@ -202,10 +186,11 @@ public class TransactionListDataManager {
     }
 
     private void filterProcessed(List<TransactionSummary> newlyFetchedTxs, HashMap<String, TransactionSummary> pendingMap) {
-        for(TransactionSummary tx : newlyFetchedTxs) {
-            if(pendingMap.containsKey(tx.getHash())) {
+        for (TransactionSummary tx : newlyFetchedTxs) {
+            if (pendingMap.containsKey(tx.getHash())) {
                 pendingMap.remove(pendingMap.get(tx.getHash()));
             }
         }
     }
+
 }

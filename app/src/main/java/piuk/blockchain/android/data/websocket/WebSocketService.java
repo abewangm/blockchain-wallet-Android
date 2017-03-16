@@ -10,6 +10,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 
+import info.blockchain.wallet.api.PersistentUrls;
+
 import javax.inject.Inject;
 
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
@@ -18,6 +20,7 @@ import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+
 public class WebSocketService extends Service {
 
     public static final String ACTION_INTENT = "info.blockchain.wallet.WebSocketService.SUBSCRIBE_TO_ADDRESS";
@@ -25,6 +28,7 @@ public class WebSocketService extends Service {
     @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected NotificationManager notificationManager;
+    @Inject protected PersistentUrls persistentUrls;
     @Thunk WebSocketHandler webSocketHandler;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -65,6 +69,7 @@ public class WebSocketService extends Service {
                     getApplicationContext(),
                     payloadDataManager,
                     notificationManager,
+                    persistentUrls,
                     new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
                     payloadDataManager.getWallet().getGuid(),
                     xpubs,

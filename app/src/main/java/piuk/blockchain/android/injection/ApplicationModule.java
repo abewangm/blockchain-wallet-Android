@@ -13,6 +13,7 @@ import dagger.Module;
 import dagger.Provides;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -23,6 +24,7 @@ import piuk.blockchain.android.util.StringUtils;
  * Created by adambennett on 08/08/2016.
  */
 
+@SuppressWarnings("WeakerAccess")
 @Module
 public class ApplicationModule {
 
@@ -89,5 +91,11 @@ public class ApplicationModule {
     @Singleton
     protected NotificationManager provideNotificationManager(Context context) {
         return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+
+    @Provides
+    @Singleton
+    protected RxBus provideRxBus() {
+        return new RxBus();
     }
 }

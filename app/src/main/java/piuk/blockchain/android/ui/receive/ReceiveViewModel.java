@@ -317,7 +317,8 @@ public class ReceiveViewModel extends BaseViewModel {
             Iterator it = intentHashMap.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry mapItem = (Map.Entry) it.next();
-                Pair<ResolveInfo, Intent> pair = (Pair<ResolveInfo, Intent>) mapItem.getValue();
+                @SuppressWarnings("unchecked") Pair<ResolveInfo, Intent> pair =
+                        (Pair<ResolveInfo, Intent>) mapItem.getValue();
                 ResolveInfo resolveInfo = pair.first;
                 String context = resolveInfo.activityInfo.packageName;
                 String packageClassName = resolveInfo.activityInfo.name;

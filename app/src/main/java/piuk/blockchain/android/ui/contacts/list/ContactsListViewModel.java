@@ -16,9 +16,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
-import piuk.blockchain.android.data.notifications.FcmCallbackService;
+import piuk.blockchain.android.data.notifications.NotificationPayload;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -30,9 +32,11 @@ public class ContactsListViewModel extends BaseViewModel {
     private static final String TAG = ContactsListViewModel.class.getSimpleName();
 
     private DataListener dataListener;
+    private Observable<NotificationPayload> notificationObservable;
     @VisibleForTesting String link;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadManager payloadManager;
+    @Inject RxBus rxBus;
 
     interface DataListener {
 
@@ -184,8 +188,10 @@ public class ContactsListViewModel extends BaseViewModel {
     }
 
     private void subscribeToNotifications() {
+        notificationObservable = rxBus.register(NotificationPayload.class);
+
         compositeDisposable.add(
-                FcmCallbackService.getNotificationSubject()
+                notificationObservable
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(
                                 notificationPayload -> refreshContacts(),
@@ -233,5 +239,11 @@ public class ContactsListViewModel extends BaseViewModel {
         } else {
             dataListener.setUiState(ContactsListActivity.FAILURE);
         }
+    }
+
+    @Override
+    public void destroy() {
+        rxBus.unregister(NotificationPayload.class, notificationObservable);
+        super.destroy();
     }
 }

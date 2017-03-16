@@ -39,7 +39,6 @@ public class RootUtil {
     }
 
     private boolean checkSu() {
-
         Process process = null;
         try {
             process = Runtime.getRuntime().exec(new String[]{"/system/xbin/which", "su"});
@@ -52,7 +51,6 @@ public class RootUtil {
                 process.destroy();
             }
         }
-
     }
 
 }

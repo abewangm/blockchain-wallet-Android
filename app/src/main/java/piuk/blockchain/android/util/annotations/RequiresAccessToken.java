@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 
 /**
- * Specifies that the method being called hits a Shared Metadata endpoing and requires an
+ * Specifies that the method being called hits a Shared Metadata endpoint and requires an
  * authenticated access token. As such, this method should be called via the helper methods {@link
  * ContactsDataManager#callWithToken(ContactsDataManager.CompletableTokenRequest)} or {@link
  * ContactsDataManager#callWithToken(ContactsDataManager.ObservableTokenRequest)} depending on the

@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.send;
 
-import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
@@ -50,8 +49,8 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
-import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
@@ -59,7 +58,6 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
-import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -106,6 +104,7 @@ public class SendViewModel extends BaseViewModel {
     @Inject AccountDataManager accountDataManager;
     @Inject DynamicFeeCache dynamicFeeCache;
     @Inject TransactionListDataManager transactionListDataManager;
+    @Inject PersistentUrls persistentUrls;
 
     SendViewModel(SendContract.DataListener dataListener, Locale locale) {
         Injector.getInstance().getDataManagerComponent().inject(this);
@@ -389,7 +388,7 @@ public class SendViewModel extends BaseViewModel {
         unspentApiDisposable = getUnspentApiResponse(address)
                 .compose(RxUtil.applySchedulersToObservable())
                 .subscribe(
-                    coins -> {
+                        coins -> {
                             if (coins != null) {
                                 BigInteger amountToSend = getSatoshisFromText(amountToSendText);
                                 BigInteger customFee = getSatoshisFromText(customFeeText);
@@ -418,10 +417,10 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private BigInteger getSuggestedAbsoluteFee(final UnspentOutputs coins, BigInteger amountToSend)
-        throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         if (sendModel.dynamicFeeList != null) {
             SpendableUnspentOutputs spendableCoins = sendDataManager.getSpendableCoins(coins, amountToSend,
-                new BigDecimal(sendModel.dynamicFeeList.getDefaultFee().getFee()).toBigInteger());
+                    new BigDecimal(sendModel.dynamicFeeList.getDefaultFee().getFee()).toBigInteger());
             return spendableCoins.getAbsoluteFee();
         } else {
             // App is likely in low memory environment, leave page gracefully
@@ -434,7 +433,7 @@ public class SendViewModel extends BaseViewModel {
      * Payment will use customized fee
      */
     private void customFeePayment(final UnspentOutputs coins, BigInteger amountToSend, BigInteger customFee, boolean spendAll)
-        throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         Pair<BigInteger, BigInteger> sweepBundle = sendDataManager.getSweepableCoins(coins, BigInteger.ZERO);
         BigInteger sweepableAmount = sweepBundle.getLeft();
         long balanceAfterFee = sweepBundle.getLeft().longValue() - customFee.longValue();
@@ -466,7 +465,7 @@ public class SendViewModel extends BaseViewModel {
      * Payment will use suggested dynamic fee
      */
     private void suggestedFeePayment(final UnspentOutputs coins, BigInteger amountToSend, boolean spendAll)
-        throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         if (sendModel.dynamicFeeList != null) {
 
             BigInteger feePerKb = new BigDecimal(sendModel.dynamicFeeList.getDefaultFee().getFee()).toBigInteger();
@@ -541,7 +540,7 @@ public class SendViewModel extends BaseViewModel {
      * @return List of fees needed to be included in co-responding blocks
      */
     private BigInteger[] getEstimatedBlocks(BigInteger amountToSend, ArrayList<Fee> estimates, UnspentOutputs coins)
-        throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         BigInteger[] absoluteFeeSuggestedEstimates = new BigInteger[estimates.size()];
 
         for (int i = 0; i < absoluteFeeSuggestedEstimates.length; i++) {
@@ -561,7 +560,7 @@ public class SendViewModel extends BaseViewModel {
      */
     private Observable<UnspentOutputs> getUnspentApiResponse(String address) {
 
-        if(payloadManager.getAddressBalance(address).longValue() > 0) {
+        if (payloadManager.getAddressBalance(address).longValue() > 0) {
             if (sendModel.unspentApiResponses.containsKey(address)) {
                 return Observable.just(sendModel.unspentApiResponses.get(address));
             } else {
@@ -609,7 +608,7 @@ public class SendViewModel extends BaseViewModel {
      * Updates text displaying what block tx will be included in
      */
     private String updateEstimateConfirmationTime(BigInteger amountToSend, long fee, UnspentOutputs coins)
-        throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         sendModel.absoluteSuggestedFeeEstimates = getEstimatedBlocks(amountToSend, sendModel.dynamicFeeList.getEstimate(), coins);
 
         String likelyToConfirmMessage = stringUtils.getString(R.string.estimate_confirm_block_count);
@@ -891,10 +890,10 @@ public class SendViewModel extends BaseViewModel {
                 Account account = ((Account) selectedItem.accountObject);
 
                 compositeDisposable.add(
-                    payloadDataManager.getNextReceiveAddress(account)
-                        .subscribe(
-                            address -> sendModel.pendingTransaction.receivingAddress = address,
-                                throwable -> showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+                        payloadDataManager.getNextReceiveAddress(account)
+                                .subscribe(
+                                        address -> sendModel.pendingTransaction.receivingAddress = address,
+                                        throwable -> showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
 
             } else if (selectedItem.accountObject instanceof LegacyAddress) {
                 //V2
@@ -953,7 +952,7 @@ public class SendViewModel extends BaseViewModel {
                 changeAddress = payloadManager.getNextChangeAddress(account);
 
                 keys.addAll(payloadManager.getPayload().getHdWallets().get(0).getHDKeysForSigning(
-                    account, sendModel.pendingTransaction.unspentOutputBundle
+                        account, sendModel.pendingTransaction.unspentOutputBundle
                 ));
 
             } else {
@@ -997,22 +996,20 @@ public class SendViewModel extends BaseViewModel {
         insertPlaceHolderTransaction(hash, sendModel.pendingTransaction);
 
         if (sendModel.pendingTransaction.isHD()) {
-            Account account = (Account)sendModel.pendingTransaction.sendingObject.accountObject;
+            Account account = (Account) sendModel.pendingTransaction.sendingObject.accountObject;
             payloadDataManager.incrementChangeAddress(account);
             payloadDataManager.incrementReceiveAddress(account);
             try {
                 payloadManager.subtractAmountFromAddressBalance(account.getXpub(), sendModel.pendingTransaction.bigIntAmount);
             } catch (Exception e) {
                 Log.e(TAG, "subtractAmountFromAddressBalance: ", e);
-                e.printStackTrace();
             }
         } else {
             try {
-                LegacyAddress address = (LegacyAddress)sendModel.pendingTransaction.sendingObject.accountObject;
+                LegacyAddress address = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
                 payloadManager.subtractAmountFromAddressBalance(address.getAddress(), sendModel.pendingTransaction.bigIntAmount);
             } catch (Exception e) {
                 Log.e(TAG, "subtractAmountFromAddressBalance: ", e);
-                e.printStackTrace();
             }
         }
 
@@ -1063,6 +1060,8 @@ public class SendViewModel extends BaseViewModel {
         }
     }
 
+    // TODO: 16/03/2017 I'm not currently being called?
+
     /**
      * Update balance immediately after spend - until refresh from server
      */
@@ -1111,7 +1110,7 @@ public class SendViewModel extends BaseViewModel {
 
     void spendFromWatchOnlyBIP38(String pw, String scanData) {
         compositeDisposable.add(
-                sendDataManager.getEcKeyFromBip38(pw, scanData, PersistentUrls.getInstance().getCurrentNetworkParams())
+                sendDataManager.getEcKeyFromBip38(pw, scanData, persistentUrls.getCurrentNetworkParams())
                         .subscribe(ecKey -> {
                             LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
                             setTempLegacyAddressPrivateKey(legacyAddress, ecKey);
@@ -1120,12 +1119,12 @@ public class SendViewModel extends BaseViewModel {
 
     private void setTempLegacyAddressPrivateKey(LegacyAddress legacyAddress, ECKey key) {
         if (key != null && key.hasPrivKey() && legacyAddress.getAddress().equals(key.toAddress(
-                PersistentUrls.getInstance().getCurrentNetworkParams()).toString())) {
+                persistentUrls.getCurrentNetworkParams()).toString())) {
 
             //Create copy, otherwise pass by ref will override private key in wallet payload
             LegacyAddress tempLegacyAddress = new LegacyAddress();
             tempLegacyAddress.setPrivateKeyFromBytes(key.getPrivKeyBytes());
-            tempLegacyAddress.setAddress(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
+            tempLegacyAddress.setAddress(key.toAddress(persistentUrls.getCurrentNetworkParams()).toString());
             tempLegacyAddress.setLabel(legacyAddress.getLabel());
             sendModel.pendingTransaction.sendingObject.accountObject = tempLegacyAddress;
 

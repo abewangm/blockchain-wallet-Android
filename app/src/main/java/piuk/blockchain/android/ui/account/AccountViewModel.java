@@ -47,6 +47,7 @@ public class AccountViewModel extends BaseViewModel {
     @Inject PrefsUtil prefsUtil;
     @Inject AppUtil appUtil;
     @Inject PrivateKeyFactory privateKeyFactory;
+    @Inject PersistentUrls persistentUrls;
     @VisibleForTesting String doubleEncryptionPassword;
 
     AccountViewModel(DataListener dataListener) {
@@ -181,9 +182,8 @@ public class AccountViewModel extends BaseViewModel {
     void importBip38Address(String data, String password) {
         dataListener.showProgressDialog(R.string.please_wait);
         try {
-            BIP38PrivateKey bip38 = new BIP38PrivateKey(PersistentUrls.getInstance().getCurrentNetworkParams(), data);
+            BIP38PrivateKey bip38 = new BIP38PrivateKey(persistentUrls.getCurrentNetworkParams(), data);
             ECKey key = bip38.decrypt(password);
-
             handlePrivateKey(key, doubleEncryptionPassword);
         } catch (Exception e) {
             Log.e(TAG, "importBip38Address: ", e);
@@ -288,4 +288,5 @@ public class AccountViewModel extends BaseViewModel {
             dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
         }
     }
+
 }

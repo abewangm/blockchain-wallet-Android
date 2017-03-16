@@ -103,7 +103,7 @@
 
     <string name="support">Служба підтримки</string>
     <string name="rate_us">Оцінити нас</string>
-    <string name="about">Гаманець Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Гаманець Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Безкоштовна програма Підприємця</string>
     <string name="password_or_wipe">Увійти під своїм паролем або забути цей гаманець</string>
     <string name="use_password">Використати пароль</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Дешифрування гаманця...</string>
     <string name="password_unchanged">Пароль не змінено</string>
     <string name="password_changed">Пароль змінено</string>
-    <string name="verify_email2">Ваша підтверджена адреса ел. пошти використовується нами для відправки вам кодів для входу, або для інформування вас, якщо ми виявимо підозрілу чи нехарактерну активність по вашому рахунку, для нагадування вам ID гаманця або сповіщення про рух коштів по вашому рахунку. Ми не будемо використовувати вашу ел. адресу в маркетингових цілях.</string>
+    <string name="verify_email2">Ваша підтверджена адреса ел. пошти використовується нами для відправки вам кодів для входу, або для інформування вас, якщо ми виявимо підозрілу чи нехарактерну активність по вашому рахунку, для нагадування вам ID гаманця або сповіщення про рух коштів по вашому рахунку.</string>
     <string name="disable_root_warning">Вимкніть попередження рутованого пристрою</string>
 
     <string name="show_balance">Показати баланс</string>
@@ -366,8 +366,6 @@
     <string name="two_fa">2-крокове підтвердження</string>
     <string name="tor_requests">Блокувати запити з мережі Tor</string>
     <string name="tor_summary">Бажаєте заблокувати доступ до гаманця з IP-адрес, які, як відомо, є частиною анонімної мережі Tor? Мережа Tor часто використовується хакерами, які намагаються отримати доступ до гаманців Blockchain.</string>
-    <string name="password_hint">Підказка для пароля</string>
-    <string name="password_hint_summary">Ваш гаманець Blockchain ніколи не повідомляє пароль нашим серверам. Це означає, що ми не знаємо ваш пароль, і ми не можемо відновити його, якщо ви його забудете. Створіть підказку для нагадування пароля, яку ми зможемо відправити на вашу підтверджену електронну адресу, якщо ви забули свій пароль.</string>
     <string name="change_password">Змінити пароль</string>
     <string name="change_password_summary">Ваш пароль ніколи і нікуди не передається з наших серверів, а це значить, що ми не зможемо допомогти вам скинути пароль, навіть якщо ви його забудете чи втратите. Переконайтеся, що ви записали фразу для відновлення пароля, яка допоможе відновити доступ до вашого гаманця в разі втрати пароля.</string>
     <string name="verify_email_notice">На вашу ел. адресу ми надіслати листа з верифікаційним посиланням. Натисніть на посилання, щоб підтвердити свою ел. адресу.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Так, оцінити гаманець Blockchain</string>
     <string name="rate_no">Ні, дякую.</string>
     <string name="rate_later">Нагадати пізніше</string>
-    <string name="hint_reveals_password_error">Ви не можете використовувати свій основний пароль гаманця в якості підказки для нагадування пароля.</string>
     <string name="why_has_my_address_changed">Чому моя адреса змінилась?</string>
     <string name="learn_more">Дізнатись більше</string>
 

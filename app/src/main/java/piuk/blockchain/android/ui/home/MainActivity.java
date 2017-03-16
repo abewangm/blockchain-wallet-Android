@@ -7,9 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,7 +19,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -44,6 +41,7 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
 import piuk.blockchain.android.ui.account.AccountActivity;
 import piuk.blockchain.android.ui.auth.LandingActivity;
@@ -63,15 +61,14 @@ import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+import static piuk.blockchain.android.data.services.EventService.EVENT_TX_INPUT_FROM_CONTACTS;
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
 import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
-import static piuk.blockchain.android.data.services.EventService.EVENT_TX_INPUT_FROM_CONTACTS;
 
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.OnFragmentInteractionListener,
         MainViewModel.DataListener,
@@ -378,23 +375,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             upgradeMenuItem.setVisible(false);
             backUpMenuItem.setVisible(true);
         }
-
-        binding.navigationView.setItemIconTintList(null);
-        Drawable drawable = DrawableCompat.wrap(ContextCompat.getDrawable(this, R.drawable.vector_lock));
-        drawable.mutate();
-        if (viewModel.getPayloadManager().getPayload() != null &&
-                viewModel.getPayloadManager().getPayload().getHdWallets() != null &&
-                !viewModel.getPayloadManager().getPayload().getHdWallets().get(0).isMnemonicVerified()) {
-            // Not backed up
-            DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.product_red_medium));
-            DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_ATOP);
-        } else {
-            // Backed up
-            DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.product_green_medium));
-            DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_ATOP);
-        }
-
-        binding.navigationView.getMenu().findItem(R.id.nav_backup).setIcon(drawable);
 
         binding.navigationView.setNavigationItemSelectedListener(
                 menuItem -> {

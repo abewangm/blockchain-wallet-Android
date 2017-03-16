@@ -1,9 +1,7 @@
 package piuk.blockchain.android.ui.balance;
 
-import android.annotation.SuppressLint;
 import com.google.common.collect.HashBiMap;
 
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.util.Log;
@@ -13,7 +11,6 @@ import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
-import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -29,15 +26,18 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.Completable;
+import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
+import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
-import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ConsolidatedAccount;
@@ -46,7 +46,6 @@ import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -61,6 +60,9 @@ public class BalanceViewModel extends BaseViewModel {
 
     private DataListener dataListener;
 
+    private Observable<ContactsEvent> contactsEventObservable;
+    private Observable<NotificationPayload> notificationObservable;
+    private Observable<List> txListObservable;
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
     private List<Object> displayList;
@@ -72,6 +74,7 @@ public class BalanceViewModel extends BaseViewModel {
     @Inject PayloadDataManager payloadDataManager;
     @Inject SettingsDataManager settingsDataManager;
     @Inject SwipeToReceiveHelper swipeToReceiveHelper;
+    @Inject RxBus rxBus;
 
     public interface DataListener {
 
@@ -139,8 +142,10 @@ public class BalanceViewModel extends BaseViewModel {
             prefsUtil.setValue(PrefsUtil.KEY_FIRST_RUN, false);
         } else {
             // Check from this point forwards
+            txListObservable = rxBus.register(List.class);
+
             compositeDisposable.add(
-                    transactionListDataManager.getListUpdateSubject()
+                    txListObservable
                             .compose(RxUtil.applySchedulersToObservable())
                             .subscribe(txs -> {
                                 if (hasTransactions()) {
@@ -175,10 +180,11 @@ public class BalanceViewModel extends BaseViewModel {
                             }, Throwable::printStackTrace));
         }
 
-        ContactsDataManager.getServiceInitSubject()
-                .subscribe(contactsEvent -> refreshFacilitatedTransactions());
+        contactsEventObservable = rxBus.register(ContactsEvent.class);
+        contactsEventObservable.subscribe(contactsEvent -> refreshFacilitatedTransactions());
 
-        FcmCallbackService.getNotificationSubject()
+        notificationObservable = rxBus.register(NotificationPayload.class);
+        notificationObservable
                 .subscribe(notificationPayload -> {
                     if (notificationPayload.getType() != null
                             && notificationPayload.getType().equals(NotificationPayload.NotificationType.PAYMENT)) {
@@ -353,12 +359,12 @@ public class BalanceViewModel extends BaseViewModel {
 
         //Update transactions
         compositeDisposable.add(transactionListDataManager.fetchTransactions(object, 50, 0)
-            .subscribe(transactionSummaries -> {
-                    insertTransactionsAndDisplay(transactionSummaries);
-                },
+            .subscribe(
+                    this::insertTransactionsAndDisplay,
                 throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
     }
 
+    @SuppressWarnings("Java8CollectionRemoveIf")
     private void insertTransactionsAndDisplay(List<TransactionSummary> txList) throws IOException, ApiException {
         // Remove current transactions but keep headers and pending transactions
         Iterator iterator = displayList.iterator();
@@ -610,6 +616,7 @@ public class BalanceViewModel extends BaseViewModel {
         return value;
     }
 
+    @SuppressWarnings("Java8CollectionRemoveIf")
     private void handlePendingTransactions(List<ContactTransactionModel> transactions) {
         // Remove previous Pending Transactions
         Iterator iterator = displayList.iterator();
@@ -634,4 +641,11 @@ public class BalanceViewModel extends BaseViewModel {
         }
     }
 
+    @Override
+    public void destroy() {
+        rxBus.unregister(ContactsEvent.class, contactsEventObservable);
+        rxBus.unregister(NotificationPayload.class, notificationObservable);
+        rxBus.unregister(List.class, txListObservable);
+        super.destroy();
+    }
 }

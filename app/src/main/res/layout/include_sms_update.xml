@@ -21,9 +21,9 @@
                 android:gravity="center"
                 android:layout_height="match_parent" />
 
-            <android.support.v7.widget.AppCompatEditText
+            <EditText
                 android:id="@+id/etSms"
-                android:layout_width="1dp"
+                android:layout_width="0dp"
                 android:layout_weight="1"
                 android:paddingLeft="4dp"
                 android:layout_height="match_parent"

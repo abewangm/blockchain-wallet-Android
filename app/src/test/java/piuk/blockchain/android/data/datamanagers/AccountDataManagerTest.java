@@ -26,8 +26,8 @@ import static org.mockito.Mockito.when;
 public class AccountDataManagerTest extends RxTest {
 
     private AccountDataManager subject;
-    @Mock PayloadManager payloadManager;
-    @Mock PrivateKeyFactory privateKeyFactory;
+    @Mock private PayloadManager payloadManager;
+    @Mock private PrivateKeyFactory privateKeyFactory;
 
     @Before
     public void setUp() throws Exception {

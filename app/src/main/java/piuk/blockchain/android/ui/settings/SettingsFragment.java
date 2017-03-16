@@ -31,6 +31,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -398,13 +399,13 @@ public class SettingsFragment extends PreferenceFragmentCompat
         dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
             @Override
             public void onAuthenticated(String data) {
-                dialog.dismiss();
+                dialog.dismissAllowingStateLoss();
                 viewModel.setFingerprintUnlockEnabled(true);
             }
 
             @Override
             public void onCanceled() {
-                dialog.dismiss();
+                dialog.dismissAllowingStateLoss();
                 viewModel.setFingerprintUnlockEnabled(false);
                 fingerprintPref.setChecked(viewModel.getIfFingerprintUnlockEnabled());
             }
@@ -554,7 +555,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         } else {
             LayoutInflater inflater = getActivity().getLayoutInflater();
             View smsPickerView = inflater.inflate(R.layout.include_sms_update, null);
-            AppCompatEditText mobileNumber = (AppCompatEditText) smsPickerView.findViewById(R.id.etSms);
+            EditText mobileNumber = (EditText) smsPickerView.findViewById(R.id.etSms);
             TextView countryTextView = (TextView) smsPickerView.findViewById(R.id.tvCountry);
             TextView mobileNumberTextView = (TextView) smsPickerView.findViewById(R.id.tvSms);
 
@@ -680,7 +681,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             Button positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
             positive.setOnClickListener(view -> {
                 String codeS = editText.getText().toString();
-                if (codeS.length() > 0) {
+                if (!codeS.isEmpty()) {
                     viewModel.verifySms(codeS);
                     dialog.dismiss();
                     ViewUtils.hideKeyboard(getActivity());
@@ -795,7 +796,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 String walletPassword = viewModel.getTempPassword();
 
                 if (!currentPw.equals(newPw)) {
-                    if (currentPw.equals(walletPassword.toString())) {
+                    if (currentPw.equals(walletPassword)) {
                         if (newPw.equals(newConfirmedPw)) {
                             if (newConfirmedPw.length() < 4 || newConfirmedPw.length() > 255) {
                                 ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
