@@ -79,7 +79,8 @@ class ContactsInvitationBuilderViewModelTest {
             this.sender = sender
             this.recipient = recipient
         }
-        whenever(mockContactManager.createInvitation(sender, recipient)).thenReturn(Observable.just(sender))
+        whenever(mockContactManager.createInvitation(sender, recipient))
+                .thenReturn(Observable.just(sender))
         // Act
         subject.onQrCodeSelected()
         // Assert
@@ -150,7 +151,8 @@ class ContactsInvitationBuilderViewModelTest {
             this.sender = sender
             this.recipient = recipient
         }
-        whenever(mockContactManager.createInvitation(sender, recipient)).thenReturn(Observable.just(sender))
+        whenever(mockContactManager.createInvitation(sender, recipient))
+                .thenReturn(Observable.just(sender))
         // Act
         subject.onLinkClicked()
         // Assert
@@ -240,7 +242,8 @@ class ContactsInvitationBuilderViewModelTest {
         subject.apply {
             this.recipient = recipient
         }
-        whenever(mockContactManager.readInvitationSent(recipient)).thenReturn(Observable.error { Throwable() })
+        whenever(mockContactManager.readInvitationSent(recipient))
+                .thenReturn(Observable.error { Throwable() })
         // Act
         subject.onDoneSelected()
         // Assert

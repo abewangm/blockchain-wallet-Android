@@ -4,7 +4,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
@@ -14,6 +13,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
@@ -27,13 +27,12 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-@SuppressWarnings("WeakerAccess")
 public class ConfirmFundsTransferViewModel extends BaseViewModel {
 
-    @Thunk DataListener mDataListener;
+    private DataListener mDataListener;
     @Inject WalletAccountHelper mWalletAccountHelper;
     @Inject TransferFundsDataManager mFundsDataManager;
-    @Inject PayloadManager mPayloadManager;
+    @Inject PayloadDataManager mPayloadDataManager;
     @Inject PrefsUtil mPrefsUtil;
     @Inject StringUtils mStringUtils;
     @Inject ExchangeRateFactory mExchangeRateFactory;
@@ -66,17 +65,17 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
         void onUiUpdated();
     }
 
-    public ConfirmFundsTransferViewModel(DataListener listener) {
+    ConfirmFundsTransferViewModel(DataListener listener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
         mDataListener = listener;
     }
 
     @Override
     public void onViewReady() {
-        updateToAddress(mPayloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
+        updateToAddress(mPayloadDataManager.getDefaultAccountIndex());
     }
 
-    public void accountSelected(int position) {
+    void accountSelected(int position) {
         updateToAddress(getAdjustedAccountPosition(position));
     }
 
@@ -134,7 +133,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
      *
      * @param secondPassword The user's double encryption password if necessary
      */
-    public void sendPayment(@Nullable String secondPassword) {
+    void sendPayment(@Nullable String secondPassword) {
         boolean archiveAll = mDataListener.getIfArchiveChecked();
         mDataListener.setPaymentButtonEnabled(false);
         mDataListener.showProgressDialog();
@@ -143,7 +142,6 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
                 mFundsDataManager.sendPayment(mPendingTransactions, secondPassword)
                         .doAfterTerminate(() -> mDataListener.hideProgressDialog())
                         .subscribe(s -> {
-                            mDataListener.hideProgressDialog();
                             mDataListener.showToast(R.string.transfer_confirmed, ToastCustom.TYPE_OK);
                             if (archiveAll) {
                                 archiveAll();
@@ -161,10 +159,8 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
      *
      * @return {@link List<ItemAccount>}
      */
-    public List<ItemAccount> getReceiveToList() {
-        return new ArrayList<ItemAccount>() {{
-            addAll(mWalletAccountHelper.getHdAccounts(true));
-        }};
+    List<ItemAccount> getReceiveToList() {
+        return mWalletAccountHelper.getHdAccounts(true);
     }
 
     /**
@@ -172,8 +168,8 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
      *
      * @return int account position in list of non-archived accounts
      */
-    public int getDefaultAccount() {
-        return Math.max(getCorrectedAccountIndex(mPayloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx()), 0);
+    int getDefaultAccount() {
+        return Math.max(getCorrectedAccountIndex(mPayloadDataManager.getDefaultAccountIndex()), 0);
     }
 
     @Thunk
@@ -184,7 +180,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
         }
 
         compositeDisposable.add(
-                mFundsDataManager.savePayloadToServer()
+                mPayloadDataManager.syncPayloadWithServer()
                         .doAfterTerminate(() -> {
                             mDataListener.hideProgressDialog();
                             mDataListener.dismissDialog();
@@ -196,7 +192,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
     }
 
     private int getAdjustedAccountPosition(int position) {
-        List<Account> accounts = mPayloadManager.getPayload().getHdWallets().get(0).getAccounts();
+        List<Account> accounts = mPayloadDataManager.getWallet().getHdWallets().get(0).getAccounts();
         int adjustedPosition = 0;
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
@@ -214,7 +210,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
     private int getCorrectedAccountIndex(int accountIndex) {
         // Filter accounts by active
         List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = mPayloadManager.getPayload().getHdWallets().get(0).getAccounts();
+        List<Account> accounts = mPayloadDataManager.getWallet().getHdWallets().get(0).getAccounts();
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
             if (!account.isArchived()) {
@@ -223,6 +219,6 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
         }
 
         // Find corrected position
-        return activeAccounts.indexOf(mPayloadManager.getPayload().getHdWallets().get(0).getAccounts().get(accountIndex));
+        return activeAccounts.indexOf(mPayloadDataManager.getWallet().getHdWallets().get(0).getAccounts().get(accountIndex));
     }
 }

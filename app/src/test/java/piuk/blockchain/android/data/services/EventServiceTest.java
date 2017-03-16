@@ -3,13 +3,15 @@ package piuk.blockchain.android.data.services;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Status;
 
-import io.reactivex.Observable;
-import java.io.IOException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.io.IOException;
+
+import io.reactivex.Observable;
 import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.mockito.Matchers.anyBoolean;
@@ -24,10 +26,8 @@ import static org.mockito.Mockito.when;
 
 public class EventServiceTest {
 
-    @Mock
-    PrefsUtil prefsUtil;
-    @Mock
-    WalletApi walletApi;
+    @Mock private PrefsUtil prefsUtil;
+    @Mock private WalletApi walletApi;
 
     private static final String SUCCESS_TRUE = "{\"success\":true}";
 
@@ -36,7 +36,7 @@ public class EventServiceTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    private void arrangeShouldLog() throws Exception{
+    private void arrangeShouldLog() throws Exception {
         when(walletApi.logEvent(anyString())).thenReturn(getSuccess());
         when(prefsUtil.getValue(anyString(), anyBoolean())).thenReturn(false);//has not been logged
     }
@@ -45,8 +45,7 @@ public class EventServiceTest {
         return Observable.just(Status.fromJson(SUCCESS_TRUE));
     }
 
-    private void arrangeShouldNotLog() throws Exception{
-
+    private void arrangeShouldNotLog() throws Exception {
         when(walletApi.logEvent(anyString())).thenReturn(getSuccess());
         when(prefsUtil.getValue(anyString(), anyBoolean())).thenReturn(true);//has been logged
     }
@@ -144,7 +143,6 @@ public class EventServiceTest {
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_BACKUP, false);
     }
 
-
     @Test
     public void disabled_log2ndPw_notPreviouslyLogged_shouldLog() throws Exception {
         // Arrange
@@ -239,7 +237,6 @@ public class EventServiceTest {
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_BACKUP, false);
     }
 
-    @Ignore
     @Test
     public void logAddressInputEvent() throws Exception {
         // Arrange
@@ -250,7 +247,6 @@ public class EventServiceTest {
         handler.logAddressInputEvent(EventService.EVENT_TX_INPUT_FROM_DROPDOWN);
 
         // Assert
-        Thread.sleep(200);
         verify(walletApi).logEvent(EventService.EVENT_TX_INPUT_FROM_DROPDOWN);
     }
 }

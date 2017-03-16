@@ -48,19 +48,19 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
+@SuppressWarnings({"PrivateMemberAccessBetweenOuterAndInnerClass", "AnonymousInnerClassMayBeStatic"})
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class SettingsViewModelTest {
 
     private SettingsViewModel subject;
-    @Mock SettingsViewModel.DataListener activity;
-    @Mock FingerprintHelper fingerprintHelper;
-    @Mock protected SettingsDataManager settingsDataManager;
-    @Mock protected PayloadManager payloadManager;
-    @Mock protected StringUtils stringUtils;
-    @Mock protected PrefsUtil prefsUtil;
-    @Mock protected AccessState accessState;
+    @Mock private SettingsViewModel.DataListener activity;
+    @Mock private FingerprintHelper fingerprintHelper;
+    @Mock private SettingsDataManager settingsDataManager;
+    @Mock private PayloadManager payloadManager;
+    @Mock private StringUtils stringUtils;
+    @Mock private PrefsUtil prefsUtil;
+    @Mock private AccessState accessState;
 
     @Before
     public void setUp() throws Exception {
@@ -607,6 +607,7 @@ public class SettingsViewModelTest {
         // Act
         subject.updatePassword(newPassword, oldPassword);
         // Assert
+        //noinspection ResultOfMethodCallIgnored
         verify(accessState).getPIN();
         verify(accessState).createPin(newPassword, pin);
         verify(accessState).syncPayloadToServer();
@@ -627,6 +628,7 @@ public class SettingsViewModelTest {
         // Act
         subject.updatePassword(newPassword, oldPassword);
         // Assert
+        //noinspection ResultOfMethodCallIgnored
         verify(accessState).getPIN();
         verify(accessState).createPin(newPassword, pin);
         verify(payloadManager).setTempPassword(newPassword);
@@ -647,6 +649,7 @@ public class SettingsViewModelTest {
         // Act
         subject.updatePassword(newPassword, oldPassword);
         // Assert
+        //noinspection ResultOfMethodCallIgnored
         verify(accessState).getPIN();
         verify(accessState).createPin(newPassword, pin);
         verify(payloadManager).setTempPassword(newPassword);

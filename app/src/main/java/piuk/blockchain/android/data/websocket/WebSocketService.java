@@ -10,10 +10,9 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 
-import info.blockchain.wallet.payload.PayloadManager;
-
 import javax.inject.Inject;
 
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -23,7 +22,7 @@ public class WebSocketService extends Service {
 
     public static final String ACTION_INTENT = "info.blockchain.wallet.WebSocketService.SUBSCRIBE_TO_ADDRESS";
     private final IBinder binder = new LocalBinder();
-    @Inject protected PayloadManager payloadManager;
+    @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected NotificationManager notificationManager;
     @Thunk WebSocketHandler webSocketHandler;
@@ -31,20 +30,19 @@ public class WebSocketService extends Service {
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
-            // TODO: 21/02/2017  
-//            if (intent.getAction().equals(ACTION_INTENT)) {
-//                if (intent.hasExtra("address")) {
-//                    webSocketHandler.subscribeToAddress(intent.getStringExtra("address"));
-//                }
-//                if (intent.hasExtra("xpub")) {
-//                    webSocketHandler.subscribeToXpub(intent.getStringExtra("xpub"));
-//                }
-//            }
+            if (intent.getAction().equals(ACTION_INTENT)) {
+                if (intent.hasExtra("address") && webSocketHandler != null) {
+                    webSocketHandler.subscribeToAddress(intent.getStringExtra("address"));
+                }
+                if (intent.hasExtra("xpub") && webSocketHandler != null) {
+                    webSocketHandler.subscribeToXpub(intent.getStringExtra("xpub"));
+                }
+            }
         }
     };
 
     {
-        Injector.getInstance().getAppComponent().inject(this);
+        Injector.getInstance().getDataManagerComponent().inject(this);
     }
 
     @Override
@@ -59,27 +57,28 @@ public class WebSocketService extends Service {
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(receiver, filter);
 
-        // TODO: 21/02/2017  
-//        String[] addrs = getAddresses();
-//        String[] xpubs = getXpubs();
-//
-//        webSocketHandler = new WebSocketHandler(
-//                getApplicationContext(),
-//                payloadManager,
-//                notificationManager,
-//                new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
-//                payloadManager.getPayload().getGuid(),
-//                xpubs,
-//                addrs);
-//
-//        webSocketHandler.start();
+        if (payloadDataManager.getWallet() != null) {
+            String[] addrs = getAddresses();
+            String[] xpubs = getXpubs();
+
+            webSocketHandler = new WebSocketHandler(
+                    getApplicationContext(),
+                    payloadDataManager,
+                    notificationManager,
+                    new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
+                    payloadDataManager.getWallet().getGuid(),
+                    xpubs,
+                    addrs);
+
+            webSocketHandler.start();
+        }
     }
 
     private String[] getXpubs() {
         int nbAccounts = 0;
-        if (payloadManager.getPayload().isUpgraded()) {
+        if (payloadDataManager.getWallet().isUpgraded()) {
             try {
-                nbAccounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts().size();
+                nbAccounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().size();
             } catch (java.lang.IndexOutOfBoundsException e) {
                 nbAccounts = 0;
             }
@@ -87,8 +86,8 @@ public class WebSocketService extends Service {
 
         final String[] xpubs = new String[nbAccounts];
         for (int i = 0; i < nbAccounts; i++) {
-            String s = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(i).getXpub();
-            if (s != null && s.length() > 0) {
+            String s = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().get(i).getXpub();
+            if (s != null && !s.isEmpty()) {
                 xpubs[i] = s;
             }
         }
@@ -97,12 +96,12 @@ public class WebSocketService extends Service {
     }
 
     private String[] getAddresses() {
-        int nbLegacy = payloadManager.getPayload().getLegacyAddressList().size();
+        int nbLegacy = payloadDataManager.getWallet().getLegacyAddressList().size();
         final String[] addrs = new String[nbLegacy];
         for (int i = 0; i < nbLegacy; i++) {
-            String s = payloadManager.getPayload().getLegacyAddressList().get(i).getAddress();
-            if (s != null && s.length() > 0) {
-                addrs[i] = payloadManager.getPayload().getLegacyAddressList().get(i).getAddress();
+            String s = payloadDataManager.getWallet().getLegacyAddressList().get(i).getAddress();
+            if (s != null && !s.isEmpty()) {
+                addrs[i] = payloadDataManager.getWallet().getLegacyAddressList().get(i).getAddress();
             }
         }
 

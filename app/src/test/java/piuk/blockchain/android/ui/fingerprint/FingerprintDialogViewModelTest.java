@@ -39,8 +39,8 @@ import static piuk.blockchain.android.ui.fingerprint.FingerprintDialog.KEY_BUNDL
 public class FingerprintDialogViewModelTest {
 
     private FingerprintDialogViewModel subject;
-    @Mock FingerprintHelper fingerprintHelper;
-    @Mock FingerprintDialogViewModel.DataListener activity;
+    @Mock private FingerprintHelper fingerprintHelper;
+    @Mock private FingerprintDialogViewModel.DataListener activity;
 
     @Before
     public void setUp() throws Exception {
@@ -144,7 +144,7 @@ public class FingerprintDialogViewModelTest {
         Bundle bundle = new Bundle();
         bundle.putString(KEY_BUNDLE_STAGE, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
         String pincode = "1234";
-        String data = new String("");
+        String data = "";
         bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
         when(activity.getBundle()).thenReturn(bundle);
         doAnswer(invocation -> {

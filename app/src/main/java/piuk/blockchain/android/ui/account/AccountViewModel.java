@@ -9,7 +9,6 @@ import android.util.Log;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
@@ -22,6 +21,7 @@ import javax.inject.Inject;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
@@ -41,7 +41,7 @@ public class AccountViewModel extends BaseViewModel {
     private static final String KEY_ADDRESS = "address";
 
     @Thunk DataListener dataListener;
-    @Inject PayloadManager payloadManager;
+    @Inject PayloadDataManager payloadDataManager;
     @Inject AccountDataManager accountDataManager;
     @Inject TransferFundsDataManager fundsDataManager;
     @Inject PrefsUtil prefsUtil;
@@ -96,7 +96,7 @@ public class AccountViewModel extends BaseViewModel {
         compositeDisposable.add(
                 fundsDataManager.getTransferableFundTransactionListForDefaultAccount()
                         .subscribe(triple -> {
-                            if (payloadManager.getPayload().isUpgraded() && !triple.getLeft().isEmpty()) {
+                            if (payloadDataManager.getWallet().isUpgraded() && !triple.getLeft().isEmpty()) {
                                 dataListener.onSetTransferLegacyFundsMenuItemVisible(true);
 
                                 if ((prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true) || !isAutoPopup) && showWarningDialog) {
@@ -238,7 +238,7 @@ public class AccountViewModel extends BaseViewModel {
 
         if (!FormatsUtil.isValidBitcoinAddress(address)) {
             dataListener.showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
-        } else if (payloadManager.getPayload().getLegacyAddressStringList().contains(address)) {
+        } else if (payloadDataManager.getWallet().getLegacyAddressStringList().contains(address)) {
             dataListener.showToast(R.string.address_already_in_wallet, ToastCustom.TYPE_ERROR);
         } else {
             // Do some things

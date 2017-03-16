@@ -106,6 +106,7 @@ public class SwipeToReceiveViewModelTest {
         }
     }
 
+    @SuppressWarnings("SyntheticAccessorCall")
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override

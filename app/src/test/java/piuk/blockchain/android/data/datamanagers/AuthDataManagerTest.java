@@ -32,9 +32,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Created by adambennett on 15/08/2016.
- */
+
 public class AuthDataManagerTest extends RxTest {
 
     private static final String ERROR_BODY = "{\n" +
@@ -47,7 +45,7 @@ public class AuthDataManagerTest extends RxTest {
     @Mock private AppUtil appUtil;
     @Mock private AccessState accessState;
     @Mock private StringUtils stringUtils;
-    @InjectMocks AuthDataManager subject;
+    @InjectMocks private AuthDataManager subject;
 
     @Before
     public void setUp() throws Exception {

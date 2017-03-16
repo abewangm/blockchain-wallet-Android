@@ -16,19 +16,16 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
-import piuk.blockchain.android.util.annotations.Thunk;
 
-@SuppressWarnings("WeakerAccess")
 public class TransferFundsDataManager {
 
-    @Thunk PayloadDataManager payloadDataManager;
+    private PayloadDataManager payloadDataManager;
     private SendDataManager sendDataManager;
     private DynamicFeeCache dynamicFeeCache;
 
@@ -167,7 +164,8 @@ public class TransferFundsDataManager {
 
                             if (finalI == pendingTransactions.size() - 1) {
                                 // Sync once transactions are completed
-                                savePayloadToServer().subscribe(new IgnorableDefaultObserver<>());
+                                payloadDataManager.syncPayloadWithServer()
+                                        .subscribe(new IgnorableDefaultObserver<>());
 
                                 if (!subscriber.isDisposed()) {
                                     subscriber.onComplete();
@@ -183,14 +181,4 @@ public class TransferFundsDataManager {
         });
     }
 
-    /**
-     * Syncs the Wallet to the server, for instance after
-     * archiving some addresses.
-     *
-     * @return A {@link Completable} object
-     */
-    public Completable savePayloadToServer() {
-        return payloadDataManager.syncPayloadWithServer()
-                .compose(RxUtil.applySchedulersToCompletable());
-    }
 }

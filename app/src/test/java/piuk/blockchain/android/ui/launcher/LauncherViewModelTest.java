@@ -19,6 +19,7 @@ import org.robolectric.annotation.Config;
 
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -48,7 +49,7 @@ public class LauncherViewModelTest {
     @Mock private LauncherActivity launcherActivity;
     @Mock private PrefsUtil prefsUtil;
     @Mock private AppUtil appUtil;
-    @Mock private PayloadManager payloadManager;
+    @Mock private PayloadDataManager payloadDataManager;
     @Mock private AccessState accessState;
     @Mock private Intent intent;
     @Mock private Bundle extras;
@@ -61,8 +62,8 @@ public class LauncherViewModelTest {
         InjectorTestUtils.initApplicationComponent(
                 Injector.getInstance(),
                 new MockApplicationModule(RuntimeEnvironment.application),
-                new MockApiModule(),
-                new DataManagerModule());
+                new ApiModule(),
+                new MockDataManagerModule());
 
         subject = new LauncherViewModel(launcherActivity);
     }
@@ -80,7 +81,7 @@ public class LauncherViewModelTest {
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
-        when(payloadManager.getPayload()).thenReturn(wallet);
+        when(payloadDataManager.getWallet()).thenReturn(wallet);
         when(wallet.isUpgraded()).thenReturn(true);
         when(accessState.isLoggedIn()).thenReturn(true);
         // Act
@@ -106,7 +107,7 @@ public class LauncherViewModelTest {
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
-        when(payloadManager.getPayload()).thenReturn(wallet);
+        when(payloadDataManager.getWallet()).thenReturn(wallet);
         when(wallet.isUpgraded()).thenReturn(true);
         when(accessState.isLoggedIn()).thenReturn(true);
         // Act
@@ -129,7 +130,7 @@ public class LauncherViewModelTest {
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
-        when(payloadManager.getPayload()).thenReturn(wallet);
+        when(payloadDataManager.getWallet()).thenReturn(wallet);
         when(wallet.isUpgraded()).thenReturn(true);
         when(accessState.isLoggedIn()).thenReturn(false);
         // Act
@@ -151,7 +152,7 @@ public class LauncherViewModelTest {
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
-        when(payloadManager.getPayload()).thenReturn(wallet);
+        when(payloadDataManager.getWallet()).thenReturn(wallet);
         when(wallet.isUpgraded()).thenReturn(true);
         when(accessState.isLoggedIn()).thenReturn(true);
         // Act
@@ -225,7 +226,7 @@ public class LauncherViewModelTest {
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
-        when(payloadManager.getPayload()).thenReturn(wallet);
+        when(payloadDataManager.getWallet()).thenReturn(wallet);
         when(wallet.isUpgraded()).thenReturn(false);
         // Act
         subject.onViewReady();
@@ -283,11 +284,10 @@ public class LauncherViewModelTest {
         }
     }
 
-    private class MockApiModule extends ApiModule {
+    private class MockDataManagerModule extends DataManagerModule {
         @Override
-        protected PayloadManager providePayloadManager() {
-            return payloadManager;
+        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager) {
+            return payloadDataManager;
         }
     }
-
 }

@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Intent;
 
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Wallet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -105,7 +106,8 @@ public class RecoverFundsViewModelTest {
     public void onContinueClickedNoPasswordInIntent() throws Exception {
         // Arrange
         when(mActivity.getPageIntent()).thenReturn(mock(Intent.class));
-        when(mActivity.getRecoveryPhrase()).thenReturn("one two three four five six seven eight nine ten eleven twelve");
+        when(mActivity.getRecoveryPhrase())
+                .thenReturn("one two three four five six seven eight nine ten eleven twelve");
         // Act
         mSubject.onContinueClicked();
         // Assert
@@ -127,7 +129,8 @@ public class RecoverFundsViewModelTest {
         Intent intent = new Intent();
         intent.putExtra(KEY_INTENT_PASSWORD, "password");
         when(mActivity.getPageIntent()).thenReturn(intent);
-        when(mActivity.getRecoveryPhrase()).thenReturn("one two three four five six seven eight nine ten eleven twelve");
+        when(mActivity.getRecoveryPhrase())
+                .thenReturn("one two three four five six seven eight nine ten eleven twelve");
         // Act
         mSubject.onContinueClicked();
         // Assert
@@ -141,26 +144,27 @@ public class RecoverFundsViewModelTest {
 
     /**
      * Successful restore. Should take the user to the PIN entry page.
-//     */
-//    @Test
-//    public void onContinueClickedSuccessfulRestore() throws Exception {
-//        // Arrange
-//        Intent intent = new Intent();
-//        intent.putExtra(KEY_INTENT_PASSWORD, "password");
-//        intent.putExtra(KEY_INTENT_EMAIL, "email");
-//        when(mActivity.getPageIntent()).thenReturn(intent);
-//        when(mActivity.getRecoveryPhrase()).thenReturn("one two three four five six seven eight nine ten eleven twelve");
-//        when(mAuthDataManager.restoreHdWallet(anyString(), anyString(), anyString())).thenReturn(Observable.just(new Payload()));
-//        // Act
-//        mSubject.onContinueClicked();
-//        // Assert
-//        verify(mActivity).getRecoveryPhrase();
-//        verify(mActivity, times(2)).getPageIntent();
-//        verify(mActivity).showProgressDialog(anyInt());
-//        verify(mActivity).dismissProgressDialog();
-//        verify(mActivity).goToPinEntryPage();
-//        verifyNoMoreInteractions(mActivity);
-//    }
+     */
+    @Test
+    public void onContinueClickedSuccessfulRestore() throws Exception {
+        // Arrange
+        Intent intent = new Intent();
+        intent.putExtra(KEY_INTENT_PASSWORD, "password");
+        intent.putExtra(KEY_INTENT_EMAIL, "email");
+        when(mActivity.getPageIntent()).thenReturn(intent);
+        when(mActivity.getRecoveryPhrase()).thenReturn("one two three four five six seven eight nine ten eleven twelve");
+        when(mAuthDataManager.restoreHdWallet(anyString(), anyString(), anyString()))
+                .thenReturn(Observable.just(new Wallet()));
+        // Act
+        mSubject.onContinueClicked();
+        // Assert
+        verify(mActivity).getRecoveryPhrase();
+        verify(mActivity, times(2)).getPageIntent();
+        verify(mActivity).showProgressDialog(anyInt());
+        verify(mActivity).dismissProgressDialog();
+        verify(mActivity).goToPinEntryPage();
+        verifyNoMoreInteractions(mActivity);
+    }
 
     /**
      * Restore failed, inform the user.
@@ -206,6 +210,7 @@ public class RecoverFundsViewModelTest {
         assertEquals(util, mAppUtil);
     }
 
+    @SuppressWarnings("SyntheticAccessorCall")
     private class MockApplicationModule extends ApplicationModule {
 
         MockApplicationModule(Application application) {
@@ -218,6 +223,7 @@ public class RecoverFundsViewModelTest {
         }
     }
 
+    @SuppressWarnings("SyntheticAccessorCall")
     private class MockApiModule extends ApiModule {
 
         @Override
@@ -226,6 +232,7 @@ public class RecoverFundsViewModelTest {
         }
     }
 
+    @SuppressWarnings("SyntheticAccessorCall")
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override

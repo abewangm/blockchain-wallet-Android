@@ -48,7 +48,8 @@ class ContactPairingMethodViewModelTest {
         // Arrange
         val invitationUrl = "INVITATION_URL"
         val contact = Contact()
-        whenever(mockContactManager.acceptInvitation(invitationUrl)).thenReturn(Observable.just(contact))
+        whenever(mockContactManager.acceptInvitation(invitationUrl))
+                .thenReturn(Observable.just(contact))
         // Act
         subject.handleScanInput(invitationUrl)
         // Assert
@@ -63,7 +64,8 @@ class ContactPairingMethodViewModelTest {
     fun handleScanInputFailure() {
         // Arrange
         val invitationUrl = "INVITATION_URL"
-        whenever(mockContactManager.acceptInvitation(invitationUrl)).thenReturn(Observable.error { Throwable() })
+        whenever(mockContactManager.acceptInvitation(invitationUrl))
+                .thenReturn(Observable.error { Throwable() })
         // Act
         subject.handleScanInput(invitationUrl)
         // Assert

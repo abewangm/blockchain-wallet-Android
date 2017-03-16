@@ -109,7 +109,8 @@ class SendDataManagerTest : RxTest() {
         // Arrange
         val address = "ADDRESS"
         val mockUnspentOutputs: UnspentOutputs = mock()
-        whenever(mockPaymentService.getUnspentOutputs(address)).thenReturn(Observable.just(mockUnspentOutputs))
+        whenever(mockPaymentService.getUnspentOutputs(address))
+                .thenReturn(Observable.just(mockUnspentOutputs))
         // Act
         val testObserver = subject.getUnspentOutputs(address).test()
         // Assert
@@ -128,7 +129,8 @@ class SendDataManagerTest : RxTest() {
         val mockPayment: BigInteger = mock()
         val mockFee: BigInteger = mock()
         val mockOutputs: SpendableUnspentOutputs = mock()
-        whenever(mockPaymentService.getSpendableCoins(mockUnspent, mockPayment, mockFee)).thenReturn(mockOutputs)
+        whenever(mockPaymentService.getSpendableCoins(mockUnspent, mockPayment, mockFee))
+                .thenReturn(mockOutputs)
         // Act
         val result = subject.getSpendableCoins(mockUnspent, mockPayment, mockFee)
         // Assert
@@ -144,7 +146,8 @@ class SendDataManagerTest : RxTest() {
         val mockUnspent: UnspentOutputs = mock()
         val mockFee: BigInteger = mock()
         val mockSweepableCoins: Pair<BigInteger, BigInteger> = mock()
-        whenever(mockPaymentService.getSweepableCoins(mockUnspent, mockFee)).thenReturn(mockSweepableCoins)
+        whenever(mockPaymentService.getSweepableCoins(mockUnspent, mockFee))
+                .thenReturn(mockSweepableCoins)
         // Act
         val result = subject.getSweepableCoins(mockUnspent, mockFee)
         // Assert
@@ -193,7 +196,8 @@ class SendDataManagerTest : RxTest() {
         val outputs = 101
         val mockFeePerKb: BigInteger = mock()
         val mockAbsoluteFee: BigInteger = mock()
-        whenever(mockPaymentService.estimateFee(inputs, outputs, mockFeePerKb)).thenReturn(mockAbsoluteFee)
+        whenever(mockPaymentService.estimateFee(inputs, outputs, mockFeePerKb))
+                .thenReturn(mockAbsoluteFee)
         // Act
         val result = subject.estimatedFee(inputs, outputs, mockFeePerKb)
         // Assert
