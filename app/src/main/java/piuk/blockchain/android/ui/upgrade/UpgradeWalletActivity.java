@@ -92,7 +92,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
             return;
         }
 
-        if (PasswordUtil.ddpw(payloadManager.getTempPassword()) || PasswordUtil.getStrength(payloadManager.getTempPassword().toString()) < 50) {
+        if (PasswordUtil.ddpw(payloadManager.getTempPassword()) || PasswordUtil.getStrength(payloadManager.getTempPassword()) < 50) {
             final LinearLayout pwLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.modal_change_password, null);
 
             new Builder(this, R.style.AlertDialogStyle)

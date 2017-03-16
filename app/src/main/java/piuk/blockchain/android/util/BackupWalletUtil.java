@@ -12,6 +12,7 @@ import java.util.List;
 
 public class BackupWalletUtil {
 
+    // TODO: 16/03/2017 Inject PayloadManager through constructor and access this class via ViewModels
     public BackupWalletUtil() {
         // Empty Constructor
     }
@@ -28,7 +29,7 @@ public class BackupWalletUtil {
         SecureRandom random = new SecureRandom();
         List<Integer> seen = new ArrayList<>();
 
-        int sel = 0;
+        int sel;
         int i = 0;
         while (i < 3) {
             sel = random.nextInt(s.size());

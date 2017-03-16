@@ -35,7 +35,6 @@ import java.util.List;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.payload.PayloadBridge;
 import piuk.blockchain.android.databinding.FragmentBalanceBinding;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -397,17 +396,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         if (!viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, "").isEmpty()) {
             viewModel.getPayloadManager().getPayload().getHdWallets().get(0).getAccounts().get(0).setLabel(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, ""));
             viewModel.getPrefsUtil().removeValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME);
-            PayloadBridge.getInstance().remoteSaveThread(new PayloadBridge.PayloadSaveListener() {
-                @Override
-                public void onSaveSuccess() {
-                    // No-op
-                }
-
-                @Override
-                public void onSaveFail() {
-                    ToastCustom.makeText(getActivity(), getActivity().getString(R.string.remote_save_ko), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                }
-            });
+            viewModel.getPayloadDataManager().syncPayloadWithServer()
+                    .subscribe(() -> {
+                        // No-op
+                    }, throwable -> showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR));
             accountsAdapter.notifyDataSetChanged();
         }
 

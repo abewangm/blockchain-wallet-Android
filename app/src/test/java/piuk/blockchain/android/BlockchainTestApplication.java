@@ -5,6 +5,9 @@ package piuk.blockchain.android;
  */
 public class BlockchainTestApplication extends BlockchainApplication {
 
-    // Empty Class for testing
+    @Override
+    protected void checkSecurityProviderAndPatchIfNeeded() {
+        // No-op
+    }
 
 }

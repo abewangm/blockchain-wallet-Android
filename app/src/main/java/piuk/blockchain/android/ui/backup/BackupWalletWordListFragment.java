@@ -1,10 +1,10 @@
 package piuk.blockchain.android.ui.backup;
 
-import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +13,7 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 
 import java.util.List;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentBackupWordListBinding;
 import piuk.blockchain.android.util.BackupWalletUtil;
@@ -27,8 +28,7 @@ public class BackupWalletWordListFragment extends Fragment {
     private Animation animExitToRight;
 
     int currentWordIndex = 0;
-    @Thunk
-    List<String> mnemonic;
+    @Thunk List<String> mnemonic;
     @Thunk String word;
     @Thunk String of;
     private String secondPassword;

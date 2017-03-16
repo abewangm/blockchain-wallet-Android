@@ -1,13 +1,12 @@
 package piuk.blockchain.android.ui.backup;
 
 import android.annotation.SuppressLint;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,8 +60,8 @@ public class BackupWalletCompletedFragment extends Fragment implements BackupWal
         }
 
         dataBinding.buttonBackupAgain.setOnClickListener(v -> {
-            getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            getFragmentManager().beginTransaction()
+            getActivity().getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            getActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.content_frame, new BackupWalletStartingFragment())
                     .addToBackStack(BackupWalletStartingFragment.TAG)
                     .commit();
@@ -95,7 +94,7 @@ public class BackupWalletCompletedFragment extends Fragment implements BackupWal
 
     private void showTransferFundsConfirmationDialog() {
         ConfirmFundsTransferDialogFragment fragment = ConfirmFundsTransferDialogFragment.newInstance();
-        fragment.show(((AppCompatActivity) getActivity()).getSupportFragmentManager(), ConfirmFundsTransferDialogFragment.TAG);
+        fragment.show(getActivity().getSupportFragmentManager(), ConfirmFundsTransferDialogFragment.TAG);
     }
 
     @Override

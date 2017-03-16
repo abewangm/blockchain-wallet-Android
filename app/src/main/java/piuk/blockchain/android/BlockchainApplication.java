@@ -146,7 +146,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
      * @see <a href="https://developer.android.com/training/articles/security-gms-provider.html">Updating
      * Your Security Provider</a>
      */
-    private void checkSecurityProviderAndPatchIfNeeded() {
+    protected void checkSecurityProviderAndPatchIfNeeded() {
         ProviderInstaller.installIfNeededAsync(this, new ProviderInstaller.ProviderInstallListener() {
             @Override
             public void onProviderInstalled() {
