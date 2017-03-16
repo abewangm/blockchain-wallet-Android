@@ -663,7 +663,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     @Override
     public void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue) {
         playAudio();
-        LocalBroadcastManager.getInstance(getActivity()).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();

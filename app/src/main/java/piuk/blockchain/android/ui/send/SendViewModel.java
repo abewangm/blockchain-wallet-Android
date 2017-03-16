@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.send;
 
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
@@ -10,6 +11,8 @@ import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.multiaddress.TransactionSummary;
+import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.AddressBook;
@@ -46,6 +49,7 @@ import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
+import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
@@ -101,6 +105,7 @@ public class SendViewModel extends BaseViewModel {
     @Inject PayloadDataManager payloadDataManager;
     @Inject AccountDataManager accountDataManager;
     @Inject DynamicFeeCache dynamicFeeCache;
+    @Inject TransactionListDataManager transactionListDataManager;
 
     SendViewModel(SendContract.DataListener dataListener, Locale locale) {
         Injector.getInstance().getDataManagerComponent().inject(this);
@@ -966,42 +971,76 @@ public class SendViewModel extends BaseViewModel {
 
         dataListener.showProgressDialog();
 
-        compositeDisposable.add(
-                sendDataManager.submitPayment(
-                        sendModel.pendingTransaction.unspentOutputBundle,
-                        keys,
-                        sendModel.pendingTransaction.receivingAddress,
-                        changeAddress,
-                        sendModel.pendingTransaction.bigIntFee,
-                        sendModel.pendingTransaction.bigIntAmount)
-                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                        .subscribe(
-                                hash -> {
-                                    clearUnspentResponseCache();
-
+//        compositeDisposable.add(
+//                sendDataManager.submitPayment(
+//                        sendModel.pendingTransaction.unspentOutputBundle,
+//                        keys,
+//                        sendModel.pendingTransaction.receivingAddress,
+//                        changeAddress,
+//                        sendModel.pendingTransaction.bigIntFee,
+//                        sendModel.pendingTransaction.bigIntAmount)
+//                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+//                        .subscribe(
+//                                hash -> {
+//                                    clearUnspentResponseCache();
+//
                                     if (alertDialog != null && alertDialog.isShowing()) {
                                         alertDialog.dismiss();
                                     }
+//
+//                                    handleSuccessfulPayment(hash);
+//                                }, throwable -> showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)));
 
-                                    handleSuccessfulPayment(hash);
-                                }, throwable -> showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)));
+        handleSuccessfulPayment("somehashhere");
+        dataListener.dismissProgressDialog();
     }
 
     private void handleSuccessfulPayment(String hash) {
 
-        if (sendModel.pendingTransaction.isHD()) {
-            // increment change address counter
-            payloadDataManager.incrementChangeAddress((Account)sendModel.pendingTransaction.sendingObject.accountObject);
-        }
+        insertPlaceHolderTransaction(hash, sendModel.pendingTransaction);
 
-        payloadDataManager.updateBalancesAndTransactions().subscribe(new IgnorableDefaultObserver<>());
-        payloadDataManager.syncPayloadWithServer().subscribe(new IgnorableDefaultObserver<>());
+        if (sendModel.pendingTransaction.isHD()) {
+            Account account = (Account)sendModel.pendingTransaction.sendingObject.accountObject;
+            payloadDataManager.incrementChangeAddress(account);
+            payloadDataManager.incrementReceiveAddress(account);
+            try {
+                payloadManager.subtractAmountFromAddressBalance(account.getXpub(), sendModel.pendingTransaction.bigIntAmount);
+            } catch (Exception e) {
+                Log.e(TAG, "subtractAmountFromAddressBalance: ", e);
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                LegacyAddress address = (LegacyAddress)sendModel.pendingTransaction.sendingObject.accountObject;
+                payloadManager.subtractAmountFromAddressBalance(address.getAddress(), sendModel.pendingTransaction.bigIntAmount);
+            } catch (Exception e) {
+                Log.e(TAG, "subtractAmountFromAddressBalance: ", e);
+                e.printStackTrace();
+            }
+        }
 
         if (dataListener != null) {
             dataListener.onShowTransactionSuccess(contactMdid, hash, fctxId, sendModel.pendingTransaction.bigIntAmount.longValue());
         }
 
         logAddressInputMetric();
+    }
+
+    private void insertPlaceHolderTransaction(String hash, PendingTransaction pendingTransaction) {
+        // After sending btc we create a "placeholder" tx until websocket handler refreshes list
+        HashMap<String, BigInteger> inputs = new HashMap<>();
+        inputs.put(pendingTransaction.sendingObject.label, pendingTransaction.bigIntAmount);
+
+        TransactionSummary tx = new TransactionSummary();
+        tx.setDirection(Direction.SENT);
+        tx.setTime(System.currentTimeMillis() / 1000);
+        tx.setTotal(pendingTransaction.bigIntAmount);
+        tx.setHash(hash);
+        tx.setFee(pendingTransaction.bigIntFee);
+        tx.setInputsMap(inputs);
+        tx.setPending(true);
+
+        transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);
     }
 
     private void logAddressInputMetric() {
