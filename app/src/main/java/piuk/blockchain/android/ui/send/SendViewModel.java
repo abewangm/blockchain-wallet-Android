@@ -992,6 +992,11 @@ public class SendViewModel extends BaseViewModel {
 
     private void handleSuccessfulPayment(String hash) {
 
+        if (sendModel.pendingTransaction.isHD()) {
+            // increment change address counter
+            payloadDataManager.incrementChangeAddress((Account)sendModel.pendingTransaction.sendingObject.accountObject);
+        }
+
         accountDataManager.updateMultiAddress();
         accountDataManager.save();
 

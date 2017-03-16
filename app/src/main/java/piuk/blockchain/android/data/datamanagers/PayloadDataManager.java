@@ -258,6 +258,15 @@ public class PayloadDataManager {
     }
 
     /**
+     * Increments the index on the change chain for an {@link Account} object.
+     *
+     * @param account The {@link Account} you wish to increment
+     */
+    public void incrementChangeAddress(Account account) {
+        payloadManager.incrementNextChangeAddress(account);
+    }
+
+    /**
      * Returns an xPub from an address if the address belongs to this wallet.
      *
      * @param address The address you want to query as a String
