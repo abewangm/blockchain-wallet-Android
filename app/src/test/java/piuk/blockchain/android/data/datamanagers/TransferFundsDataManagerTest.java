@@ -1,275 +1,152 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import info.blockchain.api.Unspent;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.HDWallet;
-import info.blockchain.wallet.payload.LegacyAddress;
-import info.blockchain.wallet.payload.Payload;
-import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payment.Payment;
-import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
-import info.blockchain.wallet.payment.data.SuggestedFee;
-import info.blockchain.wallet.payment.data.SweepBundle;
-import info.blockchain.wallet.payment.data.UnspentOutputs;
-import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.api.data.UnspentOutputs;
+import info.blockchain.wallet.api.data.Fee;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.json.JSONObject;
-import org.junit.After;
+import org.bitcoinj.core.ECKey;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Answers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import io.reactivex.Completable;
+import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
-import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class TransferFundsDataManagerTest extends RxTest {
 
     private TransferFundsDataManager subject;
-    @Mock PayloadManager payloadManager;
-    @Mock Unspent unspentApi;
-    @Mock Payment payment;
-    @Mock MultiAddrFactory multiAddrFactory;
+    @Mock private SendDataManager sendDataManager;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS) private PayloadDataManager payloadDataManager;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS) private DynamicFeeCache dynamicFeeCache;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
-        subject = new TransferFundsDataManager(payloadManager, multiAddrFactory, unspentApi, payment);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-        Mockito.validateMockitoUsage();
+        subject = new TransferFundsDataManager(payloadDataManager, sendDataManager, dynamicFeeCache);
     }
 
     @Test
     public void getTransferableFundTransactionListForDefaultAccount() throws Exception {
         // Arrange
-        Payload mockPayload = mock(Payload.class);
         LegacyAddress legacyAddress1 = new LegacyAddress();
         legacyAddress1.setAddress("address");
-        List<LegacyAddress> legacyAddresses = new ArrayList<LegacyAddress>() {{
-           add(legacyAddress1);
-           add(legacyAddress1);
-           add(legacyAddress1);
-        }};
-        SuggestedFee suggestedFee = new SuggestedFee();
-        suggestedFee.defaultFeePerKb = new BigInteger("100");
-        DynamicFeeCache.getInstance().setSuggestedFee(suggestedFee);
-        MultiAddrFactory.getInstance().setLegacyBalance("address", 1000000L);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        HDWallet mockHdWallet = mock(HDWallet.class);
-        when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
-        when(mockHdWallet.getDefaultIndex()).thenReturn(0);
-        when(mockPayload.getLegacyAddressList()).thenReturn(legacyAddresses);
-        when(unspentApi.getUnspentOutputs(anyString())).thenReturn(mock(JSONObject.class));
-        UnspentOutputs mockUnspentOutputs = mock(UnspentOutputs.class);
-        when(payment.getCoins(any(JSONObject.class))).thenReturn(mockUnspentOutputs);
-        SpendableUnspentOutputs mockSpendableUnspentOutputs = mock(SpendableUnspentOutputs.class);
-        when(payment.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class))).thenReturn(mockSpendableUnspentOutputs);
-        when(mockSpendableUnspentOutputs.getAbsoluteFee()).thenReturn(new BigInteger("10"));
-        SweepBundle mockSweepBundle = mock(SweepBundle.class);
-        when(mockSweepBundle.getSweepAmount()).thenReturn(new BigInteger("5460"));
-        when(payment.getSweepBundle(any(UnspentOutputs.class), any(BigInteger.class))).thenReturn(mockSweepBundle);
+        legacyAddress1.setPrivateKey("");
+        List<LegacyAddress> legacyAddresses = Arrays.asList(legacyAddress1, legacyAddress1, legacyAddress1);
+        Fee suggestedFee = mock(Fee.class);
+        when(suggestedFee.getFee()).thenReturn(100.0d);
+        when(dynamicFeeCache.getCachedDynamicFee().getDefaultFee()).thenReturn(suggestedFee);
+        when(payloadDataManager.getWallet().getLegacyAddressList()).thenReturn(legacyAddresses);
+        when(payloadDataManager.getAddressBalance(anyString())).thenReturn(BigInteger.TEN);
+        UnspentOutputs unspentOutputs = mock(UnspentOutputs.class);
+        when(unspentOutputs.getNotice()).thenReturn(null);
+        when(sendDataManager.getUnspentOutputs(anyString())).thenReturn(Observable.just(unspentOutputs));
+        SpendableUnspentOutputs spendableUnspentOutputs = new SpendableUnspentOutputs();
+        spendableUnspentOutputs.setAbsoluteFee(BigInteger.TEN);
+        when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
+                .thenReturn(spendableUnspentOutputs);
+        when(sendDataManager.getSweepableCoins(unspentOutputs, BigInteger.valueOf(100)))
+                .thenReturn(Pair.of(BigInteger.valueOf(1_000_000L), BigInteger.TEN));
         // Act
-        TestObserver<Triple<List<PendingTransaction>, Long, Long>> observer = subject.getTransferableFundTransactionListForDefaultAccount().test();
+        TestObserver<Triple<List<PendingTransaction>, Long, Long>> testObserver =
+                subject.getTransferableFundTransactionListForDefaultAccount().test();
         // Assert
-        observer.assertComplete();
-        observer.assertNoErrors();
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
     }
 
     @Test
-    public void sendPaymentSuccessNoEncryption() throws Exception {
+    public void sendPaymentSuccess() throws Exception {
         // Arrange
-        Payment mockPayment = mock(Payment.class);
-        doAnswer(invocation -> {
-            ((Payment.SubmitPaymentListener) invocation.getArguments()[6]).onSuccess("hash");
-            return null;
-        }).when(mockPayment).submitPayment(
-                any(SpendableUnspentOutputs.class),
-                anyList(),
-                isNull(),
-                isNull(),
-                any(BigInteger.class),
-                any(BigInteger.class),
-                any(Payment.SubmitPaymentListener.class));
-
-        PendingTransaction transaction1 = new PendingTransaction();
-        transaction1.sendingObject = new ItemAccount("", "", null, null, null);
-        transaction1.sendingObject.accountObject = new LegacyAddress();
-        transaction1.bigIntAmount = new BigInteger("1000000");
-        transaction1.bigIntFee = new BigInteger("100");
-        transaction1.unspentOutputBundle = new SpendableUnspentOutputs();
-
-        List<PendingTransaction> pendingTransactions = new ArrayList<PendingTransaction>() {{
-            add(transaction1);
-            add(transaction1);
-            add(transaction1);
-        }};
-        when(payloadManager.savePayloadToServer()).thenReturn(true);
-        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
-        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
-        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-
-        // Act
-        TestObserver<String> observer = subject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
-        // Assert
-        assertEquals("hash", observer.values().get(0));
-        observer.assertComplete();
-        observer.assertNoErrors();
-    }
-
-    @Test
-    public void sendPaymentEncryptionThrowsException() throws Exception {
-        // Arrange
-        Payment mockPayment = mock(Payment.class);
-        doAnswer(invocation -> {
-            ((Payment.SubmitPaymentListener) invocation.getArguments()[6]).onSuccess("hash");
-            return null;
-        }).when(mockPayment).submitPayment(
+        when(sendDataManager.submitPayment(
                 any(SpendableUnspentOutputs.class),
                 anyList(),
                 anyString(),
                 anyString(),
                 any(BigInteger.class),
-                any(BigInteger.class),
-                any(Payment.SubmitPaymentListener.class));
+                any(BigInteger.class))).thenReturn(Observable.just("hash"));
 
         PendingTransaction transaction1 = new PendingTransaction();
         transaction1.sendingObject = new ItemAccount("", "", null, null, null);
-        transaction1.sendingObject.accountObject = new LegacyAddress();
+        LegacyAddress legacyAddress = new LegacyAddress();
+        legacyAddress.setAddress("");
+        transaction1.sendingObject.accountObject = legacyAddress;
         transaction1.bigIntAmount = new BigInteger("1000000");
         transaction1.bigIntFee = new BigInteger("100");
-
-        List<PendingTransaction> pendingTransactions = new ArrayList<PendingTransaction>() {{
-            add(transaction1);
-            add(transaction1);
-            add(transaction1);
-        }};
-        when(payloadManager.savePayloadToServer()).thenReturn(true);
-        Payload mockPayload = mock(Payload.class);
-        // For now, this method will cause an exception to be thrown
-        // In the future, this should be testable and this particular setup should be successful
-        when(mockPayload.isDoubleEncrypted()).thenReturn(true);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-
-        // Act
-        TestObserver<String> observer = subject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
-        // Assert
-        observer.assertError(Throwable.class);
-        observer.assertNotComplete();
-        observer.assertNoValues();
-    }
-
-    @Test()
-    public void sendPaymentFailed() throws Exception {
-        // Arrange
-        Payment mockPayment = mock(Payment.class);
-        doAnswer(invocation -> {
-            ((Payment.SubmitPaymentListener) invocation.getArguments()[6]).onFail("failed");
-            return null;
-        }).when(mockPayment).submitPayment(
-                any(SpendableUnspentOutputs.class),
-                anyList(),
-                isNull(),
-                isNull(),
-                isNull(),
-                isNull(),
-                any(Payment.SubmitPaymentListener.class));
-
-        PendingTransaction transaction1 = new PendingTransaction();
-        transaction1.sendingObject = new ItemAccount("", "", null, null, null);
-        transaction1.sendingObject.accountObject = new LegacyAddress();
         transaction1.unspentOutputBundle = new SpendableUnspentOutputs();
 
-        List<PendingTransaction> pendingTransactions = new ArrayList<PendingTransaction>() {{
-            add(transaction1);
-            add(transaction1);
-            add(transaction1);
-        }};
-        when(payloadManager.savePayloadToServer()).thenReturn(true);
-        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
-        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
-        when(mockPayload.isDoubleEncrypted()).thenReturn(false);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-
+        List<PendingTransaction> pendingTransactions = Arrays.asList(transaction1, transaction1, transaction1);
+        when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.complete());
+        when(payloadDataManager.getNextReceiveAddress(anyInt())).thenReturn(Observable.just("address"));
+        when(payloadDataManager.getAddressECKey(any(LegacyAddress.class), anyString()))
+                .thenReturn(mock(ECKey.class));
+        when(payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().get(anyInt()))
+                .thenReturn(mock(Account.class));
         // Act
-        TestObserver<String> observer = subject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
+        TestObserver<String> testObserver =
+                subject.sendPayment(pendingTransactions, "password").test();
         // Assert
-        observer.assertError(Throwable.class);
-        observer.assertNotComplete();
-        observer.assertNoValues();
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        testObserver.assertValues("hash", "hash", "hash");
     }
 
     @Test
-    public void sendPaymentException() throws Exception {
+    public void sendPaymentError() throws Exception {
         // Arrange
-        Payment mockPayment = mock(Payment.class);
-        doThrow(new NullPointerException())
-                .when(mockPayment)
-                .submitPayment(
-                        any(SpendableUnspentOutputs.class),
-                        anyList(),
-                        anyString(),
-                        anyString(),
-                        any(BigInteger.class),
-                        any(BigInteger.class),
-                        any(Payment.SubmitPaymentListener.class));
+        when(sendDataManager.submitPayment(
+                any(SpendableUnspentOutputs.class),
+                anyList(),
+                anyString(),
+                anyString(),
+                any(BigInteger.class),
+                any(BigInteger.class))).thenReturn(Observable.error(new Throwable()));
 
         PendingTransaction transaction1 = new PendingTransaction();
         transaction1.sendingObject = new ItemAccount("", "", null, null, null);
-        transaction1.sendingObject.accountObject = new LegacyAddress();
+        LegacyAddress legacyAddress = new LegacyAddress();
+        legacyAddress.setAddress("");
+        transaction1.sendingObject.accountObject = legacyAddress;
+        transaction1.bigIntAmount = new BigInteger("1000000");
+        transaction1.bigIntFee = new BigInteger("100");
+        transaction1.unspentOutputBundle = new SpendableUnspentOutputs();
 
-        List<PendingTransaction> pendingTransactions = new ArrayList<PendingTransaction>() {{
-            add(transaction1);
-            add(transaction1);
-            add(transaction1);
-        }};
-        when(payloadManager.savePayloadToServer()).thenReturn(true);
-
+        List<PendingTransaction> pendingTransactions = Arrays.asList(transaction1, transaction1, transaction1);
+        when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.complete());
+        when(payloadDataManager.getNextReceiveAddress(anyInt())).thenReturn(Observable.just("address"));
+        when(payloadDataManager.getAddressECKey(any(LegacyAddress.class), anyString()))
+                .thenReturn(mock(ECKey.class));
+        when(payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().get(anyInt()))
+                .thenReturn(mock(Account.class));
         // Act
-        TestObserver<String> observer = subject.sendPayment(mockPayment, pendingTransactions, new CharSequenceX("password")).test();
+        TestObserver<String> testObserver =
+                subject.sendPayment(pendingTransactions, "password").test();
         // Assert
-        observer.assertError(Throwable.class);
-        observer.assertNotComplete();
-        observer.assertNoValues();
-    }
-
-    @Test
-    public void savePayloadToServer() throws Exception {
-        // Arrange
-        when(payloadManager.savePayloadToServer()).thenReturn(true);
-        // Act
-        TestObserver<Boolean> observer = subject.savePayloadToServer().test();
-        // Assert
-        assertEquals(true, observer.values().get(0));
-        observer.assertComplete();
-        observer.assertNoErrors();
+        testObserver.assertNotComplete();
+        testObserver.assertError(Throwable.class);
+        testObserver.assertNoValues();
     }
 
 }

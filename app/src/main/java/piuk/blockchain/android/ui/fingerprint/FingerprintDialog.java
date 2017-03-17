@@ -18,8 +18,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import info.blockchain.wallet.util.CharSequenceX;
-
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -40,9 +38,9 @@ public class FingerprintDialog extends AppCompatDialogFragment
     private FingerprintAuthCallback authCallback;
     private FingerprintDialogViewModel viewModel;
 
-    public static FingerprintDialog newInstance(CharSequenceX pin, String stage) {
+    public static FingerprintDialog newInstance(String pin, String stage) {
         Bundle args = new Bundle();
-        args.putString(KEY_BUNDLE_PIN_CODE, pin.toString());
+        args.putString(KEY_BUNDLE_PIN_CODE, pin);
         args.putString(KEY_BUNDLE_STAGE, stage);
         FingerprintDialog fragment = new FingerprintDialog();
         fragment.setArguments(args);
@@ -124,7 +122,7 @@ public class FingerprintDialog extends AppCompatDialogFragment
     }
 
     @Override
-    public void onAuthenticated(@Nullable CharSequenceX data) {
+    public void onAuthenticated(@Nullable String data) {
         statusTextView.removeCallbacks(resetErrorTextRunnable);
         fingerprintIcon.postDelayed(() -> authCallback.onAuthenticated(data), SUCCESS_DELAY_MILLIS);
     }
@@ -185,7 +183,7 @@ public class FingerprintDialog extends AppCompatDialogFragment
 
     public interface FingerprintAuthCallback {
 
-        void onAuthenticated(CharSequenceX data);
+        void onAuthenticated(String data);
 
         void onCanceled();
     }

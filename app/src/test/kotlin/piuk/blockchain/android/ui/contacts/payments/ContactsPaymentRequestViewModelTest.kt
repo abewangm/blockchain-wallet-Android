@@ -6,11 +6,13 @@ import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest
 import info.blockchain.wallet.payload.PayloadManager
+import info.blockchain.wallet.payload.data.Account
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
@@ -32,7 +34,7 @@ class ContactsPaymentRequestViewModelTest {
     private lateinit var subject: ContactsPaymentRequestViewModel
     private val mockActivity: ContactsPaymentRequestViewModel.DataListener = mock()
     private val mockContactsManager: ContactsDataManager = mock()
-    private val mockPayloadManager: PayloadManager = mock()
+    private val mockPayloadManager: PayloadManager = mock(defaultAnswer = RETURNS_DEEP_STUBS)
 
     @Before
     @Throws(Exception::class)
@@ -196,6 +198,7 @@ class ContactsPaymentRequestViewModelTest {
         val accountPosition = 3
         val paymentRequestType = PaymentRequestType.REQUEST
         val receiveAddress = "RECEIVE_ADDRESS"
+        val account: Account = mock()
         val recipient = Contact().apply {
             name = contactName
             mdid = contactMdid
@@ -206,14 +209,17 @@ class ContactsPaymentRequestViewModelTest {
             this.accountPosition = accountPosition
             this.paymentRequestType = paymentRequestType
         }
-        whenever(mockPayloadManager.getNextReceiveAddress(accountPosition)).thenReturn(receiveAddress)
-        whenever(mockContactsManager.requestSendPayment(eq(contactMdid), any())).thenReturn(Completable.complete())
+        whenever(mockPayloadManager.payload.hdWallets[0].accounts[accountPosition])
+                .thenReturn(account)
+        whenever(mockPayloadManager.getNextReceiveAddress(account))
+                .thenReturn(receiveAddress)
+        whenever(mockContactsManager.requestSendPayment(eq(contactMdid), any()))
+                .thenReturn(Completable.complete())
         whenever(mockActivity.note).thenReturn(note)
         // Act
         subject.sendRequest()
         // Assert
-        verify(mockPayloadManager).getNextReceiveAddress(accountPosition)
-        verifyNoMoreInteractions(mockPayloadManager)
+        verify(mockPayloadManager).getNextReceiveAddress(account)
         verify(mockContactsManager).requestSendPayment(eq(contactMdid), any<PaymentRequest>())
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).showProgressDialog()
@@ -243,7 +249,8 @@ class ContactsPaymentRequestViewModelTest {
             this.accountPosition = accountPosition
             this.paymentRequestType = paymentRequestType
         }
-        whenever(mockContactsManager.requestReceivePayment(eq(contactMdid), any())).thenReturn(Completable.complete())
+        whenever(mockContactsManager.requestReceivePayment(eq(contactMdid), any()))
+                .thenReturn(Completable.complete())
         whenever(mockActivity.note).thenReturn(note)
         // Act
         subject.sendRequest()
@@ -269,6 +276,7 @@ class ContactsPaymentRequestViewModelTest {
         val accountPosition = 3
         val paymentRequestType = PaymentRequestType.REQUEST
         val receiveAddress = "RECEIVE_ADDRESS"
+        val account: Account = mock()
         val recipient = Contact().apply {
             name = contactName
             mdid = contactMdid
@@ -279,15 +287,17 @@ class ContactsPaymentRequestViewModelTest {
             this.accountPosition = accountPosition
             this.paymentRequestType = paymentRequestType
         }
-        whenever(mockPayloadManager.getNextReceiveAddress(accountPosition)).thenReturn(receiveAddress)
+        whenever(mockPayloadManager.payload.hdWallets[0].accounts[accountPosition])
+                .thenReturn(account)
+        whenever(mockPayloadManager.getNextReceiveAddress(account))
+                .thenReturn(receiveAddress)
         whenever(mockContactsManager.requestSendPayment(eq(contactMdid), any()))
                 .thenReturn(Completable.error { Throwable() })
         whenever(mockActivity.note).thenReturn(note)
         // Act
         subject.sendRequest()
         // Assert
-        verify(mockPayloadManager).getNextReceiveAddress(accountPosition)
-        verifyNoMoreInteractions(mockPayloadManager)
+        verify(mockPayloadManager).getNextReceiveAddress(account)
         verify(mockContactsManager).requestSendPayment(eq(contactMdid), any<PaymentRequest>())
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).showProgressDialog()

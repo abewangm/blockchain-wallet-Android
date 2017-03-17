@@ -1,7 +1,7 @@
 package piuk.blockchain.android.ui.backup;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 
 import info.blockchain.wallet.payload.PayloadManager;
@@ -29,7 +29,7 @@ public class BackupWalletActivity extends BaseAuthActivity {
     }
 
     private void startFragment(Fragment fragment, String tag) {
-        getFragmentManager().beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_frame, fragment)
                 .addToBackStack(tag)
                 .commit();
@@ -52,7 +52,7 @@ public class BackupWalletActivity extends BaseAuthActivity {
 
     private boolean isBackedUp() {
         return PayloadManager.getInstance().getPayload() != null
-                && PayloadManager.getInstance().getPayload().getHdWallet() != null
-                && PayloadManager.getInstance().getPayload().getHdWallet().isMnemonicVerified();
+                && PayloadManager.getInstance().getPayload().getHdWallets() != null
+                && PayloadManager.getInstance().getPayload().getHdWallets().get(0).isMnemonicVerified();
     }
 }

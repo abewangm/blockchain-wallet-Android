@@ -1,37 +1,36 @@
 package piuk.blockchain.android.ui.backup;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
-import info.blockchain.wallet.payload.PayloadManager;
-
 import java.util.List;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.payload.PayloadBridge;
 import piuk.blockchain.android.databinding.FragmentBackupWalletVerifyBinding;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.BackupWalletUtil;
-import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-public class BackupWalletVerifyFragment extends Fragment {
+public class BackupWalletVerifyFragment extends Fragment implements BackupVerifyViewModel.DataListener {
 
+    private BackupVerifyViewModel viewModel;
     @Thunk FragmentBackupWalletVerifyBinding binding;
     @Thunk MaterialProgressDialog mProgressDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_backup_wallet_verify, container, false);
+        viewModel = new BackupVerifyViewModel(this);
 
         Bundle bundle = getArguments();
         String secondPassword = null;
@@ -51,36 +50,19 @@ public class BackupWalletVerifyFragment extends Fragment {
                     && binding.etSecondRequest.getText().toString().trim().equalsIgnoreCase(confirmSequence.get(1).second)
                     && binding.etThirdRequest.getText().toString().trim().equalsIgnoreCase(confirmSequence.get(2).second)) {
 
-                showProgressDialog();
-
-                PayloadManager.getInstance().getPayload().getHdWallet().setMnemonicVerified(true);
-                PayloadBridge.getInstance().remoteSaveThread(new PayloadBridge.PayloadSaveListener() {
-                    @Override
-                    public void onSaveSuccess() {
-                        if (getActivity() != null && !getActivity().isFinishing()) {
-                            hideProgressDialog();
-                            new PrefsUtil(getActivity()).setValue(BackupWalletActivity.BACKUP_DATE_KEY, (int) (System.currentTimeMillis() / 1000));
-                            ToastCustom.makeText(getActivity(), getString(R.string.backup_confirmed), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
-                            popAllAndStartFragment(BackupWalletCompletedFragment.newInstance(true), BackupWalletCompletedFragment.TAG);
-                        }
-                    }
-
-                    @Override
-                    public void onSaveFail() {
-                        if (getActivity() != null && !getActivity().isFinishing()) {
-                            hideProgressDialog();
-                            ToastCustom.makeText(getActivity(), getActivity().getString(R.string.api_fail), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                            popAllAndStartFragment(new BackupWalletStartingFragment(), BackupWalletStartingFragment.TAG);
-                        }
-                    }
-                });
-
+                viewModel.onVerifyClicked();
             } else {
                 ToastCustom.makeText(getActivity(), getString(R.string.backup_word_mismatch), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
             }
         });
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        viewModel.onViewReady();
     }
 
     @Thunk
@@ -92,27 +74,45 @@ public class BackupWalletVerifyFragment extends Fragment {
                 .commit();
     }
 
-    private void showProgressDialog() {
+    @Override
+    public void showProgressDialog() {
         mProgressDialog = new MaterialProgressDialog(getActivity());
         mProgressDialog.setMessage(getString(R.string.please_wait) + "…");
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
     }
 
-    @Thunk
-    void hideProgressDialog() {
+    @Override
+    public void hideProgressDialog() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.dismiss();
         }
     }
 
     @Override
+    public void showCompletedFragment() {
+        popAllAndStartFragment(BackupWalletCompletedFragment.newInstance(true), BackupWalletCompletedFragment.TAG);
+    }
+
+    @Override
+    public void showStartingFragment() {
+        popAllAndStartFragment(new BackupWalletStartingFragment(), BackupWalletStartingFragment.TAG);
+    }
+
+    @Override
+    public void showToast(int message, String toastType) {
+        ToastCustom.makeText(getContext(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
+        viewModel.destroy();
         View view = getActivity().getCurrentFocus();
         if (view != null) {
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
+
 }

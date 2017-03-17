@@ -228,7 +228,7 @@ public class ContactsListViewModel extends BaseViewModel {
                                             }
                                         } else {
                                             // Not set up, most likely has a second password enabled
-                                            if (payloadManager.getPayload().isDoubleEncrypted()) {
+                                            if (payloadManager.getPayload().isDoubleEncryption()) {
                                                 dataListener.showSecondPasswordDialog();
                                                 dataListener.setUiState(ContactsListActivity.FAILURE);
                                             } else {

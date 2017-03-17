@@ -32,8 +32,6 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
-import info.blockchain.wallet.payload.PayloadManager;
-
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -43,6 +41,7 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
 import piuk.blockchain.android.ui.account.AccountActivity;
 import piuk.blockchain.android.ui.auth.LandingActivity;
@@ -58,20 +57,18 @@ import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
-import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+import static piuk.blockchain.android.data.services.EventService.EVENT_TX_INPUT_FROM_CONTACTS;
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
 import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
-import static piuk.blockchain.android.util.EventLogHandler.URL_EVENT_TX_INPUT_FROM_CONTACTS;
 
 public class MainActivity extends BaseAuthActivity implements BalanceFragment.OnFragmentInteractionListener,
         MainViewModel.DataListener,
@@ -109,8 +106,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appUtil = new AppUtil(this);
-
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         appUtil = new AppUtil(this);
@@ -202,17 +197,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     protected void onResume() {
         super.onResume();
         appUtil.deleteQR();
-        viewModel.storeSwipeReceiveAddresses();
+        viewModel.updateTicker();
         resetNavigationDrawer();
-
-        if (AndroidUtils.is25orHigher() && viewModel.areLauncherShortcutsEnabled()) {
-            LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(
-                    this,
-                    PayloadManager.getInstance(),
-                    getSystemService(ShortcutManager.class));
-
-            launcherShortcutHelper.generateReceiveShortcuts();
-        }
     }
 
     @Override
@@ -279,7 +265,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         if (resultCode == RESULT_OK && requestCode == SCAN_URI
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
             String strResult = data.getStringExtra(CaptureActivity.SCAN_RESULT);
-            doScanInput(strResult, EventLogHandler.URL_EVENT_TX_INPUT_FROM_QR);
+            doScanInput(strResult, EventService.EVENT_TX_INPUT_FROM_QR);
 
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_BACKUP) {
             resetNavigationDrawer();
@@ -410,7 +396,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public void updateCurrentPrice(String price) {
         View headerView = binding.navigationView.getHeaderView(0);
         TextView currentPrice = (TextView) headerView.findViewById(R.id.textview_current_price);
-        currentPrice.setText(price);
+
+        runOnUiThread(() -> currentPrice.setText(price));
     }
 
     private void startMerchantActivity() {
@@ -637,7 +624,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void onScanInput(String strUri) {
-        doScanInput(strUri, EventLogHandler.URL_EVENT_TX_INPUT_FROM_URI);
+        doScanInput(strUri, EventService.EVENT_TX_INPUT_FROM_URI);
     }
 
     @Override
@@ -807,7 +794,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     private void startSendFragmentFromIntent(String uri, String recipientId, String mdid, String fctxId, int accountPosition) {
-        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId, URL_EVENT_TX_INPUT_FROM_CONTACTS, accountPosition);
+        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId,
+            EVENT_TX_INPUT_FROM_CONTACTS, accountPosition);
         replaceFragmentWithAnimation(sendFragment);
         binding.bottomNavigation.restoreBottomNavigation();
     }

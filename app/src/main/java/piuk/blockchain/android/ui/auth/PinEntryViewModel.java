@@ -18,7 +18,6 @@ import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
 
 import org.spongycastle.crypto.InvalidCipherTextException;
 
@@ -65,7 +64,7 @@ public class PinEntryViewModel extends BaseViewModel {
     @Inject protected AccessState mAccessState;
 
     private String mEmail;
-    private CharSequenceX mPassword;
+    private String mPassword;
     @VisibleForTesting boolean mRecoveringFunds = false;
     @VisibleForTesting boolean mCanShowFingerprintDialog = true;
     @VisibleForTesting boolean mValidatingPinForResult = false;
@@ -107,7 +106,7 @@ public class PinEntryViewModel extends BaseViewModel {
 
         void finishWithResultOk(String pin);
 
-        void showFingerprintDialog(CharSequenceX pincode);
+        void showFingerprintDialog(String pincode);
 
         void showKeyboard();
 
@@ -134,7 +133,7 @@ public class PinEntryViewModel extends BaseViewModel {
 
                 if (extras.containsKey(KEY_INTENT_PASSWORD)) {
                     //noinspection ConstantConditions
-                    mPassword = new CharSequenceX(extras.getString(KEY_INTENT_PASSWORD));
+                    mPassword = extras.getString(KEY_INTENT_PASSWORD);
                 }
 
                 if (extras.containsKey(KEY_INTENT_RECOVERING_FUNDS)) {
@@ -145,10 +144,12 @@ public class PinEntryViewModel extends BaseViewModel {
                     mValidatingPinForResult = extras.getBoolean(KEY_VALIDATING_PIN_FOR_RESULT);
                 }
 
-                if (mPassword != null && mPassword.length() > 0 && mEmail != null && !mEmail.isEmpty()) {
+                if (mPassword != null && !mPassword.isEmpty() && mEmail != null && !mEmail.isEmpty()) {
                     // Previous page was CreateWalletFragment
                     bAllowExit = false;
-                    saveLoginAndPassword();
+
+                    mPrefsUtil.setValue(PrefsUtil.KEY_EMAIL, mEmail);
+
                     if (!mRecoveringFunds) {
                         // If funds recovered, wallet already restored, no need to overwrite payload
                         // with another new wallet
@@ -182,16 +183,16 @@ public class PinEntryViewModel extends BaseViewModel {
                 && mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE) != null;
     }
 
-    public void loginWithDecryptedPin(CharSequenceX pincode) {
+    public void loginWithDecryptedPin(String pincode) {
         mCanShowFingerprintDialog = false;
         for (ImageView view : mDataListener.getPinBoxArray()) {
             view.setImageResource(R.drawable.rounded_view_dark_blue);
         }
-        validatePIN(pincode.toString());
+        validatePIN(pincode);
     }
 
     public void onDeleteClicked() {
-        if (mUserEnteredPin.length() > 0) {
+        if (!mUserEnteredPin.isEmpty()) {
             // Remove last char from pin string
             mUserEnteredPin = mUserEnteredPin.substring(0, mUserEnteredPin.length() - 1);
 
@@ -284,7 +285,7 @@ public class PinEntryViewModel extends BaseViewModel {
     }
 
     @VisibleForTesting
-    void updatePayload(CharSequenceX password) {
+    void updatePayload(String password) {
         mDataListener.showProgressDialog(R.string.decrypting_wallet, null);
 
         compositeDisposable.add(
@@ -353,7 +354,7 @@ public class PinEntryViewModel extends BaseViewModel {
         return mValidatingPinForResult;
     }
 
-    public void validatePassword(CharSequenceX password) {
+    public void validatePassword(String password) {
         mDataListener.showProgressDialog(R.string.validating_password, null);
 
         compositeDisposable.add(
@@ -361,7 +362,6 @@ public class PinEntryViewModel extends BaseViewModel {
                         mPrefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""),
                         mPrefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
                         password)
-                        .doOnSubscribe(disposable -> mPayloadManager.setTempPassword(new CharSequenceX("")))
                         .doAfterTerminate(() -> mDataListener.dismissProgressDialog())
                         .subscribe(() -> {
                             mDataListener.showToast(R.string.pin_4_strikes_password_accepted, ToastCustom.TYPE_OK);
@@ -477,31 +477,23 @@ public class PinEntryViewModel extends BaseViewModel {
         }
     }
 
-    private void saveLoginAndPassword() {
-        mPrefsUtil.setValue(PrefsUtil.KEY_EMAIL, mEmail);
-        mPayloadManager.setEmail(mEmail);
-        mPayloadManager.setTempPassword(mPassword);
-    }
-
     private void setAccountLabelIfNecessary() {
         if (mAppUtil.isNewlyCreated()
-                && mPayloadManager.getPayload().getHdWallet() != null
-                && (mPayloadManager.getPayload().getHdWallet().getAccounts().get(0).getLabel() == null
-                || mPayloadManager.getPayload().getHdWallet().getAccounts().get(0).getLabel().isEmpty())) {
+                && mPayloadManager.getPayload().getHdWallets() != null
+                && (mPayloadManager.getPayload().getHdWallets().get(0).getAccounts().get(0).getLabel() == null
+                || mPayloadManager.getPayload().getHdWallets().get(0).getAccounts().get(0).getLabel().isEmpty())) {
 
-            mPayloadManager.getPayload().getHdWallet().getAccounts().get(0).setLabel(mStringUtils.getString(R.string.default_wallet_name));
+            mPayloadManager.getPayload().getHdWallets().get(0).getAccounts().get(0).setLabel(mStringUtils.getString(R.string.default_wallet_name));
         }
     }
 
     private void createWallet() {
         mAppUtil.applyPRNGFixes();
         compositeDisposable.add(
-                mAuthDataManager.createHdWallet(mPassword.toString(), mStringUtils.getString(R.string.default_wallet_name))
+                mAuthDataManager.createHdWallet(mPassword, mStringUtils.getString(R.string.default_wallet_name), mEmail)
                         .doAfterTerminate(() -> mDataListener.dismissProgressDialog())
                         .subscribe(payload -> {
-                            if (payload == null) {
-                                showErrorToast(R.string.remote_save_ko);
-                            }
+                            // No-op
                         }, throwable -> showErrorToastAndRestartApp(R.string.hd_error)));
     }
 

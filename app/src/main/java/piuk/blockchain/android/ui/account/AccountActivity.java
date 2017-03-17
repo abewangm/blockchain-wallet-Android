@@ -27,13 +27,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.ImportedAccount;
-import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -108,8 +106,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     @Thunk
     void onRowClick(int position) {
         Intent intent = new Intent(this, AccountEditActivity.class);
-        if (position >= payloadManager.getPayload().getHdWallet().getAccounts().size()) {
-            intent.putExtra("address_index", position - payloadManager.getPayload().getHdWallet().getAccounts().size());
+        if (position >= payloadManager.getPayload().getHdWallets().get(0).getAccounts().size()) {
+            intent.putExtra("address_index", position - payloadManager.getPayload().getHdWallets().get(0).getAccounts().size());
         } else {
             intent.putExtra("account_index", position);
         }
@@ -167,7 +165,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
             @Override
             public void onSecondPasswordValidated(String validateSecondPassword) {
-                viewModel.setDoubleEncryptionPassword(new CharSequenceX(validateSecondPassword));
+                viewModel.setDoubleEncryptionPassword(validateSecondPassword);
                 viewModel.onScanButtonClicked();
             }
         });
@@ -183,7 +181,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
             @Override
             public void onSecondPasswordValidated(String validateSecondPassword) {
-                viewModel.setDoubleEncryptionPassword(new CharSequenceX(validateSecondPassword));
+                viewModel.setDoubleEncryptionPassword(validateSecondPassword);
                 promptForAccountLabel();
             }
         });
@@ -199,7 +197,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 .setView(ViewUtils.getAlertDialogEditTextLayout(this, editText))
                 .setCancelable(false)
                 .setPositiveButton(R.string.save_name, (dialog, whichButton) -> {
-                    if (editText.getText().toString().trim().length() > 0) {
+                    if (!editText.getText().toString().trim().isEmpty()) {
                         addAccount(editText.getText().toString().trim());
                     } else {
                         ToastCustom.makeText(AccountActivity.this, getResources().getString(R.string.label_cant_be_empty), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
@@ -219,31 +217,32 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     @Override
     public void onUpdateAccountsList() {
-        //accountsAndImportedList is linked to AccountAdapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
+
+//        accountsAndImportedList is linked to AccountAdapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
         accountsAndImportedList.clear();
         int correctedPosition = 0;
-
-        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
         List<Account> accountClone = new ArrayList<>(accounts.size());
         accountClone.addAll(accounts);
 
-        if (accountClone.get(accountClone.size() - 1) instanceof ImportedAccount) {
+        if (accountClone.get(accountClone.size() - 1) instanceof ConsolidatedAccount) {
             accountClone.remove(accountClone.size() - 1);
         }
 
         // Create New Wallet button at top position
         accountsAndImportedList.add(new AccountItem(AccountItem.TYPE_CREATE_NEW_WALLET_BUTTON));
 
-        int defaultIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
-        Account defaultAccount = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultIndex);
+        int defaultIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
+        Account defaultAccount = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultIndex);
 
         for (int i = 0; i < accountClone.size(); i++) {
             String label = accountClone.get(i).getLabel();
             String balance = getAccountBalance(i);
 
-            if (label != null && label.length() > ADDRESS_LABEL_MAX_LENGTH)
+            if (label != null && label.length() > ADDRESS_LABEL_MAX_LENGTH) {
                 label = label.substring(0, ADDRESS_LABEL_MAX_LENGTH) + "...";
-            if (label == null || label.length() == 0) label = "";
+            }
+            if (label == null || label.isEmpty()) label = "";
 
             accountsAndImportedList.add(new AccountItem(correctedPosition,
                     label,
@@ -259,15 +258,16 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         // Import Address button at first position after wallets
         accountsAndImportedList.add(new AccountItem(AccountItem.TYPE_IMPORT_ADDRESS_BUTTON));
 
-        ImportedAccount importedAccount = null;
-        if (payloadManager.getPayload().getLegacyAddressList().size() > 0) {
-            importedAccount = new ImportedAccount(getString(R.string.imported_addresses),
+        ConsolidatedAccount consolidatedAccount = null;
+        if (!payloadManager.getPayload().getLegacyAddressList().isEmpty()) {
+
+            consolidatedAccount = new ConsolidatedAccount(getString(R.string.imported_addresses),
                     payloadManager.getPayload().getLegacyAddressList(),
-                    MultiAddrFactory.getInstance().getLegacyBalance());
+                    payloadManager.getImportedAddressesBalance().longValue());
         }
 
-        if (importedAccount != null) {
-            legacy = importedAccount.getLegacyAddresses();
+        if (consolidatedAccount != null) {
+            legacy = consolidatedAccount.getLegacyAddresses();
             for (int j = 0; j < legacy.size(); j++) {
 
                 String label = legacy.get(j).getLabel();
@@ -276,8 +276,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
                 if (label != null && label.length() > ADDRESS_LABEL_MAX_LENGTH)
                     label = label.substring(0, ADDRESS_LABEL_MAX_LENGTH) + "...";
-                if (label == null || label.length() == 0) label = "";
-                if (address == null || address.length() == 0) address = "";
+                if (label == null || label.isEmpty()) label = "";
+                if (address == null || address.isEmpty()) address = "";
 
                 accountsAndImportedList.add(new AccountItem(correctedPosition,
                         label,
@@ -319,8 +319,9 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     private String getAccountBalance(int index) {
         String address = payloadManager.getXpubFromAccountIndex(index);
-        Long amount = MultiAddrFactory.getInstance().getXpubAmounts().get(address);
-        if (amount == null) amount = 0L;
+        BigInteger addressBalance = payloadManager.getAddressBalance(address);
+        // Archived addresses/xPubs aren't parsed, so balance will be null
+        Long amount = addressBalance != null ? addressBalance.longValue() : 0L;
 
         String unit = (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
 
@@ -329,7 +330,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     private String getAddressBalance(int index) {
         String address = legacy.get(index).getAddress();
-        Long amount = MultiAddrFactory.getInstance().getLegacyBalance(address);
+        Long amount = payloadManager.getAddressBalance(address).longValue();
         String unit = (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
 
         return monetaryUtil.getDisplayAmount(amount) + " " + unit;
@@ -372,7 +373,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 .setView(ViewUtils.getAlertDialogEditTextLayout(this, password))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
-                        viewModel.importBip38Address(data, new CharSequenceX(password.getText().toString())))
+                        viewModel.importBip38Address(data, password.getText().toString()))
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
@@ -399,7 +400,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 .setCancelable(false)
                 .setPositiveButton(R.string.save_name, (dialog, whichButton) -> {
                     String label = editText.getText().toString();
-                    if (label.trim().length() > 0) {
+                    if (!label.trim().isEmpty()) {
                         address.setLabel(label);
                     } else {
                         address.setLabel(address.getAddress());

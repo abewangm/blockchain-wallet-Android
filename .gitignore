@@ -16,6 +16,12 @@ local.properties
 # Mac OS X clutter
 *.DS_Store
 
+# QA
+*credentials_qa.xml
+
+# Migration to Android Studio 2.4 Preview
+projectFilesBackup/
+
 # Captures
 captures
 

@@ -18,6 +18,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AlertDialog.Builder;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceCategory;
 import android.support.v7.preference.PreferenceFragmentCompat;
@@ -38,8 +39,7 @@ import android.widget.TextView;
 import com.mukesh.countrypicker.fragments.CountryPicker;
 import com.mukesh.countrypicker.models.Country;
 
-import info.blockchain.api.Settings;
-import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PasswordUtil;
 
@@ -65,7 +65,9 @@ import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATED_PIN
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.REQUEST_CODE_VALIDATE_PIN;
 
-public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceClickListener, SettingsViewModel.DataListener {
+public class SettingsFragment extends PreferenceFragmentCompat
+        implements Preference.OnPreferenceClickListener,
+        SettingsViewModel.DataListener {
 
     public static final String EXTRA_SHOW_TWO_FA_DIALOG = "show_two_fa_dialog";
     public static final String EXTRA_SHOW_ADD_EMAIL_DIALOG = "show_add_email_dialog";
@@ -162,7 +164,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         screenshotPref = (SwitchPreferenceCompat) findPreference("screenshots_enabled");
         screenshotPref.setOnPreferenceChangeListener((preference, newValue) -> {
             if (((Boolean) newValue)) {
-                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                new Builder(getActivity(), R.style.AlertDialogStyle)
                         .setTitle(R.string.enable_screenshots)
                         .setMessage(R.string.enable_screenshots_warning)
                         .setCancelable(false)
@@ -392,11 +394,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     }
 
     @Override
-    public void showFingerprintDialog(CharSequenceX pincode) {
+    public void showFingerprintDialog(String pincode) {
         FingerprintDialog dialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
         dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
             @Override
-            public void onAuthenticated(CharSequenceX data) {
+            public void onAuthenticated(String data) {
                 dialog.dismissAllowingStateLoss();
                 viewModel.setFingerprintUnlockEnabled(true);
             }
@@ -515,7 +517,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 .setPositiveButton(R.string.update, (dialogInterface, i) -> {
                     String email = editText.getText().toString();
 
-                    if (!FormatsUtil.getInstance().isValidEmailAddress(email)) {
+                    if (!FormatsUtil.isValidEmailAddress(email)) {
                         ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                     } else {
                         viewModel.updateEmail(email);
@@ -598,7 +600,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 positive.setOnClickListener(view -> {
                     String sms = countryTextView.getText() + mobileNumber.getText().toString();
 
-                    if (!FormatsUtil.getInstance().isValidMobileNumber(sms)) {
+                    if (!FormatsUtil.isValidMobileNumber(sms)) {
                         ToastCustom.makeText(getActivity(), getString(R.string.invalid_mobile), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                     } else {
                         viewModel.updateSms(sms);
@@ -679,7 +681,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             Button positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
             positive.setOnClickListener(view -> {
                 String codeS = editText.getText().toString();
-                if (codeS.length() > 0) {
+                if (!codeS.isEmpty()) {
                     viewModel.verifySms(codeS);
                     dialog.dismiss();
                     ViewUtils.hideKeyboard(getActivity());
@@ -702,7 +704,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         if (requestCode == REQUEST_CODE_VALIDATE_PIN && resultCode == RESULT_OK) {
             viewModel.pinCodeValidatedForChange();
         } else if (requestCode == REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT && resultCode == RESULT_OK) {
-            viewModel.pinCodeValidatedForFingerprint(new CharSequenceX(data.getStringExtra(KEY_VALIDATED_PIN)));
+            viewModel.pinCodeValidatedForFingerprint(data.getStringExtra(KEY_VALIDATED_PIN));
         }
     }
 
@@ -791,10 +793,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 String currentPw = currentPassword.getText().toString();
                 String newPw = newPassword.getText().toString();
                 String newConfirmedPw = newPasswordConfirmation.getText().toString();
-                CharSequenceX walletPassword = viewModel.getTempPassword();
+                String walletPassword = viewModel.getTempPassword();
 
                 if (!currentPw.equals(newPw)) {
-                    if (currentPw.equals(walletPassword.toString())) {
+                    if (currentPw.equals(walletPassword)) {
                         if (newPw.equals(newConfirmedPw)) {
                             if (newConfirmedPw.length() < 4 || newConfirmedPw.length() > 255) {
                                 ToastCustom.makeText(getActivity(), getString(R.string.invalid_password), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
@@ -811,12 +813,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                                         })
                                         .setNegativeButton(R.string.polite_no, (dialog1, which) -> {
                                             alertDialog.dismiss();
-                                            viewModel.updatePassword(new CharSequenceX(newConfirmedPw), walletPassword);
+                                            viewModel.updatePassword(newConfirmedPw, walletPassword);
                                         })
                                         .show();
                             } else {
                                 alertDialog.dismiss();
-                                viewModel.updatePassword(new CharSequenceX(newConfirmedPw), walletPassword);
+                                viewModel.updatePassword(newConfirmedPw, walletPassword);
                             }
                         } else {
                             newPasswordConfirmation.setText("");
@@ -868,7 +870,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         if (getActivity() != null && !getActivity().isFinishing()) {
             int[] strengthVerdicts = {R.string.strength_weak, R.string.strength_medium, R.string.strength_normal, R.string.strength_strong};
             int[] strengthColors = {R.drawable.progress_red, R.drawable.progress_orange, R.drawable.progress_blue, R.drawable.progress_green};
-            pwStrength = (int) Math.round(PasswordUtil.getInstance().getStrength(pw));
+            pwStrength = (int) Math.round(PasswordUtil.getStrength(pw));
 
             if (pw.equals(viewModel.getEmail())) pwStrength = 0;
 

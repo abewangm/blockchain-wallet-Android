@@ -1,21 +1,15 @@
 package piuk.blockchain.android.ui.backup;
 
 import android.annotation.SuppressLint;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import info.blockchain.api.Unspent;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payment.Payment;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -23,17 +17,19 @@ import java.util.Date;
 
 import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.databinding.AlertPromptTransferFundsBinding;
 import piuk.blockchain.android.databinding.FragmentBackupCompleteBinding;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.annotations.Thunk;
 
-public class BackupWalletCompletedFragment extends Fragment {
+public class BackupWalletCompletedFragment extends Fragment implements BackupWalletViewModel.DataListener{
 
     public static final String TAG = BackupWalletCompletedFragment.class.getSimpleName();
     private static final String KEY_CHECK_TRANSFER = "check_transfer";
 
     private CompositeDisposable compositeDisposable;
+
+    @Thunk BackupWalletViewModel viewModel;
 
     public static BackupWalletCompletedFragment newInstance(boolean checkTransfer) {
         Bundle args = new Bundle();
@@ -49,6 +45,8 @@ public class BackupWalletCompletedFragment extends Fragment {
         FragmentBackupCompleteBinding dataBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_backup_complete, container, false);
         compositeDisposable = new CompositeDisposable();
 
+        viewModel = new BackupWalletViewModel(this);
+
         long lastBackup = new PrefsUtil(getActivity()).getValue(BackupWalletActivity.BACKUP_DATE_KEY, 0);
 
         if (lastBackup != 0) {
@@ -62,33 +60,22 @@ public class BackupWalletCompletedFragment extends Fragment {
         }
 
         dataBinding.buttonBackupAgain.setOnClickListener(v -> {
-            getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            getFragmentManager().beginTransaction()
+            getActivity().getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            getActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.content_frame, new BackupWalletStartingFragment())
                     .addToBackStack(BackupWalletStartingFragment.TAG)
                     .commit();
         });
 
         if (getArguments() != null && getArguments().getBoolean(KEY_CHECK_TRANSFER)) {
-            TransferFundsDataManager fundsHelper =
-                    new TransferFundsDataManager(
-                            PayloadManager.getInstance(),
-                            MultiAddrFactory.getInstance(),
-                            new Unspent(),
-                            new Payment());
-            compositeDisposable.add(
-                    fundsHelper.getTransferableFundTransactionListForDefaultAccount()
-                            .subscribe(triple -> {
-                                if (!triple.getLeft().isEmpty()) {
-                                    showTransferFundsPrompt();
-                                }
-                            }, Throwable::printStackTrace));
+            viewModel.checkTransferableFunds();
         }
 
         return dataBinding.getRoot();
     }
 
-    private void showTransferFundsPrompt() {
+    @Override
+    public void showTransferFundsPrompt() {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle);
         AlertPromptTransferFundsBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(getActivity()),
                 R.layout.alert_prompt_transfer_funds, null, false);
@@ -107,7 +94,7 @@ public class BackupWalletCompletedFragment extends Fragment {
 
     private void showTransferFundsConfirmationDialog() {
         ConfirmFundsTransferDialogFragment fragment = ConfirmFundsTransferDialogFragment.newInstance();
-        fragment.show(((AppCompatActivity) getActivity()).getSupportFragmentManager(), ConfirmFundsTransferDialogFragment.TAG);
+        fragment.show(getActivity().getSupportFragmentManager(), ConfirmFundsTransferDialogFragment.TAG);
     }
 
     @Override

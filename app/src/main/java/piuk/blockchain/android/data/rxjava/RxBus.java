@@ -26,7 +26,7 @@ public class RxBus {
      * key for lookups.
      */
     @SuppressWarnings("WeakerAccess")
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    @VisibleForTesting
     ConcurrentHashMap<Object, List<Subject>> subjectsMap = new ConcurrentHashMap<>();
 
     public RxBus() {
@@ -41,6 +41,7 @@ public class RxBus {
      * @param type The class type of the events you wish to emit
      * @return A {@link PublishSubject} with type {@code type}
      */
+    @SuppressWarnings("Java8MapApi")
     public <T> Observable<T> register(@NonNull Class<T> type) {
         List<Subject> subjects = subjectsMap.get(type);
         if (subjects == null) {

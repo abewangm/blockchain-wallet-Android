@@ -6,10 +6,10 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
-import info.blockchain.wallet.payload.Account
-import info.blockchain.wallet.payload.HDWallet
-import info.blockchain.wallet.payload.Payload
 import info.blockchain.wallet.payload.PayloadManager
+import info.blockchain.wallet.payload.data.Account
+import info.blockchain.wallet.payload.data.HDWallet
+import info.blockchain.wallet.payload.data.Wallet
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
@@ -470,10 +470,10 @@ class ContactDetailViewModelTest {
             state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
             role = FacilitatedTransaction.ROLE_PR_RECEIVER
         })
-        val mockPayload: Payload = mock()
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallet).thenReturn(mockHdWallet)
+        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         val account0 = Account().apply { isArchived = true }
         val account1 = Account().apply { isArchived = true }
         val account2 = Account()
@@ -497,10 +497,10 @@ class ContactDetailViewModelTest {
             state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
             role = FacilitatedTransaction.ROLE_RPR_RECEIVER
         })
-        val mockPayload: Payload = mock()
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallet).thenReturn(mockHdWallet)
+        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         val accountLabel0 = "ACCOUNT_0"
         val account0 = Account().apply { label = accountLabel0 }
         val accountLabel1 = "ACCOUNT_1"
@@ -530,12 +530,12 @@ class ContactDetailViewModelTest {
             address = ""
         }
         contact.addFacilitatedTransaction(facilitatedTransaction)
-        val mockPayload: Payload = mock()
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallet).thenReturn(mockHdWallet)
+        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         val defaultIndex = 1337
-        whenever(mockHdWallet.defaultIndex).thenReturn(defaultIndex)
+        whenever(mockHdWallet.defaultAccountIdx).thenReturn(defaultIndex)
         // Act
         subject.onTransactionClicked(fctxId)
         // Assert
@@ -566,12 +566,12 @@ class ContactDetailViewModelTest {
             address = ""
         }
         contact.addFacilitatedTransaction(facilitatedTransaction)
-        val mockPayload: Payload = mock()
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallet).thenReturn(mockHdWallet)
+        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         val defaultIndex = 1337
-        whenever(mockHdWallet.defaultIndex).thenReturn(defaultIndex)
+        whenever(mockHdWallet.defaultAccountIdx).thenReturn(defaultIndex)
         // Act
         subject.onTransactionClicked(fctxId)
         // Assert
@@ -602,8 +602,10 @@ class ContactDetailViewModelTest {
         // Arrange
         val fctxId = "FCTX_ID"
         val contact = Contact()
-        whenever(mockContactsManager.getContactFromFctxId(fctxId)).thenReturn(Observable.just(contact))
-        whenever(mockContactsManager.deleteFacilitatedTransaction(contact.mdid, fctxId)).thenReturn(Completable.complete())
+        whenever(mockContactsManager.getContactFromFctxId(fctxId))
+                .thenReturn(Observable.just(contact))
+        whenever(mockContactsManager.deleteFacilitatedTransaction(contact.mdid, fctxId))
+                .thenReturn(Completable.complete())
         // Act
         subject.confirmDeleteFacilitatedTransaction(fctxId)
         // Assert
@@ -619,7 +621,8 @@ class ContactDetailViewModelTest {
         // Arrange
         val fctxId = "FCTX_ID"
         val contact = Contact()
-        whenever(mockContactsManager.getContactFromFctxId(fctxId)).thenReturn(Observable.just(contact))
+        whenever(mockContactsManager.getContactFromFctxId(fctxId))
+                .thenReturn(Observable.just(contact))
         whenever(mockContactsManager.deleteFacilitatedTransaction(contact.mdid, fctxId))
                 .thenReturn(Completable.error { Throwable() })
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
@@ -648,12 +651,12 @@ class ContactDetailViewModelTest {
             intendedAmount = 21 * 1000 * 1000L
         })
         val address = "ADDRESS"
-        whenever(mockPayloadManager.getNextReceiveAddress(accountPosition)).thenReturn(address)
-        val mockPayload: Payload = mock()
+        val account = Account()
+        whenever(mockPayloadManager.getNextReceiveAddress(account)).thenReturn(address)
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallet).thenReturn(mockHdWallet)
-        val account = Account()
+        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         whenever(mockHdWallet.accounts).thenReturn(listOf(account))
         whenever(mockContactsManager.sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId)))
                 .thenReturn(Completable.complete())
@@ -682,12 +685,12 @@ class ContactDetailViewModelTest {
             intendedAmount = 21 * 1000 * 1000L
         })
         val address = "ADDRESS"
-        whenever(mockPayloadManager.getNextReceiveAddress(accountPosition)).thenReturn(address)
-        val mockPayload: Payload = mock()
+        val account = Account()
+        whenever(mockPayloadManager.getNextReceiveAddress(account)).thenReturn(address)
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallet).thenReturn(mockHdWallet)
-        val account = Account()
+        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         whenever(mockHdWallet.accounts).thenReturn(listOf(account))
         whenever(mockContactsManager.sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId)))
                 .thenReturn(Completable.error { Throwable() })

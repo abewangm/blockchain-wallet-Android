@@ -3,6 +3,8 @@ package piuk.blockchain.android.data.rxjava;
 import io.reactivex.CompletableTransformer;
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
+import io.reactivex.Single;
+import io.reactivex.SingleTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
@@ -20,6 +22,16 @@ public final class RxUtil {
      * onNext/onComplete/onError
      */
     public static <T> ObservableTransformer<T, T> applySchedulersToObservable() {
+        return observable -> observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError(Throwable::printStackTrace);
+    }
+
+    /**
+     * Applies standard Schedulers to a {@link Single}, ie IO for subscription, Main Thread for
+     * onNext/onComplete/onError
+     */
+    public static <T> SingleTransformer<T, T> applySchedulersToSingle() {
         return observable -> observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnError(Throwable::printStackTrace);

@@ -16,9 +16,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.transaction.Tx;
 
+import info.blockchain.wallet.multiaddress.TransactionSummary;
+import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -207,22 +207,22 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     }
 
     private void bindTxView(RecyclerView.ViewHolder holder, int position) {
+
         final TxViewHolder txViewHolder = (TxViewHolder) holder;
-        final Tx tx = (Tx) objects.get(position);
+        final TransactionSummary tx = (TransactionSummary) objects.get(position);
         String fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double btcBalance = tx.getAmount() / 1e8;
+        double btcBalance = tx.getTotal().longValue() / 1e8;
         double fiatBalance = btcExchangeRate * btcBalance;
 
         txViewHolder.result.setTextColor(Color.WHITE);
-        txViewHolder.timeSince.setText(dateUtil.formatted(tx.getTS()));
+        txViewHolder.timeSince.setText(dateUtil.formatted(tx.getTime()));
 
-        String dirText = tx.getDirection();
-        switch (dirText) {
-            case MultiAddrFactory.MOVED:
+        switch (tx.getDirection()) {
+            case TRANSFERRED:
                 txViewHolder.direction.setText(
                         txViewHolder.direction.getContext().getString(R.string.MOVED));
                 break;
-            case MultiAddrFactory.RECEIVED:
+            case RECEIVED:
                 if (contactsTransactionMap.containsKey(tx.getHash())) {
                     String contactName = contactsTransactionMap.get(tx.getHash());
                     txViewHolder.direction.setText(
@@ -232,7 +232,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
                             txViewHolder.direction.getContext().getString(R.string.RECEIVED));
                 }
                 break;
-            case MultiAddrFactory.SENT:
+            case SENT:
                 if (contactsTransactionMap.containsKey(tx.getHash())) {
                     String contactName = contactsTransactionMap.get(tx.getHash());
                     txViewHolder.direction.setText(
@@ -244,16 +244,16 @@ class BalanceListAdapter extends RecyclerView.Adapter {
                 break;
         }
 
-        txViewHolder.result.setText(getDisplaySpannable(tx.getAmount(), fiatBalance, fiatString));
+        txViewHolder.result.setText(getDisplaySpannable(tx.getTotal().longValue(), fiatBalance, fiatString));
 
-        if (tx.isMove()) {
+        if (tx.getDirection() == Direction.TRANSFERRED) {
             txViewHolder.result.setBackgroundResource(
                     getColorForConfirmations(tx, R.drawable.rounded_view_transferred_50, R.drawable.rounded_view_transferred));
 
             txViewHolder.direction.setTextColor(ContextCompat.getColor(txViewHolder.direction.getContext(),
                     getColorForConfirmations(tx, R.color.product_gray_transferred_50, R.color.product_gray_transferred)));
 
-        } else if (btcBalance < 0.0) {
+        } else if (tx.getDirection() == Direction.SENT) {
             txViewHolder.result.setBackgroundResource(
                     getColorForConfirmations(tx, R.drawable.rounded_view_red_50, R.drawable.rounded_view_red));
 
@@ -317,7 +317,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
             return VIEW_TYPE_HEADER;
         } else if (objects.get(position) instanceof ContactTransactionModel) {
             return VIEW_TYPE_FCTX;
-        } else if (objects.get(position) instanceof Tx) {
+        } else if (objects.get(position) instanceof TransactionSummary) {
             return VIEW_TYPE_TRANSACTION;
         } else {
             throw new IllegalArgumentException(
@@ -328,7 +328,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     private int getRealTxPosition(int position) {
         int totalTransactions = 0;
         for (Object object : objects) {
-            if (object instanceof Tx) {
+            if (object instanceof TransactionSummary) {
                 totalTransactions++;
             }
         }
@@ -337,7 +337,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         return position - diff;
     }
 
-    private int getColorForConfirmations(Tx tx, @DrawableRes int colorLight, @DrawableRes int colorDark) {
+    private int getColorForConfirmations(TransactionSummary tx, @DrawableRes int colorLight, @DrawableRes int colorDark) {
         return tx.getConfirmations() < 3 ? colorLight : colorDark;
     }
 

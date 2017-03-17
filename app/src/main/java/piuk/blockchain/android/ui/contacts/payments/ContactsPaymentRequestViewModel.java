@@ -9,6 +9,7 @@ import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
 
 import javax.inject.Inject;
 
@@ -136,7 +137,8 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
     }
 
     private Observable<String> getNextReceiveAddress(int defaultIndex) {
-        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
+        Account account = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultIndex);
+        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account));
     }
 
 }

@@ -8,6 +8,9 @@ import android.annotation.SuppressLint;
 @SuppressLint("Registered")
 public class BlockchainTestApplication extends BlockchainApplication {
 
-    // Empty Class for testing
+    @Override
+    protected void checkSecurityProviderAndPatchIfNeeded() {
+        // No-op
+    }
 
 }

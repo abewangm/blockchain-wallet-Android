@@ -99,8 +99,7 @@ public class AppUtil {
         String encryptedPassword = prefs.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
         String pinID = prefs.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
 
-        return !(encryptedPassword.length() == 0 || pinID.length() == 0);
-
+        return !(encryptedPassword.isEmpty() || pinID.isEmpty());
     }
 
     public boolean isCameraOpen() {

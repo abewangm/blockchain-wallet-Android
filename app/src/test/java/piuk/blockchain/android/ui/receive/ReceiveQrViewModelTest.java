@@ -36,8 +36,8 @@ import static org.mockito.Mockito.when;
 public class ReceiveQrViewModelTest {
 
     private ReceiveQrViewModel subject;
-    @Mock ReceiveQrViewModel.DataListener activity;
-    @Mock QrCodeDataManager qrCodeDataManager;
+    @Mock private ReceiveQrViewModel.DataListener activity;
+    @Mock private QrCodeDataManager qrCodeDataManager;
 
     @Before
     public void setUp() throws Exception {

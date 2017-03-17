@@ -3,8 +3,8 @@ package piuk.blockchain.android.ui.recover;
 import android.app.Application;
 import android.content.Intent;
 
-import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Wallet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +25,7 @@ import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
-import piuk.blockchain.android.util.AESUtilWrapper;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
@@ -106,7 +106,8 @@ public class RecoverFundsViewModelTest {
     public void onContinueClickedNoPasswordInIntent() throws Exception {
         // Arrange
         when(mActivity.getPageIntent()).thenReturn(mock(Intent.class));
-        when(mActivity.getRecoveryPhrase()).thenReturn("one two three four five six seven eight nine ten eleven twelve");
+        when(mActivity.getRecoveryPhrase())
+                .thenReturn("one two three four five six seven eight nine ten eleven twelve");
         // Act
         mSubject.onContinueClicked();
         // Assert
@@ -128,7 +129,8 @@ public class RecoverFundsViewModelTest {
         Intent intent = new Intent();
         intent.putExtra(KEY_INTENT_PASSWORD, "password");
         when(mActivity.getPageIntent()).thenReturn(intent);
-        when(mActivity.getRecoveryPhrase()).thenReturn("one two three four five six seven eight nine ten eleven twelve");
+        when(mActivity.getRecoveryPhrase())
+                .thenReturn("one two three four five six seven eight nine ten eleven twelve");
         // Act
         mSubject.onContinueClicked();
         // Assert
@@ -151,7 +153,8 @@ public class RecoverFundsViewModelTest {
         intent.putExtra(KEY_INTENT_EMAIL, "email");
         when(mActivity.getPageIntent()).thenReturn(intent);
         when(mActivity.getRecoveryPhrase()).thenReturn("one two three four five six seven eight nine ten eleven twelve");
-        when(mAuthDataManager.restoreHdWallet(anyString(), anyString(), anyString())).thenReturn(Observable.just(new Payload()));
+        when(mAuthDataManager.restoreHdWallet(anyString(), anyString(), anyString()))
+                .thenReturn(Observable.just(new Wallet()));
         // Act
         mSubject.onContinueClicked();
         // Assert
@@ -207,6 +210,7 @@ public class RecoverFundsViewModelTest {
         assertEquals(util, mAppUtil);
     }
 
+    @SuppressWarnings("SyntheticAccessorCall")
     private class MockApplicationModule extends ApplicationModule {
 
         MockApplicationModule(Application application) {
@@ -219,6 +223,7 @@ public class RecoverFundsViewModelTest {
         }
     }
 
+    @SuppressWarnings("SyntheticAccessorCall")
     private class MockApiModule extends ApiModule {
 
         @Override
@@ -227,13 +232,13 @@ public class RecoverFundsViewModelTest {
         }
     }
 
+    @SuppressWarnings("SyntheticAccessorCall")
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected AuthDataManager provideAuthDataManager(PayloadManager payloadManager,
+        protected AuthDataManager provideAuthDataManager(PayloadDataManager payloadDataManager,
                                                          PrefsUtil prefsUtil,
                                                          AppUtil appUtil,
-                                                         AESUtilWrapper aesUtilWrapper,
                                                          AccessState accessState,
                                                          StringUtils stringUtils) {
             return mAuthDataManager;

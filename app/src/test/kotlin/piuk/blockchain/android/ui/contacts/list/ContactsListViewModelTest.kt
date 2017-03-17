@@ -6,8 +6,8 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.exceptions.DecryptionException
 import info.blockchain.wallet.metadata.MetadataNodeFactory
-import info.blockchain.wallet.payload.Payload
 import info.blockchain.wallet.payload.PayloadManager
+import info.blockchain.wallet.payload.data.Wallet
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
@@ -145,9 +145,9 @@ class ContactsListViewModelTest {
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         whenever(mockActivity.pageIntent).thenReturn(intent)
         whenever(mockContactsManager.loadNodes()).thenReturn(Observable.just(false))
-        val mockPayload: Payload = mock()
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
-        whenever(mockPayload.isDoubleEncrypted).thenReturn(true)
+        whenever(mockPayload.isDoubleEncryption).thenReturn(true)
         // Act
         subject.onViewReady()
         // Assert
@@ -164,15 +164,17 @@ class ContactsListViewModelTest {
     fun onViewReadyShouldInitContacts() {
         // Arrange
         whenever(mockContactsManager.loadNodes()).thenReturn(Observable.just(false))
-        val mockPayload: Payload = mock()
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
-        whenever(mockPayload.isDoubleEncrypted).thenReturn(false)
+        whenever(mockPayload.isDoubleEncryption).thenReturn(false)
         whenever(mockContactsManager.generateNodes(isNull())).thenReturn(Completable.complete())
         val mockNodeFactory: MetadataNodeFactory = mock()
-        whenever(mockContactsManager.metadataNodeFactory).thenReturn(Observable.just(mockNodeFactory))
+        whenever(mockContactsManager.metadataNodeFactory)
+                .thenReturn(Observable.just(mockNodeFactory))
         whenever(mockNodeFactory.sharedMetadataNode).thenReturn(mock())
         whenever(mockNodeFactory.metadataNode).thenReturn(mock())
-        whenever(mockContactsManager.initContactsService(any(), any())).thenReturn(Completable.complete())
+        whenever(mockContactsManager.initContactsService(any(), any()))
+                .thenReturn(Completable.complete())
         whenever(mockContactsManager.registerMdid()).thenReturn(Completable.complete())
         whenever(mockContactsManager.publishXpub()).thenReturn(Completable.complete())
         val notificationObservable = PublishSubject.create<NotificationPayload>()
@@ -185,7 +187,7 @@ class ContactsListViewModelTest {
         verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
         // There will be other interactions with the mocks, but they are not tested here
         verify(mockPayloadManager).payload
-        verify(mockPayload).isDoubleEncrypted
+        verify(mockPayload).isDoubleEncryption
         verify(mockContactsManager).generateNodes(isNull())
         verify(mockContactsManager).metadataNodeFactory
         verify(mockContactsManager).initContactsService(any(), any())
@@ -255,7 +257,8 @@ class ContactsListViewModelTest {
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         whenever(mockContactsManager.loadNodes()).thenReturn(Observable.just(true))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
-        whenever(mockContactsManager.contactList).thenReturn(Observable.fromIterable(listOf<Contact>()))
+        whenever(mockContactsManager.contactList)
+                .thenReturn(Observable.fromIterable(listOf<Contact>()))
         whenever(mockContactsManager.contactsWithUnreadPaymentRequests)
                 .thenReturn(Observable.error { Throwable() })
         // Act
@@ -290,12 +293,15 @@ class ContactsListViewModelTest {
     fun initContactsServiceShouldThrowDecryptionException() {
         // Arrange
         val password = "PASSWORD"
-        whenever(mockContactsManager.generateNodes(password)).thenReturn(Completable.error { DecryptionException() })
+        whenever(mockContactsManager.generateNodes(password))
+                .thenReturn(Completable.error { DecryptionException() })
         val mockNodeFactory: MetadataNodeFactory = mock()
-        whenever(mockContactsManager.metadataNodeFactory).thenReturn(Observable.just(mockNodeFactory))
+        whenever(mockContactsManager.metadataNodeFactory)
+                .thenReturn(Observable.just(mockNodeFactory))
         whenever(mockNodeFactory.sharedMetadataNode).thenReturn(mock())
         whenever(mockNodeFactory.metadataNode).thenReturn(mock())
-        whenever(mockContactsManager.initContactsService(any(), any())).thenReturn(Completable.complete())
+        whenever(mockContactsManager.initContactsService(any(), any()))
+                .thenReturn(Completable.complete())
         whenever(mockContactsManager.registerMdid()).thenReturn(Completable.complete())
         whenever(mockContactsManager.publishXpub()).thenReturn(Completable.complete())
         // Act
@@ -317,12 +323,15 @@ class ContactsListViewModelTest {
     fun initContactsServiceShouldThrowException() {
         // Arrange
         val password = "PASSWORD"
-        whenever(mockContactsManager.generateNodes(password)).thenReturn(Completable.error { Throwable() })
+        whenever(mockContactsManager.generateNodes(password))
+                .thenReturn(Completable.error { Throwable() })
         val mockNodeFactory: MetadataNodeFactory = mock()
-        whenever(mockContactsManager.metadataNodeFactory).thenReturn(Observable.just(mockNodeFactory))
+        whenever(mockContactsManager.metadataNodeFactory)
+                .thenReturn(Observable.just(mockNodeFactory))
         whenever(mockNodeFactory.sharedMetadataNode).thenReturn(mock())
         whenever(mockNodeFactory.metadataNode).thenReturn(mock())
-        whenever(mockContactsManager.initContactsService(any(), any())).thenReturn(Completable.complete())
+        whenever(mockContactsManager.initContactsService(any(), any()))
+                .thenReturn(Completable.complete())
         whenever(mockContactsManager.registerMdid()).thenReturn(Completable.complete())
         whenever(mockContactsManager.publishXpub()).thenReturn(Completable.complete())
         // Act
@@ -343,7 +352,8 @@ class ContactsListViewModelTest {
     @Throws(Exception::class)
     fun checkStatusOfPendingContactsSuccess() {
         // Arrange
-        whenever(mockContactsManager.readInvitationSent(any<Contact>())).thenReturn(Observable.just(true))
+        whenever(mockContactsManager.readInvitationSent(any<Contact>()))
+                .thenReturn(Observable.just(true))
         whenever(mockContactsManager.contactList).thenReturn(Observable.error { Throwable() })
         // Act
         subject.checkStatusOfPendingContacts(listOf(Contact(), Contact(), Contact()))

@@ -2,9 +2,8 @@ package piuk.blockchain.android.ui.auth;
 
 import android.app.Application;
 
-import info.blockchain.api.WalletPayload;
-import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,47 +14,50 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
+import okhttp3.MediaType;
+import okhttp3.ResponseBody;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
-import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
+import retrofit2.Response;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static piuk.blockchain.android.ui.auth.PasswordRequiredViewModel.KEY_AUTH_REQUIRED;
 
-/**
- * Created by adambennett on 10/08/2016.
- */
+
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class PasswordRequiredViewModelTest extends RxTest {
 
-    private PasswordRequiredViewModel mSubject;
-
-    @Mock private PasswordRequiredActivity mActivity;
-    @Mock protected AppUtil mAppUtil;
-    @Mock protected PrefsUtil mPrefsUtil;
-    @Mock protected AuthDataManager mAuthDataManager;
+    private PasswordRequiredViewModel subject;
+    @Mock private PasswordRequiredActivity activity;
+    @Mock private AppUtil appUtil;
+    @Mock private PrefsUtil prefsUtil;
+    @Mock private AuthDataManager authDataManager;
 
     @Before
     public void setUp() throws Exception {
@@ -68,179 +70,216 @@ public class PasswordRequiredViewModelTest extends RxTest {
                 new ApiModule(),
                 new MockDataManagerModule());
 
-        mSubject = new PasswordRequiredViewModel(mActivity);
+        subject = new PasswordRequiredViewModel(activity);
     }
 
     /**
-     * Password is missing, should trigger {@link PasswordRequiredActivity#restartPage()}
+     * Password is missing, should trigger {@link PasswordRequiredActivity#showToast(int, String)}
      */
     @Test
     public void onContinueClickedNoPassword() throws Exception {
         // Arrange
-        when(mActivity.getPassword()).thenReturn("");
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("");
+        when(activity.getPassword()).thenReturn("");
         // Act
-        mSubject.onContinueClicked();
+        subject.onContinueClicked();
         // Assert
         // noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), anyString());
-        verify(mActivity).restartPage();
+        verify(activity).showToast(anyInt(), anyString());
     }
 
     /**
      * Password is correct, should trigger {@link PasswordRequiredActivity#goToPinPage()}
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void onContinueClickedCorrectPassword() throws Exception {
         // Arrange
-        when(mActivity.getPassword()).thenReturn("1234567890");
-        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
 
-        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
-        doAnswer(invocation -> {
-            ((AuthDataManager.DecryptPayloadListener) invocation.getArguments()[3]).onSuccess();
-            return null;
-        }).when(mAuthDataManager).attemptDecryptPayload(
-                any(CharSequenceX.class), anyString(), anyString(), any(AuthDataManager.DecryptPayloadListener.class));
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        Response response = Response.success(responseBody);
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.just(response));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
+        when(authDataManager.initializeFromPayload(anyString(), anyString()))
+                .thenReturn(Completable.complete());
 
         // Act
-        mSubject.onContinueClicked();
+        subject.onContinueClicked();
         // Assert
         // noinspection WrongConstant
-        verify(mActivity).goToPinPage();
+        verify(activity).goToPinPage();
     }
 
     /**
-     * PayloadManager returns a pairing failure, should trigger {@link PasswordRequiredActivity#showToast(int, String)} ()}
+     * AuthDataManager returns a failure when getting encrypted payload, should trigger {@link
+     * PasswordRequiredActivity#showToast(int, String)}
      */
     @Test
     public void onContinueClickedPairingFailure() throws Exception {
         // Arrange
-        when(mActivity.getPassword()).thenReturn("1234567890");
-        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
-
-        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
-        doAnswer(invocation -> {
-            ((AuthDataManager.DecryptPayloadListener) invocation.getArguments()[3]).onPairFail();
-            return null;
-        }).when(mAuthDataManager).attemptDecryptPayload(
-                any(CharSequenceX.class), anyString(), anyString(), any(AuthDataManager.DecryptPayloadListener.class));
-
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.error(new Throwable()));
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
         // Act
-        mSubject.onContinueClicked();
+        subject.onContinueClicked();
         // Assert
         // noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), anyString());
-        verify(mActivity).resetPasswordField();
-        verify(mActivity).dismissProgressDialog();
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).resetPasswordField();
+        verify(activity).dismissProgressDialog();
     }
 
+
     /**
-     * PayloadManager returns wallet creation failure, should trigger {@link PasswordRequiredActivity#showToast(int, String)} ()}
+     * AuthDataManager returns failure when polling auth status, should trigger {@link
+     * PasswordRequiredActivity#showToast(int, String)}
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void onContinueClickedCreateFailure() throws Exception {
         // Arrange
-        when(mActivity.getPassword()).thenReturn("1234567890");
-        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
 
-        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
-        doAnswer(invocation -> {
-            ((AuthDataManager.DecryptPayloadListener) invocation.getArguments()[3]).onPairFail();
-            return null;
-        }).when(mAuthDataManager).attemptDecryptPayload(
-                any(CharSequenceX.class), anyString(), anyString(), any(AuthDataManager.DecryptPayloadListener.class));
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        Response response = Response.success(responseBody);
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.just(response));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.error(new Throwable()));
 
         // Act
-        mSubject.onContinueClicked();
+        subject.onContinueClicked();
         // Assert
         // noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), anyString());
-        verify(mActivity).resetPasswordField();
-        verify(mActivity).dismissProgressDialog();
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).resetPasswordField();
+        verify(activity).dismissProgressDialog();
     }
 
+
     /**
-     * PayloadManager returns auth failure, should trigger {@link PasswordRequiredActivity#showToast(int, String)} ()}
+     * AuthDataManager returns a {@link DecryptionException}, should trigger {@link
+     * PasswordRequiredActivity#showToast(int, String)}.
      */
+    @SuppressWarnings("unchecked")
     @Test
-    public void onContinueClickedAuthFailure() throws Exception {
+    public void onContinueClickedDecryptionFailure() throws Exception {
         // Arrange
-        when(mActivity.getPassword()).thenReturn("1234567890");
-        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
 
-        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
-        doAnswer(invocation -> {
-            ((AuthDataManager.DecryptPayloadListener) invocation.getArguments()[3]).onAuthFail();
-            return null;
-        }).when(mAuthDataManager).attemptDecryptPayload(
-                any(CharSequenceX.class), anyString(), anyString(), any(AuthDataManager.DecryptPayloadListener.class));
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        Response response = Response.success(responseBody);
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.just(response));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
+        when(authDataManager.initializeFromPayload(anyString(), anyString()))
+                .thenReturn(Completable.error(new DecryptionException()));
 
         // Act
-        mSubject.onContinueClicked();
+        subject.onContinueClicked();
         // Assert
         // noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), anyString());
-        verify(mActivity).resetPasswordField();
-        verify(mActivity).dismissProgressDialog();
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).resetPasswordField();
+        verify(activity).dismissProgressDialog();
     }
 
     /**
-     * PayloadManager returns a fatal error, should trigger {@link AppUtil#clearCredentialsAndRestart()}
+     * AuthDataManager returns a {@link HDWalletException}, should trigger {@link
+     * PasswordRequiredActivity#showToast(int, String)}.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void onContinueClickedHDWalletExceptionFailure() throws Exception {
+        // Arrange
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
+
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        Response response = Response.success(responseBody);
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.just(response));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
+        when(authDataManager.initializeFromPayload(anyString(), anyString()))
+                .thenReturn(Completable.error(new HDWalletException()));
+
+        // Act
+        subject.onContinueClicked();
+        // Assert
+        // noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).resetPasswordField();
+        verify(activity).dismissProgressDialog();
+    }
+
+    /**
+     * AuthDataManager returns a fatal exception, should restart the app and clear credentials.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void onContinueClickedFatalErrorClearData() throws Exception {
+        // Arrange
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
+
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        Response response = Response.success(responseBody);
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.just(response));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
+        when(authDataManager.initializeFromPayload(anyString(), anyString()))
+                .thenReturn(Completable.error(new RuntimeException()));
+
+        // Act
+        subject.onContinueClicked();
+        // Assert
+        // noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).resetPasswordField();
+        verify(activity).dismissProgressDialog();
+        verify(appUtil).clearCredentialsAndRestart();
+    }
+
+    /**
+     * AuthDataManager returns an error when getting session ID, should trigger {@link
+     * AppUtil#clearCredentialsAndRestart()}
      */
     @Test
     public void onContinueClickedFatalError() throws Exception {
         // Arrange
-        when(mActivity.getPassword()).thenReturn("1234567890");
-        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
 
-        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
-        doAnswer(invocation -> {
-            ((AuthDataManager.DecryptPayloadListener) invocation.getArguments()[3]).onFatalError();
-            return null;
-        }).when(mAuthDataManager).attemptDecryptPayload(
-                any(CharSequenceX.class), anyString(), anyString(), any(AuthDataManager.DecryptPayloadListener.class));
-
+        when(authDataManager.getSessionId(anyString()))
+                .thenReturn(Observable.error(new Throwable()));
         // Act
-        mSubject.onContinueClicked();
+        subject.onContinueClicked();
         // Assert
         // noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), anyString());
-        verify(mActivity).resetPasswordField();
-        verify(mActivity).dismissProgressDialog();
-        verify(mAppUtil).clearCredentialsAndRestart();
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).resetPasswordField();
+        verify(activity).dismissProgressDialog();
+        verify(appUtil).clearCredentialsAndRestart();
     }
 
-    /**
-     * {@link AuthDataManager#getSessionId(String)} throws exception. Should restart
-     * the app view {@link AppUtil#clearCredentialsAndRestart()}
-     */
-    @Test
-    public void onContinueClickedSessionIdFailure() throws Exception {
-        // Arrange
-        when(mActivity.getPassword()).thenReturn("1234567890");
-        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
-
-        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.error(new Throwable()));
-
-        // Act
-        mSubject.onContinueClicked();
-        // Assert
-        // noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), anyString());
-        verify(mActivity).resetPasswordField();
-        verify(mActivity).dismissProgressDialog();
-        verify(mAppUtil).clearCredentialsAndRestart();
-    }
 
     /**
      * {@link AuthDataManager#getEncryptedPayload(String, String)} throws exception. Should restart
@@ -249,129 +288,159 @@ public class PasswordRequiredViewModelTest extends RxTest {
     @Test
     public void onContinueClickedEncryptedPayloadFailure() throws Exception {
         // Arrange
-        when(mActivity.getPassword()).thenReturn("1234567890");
-        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
 
-        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.error(new Throwable()));
-
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.error(new Throwable()));
         // Act
-        mSubject.onContinueClicked();
+        subject.onContinueClicked();
         // Assert
         // noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), anyString());
-        verify(mActivity).resetPasswordField();
-        verify(mActivity).dismissProgressDialog();
-        verify(mAppUtil).clearCredentialsAndRestart();
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).resetPasswordField();
+        verify(activity).dismissProgressDialog();
+        verify(appUtil).clearCredentialsAndRestart();
     }
 
     /**
-     * {@link AuthDataManager#startPollingAuthStatus(String)}} returns Access Required. Should restart
-     * the app via {@link AppUtil#clearCredentialsAndRestart()}
+     * {@link AuthDataManager#startPollingAuthStatus(String, String)} returns Access Required.
+     * Should restart the app via {@link AppUtil#clearCredentialsAndRestart()}
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void onContinueClickedWaitingForAuthRequired() throws Exception {
         // Arrange
-        when(mActivity.getPassword()).thenReturn("1234567890");
-        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
 
-        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
-        when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        Response response = Response.error(500, responseBody);
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.just(response));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just(KEY_AUTH_REQUIRED));
+        when(authDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
         // Act
-        mSubject.onContinueClicked();
+        subject.onContinueClicked();
         // Assert
         // noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), anyString());
-        verify(mActivity).resetPasswordField();
-        verify(mAppUtil).clearCredentialsAndRestart();
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).resetPasswordField();
+        verify(appUtil).clearCredentialsAndRestart();
     }
 
     /**
-     * {@link AuthDataManager#startPollingAuthStatus(String)}} returns payload. Should attempt to
-     * decrypt the payload.
+     * {@link AuthDataManager#startPollingAuthStatus(String, String)} returns payload. Should
+     * attempt to decrypt the payload.
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void onContinueClickedWaitingForAuthSuccess() throws Exception {
         // Arrange
-        when(mActivity.getPassword()).thenReturn("1234567890");
-        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
 
-        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        Response response = Response.error(500, responseBody);
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.just(response));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
+        when(authDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
+        when(authDataManager.initializeFromPayload(anyString(), anyString()))
+                .thenReturn(Completable.complete());
         // Act
-        mSubject.onContinueClicked();
+        subject.onContinueClicked();
         // Assert
-        verify(mAuthDataManager).attemptDecryptPayload(any(), anyString(), anyString(), any());
+        verify(authDataManager).initializeFromPayload(anyString(), anyString());
     }
 
     /**
-     * {@link AuthDataManager#startPollingAuthStatus(String)}} returns an error. Should restart the app
-     * via {@link AppUtil#clearCredentialsAndRestart()}
+     * {@link AuthDataManager#createCheckEmailTimer()} throws an error. Should show error toast.
      */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void onContinueClickedWaitingForAuthEmailTimerError() throws Exception {
+        // Arrange
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
+
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        Response response = Response.error(500, responseBody);
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.just(response));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
+        when(authDataManager.createCheckEmailTimer())
+                .thenReturn(Observable.error(new Throwable()));
+        when(authDataManager.initializeFromPayload(anyString(), anyString()))
+                .thenReturn(Completable.complete());
+        // Act
+        subject.onContinueClicked();
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).resetPasswordField();
+    }
+
+    /**
+     * {@link AuthDataManager#startPollingAuthStatus(String, String)} returns an error. Should
+     * restart the app via {@link AppUtil#clearCredentialsAndRestart()}
+     */
+    @SuppressWarnings("unchecked")
     @Test
     public void onContinueClickedWaitingForAuthFailure() throws Exception {
         // Arrange
-        when(mActivity.getPassword()).thenReturn("1234567890");
-        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
 
-        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
-        when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.error(new Throwable()));
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        Response response = Response.error(500, responseBody);
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.just(response));
+        when(authDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.error(new Throwable()));
         // Act
-        mSubject.onContinueClicked();
+        subject.onContinueClicked();
         // Assert
         // noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), anyString());
-        verify(mActivity).resetPasswordField();
-        verify(mAppUtil).clearCredentialsAndRestart();
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).resetPasswordField();
+        verify(appUtil).clearCredentialsAndRestart();
     }
 
     /**
-     * {@link AuthDataManager#startPollingAuthStatus(String)}} counts down to zero. Should restart the app
-     * via {@link AppUtil#clearCredentialsAndRestart()}
+     * {@link AuthDataManager#startPollingAuthStatus(String, String)} counts down to zero. Should
+     * restart the app via {@link AppUtil#clearCredentialsAndRestart()}
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void onContinueClickedWaitingForAuthCountdownComplete() throws Exception {
         // Arrange
-        when(mActivity.getPassword()).thenReturn("1234567890");
-        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
-
-        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
-        when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.just(0));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        Response response = Response.error(500, responseBody);
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.just(response));
+        when(authDataManager.createCheckEmailTimer()).thenReturn(Observable.just(0));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
         // Act
-        mSubject.onContinueClicked();
+        subject.onContinueClicked();
         // Assert
         // noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), anyString());
-        verify(mActivity).resetPasswordField();
-        verify(mAppUtil).clearCredentialsAndRestart();
-    }
-
-    /**
-     * {@link AuthDataManager#createCheckEmailTimer()}} returns Throwable. Should show error toast.
-     */
-    @Test
-    public void onContinueClickedWaitingForAuthCountdownError() throws Exception {
-        // Arrange
-        when(mActivity.getPassword()).thenReturn("1234567890");
-        when(mPrefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
-
-        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        when(mAuthDataManager.getEncryptedPayload(anyString(), anyString())).thenReturn(Observable.just(WalletPayload.KEY_AUTH_REQUIRED));
-        when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.error(new Throwable()));
-        when(mAuthDataManager.startPollingAuthStatus(anyString())).thenReturn(Observable.just("1234567890"));
-        // Act
-        mSubject.onContinueClicked();
-        // Assert
-        // noinspection WrongConstant
-        verify(mActivity).showToast(anyInt(), anyString());
+        verify(activity, times(2)).showToast(anyInt(), anyString());
+        verify(activity, times(2)).resetPasswordField();
+        verify(appUtil, times(2)).clearCredentialsAndRestart();
     }
 
     @Test
@@ -379,10 +448,10 @@ public class PasswordRequiredViewModelTest extends RxTest {
         // Arrange
 
         // Act
-        mSubject.onProgressCancelled();
+        subject.onProgressCancelled();
         // Assert
-        assertFalse(mSubject.mWaitingForAuth);
-        assertEquals(0, mSubject.compositeDisposable.size());
+        assertFalse(subject.waitingForAuth);
+        assertEquals(0, subject.compositeDisposable.size());
     }
 
     @Test
@@ -391,12 +460,12 @@ public class PasswordRequiredViewModelTest extends RxTest {
         doAnswer(invocation -> {
             ((DialogButtonCallback) invocation.getArguments()[0]).onPositiveClicked();
             return null;
-        }).when(mActivity).showForgetWalletWarning(any(DialogButtonCallback.class));
+        }).when(activity).showForgetWalletWarning(any(DialogButtonCallback.class));
         // Act
-        mSubject.onForgetWalletClicked();
+        subject.onForgetWalletClicked();
         // Assert
-        verify(mActivity).showForgetWalletWarning(any(DialogButtonCallback.class));
-        verify(mAppUtil).clearCredentialsAndRestart();
+        verify(activity).showForgetWalletWarning(any(DialogButtonCallback.class));
+        verify(appUtil).clearCredentialsAndRestart();
     }
 
     @Test
@@ -405,12 +474,12 @@ public class PasswordRequiredViewModelTest extends RxTest {
         doAnswer(invocation -> {
             ((DialogButtonCallback) invocation.getArguments()[0]).onNegativeClicked();
             return null;
-        }).when(mActivity).showForgetWalletWarning(any(DialogButtonCallback.class));
+        }).when(activity).showForgetWalletWarning(any(DialogButtonCallback.class));
         // Act
-        mSubject.onForgetWalletClicked();
+        subject.onForgetWalletClicked();
         // Assert
-        verify(mActivity).showForgetWalletWarning(any(DialogButtonCallback.class));
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).showForgetWalletWarning(any(DialogButtonCallback.class));
+        verifyNoMoreInteractions(activity);
     }
 
     @Test
@@ -418,9 +487,9 @@ public class PasswordRequiredViewModelTest extends RxTest {
         // Arrange
 
         // Act
-        AppUtil util = mSubject.getAppUtil();
+        AppUtil util = subject.getAppUtil();
         // Assert
-        assertEquals(util, mAppUtil);
+        assertEquals(util, appUtil);
     }
 
     @Test
@@ -428,11 +497,12 @@ public class PasswordRequiredViewModelTest extends RxTest {
         // Arrange
 
         // Act
-        mSubject.onViewReady();
+        subject.onViewReady();
         // Assert
         assertTrue(true);
     }
 
+    @SuppressWarnings("SyntheticAccessorCall")
     private class MockApplicationModule extends ApplicationModule {
 
         MockApplicationModule(Application application) {
@@ -441,25 +511,24 @@ public class PasswordRequiredViewModelTest extends RxTest {
 
         @Override
         protected PrefsUtil providePrefsUtil() {
-            return mPrefsUtil;
+            return prefsUtil;
         }
 
         @Override
         protected AppUtil provideAppUtil() {
-            return mAppUtil;
+            return appUtil;
         }
     }
 
+    @SuppressWarnings("SyntheticAccessorCall")
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected AuthDataManager provideAuthDataManager(PayloadManager payloadManager,
-                                                         PrefsUtil prefsUtil,
-                                                         AppUtil appUtil,
-                                                         AESUtilWrapper aesUtilWrapper,
+        protected AuthDataManager provideAuthDataManager(PayloadDataManager payloadDataManager,
+                                                         PrefsUtil prefsUtil, AppUtil appUtil,
                                                          AccessState accessState,
                                                          StringUtils stringUtils) {
-            return mAuthDataManager;
+            return authDataManager;
         }
     }
 }

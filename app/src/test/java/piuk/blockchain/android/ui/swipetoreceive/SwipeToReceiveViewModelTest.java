@@ -3,9 +3,6 @@ package piuk.blockchain.android.ui.swipetoreceive;
 import android.app.Application;
 import android.graphics.Bitmap;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.PayloadManager;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +19,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
@@ -42,9 +40,9 @@ import static org.mockito.Mockito.when;
 public class SwipeToReceiveViewModelTest {
 
     private SwipeToReceiveViewModel subject;
-    @Mock SwipeToReceiveViewModel.DataListener activity;
-    @Mock SwipeToReceiveHelper swipeToReceiveHelper;
-    @Mock QrCodeDataManager qrCodeDataManager;
+    @Mock private SwipeToReceiveViewModel.DataListener activity;
+    @Mock private SwipeToReceiveHelper swipeToReceiveHelper;
+    @Mock private QrCodeDataManager qrCodeDataManager;
 
     @Before
     public void setUp() throws Exception {
@@ -108,15 +106,12 @@ public class SwipeToReceiveViewModelTest {
         }
     }
 
+    @SuppressWarnings("SyntheticAccessorCall")
     private class MockDataManagerModule extends DataManagerModule {
 
-        MockDataManagerModule() {
-        }
-
         @Override
-        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadManager payloadManager,
-                                                            MultiAddrFactory multiAddrFactory,
-                                                            PrefsUtil prefsUtil) {
+        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadDataManager payloadDataManager,
+                                                                   PrefsUtil prefsUtil) {
             return swipeToReceiveHelper;
         }
 

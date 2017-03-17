@@ -1,36 +1,32 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
-import info.blockchain.wallet.payload.Payload;
-import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payment.Payment;
-import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
-import info.blockchain.wallet.payment.data.SuggestedFee;
-import info.blockchain.wallet.payment.data.UnspentOutputs;
+import info.blockchain.api.data.UnspentOutputs;
+import info.blockchain.wallet.api.data.Fee;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigInteger;
-import java.util.List;
+import java.util.Collections;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.services.PaymentService;
-import piuk.blockchain.android.data.services.UnspentService;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,16 +34,16 @@ import static org.mockito.Mockito.when;
 public class AccountEditDataManagerTest extends RxTest {
 
     private AccountEditDataManager subject;
-    @Mock PayloadManager payloadManager;
-    @Mock UnspentService unspentService;
-    @Mock PaymentService paymentService;
+    @Mock private PayloadDataManager payloadDataManager;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS) private DynamicFeeCache dynamicFeeCache;
+    @Mock private PaymentService paymentService;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        subject = new AccountEditDataManager(unspentService, paymentService, payloadManager);
+        subject = new AccountEditDataManager(paymentService, payloadDataManager, dynamicFeeCache);
     }
 
     @Test
@@ -55,22 +51,26 @@ public class AccountEditDataManagerTest extends RxTest {
         // Arrange
         LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setAddress("");
-        Payment payment = new Payment();
-        SuggestedFee suggestedFee = new SuggestedFee();
-        suggestedFee.defaultFeePerKb = BigInteger.valueOf(100);
-        DynamicFeeCache.getInstance().setSuggestedFee(suggestedFee);
-        Payload mockPayload = mock(Payload.class, RETURNS_DEEP_STUBS);
-        when(mockPayload.getHdWallet().getDefaultIndex()).thenReturn(0);
-        when(mockPayload.getHdWallet().getAccounts().get(anyInt())).thenReturn(mock(Account.class));
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        when(payloadManager.getNextReceiveAddress(anyInt())).thenReturn("address");
-        when(unspentService.getUnspentOutputs(anyString(), any(Payment.class))).thenReturn(Observable.just(mock(UnspentOutputs.class)));
+        Fee suggestedFee = mock(Fee.class);
+        Pair<BigInteger, BigInteger> sweepableCoins = Pair.of(BigInteger.ONE, BigInteger.TEN);
+        when(suggestedFee.getFee()).thenReturn(100.0d);
+        when(dynamicFeeCache.getCachedDynamicFee().getDefaultFee()).thenReturn(suggestedFee);
+        when(payloadDataManager.getDefaultAccount()).thenReturn(mock(Account.class));
+        when(payloadDataManager.getNextReceiveAddress(any(Account.class)))
+                .thenReturn(Observable.just("address"));
+        when(paymentService.getUnspentOutputs(anyString()))
+                .thenReturn(Observable.just(mock(UnspentOutputs.class)));
+        when(paymentService.getSweepableCoins(any(UnspentOutputs.class), any(BigInteger.class)))
+                .thenReturn(sweepableCoins);
+        when(paymentService.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
+                .thenReturn(mock(SpendableUnspentOutputs.class));
         // Act
-        TestObserver<PendingTransaction> observer = subject.getPendingTransactionForLegacyAddress(legacyAddress, payment).test();
+        TestObserver<PendingTransaction> testObserver =
+                subject.getPendingTransactionForLegacyAddress(legacyAddress).test();
         // Assert
-        observer.assertComplete();
-        observer.assertNoErrors();
-        assertEquals(PendingTransaction.class, observer.values().get(0).getClass());
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        assertEquals(PendingTransaction.class, testObserver.values().get(0).getClass());
     }
 
     @Test
@@ -84,40 +84,17 @@ public class AccountEditDataManagerTest extends RxTest {
                 any(BigInteger.class),
                 any(BigInteger.class))).thenReturn(Observable.just("hash"));
         // Act
-        TestObserver<String> observer = subject.submitPayment(mock(
+        TestObserver<String> testObserver = subject.submitPayment(mock(
                 SpendableUnspentOutputs.class),
-                mock(List.class),
+                Collections.emptyList(),
                 "",
                 "",
                 mock(BigInteger.class),
                 mock(BigInteger.class)).test();
         // Assert
-        observer.assertComplete();
-        observer.assertNoErrors();
-        assertEquals("hash", observer.values().get(0));
-    }
-
-    @Test
-    public void syncPayloadWithServer() throws Exception {
-        // Arrange
-        when(payloadManager.savePayloadToServer()).thenReturn(true);
-        // Act
-        TestObserver<Boolean> observer = subject.syncPayloadWithServer().test();
-        // Assert
-        observer.assertComplete();
-        observer.assertNoErrors();
-        assertEquals(true, observer.values().get(0).booleanValue());
-    }
-
-    @Test
-    public void updateBalancesAndTransactions() throws Exception {
-        // Arrange
-
-        // Act
-        TestObserver<Void> observer = subject.updateBalancesAndTransactions().test();
-        // Assert
-        observer.assertComplete();
-        observer.assertNoErrors();
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        testObserver.assertValue("hash");
     }
 
 }

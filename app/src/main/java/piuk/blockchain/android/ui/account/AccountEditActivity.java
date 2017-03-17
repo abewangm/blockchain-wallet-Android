@@ -21,8 +21,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
-import info.blockchain.wallet.payload.PayloadManager;
-
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.websocket.WebSocketService;
@@ -407,7 +405,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         if (AndroidUtils.is25orHigher() && viewModel.areLauncherShortcutsEnabled()) {
             LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(
                     this,
-                    PayloadManager.getInstance(),
+                    viewModel.getPayloadDataManager(),
                     getSystemService(ShortcutManager.class));
 
             launcherShortcutHelper.generateReceiveShortcuts();

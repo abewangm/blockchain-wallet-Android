@@ -1,107 +1,186 @@
 package piuk.blockchain.android.util;
 
+import info.blockchain.api.data.Ticker;
+import info.blockchain.api.data.TickerItem;
+import info.blockchain.api.exchangerates.ExchangeRates;
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.api.WalletApi;
 
-import android.util.Log;
-
-import info.blockchain.api.ExchangeTicker;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import io.reactivex.Completable;
+import org.apache.commons.lang3.EnumUtils;
 
 import java.text.NumberFormat;
-import java.util.HashMap;
 import java.util.Locale;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
-import io.reactivex.Observable;
+import retrofit2.Response;
 
 /**
  * This class obtains info on the currencies communicated via https://blockchain.info/ticker
  */
 public class ExchangeRateFactory {
 
-    private static JSONObject jsonObject = null;
-    @Inject protected PrefsUtil mPrefsUtil;
+    private String TAG = getClass().getName();
 
-    private static HashMap<String, Double> fxRates = null;
-    private static HashMap<String, String> fxSymbols = null;
+    private ExchangeRates api;
+
+    //Regularly updated ticker data
+    private Ticker tickerData;
+
+    @Inject protected PrefsUtil prefsUtil;
 
     private static ExchangeRateFactory instance = null;
 
-    /**
-     * Currencies handles by https://blockchain.info/ticker
-     */
-    private static String[] currencies = {
-            "AUD", "BRL", "CAD", "CHF", "CLP", "CNY", "DKK", "EUR", "GBP", "HKD",
-            "ISK", "JPY", "KRW", "NZD", "PLN", "RUB", "SEK", "SGD", "THB", "TWD", "USD"
-    };
-
-    private static String[] currencyLabels = {
-            "United States Dollar - USD",
-            "Euro - EUR",
-            "British Pound Sterling - GBP",
-            "Australian Dollar - AUD",
-            "Brazilian Real - BRL",
-            "Canadian Dollar - CAD",
-            "Chinese Yuan - CNY",
-            "Swiss Franc - CHF",
-            "Chilean Peso - CLP",
-            "Danish Krone - DKK",
-            "Hong Kong Dollar - HKD",
-            "Icelandic Krona - ISK",
-            "Japanese Yen - JPY",
-            "South Korean Won - KRW",
-            "New Zealand Dollar - NZD",
-            "Polish Zloty - PLN",
-            "Russian Rouble - RUB",
-            "Swedish Krona - SEK",
-            "Singapore Dollar - SGD",
-            "Thai Baht - THB",
-            "Taiwanese Dollar - TWD",
-    };
-
+    public enum Currency {
+        AUD, BRL, CAD, CHF, CLP, CNY, DKK, EUR, GBP, HKD,
+        ISK, JPY, KRW, NZD, PLN, RUB, SEK, SGD, THB, TWD, USD
+    }
 
     private ExchangeRateFactory() {
         Injector.getInstance().getAppComponent().inject(this);
+        api = new ExchangeRates(
+                BlockchainFramework.getRetrofitServerInstance(),
+                BlockchainFramework.getApiCode());
     }
 
     public static ExchangeRateFactory getInstance() {
         if (instance == null) {
-            fxRates = new HashMap<>();
-            fxSymbols = new HashMap<>();
-
             instance = new ExchangeRateFactory();
         }
 
         return instance;
     }
 
-    public double getLastPrice(String currency) {
-        if (fxRates.get(currency) != null && fxRates.get(currency) > 0.0) {
-            mPrefsUtil.setValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency, Double.toString(fxRates.get(currency)));
-            return fxRates.get(currency);
-        } else {
-            return Double.parseDouble(mPrefsUtil.getValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency, "0.0"));
+    public Completable updateTicker() {
+
+        return Completable.fromCallable(() -> {
+                Response<Ticker> call = api.getTicker().execute();
+
+                if (call.isSuccessful()) {
+                    tickerData = call.body();
+                    return Void.TYPE;
+                } else {
+                    throw new Exception(call.errorBody().string());
+                }
+        }).compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    private TickerItem getTickerItem(Currency currency) {
+
+        TickerItem item;
+
+        switch (currency) {
+            case AUD:
+                item = tickerData.getAUD();
+                break;
+            case BRL:
+                item = tickerData.getBRL();
+                break;
+            case CAD:
+                item = tickerData.getCAD();
+                break;
+            case CHF:
+                item = tickerData.getCHF();
+                break;
+            case CLP:
+                item = tickerData.getCLP();
+                break;
+            case CNY:
+                item = tickerData.getCNY();
+                break;
+            case DKK:
+                item = tickerData.getDKK();
+                break;
+            case EUR:
+                item = tickerData.getEUR();
+                break;
+            case GBP:
+                item = tickerData.getGBP();
+                break;
+            case HKD:
+                item = tickerData.getHKD();
+                break;
+            case ISK:
+                item = tickerData.getISK();
+                break;
+            case JPY:
+                item = tickerData.getJPY();
+                break;
+            case KRW:
+                item = tickerData.getKRW();
+                break;
+            case NZD:
+                item = tickerData.getNZD();
+                break;
+            case PLN:
+                item = tickerData.getPLN();
+                break;
+            case RUB:
+                item = tickerData.getRUB();
+                break;
+            case SEK:
+                item = tickerData.getSEK();
+                break;
+            case SGD:
+                item = tickerData.getSGD();
+                break;
+            case THB:
+                item = tickerData.getTHB();
+                break;
+            case TWD:
+                item = tickerData.getTWD();
+                break;
+            case USD:
+                item = tickerData.getUSD();
+                break;
+            default:
+                item = tickerData.getUSD();
         }
+
+        return item;
     }
 
-    public String getSymbol(String currency) {
-        if (fxSymbols.get(currency) != null) {
-            return fxSymbols.get(currency);
-        } else {
-            return null;
+    public double getLastPrice(String currencyName) {
+
+        if (currencyName.isEmpty()) {
+            currencyName = Currency.USD.name();
         }
+
+        double lastPrice;
+        Currency currency = Currency.valueOf(currencyName.toUpperCase().trim());
+        double lastKnown = Double.parseDouble(prefsUtil.getValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency, "0.0"));
+
+        if (tickerData == null) {
+            lastPrice = lastKnown;
+        } else {
+            TickerItem tickerItem = getTickerItem(currency);
+
+            lastPrice = tickerItem.getLast();
+
+            if (lastPrice > 0.0) {
+                prefsUtil.setValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency, Double.toString(lastPrice));
+            } else {
+                lastPrice = lastKnown;
+            }
+        }
+
+        return lastPrice;
     }
 
-    public String[] getCurrencies() {
-        return currencies.clone();
-    }
+    public String getSymbol(String currencyName) {
 
-    public String[] getCurrencyLabels() {
-        return currencyLabels.clone();
+        if (currencyName.isEmpty()) {
+            currencyName = Currency.USD.name();
+        }
+
+        Currency currency = Currency.valueOf(currencyName.toUpperCase().trim());
+
+        TickerItem tickerItem = getTickerItem(currency);
+        return tickerItem.getSymbol();
     }
 
     /**
@@ -114,8 +193,8 @@ public class ExchangeRateFactory {
      * @return A double value
      */
     public Observable<Double> getHistoricPrice(long satoshis, String currency, long timeInMillis) {
-        return Observable.fromCallable(() -> new ExchangeTicker().getHistoricPrice(satoshis, currency, timeInMillis))
-                .flatMap(this::parseStringValue)
+        return new WalletApi().getHistoricPrice(satoshis, currency, timeInMillis)
+                .flatMap(responseBody -> parseStringValue(responseBody.string()))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -132,41 +211,11 @@ public class ExchangeRateFactory {
     /**
      * Parse the data supplied to this instance.
      */
-    public void setData(String data) {
-        try {
-            jsonObject = new JSONObject(data);
-        } catch (JSONException e) {
-            Log.e(getClass().getSimpleName(), "setData: ", e);
-        }
+    public void setData(Ticker data) {
+        tickerData = data;
     }
 
-    public void updateFxPricesForEnabledCurrencies() {
-        for (String currency : currencies) {
-            setFxPriceForCurrency(currency);
-        }
-    }
-
-    private void setFxPriceForCurrency(String currency) {
-        try {
-            if (jsonObject.has(currency)) {
-                JSONObject jsonCurr = jsonObject.getJSONObject(currency);
-                if (jsonCurr != null) {
-                    double last_price = jsonCurr.getDouble("last");
-                    fxRates.put(currency, last_price);
-                    String symbol = jsonCurr.getString("symbol");
-                    fxSymbols.put(currency, symbol);
-                }
-            } else {
-                setDefaultExchangeRate(currency);
-            }
-        } catch (JSONException e) {
-            Log.e(getClass().getSimpleName(), "setData: ", e);
-            setDefaultExchangeRate(currency);
-        }
-    }
-
-    private void setDefaultExchangeRate(String currency) {
-        fxRates.put(currency, -1.0);
-        fxSymbols.put(currency, null);
+    public String[] getCurrencyLabels() {
+        return EnumUtils.getEnumMap(Currency.class).keySet().toArray(new String[0]);
     }
 }
