@@ -301,7 +301,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
         new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(getString(R.string.password_entry))
-                .setView(ViewUtils.getAlertDialogEditTextLayout(getContext(), password))
+                .setView(ViewUtils.getAlertDialogPaddedView(getContext(), password))
                 .setCancelable(false)
                 .setNegativeButton(android.R.string.cancel, (dialog, whichButton) -> viewModel.getAppUtil().restartApp())
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {

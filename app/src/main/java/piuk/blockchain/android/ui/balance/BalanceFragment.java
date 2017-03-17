@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.balance;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
 import android.support.design.widget.AppBarLayout;
@@ -21,14 +19,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,7 +128,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setShowRefreshing(true);
         viewModel.onViewReady();
     }
 
@@ -456,14 +451,14 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         if (accountSpinner != null) accountSpinner.setSelection(0);
     }
 
-    @SuppressLint("ObsoleteSdkInt")
     @Override
     public void onRefreshBalanceAndTransactions() {
         // Notify adapter of change, let DiffUtil work out what needs changing
         List<Object> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
         transactionAdapter.onTransactionsUpdated(newTransactions);
-        transactionAdapter.onContactsMapChanged(viewModel.getContactsTransactionMap());
+        // TODO: 17/03/2017 This breaks the DiffUtil
+//        transactionAdapter.onContactsMapChanged(viewModel.getContactsTransactionMap());
         binding.balanceLayout.post(() -> setToolbarOffset(0));
 
         //Display help text to user if no transactionList on selected account/address
@@ -473,12 +468,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         } else {
             binding.rvTransactions.setVisibility(View.GONE);
             binding.noTransactionMessage.noTxMessage.setVisibility(View.VISIBLE);
-        }
-
-        if (isAdded() && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            //Fix for padding bug related to Android 4.1
-            float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 72, getResources().getDisplayMetrics());
-            binding.balance.setPadding((int) px, 0, 0, 0);
         }
 
         accountsAdapter.notifyBtcChanged(isBTC);
@@ -494,8 +483,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
             launcherShortcutHelper.generateReceiveShortcuts();
         }
-
-        setShowRefreshing(false);
     }
 
     @Override
@@ -521,17 +508,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             }
         });
 
-        FrameLayout frameLayout = new FrameLayout(getActivity());
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        int marginInPixels = (int) ViewUtils.convertDpToPixel(20, getActivity());
-        params.setMargins(marginInPixels, 0, marginInPixels, 0);
-        frameLayout.addView(spinner, params);
-
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_choose_account_message)
-                .setView(frameLayout)
+                .setView(ViewUtils.getAlertDialogPaddedView(getContext(), spinner))
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.onAccountChosen(selection[0], fctxId))
                 .create()
                 .show();

@@ -91,7 +91,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.name)
                 .setMessage(R.string.assign_display_name)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(this, etLabel))
+                .setView(ViewUtils.getAlertDialogPaddedView(this, etLabel))
                 .setCancelable(false)
                 .setPositiveButton(R.string.save_name, (dialog, whichButton) -> {
                     if (!ConnectivityStatus.hasConnectivity(this)) {
@@ -280,7 +280,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.bip38_password_entry)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(this, password))
+                .setView(ViewUtils.getAlertDialogPaddedView(this, password))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
                         viewModel.importBIP38Address(data, password.getText().toString()))

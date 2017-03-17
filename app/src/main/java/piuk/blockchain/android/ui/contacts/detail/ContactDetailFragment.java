@@ -100,7 +100,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
 
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
+                .setView(ViewUtils.getAlertDialogPaddedView(getActivity(), editText))
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.onContactRenamed(editText.getText().toString()))
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()

@@ -194,7 +194,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.label)
                 .setMessage(R.string.assign_display_name)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(this, editText))
+                .setView(ViewUtils.getAlertDialogPaddedView(this, editText))
                 .setCancelable(false)
                 .setPositiveButton(R.string.save_name, (dialog, whichButton) -> {
                     if (!editText.getText().toString().trim().isEmpty()) {
@@ -370,7 +370,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.bip38_password_entry)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(this, password))
+                .setView(ViewUtils.getAlertDialogPaddedView(this, password))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
                         viewModel.importBip38Address(data, password.getText().toString()))
@@ -396,7 +396,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         new AlertDialog.Builder(AccountActivity.this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.label_address)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(this, editText))
+                .setView(ViewUtils.getAlertDialogPaddedView(this, editText))
                 .setCancelable(false)
                 .setPositiveButton(R.string.save_name, (dialog, whichButton) -> {
                     String label = editText.getText().toString();

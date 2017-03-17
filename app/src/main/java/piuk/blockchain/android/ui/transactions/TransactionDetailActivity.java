@@ -63,7 +63,7 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
 
             new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
-                    .setView(ViewUtils.getAlertDialogEditTextLayout(this, editText))
+                    .setView(ViewUtils.getAlertDialogPaddedView(this, editText))
                     .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                         mViewModel.updateTransactionNote(editText.getText().toString());
