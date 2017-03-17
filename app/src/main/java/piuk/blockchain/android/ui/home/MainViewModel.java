@@ -2,28 +2,19 @@ package piuk.blockchain.android.ui.home;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.util.Log;
 
-import info.blockchain.api.Balance;
-import info.blockchain.api.DynamicFee;
-import info.blockchain.api.ExchangeTicker;
-import info.blockchain.api.Settings;
-import info.blockchain.api.Unspent;
+import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.WebUtil;
 
-import org.json.JSONObject;
-
-import java.util.Arrays;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -31,21 +22,25 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
+import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
-import piuk.blockchain.android.data.notifications.FcmCallbackService;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.SendDataManager;
+import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
+import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
-import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
@@ -58,16 +53,22 @@ public class MainViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     private OSUtil osUtil;
+    private MonetaryUtil monetaryUtil;
+    private Observable<NotificationPayload> notificationObservable;
     @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
     @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
+    @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected ContactsDataManager contactsDataManager;
-    @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
+    @Inject protected SendDataManager sendDataManager;
     @Inject protected NotificationTokenManager notificationTokenManager;
-    @Inject protected MultiAddrFactory multiAddrFactory;
     @Inject protected Context applicationContext;
     @Inject protected StringUtils stringUtils;
+    @Inject protected SettingsDataManager settingsDataManager;
+    @Inject protected DynamicFeeCache dynamicFeeCache;
+    @Inject protected ExchangeRateFactory exchangeRateFactory;
+    @Inject protected RxBus rxBus;
 
     public interface DataListener {
 
@@ -123,6 +124,7 @@ public class MainViewModel extends BaseViewModel {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
         osUtil = new OSUtil(applicationContext);
+        monetaryUtil = new MonetaryUtil(getCurrentBitcoinFormat());
     }
 
     @Override
@@ -203,10 +205,6 @@ public class MainViewModel extends BaseViewModel {
                                 throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
     }
 
-    void storeSwipeReceiveAddresses() {
-        swipeToReceiveHelper.updateAndStoreAddresses();
-    }
-
     void checkIfShouldShowSurvey() {
         if (!prefs.getValue(PrefsUtil.KEY_SURVEY_COMPLETED, false)) {
             int visitsToPageThisSession = prefs.getValue(PrefsUtil.KEY_SURVEY_VISITS, 0);
@@ -233,14 +231,9 @@ public class MainViewModel extends BaseViewModel {
     void unpair() {
         dataListener.clearAllDynamicShortcuts();
         payloadManager.wipe();
-        multiAddrFactory.wipe();
         prefs.logOut();
         appUtil.restartApp();
         accessState.setPIN(null);
-    }
-
-    boolean areLauncherShortcutsEnabled() {
-        return prefs.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true);
     }
 
     PayloadManager getPayloadManager() {
@@ -248,8 +241,10 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void subscribeToNotifications() {
+        notificationObservable = rxBus.register(NotificationPayload.class);
+
         compositeDisposable.add(
-                FcmCallbackService.getNotificationSubject()
+                notificationObservable
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(
                                 notificationPayload -> checkForMessages(),
@@ -260,7 +255,7 @@ public class MainViewModel extends BaseViewModel {
         String uri = null;
         boolean fromNotification = false;
 
-        if (prefs.getValue(PrefsUtil.KEY_METADATA_URI, "").length() > 0) {
+        if (!prefs.getValue(PrefsUtil.KEY_METADATA_URI, "").isEmpty()) {
             uri = prefs.getValue(PrefsUtil.KEY_METADATA_URI, "");
             prefs.removeValue(PrefsUtil.KEY_METADATA_URI);
         }
@@ -271,7 +266,8 @@ public class MainViewModel extends BaseViewModel {
         }
 
         final String finalUri = uri;
-        if (finalUri != null || fromNotification) dataListener.showProgressDialog(R.string.please_wait);
+        if (finalUri != null || fromNotification)
+            dataListener.showProgressDialog(R.string.please_wait);
 
         final boolean finalFromNotification = fromNotification;
 
@@ -281,7 +277,7 @@ public class MainViewModel extends BaseViewModel {
                             if (loaded) {
                                 return contactsDataManager.getMetadataNodeFactory();
                             } else {
-                                if (!payloadManager.getPayload().isDoubleEncrypted()) {
+                                if (!payloadManager.getPayload().isDoubleEncryption()) {
                                     return contactsDataManager.generateNodes(null)
                                             .andThen(contactsDataManager.getMetadataNodeFactory());
                                 } else {
@@ -294,6 +290,7 @@ public class MainViewModel extends BaseViewModel {
                                 metadataNodeFactory.getSharedMetadataNode()))
                         .andThen(contactsDataManager.registerMdid())
                         .andThen(contactsDataManager.publishXpub())
+                        .doOnComplete(() -> rxBus.emitEvent(ContactsEvent.class, ContactsEvent.INIT))
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(() -> {
                             if (finalUri != null) {
@@ -321,7 +318,7 @@ public class MainViewModel extends BaseViewModel {
                     getSettingsApi()
                             .compose(RxUtil.applySchedulersToObservable())
                             .subscribe(settings -> {
-                                if (!settings.isEmailVerified()) {
+                                if (settings.isEmailVerified()) {
                                     appUtil.setNewlyCreated(false);
                                     String email = settings.getEmail();
                                     if (email != null && !email.isEmpty()) {
@@ -335,9 +332,9 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private Observable<Settings> getSettingsApi() {
-        return Observable.fromCallable(() -> new Settings(
+        return settingsDataManager.initSettings(
                 payloadManager.getPayload().getGuid(),
-                payloadManager.getPayload().getSharedKey()));
+                payloadManager.getPayload().getSharedKey());
     }
 
     private void checkRooted() {
@@ -356,44 +353,28 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void preLaunchChecks() {
-        exchangeRateThread();
 
-        if (AccessState.getInstance().isLoggedIn()) {
+        if (accessState.isLoggedIn()) {
+            dataListener.onStartBalanceFragment(false);
             dataListener.onFetchTransactionsStart();
 
-            new Thread(() -> {
-                Looper.prepare();
-                cacheDynamicFee();
-                cacheDefaultAccountUnspentData();
-                logEvents();
-                Looper.loop();
-            }).start();
+            compositeDisposable.add(
+                    Completable.fromCallable(() -> {
+                        cacheDynamicFee();
+                        logEvents();
+                        return Void.TYPE;
+                    }).compose(RxUtil.applySchedulersToCompletable())
+                            .subscribe(() -> {
+                                if (dataListener != null) {
+                                    dataListener.onFetchTransactionCompleted();
+                                }
 
-            new Thread(() -> {
-
-                Looper.prepare();
-
-                try {
-                    payloadManager.updateBalancesAndTransactions();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                storeSwipeReceiveAddresses();
-
-                if (dataListener != null) {
-                    dataListener.onFetchTransactionCompleted();
-                    dataListener.onStartBalanceFragment(false);
-                }
-
-                if (prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").length() > 0) {
-                    String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
-                    prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
-                    dataListener.onScanInput(strUri);
-                }
-
-                Looper.loop();
-            }).start();
+                                if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
+                                    String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
+                                    prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
+                                    dataListener.onScanInput(strUri);
+                                }
+                            }));
         } else {
             // This should never happen, but handle the scenario anyway by starting the launcher
             // activity, which handles all login/auth/corruption scenarios itself
@@ -402,70 +383,53 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void cacheDynamicFee() {
-        try {
-            DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDynamicFee());
-        } catch (Exception e) {
-            Log.e(TAG, "cacheDynamicFee: ", e);
-        }
-    }
-
-    private void cacheDefaultAccountUnspentData() {
-
-        if (payloadManager.getPayload().getHdWallet() != null) {
-
-            int defaultAccountIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
-
-            Account defaultAccount = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultAccountIndex);
-            String xpub = defaultAccount.getXpub();
-
-            try {
-                JSONObject unspentResponse = new Unspent().getUnspentOutputs(xpub);
-                DefaultAccountUnspentCache.getInstance().setUnspentApiResponse(xpub, unspentResponse);
-            } catch (Exception e) {
-                Log.e(TAG, "cacheDefaultAccountUnspentData: ", e);
-            }
-        }
+        compositeDisposable.add(
+                sendDataManager.getSuggestedFee()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(feeList -> dynamicFeeCache.setCachedDynamicFee(feeList),
+                                Throwable::printStackTrace));
     }
 
     @Override
     public void destroy() {
         super.destroy();
+        rxBus.unregister(NotificationPayload.class, notificationObservable);
         appUtil.deleteQR();
-        DynamicFeeCache.getInstance().destroy();
+        dynamicFeeCache.destroy();
     }
 
-    private void exchangeRateThread() {
-        List<String> currencies = Arrays.asList(ExchangeRateFactory.getInstance().getCurrencies());
-        String strCurrentSelectedFiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
-        if (!currencies.contains(strCurrentSelectedFiat)) {
-            prefs.setValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        }
-
-        new Thread(() -> {
-            Looper.prepare();
-
-            String response = null;
-            try {
-                response = new ExchangeTicker().getExchangeRate();
-
-                ExchangeRateFactory.getInstance().setData(response);
-                ExchangeRateFactory.getInstance().updateFxPricesForEnabledCurrencies();
-                dataListener.updateCurrentPrice(getFormattedPriceString());
-            } catch (Exception e) {
-                Log.e(TAG, "exchangeRateThread: ", e);
-            }
-
-            Looper.loop();
-
-        }).start();
+    public void updateTicker() {
+        compositeDisposable.add(exchangeRateFactory.updateTicker().subscribe(() ->
+                        dataListener.updateCurrentPrice(getFormattedPriceString()),
+                Throwable::printStackTrace));
     }
 
     private String getFormattedPriceString() {
+        monetaryUtil.updateUnit(getCurrentBitcoinFormat());
         String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
-        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiat);
-        String fiatSymbol = ExchangeRateFactory.getInstance().getSymbol(fiat);
-        String args = fiatSymbol + lastPrice;
-        return stringUtils.getFormattedString(R.string.current_price, args);
+        double lastPrice = exchangeRateFactory.getLastPrice(fiat);
+        String fiatSymbol = exchangeRateFactory.getSymbol(fiat);
+        DecimalFormat format = new DecimalFormat();
+        format.setMinimumFractionDigits(2);
+
+        switch (getCurrentBitcoinFormat()) {
+            case MonetaryUtil.MICRO_BTC:
+                return stringUtils.getFormattedString(
+                        R.string.current_price_bits,
+                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
+            case MonetaryUtil.MILLI_BTC:
+                return stringUtils.getFormattedString(
+                        R.string.current_price_millibits,
+                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
+            default:
+                return stringUtils.getFormattedString(
+                        R.string.current_price_btc,
+                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
+        }
+    }
+
+    private int getCurrentBitcoinFormat() {
+        return prefs.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
     }
 
     private void startWebSocketService() {
@@ -482,16 +446,18 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void logEvents() {
-        EventLogHandler handler = new EventLogHandler(prefs, WebUtil.getInstance());
-        handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncrypted());
-        handler.logBackupEvent(payloadManager.getPayload().getHdWallet().isMnemonicVerified());
+        EventService handler = new EventService(prefs, new WalletApi());
+        handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncryption());
+        handler.logBackupEvent(payloadManager.getPayload().getHdWallets().get(0).isMnemonicVerified());
 
         try {
-            List<String> activeLegacyAddressStrings = PayloadManager.getInstance().getPayload().getLegacyAddressStringList();
-            long balance = new Balance().getTotalBalance(activeLegacyAddressStrings);
-            handler.logLegacyEvent(balance > 0L);
+            BigInteger importedAddressesBalance = payloadManager.getImportedAddressesBalance();
+            if (importedAddressesBalance != null) {
+                handler.logLegacyEvent(importedAddressesBalance.longValue() > 0L);
+            }
         } catch (Exception e) {
             Log.e(TAG, "logEvents: ", e);
         }
     }
+
 }

@@ -19,9 +19,8 @@ import android.util.Pair;
 import android.util.SparseIntArray;
 import android.webkit.MimeTypeMap;
 
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
-import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
@@ -40,6 +39,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
@@ -57,14 +57,12 @@ import piuk.blockchain.android.util.StringUtils;
 public class ReceiveViewModel extends BaseViewModel {
 
     public static final String TAG = ReceiveViewModel.class.getSimpleName();
-    public static final String KEY_WARN_WATCH_ONLY_SPEND = "warn_watch_only_spend";
-
+    @VisibleForTesting static final String KEY_WARN_WATCH_ONLY_SPEND = "warn_watch_only_spend";
     private static final int DIMENSION_QR_CODE = 600;
 
     private DataListener dataListener;
     private ReceiveCurrencyHelper currencyHelper;
 
-    @Inject PayloadManager payloadManager;
     @Inject AppUtil appUtil;
     @Inject PrefsUtil prefsUtil;
     @Inject StringUtils stringUtils;
@@ -72,6 +70,7 @@ public class ReceiveViewModel extends BaseViewModel {
     @Inject WalletAccountHelper walletAccountHelper;
     @Inject SSLVerifyUtil sslVerifyUtil;
     @Inject Context applicationContext;
+    @Inject PayloadDataManager payloadDataManager;
     @VisibleForTesting HashBiMap<Integer, Object> accountMap;
     @VisibleForTesting SparseIntArray spinnerIndexMap;
 
@@ -92,6 +91,8 @@ public class ReceiveViewModel extends BaseViewModel {
         void updateBtcTextField(String text);
 
         void startContactSelectionActivity();
+
+        void updateReceiveAddress(String address);
 
     }
 
@@ -160,7 +161,7 @@ public class ReceiveViewModel extends BaseViewModel {
     int getCorrectedAccountIndex(int accountIndex) {
         // Filter accounts by active
         List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        List<Account> accounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts();
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
             if (!account.isArchived()) {
@@ -169,7 +170,7 @@ public class ReceiveViewModel extends BaseViewModel {
         }
 
         // Find corrected position
-        return payloadManager.getPayload().getHdWallet().getAccounts().indexOf(activeAccounts.get(accountIndex));
+        return payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
     void updateAccountList() {
@@ -177,7 +178,7 @@ public class ReceiveViewModel extends BaseViewModel {
         spinnerIndexMap.clear();
         int spinnerIndex = 0;
         // V3
-        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        List<Account> accounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts();
         int accountIndex = 0;
         for (Account item : accounts) {
             spinnerIndexMap.put(spinnerIndex, accountIndex);
@@ -191,7 +192,7 @@ public class ReceiveViewModel extends BaseViewModel {
         }
 
         // Legacy Addresses
-        List<LegacyAddress> legacyAddresses = payloadManager.getPayload().getLegacyAddressList();
+        List<LegacyAddress> legacyAddresses = payloadDataManager.getWallet().getLegacyAddressList();
         for (LegacyAddress legacyAddress : legacyAddresses) {
             if (legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS)
                 // Skip archived address
@@ -245,16 +246,12 @@ public class ReceiveViewModel extends BaseViewModel {
         dataListener.updateBtcTextField(currencyHelper.getFormattedBtcString(btcAmount));
     }
 
-    @Nullable
-    String getV3ReceiveAddress(Account account) {
-        try {
-            int spinnerIndex = accountMap.inverse().get(account);
-            int accountIndex = spinnerIndexMap.get(spinnerIndex);
-            return payloadManager.getNextReceiveAddress(accountIndex);
-        } catch (Exception e) {
-            Log.e(TAG, "getV3ReceiveAddress: ", e);
-            return null;
-        }
+    void getV3ReceiveAddress(Account account) {
+        compositeDisposable.add(
+                payloadDataManager.getNextReceiveAddress(account)
+                        .subscribe(
+                                address -> dataListener.updateReceiveAddress(address),
+                                throwable -> dataListener.showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR)));
     }
 
     @Nullable
@@ -320,7 +317,8 @@ public class ReceiveViewModel extends BaseViewModel {
             Iterator it = intentHashMap.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry mapItem = (Map.Entry) it.next();
-                Pair<ResolveInfo, Intent> pair = (Pair<ResolveInfo, Intent>) mapItem.getValue();
+                @SuppressWarnings("unchecked") Pair<ResolveInfo, Intent> pair =
+                        (Pair<ResolveInfo, Intent>) mapItem.getValue();
                 ResolveInfo resolveInfo = pair.first;
                 String context = resolveInfo.activityInfo.packageName;
                 String packageClassName = resolveInfo.activityInfo.name;
@@ -398,8 +396,7 @@ public class ReceiveViewModel extends BaseViewModel {
     }
 
     private Account getDefaultAccount() {
-        return payloadManager.getPayload().getHdWallet().getAccounts().get(
-                payloadManager.getPayload().getHdWallet().getDefaultIndex());
+        return payloadDataManager.getDefaultAccount();
     }
 
     /**

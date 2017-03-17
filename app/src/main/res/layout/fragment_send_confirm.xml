@@ -25,7 +25,7 @@
                     android:gravity="center"
                     android:padding="16dp"
                     android:text="@string/confirm_details"
-                    android:textColor="@color/primary_text_default_material_light"
+                    android:textColor="@color/black"
                     android:textSize="24sp" />
 
                 <ImageView
@@ -187,7 +187,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical|right"
                             android:text="@string/customize"
-                            android:textColor="@color/primary_navy_medium"
+                            android:textColor="@color/primary_blue_accent"
                             android:textSize="14sp" />
 
                     </LinearLayout>

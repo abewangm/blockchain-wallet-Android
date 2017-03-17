@@ -9,8 +9,8 @@ import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.metadata.data.Message;
+import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.transaction.Tx;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
@@ -21,7 +21,6 @@ import java.util.List;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
-import io.reactivex.subjects.PublishSubject;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.ContactsService;
@@ -49,16 +48,10 @@ import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 @SuppressWarnings({"WeakerAccess", "AnonymousInnerClassMayBeStatic"})
 public class ContactsDataManager {
 
-    private static PublishSubject<ContactsEvent> serviceInitSubject = PublishSubject.create();
-
     private ContactsService contactsService;
     private PayloadManager payloadManager;
     private PendingTransactionListStore pendingTransactionListStore;
     @VisibleForTesting HashMap<String, String> contactsTransactionMap = new HashMap<>();
-
-    public enum ContactsEvent {
-        INIT
-    }
 
     public ContactsDataManager(ContactsService contactsService,
                                PayloadManager payloadManager,
@@ -69,16 +62,6 @@ public class ContactsDataManager {
     }
 
     /**
-     * Returns a {@link PublishSubject} which emits an item when the contacts service has been fully
-     * and successfully initialised.
-     *
-     * @return A {@link PublishSubject}
-     */
-    public static PublishSubject<ContactsEvent> getServiceInitSubject() {
-        return serviceInitSubject;
-    }
-
-    /**
      * Loads previously saved nodes from the Metadata service. If none are found, the {@link
      * Observable} returns false.
      *
@@ -86,10 +69,7 @@ public class ContactsDataManager {
      * loaded nodes
      */
     public Observable<Boolean> loadNodes() {
-        return Observable.fromCallable(() -> payloadManager.loadNodes(
-                payloadManager.getPayload().getGuid(),
-                payloadManager.getPayload().getSharedKey(),
-                payloadManager.getTempPassword().toString()))
+        return Observable.fromCallable(() -> payloadManager.loadNodes())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -136,10 +116,7 @@ public class ContactsDataManager {
      */
     public Completable registerMdid() {
         return Completable.fromCallable(() -> {
-            payloadManager.registerMdid(
-                    payloadManager.getPayload().getGuid(),
-                    payloadManager.getPayload().getSharedKey(),
-                    payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
+            payloadManager.registerMdid(payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }
@@ -153,8 +130,6 @@ public class ContactsDataManager {
     public Completable unregisterMdid() {
         return Completable.fromCallable(() -> {
             payloadManager.unregisterMdid(
-                    payloadManager.getPayload().getGuid(),
-                    payloadManager.getPayload().getSharedKey(),
                     payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
@@ -233,10 +208,12 @@ public class ContactsDataManager {
                 .toList()
                 .doOnEvent((contacts, throwable) -> {
                     contactsTransactionMap.clear();
-                    for (Contact contact : contacts) {
-                        for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
-                            if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
-                                contactsTransactionMap.put(tx.getTxHash(), contact.getName());
+                    if (contacts != null) {
+                        for (Contact contact : contacts) {
+                            for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
+                                if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
+                                    contactsTransactionMap.put(tx.getTxHash(), contact.getName());
+                                }
                             }
                         }
                     }
@@ -450,7 +427,6 @@ public class ContactsDataManager {
      */
     public Completable publishXpub() {
         return contactsService.publishXpub()
-                .doOnComplete(() -> getServiceInitSubject().onNext(ContactsEvent.INIT))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -574,8 +550,8 @@ public class ContactsDataManager {
     /**
      * Returns a Map of Contact names keyed to transaction hashes.
      *
-     * @return A {@link HashMap} where the key is a {@link Tx#getHash()}, and the value is a {@link
-     * Contact#getName()}
+     * @return A {@link HashMap} where the key is a {@link TransactionSummary#getHash()}, and the
+     * value is a {@link Contact#getName()}
      */
     public HashMap<String, String> getContactsTransactionMap() {
         return contactsTransactionMap;

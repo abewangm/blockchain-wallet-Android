@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.base;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -17,20 +18,23 @@ import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import io.reactivex.disposables.CompositeDisposable;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ApplicationLifeCycle;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 
 /**
  * A base Activity for all activities which need auth timeouts & screenshot prevention
  */
+@SuppressLint("Registered")
 public class BaseAuthActivity extends AppCompatActivity {
 
     private AlertDialog mAlertDialog;
     private SSLVerifyUtil mSSLVerifyUtil = new SSLVerifyUtil(this);
+    private PrefsUtil mPrefsUtil;
     private static CompositeDisposable compositeDisposable;
 
     @CallSuper
@@ -38,10 +42,7 @@ public class BaseAuthActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-        if (!BuildConfig.DOGFOOD && !BuildConfig.DEBUG) {
-            disallowScreenshots();
-        }
+        mPrefsUtil = new PrefsUtil(this);
 
         compositeDisposable = new CompositeDisposable();
 
@@ -90,9 +91,12 @@ public class BaseAuthActivity extends AppCompatActivity {
      * @param title   The title for the page, as a String
      */
     public void setupToolbar(Toolbar toolbar, String title) {
-        toolbar.setTitle(CalligraphyUtils.applyTypefaceSpan(
-                title,
-                TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        // Fix for bug with formatted ActionBars https://android-review.googlesource.com/#/c/47831/
+        if (AndroidUtils.is18orHigher()) {
+            toolbar.setTitle(CalligraphyUtils.applyTypefaceSpan(
+                    title,
+                    TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        }
 
         setSupportActionBar(toolbar);
     }
@@ -106,9 +110,12 @@ public class BaseAuthActivity extends AppCompatActivity {
      * @param title     The title for the page, as a StringRes
      */
     public void setupToolbar(ActionBar actionBar, @StringRes int title) {
-        actionBar.setTitle(CalligraphyUtils.applyTypefaceSpan(
-                getString(title),
-                TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        // Fix for bug with formatted ActionBars https://android-review.googlesource.com/#/c/47831/
+        if (AndroidUtils.is18orHigher()) {
+            actionBar.setTitle(CalligraphyUtils.applyTypefaceSpan(
+                    getString(title),
+                    TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        }
     }
 
     @CallSuper
@@ -117,6 +124,12 @@ public class BaseAuthActivity extends AppCompatActivity {
         super.onResume();
         stopLogoutTimer();
         ApplicationLifeCycle.getInstance().onActivityResumed();
+
+        if (mPrefsUtil.getValue(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false)) {
+            enableScreenshots();
+        } else {
+            disallowScreenshots();
+        }
     }
 
     @CallSuper
@@ -156,11 +169,12 @@ public class BaseAuthActivity extends AppCompatActivity {
         AccessState.getInstance().stopLogoutTimer(this);
     }
 
-    /**
-     * Override if you want a particular activity to be able to be screenshot.
-     */
-    protected void disallowScreenshots() {
+    private void disallowScreenshots() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+    }
+
+    private void enableScreenshots() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
     }
 
     private void showAlertDialog(final String message, final boolean forceExit) {

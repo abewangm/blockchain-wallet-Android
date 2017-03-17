@@ -1,26 +1,27 @@
 package piuk.blockchain.android.ui.receive;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
-
+import info.blockchain.api.data.MultiAddress;
+import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import java.math.BigInteger;
 import piuk.blockchain.android.util.MonetaryUtil;
 
 class AddressBalanceHelper {
 
     private MonetaryUtil monetaryUtil;
-    private MultiAddrFactory multiAddrFactory;
+    private PayloadManager payloadManager;
 
-    AddressBalanceHelper(MonetaryUtil monetaryUtil, MultiAddrFactory multiAddrFactory) {
+    AddressBalanceHelper(MonetaryUtil monetaryUtil, PayloadManager payloadManager) {
         this.monetaryUtil = monetaryUtil;
-        this.multiAddrFactory = multiAddrFactory;
+        this.payloadManager = payloadManager;
     }
 
     /**
      * Returns the balance of an {@link Account} in Satoshis
      */
     long getAccountAbsoluteBalance(Account account) {
-        return multiAddrFactory.getXpubAmounts().get(account.getXpub());
+        return payloadManager.getAddressBalance(account.getXpub()).longValue();
     }
 
     /**
@@ -42,7 +43,7 @@ class AddressBalanceHelper {
      * Returns the balance of a {@link LegacyAddress} in Satoshis
      */
     long getAddressAbsoluteBalance(LegacyAddress legacyAddress) {
-        return multiAddrFactory.getLegacyBalance(legacyAddress.getAddress());
+        return payloadManager.getAddressBalance(legacyAddress.getAddress()).longValue();
     }
 
     /**

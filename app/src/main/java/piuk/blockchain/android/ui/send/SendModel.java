@@ -1,9 +1,7 @@
 package piuk.blockchain.android.ui.send;
 
-import info.blockchain.wallet.payment.data.SuggestedFee;
-
-import org.json.JSONObject;
-
+import info.blockchain.api.data.UnspentOutputs;
+import info.blockchain.wallet.api.data.FeeList;
 import java.math.BigInteger;
 import java.util.HashMap;
 
@@ -29,16 +27,17 @@ public class SendModel {
     int btcUniti;
     String fiatUnit;
     double exchangeRate;
-    SuggestedFee suggestedFee;
 
+    FeeList dynamicFeeList;//Fee per kb list
+
+    PendingTransaction pendingTransaction;
+    BigInteger maxAvailable;
     /**
      * Currently selected <from address, unspent api response>, stored so we don't need to call API
      * repeatedly
      */
-    HashMap<String, JSONObject> unspentApiResponse;
-    PendingTransaction pendingTransaction;
-    BigInteger maxAvailable;
-    BigInteger[] absoluteSuggestedFeeEstimates;
+    HashMap<String, UnspentOutputs> unspentApiResponses;
+    public BigInteger[] absoluteSuggestedFeeEstimates;
 
     /**
      * Fee for 2nd block inclusion

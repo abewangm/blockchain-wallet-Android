@@ -1,38 +1,38 @@
 package piuk.blockchain.android.ui.account;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Intent;
 
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
-import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payload.data.Wallet;
+import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import org.apache.commons.lang3.tuple.Triple;
-import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.NetworkParameters;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import java.util.ArrayList;
+import java.util.Collections;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
@@ -44,13 +44,13 @@ import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -58,18 +58,18 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.account.AccountViewModel.KEY_WARN_TRANSFER_ALL;
 
-@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
+@SuppressWarnings({"PrivateMemberAccessBetweenOuterAndInnerClass", "AnonymousInnerClassMayBeStatic", "unchecked"})
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class AccountViewModelTest {
 
     private AccountViewModel subject;
-    @Mock AccountViewModel.DataListener activity;
-    @Mock PayloadManager payloadManager;
-    @Mock AccountDataManager accountDataManager;
-    @Mock TransferFundsDataManager fundsDataManager;
-    @Mock PrefsUtil prefsUtil;
-    @Mock AppUtil appUtil;
+    @Mock private AccountViewModel.DataListener activity;
+    @Mock private PayloadDataManager payloadDataManager;
+    @Mock private AccountDataManager accountDataManager;
+    @Mock private TransferFundsDataManager fundsDataManager;
+    @Mock private PrefsUtil prefsUtil;
+    @Mock private AppUtil appUtil;
 
     @Before
     public void setUp() throws Exception {
@@ -78,7 +78,7 @@ public class AccountViewModelTest {
         InjectorTestUtils.initApplicationComponent(
                 Injector.getInstance(),
                 new MockApplicationModule(RuntimeEnvironment.application),
-                new MockApiModule(),
+                new ApiModule(),
                 new MockDataManagerModule());
 
         subject = new AccountViewModel(activity);
@@ -97,23 +97,23 @@ public class AccountViewModelTest {
     @Test
     public void setDoubleEncryptionPassword() throws Exception {
         // Arrange
-        CharSequenceX password = new CharSequenceX("password");
+        String password = "password";
         // Act
         subject.setDoubleEncryptionPassword(password);
         // Assert
         assertEquals(password, subject.doubleEncryptionPassword);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void checkTransferableLegacyFundsWarnTransferAllTrue() throws Exception {
         // Arrange
-        Triple triple = Triple.of(new ArrayList<PendingTransaction>() {{
-            add(new PendingTransaction());
-        }}, 1L, 2L);
-        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.just(triple));
-        Payload mockPayload = mock(Payload.class);
+        Triple triple = Triple.of(Collections.singletonList(new PendingTransaction()), 1L, 2L);
+        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount())
+                .thenReturn(Observable.just(triple));
+        Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.isUpgraded()).thenReturn(true);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true)).thenReturn(true);
         // Act
         subject.checkTransferableLegacyFunds(false, true);
@@ -124,16 +124,16 @@ public class AccountViewModelTest {
         verifyNoMoreInteractions(activity);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void checkTransferableLegacyFundsWarnTransferAllTrueDontShowDialog() throws Exception {
         // Arrange
-        Triple triple = Triple.of(new ArrayList<PendingTransaction>() {{
-            add(new PendingTransaction());
-        }}, 1L, 2L);
-        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.just(triple));
-        Payload mockPayload = mock(Payload.class);
+        Triple triple = Triple.of(Collections.singletonList(new PendingTransaction()), 1L, 2L);
+        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount())
+                .thenReturn(Observable.just(triple));
+        Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.isUpgraded()).thenReturn(true);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true)).thenReturn(true);
         // Act
         subject.checkTransferableLegacyFunds(false, false);
@@ -143,14 +143,16 @@ public class AccountViewModelTest {
         verifyNoMoreInteractions(activity);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void checkTransferableLegacyFundsNoFundsAvailable() throws Exception {
         // Arrange
-        Triple triple = Triple.of(new ArrayList<PendingTransaction>(), 1L, 2L);
-        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.just(triple));
-        Payload mockPayload = mock(Payload.class);
+        Triple triple = Triple.of(Collections.emptyList(), 1L, 2L);
+        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount())
+                .thenReturn(Observable.just(triple));
+        Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.isUpgraded()).thenReturn(true);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.checkTransferableLegacyFunds(true, true);
         // Assert
@@ -162,7 +164,8 @@ public class AccountViewModelTest {
     @Test
     public void checkTransferableLegacyFundsThrowsException() throws Exception {
         // Arrange
-        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount()).thenReturn(Observable.error(new Throwable()));
+        when(fundsDataManager.getTransferableFundTransactionListForDefaultAccount())
+                .thenReturn(Observable.error(new Throwable()));
         // Act
         subject.checkTransferableLegacyFunds(true, true);
         // Assert
@@ -173,7 +176,8 @@ public class AccountViewModelTest {
     @Test
     public void createNewAccountSuccessful() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), isNull())).thenReturn(Observable.just(new Account()));
+        when(accountDataManager.createNewAccount(anyString(), isNull()))
+                .thenReturn(Observable.just(new Account()));
         // Act
         subject.createNewAccount("");
         // Assert
@@ -189,7 +193,8 @@ public class AccountViewModelTest {
     @Test
     public void createNewAccountDecryptionException() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), isNull())).thenReturn(Observable.error(new DecryptionException()));
+        when(accountDataManager.createNewAccount(anyString(), isNull()))
+                .thenReturn(Observable.error(new DecryptionException()));
         // Act
         subject.createNewAccount("");
         // Assert
@@ -203,7 +208,8 @@ public class AccountViewModelTest {
     @Test
     public void createNewAccountPayloadException() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), isNull())).thenReturn(Observable.error(new PayloadException()));
+        when(accountDataManager.createNewAccount(anyString(), isNull()))
+                .thenReturn(Observable.error(new PayloadException()));
         // Act
         subject.createNewAccount("");
         // Assert
@@ -217,7 +223,8 @@ public class AccountViewModelTest {
     @Test
     public void createNewAccountUnknownException() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), isNull())).thenReturn(Observable.error(new Exception()));
+        when(accountDataManager.createNewAccount(anyString(), isNull()))
+                .thenReturn(Observable.error(new Exception()));
         // Act
         subject.createNewAccount("");
         // Assert
@@ -231,7 +238,8 @@ public class AccountViewModelTest {
     @Test
     public void updateLegacyAddressSuccessful() throws Exception {
         // Arrange
-        when(accountDataManager.updateLegacyAddress(any(LegacyAddress.class))).thenReturn(Observable.just(true));
+        when(accountDataManager.updateLegacyAddress(any(LegacyAddress.class)))
+                .thenReturn(Completable.complete());
         // Act
         subject.updateLegacyAddress(new LegacyAddress());
         // Assert
@@ -247,7 +255,8 @@ public class AccountViewModelTest {
     @Test
     public void updateLegacyAddressFailed() throws Exception {
         // Arrange
-        when(accountDataManager.updateLegacyAddress(any(LegacyAddress.class))).thenReturn(Observable.just(false));
+        when(accountDataManager.updateLegacyAddress(any(LegacyAddress.class)))
+                .thenReturn(Completable.error(new Throwable()));
         // Act
         subject.updateLegacyAddress(new LegacyAddress());
         // Assert
@@ -287,7 +296,9 @@ public class AccountViewModelTest {
         // Arrange
 
         // Act
-        subject.importBip38Address("6PRJmkckxBct8jUwn6UcJbickdrnXBiPP9JkNW83g4VyFNsfEuxas39pSS", new CharSequenceX("password"));
+        subject.importBip38Address(
+                "6PRJmkckxBct8jUwn6UcJbickdrnXBiPP9JkNW83g4VyFNsfEuxas39pSS",
+                "password");
         // Assert
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
@@ -298,7 +309,9 @@ public class AccountViewModelTest {
         // Arrange
 
         // Act
-        subject.importBip38Address("6PRJmkckxBct8jUwn6UcJbickdrnXBiPP9JkNW83g4VyFNsfEuxas39pSS", new CharSequenceX("notthepassword"));
+        subject.importBip38Address(
+                "6PRJmkckxBct8jUwn6UcJbickdrnXBiPP9JkNW83g4VyFNsfEuxas39pSS",
+                "notthepassword");
         // Assert
         verify(activity).showProgressDialog(anyInt());
         //noinspection WrongConstant
@@ -318,11 +331,11 @@ public class AccountViewModelTest {
         verifyNoMoreInteractions(activity);
     }
 
-    @Ignore
     @Test
     public void onAddressScannedNonBip38() throws Exception {
         // Arrange
-        when(accountDataManager.getKeyFromImportedData(anyString(), anyString())).thenReturn(Observable.just(mock(ECKey.class)));
+        when(accountDataManager.getKeyFromImportedData(anyString(), anyString()))
+                .thenReturn(Observable.just(mock(ECKey.class)));
         // Act
         subject.onAddressScanned("L1FQxC7wmmRNNe2YFPNXscPq3kaheiA4T7SnTr7vYSBW7Jw1A7PD");
         // Assert
@@ -334,10 +347,12 @@ public class AccountViewModelTest {
     @Test
     public void onAddressScannedNonBip38Failure() throws Exception {
         // Arrange
-        when(accountDataManager.getKeyFromImportedData(anyString(), anyString())).thenReturn(Observable.error(new Throwable()));
+        when(accountDataManager.getKeyFromImportedData(anyString(), anyString()))
+                .thenReturn(Observable.error(new Throwable()));
         // Act
         subject.onAddressScanned("L1FQxC7wmmRNNe2YFPNXscPq3kaheiA4T7SnTr7vYSBW7Jw1A7PD");
-        when(accountDataManager.getKeyFromImportedData(anyString(), anyString())).thenReturn(Observable.just(mock(ECKey.class)));
+        when(accountDataManager.getKeyFromImportedData(anyString(), anyString()))
+                .thenReturn(Observable.just(mock(ECKey.class)));
         // Assert
         verify(accountDataManager).getKeyFromImportedData(anyString(), anyString());
         verify(activity).showProgressDialog(anyInt());
@@ -373,10 +388,10 @@ public class AccountViewModelTest {
     @Test
     public void onAddressScannedWatchAddressAlreadyInWallet() throws Exception {
         // Arrange
-        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
+        Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
         //noinspection SuspiciousMethodCalls
         when(mockPayload.getLegacyAddressStringList().contains(any())).thenReturn(true);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.onAddressScanned("17UovdU9ZvepPe75igTQwxqNME1HbnvMB7");
         // Assert
@@ -388,10 +403,10 @@ public class AccountViewModelTest {
     @Test
     public void onAddressScannedWatchAddressNotInWallet() throws Exception {
         // Arrange
-        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
+        Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
         //noinspection SuspiciousMethodCalls
         when(mockPayload.getLegacyAddressStringList().contains(any())).thenReturn(false);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.onAddressScanned("17UovdU9ZvepPe75igTQwxqNME1HbnvMB7");
         // Assert
@@ -412,6 +427,7 @@ public class AccountViewModelTest {
         verifyNoMoreInteractions(activity);
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void handlePrivateKeyWhenKeyIsNull() throws Exception {
         // Arrange
@@ -424,60 +440,38 @@ public class AccountViewModelTest {
         verifyNoMoreInteractions(activity);
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void handlePrivateKeyExistingAddressSuccess() throws Exception {
         // Arrange
         ECKey mockECKey = mock(ECKey.class);
         when(mockECKey.hasPrivKey()).thenReturn(true);
-        when(mockECKey.toAddress(any(NetworkParameters.class))).thenReturn(mock(Address.class));
-        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
-        //noinspection SuspiciousMethodCalls
-        when(mockPayload.getLegacyAddressStringList().contains(any())).thenReturn(true);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        when(accountDataManager.setPrivateKey(mockECKey, null)).thenReturn(Observable.just(true));
+        LegacyAddress legacyAddress = new LegacyAddress();
+        when(accountDataManager.setKeyForLegacyAddress(mockECKey, null))
+                .thenReturn(Observable.just(legacyAddress));
         // Act
         subject.handlePrivateKey(mockECKey, null);
         // Assert
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_OK));
         verify(activity).onUpdateAccountsList();
+        verify(activity).showRenameImportedAddressDialog(legacyAddress);
         verifyNoMoreInteractions(activity);
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void handlePrivateKeyExistingAddressFailure() throws Exception {
         // Arrange
         ECKey mockECKey = mock(ECKey.class);
         when(mockECKey.hasPrivKey()).thenReturn(true);
-        when(mockECKey.toAddress(any(NetworkParameters.class))).thenReturn(mock(Address.class));
-        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
-        //noinspection SuspiciousMethodCalls
-        when(mockPayload.getLegacyAddressStringList().contains(any())).thenReturn(true);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        when(accountDataManager.setPrivateKey(mockECKey, null)).thenReturn(Observable.just(false));
+        when(accountDataManager.setKeyForLegacyAddress(mockECKey, null))
+                .thenReturn(Observable.error(new Throwable()));
         // Act
         subject.handlePrivateKey(mockECKey, null);
         // Assert
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
-        verifyNoMoreInteractions(activity);
-    }
-
-    @Test
-    public void handlePrivateKeyNewAddress() throws Exception {
-        // Arrange
-        ECKey mockECKey = mock(ECKey.class);
-        when(mockECKey.hasPrivKey()).thenReturn(true);
-        when(mockECKey.toAddress(any(NetworkParameters.class))).thenReturn(mock(Address.class));
-        Payload mockPayload = Mockito.mock(Payload.class, RETURNS_DEEP_STUBS);
-        //noinspection SuspiciousMethodCalls
-        when(mockPayload.getLegacyAddressStringList().contains(any())).thenReturn(false);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        // Act
-        subject.handlePrivateKey(mockECKey, null);
-        // Assert
-        //noinspection WrongConstant
-        verify(activity).showRenameImportedAddressDialog(any(LegacyAddress.class));
         verifyNoMoreInteractions(activity);
     }
 
@@ -499,20 +493,22 @@ public class AccountViewModelTest {
 
     private class MockDataManagerModule extends DataManagerModule {
         @Override
-        protected TransferFundsDataManager provideTransferFundsDataManager(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
+        protected TransferFundsDataManager provideTransferFundsDataManager(PayloadDataManager payloadDataManager,
+                                                                           SendDataManager sendDataManager,
+                                                                           DynamicFeeCache dynamicFeeCache) {
             return fundsDataManager;
         }
 
         @Override
-        protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
+        protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
+                                                               PrivateKeyFactory privateKeyFactory) {
             return accountDataManager;
+        }
+
+        @Override
+        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager) {
+            return payloadDataManager;
         }
     }
 
-    private class MockApiModule extends ApiModule {
-        @Override
-        protected PayloadManager providePayloadManager() {
-            return payloadManager;
-        }
-    }
 }

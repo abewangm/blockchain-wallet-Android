@@ -8,8 +8,8 @@ import android.util.Log;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
-import info.blockchain.wallet.payload.Account;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,8 +23,8 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.FctxDateComparator;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
-import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -40,10 +40,12 @@ public class ContactDetailViewModel extends BaseViewModel {
     private static final String TAG = ContactDetailViewModel.class.getSimpleName();
 
     private DataListener dataListener;
+    private Observable<NotificationPayload> notificationObservable;
     @VisibleForTesting Contact contact;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadManager payloadManager;
     @Inject PrefsUtil prefsUtil;
+    @Inject RxBus rxBus;
 
     interface DataListener {
 
@@ -88,7 +90,10 @@ public class ContactDetailViewModel extends BaseViewModel {
     @Override
     public void onViewReady() {
         subscribeToNotifications();
+        setupViewModel();
+    }
 
+    private void setupViewModel() {
         Bundle bundle = dataListener.getPageBundle();
         if (bundle != null && bundle.getString(KEY_BUNDLE_CONTACT_ID) != null) {
             String id = bundle.getString(KEY_BUNDLE_CONTACT_ID);
@@ -196,7 +201,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
                 List<String> accountNames = new ArrayList<>();
                 //noinspection Convert2streamapi
-                for (Account account : payloadManager.getPayload().getHdWallet().getAccounts()) {
+                for (Account account : payloadManager.getPayload().getHdWallets().get(0).getAccounts()) {
                     if (!account.isArchived()) {
                         accountNames.add(account.getLabel());
                     }
@@ -219,7 +224,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                         contact.getId(),
                         contact.getMdid(),
                         transaction.getId(),
-                        payloadManager.getPayload().getHdWallet().getDefaultIndex());
+                        payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
             }
         }
     }
@@ -233,7 +238,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                 contactsDataManager.getContactFromFctxId(fctxId)
                         .flatMapCompletable(contact -> contactsDataManager.deleteFacilitatedTransaction(contact.getMdid(), fctxId))
                         .doOnError(throwable -> contactsDataManager.fetchContacts())
-                        .doAfterTerminate(this::onViewReady)
+                        .doAfterTerminate(this::setupViewModel)
                         .subscribe(
                                 () -> dataListener.showToast(R.string.contacts_pending_transaction_delete_success, ToastCustom.TYPE_OK),
                                 throwable -> dataListener.showToast(R.string.contacts_pending_transaction_delete_failure, ToastCustom.TYPE_ERROR)));
@@ -255,28 +260,30 @@ public class ContactDetailViewModel extends BaseViewModel {
                         .subscribe(
                                 () -> {
                                     dataListener.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK);
-                                    onViewReady();
+                                    setupViewModel();
                                 },
                                 throwable -> dataListener.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
 
     }
 
     private void subscribeToNotifications() {
+        notificationObservable = rxBus.register(NotificationPayload.class);
         compositeDisposable.add(
-                FcmCallbackService.getNotificationSubject()
+                notificationObservable
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(
                                 notificationPayload -> {
                                     if (notificationPayload.getType() != null
                                             && notificationPayload.getType().equals(NotificationPayload.NotificationType.PAYMENT)) {
-                                        onViewReady();
+                                        setupViewModel();
                                     }
                                 },
                                 throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
     }
 
     private Observable<String> getNextReceiveAddress(int defaultIndex) {
-        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
+        Account account = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultIndex);
+        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account));
     }
 
     private void sortAndUpdateTransactions(Collection<FacilitatedTransaction> values) {
@@ -295,7 +302,7 @@ public class ContactDetailViewModel extends BaseViewModel {
     private int getCorrectedAccountIndex(int accountIndex) {
         // Filter accounts by active
         List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
             if (!account.isArchived()) {
@@ -304,7 +311,12 @@ public class ContactDetailViewModel extends BaseViewModel {
         }
 
         // Find corrected position
-        return payloadManager.getPayload().getHdWallet().getAccounts().indexOf(activeAccounts.get(accountIndex));
+        return payloadManager.getPayload().getHdWallets().get(0).getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
+    @Override
+    public void destroy() {
+        rxBus.unregister(NotificationPayload.class, notificationObservable);
+        super.destroy();
+    }
 }

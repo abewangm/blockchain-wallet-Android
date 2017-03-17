@@ -3,21 +3,20 @@ package piuk.blockchain.android.ui.transactions;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Intent;
-import android.support.v4.util.Pair;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Payload;
+import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.transaction.Transaction;
-import info.blockchain.wallet.transaction.Tx;
+import info.blockchain.wallet.payload.data.Wallet;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 
-import java.util.ArrayList;
+import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -26,7 +25,10 @@ import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
@@ -41,44 +43,44 @@ import piuk.blockchain.android.util.StringUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
-@SuppressLint("UseSparseArrays")
-@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
+@SuppressWarnings({"PrivateMemberAccessBetweenOuterAndInnerClass", "WeakerAccess"})
 public class TransactionDetailViewModelTest extends RxTest {
 
-    @Mock PrefsUtil mPrefsUtil;
-    @Mock PayloadManager mPayloadManager;
-    @Mock StringUtils mStringUtils;
-    @Mock TransactionListDataManager mTransactionListDataManager;
-    @Mock TransactionDetailViewModel.DataListener mActivity;
-    @Mock ExchangeRateFactory mExchangeRateFactory;
-    @Mock TransactionHelper mTransactionHelper;
-    private TransactionDetailViewModel mSubject;
+    private TransactionDetailViewModel subject;
+    @Mock TransactionHelper transactionHelper;
+    @Mock PrefsUtil prefsUtil;
+    @Mock PayloadManager payloadManager;
+    @Mock StringUtils stringUtils;
+    @Mock TransactionListDataManager transactionListDataManager;
+    @Mock TransactionDetailViewModel.DataListener activity;
+    @Mock ExchangeRateFactory exchangeRateFactory;
+    @Mock ContactsDataManager contactsDataManager;
 
     // Transactions
-    private Tx mTxMoved = new Tx("hash", "note", "MOVED", 1.0D, 0L, new HashMap<>());
-    private Tx mTxSent = new Tx("hash", "note", "SENT", -1.0D, 0L, new HashMap<>());
-    private Tx mTxReceived = new Tx("hash", "note", "RECEIVED", 2.0D, 0L, new HashMap<>());
-    private List<Tx> mTxList;
+    private TransactionSummary txMoved = new TransactionSummary();
+    private TransactionSummary txSent = new TransactionSummary();
+    private TransactionSummary txReceived = new TransactionSummary();
+    private List<TransactionSummary> txList;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        when(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(MonetaryUtil.UNIT_BTC);
-        when(mPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)).thenReturn(PrefsUtil.DEFAULT_CURRENCY);
+        when(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(MonetaryUtil.UNIT_BTC);
+        when(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)).thenReturn(PrefsUtil.DEFAULT_CURRENCY);
 
         InjectorTestUtils.initApplicationComponent(
                 Injector.getInstance(),
@@ -86,26 +88,34 @@ public class TransactionDetailViewModelTest extends RxTest {
                 new MockApiModule(),
                 new MockDataManagerModule());
 
-        mTxMoved.setIsMove(true);
-        mTxList = new ArrayList<Tx>() {{
-            add(mTxMoved);
-            add(mTxSent);
-            add(mTxReceived);
-        }};
+        // Fees are realistic for current block size
+        txMoved.setDirection(TransactionSummary.Direction.TRANSFERRED);
+        txMoved.setTotal(BigInteger.TEN);
+        txMoved.setFee(BigInteger.ONE);
+        txMoved.setHash("txMoved_hash");
+        txSent.setDirection(TransactionSummary.Direction.SENT);
+        txSent.setTotal(BigInteger.TEN);
+        txSent.setFee(BigInteger.ONE);
+        txSent.setHash("txSent_hash");
+        txReceived.setDirection(TransactionSummary.Direction.RECEIVED);
+        txReceived.setTotal(BigInteger.TEN);
+        txReceived.setFee(BigInteger.ONE);
+        txReceived.setHash("txReceived_hash");
+        txList = Arrays.asList(txMoved, txSent, txReceived);
         Locale.setDefault(new Locale("EN", "US"));
-        mSubject = new TransactionDetailViewModel(mActivity);
+        subject = new TransactionDetailViewModel(activity);
     }
 
     @Test
     public void onViewReadyNoIntent() throws Exception {
         // Arrange
-        when(mActivity.getPageIntent()).thenReturn(null);
+        when(activity.getPageIntent()).thenReturn(null);
         // Act
-        mSubject.onViewReady();
+        subject.onViewReady();
         // Assert
-        verify(mActivity).getPageIntent();
-        verify(mActivity).pageFinish();
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).getPageIntent();
+        verify(activity).pageFinish();
+        verifyNoMoreInteractions(activity);
     }
 
     @Test
@@ -113,13 +123,13 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Arrange
         Intent mockIntent = mock(Intent.class);
         when(mockIntent.hasExtra(KEY_TRANSACTION_LIST_POSITION)).thenReturn(false);
-        when(mActivity.getPageIntent()).thenReturn(mockIntent);
+        when(activity.getPageIntent()).thenReturn(mockIntent);
         // Act
-        mSubject.onViewReady();
+        subject.onViewReady();
         // Assert
-        verify(mActivity).getPageIntent();
-        verify(mActivity).pageFinish();
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).getPageIntent();
+        verify(activity).pageFinish();
+        verifyNoMoreInteractions(activity);
     }
 
     @Test
@@ -128,144 +138,209 @@ public class TransactionDetailViewModelTest extends RxTest {
         Intent mockIntent = mock(Intent.class);
         when(mockIntent.hasExtra(KEY_TRANSACTION_LIST_POSITION)).thenReturn(true);
         when(mockIntent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1)).thenReturn(-1);
-        when(mActivity.getPageIntent()).thenReturn(mockIntent);
+        when(activity.getPageIntent()).thenReturn(mockIntent);
         // Act
-        mSubject.onViewReady();
+        subject.onViewReady();
         // Assert
-        verify(mActivity).getPageIntent();
-        verify(mActivity).pageFinish();
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).getPageIntent();
+        verify(activity).pageFinish();
+        verifyNoMoreInteractions(activity);
     }
 
     @Test
-    public void onViewReadyKeyValidTransactionNotFound() throws Exception {
+    public void onViewReadyNullIntent() throws Exception {
         // Arrange
-        Intent mockIntent = mock(Intent.class);
-        Payload mockPayload = mock(Payload.class);
-        when(mockIntent.hasExtra(KEY_TRANSACTION_LIST_POSITION)).thenReturn(true);
-        when(mockIntent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1)).thenReturn(0);
-        when(mockPayload.getTransactionNotesMap()).thenReturn(new HashMap<>());
-        when(mActivity.getPageIntent()).thenReturn(mockIntent);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mTransactionListDataManager.getTransactionList()).thenReturn(mTxList);
-        when(mStringUtils.getString(R.string.transaction_detail_pending)).thenReturn("Pending (%1$s/%2$s Confirmations)");
-        when(mTransactionListDataManager.getTransactionFromHash(anyString())).thenReturn(Observable.error(new Throwable()));
-        double price = 1000.00D;
-        when(mExchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
-        when(mStringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
-        when(mExchangeRateFactory.getSymbol(anyString())).thenReturn("$");
+        when(activity.getPageIntent()).thenReturn(null);
         // Act
-        mSubject.onViewReady();
+        subject.onViewReady();
         // Assert
-        verify(mActivity).getPageIntent();
-        verify(mActivity).setStatus("Pending (0/3 Confirmations)", "hash");
-        verify(mActivity).setTransactionType("MOVED");
-        verify(mActivity).setTransactionColour(R.color.product_gray_transferred_50);
-        verify(mActivity).setDescription(null);
-        verify(mActivity).setDate(anyString());
-        verify(mActivity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-        verify(mActivity).setToAddresses(any());
-        verify(mActivity).setTransactionValueFiat(anyString());
-        verify(mActivity).setFromAddress(isNull());
-        verify(mActivity).onDataLoaded();
+        verify(activity).getPageIntent();
+        verify(activity).pageFinish();
+        verifyNoMoreInteractions(activity);
     }
 
     @Test
-    public void onViewReadyKeyValidTransactionFound() throws Exception {
+    public void onViewReadyIntentPositionInvalid() throws Exception {
         // Arrange
-        Intent mockIntent = mock(Intent.class);
-        Payload mockPayload = mock(Payload.class);
-        Transaction mockTransaction = mock(Transaction.class);
-        when(mockIntent.hasExtra(KEY_TRANSACTION_LIST_POSITION)).thenReturn(true);
-        when(mockIntent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1)).thenReturn(0);
-        when(mockPayload.getTransactionNotesMap()).thenReturn(new HashMap<>());
-        when(mActivity.getPageIntent()).thenReturn(mockIntent);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mTransactionListDataManager.getTransactionList()).thenReturn(mTxList);
-        when(mStringUtils.getString(R.string.transaction_detail_pending)).thenReturn("Pending (%1$s/%2$s Confirmations)");
-        when(mTransactionListDataManager.getTransactionFromHash(anyString())).thenReturn(Observable.just(mockTransaction));
-        HashMap<String, Long> inputs = new HashMap<>();
-        HashMap<String, Long> outputs = new HashMap<>();
-        inputs.put("addr1", 1000L);
-        outputs.put("addr2", 2000L);
-        Pair pair = new Pair<>(inputs, outputs);
-        when(mTransactionHelper.filterNonChangeAddresses(any(Transaction.class), any(Tx.class))).thenReturn(pair);
-        when(mTransactionHelper.addressToLabel("addr1")).thenReturn("account1");
-        when(mTransactionHelper.addressToLabel("addr2")).thenReturn("account2");
-        double price = 1000.00D;
-        when(mExchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
-        when(mStringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
-        when(mExchangeRateFactory.getSymbol(anyString())).thenReturn("$");
+        Intent intent = mock(Intent.class);
+        when(intent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1)).thenReturn(-1);
+        when(activity.getPageIntent()).thenReturn(intent);
         // Act
-        mSubject.onViewReady();
+        subject.onViewReady();
         // Assert
-        verify(mActivity).getPageIntent();
-        verify(mActivity).setStatus("Pending (0/3 Confirmations)", "hash");
-        verify(mActivity).setTransactionType("MOVED");
-        verify(mActivity).setTransactionColour(R.color.product_gray_transferred_50);
-        verify(mActivity).setDescription(null);
-        verify(mActivity).setDate(anyString());
-        verify(mActivity).setToAddresses(any());
-        verify(mActivity).setFromAddress(any());
-        verify(mActivity).setFee(anyString());
-        verify(mActivity).setTransactionValueBtc(anyString());
-        verify(mActivity).setTransactionValueFiat(anyString());
-        verify(mActivity).onDataLoaded();
-        verify(mActivity).setIsDoubleSpend(anyBoolean());
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).getPageIntent();
+        verify(activity).pageFinish();
+        verifyNoMoreInteractions(activity);
     }
 
+    @Test
+    public void onViewReadyIntentHashNotFound() throws Exception {
+        // Arrange
+        Intent intent = mock(Intent.class);
+        String txHash = "TX_HASH";
+        when(intent.getStringExtra(KEY_TRANSACTION_HASH)).thenReturn(txHash);
+        when(activity.getPageIntent()).thenReturn(intent);
+        when(transactionListDataManager.getTxFromHash(txHash))
+                .thenReturn(Observable.error(new Throwable()));
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(activity).getPageIntent();
+        verify(activity).pageFinish();
+        verifyNoMoreInteractions(activity);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void onViewReadyTransactionFoundInList() throws Exception {
+        // Arrange
+        Intent mockIntent = mock(Intent.class);
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockIntent.hasExtra(KEY_TRANSACTION_LIST_POSITION)).thenReturn(true);
+        when(mockIntent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1)).thenReturn(0);
+        when(mockPayload.getTxNotes()).thenReturn(new HashMap<>());
+        when(activity.getPageIntent()).thenReturn(mockIntent);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(transactionListDataManager.getTransactionList()).thenReturn(txList);
+        when(stringUtils.getString(R.string.transaction_detail_pending)).thenReturn("Pending (%1$s/%2$s Confirmations)");
+        HashMap<String, BigInteger> inputs = new HashMap<>();
+        HashMap<String, BigInteger> outputs = new HashMap<>();
+        inputs.put("addr1", BigInteger.valueOf(1000L));
+        outputs.put("addr2", BigInteger.valueOf(2000L));
+        Pair pair = Pair.of(inputs, outputs);
+        when(transactionHelper.filterNonChangeAddresses(any(TransactionSummary.class))).thenReturn(pair);
+        when(payloadManager.getLabelFromAddress("addr1")).thenReturn("account1");
+        when(payloadManager.getLabelFromAddress("addr2")).thenReturn("account2");
+        double price = 1000.00D;
+        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
+        when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
+        when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(activity).getPageIntent();
+        verify(activity).setStatus("Pending (0/3 Confirmations)", "txMoved_hash");
+        verify(activity).setTransactionType(TransactionSummary.Direction.TRANSFERRED);
+        verify(activity).setTransactionColour(R.color.product_gray_transferred_50);
+        verify(activity).setDescription(null);
+        verify(activity).setDate(anyString());
+        verify(activity).setToAddresses(any());
+        verify(activity).setFromAddress(any());
+        verify(activity).setFee(anyString());
+        verify(activity).setTransactionValueBtc(anyString());
+        verify(activity).setTransactionValueFiat(anyString());
+        verify(activity).onDataLoaded();
+        verify(activity).setIsDoubleSpend(anyBoolean());
+        verifyNoMoreInteractions(activity);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void onViewReadyTransactionFoundViaHash() throws Exception {
+        // Arrange
+        Intent mockIntent = mock(Intent.class);
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockIntent.hasExtra(KEY_TRANSACTION_HASH)).thenReturn(true);
+        when(mockIntent.getStringExtra(KEY_TRANSACTION_HASH)).thenReturn("txMoved_hash");
+        when(activity.getPageIntent()).thenReturn(mockIntent);
+        when(mockPayload.getTxNotes()).thenReturn(new HashMap<>());
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(activity.getPageIntent()).thenReturn(mockIntent);
+        when(transactionListDataManager.getTxFromHash("txMoved_hash"))
+                .thenReturn(Observable.just(txMoved));
+        when(stringUtils.getString(R.string.transaction_detail_pending)).thenReturn("Pending (%1$s/%2$s Confirmations)");
+        HashMap<String, BigInteger> inputs = new HashMap<>();
+        HashMap<String, BigInteger> outputs = new HashMap<>();
+        inputs.put("addr1", BigInteger.valueOf(1000L));
+        outputs.put("addr2", BigInteger.valueOf(2000L));
+        Pair pair = Pair.of(inputs, outputs);
+        when(transactionHelper.filterNonChangeAddresses(any(TransactionSummary.class))).thenReturn(pair);
+        when(payloadManager.getLabelFromAddress("addr1")).thenReturn("account1");
+        when(payloadManager.getLabelFromAddress("addr2")).thenReturn("account2");
+        double price = 1000.00D;
+        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
+        when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
+        when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
+        HashMap contactsMap = new HashMap<String, String>();
+        contactsMap.put("txMoved_hash", "Adam");
+        when(contactsDataManager.getContactsTransactionMap()).thenReturn(contactsMap);
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(activity).getPageIntent();
+        verify(activity).setStatus("Pending (0/3 Confirmations)", "txMoved_hash");
+        verify(activity).setTransactionType(TransactionSummary.Direction.TRANSFERRED);
+        verify(activity).setTransactionColour(R.color.product_gray_transferred_50);
+        verify(activity).setDescription(null);
+        verify(activity).setDate(anyString());
+        verify(activity).setToAddresses(any());
+        verify(activity).setFromAddress(any());
+        verify(activity).setFee(anyString());
+        verify(activity).setTransactionValueBtc(anyString());
+        verify(activity).setTransactionValueFiat(anyString());
+        verify(activity).onDataLoaded();
+        verify(activity).setIsDoubleSpend(anyBoolean());
+        verifyNoMoreInteractions(activity);
+    }
+
+    @SuppressLint("VisibleForTests")
     @Test
     public void getTransactionValueStringUsd() {
         // Arrange
         double price = 1000.00D;
-        when(mExchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
-        when(mStringUtils.getString(anyInt())).thenReturn("Value when sent: ");
-        when(mExchangeRateFactory.getSymbol(anyString())).thenReturn("$");
+        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
+        when(stringUtils.getString(anyInt())).thenReturn("Value when sent: ");
+        when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         // Act
-        TestObserver<String> observer = mSubject.getTransactionValueString("USD", mTxSent).test();
+        TestObserver<String> observer =
+                subject.getTransactionValueString("USD", txSent).test();
         // Assert
         assertEquals("Value when sent: $1 000.00", observer.values().get(0));
         observer.onComplete();
         observer.assertNoErrors();
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void getTransactionValueStringNonUsd() {
         // Arrange
 
         // Act
-        TestObserver<String> observer = mSubject.getTransactionValueString("GBP", mTxReceived).test();
+        TestObserver<String> observer = subject.getTransactionValueString("GBP", txReceived).test();
         // Assert
         assertNotNull(observer.values().get(0));
         observer.onComplete();
         observer.assertNoErrors();
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void getTransactionValueStringReceived() {
         // Arrange
         double price = 1000.00D;
-        when(mExchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
-        when(mStringUtils.getString(anyInt())).thenReturn("Value when received: ");
-        when(mExchangeRateFactory.getSymbol(anyString())).thenReturn("$");
+        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong()))
+                .thenReturn(Observable.just(price));
+        when(stringUtils.getString(anyInt())).thenReturn("Value when received: ");
+        when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         // Act
-        TestObserver<String> observer = mSubject.getTransactionValueString("USD", mTxReceived).test();
+        TestObserver<String> observer = subject.getTransactionValueString("USD", txReceived).test();
         // Assert
         assertEquals("Value when received: $1 000.00", observer.values().get(0));
         observer.onComplete();
         observer.assertNoErrors();
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void getTransactionValueStringTransferred() {
         // Arrange
         double price = 1000.00D;
-        when(mExchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
-        when(mStringUtils.getString(anyInt())).thenReturn("Value when transferred: ");
-        when(mExchangeRateFactory.getSymbol(anyString())).thenReturn("$");
+        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong()))
+                .thenReturn(Observable.just(price));
+        when(stringUtils.getString(anyInt())).thenReturn("Value when transferred: ");
+        when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         // Act
-        TestObserver<String> observer = mSubject.getTransactionValueString("USD", mTxSent).test();
+        TestObserver<String> observer = subject.getTransactionValueString("USD", txSent).test();
         // Assert
         assertEquals("Value when transferred: $1 000.00", observer.values().get(0));
         observer.onComplete();
@@ -275,130 +350,167 @@ public class TransactionDetailViewModelTest extends RxTest {
     @Test
     public void updateTransactionNoteSuccess() throws Exception {
         // Arrange
-        when(mTransactionListDataManager.updateTransactionNotes(anyString(), anyString())).thenReturn(Observable.just(true));
-        mSubject.mTransaction = mTxMoved;
+        when(transactionListDataManager.updateTransactionNotes(anyString(), anyString()))
+                .thenReturn(Observable.just(true));
+        subject.mTransaction = txMoved;
         // Act
-        mSubject.updateTransactionNote("note");
+        subject.updateTransactionNote("note");
         // Assert
-        verify(mTransactionListDataManager).updateTransactionNotes("hash", "note");
+        verify(transactionListDataManager).updateTransactionNotes(txMoved.getHash(), "note");
         //noinspection WrongConstant
-        verify(mActivity).showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
-        verify(mActivity).setDescription("note");
+        verify(activity).showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
+        verify(activity).setDescription("note");
     }
 
     @Test
     public void updateTransactionNoteFailure() throws Exception {
         // Arrange
-        when(mTransactionListDataManager.updateTransactionNotes(anyString(), anyString())).thenReturn(Observable.just(false));
-        mSubject.mTransaction = mTxMoved;
+        when(transactionListDataManager.updateTransactionNotes(anyString(), anyString()))
+                .thenReturn(Observable.just(false));
+        subject.mTransaction = txMoved;
         // Act
-        mSubject.updateTransactionNote("note");
+        subject.updateTransactionNote("note");
         // Assert
-        verify(mTransactionListDataManager).updateTransactionNotes("hash", "note");
+        verify(transactionListDataManager).updateTransactionNotes(txMoved.getHash(), "note");
         //noinspection WrongConstant
-        verify(mActivity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+        verify(activity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
     }
 
     @Test
     public void updateTransactionNoteException() throws Exception {
         // Arrange
-        when(mTransactionListDataManager.updateTransactionNotes(anyString(), anyString())).thenReturn(Observable.error(new Throwable()));
-        mSubject.mTransaction = mTxMoved;
+        when(transactionListDataManager.updateTransactionNotes(anyString(), anyString()))
+                .thenReturn(Observable.error(new Throwable()));
+        subject.mTransaction = txMoved;
         // Act
-        mSubject.updateTransactionNote("note");
+        subject.updateTransactionNote("note");
         // Assert
-        verify(mTransactionListDataManager).updateTransactionNotes("hash", "note");
+        verify(transactionListDataManager).updateTransactionNotes(txMoved.getHash(), "note");
         //noinspection WrongConstant
-        verify(mActivity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+        verify(activity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
     }
 
+    @Test
+    public void getTransactionNote() throws Exception {
+        // Arrange
+        Wallet mockPayload = mock(Wallet.class);
+        HashMap<String, String> notesMap = new HashMap<>();
+        notesMap.put(txSent.getHash(), "note");
+        when(mockPayload.getTxNotes()).thenReturn(notesMap);
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        subject.mTransaction = txSent;
+        // Act
+        String value = subject.getTransactionNote();
+        // Assert
+        assertEquals("note", value);
+    }
+
+    @Test
+    public void getTransactionHash() throws Exception {
+        // Arrange
+        subject.mTransaction = txSent;
+        // Act
+        String value = subject.getTransactionHash();
+        // Assert
+        assertEquals(txSent.getHash(), value);
+    }
+
+    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionStatusNoConfirmations() {
         // Arrange
-        when(mStringUtils.getString(R.string.transaction_detail_pending)).thenReturn("Pending (%1$s/%2$s Confirmations)");
+        when(stringUtils.getString(R.string.transaction_detail_pending))
+                .thenReturn("Pending (%1$s/%2$s Confirmations)");
         // Act
-        mSubject.setConfirmationStatus(mTxMoved);
+        subject.setConfirmationStatus("hash", 0);
         // Assert
-        verify(mActivity).setStatus("Pending (0/3 Confirmations)", "hash");
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).setStatus("Pending (0/3 Confirmations)", "hash");
+        verifyNoMoreInteractions(activity);
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionStatusConfirmed() {
         // Arrange
-        when(mStringUtils.getString(R.string.transaction_detail_confirmed)).thenReturn("Confirmed");
-        mTxMoved.setConfirmations(3);
+        when(stringUtils.getString(R.string.transaction_detail_confirmed)).thenReturn("Confirmed");
+        txMoved.setConfirmations(3);
         // Act
-        mSubject.setConfirmationStatus(mTxMoved);
+        subject.setConfirmationStatus("hash", 3);
         // Assert
-        verify(mActivity).setStatus("Confirmed", "hash");
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).setStatus("Confirmed", "hash");
+        verifyNoMoreInteractions(activity);
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionColorMove() {
         // Arrange
 
         // Act
-        mSubject.setTransactionColor(mTxMoved);
+        subject.setTransactionColor(txMoved);
         // Assert
-        verify(mActivity).setTransactionColour(R.color.product_gray_transferred_50);
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).setTransactionColour(R.color.product_gray_transferred_50);
+        verifyNoMoreInteractions(activity);
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionColorMoveConfirmed() {
         // Arrange
-        mTxMoved.setConfirmations(3);
+        txMoved.setConfirmations(3);
         // Act
-        mSubject.setTransactionColor(mTxMoved);
+        subject.setTransactionColor(txMoved);
         // Assert
-        verify(mActivity).setTransactionColour(R.color.product_gray_transferred);
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).setTransactionColour(R.color.product_gray_transferred);
+        verifyNoMoreInteractions(activity);
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionColorSent() {
         // Arrange
 
         // Act
-        mSubject.setTransactionColor(mTxSent);
+        subject.setTransactionColor(txSent);
         // Assert
-        verify(mActivity).setTransactionColour(R.color.product_red_sent_50);
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).setTransactionColour(R.color.product_red_sent_50);
+        verifyNoMoreInteractions(activity);
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionColorSentConfirmed() {
         // Arrange
-        mTxSent.setConfirmations(3);
+        txSent.setConfirmations(3);
         // Act
-        mSubject.setTransactionColor(mTxSent);
+        subject.setTransactionColor(txSent);
         // Assert
-        verify(mActivity).setTransactionColour(R.color.product_red_sent);
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).setTransactionColour(R.color.product_red_sent);
+        verifyNoMoreInteractions(activity);
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionColorReceived() {
         // Arrange
 
         // Act
-        mSubject.setTransactionColor(mTxReceived);
+        subject.setTransactionColor(txReceived);
         // Assert
-        verify(mActivity).setTransactionColour(R.color.product_green_received_50);
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).setTransactionColour(R.color.product_green_received_50);
+        verifyNoMoreInteractions(activity);
     }
 
+    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionColorReceivedConfirmed() {
         // Arrange
-        mTxReceived.setConfirmations(3);
+        txReceived.setConfirmations(3);
         // Act
-        mSubject.setTransactionColor(mTxReceived);
+        subject.setTransactionColor(txReceived);
         // Assert
-        verify(mActivity).setTransactionColour(R.color.product_green_received);
-        verifyNoMoreInteractions(mActivity);
+        verify(activity).setTransactionColour(R.color.product_green_received);
+        verifyNoMoreInteractions(activity);
     }
 
     private class MockApplicationModule extends ApplicationModule {
@@ -408,36 +520,44 @@ public class TransactionDetailViewModelTest extends RxTest {
 
         @Override
         protected PrefsUtil providePrefsUtil() {
-            return mPrefsUtil;
+            return prefsUtil;
         }
 
         @Override
         protected StringUtils provideStringUtils() {
-            return mStringUtils;
+            return stringUtils;
         }
 
         @Override
         protected ExchangeRateFactory provideExchangeRateFactory() {
-            return mExchangeRateFactory;
+            return exchangeRateFactory;
         }
     }
 
     private class MockApiModule extends ApiModule {
         @Override
         protected PayloadManager providePayloadManager() {
-            return mPayloadManager;
+            return payloadManager;
+        }
+
+        @Override
+        protected ContactsDataManager provideContactsManager(PayloadManager payloadManager) {
+            return contactsDataManager;
         }
     }
 
     private class MockDataManagerModule extends DataManagerModule {
         @Override
-        protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager, TransactionListStore transactionListStore) {
-            return mTransactionListDataManager;
+        protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
+                                                                               TransactionListStore transactionListStore,
+                                                                               RxBus rxBus) {
+            return transactionListDataManager;
         }
 
         @Override
-        protected TransactionHelper provideTransactionHelper(PayloadManager payloadManager, MultiAddrFactory multiAddrFactory) {
-            return mTransactionHelper;
+        protected TransactionHelper provideTransactionHelper(PayloadDataManager payloadDataManager) {
+            return transactionHelper;
         }
     }
+
 }

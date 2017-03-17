@@ -6,13 +6,13 @@
     android:viewportWidth="32">
 
     <path
-        android:fillColor="@color/primary_gray_dark"
+        android:fillColor="@color/white"
         android:pathData="M16.006 11.393c-2.583 0-4.677 2.094-4.677 4.677s2.094 4.677 4.677 4.677c2.583 0
 4.677-2.094 4.677-4.677s-2.094-4.677-4.677-4.677zM16.006 19.391c-1.834
 0-3.32-1.487-3.32-3.32s1.487-3.32 3.32-3.32c1.834 0 3.32 1.487 3.32 3.32s-1.487
 3.32-3.32 3.32z" />
     <path
-        android:fillColor="@color/primary_gray_dark"
+        android:fillColor="@color/white"
         android:pathData="M30.983 13.276h-5.261c-0.18-0.636-0.391-1.182-0.646-1.701l3.826-3.741c0.189-0.19
 0.307-0.453
 0.307-0.742s-0.117-0.552-0.307-0.742l-2.73-2.695c-0.19-0.189-0.453-0.307-0.742-0.307s-0.552

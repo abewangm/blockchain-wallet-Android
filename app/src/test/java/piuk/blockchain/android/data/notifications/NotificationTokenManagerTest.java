@@ -1,8 +1,8 @@
 package piuk.blockchain.android.data.notifications;
 
-import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 
+import info.blockchain.wallet.payload.data.Wallet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,10 +31,10 @@ import static org.mockito.Mockito.when;
 public class NotificationTokenManagerTest {
 
     private NotificationTokenManager subject;
-    @Mock NotificationService notificationService;
-    @Mock AccessState accessState;
-    @Mock PayloadManager payloadManager;
-    @Mock PrefsUtil prefsUtil;
+    @Mock private NotificationService notificationService;
+    @Mock private AccessState accessState;
+    @Mock private PayloadManager payloadManager;
+    @Mock private PrefsUtil prefsUtil;
 
     @Before
     public void setUp() throws Exception {
@@ -47,7 +47,7 @@ public class NotificationTokenManagerTest {
     public void storeAndUpdateTokenLoggedIn() throws Exception {
         // Arrange
         when(accessState.isLoggedIn()).thenReturn(true);
-        Payload mockPayload = mock(Payload.class);
+        Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.getGuid()).thenReturn("guid");
         when(mockPayload.getSharedKey()).thenReturn("sharedKey");
         when(payloadManager.getPayload()).thenReturn(mockPayload);
@@ -55,16 +55,18 @@ public class NotificationTokenManagerTest {
         // Act
         subject.storeAndUpdateToken("token");
         // Assert
+        //noinspection ResultOfMethodCallIgnored
         verify(accessState).isLoggedIn();
         verify(payloadManager).getPayload();
         verify(notificationService).sendNotificationToken(anyString(), anyString(), anyString());
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void storeAndUpdateTokenLoggedOut() throws Exception {
         // Arrange
         when(accessState.isLoggedIn()).thenReturn(false);
-        Payload mockPayload = mock(Payload.class);
+        Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.getGuid()).thenReturn("guid");
         when(mockPayload.getSharedKey()).thenReturn("sharedKey");
         when(payloadManager.getPayload()).thenReturn(mockPayload);

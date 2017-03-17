@@ -38,7 +38,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:alpha="@{viewModel.accountModel.transferFundsAlpha}"
-                    android:background="?android:selectableItemBackground"
+                    android:background="?attr/selectableItemBackground"
                     android:duplicateParentState="true"
                     android:gravity="center_vertical"
                     android:paddingLeft="16dp"
@@ -60,7 +60,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="72dp"
                     android:alpha="@{viewModel.accountModel.labelAlpha}"
-                    android:background="?android:selectableItemBackground"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="@{viewModel.accountModel.labelClickable}"
                     android:gravity="center_vertical"
                     android:onClick="@{viewModel.onClickChangeLabel}"
@@ -109,7 +109,7 @@
                     android:layout_height="72dp"
                     android:layout_weight="1"
                     android:alpha="@{viewModel.accountModel.defaultAlpha}"
-                    android:background="?android:selectableItemBackground"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="@{viewModel.accountModel.defaultClickable}"
                     android:gravity="center_vertical"
                     android:onClick="@{viewModel.onClickDefault}"
@@ -133,7 +133,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:alpha="@{viewModel.accountModel.xprivAlpha}"
-                    android:background="?android:selectableItemBackground"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="@{viewModel.accountModel.xprivClickable}"
                     android:minHeight="72dp"
                     android:onClick="@{viewModel.onClickScanXpriv}"
@@ -203,13 +203,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:alpha="@{viewModel.accountModel.xpubAlpha}"
-                    android:background="?android:selectableItemBackground"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="@{viewModel.accountModel.xpubClickable}"
                     android:minHeight="72dp"
                     android:onClick="@{viewModel.onClickShowXpub}"
                     android:orientation="vertical"
-                    android:paddingBottom="4dp"
-                    android:visibility="@{viewModel.accountModel.xpubDescriptionVisibility}">
+                    android:paddingBottom="4dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -261,6 +260,7 @@
                         android:text="@string/extended_public_key_description"
                         android:textColor="@color/black"
                         android:textSize="14sp"
+                        android:visibility="@{viewModel.accountModel.xpubDescriptionVisibility}"
                         tools:text="@string/extended_public_key_description" />
 
                 </LinearLayout>
@@ -270,15 +270,14 @@
                     android:layout_height="1dp"
                     android:layout_marginLeft="8dp"
                     android:layout_marginRight="8dp"
-                    android:background="@color/primary_gray_light"
-                    android:visibility="@{viewModel.accountModel.xpubDescriptionVisibility}" />
+                    android:background="@color/primary_gray_light" />
 
                 <LinearLayout
                     android:id="@+id/archive_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:alpha="@{viewModel.accountModel.archiveAlpha}"
-                    android:background="?android:selectableItemBackground"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="@{viewModel.accountModel.archiveClickable}"
                     android:gravity="center_vertical"
                     android:minHeight="72dp"

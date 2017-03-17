@@ -8,6 +8,10 @@ public class AndroidUtils {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
     }
 
+    public static boolean is18orHigher() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2;
+    }
+
     public static boolean is21orHigher() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
@@ -23,4 +27,5 @@ public class AndroidUtils {
     public static boolean is25orHigher() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1;
     }
+
 }

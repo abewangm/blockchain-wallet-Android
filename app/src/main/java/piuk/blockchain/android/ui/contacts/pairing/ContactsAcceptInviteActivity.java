@@ -76,6 +76,7 @@ public class ContactsAcceptInviteActivity extends BaseAuthActivity implements Co
         }
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {

@@ -34,7 +34,7 @@ public class SecondPasswordHandler {
 
     public void validate(final ResultListener listener) {
 
-        if (!payloadManager.getPayload().isDoubleEncrypted()) {
+        if (!payloadManager.getPayload().isDoubleEncryption()) {
             listener.onNoSecondPassword();
         } else {
 
@@ -51,7 +51,7 @@ public class SecondPasswordHandler {
 
                         String secondPassword = passwordField.getText().toString();
 
-                        if (secondPassword.length() > 0) {
+                        if (!secondPassword.isEmpty()) {
                             showProgressDialog(R.string.validating_password);
                             validateSecondPassword(secondPassword)
                                     .compose(RxUtil.applySchedulersToObservable())

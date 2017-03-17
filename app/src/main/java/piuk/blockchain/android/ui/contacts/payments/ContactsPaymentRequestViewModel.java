@@ -3,11 +3,13 @@ package piuk.blockchain.android.ui.contacts.payments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
 
 import javax.inject.Inject;
 
@@ -30,12 +32,12 @@ import static piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequest
 public class ContactsPaymentRequestViewModel extends BaseViewModel {
 
     private DataListener dataListener;
-    private Contact recipient;
-    private long satoshis;
-    private int accountPosition;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadManager payloadManager;
-    private PaymentRequestType paymentRequestType;
+    @VisibleForTesting Contact recipient;
+    @VisibleForTesting long satoshis;
+    @VisibleForTesting int accountPosition;
+    @VisibleForTesting PaymentRequestType paymentRequestType;
 
     interface DataListener {
 
@@ -66,10 +68,11 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        String contactId = dataListener.getFragmentBundle().getString(ARGUMENT_CONTACT_ID);
-        satoshis = dataListener.getFragmentBundle().getLong(ARGUMENT_SATOSHIS, -1L);
-        accountPosition = dataListener.getFragmentBundle().getInt(ARGUMENT_ACCOUNT_POSITION, -1);
-        paymentRequestType = (PaymentRequestType) dataListener.getFragmentBundle().getSerializable(ARGUMENT_REQUEST_TYPE);
+        Bundle fragmentBundle = dataListener.getFragmentBundle();
+        String contactId = fragmentBundle.getString(ARGUMENT_CONTACT_ID);
+        satoshis = fragmentBundle.getLong(ARGUMENT_SATOSHIS, -1L);
+        accountPosition = fragmentBundle.getInt(ARGUMENT_ACCOUNT_POSITION, -1);
+        paymentRequestType = (PaymentRequestType) fragmentBundle.getSerializable(ARGUMENT_REQUEST_TYPE);
 
         if (contactId != null && paymentRequestType != null && satoshis > -1L) {
             loadContact(contactId);
@@ -79,7 +82,7 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
     }
 
     void sendRequest() {
-        if (satoshis < 0) {
+        if (satoshis <= 0) {
             dataListener.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR);
         } else {
             dataListener.showProgressDialog();
@@ -123,11 +126,19 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
                                 throwable -> {
                                     dataListener.showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
                                     dataListener.finishPage();
+                                },
+                                () -> {
+                                    if (recipient == null) {
+                                        // Wasn't found via filter, show not found
+                                        dataListener.showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
+                                        dataListener.finishPage();
+                                    }
                                 }));
     }
 
     private Observable<String> getNextReceiveAddress(int defaultIndex) {
-        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(defaultIndex));
+        Account account = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultIndex);
+        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account));
     }
 
 }

@@ -19,7 +19,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 public class ContactsInvitationBuilderActivity extends BaseAuthActivity
         implements ContactsInvitationBuilderRecipientFragment.FragmentInteractionListener,
         ContactsInvitationBuilderSenderFragment.FragmentInteractionListener,
-        ContactsInvitationBuilderShareMethod.FragmentInteractionListener,
+        ContactsInvitationShareMethodFragment.FragmentInteractionListener,
         ContactsInvitationBuilderQrFragment.FragmentInteractionListener,
         ContactsInvitationBuilderViewModel.DataListener {
 
@@ -63,7 +63,7 @@ public class ContactsInvitationBuilderActivity extends BaseAuthActivity
     public void onSenderNameSubmitted(String name) {
         viewModel.setNameOfSender(name);
 
-        submitFragmentTransaction(new ContactsInvitationBuilderShareMethod());
+        submitFragmentTransaction(new ContactsInvitationShareMethodFragment());
     }
 
     @Override

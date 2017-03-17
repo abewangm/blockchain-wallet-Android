@@ -42,14 +42,15 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
 
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import org.apache.commons.lang3.StringUtils;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
@@ -71,7 +72,7 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.EventLogHandler;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -259,7 +260,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
 
             viewModel.handleIncomingQRScan(data.getStringExtra(CaptureActivity.SCAN_RESULT),
-                    EventLogHandler.URL_EVENT_TX_INPUT_FROM_QR);
+                    EventService.EVENT_TX_INPUT_FROM_QR);
 
         } else if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
             final String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);
@@ -279,11 +280,21 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 } else if (object instanceof Account) {
                     Account account = ((Account) object);
                     viewModel.setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account));
-                    binding.destination.setText(account.getLabel());
+
+                    String label = account.getLabel();
+                    if(label.isEmpty()){
+                        label = account.getXpub();
+                    }
+                    binding.destination.setText(StringUtils.abbreviate(label, 32));
                 } else if (object instanceof LegacyAddress) {
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
                     viewModel.setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress));
-                    binding.destination.setText(legacyAddress.getLabel());
+
+                    String label = legacyAddress.getLabel();
+                    if(label.isEmpty()){
+                        label = legacyAddress.getAddress();
+                    }
+                    binding.destination.setText(StringUtils.abbreviate(label, 32));
                 }
 
             } catch (ClassNotFoundException e) {
@@ -302,13 +313,25 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 if (object instanceof Account) {
                     Account account = ((Account) object);
                     chosenItem = new ItemAccount(account.getLabel(), null, null, null, account);
+
+                    String label = chosenItem.label;
+                    if(label.isEmpty()){
+                        label = account.getXpub();
+                    }
+                    binding.from.setText(StringUtils.abbreviate(label, 32));
+
                 } else if (object instanceof LegacyAddress) {
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
                     chosenItem = new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress);
+
+                    String label = chosenItem.label;
+                    if(label.isEmpty()){
+                        label = legacyAddress.getAddress();
+                    }
+                    binding.from.setText(StringUtils.abbreviate(label, 32));
                 }
 
                 viewModel.setSendingAddress(chosenItem);
-                binding.from.setText(chosenItem.label);
 
                 viewModel.calculateTransactionAmounts(chosenItem,
                         binding.amountRow.amountBtc.getText().toString(),
@@ -458,17 +481,17 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         binding.buttonSend.setOnClickListener(v -> {
             customKeypad.setNumpadVisibility(View.GONE);
             if (ConnectivityStatus.hasConnectivity(getActivity())) {
-                requestSendPayment(binding.amountRow.amountBtc.getText().toString());
+                requestSendPayment(false);
             } else {
                 showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
             }
         });
     }
 
-    private void requestSendPayment(String amount) {
+    private void requestSendPayment(boolean feeWarningSeen) {
         viewModel.onSendClicked(binding.customFee.getText().toString(),
-                amount,
-                false,
+            binding.amountRow.amountBtc.getText().toString(),
+                feeWarningSeen,
                 binding.destination.getText().toString());
     }
 
@@ -613,7 +636,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         if (getArguments() != null && getArguments().containsKey(ARGUMENT_LAUNCH_CONFIRMATION)) {
             // Skip straight to payment confirmation
-            requestSendPayment(binding.amountRow.amountBtc.getText().toString());
+            requestSendPayment(false);
         }
     }
 
@@ -640,7 +663,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     @Override
     public void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue) {
         playAudio();
-        LocalBroadcastManager.getInstance(getActivity()).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -987,21 +1009,25 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public void onShowAlterFee(String absoluteFeeSuggested,
-                               String body,
-                               @StringRes int positiveAction,
-                               @StringRes int negativeAction) {
+    public void onShowAlterFee(String suggestedAbsoluteFee,
+        String body,
+        @StringRes int positiveAction,
+        @StringRes int negativeAction) {
 
         new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
-                .setTitle(R.string.warning)
-                .setMessage(body)
-                .setCancelable(false)
-                .setPositiveButton(positiveAction, (dialog, which) ->
-                        requestSendPayment(absoluteFeeSuggested))
-                .setNegativeButton(negativeAction, (dialog, which) ->
-                        requestSendPayment(binding.amountRow.amountBtc.getText().toString()))
-                .create()
-                .show();
+            .setTitle(R.string.warning)
+            .setMessage(body)
+            .setCancelable(false)
+            .setPositiveButton(positiveAction, (dialog, which) -> {
+                //Accept suggested fee
+                binding.customFee.setText(suggestedAbsoluteFee);
+                requestSendPayment(true);
+            })
+            .setNegativeButton(negativeAction, (dialog, which) ->
+                //User rejected suggested fee. Don't alter.
+                requestSendPayment(true))
+            .create()
+            .show();
     }
 
     private void alertCustomSpend(String btcFee, String btcFeeUnit) {

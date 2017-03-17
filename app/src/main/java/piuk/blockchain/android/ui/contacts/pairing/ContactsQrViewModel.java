@@ -4,13 +4,16 @@ import android.app.NotificationManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -19,11 +22,13 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 @SuppressWarnings("WeakerAccess")
 public class ContactsQrViewModel extends BaseViewModel {
 
-    private static final int DIMENSION_QR_CODE = 600;
+    @VisibleForTesting static final int DIMENSION_QR_CODE = 600;
 
     private DataListener dataListener;
+    private Observable<NotificationPayload> notificationObservable;
     @Inject QrCodeDataManager qrCodeDataManager;
     @Inject NotificationManager notificationManager;
+    @Inject RxBus rxBus;
 
     interface DataListener {
 
@@ -48,10 +53,11 @@ public class ContactsQrViewModel extends BaseViewModel {
     public void onViewReady() {
         subscribeToNotifications();
 
-        if (dataListener.getFragmentBundle() != null) {
-            String name = dataListener.getFragmentBundle().getString(ContactsInvitationBuilderQrFragment.ARGUMENT_NAME);
+        Bundle fragmentBundle = dataListener.getFragmentBundle();
+        if (fragmentBundle != null) {
+            String name = fragmentBundle.getString(ContactsInvitationBuilderQrFragment.ARGUMENT_NAME);
             dataListener.updateDisplayMessage(name);
-            String uri = dataListener.getFragmentBundle().getString(ContactsInvitationBuilderQrFragment.ARGUMENT_URI);
+            String uri = fragmentBundle.getString(ContactsInvitationBuilderQrFragment.ARGUMENT_URI);
 
             compositeDisposable.add(
                     qrCodeDataManager.generateQrCode(uri, DIMENSION_QR_CODE)
@@ -65,8 +71,9 @@ public class ContactsQrViewModel extends BaseViewModel {
     }
 
     private void subscribeToNotifications() {
+        notificationObservable = rxBus.register(NotificationPayload.class);
         compositeDisposable.add(
-                FcmCallbackService.getNotificationSubject()
+                notificationObservable
                         .subscribe(
                                 notificationPayload -> {
                                     if (notificationPayload.getType() != null
@@ -80,5 +87,11 @@ public class ContactsQrViewModel extends BaseViewModel {
                                     // No-op
                                 }
                         ));
+    }
+
+    @Override
+    public void destroy() {
+        rxBus.unregister(NotificationPayload.class, notificationObservable);
+        super.destroy();
     }
 }

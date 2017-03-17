@@ -67,8 +67,10 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
         }
     }
 
-    private Metadata getBuyMetadata() throws IOException, MetadataException, NoSuchAlgorithmException {
-        DeterministicKey metadataHDNode = MetadataUtil.deriveMetadataNode(payloadManager.getMasterKey());
+    private Metadata getBuyMetadata() throws Exception {
+        DeterministicKey masterKey = payloadManager.getPayload().getHdWallets().get(0)
+            .getMasterKey();
+        DeterministicKey metadataHDNode = MetadataUtil.deriveMetadataNode(masterKey);
         return new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXTERNAL).build();
     }
 
@@ -114,7 +116,7 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
                 byte[] magicHash = buyMetadata.getMagicHash();
 
                 frontendJavascriptManager.activateMobileBuyFromJson(
-                        payloadManager.getPayload().getDecryptedPayload(),
+                        payloadManager.getPayload().toJson(),
                         metadata == null ? "" : metadata,
                         magicHash == null ? "" : Hex.toHexString(magicHash),
                         payloadManager.getTempPassword().toString()

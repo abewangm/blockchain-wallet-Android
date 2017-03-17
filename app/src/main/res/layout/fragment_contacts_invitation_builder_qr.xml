@@ -54,7 +54,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="56dp"
             android:text="@string/done"
-            android:theme="@style/ButtonBlueTheme" />
+            android:theme="@style/ButtonLightBlueTheme" />
 
     </LinearLayout>
 </layout>

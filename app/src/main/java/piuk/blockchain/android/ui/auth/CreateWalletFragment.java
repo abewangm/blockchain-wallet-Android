@@ -103,7 +103,7 @@ public class CreateWalletFragment extends Fragment {
                             // Email and password can't be the same
                             pwStrength = 0;
                         } else {
-                            pwStrength = (int) Math.round(PasswordUtil.getInstance().getStrength(pw));
+                            pwStrength = (int) Math.round(PasswordUtil.getStrength(pw));
                         }
 
                         int pwStrengthLevel = 0;//red
@@ -131,7 +131,7 @@ public class CreateWalletFragment extends Fragment {
             final String pw1 = binding.walletPass.getText().toString();
             final String pw2 = binding.walletPassConfrirm.getText().toString();
 
-            if (!FormatsUtil.getInstance().isValidEmailAddress(em)) {
+            if (!FormatsUtil.isValidEmailAddress(em)) {
                 ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
             } else if (pw1.length() < 4) {
                 ToastCustom.makeText(getActivity(), getString(R.string.invalid_password_too_short), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
@@ -163,7 +163,7 @@ public class CreateWalletFragment extends Fragment {
         String text2 = getString(R.string.blockchain_tos);
 
         Spannable spannable = new SpannableString(text + text2);
-        spannable.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getActivity(), R.color.primary_navy_medium)),
+        spannable.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getActivity(), R.color.primary_blue_accent)),
                 text.length(), text.length() + text2.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         binding.tos.setText(spannable, TextView.BufferType.SPANNABLE);
 

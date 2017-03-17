@@ -103,7 +103,7 @@
 
     <string name="support">สนับสนุน</string>
     <string name="rate_us">ให้คะแนนเรา</string>
-    <string name="about">กระเป๋าเงิน Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">กระเป๋าเงิน Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">แอปร้านค้าฟรี</string>
     <string name="password_or_wipe">กรอกโดยใช้รหัสผ่านของคุณ หรือลืมกระเป๋าเงินนี้</string>
     <string name="use_password">ใช้รหัสผ่าน</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">กำลังถอดรหัสกระเป๋าเงิน...</string>
     <string name="password_unchanged">ไม่ได้เปลี่ยนรหัสผ่าน</string>
     <string name="password_changed">เปลี่ยนรหัสผ่านแล้ว</string>
-    <string name="verify_email2">ที่อยู่อีเมลซึ่งได้รับการยืนยันของคุณจะใช้เพื่อส่งรหัสล็อกอินเมื่อตรวจพบกิจกรรมที่ผิดปกติ เพื่อเตือนคุณถึง ID ล็อกอินกระเป๋าเงินของคุณ และเพื่อส่งการแจ้งเตือนการชำระเงิน bitcoin เมื่อคุณได้รับเงิน เราจะไม่ใช้ที่อยู่อีเมลของคุณสำหรับวัตถุประสงค์ทางการตลาด</string>
+    <string name="verify_email2">ที่อยู่อีเมลซึ่งได้รับการยืนยันของคุณจะใช้เพื่อส่งรหัสล็อกอินเมื่อตรวจพบกิจกรรมที่ผิดปกติ เพื่อเตือนคุณถึง ID ล็อกอินกระเป๋าเงินของคุณ และเพื่อส่งการแจ้งเตือนการชำระเงิน bitcoin เมื่อคุณได้รับเงิน</string>
     <string name="disable_root_warning">ปิดคำเตือนอุปกรณ์ที่ถูกรูท</string>
 
     <string name="show_balance">แสดงยอดคงเหลือ</string>
@@ -366,8 +366,6 @@
     <string name="two_fa">การยืนยัน 2 ขั้นตอน</string>
     <string name="tor_requests">บล็อกการร้องขอของ Tor</string>
     <string name="tor_summary">คุณต้องการบล็อกที่อยู่ IP ซึ่งรู้ว่าเป็นส่วนหนึ่งของเครือข่ายที่ไม่เปิดเผย Tor จากการเข้าถึงกระเป๋าเงินของคุณหรือไม่? เครือข่าย Tor มักจะถูกใช้งานโดยแฮกเกอร์ซึ่งพยายามที่จะเข้าถึงกระเป๋าเงินของผู้ใช้ Blockchain</string>
-    <string name="password_hint">คำใบ้รหัสผ่าน</string>
-    <string name="password_hint_summary">กระเป๋าเงิน Blockchain ของคุณจะไม่สื่อสารรหัสผ่านของคุณไปยังเซิร์ฟเวอร์ของเรา มันหมายความว่าเราไม่ทราบว่ารหัสผ่านของคุณคืออะไรและเราไม่สามารถรีเซ็ตมันได้หากคุณลืมมัน สร้างคำใบ้รหัสผ่านที่จำได้ง่ายเพื่อให้เราสามารถส่งไปยังที่อยู่อีเมลที่ได้รับการยืนยันของคุณเมื่อคุณลืมรหัสผ่าน</string>
     <string name="change_password">เปลี่ยนรหัสผ่าน</string>
     <string name="change_password_summary">รหัสผ่านของคุณไม่ได้รับการแบ่งปันกับเซิร์ฟเวอร์ของเรา ซึ่งหมายความว่าเราไม่สามารถช่วยรีเซ็ตรหัสผ่านของคุณได้หากคุณลืมมัน ตรวจสอบให้แน่ใจว่าคุณได้จดวลีเพื่อการกู้คืนของคุณแล้ว เพื่อใช้กู้คืนการเข้าถึงกระเป๋าเงินของคุณในกรณีที่รหัสผ่านสูญหาย</string>
     <string name="verify_email_notice">เราได้ส่งลิงก์ยืนยันไปยังที่อยู่อีเมลของคุณแล้ว คลิกที่ลิงก์ยืนยันเพื่อยืนยันที่อยู่อีเมลของคุณ</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">ใช่แล้ว ให้คะแนนกระเป๋าเงิน Blockchain</string>
     <string name="rate_no">ไม่ล่ะ ขอบคุณ</string>
     <string name="rate_later">เตือนฉันอีกครั้งในภายหลัง</string>
-    <string name="hint_reveals_password_error">คุณไม่สามารถตั้งรหัสผ่านกระเป๋าเงินหลักของคุณเป็นคำใบ้รหัสผ่านของคุณได้</string>
     <string name="why_has_my_address_changed">ทำไมที่อยู่ของฉันถึงเปลี่ยนไป?</string>
     <string name="learn_more">เรียนรู้เพิ่มเติม</string>
 

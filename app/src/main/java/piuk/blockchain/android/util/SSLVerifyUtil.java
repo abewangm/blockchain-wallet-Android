@@ -3,8 +3,7 @@ package piuk.blockchain.android.util;
 import android.content.Context;
 import android.util.Log;
 
-import info.blockchain.api.PersistentUrls;
-
+import info.blockchain.wallet.api.PersistentUrls;
 import org.thoughtcrime.ssl.pinning.util.PinningHelper;
 
 import java.io.IOException;
@@ -99,9 +98,7 @@ public class SSLVerifyUtil {
                             listener.onServerDown();
                         }
                     }
-                }, throwable -> {
-                    listener.onServerDown();
-                });
+                }, throwable -> listener.onServerDown());
     }
 
     private Observable<HttpsURLConnection> getPinnedConnection() {

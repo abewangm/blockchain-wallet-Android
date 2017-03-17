@@ -11,10 +11,9 @@ import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 
-import info.blockchain.BlockchainFramework;
-import info.blockchain.FrameworkInterface;
-import info.blockchain.api.PinStore;
-
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.FrameworkInterface;
+import info.blockchain.wallet.api.WalletApi;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import javax.inject.Inject;
@@ -24,7 +23,7 @@ import dagger.Lazy;
 import io.reactivex.plugins.RxJavaPlugins;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityManager;
-import piuk.blockchain.android.data.services.PinStoreService;
+import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
@@ -83,7 +82,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
         AccessState.getInstance().initAccessState(this,
                 new PrefsUtil(this),
-                new PinStoreService(new PinStore()),
+                new WalletService(new WalletApi()),
                 appUtil);
 
         // Apply PRNG fixes on app start if needed
@@ -95,6 +94,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
+        //noinspection AnonymousInnerClassMayBeStatic
         ApplicationLifeCycle.getInstance().addListener(new ApplicationLifeCycle.LifeCycleListener() {
             @Override
             public void onBecameForeground() {
@@ -120,6 +120,21 @@ public class BlockchainApplication extends Application implements FrameworkInter
         return retrofitServer.get();
     }
 
+    @Override
+    public String getApiCode() {
+        return "25a6ad13-1633-4dfb-b6ee-9b91cdf0b5c3";
+    }
+
+    @Override
+    public String getDevice() {
+        return "android";
+    }
+
+    @Override
+    public String getAppVersion() {
+        return BuildConfig.VERSION_NAME;
+    }
+
     /**
      * This patches a device's Security Provider asynchronously to help defend against various
      * vulnerabilities. This provider is normally updated in Google Play Services anyway, but this
@@ -131,7 +146,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
      * @see <a href="https://developer.android.com/training/articles/security-gms-provider.html">Updating
      * Your Security Provider</a>
      */
-    private void checkSecurityProviderAndPatchIfNeeded() {
+    protected void checkSecurityProviderAndPatchIfNeeded() {
         ProviderInstaller.installIfNeededAsync(this, new ProviderInstaller.ProviderInstallListener() {
             @Override
             public void onProviderInstalled() {

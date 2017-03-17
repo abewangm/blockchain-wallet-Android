@@ -103,7 +103,7 @@
 
     <string name="support">Podpora</string>
     <string name="rate_us">Ohodnoťte nás</string>
-    <string name="about">Peněženka Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Peněženka Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Bezplatná aplikace pro prodejce</string>
     <string name="password_or_wipe">Zadat pomocí hesla nebo zapomenout tuto peněženku</string>
     <string name="use_password">Použít heslo</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Dešifrování peněženky...</string>
     <string name="password_unchanged">Heslo nezměněno</string>
     <string name="password_changed">Heslo změněno</string>
-    <string name="verify_email2">Vaše ověřená e-mailová adresa se používá pro odesílání přihlašovacích kódů, pokud je zaznamenána podezřelá nebo neobvyklá aktivita, abychom Vám připomněli Vaše přihlašovací ID peněženky, a zasílání upozornění na bitcoinovou platbu v případě připsání prostředků. Vaši e-mailovou adresu nepoužijeme k marketingovým účelům.</string>
+    <string name="verify_email2">Vaše ověřená e-mailová adresa se používá pro odesílání přihlašovacích kódů, pokud je zaznamenána podezřelá nebo neobvyklá aktivita, abychom Vám připomněli Vaše přihlašovací ID peněženky, a zasílání upozornění na bitcoinovou platbu v případě připsání prostředků.</string>
     <string name="disable_root_warning">Deaktivovat varování před rootovaným zařízením</string>
 
     <string name="show_balance">Zobrazit zůstatek</string>
@@ -366,8 +366,6 @@
     <string name="two_fa">Dvoufázové ověření</string>
     <string name="tor_requests">Blokovat požadavky Tor</string>
     <string name="tor_summary">Chcete zablokovat přístup k Vaší peněžence IP adresám, které jsou podle dostupných informací součástí anonymizační sítě Tor? Síť Tor často využívají hackeři, aby získali přístup k peněženkám uživatelů Blockchain.</string>
-    <string name="password_hint">Nápověda k heslu</string>
-    <string name="password_hint_summary">Vaše peněženka Blockchain nikdy nesděluje Vaše heslo našim serverům. To znamená, že Vaše heslo neznáme a nemůžeme ho ani obnovit, pokud ho zapomenete. Vytvořte si zapamatovatelnou nápovědu k heslu, kterou Vám můžeme zaslat na e-mail v případě, že heslo zapomenete.</string>
     <string name="change_password">Změnit heslo</string>
     <string name="change_password_summary">Vaše heslo nikdy nesdílíme na našich serverech, což znamená, že pokud heslo zapomenete, nemůžeme ho obnovit. Nezapomeňte si zapsat frázi pro obnovení, pomocí které si můžete peněženku v případě zapomenutého hesla obnovit.</string>
     <string name="verify_email_notice">Na Vaši e-mailovou adresu jsme odeslali ověřovací odkaz. Kliknutím na ověřovací odkaz ověříte svoji e-mailovou adresu.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Ano, chci ohodnotit peněženku Blockchain</string>
     <string name="rate_no">Ne, děkuji</string>
     <string name="rate_later">Připomenout později</string>
-    <string name="hint_reveals_password_error">Jako nápovědu k heslu nemůžete nastavit svoje hlavní heslo k peněžence.</string>
     <string name="why_has_my_address_changed">Proč se moje adresa změnila?</string>
     <string name="learn_more">Zjistit více</string>
 

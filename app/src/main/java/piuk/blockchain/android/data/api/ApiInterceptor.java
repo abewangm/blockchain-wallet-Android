@@ -22,10 +22,9 @@ public class ApiInterceptor implements Interceptor {
         long startTime = System.nanoTime();
 
         String requestLog = String.format(
-                "Sending request of type %s to %s with headers %s%n%s",
+                "Sending request of type %s to %s with headers %s",
                 request.method(),
                 request.url(),
-                chain.connection(),
                 request.headers());
 
         if (request.method().compareToIgnoreCase("post") == 0) {

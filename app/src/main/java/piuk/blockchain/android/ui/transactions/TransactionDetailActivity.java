@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.transactions;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
@@ -18,8 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-
+import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import java.util.List;
 import java.util.Locale;
 
@@ -33,7 +33,6 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 public class TransactionDetailActivity extends BaseAuthActivity implements TransactionDetailViewModel.DataListener {
 
-    public static final String KEY_TRANSACTION_URL = "key_transaction_url";
     @Thunk ActivityTransactionDetailsBinding mBinding;
     private TransactionDetailViewModel mViewModel;
 
@@ -83,16 +82,16 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
     }
 
     @Override
-    public void setTransactionType(String type) {
+    public void setTransactionType(Direction type) {
         switch (type) {
-            case MultiAddrFactory.MOVED:
+            case TRANSFERRED:
                 mBinding.transactionType.setText(getResources().getString(R.string.MOVED));
                 break;
-            case MultiAddrFactory.RECEIVED:
+            case RECEIVED:
                 mBinding.transactionType.setText(getResources().getString(R.string.RECEIVED));
                 mBinding.transactionFee.setVisibility(View.GONE);
                 break;
-            case MultiAddrFactory.SENT:
+            case SENT:
                 mBinding.transactionType.setText(getResources().getString(R.string.SENT));
                 break;
         }
@@ -152,8 +151,11 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
     @Override
     public void setStatus(String status, String hash) {
         mBinding.status.setText(status);
-        mBinding.buttonVerify.setOnClickListener(v ->
-                TransactionDetailWebViewActivity.start(this, "https://blockchain.info/tx/" + hash));
+        mBinding.buttonVerify.setOnClickListener(v -> {
+            Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+            viewIntent.setData(Uri.parse("https://blockchain.info/tx/" + mViewModel.getTransactionHash()));
+            startActivity(viewIntent);
+        });
     }
 
     @Override

@@ -10,9 +10,7 @@ import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest
 import info.blockchain.wallet.metadata.MetadataNodeFactory
 import info.blockchain.wallet.metadata.data.Message
-import info.blockchain.wallet.payload.Payload
 import info.blockchain.wallet.payload.PayloadManager
-import info.blockchain.wallet.util.CharSequenceX
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
@@ -42,33 +40,16 @@ class ContactsDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
-    fun getServiceInitSubject() {
-        // Arrange
-
-        // Act
-        val publishSubject = ContactsDataManager.getServiceInitSubject()
-        // Assert
-        publishSubject is PublishSubject<ContactsDataManager.ContactsEvent>
-    }
-
-    @Test
-    @Throws(Exception::class)
     fun loadNodes() {
         // Arrange
-        val mockPayload: Payload = mock()
-        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
-        val tempPassword = CharSequenceX("TEMP_PASSWORD")
-        val guid = "GUID"
-        val sharedKey = "SHARED_KEY"
-        whenever(mockPayloadManager.tempPassword).thenReturn(tempPassword)
-        whenever(mockPayload.guid).thenReturn(guid)
-        whenever(mockPayload.sharedKey).thenReturn(sharedKey)
+        whenever(mockPayloadManager.loadNodes()).thenReturn(true)
         // Act
         val testObserver = subject.loadNodes().test()
         // Assert
-        verify(mockPayloadManager).loadNodes(guid, sharedKey, tempPassword.toString())
+        verify(mockPayloadManager).loadNodes()
         testObserver.assertComplete()
         testObserver.assertNoErrors()
+        testObserver.values()[0] equals true
     }
 
     @Test
@@ -90,7 +71,8 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
         val mockMetadataNode: DeterministicKey = mock()
         val mockSharedMetadataNode: DeterministicKey = mock()
-        whenever(mockContactsService.initContactsService(mockMetadataNode, mockSharedMetadataNode)).thenReturn(Completable.complete())
+        whenever(mockContactsService.initContactsService(mockMetadataNode, mockSharedMetadataNode))
+                .thenReturn(Completable.complete())
         // Act
         val testObserver = subject.initContactsService(mockMetadataNode, mockSharedMetadataNode).test()
         // Assert
@@ -117,12 +99,6 @@ class ContactsDataManagerTest : RxTest() {
     @Throws(Exception::class)
     fun registerMdid() {
         // Arrange
-        val mockPayload: Payload = mock()
-        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
-        val guid = "GUID"
-        val sharedKey = "SHARED_KEY"
-        whenever(mockPayload.guid).thenReturn(guid)
-        whenever(mockPayload.sharedKey).thenReturn(sharedKey)
         val mockMetadataNodeFactory: MetadataNodeFactory = mock()
         val mockSharedMetadataNode: DeterministicKey = mock()
         whenever(mockMetadataNodeFactory.sharedMetadataNode).thenReturn(mockSharedMetadataNode)
@@ -130,7 +106,7 @@ class ContactsDataManagerTest : RxTest() {
         // Act
         val testObserver = subject.registerMdid().test()
         // Assert
-        verify(mockPayloadManager).registerMdid(guid, sharedKey, mockSharedMetadataNode)
+        verify(mockPayloadManager).registerMdid(mockSharedMetadataNode)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
     }
@@ -139,12 +115,6 @@ class ContactsDataManagerTest : RxTest() {
     @Throws(Exception::class)
     fun unregisterMdid() {
         // Arrange
-        val mockPayload: Payload = mock()
-        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
-        val guid = "GUID"
-        val sharedKey = "SHARED_KEY"
-        whenever(mockPayload.guid).thenReturn(guid)
-        whenever(mockPayload.sharedKey).thenReturn(sharedKey)
         val mockMetadataNodeFactory: MetadataNodeFactory = mock()
         val mockSharedMetadataNode: DeterministicKey = mock()
         whenever(mockMetadataNodeFactory.sharedMetadataNode).thenReturn(mockSharedMetadataNode)
@@ -152,7 +122,7 @@ class ContactsDataManagerTest : RxTest() {
         // Act
         val testObserver = subject.unregisterMdid().test()
         // Assert
-        verify(mockPayloadManager).unregisterMdid(guid, sharedKey, mockSharedMetadataNode)
+        verify(mockPayloadManager).unregisterMdid(mockSharedMetadataNode)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
     }
@@ -280,7 +250,8 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
         val contactId = "CONTACT ID"
         val contactName = "CONTACT_NAME"
-        whenever(mockContactsService.renameContact(contactId, contactName)).thenReturn(Completable.complete())
+        whenever(mockContactsService.renameContact(contactId, contactName))
+                .thenReturn(Completable.complete())
         // Act
         val testObserver = subject.renameContact(contactId, contactName).test()
         // Assert
@@ -295,7 +266,8 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
         val sender = Contact()
         val recipient = Contact()
-        whenever(mockContactsService.createInvitation(sender, recipient)).thenReturn(Observable.just(sender))
+        whenever(mockContactsService.createInvitation(sender, recipient))
+                .thenReturn(Observable.just(sender))
         // Act
         val testObserver = subject.createInvitation(sender, recipient).test()
         // Assert
@@ -311,7 +283,8 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
         val invitationUrl = "INVITATION_URL"
         val sender = Contact()
-        whenever(mockContactsService.acceptInvitation(invitationUrl)).thenReturn(Observable.just(sender))
+        whenever(mockContactsService.acceptInvitation(invitationUrl))
+                .thenReturn(Observable.just(sender))
         // Act
         val testObserver = subject.acceptInvitation(invitationUrl).test()
         // Assert
@@ -327,7 +300,8 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
         val invitationUrl = "INVITATION_URL"
         val sender = Contact()
-        whenever(mockContactsService.readInvitationLink(invitationUrl)).thenReturn(Observable.just(sender))
+        whenever(mockContactsService.readInvitationLink(invitationUrl))
+                .thenReturn(Observable.just(sender))
         // Act
         val testObserver = subject.readInvitationLink(invitationUrl).test()
         // Assert
@@ -342,7 +316,8 @@ class ContactsDataManagerTest : RxTest() {
     fun readInvitationSent() {
         // Arrange
         val recipient = Contact()
-        whenever(mockContactsService.readInvitationSent(recipient)).thenReturn(Observable.just(true))
+        whenever(mockContactsService.readInvitationSent(recipient))
+                .thenReturn(Observable.just(true))
         // Act
         val testObserver = subject.readInvitationSent(recipient).test()
         // Assert
@@ -358,7 +333,8 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
         val mdid = "MDID"
         val paymentRequest = PaymentRequest()
-        whenever(mockContactsService.requestSendPayment(mdid, paymentRequest)).thenReturn(Completable.complete())
+        whenever(mockContactsService.requestSendPayment(mdid, paymentRequest))
+                .thenReturn(Completable.complete())
         // Act
         val testObserver = subject.requestSendPayment(mdid, paymentRequest).test()
         // Assert
@@ -373,7 +349,8 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
         val mdid = "MDID"
         val paymentRequest = RequestForPaymentRequest()
-        whenever(mockContactsService.requestReceivePayment(mdid, paymentRequest)).thenReturn(Completable.complete())
+        whenever(mockContactsService.requestReceivePayment(mdid, paymentRequest))
+                .thenReturn(Completable.complete())
         // Act
         val testObserver = subject.requestReceivePayment(mdid, paymentRequest).test()
         // Assert
@@ -389,7 +366,8 @@ class ContactsDataManagerTest : RxTest() {
         val mdid = "MDID"
         val paymentRequest = PaymentRequest()
         val fctxId = "FCTX_ID"
-        whenever(mockContactsService.sendPaymentRequestResponse(mdid, paymentRequest, fctxId)).thenReturn(Completable.complete())
+        whenever(mockContactsService.sendPaymentRequestResponse(mdid, paymentRequest, fctxId))
+                .thenReturn(Completable.complete())
         // Act
         val testObserver = subject.sendPaymentRequestResponse(mdid, paymentRequest, fctxId).test()
         // Assert
@@ -405,7 +383,8 @@ class ContactsDataManagerTest : RxTest() {
         val mdid = "MDID"
         val txHash = "TX_HASH"
         val fctxId = "FCTX_ID"
-        whenever(mockContactsService.sendPaymentBroadcasted(mdid, txHash, fctxId)).thenReturn(Completable.complete())
+        whenever(mockContactsService.sendPaymentBroadcasted(mdid, txHash, fctxId))
+                .thenReturn(Completable.complete())
         // Act
         val testObserver = subject.sendPaymentBroadcasted(mdid, txHash, fctxId).test()
         // Assert
@@ -436,16 +415,11 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
         whenever(mockContactsService.publishXpub()).thenReturn(Completable.complete())
         // Act
-        val publishObserver = ContactsDataManager.getServiceInitSubject().test()
         val testObserver = subject.publishXpub().test()
         // Assert
         verify(mockContactsService).publishXpub()
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        // PublishSubject won't complete
-        publishObserver.assertNotComplete()
-        publishObserver.assertNoErrors()
-        publishObserver.values()[0] equals ContactsDataManager.ContactsEvent.INIT
     }
 
     @Test
@@ -489,7 +463,8 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
         val messageId = "MESSAGE_ID"
         val markAsRead = true
-        whenever(mockContactsService.markMessageAsRead(messageId, markAsRead)).thenReturn(Completable.complete())
+        whenever(mockContactsService.markMessageAsRead(messageId, markAsRead))
+                .thenReturn(Completable.complete())
         // Act
         val testObserver = subject.markMessageAsRead(messageId, markAsRead).test()
         // Assert

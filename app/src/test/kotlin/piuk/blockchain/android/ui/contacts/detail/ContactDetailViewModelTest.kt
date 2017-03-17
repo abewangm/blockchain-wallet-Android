@@ -6,12 +6,13 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
-import info.blockchain.wallet.payload.Account
-import info.blockchain.wallet.payload.HDWallet
-import info.blockchain.wallet.payload.Payload
 import info.blockchain.wallet.payload.PayloadManager
+import info.blockchain.wallet.payload.data.Account
+import info.blockchain.wallet.payload.data.HDWallet
+import info.blockchain.wallet.payload.data.Wallet
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,6 +22,8 @@ import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.notifications.NotificationPayload
+import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID
@@ -36,6 +39,7 @@ class ContactDetailViewModelTest {
     private val mockContactsManager: ContactsDataManager = mock()
     private val mockPayloadManager: PayloadManager = mock()
     private val mockPrefsUtil: PrefsUtil = mock()
+    private val mockRxBus: RxBus = mock()
 
     @Before
     @Throws(Exception::class)
@@ -54,7 +58,8 @@ class ContactDetailViewModelTest {
     @Throws(Exception::class)
     fun onViewReadyShouldFinishPage() {
         // Arrange
-
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         // Act
         subject.onViewReady()
         // Assert
@@ -70,6 +75,8 @@ class ContactDetailViewModelTest {
         // Arrange
         val contactId = "CONTACT_ID"
         val bundle = Bundle()
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         bundle.putString(KEY_BUNDLE_CONTACT_ID, contactId)
         whenever(mockActivity.pageBundle).thenReturn(bundle)
         whenever(mockContactsManager.contactList)
@@ -89,6 +96,8 @@ class ContactDetailViewModelTest {
         // Arrange
         val contactId = "CONTACT_ID"
         val bundle = Bundle()
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         bundle.putString(KEY_BUNDLE_CONTACT_ID, contactId)
         whenever(mockActivity.pageBundle).thenReturn(bundle)
         val contactName = "CONTACT_NAME"
@@ -112,6 +121,75 @@ class ContactDetailViewModelTest {
         verify(mockContactsManager).fetchContacts()
         verifyNoMoreInteractions(mockContactsManager)
         subject.contact equals contact2
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onViewReadySubscribeAndEmitEvent() {
+        // Arrange
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        val notificationPayload: NotificationPayload = mock()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
+        whenever(notificationPayload.type).thenReturn(NotificationPayload.NotificationType.PAYMENT)
+        // Act
+        subject.onViewReady()
+        notificationObservable.onNext(notificationPayload)
+        // Assert
+        verify(mockActivity, times(2)).pageBundle
+        verify(mockActivity, times(2)).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        verify(mockActivity, times(2)).finishPage()
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onViewReadySubscribeAndEmitUnwantedEvent() {
+        // Arrange
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        val notificationPayload: NotificationPayload = mock()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
+        whenever(notificationPayload.type).thenReturn(NotificationPayload.NotificationType.CONTACT_REQUEST)
+        // Act
+        subject.onViewReady()
+        notificationObservable.onNext(notificationPayload)
+        // Assert
+        verify(mockActivity).pageBundle
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        verify(mockActivity).finishPage()
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onViewReadySubscribeAndEmitNullEvent() {
+        // Arrange
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        val notificationPayload: NotificationPayload = mock()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
+        // Act
+        subject.onViewReady()
+        notificationObservable.onNext(notificationPayload)
+        // Assert
+        verify(mockActivity).pageBundle
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        verify(mockActivity).finishPage()
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onViewReadySubscribeAndEmitErrorEvent() {
+        // Arrange
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
+        // Act
+        subject.onViewReady()
+        notificationObservable.onError(Throwable())
+        // Assert
+        verify(mockActivity).pageBundle
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        verify(mockActivity).finishPage()
+        verifyNoMoreInteractions(mockActivity)
     }
 
     @Test
@@ -297,6 +375,28 @@ class ContactDetailViewModelTest {
         verifyNoMoreInteractions(mockActivity)
     }
 
+    /**
+     * Only exists to get 100% coverage
+     */
+    @Test
+    @Throws(Exception::class)
+    fun onTransactionClickedShouldShowWaitingForAddressSecondBranch() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val contact = Contact()
+        subject.contact = contact
+        contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
+            id = fctxId
+            state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
+            role = FacilitatedTransaction.ROLE_PR_INITIATOR
+        })
+        // Act
+        subject.onTransactionClicked(fctxId)
+        // Assert
+        verify(mockActivity).showWaitingForAddressDialog()
+        verifyNoMoreInteractions(mockActivity)
+    }
+
     @Test
     @Throws(Exception::class)
     fun onTransactionClickedShouldShowWaitingForPayment() {
@@ -308,6 +408,28 @@ class ContactDetailViewModelTest {
             id = fctxId
             state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
             role = FacilitatedTransaction.ROLE_RPR_INITIATOR
+        })
+        // Act
+        subject.onTransactionClicked(fctxId)
+        // Assert
+        verify(mockActivity).showWaitingForPaymentDialog()
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    /**
+     * Only exists to get 100% coverage
+     */
+    @Test
+    @Throws(Exception::class)
+    fun onTransactionClickedShouldShowWaitingForPaymentSecondBranch() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val contact = Contact()
+        subject.contact = contact
+        contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
+            id = fctxId
+            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+            role = FacilitatedTransaction.ROLE_PR_INITIATOR
         })
         // Act
         subject.onTransactionClicked(fctxId)
@@ -348,10 +470,10 @@ class ContactDetailViewModelTest {
             state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
             role = FacilitatedTransaction.ROLE_PR_RECEIVER
         })
-        val mockPayload: Payload = mock()
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallet).thenReturn(mockHdWallet)
+        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         val account0 = Account().apply { isArchived = true }
         val account1 = Account().apply { isArchived = true }
         val account2 = Account()
@@ -373,12 +495,12 @@ class ContactDetailViewModelTest {
         contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
             id = fctxId
             state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-            role = FacilitatedTransaction.ROLE_PR_RECEIVER
+            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
         })
-        val mockPayload: Payload = mock()
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallet).thenReturn(mockHdWallet)
+        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         val accountLabel0 = "ACCOUNT_0"
         val account0 = Account().apply { label = accountLabel0 }
         val accountLabel1 = "ACCOUNT_1"
@@ -408,12 +530,48 @@ class ContactDetailViewModelTest {
             address = ""
         }
         contact.addFacilitatedTransaction(facilitatedTransaction)
-        val mockPayload: Payload = mock()
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallet).thenReturn(mockHdWallet)
+        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         val defaultIndex = 1337
-        whenever(mockHdWallet.defaultIndex).thenReturn(defaultIndex)
+        whenever(mockHdWallet.defaultAccountIdx).thenReturn(defaultIndex)
+        // Act
+        subject.onTransactionClicked(fctxId)
+        // Assert
+        verify(mockActivity).initiatePayment(
+                facilitatedTransaction.toBitcoinURI(),
+                contact.id,
+                contact.mdid,
+                fctxId,
+                defaultIndex)
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    /**
+     * Only exists to get 100% coverage
+     */
+    @Test
+    @Throws(Exception::class)
+    fun onTransactionClickedShouldInitiatePaymentSecondBranch() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val contact = Contact()
+        subject.contact = contact
+        val facilitatedTransaction = FacilitatedTransaction().apply {
+            id = fctxId
+            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
+            intendedAmount = 0L
+            address = ""
+        }
+        contact.addFacilitatedTransaction(facilitatedTransaction)
+        val mockPayload: Wallet = mock()
+        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
+        val mockHdWallet: HDWallet = mock()
+        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
+        val defaultIndex = 1337
+        whenever(mockHdWallet.defaultAccountIdx).thenReturn(defaultIndex)
         // Act
         subject.onTransactionClicked(fctxId)
         // Assert
@@ -444,8 +602,10 @@ class ContactDetailViewModelTest {
         // Arrange
         val fctxId = "FCTX_ID"
         val contact = Contact()
-        whenever(mockContactsManager.getContactFromFctxId(fctxId)).thenReturn(Observable.just(contact))
-        whenever(mockContactsManager.deleteFacilitatedTransaction(contact.mdid, fctxId)).thenReturn(Completable.complete())
+        whenever(mockContactsManager.getContactFromFctxId(fctxId))
+                .thenReturn(Observable.just(contact))
+        whenever(mockContactsManager.deleteFacilitatedTransaction(contact.mdid, fctxId))
+                .thenReturn(Completable.complete())
         // Act
         subject.confirmDeleteFacilitatedTransaction(fctxId)
         // Assert
@@ -461,7 +621,8 @@ class ContactDetailViewModelTest {
         // Arrange
         val fctxId = "FCTX_ID"
         val contact = Contact()
-        whenever(mockContactsManager.getContactFromFctxId(fctxId)).thenReturn(Observable.just(contact))
+        whenever(mockContactsManager.getContactFromFctxId(fctxId))
+                .thenReturn(Observable.just(contact))
         whenever(mockContactsManager.deleteFacilitatedTransaction(contact.mdid, fctxId))
                 .thenReturn(Completable.error { Throwable() })
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
@@ -490,12 +651,12 @@ class ContactDetailViewModelTest {
             intendedAmount = 21 * 1000 * 1000L
         })
         val address = "ADDRESS"
-        whenever(mockPayloadManager.getNextReceiveAddress(accountPosition)).thenReturn(address)
-        val mockPayload: Payload = mock()
+        val account = Account()
+        whenever(mockPayloadManager.getNextReceiveAddress(account)).thenReturn(address)
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallet).thenReturn(mockHdWallet)
-        val account = Account()
+        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         whenever(mockHdWallet.accounts).thenReturn(listOf(account))
         whenever(mockContactsManager.sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId)))
                 .thenReturn(Completable.complete())
@@ -524,12 +685,12 @@ class ContactDetailViewModelTest {
             intendedAmount = 21 * 1000 * 1000L
         })
         val address = "ADDRESS"
-        whenever(mockPayloadManager.getNextReceiveAddress(accountPosition)).thenReturn(address)
-        val mockPayload: Payload = mock()
+        val account = Account()
+        whenever(mockPayloadManager.getNextReceiveAddress(account)).thenReturn(address)
+        val mockPayload: Wallet = mock()
         whenever(mockPayloadManager.payload).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallet).thenReturn(mockHdWallet)
-        val account = Account()
+        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         whenever(mockHdWallet.accounts).thenReturn(listOf(account))
         whenever(mockContactsManager.sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId)))
                 .thenReturn(Completable.error { Throwable() })
@@ -544,9 +705,24 @@ class ContactDetailViewModelTest {
         verifyNoMoreInteractions(mockContactsManager)
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun destroy() {
+        // Arrange
+
+        // Act
+        subject.destroy()
+        // Assert
+        verify(mockRxBus).unregister(eq(NotificationPayload::class.java), anyOrNull())
+    }
+
     inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
         override fun providePrefsUtil(): PrefsUtil {
             return mockPrefsUtil
+        }
+
+        override fun provideRxBus(): RxBus {
+            return mockRxBus
         }
     }
 

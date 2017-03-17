@@ -12,17 +12,12 @@ import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.View;
 
-import info.blockchain.util.FeeUtil;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.HDWallet;
-import info.blockchain.wallet.payload.ImportedAccount;
-import info.blockchain.wallet.payload.LegacyAddress;
-import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.HDWallet;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payload.data.Wallet;
 import info.blockchain.wallet.payment.Payment;
-import info.blockchain.wallet.send.SendCoins;
-import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
@@ -31,16 +26,19 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
 import org.bitcoinj.params.MainNetParams;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.exceptions.Exceptions;
-import piuk.blockchain.android.BuildConfig;
+import io.reactivex.Completable;
+import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
+import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -48,6 +46,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.ui.send.SendModel;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.ui.zxing.Contents;
 import piuk.blockchain.android.ui.zxing.encode.QRCodeEncoder;
@@ -59,16 +58,20 @@ import piuk.blockchain.android.util.StringUtils;
 @SuppressWarnings("WeakerAccess")
 public class AccountEditViewModel extends BaseViewModel {
 
+    private static final String TAG = AccountEditViewModel.class.getSimpleName();
+
     private DataListener dataListener;
 
     @Inject protected PayloadManager payloadManager;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected StringUtils stringUtils;
     @Inject protected AccountEditDataManager accountEditDataManager;
-    @Inject protected MultiAddrFactory multiAddrFactory;
+    @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
+    @Inject protected SendDataManager sendDataManager;
     @Inject protected PrivateKeyFactory privateKeyFactory;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
+    @Inject protected DynamicFeeCache dynamicFeeCache;
 
     // Visible for data binding
     public AccountEditModel accountModel;
@@ -141,13 +144,13 @@ public class AccountEditViewModel extends BaseViewModel {
 
         if (accountIndex >= 0) {
             // V3
-            List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+            List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
 
             // Remove "All"
             List<Account> accountClone = new ArrayList<>(accounts.size());
             accountClone.addAll(accounts);
 
-            if (accountClone.get(accountClone.size() - 1) instanceof ImportedAccount) {
+            if (accountClone.get(accountClone.size() - 1) instanceof ConsolidatedAccount) {
                 accountClone.remove(accountClone.size() - 1);
             }
 
@@ -164,11 +167,12 @@ public class AccountEditViewModel extends BaseViewModel {
 
         } else if (addressIndex >= 0) {
             // V2
-            ImportedAccount iAccount = null;
-            if (payloadManager.getPayload().getLegacyAddressList().size() > 0) {
-                iAccount = new ImportedAccount(stringUtils.getString(R.string.imported_addresses),
+            ConsolidatedAccount iAccount = null;
+            if (!payloadManager.getPayload().getLegacyAddressList().isEmpty()) {
+
+                iAccount = new ConsolidatedAccount(stringUtils.getString(R.string.imported_addresses),
                         payloadManager.getPayload().getLegacyAddressList(),
-                        MultiAddrFactory.getInstance().getLegacyBalance());
+                        payloadManager.getImportedAddressesBalance().longValue());
             }
 
             if (iAccount != null) {
@@ -192,11 +196,18 @@ public class AccountEditViewModel extends BaseViewModel {
                 }
 
                 if (payloadManager.getPayload().isUpgraded()) {
-                    long balance = multiAddrFactory.getLegacyBalance(legacyAddress.getAddress());
-                    // Subtract fee
-                    long balanceAfterFee = (balance - FeeUtil.AVERAGE_ABSOLUTE_FEE.longValue());
 
-                    if (balanceAfterFee > SendCoins.bDust.longValue() && !legacyAddress.isWatchOnly()) {
+                    // Subtract fee
+                    long balanceAfterFee = payloadManager.getAddressBalance(
+                            legacyAddress.getAddress()).longValue() -
+                            sendDataManager.estimatedFee(1, 1,
+                                    BigDecimal.valueOf(dynamicFeeCache.getCachedDynamicFee()
+                                            .getDefaultFee()
+                                            .getFee())
+                                            .toBigInteger())
+                                    .longValue();
+
+                    if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
                         accountModel.setTransferFundsVisibility(View.VISIBLE);
                     } else {
                         // No need to show 'transfer' if funds are less than dust amount
@@ -223,13 +234,13 @@ public class AccountEditViewModel extends BaseViewModel {
         } else {
             accountModel.setDefaultAccountVisibility(View.VISIBLE);
             accountModel.setDefaultText(stringUtils.getString(R.string.make_default));
-            accountModel.setDefaultTextColor(R.color.primary_navy_medium);
+            accountModel.setDefaultTextColor(R.color.primary_blue_accent);
         }
     }
 
     private boolean isDefault(Account account) {
-        int defaultIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
-        List<Account> accounts = payloadManager.getPayload().getHdWallet().getAccounts();
+        int defaultIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
+        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
 
         int accountIndex = 0;
         for (Account acc : accounts) {
@@ -296,13 +307,13 @@ public class AccountEditViewModel extends BaseViewModel {
 
     private boolean isArchivable() {
 
-        Payload payload = payloadManager.getPayload();
+        Wallet payload = payloadManager.getPayload();
 
         if (payload.isUpgraded()) {
             //V3 - can't archive default account
-            HDWallet hdWallet = payload.getHdWallet();
+            HDWallet hdWallet = payload.getHdWallets().get(0);
 
-            int defaultIndex = hdWallet.getDefaultIndex();
+            int defaultIndex = hdWallet.getDefaultAccountIdx();
             Account defaultAccount = hdWallet.getAccounts().get(defaultIndex);
 
             if (defaultAccount == account)
@@ -320,7 +331,7 @@ public class AccountEditViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
 
         compositeDisposable.add(
-                accountEditDataManager.getPendingTransactionForLegacyAddress(legacyAddress, new Payment())
+                accountEditDataManager.getPendingTransactionForLegacyAddress(legacyAddress)
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(pendingTransaction -> {
                             if (pendingTransaction != null && pendingTransaction.bigIntAmount.compareTo(BigInteger.ZERO) == 1) {
@@ -378,7 +389,7 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     private boolean isLargeTransaction(PendingTransaction pendingTransaction) {
-        int txSize = FeeUtil.estimatedSize(pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
+        int txSize = sendDataManager.estimateSize(pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = pendingTransaction.bigIntFee.doubleValue() / pendingTransaction.bigIntAmount.doubleValue() * 100.0;
 
         return pendingTransaction.bigIntFee.longValue() > SendModel.LARGE_TX_FEE
@@ -393,15 +404,10 @@ public class AccountEditViewModel extends BaseViewModel {
         String changeAddress = legacyAddress.getAddress();
 
         List<ECKey> keys = new ArrayList<>();
-        try {
-            if (payloadManager.getPayload().isDoubleEncrypted()) {
-                ECKey walletKey = legacyAddress.getECKey(new CharSequenceX(secondPassword));
-                keys.add(walletKey);
-            } else {
-                ECKey walletKey = legacyAddress.getECKey();
-                keys.add(walletKey);
-            }
 
+        try {
+            ECKey walletKey = payloadManager.getAddressECKey(legacyAddress, secondPassword);
+            keys.add(walletKey);
         } catch (Exception e) {
             dataListener.dismissProgressDialog();
             dataListener.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR);
@@ -423,10 +429,17 @@ public class AccountEditViewModel extends BaseViewModel {
                             dataListener.showTransactionSuccess();
 
                             // Update V2 balance immediately after spend - until refresh from server
-                            long currentBalance = multiAddrFactory.getLegacyBalance();
                             long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
-                            multiAddrFactory.setLegacyBalance(currentBalance - spentAmount);
-                            accountEditDataManager.syncPayloadWithServer().subscribe(new IgnorableDefaultObserver<>());
+
+                            if (pendingTransaction.sendingObject.accountObject instanceof Account) {
+                                payloadManager.subtractAmountFromAddressBalance(
+                                        ((Account) pendingTransaction.sendingObject.accountObject).getXpub(), BigInteger.valueOf(spentAmount));
+                            } else {
+                                payloadManager.subtractAmountFromAddressBalance(
+                                        ((LegacyAddress) pendingTransaction.sendingObject.accountObject).getAddress(), BigInteger.valueOf(spentAmount));
+                            }
+
+                            payloadDataManager.syncPayloadWithServer().subscribe(new IgnorableDefaultObserver<>());
 
                             accountModel.setTransferFundsVisibility(View.GONE);
                             dataListener.setActivityResult(Activity.RESULT_OK);
@@ -437,7 +450,7 @@ public class AccountEditViewModel extends BaseViewModel {
     void updateAccountLabel(String newLabel) {
         newLabel = newLabel.trim();
 
-        if (newLabel.length() > 0) {
+        if (!newLabel.isEmpty()) {
             String finalNewLabel = newLabel;
             String revertLabel;
 
@@ -452,15 +465,11 @@ public class AccountEditViewModel extends BaseViewModel {
             dataListener.showProgressDialog(R.string.please_wait);
 
             compositeDisposable.add(
-                    accountEditDataManager.syncPayloadWithServer()
+                    payloadDataManager.syncPayloadWithServer()
                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                            .subscribe(success -> {
-                                if (success) {
-                                    accountModel.setLabel(finalNewLabel);
-                                    dataListener.setActivityResult(Activity.RESULT_OK);
-                                } else {
-                                    revertLabelAndShowError(revertLabel);
-                                }
+                            .subscribe(() -> {
+                                accountModel.setLabel(finalNewLabel);
+                                dataListener.setActivityResult(Activity.RESULT_OK);
                             }, throwable -> revertLabelAndShowError(revertLabel)));
         } else {
             dataListener.showToast(R.string.label_cant_be_empty, ToastCustom.TYPE_ERROR);
@@ -485,39 +494,43 @@ public class AccountEditViewModel extends BaseViewModel {
 
     @SuppressWarnings("unused")
     public void onClickDefault(View view) {
-        int revertDefault = payloadManager.getPayload().getHdWallet().getDefaultIndex();
-        payloadManager.getPayload().getHdWallet().setDefaultIndex(accountIndex);
+        int revertDefault = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
+        payloadManager.getPayload().getHdWallets().get(0).setDefaultAccountIdx(accountIndex);
 
         dataListener.showProgressDialog(R.string.please_wait);
 
         compositeDisposable.add(
-                accountEditDataManager.syncPayloadWithServer()
+                payloadDataManager.syncPayloadWithServer()
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                        .subscribe(success -> {
-                            if (success) {
-                                setDefault(isDefault(account));
-                                updateSwipeToReceiveAddresses();
-                                dataListener.updateAppShortcuts();
-                                dataListener.setActivityResult(Activity.RESULT_OK);
-                            } else {
-                                revertDefaultAndShowError(revertDefault);
-                            }
+                        .subscribe(() -> {
+                            setDefault(isDefault(account));
+                            updateSwipeToReceiveAddresses();
+                            dataListener.updateAppShortcuts();
+                            dataListener.setActivityResult(Activity.RESULT_OK);
                         }, throwable -> revertDefaultAndShowError(revertDefault)));
     }
 
     private void updateSwipeToReceiveAddresses() {
-        swipeToReceiveHelper.updateAndStoreAddresses();
+        // Defer to background thread as deriving addresses is quite processor intensive
+        compositeDisposable.add(
+                Completable.fromCallable(() -> {
+                    swipeToReceiveHelper.updateAndStoreAddresses();
+                    return Void.TYPE;
+                }).subscribeOn(Schedulers.computation())
+                        .subscribe(() -> {
+                            // No-op
+                        }, Throwable::printStackTrace));
     }
 
     private void revertDefaultAndShowError(int revertDefault) {
         // Remote save not successful - revert
-        payloadManager.getPayload().getHdWallet().setDefaultIndex(revertDefault);
+        payloadManager.getPayload().getHdWallets().get(0).setDefaultAccountIdx(revertDefault);
         dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
     }
 
     @SuppressWarnings("unused")
     public void onClickScanXpriv(View view) {
-        if (payloadManager.getPayload().isDoubleEncrypted()) {
+        if (payloadManager.getPayload().isDoubleEncryption()) {
             dataListener.promptPrivateKey(String.format(stringUtils.getString(R.string.watch_only_spend_instructionss), legacyAddress.getAddress()));
         } else {
             dataListener.startScanActivity();
@@ -564,41 +577,35 @@ public class AccountEditViewModel extends BaseViewModel {
 
     @VisibleForTesting
     void importAddressPrivateKey(ECKey key, LegacyAddress address, boolean matchesIntendedAddress) throws Exception {
-        setLegacyAddressKey(key, address, false);
+        setLegacyAddressKey(key, address);
 
         compositeDisposable.add(
-                accountEditDataManager.syncPayloadWithServer()
-                        .subscribe(success -> {
-                            if (success) {
-                                dataListener.setActivityResult(Activity.RESULT_OK);
-                                accountModel.setScanPrivateKeyVisibility(View.GONE);
-                                accountModel.setArchiveVisibility(View.VISIBLE);
+                payloadDataManager.syncPayloadWithServer()
+                        .subscribe(() -> {
+                            dataListener.setActivityResult(Activity.RESULT_OK);
+                            accountModel.setScanPrivateKeyVisibility(View.GONE);
+                            accountModel.setArchiveVisibility(View.VISIBLE);
 
-                                if (matchesIntendedAddress) {
-                                    dataListener.privateKeyImportSuccess();
-                                } else {
-                                    dataListener.privateKeyImportMismatch();
-                                }
+                            if (matchesIntendedAddress) {
+                                dataListener.privateKeyImportSuccess();
                             } else {
-                                throw Exceptions.propagate(new Throwable("Remote save failed"));
+                                dataListener.privateKeyImportMismatch();
                             }
                         }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
-    private void setLegacyAddressKey(ECKey key, LegacyAddress address, boolean watchOnly) throws Exception {
+    private void setLegacyAddressKey(ECKey key, LegacyAddress address) throws Exception {
         // If double encrypted, save encrypted in payload
-        if (!payloadManager.getPayload().isDoubleEncrypted()) {
-            address.setEncryptedKeyBytes(key.getPrivKeyBytes());
-            address.setWatchOnly(watchOnly);
+        if (!payloadManager.getPayload().isDoubleEncryption()) {
+            address.setPrivateKeyFromBytes(key.getPrivKeyBytes());
         } else {
             String encryptedKey = Base58.encode(key.getPrivKeyBytes());
-            String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(
+            String encrypted2 = DoubleEncryptionFactory.encrypt(
                     encryptedKey,
                     payloadManager.getPayload().getSharedKey(),
                     secondPassword,
-                    payloadManager.getPayload().getOptions().getIterations());
-            address.setEncryptedKey(encrypted2);
-            address.setWatchOnly(watchOnly);
+                    payloadManager.getPayload().getOptions().getPbkdf2Iterations());
+            address.setPrivateKey(encrypted2);
         }
     }
 
@@ -613,49 +620,13 @@ public class AccountEditViewModel extends BaseViewModel {
             }
         } else {
             // Create new address and store
-            final LegacyAddress legacyAddress = new LegacyAddress(
-                    null,
-                    System.currentTimeMillis() / 1000L,
-                    key.toAddress(MainNetParams.get()).toString(),
-                    "",
-                    0L,
-                    "android",
-                    BuildConfig.VERSION_NAME);
+            final LegacyAddress legacyAddress = LegacyAddress.fromECKey(key);
 
-            setLegacyAddressKey(key, legacyAddress, false);
+            setLegacyAddressKey(key, legacyAddress);
             remoteSaveUnmatchedPrivateKey(legacyAddress);
 
             dataListener.privateKeyImportMismatch();
         }
-    }
-
-    private void remoteSaveUnmatchedPrivateKey(final LegacyAddress legacyAddress) {
-        Payload updatedPayload = payloadManager.getPayload();
-        List<LegacyAddress> updatedLegacyAddresses = updatedPayload.getLegacyAddressList();
-        updatedLegacyAddresses.add(legacyAddress);
-        updatedPayload.setLegacyAddressList(updatedLegacyAddresses);
-        payloadManager.setPayload(updatedPayload);
-
-        compositeDisposable.add(
-                accountEditDataManager.syncPayloadWithServer()
-                        .subscribe(success -> {
-                            if (success) {
-                                List<String> legacyAddressList = payloadManager.getPayload().getLegacyAddressStringList();
-                                try {
-                                    multiAddrFactory.refreshLegacyAddressData(legacyAddressList.toArray(new String[legacyAddressList.size()]), false);
-                                } catch (Exception e) {
-                                    Log.e(AccountEditViewModel.class.getSimpleName(), "remoteSaveUnmatchedPrivateKey: ", e);
-                                }
-
-                                // Subscribe to new address only if successfully created
-                                dataListener.sendBroadcast("address", legacyAddress.getAddress());
-                                dataListener.setActivityResult(Activity.RESULT_OK);
-                            } else {
-                                throw Exceptions.propagate(new Throwable("Remote save failed"));
-                            }
-                        }, throwable -> {
-                            dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-                        }));
     }
 
     void showAddressDetails() {
@@ -684,7 +655,7 @@ public class AccountEditViewModel extends BaseViewModel {
         try {
             bitmap = qrCodeEncoder.encodeAsBitmap();
         } catch (WriterException e) {
-            Log.e(AccountEditViewModel.class.getSimpleName(), "showAddressDetails: ", e);
+            Log.e(TAG, "showAddressDetails: ", e);
         }
 
         dataListener.showAddressDetails(heading, note, copy, bitmap, qrString);
@@ -707,7 +678,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
         } catch (Exception e) {
             dataListener.showToast(R.string.scan_not_recognized, ToastCustom.TYPE_ERROR);
-            Log.e(AccountEditViewModel.class.getSimpleName(), "handleIncomingScanIntent: ", e);
+            Log.e(TAG, "handleIncomingScanIntent: ", e);
         }
     }
 
@@ -720,18 +691,14 @@ public class AccountEditViewModel extends BaseViewModel {
 
         boolean isArchived = toggleArchived();
         compositeDisposable.add(
-                accountEditDataManager.syncPayloadWithServer()
+                payloadDataManager.syncPayloadWithServer()
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                        .subscribe(success -> {
-                            if (success) {
-                                accountEditDataManager.updateBalancesAndTransactions()
-                                        .subscribe(new IgnorableDefaultObserver<>());
+                        .subscribe(() -> {
+                            payloadDataManager.updateBalancesAndTransactions()
+                                    .subscribe(new IgnorableDefaultObserver<>());
 
-                                setArchive(isArchived);
-                                dataListener.setActivityResult(Activity.RESULT_OK);
-                            } else {
-                                dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-                            }
+                            setArchive(isArchived);
+                            dataListener.setActivityResult(Activity.RESULT_OK);
                         }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
@@ -779,8 +746,29 @@ public class AccountEditViewModel extends BaseViewModel {
             }
         } catch (Exception e) {
             dataListener.showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR);
+            Log.e(TAG, "importBIP38Address: ", e);
         }
 
         dataListener.dismissProgressDialog();
+    }
+
+    private void remoteSaveUnmatchedPrivateKey(final LegacyAddress legacyAddress) {
+        Wallet updatedPayload = payloadManager.getPayload();
+        List<LegacyAddress> updatedLegacyAddresses = updatedPayload.getLegacyAddressList();
+        updatedLegacyAddresses.add(legacyAddress);
+        payloadManager.getPayload().getLegacyAddressList().clear();
+        payloadManager.getPayload().getLegacyAddressList().addAll(updatedLegacyAddresses);
+
+        compositeDisposable.add(
+                payloadDataManager.syncPayloadWithServer()
+                        .subscribe(() -> {
+                            // Subscribe to new address only if successfully created
+                            dataListener.sendBroadcast("address", legacyAddress.getAddress());
+                            dataListener.setActivityResult(Activity.RESULT_OK);
+                        }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
+    }
+
+    public PayloadDataManager getPayloadDataManager() {
+        return payloadDataManager;
     }
 }

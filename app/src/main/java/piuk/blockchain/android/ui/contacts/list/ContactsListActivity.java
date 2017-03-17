@@ -63,7 +63,7 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         binding.fab.setOnClickListener(view -> ContactInviteActivity.start(this));
         binding.buttonRetry.setOnClickListener(view -> viewModel.onViewReady());
         // Swipe to refresh layout
-        binding.swipeRefreshLayout.setColorSchemeResources(R.color.primary_navy_dark);
+        binding.swipeRefreshLayout.setColorSchemeResources(R.color.primary_blue_accent);
         binding.swipeRefreshLayout.setOnRefreshListener(() -> viewModel.onViewReady());
         // Contacts list
         contactsListAdapter = new ContactsListAdapter(new ArrayList<>(), new StringUtils(this));

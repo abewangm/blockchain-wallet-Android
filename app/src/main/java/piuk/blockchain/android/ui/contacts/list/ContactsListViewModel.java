@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.Contact;
@@ -15,9 +16,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
-import piuk.blockchain.android.data.notifications.FcmCallbackService;
+import piuk.blockchain.android.data.notifications.NotificationPayload;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -29,8 +32,11 @@ public class ContactsListViewModel extends BaseViewModel {
     private static final String TAG = ContactsListViewModel.class.getSimpleName();
 
     private DataListener dataListener;
+    private Observable<NotificationPayload> notificationObservable;
+    @VisibleForTesting String link;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadManager payloadManager;
+    @Inject RxBus rxBus;
 
     interface DataListener {
 
@@ -64,8 +70,8 @@ public class ContactsListViewModel extends BaseViewModel {
 
         Intent intent = dataListener.getPageIntent();
         if (intent != null && intent.hasExtra(ContactsListActivity.EXTRA_METADATA_URI)) {
-            String data = intent.getStringExtra(ContactsListActivity.EXTRA_METADATA_URI);
-            handleLink(data);
+            link = intent.getStringExtra(ContactsListActivity.EXTRA_METADATA_URI);
+            intent.removeExtra(ContactsListActivity.EXTRA_METADATA_URI);
         }
     }
 
@@ -91,11 +97,22 @@ public class ContactsListViewModel extends BaseViewModel {
                                 }));
     }
 
-    private void loadContacts() {
+    @VisibleForTesting
+    void refreshContacts() {
         dataListener.setUiState(ContactsListActivity.LOADING);
         compositeDisposable.add(
                 contactsDataManager.fetchContacts()
                         .andThen(contactsDataManager.getContactList())
+                        .toList()
+                        .subscribe(
+                                this::handleContactListUpdate,
+                                throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
+    }
+
+    private void loadContacts() {
+        dataListener.setUiState(ContactsListActivity.LOADING);
+        compositeDisposable.add(
+                contactsDataManager.getContactList()
                         .toList()
                         .subscribe(
                                 this::handleContactListUpdate,
@@ -127,19 +144,22 @@ public class ContactsListViewModel extends BaseViewModel {
                             }
 
                             checkStatusOfPendingContacts(pending);
-
-                            if (!list.isEmpty()) {
-                                dataListener.setUiState(ContactsListActivity.CONTENT);
-                                dataListener.onContactsLoaded(list);
-                            } else {
-                                dataListener.onContactsLoaded(new ArrayList<>());
-                                dataListener.setUiState(ContactsListActivity.EMPTY);
-                            }
+                            updateUI(list);
 
                         }, throwable -> {
                             dataListener.onContactsLoaded(new ArrayList<>());
                             dataListener.setUiState(ContactsListActivity.FAILURE);
                         }));
+    }
+
+    private void updateUI(List<ContactsListItem> list) {
+        if (!list.isEmpty()) {
+            dataListener.setUiState(ContactsListActivity.CONTENT);
+            dataListener.onContactsLoaded(list);
+        } else {
+            dataListener.onContactsLoaded(new ArrayList<>());
+            dataListener.setUiState(ContactsListActivity.EMPTY);
+        }
     }
 
     private boolean isInList(List<Contact> contacts, Contact toBeFound) {
@@ -151,14 +171,15 @@ public class ContactsListViewModel extends BaseViewModel {
         return false;
     }
 
-    private void checkStatusOfPendingContacts(List<Contact> pending) {
+    @VisibleForTesting
+    void checkStatusOfPendingContacts(List<Contact> pending) {
         for (int i = 0; i < pending.size(); i++) {
             final Contact contact = pending.get(i);
             compositeDisposable.add(
                     contactsDataManager.readInvitationSent(contact)
                             .subscribe(
                                     success -> {
-                                        // No-op
+                                        if (success) loadContacts();
                                     },
                                     throwable -> {
                                         // No-op
@@ -167,25 +188,26 @@ public class ContactsListViewModel extends BaseViewModel {
     }
 
     private void subscribeToNotifications() {
+        notificationObservable = rxBus.register(NotificationPayload.class);
+
         compositeDisposable.add(
-                FcmCallbackService.getNotificationSubject()
+                notificationObservable
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(
-                                notificationPayload -> loadContacts(),
+                                notificationPayload -> refreshContacts(),
                                 throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
     }
 
-    private void handleLink(String data) {
+    @VisibleForTesting
+    void handleLink(String data) {
         dataListener.showProgressDialog();
-
         compositeDisposable.add(
                 contactsDataManager.acceptInvitation(data)
-                        .flatMap(contact -> contactsDataManager.getContactList())
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                        .toList()
                         .subscribe(
-                                contacts -> {
-                                    handleContactListUpdate(contacts);
+                                contact -> {
+                                    link = null;
+                                    refreshContacts();
                                     dataListener.showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
                                 }, throwable -> dataListener.showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR)));
 
@@ -199,10 +221,14 @@ public class ContactsListViewModel extends BaseViewModel {
                             .subscribe(
                                     success -> {
                                         if (success) {
-                                            loadContacts();
+                                            if (link != null) {
+                                                handleLink(link);
+                                            } else {
+                                                refreshContacts();
+                                            }
                                         } else {
                                             // Not set up, most likely has a second password enabled
-                                            if (payloadManager.getPayload().isDoubleEncrypted()) {
+                                            if (payloadManager.getPayload().isDoubleEncryption()) {
                                                 dataListener.showSecondPasswordDialog();
                                                 dataListener.setUiState(ContactsListActivity.FAILURE);
                                             } else {
@@ -213,5 +239,11 @@ public class ContactsListViewModel extends BaseViewModel {
         } else {
             dataListener.setUiState(ContactsListActivity.FAILURE);
         }
+    }
+
+    @Override
+    public void destroy() {
+        rxBus.unregister(NotificationPayload.class, notificationObservable);
+        super.destroy();
     }
 }

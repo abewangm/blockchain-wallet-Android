@@ -154,7 +154,9 @@
 
         </LinearLayout>
 
-        <LinearLayout style="@style/PinEntryKeyboardHorizontalContainer">
+        <LinearLayout
+            style="@style/PinEntryKeyboardHorizontalContainer"
+            android:baselineAligned="false">
 
             <LinearLayout
                 android:id="@+id/button10"

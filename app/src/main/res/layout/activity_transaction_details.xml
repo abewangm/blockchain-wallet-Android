@@ -11,7 +11,6 @@
         <include layout="@layout/toolbar_general" />
 
         <!-- LOADING LAYOUT -->
-
         <RelativeLayout
             android:id="@+id/loading_layout"
             android:layout_width="match_parent"
@@ -50,28 +49,18 @@
                     android:visibility="gone"
                     tools:visibility="visible">
 
-                    <LinearLayout
+                    <TextView
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:orientation="horizontal">
+                        android:drawableLeft="@drawable/ic_warning_white_24dp"
+                        android:drawablePadding="8dp"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="@string/transaction_detail_double_spend"
+                        android:textColor="@color/white" />
 
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:padding="8dp"
-                            app:srcCompat="@drawable/ic_warning_white_24dp" />
-
-                        <TextView
-                            fontPath="fonts/Montserrat-Regular.ttf"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="@string/transaction_detail_double_spend"
-                            android:textColor="@color/white" />
-
-                    </LinearLayout>
                 </LinearLayout>
 
                 <!-- MAIN DETAILS -->
@@ -106,7 +95,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
                         android:layout_below="@+id/transaction_amount"
-                        android:textColor="@color/primary_gray"
+                        android:textColor="@color/product_gray_headers"
                         android:textSize="14sp"
                         tools:text="Value when recieved: $200" />
 
@@ -117,7 +106,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
                         android:layout_below="@+id/transaction_value"
-                        android:textColor="@color/primary_gray"
+                        android:textColor="@color/product_gray_headers"
                         android:textSize="14sp"
                         tools:text="Transaction fee: 0.00000124 BTC" />
 
@@ -133,14 +122,8 @@
 
                     <TextView
                         android:id="@+id/title_description"
-                        fontPath="fonts/Montserrat-Regular.ttf"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/description"
-                        android:textColor="@color/primary_gray"
-                        android:textSize="14sp" />
+                        style="@style/TransactionDetailHeader"
+                        android:text="@string/description" />
 
                     <TextView
                         android:id="@+id/description_field"
@@ -155,7 +138,7 @@
                         android:maxLines="1"
                         android:paddingRight="8dp"
                         android:textColor="@color/black"
-                        android:textColorHint="@color/product_gray_transferred_50"
+                        android:textColorHint="@color/product_gray_hint"
                         android:textSize="16sp" />
 
                     <ImageView
@@ -181,13 +164,8 @@
                     android:orientation="vertical">
 
                     <TextView
-                        fontPath="fonts/Montserrat-Regular.ttf"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/to"
-                        android:textColor="@color/primary_gray"
-                        android:textSize="14sp" />
+                        style="@style/TransactionDetailHeader"
+                        android:text="@string/to" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -219,13 +197,8 @@
                     </LinearLayout>
 
                     <TextView
-                        fontPath="fonts/Montserrat-Regular.ttf"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/from"
-                        android:textColor="@color/primary_gray"
-                        android:textSize="14sp" />
+                        style="@style/TransactionDetailHeader"
+                        android:text="@string/from" />
 
                     <TextView
                         android:id="@+id/from_address"
@@ -248,13 +221,8 @@
                     android:orientation="vertical">
 
                     <TextView
-                        fontPath="fonts/Montserrat-Regular.ttf"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/transaction_detail_date"
-                        android:textColor="@color/primary_gray"
-                        android:textSize="14sp" />
+                        style="@style/TransactionDetailHeader"
+                        android:text="@string/transaction_detail_date" />
 
                     <TextView
                         android:id="@+id/date"
@@ -278,13 +246,8 @@
                     android:orientation="vertical">
 
                     <TextView
-                        fontPath="fonts/Montserrat-Regular.ttf"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/transaction_detail_status"
-                        android:textColor="@color/primary_gray"
-                        android:textSize="14sp" />
+                        style="@style/TransactionDetailHeader"
+                        android:text="@string/transaction_detail_status" />
 
                     <TextView
                         android:id="@+id/status"
@@ -307,7 +270,7 @@
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
                     android:text="@string/transaction_detail_verify"
-                    android:theme="@style/ButtonBlueTheme" />
+                    android:theme="@style/ButtonLightBlueTheme" />
 
             </LinearLayout>
         </ScrollView>
