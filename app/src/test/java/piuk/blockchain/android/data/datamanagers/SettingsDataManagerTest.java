@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 public class SettingsDataManagerTest extends RxTest {
 
     private SettingsDataManager subject;
-    @Mock SettingsService settingsService;
+    @Mock private SettingsService settingsService;
 
     @Before
     public void setUp() throws Exception {
