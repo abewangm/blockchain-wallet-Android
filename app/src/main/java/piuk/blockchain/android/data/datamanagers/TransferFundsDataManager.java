@@ -160,7 +160,7 @@ public class TransferFundsDataManager {
 
                             // Update Balances temporarily rather than wait for sync
                             long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
-                            payloadDataManager.subtractAmountFromAddressBalance(legacyAddress, spentAmount);
+                            payloadDataManager.subtractAmountFromAddressBalance(legacyAddress.getAddress(), spentAmount);
 
                             if (finalI == pendingTransactions.size() - 1) {
                                 // Sync once transactions are completed
