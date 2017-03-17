@@ -133,6 +133,21 @@ public class ApiModule {
 
     @Provides
     @Singleton
+    @Named("sfox")
+    protected Retrofit provideRetrofitSFOXInstance(OkHttpClient okHttpClient,
+        JacksonConverterFactory converterFactory,
+        RxJava2CallAdapterFactory rxJavaCallFactory,
+        PersistentUrls persistentUrls) {
+        return new Retrofit.Builder()
+            .baseUrl(persistentUrls.getCurrentSFOXUrl())
+            .client(okHttpClient)
+            .addConverterFactory(converterFactory)
+            .addCallAdapterFactory(rxJavaCallFactory)
+            .build();
+    }
+
+    @Provides
+    @Singleton
     protected SSLVerifyUtil provideSSlVerifyUtil(Context context) {
         return new SSLVerifyUtil(context);
     }

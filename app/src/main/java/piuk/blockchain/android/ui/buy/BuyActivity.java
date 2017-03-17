@@ -5,18 +5,15 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.webkit.WebView;
-
-import org.bitcoinj.crypto.DeterministicKey;
-import org.spongycastle.util.encoders.Hex;
-
-import info.blockchain.wallet.exceptions.MetadataException;
+import info.blockchain.wallet.api.trade.SFOXApi;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.payload.PayloadManager;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-
 import info.blockchain.wallet.util.MetadataUtil;
+import io.reactivex.disposables.CompositeDisposable;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.spongycastle.util.encoders.Hex;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.databinding.ActivityBuyBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.home.MainActivity;
@@ -33,6 +30,9 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
     private Boolean frontendInitialized = false;
     private Boolean didBuyBitcoin = false;
 
+    private SFOXApi sfoxApi;
+    private CompositeDisposable compositeDisposable;
+
     @Thunk
     ActivityBuyBinding binding;
 
@@ -43,6 +43,9 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.buy);
+
+        compositeDisposable = new CompositeDisposable();
+        sfoxApi = new SFOXApi();
 
         WebView webView = binding.webview;
         frontendJavascriptManager = new FrontendJavascriptManager(this, webView);
@@ -135,5 +138,20 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    public void fetchTransaction(String accountToken) {
+
+        compositeDisposable.add(
+            sfoxApi.getTransactions(accountToken)
+                .compose(RxUtil.applySchedulersToObservable())
+                .subscribe(
+                    response -> {
+                        //do stuff
+//                        response.getAction();
+//                        response.getAmount();
+//                        response.getTransactionId();
+                    },
+                    Throwable::printStackTrace));
     }
 }
