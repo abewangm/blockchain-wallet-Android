@@ -189,15 +189,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             return true;
         });
 
-        // Setup buy WebView
-        buyWebView = new WebView(this);
-        buyWebView.getSettings().setJavaScriptEnabled(true);
-        buyWebView.loadUrl("http://localhost:8080/wallet/#/intermediate");
-
         handleIncomingIntent();
         applyFontToNavDrawer();
         if (!BuildConfig.CONTACTS_ENABLED) {
             hideContacts();
+        }
+        if (!BuildConfig.BUY_BITCOIN_ENABLED) {
+            hideBuyBitcoin();
+        } else {
+            setupBuyWebView();
         }
     }
 
@@ -668,6 +668,19 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private void hideContacts() {
         Menu menu = binding.navigationView.getMenu();
         menu.findItem(R.id.nav_contacts).setVisible(false);
+    }
+
+    private void hideBuyBitcoin() {
+        Menu menu = binding.navigationView.getMenu();
+        menu.findItem(R.id.nav_buy).setVisible(false);
+    }
+
+    private void setupBuyWebView() {
+        // Setup buy WebView
+        // TODO: 17/03/2017 Check if there's a better way to improve loading time of this webview
+        buyWebView = new WebView(this);
+        buyWebView.getSettings().setJavaScriptEnabled(true);
+        buyWebView.loadUrl("http://localhost:8080/wallet/#/intermediate");
     }
 
     private void applyFontToMenuItem(MenuItem menuItem) {

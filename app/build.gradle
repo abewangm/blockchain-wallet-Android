@@ -29,8 +29,9 @@ android {
         buildConfigField "String", "DEV_WEBSOCKET", devWebsocket
         buildConfigField "String", "STAGING_WEBSOCKET", stagingWebsocket
         buildConfigField "String", "TESTNET_WEBSOCKET", testnetWebsocket
-        // Flag for Contacts feature
+        // Flag for Buy and Contacts feature
         buildConfigField "boolean", "CONTACTS_ENABLED", "true"
+        buildConfigField "boolean", "BUY_BITCOIN_ENABLED", "true"
     }
     buildTypes {
         release {
