@@ -12,7 +12,6 @@ import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.View;
 
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.HDWallet;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -38,6 +37,7 @@ import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.injection.Injector;
@@ -46,7 +46,6 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.ui.send.SendModel;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.ui.zxing.Contents;
 import piuk.blockchain.android.ui.zxing.encode.QRCodeEncoder;
@@ -62,7 +61,6 @@ public class AccountEditViewModel extends BaseViewModel {
 
     private DataListener dataListener;
 
-    @Inject protected PayloadManager payloadManager;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected StringUtils stringUtils;
     @Inject protected AccountEditDataManager accountEditDataManager;
@@ -144,7 +142,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
         if (accountIndex >= 0) {
             // V3
-            List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
+            List<Account> accounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts();
 
             // Remove "All"
             List<Account> accountClone = new ArrayList<>(accounts.size());
@@ -155,7 +153,6 @@ public class AccountEditViewModel extends BaseViewModel {
             }
 
             account = accountClone.get(accountIndex);
-
             accountModel.setLabel(account.getLabel());
             accountModel.setLabelHeader(stringUtils.getString(R.string.name));
             accountModel.setScanPrivateKeyVisibility(View.GONE);
@@ -168,15 +165,14 @@ public class AccountEditViewModel extends BaseViewModel {
         } else if (addressIndex >= 0) {
             // V2
             ConsolidatedAccount iAccount = null;
-            if (!payloadManager.getPayload().getLegacyAddressList().isEmpty()) {
+            if (!payloadDataManager.getWallet().getLegacyAddressList().isEmpty()) {
 
                 iAccount = new ConsolidatedAccount(stringUtils.getString(R.string.imported_addresses),
-                        payloadManager.getPayload().getLegacyAddressList(),
-                        payloadManager.getImportedAddressesBalance().longValue());
+                        payloadDataManager.getWallet().getLegacyAddressList(),
+                        payloadDataManager.getImportedAddressesBalance().longValue());
             }
 
             if (iAccount != null) {
-
                 List<LegacyAddress> legacy = iAccount.getLegacyAddresses();
                 legacyAddress = legacy.get(addressIndex);
 
@@ -195,10 +191,9 @@ public class AccountEditViewModel extends BaseViewModel {
                     accountModel.setArchiveVisibility(View.VISIBLE);
                 }
 
-                if (payloadManager.getPayload().isUpgraded()) {
-
+                if (payloadDataManager.getWallet().isUpgraded()) {
                     // Subtract fee
-                    long balanceAfterFee = payloadManager.getAddressBalance(
+                    long balanceAfterFee = payloadDataManager.getAddressBalance(
                             legacyAddress.getAddress()).longValue() -
                             sendDataManager.estimatedFee(1, 1,
                                     BigDecimal.valueOf(dynamicFeeCache.getCachedDynamicFee()
@@ -239,8 +234,8 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     private boolean isDefault(Account account) {
-        int defaultIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
-        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
+        int defaultIndex = payloadDataManager.getDefaultAccountIndex();
+        List<Account> accounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts();
 
         int accountIndex = 0;
         for (Account acc : accounts) {
@@ -306,8 +301,7 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     private boolean isArchivable() {
-
-        Wallet payload = payloadManager.getPayload();
+        Wallet payload = payloadDataManager.getWallet();
 
         if (payload.isUpgraded()) {
             //V3 - can't archive default account
@@ -316,8 +310,7 @@ public class AccountEditViewModel extends BaseViewModel {
             int defaultIndex = hdWallet.getDefaultAccountIdx();
             Account defaultAccount = hdWallet.getAccounts().get(defaultIndex);
 
-            if (defaultAccount == account)
-                return false;
+            if (defaultAccount == account) return false;
         } else {
             //V2 - must have a single unarchived address
             List<LegacyAddress> allActiveLegacyAddresses = payload.getLegacyAddressList(LegacyAddress.NORMAL_ADDRESS);
@@ -340,7 +333,6 @@ public class AccountEditViewModel extends BaseViewModel {
                             } else {
                                 dataListener.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
                             }
-
                         }, throwable -> dataListener.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR)));
 
     }
@@ -406,7 +398,8 @@ public class AccountEditViewModel extends BaseViewModel {
         List<ECKey> keys = new ArrayList<>();
 
         try {
-            ECKey walletKey = payloadManager.getAddressECKey(legacyAddress, secondPassword);
+            ECKey walletKey = payloadDataManager.getAddressECKey(legacyAddress, secondPassword);
+            if (walletKey == null) throw new NullPointerException("ECKey was null");
             keys.add(walletKey);
         } catch (Exception e) {
             dataListener.dismissProgressDialog();
@@ -432,19 +425,19 @@ public class AccountEditViewModel extends BaseViewModel {
                             long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
 
                             if (pendingTransaction.sendingObject.accountObject instanceof Account) {
-                                payloadManager.subtractAmountFromAddressBalance(
-                                        ((Account) pendingTransaction.sendingObject.accountObject).getXpub(), BigInteger.valueOf(spentAmount));
+                                payloadDataManager.subtractAmountFromAddressBalance(
+                                        ((Account) pendingTransaction.sendingObject.accountObject).getXpub(), spentAmount);
                             } else {
-                                payloadManager.subtractAmountFromAddressBalance(
-                                        ((LegacyAddress) pendingTransaction.sendingObject.accountObject).getAddress(), BigInteger.valueOf(spentAmount));
+                                payloadDataManager.subtractAmountFromAddressBalance(
+                                        ((LegacyAddress) pendingTransaction.sendingObject.accountObject).getAddress(), spentAmount);
                             }
 
-                            payloadDataManager.syncPayloadWithServer().subscribe(new IgnorableDefaultObserver<>());
+                            payloadDataManager.syncPayloadWithServer()
+                                    .subscribe(new IgnorableDefaultObserver<>());
 
                             accountModel.setTransferFundsVisibility(View.GONE);
                             dataListener.setActivityResult(Activity.RESULT_OK);
                         }, throwable -> dataListener.showToast(R.string.send_failed, ToastCustom.TYPE_ERROR)));
-
     }
 
     void updateAccountLabel(String newLabel) {
@@ -494,8 +487,8 @@ public class AccountEditViewModel extends BaseViewModel {
 
     @SuppressWarnings("unused")
     public void onClickDefault(View view) {
-        int revertDefault = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
-        payloadManager.getPayload().getHdWallets().get(0).setDefaultAccountIdx(accountIndex);
+        int revertDefault = payloadDataManager.getDefaultAccountIndex();
+        payloadDataManager.getWallet().getHdWallets().get(0).setDefaultAccountIdx(accountIndex);
 
         dataListener.showProgressDialog(R.string.please_wait);
 
@@ -524,13 +517,13 @@ public class AccountEditViewModel extends BaseViewModel {
 
     private void revertDefaultAndShowError(int revertDefault) {
         // Remote save not successful - revert
-        payloadManager.getPayload().getHdWallets().get(0).setDefaultAccountIdx(revertDefault);
+        payloadDataManager.getWallet().getHdWallets().get(0).setDefaultAccountIdx(revertDefault);
         dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
     }
 
     @SuppressWarnings("unused")
     public void onClickScanXpriv(View view) {
-        if (payloadManager.getPayload().isDoubleEncryption()) {
+        if (payloadDataManager.getWallet().isDoubleEncryption()) {
             dataListener.promptPrivateKey(String.format(stringUtils.getString(R.string.watch_only_spend_instructionss), legacyAddress.getAddress()));
         } else {
             dataListener.startScanActivity();
@@ -596,24 +589,24 @@ public class AccountEditViewModel extends BaseViewModel {
 
     private void setLegacyAddressKey(ECKey key, LegacyAddress address) throws Exception {
         // If double encrypted, save encrypted in payload
-        if (!payloadManager.getPayload().isDoubleEncryption()) {
+        if (!payloadDataManager.getWallet().isDoubleEncryption()) {
             address.setPrivateKeyFromBytes(key.getPrivKeyBytes());
         } else {
             String encryptedKey = Base58.encode(key.getPrivKeyBytes());
             String encrypted2 = DoubleEncryptionFactory.encrypt(
                     encryptedKey,
-                    payloadManager.getPayload().getSharedKey(),
+                    payloadDataManager.getWallet().getSharedKey(),
                     secondPassword,
-                    payloadManager.getPayload().getOptions().getPbkdf2Iterations());
+                    payloadDataManager.getWallet().getOptions().getPbkdf2Iterations());
             address.setPrivateKey(encrypted2);
         }
     }
 
     void importUnmatchedPrivateKey(ECKey key) throws Exception {
-        if (payloadManager.getPayload().getLegacyAddressStringList().contains(key.toAddress(MainNetParams.get()).toString())) {
+        if (payloadDataManager.getWallet().getLegacyAddressStringList().contains(key.toAddress(MainNetParams.get()).toString())) {
             // Wallet contains address associated with this private key, find & save it with scanned key
             String foundAddressString = key.toAddress(MainNetParams.get()).toString();
-            for (LegacyAddress legacyAddress : payloadManager.getPayload().getLegacyAddressList()) {
+            for (LegacyAddress legacyAddress : payloadDataManager.getWallet().getLegacyAddressList()) {
                 if (legacyAddress.getAddress().equals(foundAddressString)) {
                     importAddressPrivateKey(key, legacyAddress, false);
                 }
@@ -630,7 +623,6 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     void showAddressDetails() {
-
         String heading = null;
         String note = null;
         String copy = null;
@@ -663,22 +655,15 @@ public class AccountEditViewModel extends BaseViewModel {
 
     void handleIncomingScanIntent(Intent data) {
         String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);
-
-        try {
-            String format = privateKeyFactory.getFormat(scanData);
-            if (format != null) {
-                if (!format.equals(PrivateKeyFactory.BIP38)) {
-                    importNonBIP38Address(format, scanData);
-                } else {
-                    dataListener.promptBIP38Password(scanData);
-                }
+        String format = privateKeyFactory.getFormat(scanData);
+        if (format != null) {
+            if (!format.equals(PrivateKeyFactory.BIP38)) {
+                importNonBIP38Address(format, scanData);
             } else {
-                dataListener.showToast(R.string.privkey_error, ToastCustom.TYPE_ERROR);
+                dataListener.promptBIP38Password(scanData);
             }
-
-        } catch (Exception e) {
-            dataListener.showToast(R.string.scan_not_recognized, ToastCustom.TYPE_ERROR);
-            Log.e(TAG, "handleIncomingScanIntent: ", e);
+        } else {
+            dataListener.showToast(R.string.privkey_error, ToastCustom.TYPE_ERROR);
         }
     }
 
@@ -753,11 +738,11 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     private void remoteSaveUnmatchedPrivateKey(final LegacyAddress legacyAddress) {
-        Wallet updatedPayload = payloadManager.getPayload();
+        Wallet updatedPayload = payloadDataManager.getWallet();
         List<LegacyAddress> updatedLegacyAddresses = updatedPayload.getLegacyAddressList();
         updatedLegacyAddresses.add(legacyAddress);
-        payloadManager.getPayload().getLegacyAddressList().clear();
-        payloadManager.getPayload().getLegacyAddressList().addAll(updatedLegacyAddresses);
+        payloadDataManager.getWallet().getLegacyAddressList().clear();
+        payloadDataManager.getWallet().getLegacyAddressList().addAll(updatedLegacyAddresses);
 
         compositeDisposable.add(
                 payloadDataManager.syncPayloadWithServer()

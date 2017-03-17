@@ -175,6 +175,7 @@ public class PayloadDataManager {
      * @throws InvalidCipherTextException   Thrown if there's an issue decrypting the private key
      * @see LegacyAddress#isPrivateKeyEncrypted()
      */
+    @Nullable
     public ECKey getAddressECKey(LegacyAddress legacyAddress, @Nullable String secondPassword)
             throws UnsupportedEncodingException, DecryptionException, InvalidCipherTextException {
         return payloadManager.getAddressECKey(legacyAddress, secondPassword);
@@ -202,6 +203,10 @@ public class PayloadDataManager {
 
     public String getTempPassword() {
         return payloadManager.getTempPassword();
+    }
+
+    public BigInteger getImportedAddressesBalance() {
+        return payloadManager.getImportedAddressesBalance();
     }
 
     /**
@@ -246,14 +251,12 @@ public class PayloadDataManager {
      * Updates the balance of the address as well as that of the entire wallet. To be called after a
      * successful sweep to ensure that balances are displayed correctly before syncing the wallet.
      *
-     * @param legacyAddress A {@link LegacyAddress} object from which you've just spent funds
+     * @param address An address from which you've just spent funds
      * @param spentAmount   The spent amount as a long
      * @throws Exception Thrown if the address isn't found
      */
-    public void subtractAmountFromAddressBalance(LegacyAddress legacyAddress, long spentAmount) throws Exception {
-        payloadManager.subtractAmountFromAddressBalance(
-                legacyAddress.getAddress(),
-                BigInteger.valueOf(spentAmount));
+    public void subtractAmountFromAddressBalance(String address, long spentAmount) throws Exception {
+        payloadManager.subtractAmountFromAddressBalance(address, BigInteger.valueOf(spentAmount));
     }
 
     /**
