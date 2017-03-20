@@ -2,6 +2,7 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.VisibleForTesting;
 
+import android.util.Log;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import java.util.concurrent.TimeUnit;
@@ -73,7 +74,7 @@ public class AuthDataManager {
     }
 
     public Observable<Wallet> createHdWallet(String password, String walletName, String email) {
-        return payloadDataManager.createHdWallet(walletName, email, password)
+        return payloadDataManager.createHdWallet(password, walletName, email)
                 .compose(RxUtil.applySchedulersToObservable())
                 .doOnNext(payload -> {
                     // Successfully created and saved
