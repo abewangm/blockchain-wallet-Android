@@ -352,7 +352,6 @@ public class BalanceViewModel extends BaseViewModel {
             //Update transactions
             compositeDisposable.add(
                     transactionListDataManager.fetchTransactions(object, 50, 0)
-                            .doOnSubscribe(disposable -> dataListener.setShowRefreshing(true))
                             .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
                             .subscribe(
                                     this::insertTransactionsAndDisplay,

@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -284,6 +285,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     }
 
     private void setupViews() {
+        setShowRefreshing(true);
         binding.noTransactionMessage.noTxMessage.setVisibility(View.GONE);
 
         binding.balance.setOnTouchListener((v, event) -> {
@@ -372,6 +374,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.rvTransactions.setHasFixedSize(true);
         binding.rvTransactions.setLayoutManager(layoutManager);
         binding.rvTransactions.setAdapter(transactionAdapter);
+        // Disable blinking animations in RecyclerView
+        RecyclerView.ItemAnimator animator = binding.rvTransactions.getItemAnimator();
+        if (animator instanceof SimpleItemAnimator) {
+            ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
+        }
 
         // drawerTitle account now that wallet has been created
         if (!viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, "").isEmpty()) {
