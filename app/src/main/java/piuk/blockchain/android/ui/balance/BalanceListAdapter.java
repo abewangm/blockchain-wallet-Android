@@ -16,9 +16,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
-
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -356,17 +356,21 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     }
 
     void onViewFormatUpdated(boolean isBtc) {
-        this.isBtc = isBtc;
-        notifyAdapterDataSetChanged(null);
+        if (this.isBtc != isBtc) {
+            this.isBtc = isBtc;
+            notifyAdapterDataSetChanged(null);
+        }
     }
 
     void onContactsMapChanged(HashMap<String, String> contactsTransactionMap) {
-        this.contactsTransactionMap = contactsTransactionMap;
-        notifyDataSetChanged();
+        if (this.contactsTransactionMap != contactsTransactionMap) {
+            this.contactsTransactionMap = contactsTransactionMap;
+            notifyDataSetChanged();
+        }
     }
 
     void notifyAdapterDataSetChanged(@Nullable Double btcExchangeRate) {
-        if (btcExchangeRate != null) {
+        if (btcExchangeRate != null && this.btcExchangeRate != btcExchangeRate) {
             this.btcExchangeRate = btcExchangeRate;
         }
         monetaryUtil.updateUnit(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));

@@ -122,6 +122,12 @@ public class BlockchainApplication extends Application implements FrameworkInter
     }
 
     @Override
+    public Retrofit getRetrofitSFOXInstance() {
+        // TODO: 20/03/2017 This will need updating shortly
+        return null;
+    }
+
+    @Override
     public String getApiCode() {
         return "25a6ad13-1633-4dfb-b6ee-9b91cdf0b5c3";
     }
