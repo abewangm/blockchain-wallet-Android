@@ -15,6 +15,7 @@ import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.PrefsUtil
@@ -89,7 +90,8 @@ class BackupVerifyViewModelTest {
     }
 
     inner class MockDataManagerModule : DataManagerModule() {
-        override fun providePayloadDataManager(payloadManager: PayloadManager?): PayloadDataManager {
+        override fun providePayloadDataManager(payloadManager: PayloadManager?,
+                                               rxBus: RxBus?): PayloadDataManager {
             return mockPayloadDataManager
         }
     }

@@ -92,8 +92,8 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager) {
-        return new PayloadDataManager(payloadManager);
+    protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager, RxBus rxBus) {
+        return new PayloadDataManager(payloadManager, rxBus);
     }
 
     @Provides

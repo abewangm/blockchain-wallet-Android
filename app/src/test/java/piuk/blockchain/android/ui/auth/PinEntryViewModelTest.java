@@ -32,6 +32,8 @@ import org.spongycastle.crypto.InvalidCipherTextException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import javax.inject.Named;
+
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
@@ -39,6 +41,7 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -51,6 +54,7 @@ import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
+import retrofit2.Retrofit;
 
 import static io.reactivex.Observable.just;
 import static org.junit.Assert.assertEquals;
@@ -919,7 +923,8 @@ public class PinEntryViewModelTest {
         }
 
         @Override
-        protected SSLVerifyUtil provideSSlVerifyUtil(Context context) {
+        protected SSLVerifyUtil provideSSlVerifyUtil(@Named("server") Retrofit retrofit,
+                                                     RxBus rxBus) {
             return sslVerifyUtil;
         }
     }

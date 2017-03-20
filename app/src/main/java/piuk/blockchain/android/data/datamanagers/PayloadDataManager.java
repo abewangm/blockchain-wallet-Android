@@ -25,15 +25,19 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
+import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 
 @SuppressWarnings("WeakerAccess")
 public class PayloadDataManager {
 
     private PayloadManager payloadManager;
+    private RxPinning rxPinning;
 
-    public PayloadDataManager(PayloadManager payloadManager) {
+    public PayloadDataManager(PayloadManager payloadManager, RxBus rxBus) {
         this.payloadManager = payloadManager;
+        rxPinning = new RxPinning(rxBus);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -50,10 +54,10 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      */
     public Completable initializeFromPayload(String payload, String password) {
-        return Completable.fromCallable(() -> {
+        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
             payloadManager.initializeAndDecryptFromPayload(payload, password);
             return Void.TYPE;
-        });
+        }));
     }
 
     /**
@@ -67,8 +71,8 @@ public class PayloadDataManager {
      * @return An {@link Observable<Wallet>}
      */
     public Observable<Wallet> restoreHdWallet(String mnemonic, String walletName, String email, String password) {
-        return Observable.fromCallable(() ->
-                payloadManager.recoverFromMnemonic(mnemonic, walletName, email, password));
+        return rxPinning.callObservable(() -> Observable.fromCallable(() ->
+                payloadManager.recoverFromMnemonic(mnemonic, walletName, email, password)));
     }
 
     /**
@@ -80,7 +84,8 @@ public class PayloadDataManager {
      * @return An {@link Observable<Wallet>}
      */
     public Observable<Wallet> createHdWallet(String password, String walletName, String email) {
-        return Observable.fromCallable(() -> payloadManager.create(walletName, email, password));
+        return rxPinning.callObservable(() -> Observable.fromCallable(() ->
+                payloadManager.create(walletName, email, password)));
     }
 
     /**
@@ -93,10 +98,23 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      */
     public Completable initializeAndDecrypt(String sharedKey, String guid, String password) {
-        return Completable.fromCallable(() -> {
+        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
             payloadManager.initializeAndDecrypt(sharedKey, guid, password);
             return Void.TYPE;
-        });
+        }));
+    }
+
+    /**
+     * Initializes and decrypts a wallet using the credentials from a QR code.
+     *
+     * @param qrData The scanned QR as a String
+     * @return A {@link Completable} object
+     */
+    public Completable handleQrCode(String qrData) {
+        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
+            payloadManager.initializeAndDecryptFromQR(qrData);
+            return Void.TYPE;
+        })).compose(RxUtil.applySchedulersToCompletable());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -120,10 +138,10 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      */
     public Completable syncPayloadWithServer() {
-        return Completable.fromCallable(() -> {
+        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
             if (!payloadManager.save()) throw new ApiException("Sync failed");
             return Void.TYPE;
-        }).compose(RxUtil.applySchedulersToCompletable());
+        })).compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
@@ -135,10 +153,10 @@ public class PayloadDataManager {
      * @see IgnorableDefaultObserver
      */
     public Completable updateBalancesAndTransactions() {
-        return Completable.fromCallable(() -> {
+        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
             payloadManager.getAllTransactions(50, 0);
             return Void.TYPE;
-        }).compose(RxUtil.applySchedulersToCompletable());
+        })).compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
@@ -252,8 +270,8 @@ public class PayloadDataManager {
      * Updates the balance of the address as well as that of the entire wallet. To be called after a
      * successful sweep to ensure that balances are displayed correctly before syncing the wallet.
      *
-     * @param address An address from which you've just spent funds
-     * @param spentAmount   The spent amount as a long
+     * @param address     An address from which you've just spent funds
+     * @param spentAmount The spent amount as a long
      * @throws Exception Thrown if the address isn't found
      */
     public void subtractAmountFromAddressBalance(String address, long spentAmount) throws Exception {
