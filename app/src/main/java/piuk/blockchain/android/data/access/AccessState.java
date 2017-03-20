@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
+import android.util.Log;
 import info.blockchain.wallet.crypto.AESUtil;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import org.spongycastle.util.encoders.Hex;
@@ -85,7 +87,8 @@ public class AccessState {
                             throw Exceptions.propagate(new Throwable("Validate access failed", e));
                         }
                     } else {
-                        throw Exceptions.propagate(new Throwable("Validate access failed"));
+                        //Invalid PIN
+                        throw new InvalidCredentialsException("Validate access failed");
                     }
                 })
                 .compose(RxUtil.applySchedulersToObservable());
