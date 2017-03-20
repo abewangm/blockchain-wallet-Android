@@ -317,20 +317,20 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     void onTransactionListRefreshed() {
-        dataListener.setShowRefreshing(true);
         compositeDisposable.add(
                 payloadDataManager.updateBalancesAndTransactions()
+                        .doOnSubscribe(disposable -> dataListener.setShowRefreshing(true))
                         .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
                         .subscribe(() -> {
                             updateAccountList();
                             refreshFacilitatedTransactions();
-                            updateBalanceAndTransactionList(dataListener.getSelectedItemPosition(), dataListener.isBtc());
+                            updateBalanceAndTransactionList(dataListener.getSelectedItemPosition(), dataListener.isBtc(), true);
                         }, throwable -> {
                             // No-op
                         }));
     }
 
-    void updateBalanceAndTransactionList(int accountSpinnerPosition, boolean isBTC) {
+    void updateBalanceAndTransactionList(int accountSpinnerPosition, boolean isBTC, boolean fetchTransactions) {
         // The current selected item in dropdown (Account or Legacy Address)
         Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);
 
@@ -348,11 +348,16 @@ public class BalanceViewModel extends BaseViewModel {
             dataListener.updateBalance(balanceTotal);
         }
 
-        //Update transactions
-        compositeDisposable.add(transactionListDataManager.fetchTransactions(object, 50, 0)
-                .subscribe(
-                        this::insertTransactionsAndDisplay,
-                        throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
+        if (fetchTransactions) {
+            //Update transactions
+            compositeDisposable.add(
+                    transactionListDataManager.fetchTransactions(object, 50, 0)
+                            .doOnSubscribe(disposable -> dataListener.setShowRefreshing(true))
+                            .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
+                            .subscribe(
+                                    this::insertTransactionsAndDisplay,
+                                    throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
+        }
     }
 
     @SuppressWarnings("Java8CollectionRemoveIf")
