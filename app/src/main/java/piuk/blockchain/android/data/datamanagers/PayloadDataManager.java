@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import info.blockchain.api.data.Balance;
+import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -120,7 +121,7 @@ public class PayloadDataManager {
      */
     public Completable syncPayloadWithServer() {
         return Completable.fromCallable(() -> {
-            payloadManager.save();
+            if (!payloadManager.save()) throw new ApiException("Sync failed");
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }

@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.support.annotation.IntDef;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.AppCompatEditText;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,21 +55,20 @@ public class ViewUtils {
     }
 
     /**
-     * Returns a properly padded FrameLayout which wraps an {@link AppCompatEditText}. Once wrapped,
+     * Returns a properly padded FrameLayout which wraps a {@link View}. Once wrapped,
      * the view will conform to the Material Design guidelines for spacing within a Dialog.
      *
-     * @param context  The current Activity or Fragment context
-     * @param editText An AppCompatEditText for wrapping (Note: we're using the AppCompat version
-     *                 for design compatibility - there's no reason to be using plain EditTexts)
+     * @param context The current Activity or Fragment context
+     * @param view    A {@link View} that you wish to wrap
      * @return A correctly padded FrameLayout containing the AppCompatEditText
      */
-    public static FrameLayout getAlertDialogEditTextLayout(Context context, AppCompatEditText editText) {
+    public static FrameLayout getAlertDialogPaddedView(Context context, View view) {
         FrameLayout frameLayout = new FrameLayout(context);
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         int marginInPixels = (int) ViewUtils.convertDpToPixel(20, context);
         params.setMargins(marginInPixels, 0, marginInPixels, 0);
-        frameLayout.addView(editText, params);
+        frameLayout.addView(view, params);
 
         return frameLayout;
     }

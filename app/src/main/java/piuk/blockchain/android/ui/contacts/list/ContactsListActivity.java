@@ -135,7 +135,7 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         AppCompatEditText editText = new AppCompatEditText(this);
         editText.setHint(R.string.password);
         editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        FrameLayout frameLayout = ViewUtils.getAlertDialogEditTextLayout(this, editText);
+        FrameLayout frameLayout = ViewUtils.getAlertDialogPaddedView(this, editText);
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)

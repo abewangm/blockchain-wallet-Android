@@ -45,7 +45,7 @@ public class SecondPasswordHandler {
             new AlertDialog.Builder(context, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
                     .setMessage(R.string.enter_double_encryption_pw)
-                    .setView(ViewUtils.getAlertDialogEditTextLayout(context, passwordField))
+                    .setView(ViewUtils.getAlertDialogPaddedView(context, passwordField))
                     .setCancelable(false)
                     .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
 

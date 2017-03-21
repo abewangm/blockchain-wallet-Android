@@ -14,8 +14,8 @@ android {
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 25
-        versionCode 241
-        versionName "6.3.3"
+        versionCode 243
+        versionName "6.3.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
@@ -29,8 +29,9 @@ android {
         buildConfigField "String", "DEV_WEBSOCKET", devWebsocket
         buildConfigField "String", "STAGING_WEBSOCKET", stagingWebsocket
         buildConfigField "String", "TESTNET_WEBSOCKET", testnetWebsocket
+
         // Flag for Buy and Contacts feature
-        buildConfigField "boolean", "CONTACTS_ENABLED", "true"
+        buildConfigField "boolean", "CONTACTS_ENABLED", "false"
         buildConfigField "boolean", "BUY_BITCOIN_ENABLED", "true"
     }
     buildTypes {

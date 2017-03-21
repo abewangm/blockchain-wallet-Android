@@ -209,7 +209,7 @@ public class BalanceViewModel extends BaseViewModel {
                     return Void.TYPE;
                 }).subscribeOn(Schedulers.computation())
                         .subscribe(() -> {
-                           // No-op
+                            // No-op
                         }, Throwable::printStackTrace));
     }
 
@@ -227,16 +227,14 @@ public class BalanceViewModel extends BaseViewModel {
 
         //Only active accounts/addresses (exclude archived)
         List<Account> activeAccounts = new ArrayList<>();
-        if (payloadManager.getPayload().isUpgraded()) {
+        allAccounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();//V3
 
-            allAccounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();//V3
-
-            for (Account item : allAccounts) {
-                if (!item.isArchived()) {
-                    activeAccounts.add(item);
-                }
+        for (Account item : allAccounts) {
+            if (!item.isArchived()) {
+                activeAccounts.add(item);
             }
         }
+
         List<LegacyAddress> activeLegacyAddresses = new ArrayList<>();
         for (LegacyAddress item : allLegacyAddresses) {
             if (item.getTag() != LegacyAddress.ARCHIVED_ADDRESS) {
@@ -246,27 +244,21 @@ public class BalanceViewModel extends BaseViewModel {
 
         //"All" - total balance
         if (activeAccounts.size() > 1 || !activeLegacyAddresses.isEmpty()) {
-            if (payloadManager.getPayload().isUpgraded()) {
+            //Only V3 will display "All"
+            ConsolidatedAccount all = new ConsolidatedAccount();
+            all.setLabel(stringUtils.getString(R.string.all_accounts));
+            all.setType(Type.ALL_ACCOUNTS);
 
-                //Only V3 will display "All"
-                ConsolidatedAccount all = new ConsolidatedAccount();
-                all.setLabel(stringUtils.getString(R.string.all_accounts));
-                all.setType(Type.ALL_ACCOUNTS);
-
-                BigInteger bal = payloadManager.getWalletBalance();
-                String balance = getBalanceString(true, bal.longValue());
-                activeAccountAndAddressList.add(new ItemAccount(
-                        all.getLabel(),
-                        balance,
-                        null,
-                        bal.longValue(),
-                        null));
-                activeAccountAndAddressBiMap.put(all, spinnerIndex);
-                spinnerIndex++;
-
-            } else if (activeLegacyAddresses.size() > 1) {
-                //Dropping support for non HD wallets
-            }
+            BigInteger bal = payloadManager.getWalletBalance();
+            String balance = getBalanceString(true, bal.longValue());
+            activeAccountAndAddressList.add(new ItemAccount(
+                    all.getLabel(),
+                    balance,
+                    null,
+                    bal.longValue(),
+                    null));
+            activeAccountAndAddressBiMap.put(all, spinnerIndex);
+            spinnerIndex++;
         }
 
         //Add accounts to map
@@ -276,7 +268,7 @@ public class BalanceViewModel extends BaseViewModel {
             //Give unlabeled account a label
             if (item.getLabel().trim().isEmpty()) item.setLabel("Account: " + accountIndex);
 
-            BigInteger bal = payloadManager.getAddressBalance(item.getXpub());
+            BigInteger bal = payloadDataManager.getAddressBalance(item.getXpub());
             String balanceString = getBalanceString(true, bal.longValue());
 
             activeAccountAndAddressList.add(new ItemAccount(
@@ -308,7 +300,6 @@ public class BalanceViewModel extends BaseViewModel {
                     bal.longValue(),
                     null));
             activeAccountAndAddressBiMap.put(importedAddresses, spinnerIndex);
-            spinnerIndex++;
         }
 
         //If we have multiple accounts/addresses we will show dropdown in toolbar, otherwise we will only display a static text
@@ -326,22 +317,22 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     void onTransactionListRefreshed() {
-        dataListener.setShowRefreshing(true);
         compositeDisposable.add(
                 payloadDataManager.updateBalancesAndTransactions()
+                        .doOnSubscribe(disposable -> dataListener.setShowRefreshing(true))
                         .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
                         .subscribe(() -> {
                             updateAccountList();
                             refreshFacilitatedTransactions();
-                            updateBalanceAndTransactionList(dataListener.getSelectedItemPosition(), dataListener.isBtc());
+                            updateBalanceAndTransactionList(dataListener.getSelectedItemPosition(), dataListener.isBtc(), true);
                         }, throwable -> {
                             // No-op
                         }));
     }
 
-    void updateBalanceAndTransactionList(int accountSpinnerPosition, boolean isBTC) {
-
-        Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);//the current selected item in dropdown (Account or Legacy Address)
+    void updateBalanceAndTransactionList(int accountSpinnerPosition, boolean isBTC, boolean fetchTransactions) {
+        // The current selected item in dropdown (Account or Legacy Address)
+        Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);
 
         //If current selected item gets edited by another platform object might become null
         if (object == null && dataListener != null) {
@@ -357,11 +348,15 @@ public class BalanceViewModel extends BaseViewModel {
             dataListener.updateBalance(balanceTotal);
         }
 
-        //Update transactions
-        compositeDisposable.add(transactionListDataManager.fetchTransactions(object, 50, 0)
-            .subscribe(
-                    this::insertTransactionsAndDisplay,
-                throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
+        if (fetchTransactions) {
+            //Update transactions
+            compositeDisposable.add(
+                    transactionListDataManager.fetchTransactions(object, 50, 0)
+                            .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
+                            .subscribe(
+                                    this::insertTransactionsAndDisplay,
+                                    throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
+        }
     }
 
     @SuppressWarnings("Java8CollectionRemoveIf")
@@ -630,6 +625,7 @@ public class BalanceViewModel extends BaseViewModel {
         dataListener.showFctxRequiringAttention(getNumberOfFctxRequiringAttention(transactions));
 
         if (!transactions.isEmpty()) {
+            //noinspection Java8ListSort
             Collections.sort(transactions, new ContactTransactionDateComparator());
             Collections.reverse(transactions);
             displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction));

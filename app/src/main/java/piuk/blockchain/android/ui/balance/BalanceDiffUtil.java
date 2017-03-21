@@ -4,6 +4,7 @@ import android.support.v7.util.DiffUtil;
 
 import java.util.List;
 
+// TODO: 20/03/2017 This isn't working correctly at the moment. BalanceViewModel needs re-writing.
 class BalanceDiffUtil extends DiffUtil.Callback {
 
     private List<Object> oldItems;

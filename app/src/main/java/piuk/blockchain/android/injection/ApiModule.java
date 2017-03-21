@@ -148,6 +148,21 @@ public class ApiModule {
 
     @Provides
     @Singleton
+    @Named("coinify")
+    protected Retrofit provideRetrofitCoinifyInstance(OkHttpClient okHttpClient,
+        JacksonConverterFactory converterFactory,
+        RxJava2CallAdapterFactory rxJavaCallFactory,
+        PersistentUrls persistentUrls) {
+        return new Retrofit.Builder()
+            .baseUrl(persistentUrls.getCurrentCoinifyUrl())
+            .client(okHttpClient)
+            .addConverterFactory(converterFactory)
+            .addCallAdapterFactory(rxJavaCallFactory)
+            .build();
+    }
+
+    @Provides
+    @Singleton
     protected SSLVerifyUtil provideSSlVerifyUtil(Context context) {
         return new SSLVerifyUtil(context);
     }

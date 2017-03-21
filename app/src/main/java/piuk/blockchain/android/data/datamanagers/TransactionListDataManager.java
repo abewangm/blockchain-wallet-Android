@@ -170,6 +170,11 @@ public class TransactionListDataManager {
         rxBus.emitEvent(List.class, transactionListStore.getList());
     }
 
+    /**
+     * Gets list of transactions that have been published but delivery has not yet been confirmed.
+     * @param newlyFetchedTxs
+     * @return
+     */
     private List<TransactionSummary> getRemainingPendingTransactionList(List<TransactionSummary> newlyFetchedTxs) {
         HashMap<String, TransactionSummary> pendingMap = new HashMap<>();
         for (TransactionSummary transactionSummary : transactionListStore.getList()) {
@@ -188,7 +193,7 @@ public class TransactionListDataManager {
     private void filterProcessed(List<TransactionSummary> newlyFetchedTxs, HashMap<String, TransactionSummary> pendingMap) {
         for (TransactionSummary tx : newlyFetchedTxs) {
             if (pendingMap.containsKey(tx.getHash())) {
-                pendingMap.remove(pendingMap.get(tx.getHash()));
+                pendingMap.remove(tx.getHash());
             }
         }
     }

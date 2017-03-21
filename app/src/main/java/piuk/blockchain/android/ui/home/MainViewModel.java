@@ -353,7 +353,6 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void preLaunchChecks() {
-
         if (accessState.isLoggedIn()) {
             dataListener.onStartBalanceFragment(false);
             dataListener.onFetchTransactionsStart();

@@ -512,7 +512,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(email)
                 .setMessage(R.string.verify_email2)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
+                .setView(ViewUtils.getAlertDialogPaddedView(getActivity(), editText))
                 .setCancelable(false)
                 .setPositiveButton(R.string.update, (dialogInterface, i) -> {
                     String email = editText.getText().toString();
@@ -670,7 +670,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.verify_mobile)
                 .setMessage(R.string.verify_sms_summary)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(getActivity(), editText))
+                .setView(ViewUtils.getAlertDialogPaddedView(getActivity(), editText))
                 .setCancelable(false)
                 .setPositiveButton(R.string.verify, null)
                 .setNegativeButton(android.R.string.cancel, null)

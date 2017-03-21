@@ -51,6 +51,9 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Inject
     @Named("sfox")
     protected Lazy<Retrofit> sfoxApi;
+    @Inject
+    @Named("coinify")
+    protected Lazy<Retrofit> coinify;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -126,6 +129,11 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Override
     public Retrofit getRetrofitSFOXInstance() {
         return sfoxApi.get();
+    }
+
+    @Override
+    public Retrofit getRetrofitCoinifyInstance() {
+        return coinify.get();
     }
 
     @Override

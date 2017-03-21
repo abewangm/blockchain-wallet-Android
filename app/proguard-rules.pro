@@ -138,3 +138,19 @@
  -keepclassmembers public final enum com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility {
         public static final com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility *;
  }
+# Temporary fix: Keep classes for jackson json
+-keep public class info.blockchain.api.data.** {
+  *;
+}
+-keep public class info.blockchain.wallet.api.data.** {
+   *;
+}
+-keep public class info.blockchain.wallet.contacts.data.** {
+   *;
+}
+-keep public class info.blockchain.wallet.metadata.data.** {
+   *;
+}
+-keep public class info.blockchain.wallet.payload.data.** {
+   *;
+}
