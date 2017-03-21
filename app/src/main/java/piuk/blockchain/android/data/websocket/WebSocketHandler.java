@@ -176,12 +176,12 @@ class WebSocketHandler {
 
     @Thunk
     void updateBalancesAndTransactions() {
-        payloadDataManager.updateBalancesAndTransactions()
+        payloadDataManager.updateAllBalances()
+                .andThen(payloadDataManager.updateAllTransactions())
                 .doOnComplete(() -> {
                     Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 })
-                .compose(RxUtil.applySchedulersToCompletable())
                 .subscribe(new IgnorableDefaultObserver<>());
     }
 

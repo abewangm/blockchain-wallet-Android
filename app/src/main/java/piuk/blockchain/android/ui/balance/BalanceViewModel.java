@@ -318,7 +318,7 @@ public class BalanceViewModel extends BaseViewModel {
 
     void onTransactionListRefreshed() {
         compositeDisposable.add(
-                payloadDataManager.updateBalancesAndTransactions()
+                payloadDataManager.updateAllTransactions()
                         .doOnSubscribe(disposable -> dataListener.setShowRefreshing(true))
                         .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
                         .subscribe(() -> {
@@ -341,18 +341,25 @@ public class BalanceViewModel extends BaseViewModel {
         }
 
         //Update balance
-        long btcBalance = transactionListDataManager.getBtcBalance(object);
-        String balanceTotal = getBalanceString(isBTC, btcBalance);
+        final Object finalObject = object;
+        compositeDisposable.add(
+                payloadDataManager.updateAllBalances()
+                        .subscribe(() -> {
+                            long btcBalance = transactionListDataManager.getBtcBalance(finalObject);
+                            String balanceTotal = getBalanceString(isBTC, btcBalance);
 
-        if (dataListener != null) {
-            dataListener.updateBalance(balanceTotal);
-        }
+                            if (dataListener != null) {
+                                dataListener.updateBalance(balanceTotal);
+                            }
+                        }));
 
         if (fetchTransactions) {
             //Update transactions
             compositeDisposable.add(
                     transactionListDataManager.fetchTransactions(object, 50, 0)
-                            .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
+                            .doAfterTerminate(() -> {
+                                if (dataListener != null) dataListener.setShowRefreshing(false);
+                            })
                             .subscribe(
                                     this::insertTransactionsAndDisplay,
                                     throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
