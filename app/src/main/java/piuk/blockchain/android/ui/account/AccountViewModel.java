@@ -157,6 +157,7 @@ public class AccountViewModel extends BaseViewModel {
                             dataListener.broadcastIntent(intent);
                             dataListener.onUpdateAccountsList();
                         }, throwable -> {
+                            Log.e(TAG, "updateLegacyAddress: ", throwable);
                             dataListener.dismissProgressDialog();
                             dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
                         }));
