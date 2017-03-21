@@ -404,27 +404,14 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private String getFormattedPriceString() {
-        monetaryUtil.updateUnit(getCurrentBitcoinFormat());
         String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
         double lastPrice = exchangeRateFactory.getLastPrice(fiat);
         String fiatSymbol = exchangeRateFactory.getSymbol(fiat);
         DecimalFormat format = new DecimalFormat();
         format.setMinimumFractionDigits(2);
-
-        switch (getCurrentBitcoinFormat()) {
-            case MonetaryUtil.MICRO_BTC:
-                return stringUtils.getFormattedString(
-                        R.string.current_price_bits,
-                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
-            case MonetaryUtil.MILLI_BTC:
-                return stringUtils.getFormattedString(
-                        R.string.current_price_millibits,
-                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
-            default:
-                return stringUtils.getFormattedString(
-                        R.string.current_price_btc,
-                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
-        }
+        return stringUtils.getFormattedString(
+                R.string.current_price_btc,
+                fiatSymbol + format.format(lastPrice));
     }
 
     private int getCurrentBitcoinFormat() {

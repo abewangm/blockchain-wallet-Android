@@ -4,8 +4,6 @@
     <string name="backup_wallet">Backup funds</string>
     <string name="upgrade_wallet">Upgrade</string>
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="current_price_millibits">1 mBTC = %1$s</string>
-    <string name="current_price_bits">1 bit = %1$s</string>
 
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Settings</string>
