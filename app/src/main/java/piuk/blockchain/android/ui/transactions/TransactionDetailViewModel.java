@@ -156,8 +156,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
         Set<Entry<String, BigInteger>> entrySet = inputMap.entrySet();
         for (Entry<String, BigInteger> set : entrySet) {
             String label = mPayloadManager.getLabelFromAddress(set.getKey());
-            if (!labelList.contains(label))
-                labelList.add(label);
+            if (!labelList.contains(label)) labelList.add(label);
         }
 
         String inputMapString = org.apache.commons.lang3.StringUtils.join(labelList.toArray(), "\n\n");
