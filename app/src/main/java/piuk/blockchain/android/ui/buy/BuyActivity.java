@@ -5,7 +5,8 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.webkit.WebView;
-import info.blockchain.wallet.api.trade.SFOXApi;
+import info.blockchain.wallet.api.trade.coinify.CoinifyApi;
+import info.blockchain.wallet.api.trade.sfox.SFOXApi;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.MetadataUtil;
@@ -31,6 +32,7 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
     private Boolean didBuyBitcoin = false;
 
     private SFOXApi sfoxApi;
+    private CoinifyApi coinifyApi;
     private CompositeDisposable compositeDisposable;
 
     @Thunk
@@ -46,6 +48,7 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
 
         compositeDisposable = new CompositeDisposable();
         sfoxApi = new SFOXApi();
+        coinifyApi = new CoinifyApi();
 
         WebView webView = binding.webview;
         frontendJavascriptManager = new FrontendJavascriptManager(this, webView);
@@ -146,11 +149,20 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
             sfoxApi.getTransactions(accountToken)
                 .compose(RxUtil.applySchedulersToObservable())
                 .subscribe(
-                    response -> {
+                    transactionList -> {
                         //do stuff
-//                        response.getAction();
-//                        response.getAmount();
-//                        response.getTransactionId();
+                    },
+                    Throwable::printStackTrace));
+    }
+
+    public void fetchTrades(String accessToken) {
+
+        compositeDisposable.add(
+            coinifyApi.getTrades(accessToken)
+                .compose(RxUtil.applySchedulersToObservable())
+                .subscribe(
+                    tradesList -> {
+                        //do stuff
                     },
                     Throwable::printStackTrace));
     }
