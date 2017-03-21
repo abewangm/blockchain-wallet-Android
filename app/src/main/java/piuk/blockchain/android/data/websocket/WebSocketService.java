@@ -12,10 +12,13 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import info.blockchain.wallet.api.PersistentUrls;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -29,6 +32,7 @@ public class WebSocketService extends Service {
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected NotificationManager notificationManager;
     @Inject protected PersistentUrls persistentUrls;
+    @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
     @Thunk WebSocketHandler webSocketHandler;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -61,56 +65,69 @@ public class WebSocketService extends Service {
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(receiver, filter);
 
-        if (payloadDataManager.getWallet() != null) {
-            String[] addrs = getAddresses();
-            String[] xpubs = getXpubs();
+        String[] addrs = getAddresses();
+        String[] xpubs = getXpubs();
 
-            webSocketHandler = new WebSocketHandler(
-                    getApplicationContext(),
-                    payloadDataManager,
-                    notificationManager,
-                    persistentUrls,
-                    new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
-                    payloadDataManager.getWallet().getGuid(),
-                    xpubs,
-                    addrs);
+        webSocketHandler = new WebSocketHandler(
+                getApplicationContext(),
+                payloadDataManager,
+                notificationManager,
+                persistentUrls,
+                new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
+                prefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
+                xpubs,
+                addrs);
 
-            webSocketHandler.start();
-        }
+        webSocketHandler.start();
     }
 
     private String[] getXpubs() {
         int nbAccounts = 0;
-        if (payloadDataManager.getWallet().isUpgraded()) {
-            try {
-                nbAccounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().size();
-            } catch (java.lang.IndexOutOfBoundsException e) {
-                nbAccounts = 0;
+        if (payloadDataManager.getWallet() != null) {
+            if (payloadDataManager.getWallet().isUpgraded()) {
+                try {
+                    nbAccounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().size();
+                } catch (java.lang.IndexOutOfBoundsException e) {
+                    nbAccounts = 0;
+                }
             }
-        }
 
-        final String[] xpubs = new String[nbAccounts];
-        for (int i = 0; i < nbAccounts; i++) {
-            String s = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().get(i).getXpub();
-            if (s != null && !s.isEmpty()) {
-                xpubs[i] = s;
+            final String[] xpubs = new String[nbAccounts];
+            for (int i = 0; i < nbAccounts; i++) {
+                String s = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().get(i).getXpub();
+                if (s != null && !s.isEmpty()) {
+                    xpubs[i] = s;
+                }
             }
+            return xpubs;
+        } else {
+            return new String[0];
         }
-
-        return xpubs;
     }
 
     private String[] getAddresses() {
-        int nbLegacy = payloadDataManager.getWallet().getLegacyAddressList().size();
-        final String[] addrs = new String[nbLegacy];
-        for (int i = 0; i < nbLegacy; i++) {
-            String s = payloadDataManager.getWallet().getLegacyAddressList().get(i).getAddress();
-            if (s != null && !s.isEmpty()) {
-                addrs[i] = payloadDataManager.getWallet().getLegacyAddressList().get(i).getAddress();
+        if (payloadDataManager.getWallet() != null) {
+            int nbLegacy = payloadDataManager.getWallet().getLegacyAddressList().size();
+            final String[] addrs = new String[nbLegacy];
+            for (int i = 0; i < nbLegacy; i++) {
+                String s = payloadDataManager.getWallet().getLegacyAddressList().get(i).getAddress();
+                if (s != null && !s.isEmpty()) {
+                    addrs[i] = payloadDataManager.getWallet().getLegacyAddressList().get(i).getAddress();
+                }
             }
-        }
 
-        return addrs;
+            return addrs;
+        } else if (!swipeToReceiveHelper.getReceiveAddresses().isEmpty()) {
+            final String[] addrs = new String[swipeToReceiveHelper.getReceiveAddresses().size()];
+            final List<String> receiveAddresses = swipeToReceiveHelper.getReceiveAddresses();
+            for (int i = 0; i < receiveAddresses.size(); i++) {
+                final String address = receiveAddresses.get(i);
+                addrs[i] = address;
+            }
+            return addrs;
+        } else {
+            return new String[0];
+        }
     }
 
     @Override
