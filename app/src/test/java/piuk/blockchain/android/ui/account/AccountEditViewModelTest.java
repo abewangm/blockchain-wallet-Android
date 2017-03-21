@@ -643,7 +643,7 @@ public class AccountEditViewModelTest {
         // Arrange
         subject.account = new Account();
         when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.complete());
-        when(payloadDataManager.updateBalancesAndTransactions()).thenReturn(Completable.complete());
+        when(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete());
         // Act
         subject.archiveAccount();
         // Assert
@@ -651,7 +651,7 @@ public class AccountEditViewModelTest {
         verify(activity).dismissProgressDialog();
         verify(activity).setActivityResult(anyInt());
         verify(payloadDataManager).syncPayloadWithServer();
-        verify(payloadDataManager).updateBalancesAndTransactions();
+        verify(payloadDataManager).updateAllTransactions();
     }
 
     @Test

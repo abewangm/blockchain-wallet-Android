@@ -82,7 +82,7 @@ public class SwipeToReceiveHelper {
      * return an empty list.
      */
     @NonNull
-    List<String> getReceiveAddresses() {
+    public List<String> getReceiveAddresses() {
         String addressString = prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, "");
         if (addressString.isEmpty()) {
             return Collections.emptyList();

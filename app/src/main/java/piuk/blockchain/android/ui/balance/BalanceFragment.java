@@ -93,8 +93,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             if (intent.getAction().equals(ACTION_INTENT) && getActivity() != null) {
                 viewModel.updateAccountList();
                 viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, true);
-                transactionAdapter.onTransactionsUpdated(viewModel.getTransactionList());
-                binding.rvTransactions.getAdapter().notifyDataSetChanged();
                 // Check backup status on receiving funds
                 viewModel.onViewReady();
                 binding.rvTransactions.scrollToPosition(0);

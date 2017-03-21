@@ -1013,14 +1013,18 @@ public class SendViewModel extends BaseViewModel {
             payloadDataManager.incrementChangeAddress(account);
             payloadDataManager.incrementReceiveAddress(account);
             try {
-                payloadManager.subtractAmountFromAddressBalance(account.getXpub(), sendModel.pendingTransaction.bigIntAmount);
+                payloadManager.subtractAmountFromAddressBalance(
+                        account.getXpub(),
+                        sendModel.pendingTransaction.bigIntAmount.add(sendModel.pendingTransaction.bigIntFee));
             } catch (Exception e) {
                 Log.e(TAG, "subtractAmountFromAddressBalance: ", e);
             }
         } else {
             try {
                 LegacyAddress address = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
-                payloadManager.subtractAmountFromAddressBalance(address.getAddress(), sendModel.pendingTransaction.bigIntAmount);
+                payloadManager.subtractAmountFromAddressBalance(
+                        address.getAddress(),
+                        sendModel.pendingTransaction.bigIntAmount.add(sendModel.pendingTransaction.bigIntFee));
             } catch (Exception e) {
                 Log.e(TAG, "subtractAmountFromAddressBalance: ", e);
             }

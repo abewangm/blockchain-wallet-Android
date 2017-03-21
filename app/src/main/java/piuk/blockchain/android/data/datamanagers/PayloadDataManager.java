@@ -127,16 +127,30 @@ public class PayloadDataManager {
     }
 
     /**
-     * Returns {@link Completable} which updates balances and transactions in the PayloadManager.
+     * Returns {@link Completable} which updates transactions in the PayloadManager.
      * Completable returns no value, and is used to call functions that return void but have side
      * effects.
      *
      * @return A {@link Completable} object
      * @see IgnorableDefaultObserver
      */
-    public Completable updateBalancesAndTransactions() {
+    public Completable updateAllTransactions() {
         return Completable.fromCallable(() -> {
             payloadManager.getAllTransactions(50, 0);
+            return Void.TYPE;
+        }).compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Returns a {@link Completable} which updates all balances in the PayloadManager. Completable
+     * returns no value, and is used to call functions that return void but have side effects.
+     *
+     * @return A {@link Completable} object
+     * @see IgnorableDefaultObserver
+     */
+    public Completable updateAllBalances() {
+        return Completable.fromCallable(() -> {
+            payloadManager.updateAllBalances();
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }
@@ -252,8 +266,8 @@ public class PayloadDataManager {
      * Updates the balance of the address as well as that of the entire wallet. To be called after a
      * successful sweep to ensure that balances are displayed correctly before syncing the wallet.
      *
-     * @param address An address from which you've just spent funds
-     * @param spentAmount   The spent amount as a long
+     * @param address     An address from which you've just spent funds
+     * @param spentAmount The spent amount as a long
      * @throws Exception Thrown if the address isn't found
      */
     public void subtractAmountFromAddressBalance(String address, long spentAmount) throws Exception {

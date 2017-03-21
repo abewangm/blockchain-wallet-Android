@@ -96,6 +96,8 @@ public class BaseAuthActivity extends AppCompatActivity {
             toolbar.setTitle(CalligraphyUtils.applyTypefaceSpan(
                     title,
                     TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        } else {
+            toolbar.setTitle(title);
         }
 
         setSupportActionBar(toolbar);
@@ -115,6 +117,8 @@ public class BaseAuthActivity extends AppCompatActivity {
             actionBar.setTitle(CalligraphyUtils.applyTypefaceSpan(
                     getString(title),
                     TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        } else {
+            actionBar.setTitle(title);
         }
     }
 

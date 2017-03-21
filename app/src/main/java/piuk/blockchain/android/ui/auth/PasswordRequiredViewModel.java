@@ -32,6 +32,7 @@ public class PasswordRequiredViewModel extends BaseViewModel {
     @Inject protected AuthDataManager authDataManager;
     @Inject protected AccessState accessState;
     private DataListener dataListener;
+    private String sessionId;
     @VisibleForTesting boolean waitingForAuth = false;
 
     public interface DataListener {
@@ -94,11 +95,10 @@ public class PasswordRequiredViewModel extends BaseViewModel {
 
         String guid = prefsUtil.getValue(PrefsUtil.KEY_GUID, "");
         waitingForAuth = true;
-        final String[] finalSessionId = new String[1];
 
         compositeDisposable.add(
                 authDataManager.getSessionId(guid)
-                        .doOnNext(s -> finalSessionId[0] = s)
+                        .doOnNext(s -> sessionId = s)
                         .flatMap(sessionId -> authDataManager.getEncryptedPayload(guid, sessionId))
                         .subscribe(response -> {
                             if (response.errorBody() != null
@@ -107,7 +107,7 @@ public class PasswordRequiredViewModel extends BaseViewModel {
                                 showCheckEmailDialog();
 
                                 compositeDisposable.add(
-                                        authDataManager.startPollingAuthStatus(guid, finalSessionId[0])
+                                        authDataManager.startPollingAuthStatus(guid, sessionId)
                                                 .subscribe(payloadResponse -> {
                                                     waitingForAuth = false;
 
