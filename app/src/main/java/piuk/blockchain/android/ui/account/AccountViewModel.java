@@ -233,7 +233,7 @@ public class AccountViewModel extends BaseViewModel {
 
         compositeDisposable.add(accountDataManager.updateLegacyAddress(legacyAddress).subscribe(() -> {
             dataListener.showRenameImportedAddressDialog(legacyAddress);
-        }));
+        }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
     private void importWatchOnlyAddress(String address) {
