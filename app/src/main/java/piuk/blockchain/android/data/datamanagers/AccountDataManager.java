@@ -70,7 +70,7 @@ public class AccountDataManager {
         return Completable.fromCallable(() -> {
             payloadManager.addLegacyAddress(legacyAddress);
             return Void.TYPE;
-        });
+        }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
