@@ -318,7 +318,7 @@ public class MainViewModel extends BaseViewModel {
                     getSettingsApi()
                             .compose(RxUtil.applySchedulersToObservable())
                             .subscribe(settings -> {
-                                if (settings.isEmailVerified()) {
+                                if (!settings.isEmailVerified()) {
                                     appUtil.setNewlyCreated(false);
                                     String email = settings.getEmail();
                                     if (email != null && !email.isEmpty()) {
