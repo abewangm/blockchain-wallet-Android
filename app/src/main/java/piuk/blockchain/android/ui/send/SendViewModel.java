@@ -10,6 +10,8 @@ import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -21,6 +23,8 @@ import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
+import java.io.IOException;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 
@@ -40,6 +44,10 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
+import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
+import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
+import org.spongycastle.crypto.InvalidCipherTextException;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
@@ -950,6 +958,11 @@ public class SendViewModel extends BaseViewModel {
             if (sendModel.pendingTransaction.isHD()) {
                 account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);
                 changeAddress = payloadManager.getNextChangeAddress(account);
+
+                if(payloadManager.getPayload().isDoubleEncryption()) {
+                    payloadManager.getPayload()
+                        .decryptHDWallet(0, sendModel.verifiedSecondPassword);
+                }
 
                 keys.addAll(payloadManager.getPayload().getHdWallets().get(0).getHDKeysForSigning(
                         account, sendModel.pendingTransaction.unspentOutputBundle
