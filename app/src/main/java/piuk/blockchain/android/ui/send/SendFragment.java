@@ -42,19 +42,21 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import info.blockchain.wallet.contacts.data.Contact;
-
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
+
+import org.apache.commons.lang3.StringUtils;
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import org.apache.commons.lang3.StringUtils;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentSendBinding;
 import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
@@ -72,7 +74,6 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -282,7 +283,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     viewModel.setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account));
 
                     String label = account.getLabel();
-                    if(label.isEmpty()){
+                    if (label == null || label.isEmpty()) {
                         label = account.getXpub();
                     }
                     binding.destination.setText(StringUtils.abbreviate(label, 32));
@@ -291,7 +292,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     viewModel.setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress));
 
                     String label = legacyAddress.getLabel();
-                    if(label.isEmpty()){
+                    if (label == null || label.isEmpty()) {
                         label = legacyAddress.getAddress();
                     }
                     binding.destination.setText(StringUtils.abbreviate(label, 32));
@@ -315,7 +316,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     chosenItem = new ItemAccount(account.getLabel(), null, null, null, account);
 
                     String label = chosenItem.label;
-                    if(label.isEmpty()){
+                    if (label == null || label.isEmpty()) {
                         label = account.getXpub();
                     }
                     binding.from.setText(StringUtils.abbreviate(label, 32));
@@ -325,7 +326,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     chosenItem = new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress);
 
                     String label = chosenItem.label;
-                    if(label.isEmpty()){
+                    if (label == null || label.isEmpty()) {
                         label = legacyAddress.getAddress();
                     }
                     binding.from.setText(StringUtils.abbreviate(label, 32));
@@ -490,7 +491,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     private void requestSendPayment(boolean feeWarningSeen) {
         viewModel.onSendClicked(binding.customFee.getText().toString(),
-            binding.amountRow.amountBtc.getText().toString(),
+                binding.amountRow.amountBtc.getText().toString(),
                 feeWarningSeen,
                 binding.destination.getText().toString());
     }
@@ -1010,24 +1011,24 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     @Override
     public void onShowAlterFee(String suggestedAbsoluteFee,
-        String body,
-        @StringRes int positiveAction,
-        @StringRes int negativeAction) {
+                               String body,
+                               @StringRes int positiveAction,
+                               @StringRes int negativeAction) {
 
         new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
-            .setTitle(R.string.warning)
-            .setMessage(body)
-            .setCancelable(false)
-            .setPositiveButton(positiveAction, (dialog, which) -> {
-                //Accept suggested fee
-                binding.customFee.setText(suggestedAbsoluteFee);
-                requestSendPayment(true);
-            })
-            .setNegativeButton(negativeAction, (dialog, which) ->
-                //User rejected suggested fee. Don't alter.
-                requestSendPayment(true))
-            .create()
-            .show();
+                .setTitle(R.string.warning)
+                .setMessage(body)
+                .setCancelable(false)
+                .setPositiveButton(positiveAction, (dialog, which) -> {
+                    //Accept suggested fee
+                    binding.customFee.setText(suggestedAbsoluteFee);
+                    requestSendPayment(true);
+                })
+                .setNegativeButton(negativeAction, (dialog, which) ->
+                        //User rejected suggested fee. Don't alter.
+                        requestSendPayment(true))
+                .create()
+                .show();
     }
 
     private void alertCustomSpend(String btcFee, String btcFeeUnit) {
