@@ -330,7 +330,10 @@ class WebSocketHandler {
             payloadDataManager.initializeAndDecrypt(
                     payloadDataManager.getWallet().getSharedKey(),
                     payloadDataManager.getWallet().getGuid(),
-                    payloadDataManager.getTempPassword());
+                    payloadDataManager.getTempPassword()).subscribe(() -> {
+                    updateBalancesAndTransactions();
+            });
+
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }
