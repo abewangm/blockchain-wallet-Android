@@ -26,6 +26,7 @@ public class ManualPairingViewModel extends BaseViewModel {
     private static final String TAG = ManualPairingViewModel.class.getSimpleName();
 
     private DataListener dataListener;
+    private String sessionId;
     @Inject protected AppUtil appUtil;
     @Inject protected AuthDataManager authDataManager;
     @VisibleForTesting boolean waitingForAuth = false;
@@ -77,11 +78,10 @@ public class ManualPairingViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.validating_password, null, false);
 
         waitingForAuth = true;
-        final String[] finalSessionId = new String[1];
 
         compositeDisposable.add(
                 authDataManager.getSessionId(guid)
-                        .doOnNext(s -> finalSessionId[0] = s)
+                        .doOnNext(s -> sessionId = s)
                         .flatMap(sessionId -> authDataManager.getEncryptedPayload(guid, sessionId))
                         .subscribe(response -> {
                             if (response.errorBody() != null
@@ -90,7 +90,7 @@ public class ManualPairingViewModel extends BaseViewModel {
                                 showCheckEmailDialog();
 
                                 compositeDisposable.add(
-                                        authDataManager.startPollingAuthStatus(guid, finalSessionId[0])
+                                        authDataManager.startPollingAuthStatus(guid, sessionId)
                                                 .subscribe(payloadResponse -> {
                                                     waitingForAuth = false;
 
