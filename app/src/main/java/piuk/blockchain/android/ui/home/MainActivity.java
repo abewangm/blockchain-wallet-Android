@@ -548,17 +548,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         final String message = getString(R.string.check_connectivity_exit);
         builder.setMessage(message)
                 .setCancelable(false)
-                .setPositiveButton(R.string.dialog_continue,
-                        (d, id) -> {
-                            d.dismiss();
-                            Class c = null;
-                            if (new PrefsUtil(MainActivity.this).getValue(PrefsUtil.KEY_GUID, "").length() < 1) {
-                                c = LandingActivity.class;
-                            } else {
-                                c = PinEntryActivity.class;
-                            }
-                            startSingleActivity(c);
-                        });
+                .setPositiveButton(R.string.dialog_continue, (d, id) -> {
+                    Class activityClass;
+                    if (new PrefsUtil(MainActivity.this).getValue(PrefsUtil.KEY_GUID, "").isEmpty()) {
+                        activityClass = LandingActivity.class;
+                    } else {
+                        activityClass = PinEntryActivity.class;
+                    }
+                    startSingleActivity(activityClass);
+                });
 
         if (!isFinishing()) {
             builder.create().show();
@@ -762,14 +760,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private void replaceFragmentWithAnimation(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-        transaction.replace(R.id.content_frame, fragment).commitAllowingStateLoss();
+        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+                .replace(R.id.content_frame, fragment)
+                .commit();
     }
 
     private void addFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.content_frame, fragment).commitAllowingStateLoss();
+        transaction.add(R.id.content_frame, fragment).commit();
     }
 
     private void handleIncomingIntent() {
@@ -795,7 +794,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     private void startSendFragmentFromIntent(String uri, String recipientId, String mdid, String fctxId, int accountPosition) {
         SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId,
-            EVENT_TX_INPUT_FROM_CONTACTS, accountPosition);
+                EVENT_TX_INPUT_FROM_CONTACTS, accountPosition);
         replaceFragmentWithAnimation(sendFragment);
         binding.bottomNavigation.restoreBottomNavigation();
     }

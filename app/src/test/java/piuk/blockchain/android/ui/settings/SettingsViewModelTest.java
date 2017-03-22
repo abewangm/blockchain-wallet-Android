@@ -579,7 +579,6 @@ public class SettingsViewModelTest {
         verify(settingsDataManager).enableNotification(SettingsManager.NOTIFICATION_TYPE_EMAIL, notifications);
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
-        verifyNoMoreInteractions(activity);
     }
 
     @Test

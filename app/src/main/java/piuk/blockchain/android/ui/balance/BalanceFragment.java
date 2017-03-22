@@ -142,6 +142,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void onResume() {
         super.onResume();
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+        }
+
         interactionListener.resetNavigationDrawer();
 
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
@@ -205,8 +209,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 R.drawable.vector_mobile,
                 R.string.enable,
                 true,
-                true
-        );
+                true);
 
         securityPromptDialog.setPositiveButtonListener(v -> {
             securityPromptDialog.dismiss();

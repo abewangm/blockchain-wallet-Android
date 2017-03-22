@@ -794,7 +794,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         try {
             if (input.contains(getDefaultDecimalSeparator())) {
                 String dec = input.substring(input.indexOf(getDefaultDecimalSeparator()));
-                if (dec.length() > 0) {
+                if (!dec.isEmpty()) {
                     dec = dec.substring(1);
                     if (dec.length() > maxLength) {
                         editText.setText(input.substring(0, input.length() - 1));

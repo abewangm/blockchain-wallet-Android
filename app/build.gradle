@@ -121,9 +121,11 @@ afterEvaluate {
 
 dependencies {
     compile files('libs/MyWalletHD.jar')
-    compile (group: 'info.blockchain', name: 'api-client', version: '0.1.13-SNAPSHOT') {
-        exclude group: 'org.json', module: 'json'
-    }
+    compile files('libs/api-client-0.1.13-SNAPSHOT.jar')
+    // TODO: Switch this back once the client is published
+//    compile (group: 'info.blockchain', name: 'api-client', version: '0.1.13-SNAPSHOT') {
+//        exclude group: 'org.json', module: 'json'
+//    }
     compile "com.android.support:appcompat-v7:$supportVersion"
     compile "com.android.support:recyclerview-v7:$supportVersion"
     compile "com.android.support:cardview-v7:$supportVersion"
@@ -145,7 +147,7 @@ dependencies {
     compile 'com.neovisionaries:nv-websocket-client:1.19'
     compile('com.google.zxing:core:3.3.0') { transitive = true }
     compile 'com.github.mukeshsolanki:country-picker-android:1.1.7'
-    compile 'com.aurelhubert:ahbottomnavigation:2.0.5'
+    compile 'com.aurelhubert:ahbottomnavigation:2.0.6'
     // URL Builder
     compile "io.mikael:urlbuilder:2.0.8"
     // RxJava
