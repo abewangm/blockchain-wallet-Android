@@ -216,13 +216,14 @@ repositories {
     maven {
         url "https://jitpack.io"
     }
-    maven {
-        url nexusUrl + '/repository/maven-public/'
-        credentials(PasswordCredentials) {
-            username nexusUsername
-            password nexusPassword
-        }
-    }
+    // TODO: Remove this once the client is published
+//    maven {
+//        url nexusUrl + '/repository/maven-public/'
+//        credentials(PasswordCredentials) {
+//            username nexusUsername
+//            password nexusPassword
+//        }
+//    }
 }
 
 // This must remain at the bottom of this file until Google work out a better way to do this

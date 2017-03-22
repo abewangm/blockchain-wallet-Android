@@ -34,6 +34,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentBalanceBinding;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
+import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.home.SecurityPromptDialog;
@@ -63,6 +64,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public int balanceBarHeight;
     private BalanceHeaderAdapter accountsAdapter;
     private MaterialProgressDialog progressDialog;
+    private BottomSpacerDecoration spacerDecoration;
     @Thunk OnFragmentInteractionListener interactionListener;
     @Thunk boolean isBTC = true;
     // Accounts list
@@ -476,6 +478,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
             launcherShortcutHelper.generateReceiveShortcuts();
         }
+
+        if (spacerDecoration == null) {
+            spacerDecoration = new BottomSpacerDecoration((int) ViewUtils.convertDpToPixel(56f, getContext()));
+        }
+        binding.rvTransactions.removeItemDecoration(spacerDecoration);
+        binding.rvTransactions.addItemDecoration(spacerDecoration);
     }
 
     @Override
