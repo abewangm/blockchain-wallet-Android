@@ -10,8 +10,6 @@ import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -23,8 +21,6 @@ import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
-import java.io.IOException;
-import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 
@@ -44,10 +40,6 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
-import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
-import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
-import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
-import org.spongycastle.crypto.InvalidCipherTextException;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
@@ -397,23 +389,17 @@ public class SendViewModel extends BaseViewModel {
                 .compose(RxUtil.applySchedulersToObservable())
                 .subscribe(
                         coins -> {
-                            if (coins != null) {
-                                BigInteger amountToSend = getSatoshisFromText(amountToSendText);
-                                BigInteger customFee = getSatoshisFromText(customFeeText);
+                            BigInteger amountToSend = getSatoshisFromText(amountToSendText);
+                            BigInteger customFee = getSatoshisFromText(customFeeText);
 
-                                // Future use. There might be some unconfirmed funds. Not displaying a warning currently (to line up with iOS and Web wallet)
-                                dataListener.setUnconfirmedFunds(coins.getNotice() != null ? coins.getNotice() : "");
-                                sendModel.absoluteSuggestedFee = getSuggestedAbsoluteFee(coins, amountToSend);
+                            // Future use. There might be some unconfirmed funds. Not displaying a warning currently (to line up with iOS and Web wallet)
+                            dataListener.setUnconfirmedFunds(coins.getNotice() != null ? coins.getNotice() : "");
+                            sendModel.absoluteSuggestedFee = getSuggestedAbsoluteFee(coins, amountToSend);
 
-                                if (customFeeText != null && !customFeeText.isEmpty() || customFee.compareTo(BigInteger.ZERO) == 1) {
-                                    customFeePayment(coins, amountToSend, customFee, spendAll);
-                                } else {
-                                    suggestedFeePayment(coins, amountToSend, spendAll);
-                                }
+                            if (customFeeText != null && !customFeeText.isEmpty() || customFee.compareTo(BigInteger.ZERO) == 1) {
+                                customFeePayment(coins, amountToSend, customFee, spendAll);
                             } else {
-                                // No unspent outputs
-                                updateMaxAvailable(0);
-                                sendModel.pendingTransaction.unspentOutputBundle = null;
+                                suggestedFeePayment(coins, amountToSend, spendAll);
                             }
 
                             if (listener != null) listener.onReady();
@@ -567,7 +553,6 @@ public class SendViewModel extends BaseViewModel {
      * Retrieves unspent api data in memory. If not in memory yet, it will be retrieved and added.
      */
     private Observable<UnspentOutputs> getUnspentApiResponse(String address) {
-
         if (payloadManager.getAddressBalance(address).longValue() > 0) {
             if (sendModel.unspentApiResponses.containsKey(address)) {
                 return Observable.just(sendModel.unspentApiResponses.get(address));
@@ -959,9 +944,9 @@ public class SendViewModel extends BaseViewModel {
                 account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);
                 changeAddress = payloadManager.getNextChangeAddress(account);
 
-                if(payloadManager.getPayload().isDoubleEncryption()) {
+                if (payloadManager.getPayload().isDoubleEncryption()) {
                     payloadManager.getPayload()
-                        .decryptHDWallet(0, sendModel.verifiedSecondPassword);
+                            .decryptHDWallet(0, sendModel.verifiedSecondPassword);
                 }
 
                 keys.addAll(payloadManager.getPayload().getHdWallets().get(0).getHDKeysForSigning(

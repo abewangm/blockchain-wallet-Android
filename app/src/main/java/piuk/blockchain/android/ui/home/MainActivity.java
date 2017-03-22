@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -409,7 +410,14 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             boolean enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
             if (!enabled) {
-                EnableGeo.displayGPSPrompt(this);
+                String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
+                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                        .setMessage(getActivity().getString(R.string.enable_geo))
+                        .setPositiveButton(android.R.string.ok, (d, id) ->
+                                getActivity().startActivity(new Intent(action)))
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .create()
+                        .show();
             } else {
                 Intent intent = new Intent(MainActivity.this, piuk.blockchain.android.ui.directory.MapActivity.class);
                 startActivityForResult(intent, MERCHANT_ACTIVITY);
@@ -762,13 +770,14 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
                 .replace(R.id.content_frame, fragment)
-                .commit();
+                .commitAllowingStateLoss();
     }
 
     private void addFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.content_frame, fragment).commit();
+        fragmentManager.beginTransaction()
+                .add(R.id.content_frame, fragment)
+                .commitAllowingStateLoss();
     }
 
     private void handleIncomingIntent() {

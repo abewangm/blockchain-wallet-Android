@@ -33,8 +33,8 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentBalanceBinding;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
-import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration;
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.home.SecurityPromptDialog;
@@ -89,7 +89,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         return fragment;
     }
 
-    protected BroadcastReceiver receiver = new BroadcastReceiver() {
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(ACTION_INTENT) && getActivity() != null) {
@@ -191,6 +191,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(receiver);
+
+        if (binding.swipeContainer != null) {
+            binding.swipeContainer.setRefreshing(false);
+            binding.swipeContainer.destroyDrawingCache();
+            binding.swipeContainer.clearAnimation();
+        }
     }
 
     /**
@@ -243,8 +249,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 R.drawable.vector_lock,
                 R.string.security_centre_backup_positive_button,
                 true,
-                showNeverAgain
-        );
+                showNeverAgain);
 
         securityPromptDialog.setPositiveButtonListener(v -> {
             securityPromptDialog.dismiss();

@@ -119,7 +119,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         }
     };
 
-    protected BroadcastReceiver receiver = new BroadcastReceiver() {
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {

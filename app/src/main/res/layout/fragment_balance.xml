@@ -3,63 +3,70 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- MAIN CONTENT -->
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_container"
+    <!-- This wrapper prevents the SwipeRefreshLayout from interrupting Fragment transactions -->
+    <!-- See: http://stackoverflow.com/a/30576574/3245482 -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <FrameLayout
-            android:id="@+id/balance_main_content"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/white">
+            android:layout_height="match_parent">
 
-            <include
-                android:id="@+id/no_transaction_message"
-                layout="@layout/include_no_transaction_message"
-                tools:visibility="gone" />
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rvTransactions"
+            <FrameLayout
+                android:id="@+id/balance_main_content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:divider="@drawable/list_divider"
-                android:paddingTop="@dimen/balance_bar_height" />
+                android:background="@color/white">
 
-            <!-- Balance -->
-            <RelativeLayout
-                android:id="@+id/balance_layout"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/balance_bar_height"
-                android:background="@color/primary_navy_medium"
-                android:elevation="5dp"
-                android:gravity="center_vertical">
+                <include
+                    android:id="@+id/no_transaction_message"
+                    layout="@layout/include_no_transaction_message"
+                    tools:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/balance"
-                    fontPath="fonts/Montserrat-Regular.ttf"
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rvTransactions"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:gravity="center_horizontal"
-                    android:includeFontPadding="false"
-                    android:textColor="@color/white"
-                    android:textSize="28sp"
-                    tools:text="10.0000002 BTC" />
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:divider="@drawable/list_divider"
+                    android:paddingTop="@dimen/balance_bar_height" />
 
-                <android.support.v7.widget.AppCompatSpinner
-                    android:id="@+id/accounts_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/balance"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="-8dp"
-                    android:dropDownVerticalOffset="8dp"
-                    android:spinnerMode="dropdown"
-                    android:theme="@style/SpinnerWhite"
-                    tools:text="All wallets" />
-            </RelativeLayout>
-        </FrameLayout>
-    </android.support.v4.widget.SwipeRefreshLayout>
+                <!-- Balance -->
+                <RelativeLayout
+                    android:id="@+id/balance_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/balance_bar_height"
+                    android:background="@color/primary_navy_medium"
+                    android:elevation="5dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/balance"
+                        fontPath="fonts/Montserrat-Regular.ttf"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:gravity="center_horizontal"
+                        android:includeFontPadding="false"
+                        android:textColor="@color/white"
+                        android:textSize="28sp"
+                        tools:text="10.0000002 BTC" />
+
+                    <android.support.v7.widget.AppCompatSpinner
+                        android:id="@+id/accounts_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/balance"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="-8dp"
+                        android:dropDownVerticalOffset="8dp"
+                        android:spinnerMode="dropdown"
+                        android:theme="@style/SpinnerWhite"
+                        tools:text="All wallets" />
+                </RelativeLayout>
+            </FrameLayout>
+        </android.support.v4.widget.SwipeRefreshLayout>
+    </FrameLayout>
 </layout>
