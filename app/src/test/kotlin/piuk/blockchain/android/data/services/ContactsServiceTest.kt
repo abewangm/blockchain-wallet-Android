@@ -289,6 +289,34 @@ class ContactsServiceTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
+    fun sendPaymentDeclinedResponse() {
+        // Arrange
+        val mdid = "MDID"
+        val fctxId = "FCTX_ID"
+        // Act
+        val testObserver = subject.sendPaymentDeclinedResponse(mdid, fctxId).test()
+        // Assert
+        verify(mockContacts).sendPaymentDeclined(mdid, fctxId)
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun sendPaymentCancelledResponse() {
+        // Arrange
+        val mdid = "MDID"
+        val fctxId = "FCTX_ID"
+        // Act
+        val testObserver = subject.sendPaymentCancelledResponse(mdid, fctxId).test()
+        // Assert
+        verify(mockContacts).sendPaymentCancelled(mdid, fctxId)
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun fetchXpub() {
         // Arrange
         val mdid = "MDID"

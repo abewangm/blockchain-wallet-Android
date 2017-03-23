@@ -97,6 +97,8 @@ public class BalanceViewModel extends BaseViewModel {
 
         void onRefreshBalanceAndTransactions();
 
+        void onRefreshContactList();
+
         void showBackupPromptDialog(boolean showNeverAgain);
 
         void show2FaDialog();
@@ -123,7 +125,10 @@ public class BalanceViewModel extends BaseViewModel {
 
         void showFctxRequiringAttention(int number);
 
-        void showDeleteFacilitatedTransactionDialog(String fctxId);
+        void showTransactionDeclineDialog(String fctxId);
+
+        void showTransactionCancelDialog(String fctxId);
+
     }
 
     public BalanceViewModel(DataListener dataListener) {
@@ -390,6 +395,7 @@ public class BalanceViewModel extends BaseViewModel {
                     contactsDataManager.fetchContacts()
                             .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
                             .toList()
+                            .doOnSuccess(contacts -> dataListener.onRefreshContactList())
                             .flatMapObservable(contacts -> contactsDataManager.refreshFacilitatedTransactions())
                             .toList()
                             .subscribe(
@@ -402,6 +408,7 @@ public class BalanceViewModel extends BaseViewModel {
         compositeDisposable.add(
                 contactsDataManager.getFacilitatedTransactions()
                         .toList()
+                        .doOnSuccess(contacts -> dataListener.onRefreshContactList())
                         .subscribe(
                                 this::handlePendingTransactions,
                                 Throwable::printStackTrace));
@@ -443,6 +450,7 @@ public class BalanceViewModel extends BaseViewModel {
                                             accountNames.add(account.getLabel());
                                         }
                                     }
+
                                     if (accountNames.size() == 1) {
                                         // Only one account, ask if you want to send an address
                                         dataListener.showSendAddressDialog(fctxId);
@@ -468,18 +476,60 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     void onPendingTransactionLongClicked(String fctxId) {
-        dataListener.showDeleteFacilitatedTransactionDialog(fctxId);
+        compositeDisposable.add(
+                contactsDataManager.getFacilitatedTransactions()
+                        .filter(contactTransactionModel -> contactTransactionModel.getFacilitatedTransaction().getId().equals(fctxId))
+                        .subscribe(contactTransactionModel -> {
+                            FacilitatedTransaction fctx = contactTransactionModel.getFacilitatedTransaction();
+
+                            if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+                                    dataListener.showTransactionDeclineDialog(fctxId);
+                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+                                    dataListener.showTransactionCancelDialog(fctxId);
+                                }
+
+                            } else if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+                                    if (fctx.getAddress() != null) {
+                                        dataListener.showTransactionCancelDialog(fctxId);
+                                    } else {
+                                        dataListener.showTransactionDeclineDialog(fctxId);
+                                    }
+                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
+                                    dataListener.showTransactionCancelDialog(fctxId);
+                                }
+                            }
+
+//                                dataListener.showTransactionDeclineDialog(fctxId);
+//                            } else {
+//                                dataListener.showTransactionCancelDialog(fctxId);
+//                            }
+                        }, throwable -> {
+                            // No-op
+                        }));
     }
 
-    void confirmDeleteFacilitatedTransaction(String fctxId) {
+    void confirmDeclineTransaction(String fctxId) {
         compositeDisposable.add(
                 contactsDataManager.getContactFromFctxId(fctxId)
-                        .flatMapCompletable(contact -> contactsDataManager.deleteFacilitatedTransaction(contact.getMdid(), fctxId))
+                        .flatMapCompletable(contact -> contactsDataManager.sendPaymentDeclinedResponse(contact.getMdid(), fctxId))
                         .doOnError(throwable -> contactsDataManager.fetchContacts())
                         .doAfterTerminate(this::refreshFacilitatedTransactions)
                         .subscribe(
-                                () -> dataListener.showToast(R.string.contacts_pending_transaction_delete_success, ToastCustom.TYPE_OK),
-                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_delete_failure, ToastCustom.TYPE_ERROR)));
+                                () -> dataListener.showToast(R.string.contacts_pending_transaction_decline_success, ToastCustom.TYPE_OK),
+                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_decline_failure, ToastCustom.TYPE_ERROR)));
+    }
+
+    void confirmCancelTransaction(String fctxId) {
+        compositeDisposable.add(
+                contactsDataManager.getContactFromFctxId(fctxId)
+                        .flatMapCompletable(contact -> contactsDataManager.sendPaymentCancelledResponse(contact.getMdid(), fctxId))
+                        .doOnError(throwable -> contactsDataManager.fetchContacts())
+                        .doAfterTerminate(this::refreshFacilitatedTransactions)
+                        .subscribe(
+                                () -> dataListener.showToast(R.string.contacts_pending_transaction_cancel_success, ToastCustom.TYPE_OK),
+                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_cancel_failure, ToastCustom.TYPE_ERROR)));
     }
 
     void onAccountChosen(int accountPosition, String fctxId) {

@@ -206,14 +206,12 @@ public class ContactsDataManager {
         return contactsService.fetchContacts()
                 .andThen(contactsService.getContactList())
                 .toList()
-                .doOnEvent((contacts, throwable) -> {
+                .doOnSuccess(contacts -> {
                     contactsTransactionMap.clear();
-                    if (contacts != null) {
-                        for (Contact contact : contacts) {
-                            for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
-                                if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
-                                    contactsTransactionMap.put(tx.getTxHash(), contact.getName());
-                                }
+                    for (Contact contact : contacts) {
+                        for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
+                            if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
+                                contactsTransactionMap.put(tx.getTxHash(), contact.getName());
                             }
                         }
                     }
@@ -379,7 +377,8 @@ public class ContactsDataManager {
     }
 
     /**
-     * Sends a response to a payment request.
+     * Sends a response to a payment request containing a {@link PaymentRequest}, which contains a
+     * bitcoin address belonging to the user.
      *
      * @param mdid            The recipient's MDID
      * @param paymentRequest  A {@link PaymentRequest} object
@@ -401,6 +400,30 @@ public class ContactsDataManager {
      */
     public Completable sendPaymentBroadcasted(String mdid, String txHash, String facilitatedTxId) {
         return callWithToken(() -> contactsService.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Sends a response to a payment request declining the offer of payment.
+     *
+     * @param mdid   The recipient's MDID
+     * @param fctxId The ID of the {@link FacilitatedTransaction} to be declined
+     * @return A {@link Completable} object
+     */
+    public Completable sendPaymentDeclinedResponse(String mdid, String fctxId) {
+        return callWithToken(() -> contactsService.sendPaymentDeclinedResponse(mdid, fctxId))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Informs the recipient of a payment request that the request has been cancelled.
+     *
+     * @param mdid   The recipient's MDID
+     * @param fctxId The ID of the {@link FacilitatedTransaction} to be cancelled
+     * @return A {@link Completable} object
+     */
+    public Completable sendPaymentCancelledResponse(String mdid, String fctxId) {
+        return callWithToken(() -> contactsService.sendPaymentCancelledResponse(mdid, fctxId))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 

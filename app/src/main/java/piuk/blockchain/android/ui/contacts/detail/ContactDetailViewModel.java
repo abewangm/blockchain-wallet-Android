@@ -233,6 +233,8 @@ public class ContactDetailViewModel extends BaseViewModel {
         dataListener.showDeleteFacilitatedTransactionDialog(fctxId);
     }
 
+    // TODO: 23/03/2017 Remove me
+    @Deprecated
     void confirmDeleteFacilitatedTransaction(String fctxId) {
         compositeDisposable.add(
                 contactsDataManager.getContactFromFctxId(fctxId)

@@ -633,15 +633,26 @@
     <string name="contacts_transaction_history">Transaction History</string>
     <string name="contacts_request_money_receive">Send request to contact</string>
     <string name="contacts_no_confirmed_contacts_found">No confirmed contacts found!</string>
-    <string name="contacts_delete_pending_transaction">Are you sure you want to delete this pending transaction? Please note this will not delete the request from your contact\'s device. No bitcoin will be lost.</string>
+    <string name="contacts_decline_pending_transaction">Are you sure you want to decline this pending transaction?</string>
+    <string name="contacts_cancel_pending_transaction">Are you sure you want to cancel this pending transaction?</string>
     <string name="contacts_pending_transaction_delete_success">Pending transaction successfully deleted</string>
     <string name="contacts_pending_transaction_delete_failure">Pending transaction deletion failed</string>
+    <string name="contacts_pending_transaction_decline_success">Pending transaction successfully declined</string>
+    <string name="contacts_pending_transaction_decline_failure">Pending transaction declination failed</string>
+    <string name="contacts_pending_transaction_cancel_success">Pending transaction successfully cancelled</string>
+    <string name="contacts_pending_transaction_cancel_failure">Pending transaction cancellation failed</string>
     <!-- CONTACTS PENDING TRANSACTION STRINGS -->
     <string name="contacts_sending_to_contact_ready_to_send">Sending %1$s to %2$s\nReady to send</string>
     <string name="contacts_sending_to_contact_waiting">Sending %1$s to %2$s\nWaiting for %2$s to accept</string>
+    <string name="contacts_payment_requested_ready_to_send">%1$s requested by %2$s\nReady to send</string>
     <string name="contacts_requesting_from_contact_waiting_for_payment">Requested %1$s from %2$s\nWaiting for payment</string>
+    <string name="contacts_receiving_from_contact_waiting_for_payment">Receiving %1$s from %2$s\nWaiting for payment</string>
     <string name="contacts_requesting_from_contact_waiting_to_accept">Requested %1$s from %2$s\nWaiting for %2$s to accept</string>
     <string name="contacts_receiving_from_contact_waiting_to_accept">Receiving %1$s from %2$s\nWaiting for you to accept</string>
+    <string name="contacts_sending_declined_by_contact">Payment declined by %1$s</string>
+    <string name="contacts_receiving_declined">Payment declined</string>
+    <string name="contacts_sending_cancelled_by_contact">Payment cancelled by %1$s</string>
+    <string name="contacts_receiving_cancelled">Payment cancelled</string>
     <string name="contacts_send_complete">Sent %1$s to %2$s</string>
     <string name="contacts_receive_complete">Received %1$s from %2$s</string>
     <string name="contacts_received">Received from %1$s</string>

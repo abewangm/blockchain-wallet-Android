@@ -13,7 +13,6 @@ import info.blockchain.wallet.metadata.data.Message
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.subjects.PublishSubject
 import org.bitcoinj.crypto.DeterministicKey
 import org.junit.Before
 import org.junit.Test
@@ -389,6 +388,38 @@ class ContactsDataManagerTest : RxTest() {
         val testObserver = subject.sendPaymentBroadcasted(mdid, txHash, fctxId).test()
         // Assert
         verify(mockContactsService).sendPaymentBroadcasted(mdid, txHash, fctxId)
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun sendPaymentDeclinedResponse() {
+        // Arrange
+        val mdid = "MDID"
+        val fctxId = "FCTX_ID"
+        whenever(mockContactsService.sendPaymentDeclinedResponse(mdid, fctxId))
+                .thenReturn(Completable.complete())
+        // Act
+        val testObserver = subject.sendPaymentDeclinedResponse(mdid, fctxId).test()
+        // Assert
+        verify(mockContactsService).sendPaymentDeclinedResponse(mdid, fctxId)
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun sendPaymentCancelledResponse() {
+        // Arrange
+        val mdid = "MDID"
+        val fctxId = "FCTX_ID"
+        whenever(mockContactsService.sendPaymentCancelledResponse(mdid, fctxId))
+                .thenReturn(Completable.complete())
+        // Act
+        val testObserver = subject.sendPaymentCancelledResponse(mdid, fctxId).test()
+        // Assert
+        verify(mockContactsService).sendPaymentCancelledResponse(mdid, fctxId)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
     }

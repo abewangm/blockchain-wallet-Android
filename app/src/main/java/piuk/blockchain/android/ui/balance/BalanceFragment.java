@@ -95,6 +95,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             if (intent.getAction().equals(ACTION_INTENT) && getActivity() != null) {
                 viewModel.updateAccountList();
                 viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, true);
+                viewModel.refreshFacilitatedTransactions();
                 // Check backup status on receiving funds
                 viewModel.onViewReady();
                 binding.rvTransactions.scrollToPosition(0);
@@ -458,7 +459,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         List<Object> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
         transactionAdapter.onTransactionsUpdated(newTransactions);
-        transactionAdapter.onContactsMapChanged(viewModel.getContactsTransactionMap());
         binding.balanceLayout.post(() -> setToolbarOffset(0));
 
         //Display help text to user if no transactionList on selected account/address
@@ -489,6 +489,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         }
         binding.rvTransactions.removeItemDecoration(spacerDecoration);
         binding.rvTransactions.addItemDecoration(spacerDecoration);
+    }
+
+    @Override
+    public void onRefreshContactList() {
+        transactionAdapter.onContactsMapChanged(viewModel.getContactsTransactionMap());
     }
 
     @Override
@@ -555,11 +560,24 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     }
 
     @Override
-    public void showDeleteFacilitatedTransactionDialog(String fctxId) {
+    public void showTransactionDeclineDialog(String fctxId) {
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
-                .setMessage(R.string.contacts_delete_pending_transaction)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.confirmDeleteFacilitatedTransaction(fctxId))
+                .setMessage(R.string.contacts_decline_pending_transaction)
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        viewModel.confirmDeclineTransaction(fctxId))
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showTransactionCancelDialog(String fctxId) {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_cancel_pending_transaction)
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        viewModel.confirmCancelTransaction(fctxId))
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();

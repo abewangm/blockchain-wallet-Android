@@ -120,13 +120,14 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
 
     @Override
     public void showDeleteFacilitatedTransactionDialog(String fctxId) {
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.contacts_delete_pending_transaction)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.confirmDeleteFacilitatedTransaction(fctxId))
-                .setNegativeButton(android.R.string.cancel, null)
-                .create()
-                .show();
+        // TODO: 23/03/2017 This needs replacing with new cancel/decline options
+//        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+//                .setTitle(R.string.app_name)
+//                .setMessage(R.string.contacts_delete_pending_transaction)
+//                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.confirmDeleteFacilitatedTransaction(fctxId))
+//                .setNegativeButton(android.R.string.cancel, null)
+//                .create()
+//                .show();
     }
 
     @Override

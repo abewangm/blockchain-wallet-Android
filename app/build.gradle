@@ -30,7 +30,7 @@ android {
         buildConfigField "String", "STAGING_WEBSOCKET", stagingWebsocket
         buildConfigField "String", "TESTNET_WEBSOCKET", testnetWebsocket
         // Flag for Contacts feature
-        buildConfigField "boolean", "CONTACTS_ENABLED", "false"
+        buildConfigField "boolean", "CONTACTS_ENABLED", "true"
     }
     buildTypes {
         release {

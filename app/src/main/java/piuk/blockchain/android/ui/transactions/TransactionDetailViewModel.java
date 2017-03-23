@@ -164,6 +164,11 @@ public class TransactionDetailViewModel extends BaseViewModel {
             inputMapString = mStringUtils.getString(R.string.transaction_detail_coinbase);
         }
 
+        if (mContactsDataManager.getContactsTransactionMap().containsKey(transactionSummary.getHash())
+                && transactionSummary.getDirection().equals(Direction.RECEIVED)) {
+            inputMapString = mContactsDataManager.getContactsTransactionMap().get(transactionSummary.getHash());
+        }
+
         // TODO: 14/03/2017 Change this to dropdown like outputs, as a list of addresses looks terrible
         mDataListener.setFromAddress(inputMapString);
 
@@ -177,7 +182,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     mMonetaryUtil.getDisplayAmountWithFormatting(item.getValue().longValue()),
                     getDisplayUnits());
 
-            if (mContactsDataManager.getContactsTransactionMap().containsKey(transactionSummary.getHash())) {
+            if (mContactsDataManager.getContactsTransactionMap().containsKey(transactionSummary.getHash())
+                    && transactionSummary.getDirection().equals(Direction.SENT)) {
                 String contactName = mContactsDataManager.getContactsTransactionMap().get(transactionSummary.getHash());
                 recipientModel.setAddress(contactName);
             }
