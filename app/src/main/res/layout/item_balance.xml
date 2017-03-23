@@ -10,13 +10,6 @@
         android:gravity="start">
 
         <View
-            android:id="@+id/top_seperator"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_gravity="top"
-            android:background="@color/primary_gray_light" />
-
-        <View
             android:id="@+id/tx_touch_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -116,5 +109,11 @@
                 tools:text="0.123456" />
 
         </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/primary_gray_light" />
     </RelativeLayout>
 </layout>

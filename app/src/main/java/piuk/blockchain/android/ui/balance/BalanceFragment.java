@@ -33,6 +33,7 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentBalanceBinding;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
+import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
@@ -63,6 +64,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public int balanceBarHeight;
     private BalanceHeaderAdapter accountsAdapter;
     private MaterialProgressDialog progressDialog;
+    private BottomSpacerDecoration spacerDecoration;
     @Thunk OnFragmentInteractionListener interactionListener;
     @Thunk boolean isBTC = true;
     // Accounts list
@@ -87,7 +89,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         return fragment;
     }
 
-    protected BroadcastReceiver receiver = new BroadcastReceiver() {
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(ACTION_INTENT) && getActivity() != null) {
@@ -142,6 +144,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void onResume() {
         super.onResume();
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+        }
+
         interactionListener.resetNavigationDrawer();
 
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
@@ -185,6 +191,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(receiver);
+
+        if (binding.swipeContainer != null) {
+            binding.swipeContainer.setRefreshing(false);
+            binding.swipeContainer.destroyDrawingCache();
+            binding.swipeContainer.clearAnimation();
+        }
     }
 
     /**
@@ -205,8 +217,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 R.drawable.vector_mobile,
                 R.string.enable,
                 true,
-                true
-        );
+                true);
 
         securityPromptDialog.setPositiveButtonListener(v -> {
             securityPromptDialog.dismiss();
@@ -238,8 +249,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 R.drawable.vector_lock,
                 R.string.security_centre_backup_positive_button,
                 true,
-                showNeverAgain
-        );
+                showNeverAgain);
 
         securityPromptDialog.setPositiveButtonListener(v -> {
             securityPromptDialog.dismiss();
@@ -473,6 +483,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
             launcherShortcutHelper.generateReceiveShortcuts();
         }
+
+        if (spacerDecoration == null) {
+            spacerDecoration = new BottomSpacerDecoration((int) ViewUtils.convertDpToPixel(56f, getContext()));
+        }
+        binding.rvTransactions.removeItemDecoration(spacerDecoration);
+        binding.rvTransactions.addItemDecoration(spacerDecoration);
     }
 
     @Override

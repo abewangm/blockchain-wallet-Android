@@ -238,11 +238,13 @@ public class AccountViewModelTest {
     @Test
     public void updateLegacyAddressSuccessful() throws Exception {
         // Arrange
-        when(accountDataManager.updateLegacyAddress(any(LegacyAddress.class)))
+        when(payloadDataManager.syncPayloadWithServer())
                 .thenReturn(Completable.complete());
         // Act
         subject.updateLegacyAddress(new LegacyAddress());
         // Assert
+        verify(payloadDataManager).syncPayloadWithServer();
+        verifyNoMoreInteractions(payloadDataManager);
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
@@ -255,11 +257,13 @@ public class AccountViewModelTest {
     @Test
     public void updateLegacyAddressFailed() throws Exception {
         // Arrange
-        when(accountDataManager.updateLegacyAddress(any(LegacyAddress.class)))
+        when(payloadDataManager.syncPayloadWithServer())
                 .thenReturn(Completable.error(new Throwable()));
         // Act
         subject.updateLegacyAddress(new LegacyAddress());
         // Assert
+        verify(payloadDataManager).syncPayloadWithServer();
+        verifyNoMoreInteractions(payloadDataManager);
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
@@ -416,14 +420,33 @@ public class AccountViewModelTest {
     }
 
     @Test
-    public void confirmImportWatchOnly() throws Exception {
+    public void confirmImportWatchOnlySuccess() throws Exception {
         // Arrange
-
+        String address = "17UovdU9ZvepPe75igTQwxqNME1HbnvMB7";
+        when(accountDataManager.updateLegacyAddress(any(LegacyAddress.class)))
+                .thenReturn(Completable.complete());
         // Act
-        subject.confirmImportWatchOnly("17UovdU9ZvepPe75igTQwxqNME1HbnvMB7");
+        subject.confirmImportWatchOnly(address);
         // Assert
         //noinspection WrongConstant
+        verify(accountDataManager).updateLegacyAddress(any(LegacyAddress.class));
+        verifyNoMoreInteractions(accountDataManager);
         verify(activity).showRenameImportedAddressDialog(any(LegacyAddress.class));
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void confirmImportWatchOnlyFailure() throws Exception {
+        // Arrange
+        String address = "17UovdU9ZvepPe75igTQwxqNME1HbnvMB7";
+        when(accountDataManager.updateLegacyAddress(any(LegacyAddress.class)))
+                .thenReturn(Completable.error(new Throwable()));
+        // Act
+        subject.confirmImportWatchOnly(address);
+        // Assert
+        verify(accountDataManager).updateLegacyAddress(any(LegacyAddress.class));
+        verifyNoMoreInteractions(accountDataManager);
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
         verifyNoMoreInteractions(activity);
     }
 

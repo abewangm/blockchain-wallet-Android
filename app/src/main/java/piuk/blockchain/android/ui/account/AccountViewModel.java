@@ -157,7 +157,6 @@ public class AccountViewModel extends BaseViewModel {
                             dataListener.broadcastIntent(intent);
                             dataListener.onUpdateAccountsList();
                         }, throwable -> {
-                            Log.e(TAG, "updateLegacyAddress: ", throwable);
                             dataListener.dismissProgressDialog();
                             dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
                         }));
@@ -231,9 +230,11 @@ public class AccountViewModel extends BaseViewModel {
         legacyAddress.setCreatedTime(System.currentTimeMillis());
         legacyAddress.setCreatedDeviceVersion(BuildConfig.VERSION_NAME);
 
-        compositeDisposable.add(accountDataManager.updateLegacyAddress(legacyAddress).subscribe(() -> {
-            dataListener.showRenameImportedAddressDialog(legacyAddress);
-        }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
+        compositeDisposable.add(
+                accountDataManager.updateLegacyAddress(legacyAddress)
+                        .subscribe(
+                                () -> dataListener.showRenameImportedAddressDialog(legacyAddress),
+                                throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
     private void importWatchOnlyAddress(String address) {
