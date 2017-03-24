@@ -155,7 +155,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(receiver, filter);
 
         viewModel.updateAccountList();
-        viewModel.getFacilitatedTransactions();
+        viewModel.refreshFacilitatedTransactions();
         viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, true);
 
         binding.rvTransactions.clearOnScrollListeners();
