@@ -426,22 +426,19 @@ public class BalanceViewModel extends BaseViewModel {
 
                                 // Payment request sent, waiting for address from recipient
                                 if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                                        && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)
-                                        || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR))) {
+                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
 
                                     dataListener.showWaitingForAddressDialog();
 
                                     // Payment request sent, waiting for payment
                                 } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                                        && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)
-                                        || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR))) {
+                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
 
                                     dataListener.showWaitingForPaymentDialog();
 
                                     // Received payment request, need to send address to sender
                                 } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                                        && (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)
-                                        || transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER))) {
+                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
 
                                     List<String> accountNames = new ArrayList<>();
                                     //noinspection Convert2streamapi
@@ -461,8 +458,7 @@ public class BalanceViewModel extends BaseViewModel {
 
                                     // Waiting for payment
                                 } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                                        && (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)
-                                        || transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER))) {
+                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
 
                                     dataListener.initiatePayment(
                                             transaction.toBitcoinURI(),
@@ -491,20 +487,11 @@ public class BalanceViewModel extends BaseViewModel {
 
                             } else if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
                                 if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-                                    if (fctx.getAddress() != null) {
-                                        dataListener.showTransactionCancelDialog(fctxId);
-                                    } else {
-                                        dataListener.showTransactionDeclineDialog(fctxId);
-                                    }
+                                    dataListener.showTransactionDeclineDialog(fctxId);
                                 } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
                                     dataListener.showTransactionCancelDialog(fctxId);
                                 }
                             }
-
-//                                dataListener.showTransactionDeclineDialog(fctxId);
-//                            } else {
-//                                dataListener.showTransactionCancelDialog(fctxId);
-//                            }
                         }, throwable -> {
                             // No-op
                         }));

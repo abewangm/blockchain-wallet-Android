@@ -68,7 +68,7 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
         });
 
         holder.itemView.setOnLongClickListener(view -> {
-            if (listener != null ) listener.onLongClick(transaction.getId());
+            if (listener != null) listener.onLongClick(transaction.getId());
             return true;
         });
 
@@ -81,81 +81,52 @@ class ContactTransactionAdapter extends RecyclerView.Adapter<ContactTransactionA
         String fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         Spannable amountSpannable = getDisplaySpannable(transaction.getIntendedAmount(), fiatBalance, fiatString);
 
-        if (transaction.getState() != null
-                && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-            if (transaction.getRole() != null) {
-                if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_sending_to_contact_waiting),
-                            amountSpannable,
-                            contactName);
-                    holder.title.setText(display);
-                    holder.indicator.setVisibility(View.VISIBLE);
+        if (transaction.getState().equals(FacilitatedTransaction.STATE_DECLINED)) {
+            holder.title.setText(R.string.contacts_receiving_declined);
 
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_receiving_from_contact_waiting_to_accept),
-                            amountSpannable,
-                            contactName);
-                    holder.title.setText(display);
-                    holder.indicator.setVisibility(View.VISIBLE);
+        } else if (transaction.getState().equals(FacilitatedTransaction.STATE_CANCELLED)) {
+            holder.title.setText(R.string.contacts_receiving_cancelled);
 
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_requesting_from_contact_waiting_to_accept),
-                            amountSpannable,
-                            contactName);
-                    holder.title.setText(display);
+        } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+            if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
 
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_sending_to_contact_waiting),
-                            amountSpannable,
-                            contactName);
-                    holder.title.setText(display);
-                }
+                Spanned display = SpanFormatter.format(
+                        stringUtils.getString(R.string.contacts_receiving_from_contact_waiting_to_accept),
+                        amountSpannable,
+                        contactName);
+                holder.title.setText(display);
+                holder.indicator.setVisibility(View.VISIBLE);
+
+            } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+
+                Spanned display = SpanFormatter.format(
+                        stringUtils.getString(R.string.contacts_sending_to_contact_waiting),
+                        amountSpannable,
+                        contactName);
+                holder.title.setText(display);
+            }
+        } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+            if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+
+                Spanned display = SpanFormatter.format(
+                        stringUtils.getString(R.string.contacts_payment_requested_ready_to_send),
+                        amountSpannable,
+                        contactName);
+                holder.title.setText(display);
+                holder.indicator.setVisibility(View.VISIBLE);
+
+            } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
+
+                Spanned display = SpanFormatter.format(
+                        stringUtils.getString(R.string.contacts_requesting_from_contact_waiting_for_payment),
+                        amountSpannable,
+                        contactName);
+                holder.title.setText(display);
             }
 
-        } else if (transaction.getState() != null
-                && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-            if (transaction.getRole() != null) {
-                if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_sending_to_contact_ready_to_send),
-                            amountSpannable,
-                            contactName);
-                    holder.title.setText(display);
-                    holder.indicator.setVisibility(View.VISIBLE);
-
-
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_requesting_from_contact_waiting_for_payment),
-                            amountSpannable,
-                            contactName);
-                    holder.title.setText(display);
-                    holder.indicator.setVisibility(View.VISIBLE);
-
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_requesting_from_contact_waiting_for_payment),
-                            amountSpannable,
-                            contactName);
-                    holder.title.setText(display);
-
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_sending_to_contact_ready_to_send),
-                            amountSpannable,
-                            contactName);
-                    holder.title.setText(display);
-                }
-            }
-        } else if (transaction.getState() != null
-                && transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
-            if (transaction.getRole() != null
-                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
-                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
+        } else if (transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
+            if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
+                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
 
                 Spanned display = SpanFormatter.format(
                         stringUtils.getString(R.string.contacts_send_complete),
