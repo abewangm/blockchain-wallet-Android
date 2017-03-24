@@ -172,60 +172,61 @@ public class ContactDetailViewModel extends BaseViewModel {
     }
 
     void onTransactionClicked(String fctxId) {
-        compositeDisposable.add(
-                contactsDataManager.getContactFromFctxId(fctxId)
-                        .subscribe(contact -> {
-                            FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
+        FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
 
-                            if (transaction == null) {
-                                dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
-                            } else {
+        if (transaction == null) {
+            dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
+        } else {
 
-                                // Payment request sent, waiting for address from recipient
-                                if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+            // Payment request sent, waiting for address from recipient
+            if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
 
-                                    dataListener.showWaitingForAddressDialog();
+                dataListener.showWaitingForAddressDialog();
 
-                                    // Payment request sent, waiting for payment
-                                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
+                // Payment request sent, waiting for payment
+            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
 
-                                    dataListener.showWaitingForPaymentDialog();
+                dataListener.showWaitingForPaymentDialog();
 
-                                    // Received payment request, need to send address to sender
-                                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+                // Received payment request, need to send address to sender
+            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
 
-                                    List<String> accountNames = new ArrayList<>();
-                                    //noinspection Convert2streamapi
-                                    for (Account account : payloadManager.getPayload().getHdWallets().get(0).getAccounts()) {
-                                        if (!account.isArchived()) {
-                                            accountNames.add(account.getLabel());
-                                        }
-                                    }
+                List<String> accountNames = new ArrayList<>();
+                //noinspection Convert2streamapi
+                for (Account account : payloadManager.getPayload().getHdWallets().get(0).getAccounts()) {
+                    if (!account.isArchived()) {
+                        accountNames.add(account.getLabel());
+                    }
+                }
 
-                                    if (accountNames.size() == 1) {
-                                        // Only one account, ask if you want to send an address
-                                        dataListener.showSendAddressDialog(fctxId);
-                                    } else {
-                                        // Show dialog allowing user to select which account they want to use
-                                        dataListener.showAccountChoiceDialog(accountNames, fctxId);
-                                    }
+                if (accountNames.size() == 1) {
+                    // Only one account, ask if you want to send an address
+                    dataListener.showSendAddressDialog(fctxId);
+                } else {
+                    // Show dialog allowing user to select which account they want to use
+                    dataListener.showAccountChoiceDialog(accountNames, fctxId);
+                }
 
-                                    // Waiting for payment
-                                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+                // Waiting for payment
+            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
 
-                                    dataListener.initiatePayment(
-                                            transaction.toBitcoinURI(),
-                                            contact.getId(),
-                                            contact.getMdid(),
-                                            transaction.getId(),
-                                            payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
-                                }
-                            }
-                        }, throwable -> dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)));
+                dataListener.initiatePayment(
+                        transaction.toBitcoinURI(),
+                        contact.getId(),
+                        contact.getMdid(),
+                        transaction.getId(),
+                        payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
+
+                // Payment sent, show detail regardless of role
+            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
+
+                dataListener.showTransactionDetail(transaction.getTxHash());
+            }
+        }
     }
 
     void onTransactionLongClicked(String fctxId) {
@@ -249,9 +250,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                                     dataListener.showTransactionCancelDialog(fctxId);
                                 }
                             }
-                        }, throwable -> {
-                            // No-op
-                        }));
+                        }, throwable -> showErrorAndQuitPage()));
     }
 
     void confirmDeclineTransaction(String fctxId) {
