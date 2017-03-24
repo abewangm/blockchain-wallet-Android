@@ -6,16 +6,9 @@
     <RelativeLayout
         android:id="@+id/tx_row"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/expandable_layout_base_height"
-        android:gravity="start">
-
-        <View
-            android:id="@+id/tx_touch_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"
-            android:foreground="?attr/selectableItemBackground"
-            android:theme="@style/PlainTheme" />
+        android:layout_height="wrap_content"
+        android:foreground="?attr/selectableItemBackground"
+        android:theme="@style/PlainTheme">
 
         <!-- DATE -->
         <TextView
@@ -35,6 +28,7 @@
             tools:text="April 2015" />
 
         <RelativeLayout
+            android:id="@+id/main_layout"
             android:layout_width="match_parent"
             android:layout_height="@dimen/expandable_layout_base_height"
             android:layout_gravity="top"
@@ -109,8 +103,23 @@
                 android:textColor="@color/white"
                 android:textSize="14sp"
                 tools:text="0.123456" />
-
         </RelativeLayout>
+
+        <TextView
+            android:id="@+id/note"
+            fontPath="fonts/Montserrat-Regular.ttf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/main_layout"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="-6dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:textAppearance="?attr/textAppearanceListItemSmall"
+            android:textColor="@color/primary_gray"
+            android:visibility="gone"
+            tools:text="Thanks for the burger"
+            tools:visibility="visible" />
 
         <View
             android:layout_width="match_parent"

@@ -52,6 +52,7 @@ public class ContactsDataManager {
     private PayloadManager payloadManager;
     private PendingTransactionListStore pendingTransactionListStore;
     @VisibleForTesting HashMap<String, String> contactsTransactionMap = new HashMap<>();
+    @VisibleForTesting HashMap<String, String> notesTransactionMap = new HashMap<>();
 
     public ContactsDataManager(ContactsService contactsService,
                                PayloadManager payloadManager,
@@ -212,6 +213,9 @@ public class ContactsDataManager {
                         for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
                             if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
                                 contactsTransactionMap.put(tx.getTxHash(), contact.getName());
+                                if (tx.getNote() != null && !tx.getNote().isEmpty()) {
+                                    notesTransactionMap.put(tx.getTxHash(), tx.getNote());
+                                }
                             }
                         }
                     }
@@ -498,7 +502,9 @@ public class ContactsDataManager {
 
     /**
      * Finds and returns a stream of {@link ContactTransactionModel} objects and stores them locally
-     * where the transaction is yet to be completed, ie the hash is empty.
+     * where the transaction is yet to be completed, ie the hash is empty. Intended to be used to
+     * display a list of transactions with another user in the balance page, and therefore this list
+     * does not contain completed, cancelled or declined transactions.
      *
      * @return An {@link Observable} stream of {@link ContactTransactionModel} objects
      */
@@ -513,7 +519,11 @@ public class ContactsDataManager {
                     for (Contact contact : contacts) {
                         for (FacilitatedTransaction transaction : contact.getFacilitatedTransactions().values()) {
                             // If hash is null, transaction has not been completed
-                            if (transaction.getTxHash() == null || transaction.getTxHash().isEmpty()) {
+                            if (((transaction.getTxHash() == null) || transaction.getTxHash().isEmpty())
+                                    // Filter out cancelled and declined transactions
+                                    && !transaction.getState().equals(FacilitatedTransaction.STATE_CANCELLED)
+                                    && !transaction.getState().equals(FacilitatedTransaction.STATE_DECLINED)) {
+
                                 ContactTransactionModel model = new ContactTransactionModel(contact.getName(), transaction);
                                 pendingTransactionListStore.insertTransaction(model);
                                 transactions.add(model);
@@ -578,5 +588,15 @@ public class ContactsDataManager {
      */
     public HashMap<String, String> getContactsTransactionMap() {
         return contactsTransactionMap;
+    }
+
+    /**
+     * Returns a Map of {@link FacilitatedTransaction} notes keyed to Transaction hashes.
+     *
+     * @return A {@link HashMap} where the key is a {@link TransactionSummary#getHash()} ()}, and
+     * the value is a {@link FacilitatedTransaction#getNote()}
+     */
+    public HashMap<String, String> getNotesTransactionMap() {
+        return notesTransactionMap;
     }
 }

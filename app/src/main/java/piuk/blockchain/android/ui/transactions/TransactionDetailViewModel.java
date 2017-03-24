@@ -85,6 +85,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
         void setIsDoubleSpend(boolean isDoubleSpend);
 
+        void setTransactionNote(String note);
+
         void setTransactionColour(@ColorRes int colour);
 
         void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
@@ -192,6 +194,11 @@ public class TransactionDetailViewModel extends BaseViewModel {
         }
 
         mDataListener.setToAddresses(recipients);
+
+        if (mContactsDataManager.getNotesTransactionMap().containsKey(transactionSummary.getHash())) {
+            String note = mContactsDataManager.getNotesTransactionMap().get(transactionSummary.getHash());
+            mDataListener.setTransactionNote(note);
+        }
 
         compositeDisposable.add(
                 getTransactionValueString(mFiatType, transactionSummary)

@@ -349,6 +349,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         transactionAdapter = new BalanceListAdapter(
                 viewModel.getContactsTransactionMap(),
+                viewModel.getNotesTransactionMap(),
                 viewModel.getPrefsUtil(),
                 viewModel.getMonetaryUtil(),
                 viewModel.stringUtils,
@@ -493,7 +494,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void onRefreshContactList() {
-        transactionAdapter.onContactsMapChanged(viewModel.getContactsTransactionMap());
+        transactionAdapter.onContactsMapChanged(
+                viewModel.getContactsTransactionMap(),
+                viewModel.getNotesTransactionMap());
     }
 
     @Override

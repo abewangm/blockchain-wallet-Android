@@ -494,6 +494,7 @@
     <string name="transaction_detail_double_spend">May be at risk for a double spend.</string>
     <string name="transaction_detail_verify">Verify on Blockchain.info</string>
     <string name="transaction_detail_share_chooser">Share transaction details</string>
+    <string name="transaction_detail_contact_note">Note</string>
 
     <!-- SECURITY CENTRE -->
     <string name="security_centre_email_title">Check your email</string>

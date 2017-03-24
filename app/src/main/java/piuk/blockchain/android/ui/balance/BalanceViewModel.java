@@ -321,6 +321,10 @@ public class BalanceViewModel extends BaseViewModel {
         return contactsDataManager.getContactsTransactionMap();
     }
 
+    HashMap<String, String> getNotesTransactionMap() {
+        return contactsDataManager.getNotesTransactionMap();
+    }
+
     void onTransactionListRefreshed() {
         compositeDisposable.add(
                 payloadDataManager.updateAllTransactions()
@@ -638,17 +642,11 @@ public class BalanceViewModel extends BaseViewModel {
         int value = 0;
         for (ContactTransactionModel transactionModel : facilitatedTransactions) {
             FacilitatedTransaction transaction = transactionModel.getFacilitatedTransaction();
-            if (transaction.getState() != null
-                    && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                    && transaction.getRole() != null
-                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
-                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
+            if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
                 value++;
-            } else if (transaction.getState() != null
-                    && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                    && transaction.getRole() != null
-                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
-                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
+            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
                 value++;
             }
         }

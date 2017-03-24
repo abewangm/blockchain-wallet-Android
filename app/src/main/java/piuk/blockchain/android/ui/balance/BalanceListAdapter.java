@@ -46,8 +46,10 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     private boolean isBtc;
     private BalanceListClickListener listClickListener;
     private HashMap<String, String> contactsTransactionMap;
+    private HashMap<String, String> notesTransactionMap;
 
     BalanceListAdapter(HashMap<String, String> contactsTransactionMap,
+                       HashMap<String, String> notesTransactionMap,
                        PrefsUtil prefsUtil,
                        MonetaryUtil monetaryUtil,
                        StringUtils stringUtils,
@@ -57,6 +59,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
 
         objects = new ArrayList<>();
         this.contactsTransactionMap = contactsTransactionMap;
+        this.notesTransactionMap = notesTransactionMap;
         this.prefsUtil = prefsUtil;
         this.monetaryUtil = monetaryUtil;
         this.stringUtils = stringUtils;
@@ -107,6 +110,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     }
 
     private void bindFctxView(RecyclerView.ViewHolder holder, int position) {
+
         final FctxViewHolder fctxViewHolder = (FctxViewHolder) holder;
         final ContactTransactionModel model = (ContactTransactionModel) objects.get(position);
         final FacilitatedTransaction transaction = model.getFacilitatedTransaction();
@@ -216,6 +220,13 @@ class BalanceListAdapter extends RecyclerView.Adapter {
                 break;
         }
 
+        if (notesTransactionMap.containsKey(tx.getHash())) {
+            txViewHolder.note.setText(notesTransactionMap.get(tx.getHash()));
+            txViewHolder.note.setVisibility(View.VISIBLE);
+        } else {
+            txViewHolder.note.setVisibility(View.GONE);
+        }
+
         txViewHolder.result.setText(getDisplaySpannable(tx.getTotal().longValue(), fiatBalance, fiatString));
 
         if (tx.getDirection() == Direction.TRANSFERRED) {
@@ -248,7 +259,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
             if (listClickListener != null) listClickListener.onValueClicked(isBtc);
         });
 
-        txViewHolder.touchView.setOnClickListener(v -> {
+        txViewHolder.itemView.setOnClickListener(v -> {
             if (listClickListener != null) {
                 listClickListener.onTransactionClicked(getRealTxPosition(txViewHolder.getAdapterPosition()));
             }
@@ -334,8 +345,10 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         }
     }
 
-    void onContactsMapChanged(HashMap<String, String> contactsTransactionMap) {
+    void onContactsMapChanged(HashMap<String, String> contactsTransactionMap,
+                              HashMap<String, String> notesTransactionMap) {
         this.contactsTransactionMap = contactsTransactionMap;
+        this.notesTransactionMap = notesTransactionMap;
         notifyDataSetChanged();
     }
 
@@ -360,20 +373,20 @@ class BalanceListAdapter extends RecyclerView.Adapter {
 
     private static class TxViewHolder extends RecyclerView.ViewHolder {
 
-        View touchView;
         TextView result;
         TextView timeSince;
         TextView direction;
         TextView watchOnly;
+        TextView note;
         ImageView doubleSpend;
 
         TxViewHolder(View view) {
             super(view);
-            touchView = view.findViewById(R.id.tx_touch_view);
             result = (TextView) view.findViewById(R.id.result);
             timeSince = (TextView) view.findViewById(R.id.ts);
             direction = (TextView) view.findViewById(R.id.direction);
             watchOnly = (TextView) view.findViewById(R.id.watch_only);
+            note = (TextView) view.findViewById(R.id.note);
             doubleSpend = (ImageView) view.findViewById(R.id.double_spend_warning);
         }
     }

@@ -215,6 +215,9 @@ public class TransactionDetailViewModelTest extends RxTest {
         when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
         when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
+        HashMap<String, String> notesMap = new HashMap<>();
+        notesMap.put("txMoved_hash", "transaction_note");
+        when(contactsDataManager.getNotesTransactionMap()).thenReturn(notesMap);
         // Act
         subject.onViewReady();
         // Assert
@@ -229,6 +232,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         verify(activity).setFee(anyString());
         verify(activity).setTransactionValueBtc(anyString());
         verify(activity).setTransactionValueFiat(anyString());
+        verify(activity).setTransactionNote(anyString());
         verify(activity).onDataLoaded();
         verify(activity).setIsDoubleSpend(anyBoolean());
         verifyNoMoreInteractions(activity);
