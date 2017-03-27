@@ -21,6 +21,7 @@ import piuk.blockchain.android.data.contacts.ContactTransactionModel
 import piuk.blockchain.android.data.services.ContactsService
 import piuk.blockchain.android.data.stores.PendingTransactionListStore
 import piuk.blockchain.android.equals
+import java.util.*
 
 class ContactsDataManagerTest : RxTest() {
 
@@ -617,6 +618,31 @@ class ContactsDataManagerTest : RxTest() {
         testObserver.assertComplete()
         testObserver.assertNoErrors()
         testObserver.values()[0] equals contact0
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun getContactFromFctxIdNotFound() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val facilitatedTransaction0 = FacilitatedTransaction()
+        val facilitatedTransaction1 = FacilitatedTransaction()
+        val facilitatedTransaction2 = FacilitatedTransaction()
+        val contact0 = Contact()
+        contact0.addFacilitatedTransaction(facilitatedTransaction0)
+        contact0.addFacilitatedTransaction(facilitatedTransaction1)
+        contact0.addFacilitatedTransaction(facilitatedTransaction2)
+        val contact1 = Contact()
+        val contact2 = Contact()
+        whenever(mockContactsService.contactList)
+                .thenReturn(Observable.fromIterable(listOf(contact0, contact1, contact2)))
+        // Act
+        val testObserver = subject.getContactFromFctxId(fctxId).test()
+        // Assert
+        verify(mockContactsService).contactList
+        testObserver.assertError(NoSuchElementException::class.java)
+        testObserver.assertNotComplete()
+        testObserver.assertNoValues()
     }
 
     @Test

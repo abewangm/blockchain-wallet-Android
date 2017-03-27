@@ -408,6 +408,9 @@ public class BalanceViewModel extends BaseViewModel {
         }
     }
 
+    /**
+     * Cached transactions. To be called sometime in the future
+     */
     void getFacilitatedTransactions() {
         compositeDisposable.add(
                 contactsDataManager.getFacilitatedTransactions()

@@ -158,11 +158,11 @@ public class PayloadDataManager {
     /**
      * Returns the next Receive address for a given account index.
      *
-     * @param defaultIndex The index of the account for which you want an address to be generated
+     * @param accountIndex The index of the account for which you want an address to be generated
      * @return An {@link Observable} wrapping the receive address
      */
-    public Observable<String> getNextReceiveAddress(int defaultIndex) {
-        Account account = getWallet().getHdWallets().get(0).getAccounts().get(defaultIndex);
+    public Observable<String> getNextReceiveAddress(int accountIndex) {
+        Account account = getWallet().getHdWallets().get(0).getAccounts().get(accountIndex);
         return getNextReceiveAddress(account);
     }
 

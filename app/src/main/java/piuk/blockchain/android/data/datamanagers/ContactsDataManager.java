@@ -17,9 +17,11 @@ import org.bitcoinj.crypto.DeterministicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.functions.Function;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -206,20 +208,17 @@ public class ContactsDataManager {
     public Completable fetchContacts() {
         return contactsService.fetchContacts()
                 .andThen(contactsService.getContactList())
-                .toList()
-                .doOnSuccess(contacts -> {
-                    contactsTransactionMap.clear();
-                    for (Contact contact : contacts) {
-                        for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
-                            if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
-                                contactsTransactionMap.put(tx.getTxHash(), contact.getName());
-                                if (tx.getNote() != null && !tx.getNote().isEmpty()) {
-                                    notesTransactionMap.put(tx.getTxHash(), tx.getNote());
-                                }
+                .doOnNext(contact -> {
+                    for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
+                        if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
+                            contactsTransactionMap.put(tx.getTxHash(), contact.getName());
+                            if (tx.getNote() != null && !tx.getNote().isEmpty()) {
+                                notesTransactionMap.put(tx.getTxHash(), tx.getNote());
                             }
                         }
                     }
                 })
+                .toList()
                 .toCompletable()
                 .compose(RxUtil.applySchedulersToCompletable());
     }
@@ -512,25 +511,21 @@ public class ContactsDataManager {
     public Observable<ContactTransactionModel> refreshFacilitatedTransactions() {
         pendingTransactionListStore.clearList();
         return getContactList()
-                .toList()
-                .toObservable()
-                .flatMap(contacts -> {
+                .flatMapIterable(contact -> {
                     ArrayList<ContactTransactionModel> transactions = new ArrayList<>();
-                    for (Contact contact : contacts) {
-                        for (FacilitatedTransaction transaction : contact.getFacilitatedTransactions().values()) {
-                            // If hash is null, transaction has not been completed
-                            if (((transaction.getTxHash() == null) || transaction.getTxHash().isEmpty())
-                                    // Filter out cancelled and declined transactions
-                                    && !transaction.getState().equals(FacilitatedTransaction.STATE_CANCELLED)
-                                    && !transaction.getState().equals(FacilitatedTransaction.STATE_DECLINED)) {
+                    for (FacilitatedTransaction transaction : contact.getFacilitatedTransactions().values()) {
+                        // If hash is null, transaction has not been completed
+                        if (((transaction.getTxHash() == null) || transaction.getTxHash().isEmpty())
+                                // Filter out cancelled and declined transactions
+                                && !transaction.getState().equals(FacilitatedTransaction.STATE_CANCELLED)
+                                && !transaction.getState().equals(FacilitatedTransaction.STATE_DECLINED)) {
 
-                                ContactTransactionModel model = new ContactTransactionModel(contact.getName(), transaction);
-                                pendingTransactionListStore.insertTransaction(model);
-                                transactions.add(model);
-                            }
+                            ContactTransactionModel model = new ContactTransactionModel(contact.getName(), transaction);
+                            pendingTransactionListStore.insertTransaction(model);
+                            transactions.add(model);
                         }
                     }
-                    return Observable.fromIterable(transactions);
+                    return transactions;
                 });
     }
 
@@ -549,22 +544,13 @@ public class ContactsDataManager {
      * the Observable will return an empty object, but very unlikely.
      *
      * @param fctxId The {@link FacilitatedTransaction} ID.
-     * @return An {@link Observable} containing a {@link Contact} object OR potentially an empty
-     * Observable
+     * @return A {@link Single} emitting a {@link Contact} object or will emit a {@link
+     * NoSuchElementException} if the Contact isn't found.
      */
-    public Observable<Contact> getContactFromFctxId(String fctxId) {
+    public Single<Contact> getContactFromFctxId(String fctxId) {
         return getContactList()
-                .toList()
-                .toObservable()
-                .flatMap(contacts -> {
-                    for (Contact contact : contacts) {
-                        if (contact.getFacilitatedTransactions().get(fctxId) != null) {
-                            return Observable.just(contact);
-                        }
-                    }
-
-                    return Observable.empty();
-                });
+                .filter(contact -> contact.getFacilitatedTransactions().get(fctxId) != null)
+                .firstOrError();
     }
 
     /**

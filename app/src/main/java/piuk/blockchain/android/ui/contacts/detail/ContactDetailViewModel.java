@@ -8,7 +8,6 @@ import android.util.Log;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 
 import java.util.ArrayList;
@@ -23,6 +22,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.FctxDateComparator;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -43,7 +43,7 @@ public class ContactDetailViewModel extends BaseViewModel {
     private Observable<NotificationPayload> notificationObservable;
     @VisibleForTesting Contact contact;
     @Inject ContactsDataManager contactsDataManager;
-    @Inject PayloadManager payloadManager;
+    @Inject PayloadDataManager payloadDataManager;
     @Inject PrefsUtil prefsUtil;
     @Inject RxBus rxBus;
 
@@ -196,7 +196,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
                 List<String> accountNames = new ArrayList<>();
                 //noinspection Convert2streamapi
-                for (Account account : payloadManager.getPayload().getHdWallets().get(0).getAccounts()) {
+                for (Account account : payloadDataManager.getWallet().getHdWallets().get(0).getAccounts()) {
                     if (!account.isArchived()) {
                         accountNames.add(account.getLabel());
                     }
@@ -219,7 +219,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                         contact.getId(),
                         contact.getMdid(),
                         transaction.getId(),
-                        payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
+                        payloadDataManager.getDefaultAccountIndex());
 
                 // Payment sent, show detail regardless of role
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
@@ -284,7 +284,7 @@ public class ContactDetailViewModel extends BaseViewModel {
         paymentRequest.setId(fctxId);
 
         compositeDisposable.add(
-                getNextReceiveAddress(getCorrectedAccountIndex(accountPosition))
+                payloadDataManager.getNextReceiveAddress(getCorrectedAccountIndex(accountPosition))
                         .doOnNext(paymentRequest::setAddress)
                         .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
@@ -312,11 +312,6 @@ public class ContactDetailViewModel extends BaseViewModel {
                                 throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
     }
 
-    private Observable<String> getNextReceiveAddress(int defaultIndex) {
-        Account account = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultIndex);
-        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account));
-    }
-
     private void sortAndUpdateTransactions(Collection<FacilitatedTransaction> values) {
         ArrayList<FacilitatedTransaction> facilitatedTransactions = new ArrayList<>(values);
         Collections.sort(facilitatedTransactions, new FctxDateComparator());
@@ -333,7 +328,7 @@ public class ContactDetailViewModel extends BaseViewModel {
     private int getCorrectedAccountIndex(int accountIndex) {
         // Filter accounts by active
         List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
+        List<Account> accounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts();
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
             if (!account.isArchived()) {
@@ -342,7 +337,7 @@ public class ContactDetailViewModel extends BaseViewModel {
         }
 
         // Find corrected position
-        return payloadManager.getPayload().getHdWallets().get(0).getAccounts().indexOf(activeAccounts.get(accountIndex));
+        return payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
     @Override
