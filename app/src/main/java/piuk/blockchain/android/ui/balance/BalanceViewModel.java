@@ -111,7 +111,7 @@ public class BalanceViewModel extends BaseViewModel {
 
         void showAccountChoiceDialog(List<String> accounts, String fctxId);
 
-        void initiatePayment(String uri, String recipientId, String mdid, String fctxId, int defaultIndex);
+        void initiatePayment(String uri, String recipientId, String mdid, String fctxId);
 
         void showWaitingForPaymentDialog();
 
@@ -471,8 +471,7 @@ public class BalanceViewModel extends BaseViewModel {
                                             transaction.toBitcoinURI(),
                                             contact.getId(),
                                             contact.getMdid(),
-                                            transaction.getId(),
-                                            payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
+                                            transaction.getId());
                                 }
                             }
                         }, throwable -> dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)));

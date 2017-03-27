@@ -40,7 +40,6 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
-import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
@@ -53,7 +52,6 @@ public class MainViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     private OSUtil osUtil;
-    private MonetaryUtil monetaryUtil;
     private Observable<NotificationPayload> notificationObservable;
     @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
@@ -115,8 +113,6 @@ public class MainViewModel extends BaseViewModel {
 
         void showBroadcastSuccessDialog();
 
-        void showPaymentMismatchDialog(@StringRes int message);
-
         void updateCurrentPrice(String price);
     }
 
@@ -124,7 +120,6 @@ public class MainViewModel extends BaseViewModel {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
         osUtil = new OSUtil(applicationContext);
-        monetaryUtil = new MonetaryUtil(getCurrentBitcoinFormat());
     }
 
     @Override
@@ -140,8 +135,6 @@ public class MainViewModel extends BaseViewModel {
     }
 
     void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
-        dataListener.showProgressDialog(R.string.contacts_broadcasting_payment);
-
         compositeDisposable.add(
                 // Get contacts
                 contactsDataManager.getContactList()
@@ -151,25 +144,15 @@ public class MainViewModel extends BaseViewModel {
                         .flatMap(contact -> Observable.just(contact.getFacilitatedTransactions().get(facilitatedTxId)))
                         // Check the payment value was appropriate
                         .flatMapCompletable(transaction -> {
-                            // Too much sent
-                            if (transactionValue > transaction.getIntendedAmount()) {
-                                dataListener.showPaymentMismatchDialog(R.string.contacts_too_much_sent);
-                                return Completable.complete();
-                                // Too little sent
-                            } else if (transactionValue < transaction.getIntendedAmount()) {
-                                dataListener.showPaymentMismatchDialog(R.string.contacts_too_little_sent);
-                                return Completable.complete();
-                                // Correct amount sent
-                            } else {
-                                // Broadcast payment to shared metadata service
-                                return contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
-                                        // Show successfully broadcast
-                                        .doOnComplete(() -> dataListener.showBroadcastSuccessDialog())
-                                        // Show retry dialog if broadcast failed
-                                        .doOnError(throwable -> dataListener.showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
-                            }
+                            // Broadcast payment to shared metadata service
+                            return contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
+                                    // Show successfully broadcast
+                                    .doOnComplete(() -> dataListener.showBroadcastSuccessDialog())
+                                    // Show retry dialog if broadcast failed
+                                    .doOnError(throwable -> dataListener.showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
                         })
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
+                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.contacts_broadcasting_payment))
                         .subscribe(
                                 () -> {
                                     // No-op
@@ -412,10 +395,6 @@ public class MainViewModel extends BaseViewModel {
         return stringUtils.getFormattedString(
                 R.string.current_price_btc,
                 fiatSymbol + format.format(lastPrice));
-    }
-
-    private int getCurrentBitcoinFormat() {
-        return prefs.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
     }
 
     private void startWebSocketService() {

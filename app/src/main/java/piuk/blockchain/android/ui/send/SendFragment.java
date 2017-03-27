@@ -93,7 +93,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     public static final String ARGUMENT_CONTACT_MDID = "contact_mdid";
     public static final String ARGUMENT_FCTX_ID = "fctx_id";
     public static final String ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE = "address_input_route";
-    public static final String ARGUMENT_LAUNCH_CONFIRMATION = "launch_confirmation";
 
     private static final int SCAN_URI = 2007;
     private static final int SCAN_PRIVX = 2008;
@@ -130,26 +129,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     public SendFragment() {
         // Required empty public constructor
-    }
-
-    public static SendFragment newInstance(@NonNull String scanData,
-                                           @NonNull String contactId,
-                                           @NonNull String mdid,
-                                           @NonNull String fctxId,
-                                           @Nullable String scanRoute,
-                                           int selectedAccountPosition) {
-        SendFragment fragment = new SendFragment();
-        Bundle args = new Bundle();
-        args.putString(ARGUMENT_SCAN_DATA, scanData);
-        args.putString(ARGUMENT_CONTACT_ID, contactId);
-        args.putString(ARGUMENT_CONTACT_MDID, mdid);
-        args.putString(ARGUMENT_FCTX_ID, fctxId);
-        args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute);
-        args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
-        // This constructor triggers launch of the confirmation dialog immediately using this flag
-        args.putBoolean(ARGUMENT_LAUNCH_CONFIRMATION, true);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     public static SendFragment newInstance(@Nullable String scanData,
@@ -219,7 +198,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                         ViewUtils.convertDpToPixel(5F, getContext()));
             }
         } else {
-            finishPage(false);
+            finishPage();
         }
     }
 
@@ -629,19 +608,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public void lockDestination() {
-        // Disable changing destination and disable all input
-        binding.imageviewDropdownReceive.setVisibility(View.GONE);
-        binding.destination.setOnClickListener(null);
-        binding.destination.setKeyListener(null);
-
-        if (getArguments() != null && getArguments().containsKey(ARGUMENT_LAUNCH_CONFIRMATION)) {
-            // Skip straight to payment confirmation
-            requestSendPayment(false);
-        }
-    }
-
-    @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
@@ -662,7 +628,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue) {
+    public void onShowTransactionSuccess(String hash, long transactionValue) {
         playAudio();
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
@@ -682,22 +648,15 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         // happen if the user chooses to rate the app - they'll return to the main page.
         if (appRate.shouldShowDialog()) {
             AlertDialog ratingDialog = appRate.getRateDialog();
-            ratingDialog.setOnDismissListener(d -> finishAndNotifySuccess(mdid, hash, fctxId, transactionValue));
+            ratingDialog.setOnDismissListener(d -> finishPage());
             transactionSuccessDialog.show();
             transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
         } else {
             transactionSuccessDialog.show();
-            transactionSuccessDialog.setOnDismissListener(dialogInterface -> finishAndNotifySuccess(mdid, hash, fctxId, transactionValue));
+            transactionSuccessDialog.setOnDismissListener(dialogInterface -> finishPage());
         }
 
         dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
-    }
-
-    private void finishAndNotifySuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue) {
-        if (listener != null) {
-            listener.onSendPaymentSuccessful(mdid, hash, fctxId, transactionValue);
-        }
-        finishPage(true);
     }
 
     @Override
@@ -1084,8 +1043,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public void finishPage(boolean paymentToContactMade) {
-        if (listener != null) listener.onSendFragmentClose(paymentToContactMade);
+    public void finishPage() {
+        if (listener != null) listener.onSendFragmentClose();
     }
 
     @Override
@@ -1112,11 +1071,9 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     public interface OnSendFragmentInteractionListener {
 
-        void onSendFragmentClose(boolean paymentToContactMade);
+        void onSendFragmentClose();
 
         void onSendFragmentStart();
-
-        void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue);
 
         void onTransactionNotesRequested(String contactId, @Nullable Integer accountPosition, PaymentRequestType paymentRequestType, long satoshis);
     }
