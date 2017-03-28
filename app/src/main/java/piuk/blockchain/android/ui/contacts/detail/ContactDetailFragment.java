@@ -149,6 +149,9 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
             setUpAdapter();
         }
 
+        transactionAdapter.onContactsMapChanged(
+                viewModel.getContactsTransactionMap(),
+                viewModel.getNotesTransactionMap());
         transactionAdapter.onTransactionsUpdated(transactions);
         if (!transactions.isEmpty()) {
             binding.recyclerView.setVisibility(View.VISIBLE);
@@ -304,9 +307,6 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
         ((ContactDetailActivity) getActivity()).setupToolbar(
                 ((ContactDetailActivity) getActivity()).getToolbar(), name);
         binding.textviewTransactionListHeader.setText(getString(R.string.contacts_detail_transactions, name));
-        if (transactionAdapter != null) transactionAdapter.onContactsMapChanged(
-                viewModel.getContactsTransactionMap(),
-                viewModel.getNotesTransactionMap());
     }
 
     @Override

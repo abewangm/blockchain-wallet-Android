@@ -6,6 +6,7 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
+import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.HDWallet
@@ -31,7 +32,12 @@ import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.StringUtils
+import java.util.*
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
+import kotlin.test.assertTrue
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
@@ -118,7 +124,7 @@ class ContactDetailViewModelTest {
         // Assert
         verify(mockActivity).pageBundle
         verify(mockActivity).updateContactName(contactName)
-        verify(mockActivity, times(2)).onTransactionsUpdated(any(), eq(contactName))
+        verify(mockActivity, times(2)).onTransactionsUpdated(any())
         verifyNoMoreInteractions(mockActivity)
         verify(mockContactsManager).contactList
         verify(mockContactsManager).fetchContacts()
@@ -204,6 +210,53 @@ class ContactDetailViewModelTest {
         val result = subject.getPrefsUtil()
         // Assert
         result equals mockPrefsUtil
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun getContactsTransactionMap() {
+        // Arrange
+        whenever(mockContactsManager.contactsTransactionMap).thenReturn(HashMap())
+        // Act
+        val result = subject.contactsTransactionMap
+        // Assert
+        verify(mockContactsManager).contactsTransactionMap
+        assertTrue { result is HashMap }
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun getNotesTransactionMap() {
+        // Arrange
+        whenever(mockContactsManager.notesTransactionMap).thenReturn(HashMap())
+        // Act
+        val result = subject.notesTransactionMap
+        // Assert
+        verify(mockContactsManager).notesTransactionMap
+        assertTrue { result is HashMap }
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun getMonetaryUtil() {
+        // Arrange
+
+        // Act
+        val result = subject.monetaryUtil
+        // Assert
+        verify(mockPrefsUtil).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+        assertTrue { result is MonetaryUtil }
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun getStringUtils() {
+        // Arrange
+
+        // Act
+        val result = subject.getStringUtils()
+        // Assert
+        assertTrue { result is StringUtils }
     }
 
     @Test
@@ -324,24 +377,36 @@ class ContactDetailViewModelTest {
     @Throws(Exception::class)
     fun onContactRenamedShouldShowSuccess() {
         // Arrange
-        val newName = "CONTACT_NAME"
+        val newName = "NEW_NAME"
+        val oldName = "OLD_NAME"
         val contactId = "CONTACT_ID"
         val contact = Contact().apply {
-            name = ""
+            name = oldName
             id = contactId
         }
         subject.contact = contact
+        val bundle = Bundle()
+        bundle.putString(KEY_BUNDLE_CONTACT_ID, contactId)
+        whenever(mockActivity.pageBundle).thenReturn(bundle)
         whenever(mockContactsManager.renameContact(contactId, newName))
                 .thenReturn(Completable.complete())
+        whenever(mockContactsManager.contactList).thenReturn(Observable.just(contact))
+        whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         // Act
         subject.onContactRenamed(newName)
         // Assert
+        verify(mockActivity).pageBundle
         verify(mockActivity).showProgressDialog()
         verify(mockActivity).dismissProgressDialog()
-        verify(mockActivity).updateContactName(newName)
+        verify(mockActivity).updateContactName(oldName)
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_OK))
+        verify(mockActivity, times(2)).onTransactionsUpdated(any())
         verifyNoMoreInteractions(mockActivity)
         verify(mockContactsManager).renameContact(contactId, newName)
+        verify(mockContactsManager).contactList
+        verify(mockContactsManager).fetchContacts()
         verifyNoMoreInteractions(mockContactsManager)
     }
 
@@ -401,17 +466,12 @@ class ContactDetailViewModelTest {
     @Throws(Exception::class)
     fun onTransactionClickedShouldShowTxDetail() {
         // Arrange
-        val fctxId = "FCTX_ID"
         val txHash = "TX_HASH"
-        val contact = Contact()
-        subject.contact = contact
-        contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
-            id = fctxId
-            state = FacilitatedTransaction.STATE_PAYMENT_BROADCASTED
-            this.txHash = txHash
-        })
+        val transactionPosition = 0
+        val summary = TransactionSummary().apply { hash = txHash }
+        subject.displayList.add(summary)
         // Act
-        subject.onTransactionClicked(fctxId)
+        subject.onCompletedTransactionClicked(transactionPosition)
         // Assert
         verify(mockActivity).showTransactionDetail(txHash)
         verifyNoMoreInteractions(mockActivity)
@@ -774,6 +834,46 @@ class ContactDetailViewModelTest {
         verify(mockPayloadDataManager).getPositionOfAccountInActiveList(accountPosition)
         verify(mockPayloadDataManager).getNextReceiveAddress(accountPosition)
         verifyNoMoreInteractions(mockPayloadDataManager)
+    }
+
+    @Suppress("CAST_NEVER_SUCCEEDS")
+    @Test
+    @Throws(Exception::class)
+    fun sortAndUpdateTransactions() {
+        // Arrange
+        val contactName = "CONTACT_NAME"
+        val contact = Contact().apply { name = contactName }
+        subject.contact = contact
+        val txHash0 = "TX_HASH_0"
+        val txHash1 = "TX_HASH_1"
+        val fctx0 = FacilitatedTransaction().apply {
+            txHash = txHash0
+            lastUpdated = 1337L
+            intendedAmount = 1337L
+            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
+        }
+        val fctx1 = FacilitatedTransaction().apply {
+            txHash = txHash1
+            lastUpdated = 1337L
+            intendedAmount = 1337L
+            role = FacilitatedTransaction.ROLE_PR_INITIATOR
+        }
+        val fctx2 = FacilitatedTransaction().apply {
+            txHash = null
+            lastUpdated = 1337L
+            intendedAmount = 1337L
+        }
+        val values = listOf(fctx0, fctx1, fctx2)
+        val captor = argumentCaptor<List<JvmType.Object>>()
+        // Act
+        subject.sortAndUpdateTransactions(values)
+        // Assert
+        verify(mockActivity).onTransactionsUpdated(captor.capture())
+        verifyZeroInteractions(mockActivity)
+        val list = captor.firstValue
+        (list[0] as ContactTransactionModel).contactName equals contactName
+        (list[1] as TransactionSummary).hash equals txHash1
+        (list[2] as TransactionSummary).hash equals txHash0
     }
 
     @Test

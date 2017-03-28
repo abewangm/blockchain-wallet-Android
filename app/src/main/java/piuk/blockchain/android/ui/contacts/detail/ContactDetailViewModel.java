@@ -47,7 +47,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     private Observable<NotificationPayload> notificationObservable;
-    private List<Object> displayList = new ArrayList<>();
+    @VisibleForTesting List<Object> displayList = new ArrayList<>();
     @VisibleForTesting Contact contact;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadDataManager payloadDataManager;
@@ -158,7 +158,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                             .subscribe(
                                     () -> {
-                                        dataListener.updateContactName(name);
+                                        onViewReady();
                                         dataListener.showToast(R.string.contacts_rename_success, ToastCustom.TYPE_OK);
                                     },
                                     throwable -> dataListener.showToast(R.string.contacts_rename_failed, ToastCustom.TYPE_ERROR)));
@@ -318,8 +318,10 @@ public class ContactDetailViewModel extends BaseViewModel {
                     contactsDataManager.getContactList()
                             // Find current contact
                             .filter(ContactsPredicates.filterById(id))
+                            // Shouldn't be necessary but checks for only one value and returns a Single
+                            .firstOrError()
                             // Update UI
-                            .doOnNext(contact -> {
+                            .doOnSuccess(contact -> {
                                 this.contact = contact;
                                 dataListener.updateContactName(contact.getName());
                                 sortAndUpdateTransactions(contact.getFacilitatedTransactions().values());
@@ -338,7 +340,8 @@ public class ContactDetailViewModel extends BaseViewModel {
         }
     }
 
-    private void sortAndUpdateTransactions(Collection<FacilitatedTransaction> values) {
+    @VisibleForTesting
+    void sortAndUpdateTransactions(Collection<FacilitatedTransaction> values) {
         List<FacilitatedTransaction> facilitatedTransactions = new ArrayList<>(values);
         Collections.sort(facilitatedTransactions, new FctxDateComparator());
         Collections.reverse(facilitatedTransactions);
