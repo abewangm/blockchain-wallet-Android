@@ -29,7 +29,6 @@ import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
-import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -53,11 +52,11 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     private MonetaryUtil monetaryUtil;
-    private PendingTransaction pendingTransaction = new PendingTransaction();
     private ReceiveCurrencyHelper currencyHelper;
-    private FeeList dynamicFeeList;
     private Disposable unspentApiDisposable;
-    private BigInteger maxAvailable;
+    @VisibleForTesting BigInteger maxAvailable;
+    @VisibleForTesting FeeList dynamicFeeList;
+    @VisibleForTesting PendingTransaction pendingTransaction = new PendingTransaction();
     @Nullable private String contactMdid;
     @Nullable private String fctxId;
     @Inject protected ContactsDataManager contactsDataManager;
@@ -107,11 +106,12 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        if (dataListener.getFragmentBundle() != null) {
-            final String uri = dataListener.getFragmentBundle().getString(ARGUMENT_URI);
-            final String contactId = dataListener.getFragmentBundle().getString(ARGUMENT_CONTACT_ID);
-            contactMdid = dataListener.getFragmentBundle().getString(ARGUMENT_CONTACT_MDID);
-            fctxId = dataListener.getFragmentBundle().getString(ARGUMENT_FCTX_ID);
+        Bundle bundle = dataListener.getFragmentBundle();
+        if (bundle != null) {
+            final String uri = bundle.getString(ARGUMENT_URI);
+            final String contactId = bundle.getString(ARGUMENT_CONTACT_ID);
+            contactMdid = bundle.getString(ARGUMENT_CONTACT_MDID);
+            fctxId = bundle.getString(ARGUMENT_FCTX_ID);
 
             if (contactId != null) {
                 compositeDisposable.add(
@@ -123,10 +123,9 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
                                             dataListener.setContactName(contact.getName());
                                             handleIncomingUri(uri);
                                         },
-                                        throwable -> dataListener.finishPage(false)));
+                                        throwable -> showContactNotFoundAndQuit()));
             } else {
-                dataListener.showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
-                dataListener.finishPage(false);
+                showContactNotFoundAndQuit();
             }
         } else {
             dataListener.finishPage(false);
@@ -148,16 +147,14 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
      * @return int account position in list of non-archived accounts
      * @see PayloadDataManager#getPositionOfAccountInActiveList(int)
      */
-    int getDefaultAccount() {
+    int getDefaultAccountPosition() {
         return Math.max(payloadDataManager.getPositionOfAccountInActiveList(
                 payloadDataManager.getDefaultAccountIndex()), 0);
     }
 
     void accountSelected(int position) {
-        Account account = payloadDataManager.getWallet()
-                .getHdWallets()
-                .get(0)
-                .getAccount(payloadDataManager.getPositionOfAccountFromActiveList(position));
+        Account account =
+                payloadDataManager.getAccount(payloadDataManager.getPositionOfAccountFromActiveList(position));
 
         pendingTransaction.sendingObject = new ItemAccount(account.getLabel(), "", null, null, account);
         calculateTransactionAmounts();
@@ -167,6 +164,7 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
         Account account = (Account) pendingTransaction.sendingObject.accountObject;
         compositeDisposable.add(
                 payloadDataManager.getNextChangeAddress(account)
+                        .doOnSubscribe(disposable -> dataListener.showProgressDialog())
                         .flatMap(changeAddress -> {
                             if (payloadDataManager.isDoubleEncrypted()) {
                                 payloadDataManager.getWallet()
@@ -185,7 +183,6 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
                                     pendingTransaction.bigIntAmount);
                         })
                         .doOnTerminate(() -> dataListener.hideProgressDialog())
-                        .doOnSubscribe(disposable -> dataListener.showProgressDialog())
                         .subscribe(
                                 this::handleSuccessfulPayment,
                                 throwable -> dataListener.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)));
@@ -215,7 +212,10 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
         compositeDisposable.add(
                 sendDataManager.getSuggestedFee()
                         .doAfterTerminate(() -> dynamicFeeList = dynamicFeeCache.getCachedDynamicFee())
-                        .subscribe(suggestedFee -> dynamicFeeCache.setCachedDynamicFee(suggestedFee)));
+                        .subscribe(suggestedFee -> dynamicFeeCache.setCachedDynamicFee(suggestedFee)
+                                , throwable -> {
+                                    // No-op
+                                }));
     }
 
     private void handleIncomingUri(String uri) {
@@ -244,7 +244,6 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
         String address = ((Account) pendingTransaction.sendingObject.accountObject).getXpub();
         if (unspentApiDisposable != null) unspentApiDisposable.dispose();
         unspentApiDisposable = sendDataManager.getUnspentOutputs(address)
-                .compose(RxUtil.applySchedulersToObservable())
                 .subscribe(
                         coins -> suggestedFeePayment(coins, pendingTransaction.bigIntAmount),
                         throwable -> dataListener.showToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR));
@@ -274,7 +273,8 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
     /**
      * Checks whether or not the transaction is valid
      */
-    private boolean isValidSpend(PendingTransaction pendingTransaction) {
+    @VisibleForTesting
+    boolean isValidSpend(PendingTransaction pendingTransaction) {
         // Validate sufficient funds
         if (pendingTransaction.unspentOutputBundle == null
                 || pendingTransaction.unspentOutputBundle.getSpendableOutputs() == null) {
@@ -288,11 +288,6 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
             return false;
         }
 
-        if (pendingTransaction.unspentOutputBundle == null) {
-            dataListener.showToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR);
-            return false;
-        }
-
         if (pendingTransaction.unspentOutputBundle.getSpendableOutputs().isEmpty()) {
             // TODO: 27/03/2017 Prompt user to buy bitcoin here, probably want a flag to only do it once per session
             dataListener.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
@@ -302,8 +297,7 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
         return true;
     }
 
-    @VisibleForTesting
-    void updateUi(long totalToSend, long totalFee) {
+    private void updateUi(long totalToSend, long totalFee) {
         String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         String btcUnit = monetaryUtil.getBTCUnit(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
         double exchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
@@ -330,6 +324,11 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
         dataListener.setPaymentButtonEnabled(isValidSpend(pendingTransaction));
 
         dataListener.onUiUpdated();
+    }
+
+    private void showContactNotFoundAndQuit() {
+        dataListener.showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
+        dataListener.finishPage(false);
     }
 
 }

@@ -269,6 +269,10 @@ public class PayloadDataManager {
         return getWallet().isDoubleEncryption();
     }
 
+    public Account getAccount(int accountPosition) {
+        return getWallet().getHdWallets().get(0).getAccount(accountPosition);
+    }
+
     /**
      * Returns the balance of an address. If the address isn't found in the address map object, the
      * method will return {@link BigInteger#ZERO} instead of a null object.

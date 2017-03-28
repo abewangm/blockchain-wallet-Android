@@ -7,7 +7,6 @@ import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.exceptions.DecryptionException
 import info.blockchain.wallet.metadata.MetadataNodeFactory
 import info.blockchain.wallet.payload.PayloadManager
-import info.blockchain.wallet.payload.data.Wallet
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
@@ -20,6 +19,7 @@ import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.equals
@@ -35,7 +35,7 @@ class ContactsListViewModelTest {
     private lateinit var subject: ContactsListViewModel
     private var mockActivity: ContactsListViewModel.DataListener = mock()
     private var mockContactsManager: ContactsDataManager = mock()
-    private var mockPayloadManager: PayloadManager = mock()
+    private var mockPayloadDataManager: PayloadDataManager = mock()
     private val mockRxBus: RxBus = mock()
 
     @Before
@@ -46,7 +46,7 @@ class ContactsListViewModelTest {
                 Injector.getInstance(),
                 MockApplicationModule(RuntimeEnvironment.application),
                 MockApiModule(),
-                DataManagerModule())
+                MockDataManagerModule())
 
         subject = ContactsListViewModel(mockActivity)
     }
@@ -145,12 +145,11 @@ class ContactsListViewModelTest {
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         whenever(mockActivity.pageIntent).thenReturn(intent)
         whenever(mockContactsManager.loadNodes()).thenReturn(Observable.just(false))
-        val mockPayload: Wallet = mock()
-        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
-        whenever(mockPayload.isDoubleEncryption).thenReturn(true)
+        whenever(mockPayloadDataManager.isDoubleEncrypted).thenReturn(true)
         // Act
         subject.onViewReady()
         // Assert
+        verify(mockPayloadDataManager).isDoubleEncrypted
         verify(mockActivity).pageIntent
         verify(mockActivity).setUiState(ContactsListActivity.LOADING)
         verify(mockActivity).showSecondPasswordDialog()
@@ -164,9 +163,7 @@ class ContactsListViewModelTest {
     fun onViewReadyShouldInitContacts() {
         // Arrange
         whenever(mockContactsManager.loadNodes()).thenReturn(Observable.just(false))
-        val mockPayload: Wallet = mock()
-        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
-        whenever(mockPayload.isDoubleEncryption).thenReturn(false)
+        whenever(mockPayloadDataManager.isDoubleEncrypted).thenReturn(false)
         whenever(mockContactsManager.generateNodes(isNull())).thenReturn(Completable.complete())
         val mockNodeFactory: MetadataNodeFactory = mock()
         whenever(mockContactsManager.metadataNodeFactory)
@@ -186,8 +183,7 @@ class ContactsListViewModelTest {
         verify(mockActivity, times(2)).setUiState(ContactsListActivity.LOADING)
         verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
         // There will be other interactions with the mocks, but they are not tested here
-        verify(mockPayloadManager).payload
-        verify(mockPayload).isDoubleEncryption
+        verify(mockPayloadDataManager).isDoubleEncrypted
         verify(mockContactsManager).generateNodes(isNull())
         verify(mockContactsManager).metadataNodeFactory
         verify(mockContactsManager).initContactsService(any(), any())
@@ -401,12 +397,14 @@ class ContactsListViewModelTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun providePayloadManager(): PayloadManager {
-            return mockPayloadManager
-        }
-
         override fun provideContactsManager(payloadManager: PayloadManager?): ContactsDataManager {
             return mockContactsManager
+        }
+    }
+
+    inner class MockDataManagerModule : DataManagerModule() {
+        override fun providePayloadDataManager(payloadManager: PayloadManager?): PayloadDataManager {
+            return mockPayloadDataManager
         }
     }
 

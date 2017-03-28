@@ -335,7 +335,10 @@ public class SendViewModel extends BaseViewModel {
         compositeDisposable.add(
                 sendDataManager.getSuggestedFee()
                         .doAfterTerminate(() -> sendModel.dynamicFeeList = dynamicFeeCache.getCachedDynamicFee())
-                        .subscribe(suggestedFee -> dynamicFeeCache.setCachedDynamicFee(suggestedFee)));
+                        .subscribe(suggestedFee -> dynamicFeeCache.setCachedDynamicFee(suggestedFee)
+                                , throwable -> {
+                                    // No-op
+                                }));
     }
 
     /**

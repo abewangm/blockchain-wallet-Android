@@ -117,7 +117,7 @@ public class ContactPaymentDialog extends AppCompatDialogFragment
                 true);
         receiveToAdapter.setDropDownViewResource(R.layout.spinner_dropdown);
         binding.spinnerFrom.spinner.setAdapter(receiveToAdapter);
-        binding.spinnerFrom.spinner.setSelection(viewModel.getDefaultAccount());
+        binding.spinnerFrom.spinner.setSelection(viewModel.getDefaultAccountPosition());
         binding.spinnerFrom.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {

@@ -27,6 +27,7 @@ import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.FctxDateComparator;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -54,6 +55,7 @@ public class ContactDetailViewModel extends BaseViewModel {
     @Inject PrefsUtil prefsUtil;
     @Inject RxBus rxBus;
     @Inject StringUtils stringUtils;
+    @Inject TransactionListDataManager transactionListDataManager;
 
     interface DataListener {
 
@@ -354,8 +356,12 @@ public class ContactDetailViewModel extends BaseViewModel {
                 summary.setHash(fctx.getTxHash());
                 summary.setTime(fctx.getLastUpdated());
                 summary.setTotal(BigInteger.valueOf(fctx.getIntendedAmount()));
-                // TODO: 28/03/2017 This is cheating. Store confirmations in HashMap somewhere
-                summary.setConfirmations(3);
+                if (transactionListDataManager.getTxConfirmationsMap().containsKey(summary.getHash())) {
+                    summary.setConfirmations(transactionListDataManager.getTxConfirmationsMap().get(summary.getHash()));
+                } else {
+                    // Assume confirmed
+                    summary.setConfirmations(3);
+                }
 
                 if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
                         || fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {

@@ -9,7 +9,6 @@ import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.payload.PayloadManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +18,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -34,9 +34,9 @@ public class ContactsListViewModel extends BaseViewModel {
     private DataListener dataListener;
     private Observable<NotificationPayload> notificationObservable;
     @VisibleForTesting String link;
-    @Inject ContactsDataManager contactsDataManager;
-    @Inject PayloadManager payloadManager;
-    @Inject RxBus rxBus;
+    @Inject protected ContactsDataManager contactsDataManager;
+    @Inject protected PayloadDataManager payloadDataManager;
+    @Inject protected RxBus rxBus;
 
     interface DataListener {
 
@@ -228,7 +228,7 @@ public class ContactsListViewModel extends BaseViewModel {
                                             }
                                         } else {
                                             // Not set up, most likely has a second password enabled
-                                            if (payloadManager.getPayload().isDoubleEncryption()) {
+                                            if (payloadDataManager.isDoubleEncrypted()) {
                                                 dataListener.showSecondPasswordDialog();
                                                 dataListener.setUiState(ContactsListActivity.FAILURE);
                                             } else {

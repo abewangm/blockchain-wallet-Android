@@ -98,7 +98,6 @@ public class TransactionListDataManager {
      * @return A BTC value as a long.
      */
     public long getBtcBalance(Object object) {
-
         long result = 0;
 
         if (object instanceof ConsolidatedAccount) {
@@ -161,19 +160,25 @@ public class TransactionListDataManager {
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
+    /**
+     * Returns a {@link HashMap} where a {@link TransactionSummary} hash is used as a key against
+     * the confirmation number. This is for displaying the confirmation number in the Contacts page.
+     * Please note that this is deliberately not cleared when switching accounts.
+     */
+    public HashMap<String, Integer> getTxConfirmationsMap() {
+        return transactionListStore.getTxConfirmationsMap();
+    }
+
     private void insertTransactionList(List<TransactionSummary> txList) {
         List<TransactionSummary> pendingTxs = getRemainingPendingTransactionList(txList);
         clearTransactionList();
         txList.addAll(pendingTxs);
         transactionListStore.insertTransactions(txList);
-        transactionListStore.sort(new TransactionSummary.TxMostRecentDateComparator());
         rxBus.emitEvent(List.class, transactionListStore.getList());
     }
 
     /**
      * Gets list of transactions that have been published but delivery has not yet been confirmed.
-     * @param newlyFetchedTxs
-     * @return
      */
     private List<TransactionSummary> getRemainingPendingTransactionList(List<TransactionSummary> newlyFetchedTxs) {
         HashMap<String, TransactionSummary> pendingMap = new HashMap<>();
