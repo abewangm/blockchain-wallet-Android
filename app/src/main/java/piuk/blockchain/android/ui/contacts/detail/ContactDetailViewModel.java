@@ -8,17 +8,21 @@ import android.util.Log;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
+import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.data.Account;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.FctxDateComparator;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
@@ -29,7 +33,9 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.StringUtils;
 
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID;
 
@@ -41,11 +47,13 @@ public class ContactDetailViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     private Observable<NotificationPayload> notificationObservable;
+    private List<Object> displayList = new ArrayList<>();
     @VisibleForTesting Contact contact;
     @Inject ContactsDataManager contactsDataManager;
     @Inject PayloadDataManager payloadDataManager;
     @Inject PrefsUtil prefsUtil;
     @Inject RxBus rxBus;
+    @Inject StringUtils stringUtils;
 
     interface DataListener {
 
@@ -65,7 +73,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
         void showDeleteUserDialog();
 
-        void onTransactionsUpdated(List<FacilitatedTransaction> transactions, String contactName);
+        void onTransactionsUpdated(List<Object> transactions);
 
         void showAccountChoiceDialog(List<String> accounts, String fctxId);
 
@@ -96,38 +104,24 @@ public class ContactDetailViewModel extends BaseViewModel {
         setupViewModel();
     }
 
-    private void setupViewModel() {
-        Bundle bundle = dataListener.getPageBundle();
-        if (bundle != null && bundle.getString(KEY_BUNDLE_CONTACT_ID) != null) {
-            String id = bundle.getString(KEY_BUNDLE_CONTACT_ID);
-
-            compositeDisposable.add(
-                    // Get contacts list
-                    contactsDataManager.getContactList()
-                            // Find current contact
-                            .filter(ContactsPredicates.filterById(id))
-                            // Update UI
-                            .doOnNext(contact -> {
-                                this.contact = contact;
-                                dataListener.updateContactName(contact.getName());
-                                sortAndUpdateTransactions(contact.getFacilitatedTransactions().values());
-                            })
-                            // Contact not found, quit page
-                            .doOnError(throwable -> showErrorAndQuitPage())
-                            // Update contacts in case of new FacilitatedTransactions
-                            .flatMapCompletable(contact -> contactsDataManager.fetchContacts())
-                            .subscribe(
-                                    // Update with FacilitatedTransactions, UI handles diff
-                                    () -> sortAndUpdateTransactions(contact.getFacilitatedTransactions().values()),
-                                    // Show error if updating contacts failed
-                                    throwable -> dataListener.showToast(R.string.contacts_digesting_messages_failed, ToastCustom.TYPE_ERROR)));
-        } else {
-            showErrorAndQuitPage();
-        }
-    }
-
     PrefsUtil getPrefsUtil() {
         return prefsUtil;
+    }
+
+    HashMap<String, String> getContactsTransactionMap() {
+        return contactsDataManager.getContactsTransactionMap();
+    }
+
+    HashMap<String, String> getNotesTransactionMap() {
+        return contactsDataManager.getNotesTransactionMap();
+    }
+
+    MonetaryUtil getMonetaryUtil() {
+        return new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
+    }
+
+    StringUtils getStringUtils() {
+        return stringUtils;
     }
 
     void onDeleteContactClicked() {
@@ -220,12 +214,14 @@ public class ContactDetailViewModel extends BaseViewModel {
                         contact.getMdid(),
                         transaction.getId(),
                         payloadDataManager.getDefaultAccountIndex());
-
-                // Payment sent, show detail regardless of role
-            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)) {
-
-                dataListener.showTransactionDetail(transaction.getTxHash());
             }
+        }
+    }
+
+    void onCompletedTransactionClicked(int position) {
+        if (displayList.get(position) instanceof TransactionSummary) {
+            TransactionSummary summary = (TransactionSummary) displayList.get(position);
+            dataListener.showTransactionDetail(summary.getHash());
         }
     }
 
@@ -284,7 +280,7 @@ public class ContactDetailViewModel extends BaseViewModel {
         paymentRequest.setId(fctxId);
 
         compositeDisposable.add(
-                payloadDataManager.getNextReceiveAddress(getCorrectedAccountIndex(accountPosition))
+                payloadDataManager.getNextReceiveAddress(payloadDataManager.getPositionOfAccountInActiveList(accountPosition))
                         .doOnNext(paymentRequest::setAddress)
                         .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
@@ -312,32 +308,71 @@ public class ContactDetailViewModel extends BaseViewModel {
                                 throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
     }
 
+    private void setupViewModel() {
+        Bundle bundle = dataListener.getPageBundle();
+        if (bundle != null && bundle.getString(KEY_BUNDLE_CONTACT_ID) != null) {
+            String id = bundle.getString(KEY_BUNDLE_CONTACT_ID);
+
+            compositeDisposable.add(
+                    // Get contacts list
+                    contactsDataManager.getContactList()
+                            // Find current contact
+                            .filter(ContactsPredicates.filterById(id))
+                            // Update UI
+                            .doOnNext(contact -> {
+                                this.contact = contact;
+                                dataListener.updateContactName(contact.getName());
+                                sortAndUpdateTransactions(contact.getFacilitatedTransactions().values());
+                            })
+                            // Contact not found, quit page
+                            .doOnError(throwable -> showErrorAndQuitPage())
+                            // Update contacts in case of new FacilitatedTransactions
+                            .flatMapCompletable(contact -> contactsDataManager.fetchContacts())
+                            .subscribe(
+                                    // Update with FacilitatedTransactions, UI handles diff
+                                    () -> sortAndUpdateTransactions(contact.getFacilitatedTransactions().values()),
+                                    // Show error if updating contacts failed
+                                    throwable -> dataListener.showToast(R.string.contacts_digesting_messages_failed, ToastCustom.TYPE_ERROR)));
+        } else {
+            showErrorAndQuitPage();
+        }
+    }
+
     private void sortAndUpdateTransactions(Collection<FacilitatedTransaction> values) {
-        ArrayList<FacilitatedTransaction> facilitatedTransactions = new ArrayList<>(values);
+        List<FacilitatedTransaction> facilitatedTransactions = new ArrayList<>(values);
         Collections.sort(facilitatedTransactions, new FctxDateComparator());
         Collections.reverse(facilitatedTransactions);
+        displayList.clear();
 
-        dataListener.onTransactionsUpdated(facilitatedTransactions, contact.getName());
+        for (FacilitatedTransaction fctx : facilitatedTransactions) {
+            if (fctx.getTxHash() != null && !fctx.getTxHash().isEmpty()) {
+                // Do something
+                TransactionSummary summary = new TransactionSummary();
+                summary.setHash(fctx.getTxHash());
+                summary.setTime(fctx.getLastUpdated());
+                summary.setTotal(BigInteger.valueOf(fctx.getIntendedAmount()));
+                // TODO: 28/03/2017 This is cheating. Store confirmations in HashMap somewhere
+                summary.setConfirmations(3);
+
+                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
+                        || fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+                    summary.setDirection(TransactionSummary.Direction.SENT);
+                } else {
+                    summary.setDirection(TransactionSummary.Direction.RECEIVED);
+                }
+                displayList.add(summary);
+            } else {
+                // Do something else
+                displayList.add(new ContactTransactionModel(contact.getName(), fctx));
+            }
+        }
+
+        dataListener.onTransactionsUpdated(displayList);
     }
 
     private void showErrorAndQuitPage() {
         dataListener.showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
         dataListener.finishPage();
-    }
-
-    private int getCorrectedAccountIndex(int accountIndex) {
-        // Filter accounts by active
-        List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts();
-        for (int i = 0; i < accounts.size(); i++) {
-            Account account = accounts.get(i);
-            if (!account.isArchived()) {
-                activeAccounts.add(account);
-            }
-        }
-
-        // Find corrected position
-        return payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
     @Override

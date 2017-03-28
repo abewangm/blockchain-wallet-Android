@@ -10,6 +10,12 @@
         android:foreground="?attr/selectableItemBackground"
         android:theme="@style/PlainTheme">
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentTop="true"
+            android:background="@color/primary_gray_light" />
+
         <!-- DATE -->
         <TextView
             android:id="@+id/ts"
@@ -121,10 +127,5 @@
             tools:text="Thanks for the burger"
             tools:visibility="visible" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_alignParentBottom="true"
-            android:background="@color/primary_gray_light" />
     </RelativeLayout>
 </layout>

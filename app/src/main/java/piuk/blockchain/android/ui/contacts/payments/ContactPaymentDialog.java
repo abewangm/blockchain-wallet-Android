@@ -203,8 +203,7 @@ public class ContactPaymentDialog extends AppCompatDialogFragment
         Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
 
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.modal_transaction_success, null);
+        View dialogView = View.inflate(getActivity(), R.layout.modal_transaction_success, null);
         transactionSuccessDialog = new AlertDialog.Builder(getActivity())
                 .setView(dialogView)
                 .setTitle(R.string.transaction_submitted)
@@ -214,7 +213,6 @@ public class ContactPaymentDialog extends AppCompatDialogFragment
 
         transactionSuccessDialog.show();
         dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
-
     }
 
     @Override

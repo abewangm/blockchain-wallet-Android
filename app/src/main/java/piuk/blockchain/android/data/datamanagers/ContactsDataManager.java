@@ -17,6 +17,7 @@ import org.bitcoinj.crypto.DeterministicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import io.reactivex.Completable;
@@ -287,14 +288,29 @@ public class ContactsDataManager {
     }
 
     /**
-     * Renames a {@link Contact} and then saves the changes to the server.
+     * Renames a {@link Contact} and then saves the changes to the server. Updates the
+     * Contacts/Transaction map if applicable.
      *
      * @param contactId The ID of the Contact you wish to update
      * @param name      The new name for the Contact
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
     public Completable renameContact(String contactId, String name) {
+        String oldName = getContactList()
+                .filter(contact -> contact.getId().equals(contactId))
+                .blockingFirst()
+                .getName();
+
         return contactsService.renameContact(contactId, name)
+                .doOnComplete(() -> {
+                    if (getContactsTransactionMap().containsValue(oldName)) {
+                        for (Map.Entry<String, String> entry : getContactsTransactionMap().entrySet()) {
+                            if (entry.getValue().equals(oldName)) {
+                                entry.setValue(name);
+                            }
+                        }
+                    }
+                })
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 

@@ -358,8 +358,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 isBTC);
         transactionAdapter.setTxListClickListener(new BalanceListAdapter.BalanceListClickListener() {
             @Override
-            public void onTransactionClicked(int position) {
-                goToTransactionDetail(position);
+            public void onTransactionClicked(int correctedPosition, int absolutePosition) {
+                goToTransactionDetail(correctedPosition);
             }
 
             @Override
@@ -486,7 +486,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         }
 
         if (spacerDecoration == null) {
-            spacerDecoration = new BottomSpacerDecoration((int) ViewUtils.convertDpToPixel(56f, getContext()));
+            spacerDecoration = new BottomSpacerDecoration(
+                    getContext(),
+                    (int) ViewUtils.convertDpToPixel(56f, getContext()));
         }
         binding.rvTransactions.removeItemDecoration(spacerDecoration);
         binding.rvTransactions.addItemDecoration(spacerDecoration);

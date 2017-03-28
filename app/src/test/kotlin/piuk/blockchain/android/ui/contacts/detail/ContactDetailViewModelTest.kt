@@ -722,14 +722,10 @@ class ContactDetailViewModelTest {
             intendedAmount = 21 * 1000 * 1000L
         })
         val address = "ADDRESS"
-        val account = Account()
         whenever(mockPayloadDataManager.getNextReceiveAddress(accountPosition))
                 .thenReturn(Observable.just(address))
-        val mockPayload: Wallet = mock()
-        whenever(mockPayloadDataManager.wallet).thenReturn(mockPayload)
-        val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
-        whenever(mockHdWallet.accounts).thenReturn(listOf(account))
+        whenever(mockPayloadDataManager.getPositionOfAccountInActiveList(accountPosition))
+                .thenReturn(accountPosition)
         whenever(mockContactsManager.sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId)))
                 .thenReturn(Completable.complete())
         // Act
@@ -741,6 +737,9 @@ class ContactDetailViewModelTest {
         // More interactions as page is set up again, but we're not testing those
         verify(mockContactsManager).sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId))
         verifyNoMoreInteractions(mockContactsManager)
+        verify(mockPayloadDataManager).getPositionOfAccountInActiveList(accountPosition)
+        verify(mockPayloadDataManager).getNextReceiveAddress(accountPosition)
+        verifyNoMoreInteractions(mockPayloadDataManager)
     }
 
     @Test
@@ -757,14 +756,10 @@ class ContactDetailViewModelTest {
             intendedAmount = 21 * 1000 * 1000L
         })
         val address = "ADDRESS"
-        val account = Account()
         whenever(mockPayloadDataManager.getNextReceiveAddress(accountPosition))
                 .thenReturn(Observable.just(address))
-        val mockPayload: Wallet = mock()
-        whenever(mockPayloadDataManager.wallet).thenReturn(mockPayload)
-        val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
-        whenever(mockHdWallet.accounts).thenReturn(listOf(account))
+        whenever(mockPayloadDataManager.getPositionOfAccountInActiveList(accountPosition))
+                .thenReturn(accountPosition)
         whenever(mockContactsManager.sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId)))
                 .thenReturn(Completable.error { Throwable() })
         // Act
@@ -776,6 +771,9 @@ class ContactDetailViewModelTest {
         // More interactions as page is set up again, but we're not testing those
         verify(mockContactsManager).sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId))
         verifyNoMoreInteractions(mockContactsManager)
+        verify(mockPayloadDataManager).getPositionOfAccountInActiveList(accountPosition)
+        verify(mockPayloadDataManager).getNextReceiveAddress(accountPosition)
+        verifyNoMoreInteractions(mockPayloadDataManager)
     }
 
     @Test

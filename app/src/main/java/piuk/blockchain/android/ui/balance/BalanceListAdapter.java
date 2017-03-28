@@ -31,7 +31,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SpanFormatter;
 import piuk.blockchain.android.util.StringUtils;
 
-class BalanceListAdapter extends RecyclerView.Adapter {
+public class BalanceListAdapter extends RecyclerView.Adapter {
 
     private static final int VIEW_TYPE_HEADER = 0;
     private static final int VIEW_TYPE_FCTX = 1;
@@ -48,14 +48,14 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     private HashMap<String, String> contactsTransactionMap;
     private HashMap<String, String> notesTransactionMap;
 
-    BalanceListAdapter(HashMap<String, String> contactsTransactionMap,
-                       HashMap<String, String> notesTransactionMap,
-                       PrefsUtil prefsUtil,
-                       MonetaryUtil monetaryUtil,
-                       StringUtils stringUtils,
-                       DateUtil dateUtil,
-                       double btcExchangeRate,
-                       boolean isBtc) {
+    public BalanceListAdapter(HashMap<String, String> contactsTransactionMap,
+                              HashMap<String, String> notesTransactionMap,
+                              PrefsUtil prefsUtil,
+                              MonetaryUtil monetaryUtil,
+                              StringUtils stringUtils,
+                              DateUtil dateUtil,
+                              double btcExchangeRate,
+                              boolean isBtc) {
 
         objects = new ArrayList<>();
         this.contactsTransactionMap = contactsTransactionMap;
@@ -261,7 +261,8 @@ class BalanceListAdapter extends RecyclerView.Adapter {
 
         txViewHolder.itemView.setOnClickListener(v -> {
             if (listClickListener != null) {
-                listClickListener.onTransactionClicked(getRealTxPosition(txViewHolder.getAdapterPosition()));
+                listClickListener.onTransactionClicked(
+                        getRealTxPosition(txViewHolder.getAdapterPosition()), position);
             }
         });
     }
@@ -328,31 +329,31 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         return (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
     }
 
-    void onTransactionsUpdated(List<Object> objects) {
+    public void onTransactionsUpdated(List<Object> objects) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new BalanceDiffUtil(this.objects, objects));
         this.objects = objects;
         diffResult.dispatchUpdatesTo(this);
     }
 
-    void setTxListClickListener(BalanceListClickListener listClickListener) {
+    public void setTxListClickListener(BalanceListClickListener listClickListener) {
         this.listClickListener = listClickListener;
     }
 
-    void onViewFormatUpdated(boolean isBtc) {
+    public void onViewFormatUpdated(boolean isBtc) {
         if (this.isBtc != isBtc) {
             this.isBtc = isBtc;
             notifyAdapterDataSetChanged(null);
         }
     }
 
-    void onContactsMapChanged(HashMap<String, String> contactsTransactionMap,
-                              HashMap<String, String> notesTransactionMap) {
+    public void onContactsMapChanged(HashMap<String, String> contactsTransactionMap,
+                                     HashMap<String, String> notesTransactionMap) {
         this.contactsTransactionMap = contactsTransactionMap;
         this.notesTransactionMap = notesTransactionMap;
         notifyDataSetChanged();
     }
 
-    void notifyAdapterDataSetChanged(@Nullable Double btcExchangeRate) {
+    public void notifyAdapterDataSetChanged(@Nullable Double btcExchangeRate) {
         if (btcExchangeRate != null && this.btcExchangeRate != btcExchangeRate) {
             this.btcExchangeRate = btcExchangeRate;
         }
@@ -360,9 +361,9 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
-    interface BalanceListClickListener {
+    public interface BalanceListClickListener {
 
-        void onTransactionClicked(int position);
+        void onTransactionClicked(int correctedPosition, int absolutePosition);
 
         void onValueClicked(boolean isBtc);
 
