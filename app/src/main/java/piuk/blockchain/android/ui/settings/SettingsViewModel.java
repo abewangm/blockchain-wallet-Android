@@ -436,11 +436,13 @@ public class SettingsViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
         compositeDisposable.add(
                 settingsDataManager.verifySms(code)
-                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
+                        .doAfterTerminate(() -> {
+                            dataListener.hideProgressDialog();
+                            updateUi();
+                        })
                         .subscribe(settings -> {
                             this.settings = settings;
                             dataListener.showDialogSmsVerified();
-                            updateUi();
                         }, throwable -> dataListener.showWarningDialog(R.string.verify_sms_failed)));
     }
 
@@ -452,10 +454,10 @@ public class SettingsViewModel extends BaseViewModel {
     void updateTor(boolean blocked) {
         compositeDisposable.add(
                 settingsDataManager.updateTor(blocked)
-                        .subscribe(settings -> {
-                            this.settings = settings;
-                            updateUi();
-                        }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                        .doAfterTerminate(this::updateUi)
+                        .subscribe(
+                                settings -> this.settings = settings,
+                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     /**
@@ -467,10 +469,10 @@ public class SettingsViewModel extends BaseViewModel {
     void updateTwoFa(int type) {
         compositeDisposable.add(
                 settingsDataManager.updateTwoFactor(type)
-                        .subscribe(settings -> {
-                            this.settings = settings;
-                            updateUi();
-                        }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                        .doAfterTerminate(this::updateUi)
+                        .subscribe(
+                                settings -> this.settings = settings,
+                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     /**
@@ -500,10 +502,10 @@ public class SettingsViewModel extends BaseViewModel {
                                 return settingsDataManager.disableNotification(type, settings.getNotificationsType());
                             }
                         })
-                        .subscribe(settings -> {
-                            this.settings = settings;
-                            updateUi();
-                        }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                        .doAfterTerminate(this::updateUi)
+                        .subscribe(
+                                settings -> this.settings = settings,
+                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     private boolean isNotificationTypeEnabled(int type) {

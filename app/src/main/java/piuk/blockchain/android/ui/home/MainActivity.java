@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -50,6 +51,7 @@ import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
+import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -66,7 +68,6 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-import static piuk.blockchain.android.data.services.EventService.EVENT_TX_INPUT_FROM_CONTACTS;
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
 import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
 
@@ -74,7 +75,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         MainViewModel.DataListener,
         SendFragment.OnSendFragmentInteractionListener,
         ReceiveFragment.OnReceiveFragmentInteractionListener,
-        ContactPaymentRequestNotesFragment.FragmentInteractionListener {
+        ContactPaymentRequestNotesFragment.FragmentInteractionListener,
+        ContactPaymentDialog.OnContactPaymentDialogInteractionListener {
 
     private static final String SUPPORT_URI = "https://support.blockchain.com/";
     private static final int REQUEST_BACKUP = 2225;
@@ -85,7 +87,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public static final String EXTRA_RECIPIENT_ID = "recipient_id";
     public static final String EXTRA_MDID = "mdid";
     public static final String EXTRA_FCTX_ID = "fctx_id";
-    public static final String EXTRA_DEFAULT_INDEX = "default_index";
     public static final int SCAN_URI = 2007;
 
     @Thunk boolean drawerIsOpen = false;
@@ -95,7 +96,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private MaterialProgressDialog fetchTransactionsProgress;
     private AlertDialog rootedDialog;
     private MaterialProgressDialog materialProgressDialog;
-    private OnBalanceFragmentAddedCallback balanceFragmentAddedCallback;
     private AppUtil appUtil;
     private long backPressed;
     private Toolbar toolbar;
@@ -409,7 +409,14 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             boolean enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
             if (!enabled) {
-                EnableGeo.displayGPSPrompt(this);
+                String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
+                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                        .setMessage(getActivity().getString(R.string.enable_geo))
+                        .setPositiveButton(android.R.string.ok, (d, id) ->
+                                getActivity().startActivity(new Intent(action)))
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .create()
+                        .show();
             } else {
                 Intent intent = new Intent(MainActivity.this, piuk.blockchain.android.ui.directory.MapActivity.class);
                 startActivityForResult(intent, MERCHANT_ACTIVITY);
@@ -548,17 +555,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         final String message = getString(R.string.check_connectivity_exit);
         builder.setMessage(message)
                 .setCancelable(false)
-                .setPositiveButton(R.string.dialog_continue,
-                        (d, id) -> {
-                            d.dismiss();
-                            Class c = null;
-                            if (new PrefsUtil(MainActivity.this).getValue(PrefsUtil.KEY_GUID, "").length() < 1) {
-                                c = LandingActivity.class;
-                            } else {
-                                c = PinEntryActivity.class;
-                            }
-                            startSingleActivity(c);
-                        });
+                .setPositiveButton(R.string.dialog_continue, (d, id) -> {
+                    Class activityClass;
+                    if (new PrefsUtil(MainActivity.this).getValue(PrefsUtil.KEY_GUID, "").isEmpty()) {
+                        activityClass = LandingActivity.class;
+                    } else {
+                        activityClass = PinEntryActivity.class;
+                    }
+                    startSingleActivity(activityClass);
+                });
 
         if (!isFinishing()) {
             builder.create().show();
@@ -566,8 +571,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, int defaultIndex) {
-        startSendFragmentFromIntent(uri, recipientId, mdid, fctxId, defaultIndex);
+    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId) {
+        startContactSendDialog(uri, recipientId, mdid, fctxId);
+    }
+
+    @Override
+    public void onContactPaymentDialogClosed(boolean paymentToContactMade) {
+        this.paymentToContactMade = paymentToContactMade;
     }
 
     @Override
@@ -631,7 +641,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public void onStartBalanceFragment(boolean paymentToContactMade) {
         BalanceFragment fragment = BalanceFragment.newInstance(paymentToContactMade);
         replaceFragmentWithAnimation(fragment);
-        if (balanceFragmentAddedCallback != null) balanceFragmentAddedCallback.onFragmentAdded();
         viewModel.checkIfShouldShowSurvey();
     }
 
@@ -681,16 +690,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void showPaymentMismatchDialog(@StringRes int message) {
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, null)
-                .create()
-                .show();
-    }
-
-    @Override
     public void showBroadcastSuccessDialog() {
         if (getCurrentFragment() instanceof BalanceFragment) {
             ((BalanceFragment) getCurrentFragment()).refreshFacilitatedTransactions();
@@ -705,9 +704,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void onSendFragmentClose(boolean paymentToContactMade) {
-        // Flag to prevent reloading of transactions whilst broadcasting payment to prevent race condition
-        this.paymentToContactMade = paymentToContactMade;
+    public void onSendFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
     }
 
@@ -762,14 +759,16 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private void replaceFragmentWithAnimation(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-        transaction.replace(R.id.content_frame, fragment).commitAllowingStateLoss();
+        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+                .replace(R.id.content_frame, fragment)
+                .commitAllowingStateLoss();
     }
 
     private void addFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.content_frame, fragment).commitAllowingStateLoss();
+        fragmentManager.beginTransaction()
+                .add(R.id.content_frame, fragment)
+                .commitAllowingStateLoss();
     }
 
     private void handleIncomingIntent() {
@@ -778,32 +777,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             String recipientId = getIntent().getStringExtra(EXTRA_RECIPIENT_ID);
             String mdid = getIntent().getStringExtra(EXTRA_MDID);
             String fctxId = getIntent().getStringExtra(EXTRA_FCTX_ID);
-            int accountPosition = getIntent().getIntExtra(EXTRA_DEFAULT_INDEX, -1);
 
-            if (getCurrentFragment() != null && getCurrentFragment() instanceof BalanceFragment) {
-                startSendFragmentFromIntent(uri, recipientId, mdid, fctxId, accountPosition);
-            } else {
-                // Wait for fragment transaction to finish and then pop in
-                balanceFragmentAddedCallback = () -> {
-                    startSendFragmentFromIntent(uri, recipientId, mdid, fctxId, accountPosition);
-                    // Null-out callback as not to cause issues later
-                    balanceFragmentAddedCallback = null;
-                };
-            }
+            startContactSendDialog(uri, recipientId, mdid, fctxId);
         }
     }
 
-    private void startSendFragmentFromIntent(String uri, String recipientId, String mdid, String fctxId, int accountPosition) {
-        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId,
-            EVENT_TX_INPUT_FROM_CONTACTS, accountPosition);
-        replaceFragmentWithAnimation(sendFragment);
-        binding.bottomNavigation.restoreBottomNavigation();
-    }
-
-    private interface OnBalanceFragmentAddedCallback {
-
-        void onFragmentAdded();
-
+    private void startContactSendDialog(String uri, String recipientId, String mdid, String fctxId) {
+        ContactPaymentDialog paymentDialog =
+                ContactPaymentDialog.newInstance(uri, recipientId, mdid, fctxId);
+        paymentDialog.show(getSupportFragmentManager(), ContactPaymentDialog.class.getSimpleName());
     }
 
 }

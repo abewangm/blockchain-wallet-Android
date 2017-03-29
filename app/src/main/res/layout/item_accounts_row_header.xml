@@ -28,7 +28,7 @@
             android:layout_alignParentRight="true"
             android:padding="16dp"
             android:tint="@color/primary_navy_medium"
-            app:srcCompat="@drawable/ic_add" />
+            app:srcCompat="@drawable/vector_add" />
 
     </RelativeLayout>
 </layout>

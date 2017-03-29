@@ -16,6 +16,7 @@ import piuk.blockchain.android.ui.contacts.list.ContactsListViewModel;
 import piuk.blockchain.android.ui.contacts.pairing.ContactPairingMethodViewModel;
 import piuk.blockchain.android.ui.contacts.pairing.ContactsInvitationBuilderViewModel;
 import piuk.blockchain.android.ui.contacts.pairing.ContactsQrViewModel;
+import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialogViewModel;
 import piuk.blockchain.android.ui.contacts.payments.ContactsPaymentRequestViewModel;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialogViewModel;
 import piuk.blockchain.android.ui.home.MainViewModel;
@@ -94,4 +95,6 @@ public interface DataManagerComponent {
     void inject(WebSocketService webSocketService);
 
     void inject(BackupVerifyViewModel backupVerifyViewModel);
+
+    void inject(ContactPaymentDialogViewModel contactPaymentDialogViewModel);
 }

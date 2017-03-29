@@ -11,12 +11,14 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
+import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
 import org.bitcoinj.core.ECKey;
 import org.spongycastle.crypto.InvalidCipherTextException;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -104,19 +106,6 @@ public class PayloadDataManager {
         }));
     }
 
-    /**
-     * Initializes and decrypts a wallet using the credentials from a QR code.
-     *
-     * @param qrData The scanned QR as a String
-     * @return A {@link Completable} object
-     */
-    public Completable handleQrCode(String qrData) {
-        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
-            payloadManager.initializeAndDecryptFromQR(qrData);
-            return Void.TYPE;
-        })).compose(RxUtil.applySchedulersToCompletable());
-    }
-
     ///////////////////////////////////////////////////////////////////////////
     // THE NEXT LOGICAL BLOCK -> TODO: ORGANISE REMAINING METHODS
     ///////////////////////////////////////////////////////////////////////////
@@ -145,14 +134,14 @@ public class PayloadDataManager {
     }
 
     /**
-     * Returns {@link Completable} which updates balances and transactions in the PayloadManager.
+     * Returns {@link Completable} which updates transactions in the PayloadManager.
      * Completable returns no value, and is used to call functions that return void but have side
      * effects.
      *
      * @return A {@link Completable} object
      * @see IgnorableDefaultObserver
      */
-    public Completable updateBalancesAndTransactions() {
+    public Completable updateAllTransactions() {
         return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
             payloadManager.getAllTransactions(50, 0);
             return Void.TYPE;
@@ -160,13 +149,27 @@ public class PayloadDataManager {
     }
 
     /**
+     * Returns a {@link Completable} which updates all balances in the PayloadManager. Completable
+     * returns no value, and is used to call functions that return void but have side effects.
+     *
+     * @return A {@link Completable} object
+     * @see IgnorableDefaultObserver
+     */
+    public Completable updateAllBalances() {
+        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
+            payloadManager.updateAllBalances();
+            return Void.TYPE;
+        })).compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
      * Returns the next Receive address for a given account index.
      *
-     * @param defaultIndex The index of the account for which you want an address to be generated
+     * @param accountIndex The index of the account for which you want an address to be generated
      * @return An {@link Observable} wrapping the receive address
      */
-    public Observable<String> getNextReceiveAddress(int defaultIndex) {
-        Account account = getWallet().getHdWallets().get(0).getAccounts().get(defaultIndex);
+    public Observable<String> getNextReceiveAddress(int accountIndex) {
+        Account account = getWallet().getHdWallets().get(0).getAccounts().get(accountIndex);
         return getNextReceiveAddress(account);
     }
 
@@ -178,6 +181,29 @@ public class PayloadDataManager {
      */
     public Observable<String> getNextReceiveAddress(Account account) {
         return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    /**
+     * Returns the next Change address for a given account index.
+     *
+     * @param accountIndex The index of the account for which you want an address to be generated
+     * @return An {@link Observable} wrapping the receive address
+     */
+    public Observable<String> getNextChangeAddress(int accountIndex) {
+        Account account = getWallet().getHdWallets().get(0).getAccounts().get(accountIndex);
+        return getNextChangeAddress(account);
+    }
+
+    /**
+     * Returns the next Change address for a given {@link Account object}
+     *
+     * @param account The {@link Account} for which you want an address to be generated
+     * @return An {@link Observable} wrapping the receive address
+     */
+    public Observable<String> getNextChangeAddress(Account account) {
+        return Observable.fromCallable(() -> payloadManager.getNextChangeAddress(account))
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -216,6 +242,22 @@ public class PayloadDataManager {
         return getWallet().getHdWallets().get(0).getAccount(getDefaultAccountIndex());
     }
 
+    /**
+     * Returns a list of {@link ECKey} objects for signing transactions.
+     *
+     * @param account             The {@link Account} that you wish to send funds from
+     * @param unspentOutputBundle A {@link SpendableUnspentOutputs} bundle for a given Account
+     * @return A list of {@link ECKey} objects
+     * @throws Exception Will be thrown if there are issues with the private keys
+     */
+    public List<ECKey> getHDKeysForSigning(Account account, SpendableUnspentOutputs unspentOutputBundle)
+            throws Exception {
+        return payloadManager.getPayload()
+                .getHdWallets()
+                .get(0)
+                .getHDKeysForSigning(account, unspentOutputBundle);
+    }
+
     public String getPayloadChecksum() {
         return payloadManager.getPayloadChecksum();
     }
@@ -226,6 +268,14 @@ public class PayloadDataManager {
 
     public BigInteger getImportedAddressesBalance() {
         return payloadManager.getImportedAddressesBalance();
+    }
+
+    public boolean isDoubleEncrypted() {
+        return getWallet().isDoubleEncryption();
+    }
+
+    public Account getAccount(int accountPosition) {
+        return getWallet().getHdWallets().get(0).getAccount(accountPosition);
     }
 
     /**
@@ -263,7 +313,8 @@ public class PayloadDataManager {
      * @return A {@link LinkedHashMap}
      */
     public Observable<LinkedHashMap<String, Balance>> getBalanceOfAddresses(List<String> addresses) {
-        return Observable.fromCallable(() -> payloadManager.getBalanceOfAddresses(addresses));
+        return rxPinning.callObservable(() -> Observable.fromCallable(() ->
+                payloadManager.getBalanceOfAddresses(addresses)));
     }
 
     /**
@@ -315,6 +366,58 @@ public class PayloadDataManager {
      */
     public boolean isOwnHDAddress(String address) {
         return payloadManager.isOwnHDAddress(address);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // HELPER METHODS
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Returns the index for an {@link Account}, assuming that the supplied position was gotten from
+     * a list of only those Accounts which are active.
+     *
+     * @param position The position of the {@link Account} that you want to select from a list of
+     *                 active Accounts
+     * @return The position of the {@link Account} within the full list of Accounts
+     */
+    public int getPositionOfAccountFromActiveList(int position) {
+        List<Account> accounts = getWallet().getHdWallets().get(0).getAccounts();
+        int adjustedPosition = 0;
+        for (int i = 0; i < accounts.size(); i++) {
+            Account account = accounts.get(i);
+            if (!account.isArchived()) {
+                if (position == adjustedPosition) {
+                    return i;
+                }
+                adjustedPosition++;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Returns the index for an {@link Account} in a list of active-only Accounts, where the
+     * supplied {@code accountIndex} is the position of the Account in the full list of both active
+     * and archived Accounts.
+     *
+     * @param accountIndex The position of an {@link Account} in the full list of Accounts
+     * @return The Account's position within a list of active-only Accounts. Will be -1 if you
+     * attempt to find the position of an archived Account
+     */
+    public int getPositionOfAccountInActiveList(int accountIndex) {
+        // Filter accounts by active
+        List<Account> activeAccounts = new ArrayList<>();
+        List<Account> accounts = getWallet().getHdWallets().get(0).getAccounts();
+        for (int i = 0; i < accounts.size(); i++) {
+            Account account = accounts.get(i);
+            if (!account.isArchived()) {
+                activeAccounts.add(account);
+            }
+        }
+
+        // Find corrected position
+        return activeAccounts.indexOf(getWallet().getHdWallets().get(0).getAccounts().get(accountIndex));
     }
 
 }

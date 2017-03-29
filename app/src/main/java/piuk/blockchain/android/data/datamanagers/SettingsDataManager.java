@@ -26,7 +26,8 @@ public class SettingsDataManager {
      */
     public Observable<Settings> initSettings(String guid, String sharedKey) {
         settingsService.initSettings(guid, sharedKey);
-        return fetchSettings();
+        return fetchSettings()
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -37,7 +38,8 @@ public class SettingsDataManager {
      */
     public Observable<Settings> updateEmail(String email) {
         return settingsService.updateEmail(email)
-                .flatMap(responseBody -> fetchSettings());
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -48,7 +50,8 @@ public class SettingsDataManager {
      */
     public Observable<Settings> updateSms(String sms) {
         return settingsService.updateSms(sms)
-                .flatMap(responseBody -> fetchSettings());
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -60,7 +63,8 @@ public class SettingsDataManager {
      */
     public Observable<Settings> verifySms(String code) {
         return settingsService.verifySms(code)
-                .flatMap(responseBody -> fetchSettings());
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -71,7 +75,8 @@ public class SettingsDataManager {
      */
     public Observable<Settings> updateTor(boolean blocked) {
         return settingsService.updateTor(blocked)
-                .flatMap(responseBody -> fetchSettings());
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -83,7 +88,8 @@ public class SettingsDataManager {
      */
     public Observable<Settings> updateTwoFactor(int authType) {
         return settingsService.updateTwoFactor(authType)
-                .flatMap(responseBody -> fetchSettings());
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -98,7 +104,8 @@ public class SettingsDataManager {
         if (notifications.isEmpty() || notifications.contains(SettingsManager.NOTIFICATION_TYPE_NONE)) {
             // No notification type registered, enable
             return settingsService.enableNotifications(true)
-                    .flatMap(responseBody -> updateNotifications(notificationType));
+                    .flatMap(responseBody -> updateNotifications(notificationType))
+                    .compose(RxUtil.applySchedulersToObservable());
         } else if (notifications.size() == 1
                 && ((notifications.contains(SettingsManager.NOTIFICATION_TYPE_EMAIL)
                 && notificationType == SettingsManager.NOTIFICATION_TYPE_SMS)
@@ -106,10 +113,12 @@ public class SettingsDataManager {
                 && notificationType == SettingsManager.NOTIFICATION_TYPE_EMAIL))) {
             // Contains another type already, send "All"
             return settingsService.enableNotifications(true)
-                    .flatMap(responseBody -> updateNotifications(SettingsManager.NOTIFICATION_TYPE_ALL));
+                    .flatMap(responseBody -> updateNotifications(SettingsManager.NOTIFICATION_TYPE_ALL))
+                    .compose(RxUtil.applySchedulersToObservable());
         } else {
             return settingsService.enableNotifications(true)
-                    .flatMap(responseBody -> fetchSettings());
+                    .flatMap(responseBody -> fetchSettings())
+                    .compose(RxUtil.applySchedulersToObservable());
         }
     }
 
@@ -124,25 +133,30 @@ public class SettingsDataManager {
     public Observable<Settings> disableNotification(int notificationType, List<Integer> notifications) {
         if (notifications.isEmpty() || notifications.contains(SettingsManager.NOTIFICATION_TYPE_NONE)) {
             // No notifications anyway, return Settings
-            return fetchSettings();
+            return fetchSettings()
+                    .compose(RxUtil.applySchedulersToObservable());
         } else if (notifications.contains(SettingsManager.NOTIFICATION_TYPE_ALL)
                 || (notifications.contains(SettingsManager.NOTIFICATION_TYPE_EMAIL)
                 && notifications.contains(SettingsManager.NOTIFICATION_TYPE_SMS))) {
             // All types enabled, disable passed type and enable other
             return updateNotifications(notificationType == SettingsManager.NOTIFICATION_TYPE_EMAIL
-                    ? SettingsManager.NOTIFICATION_TYPE_SMS : SettingsManager.NOTIFICATION_TYPE_EMAIL);
+                    ? SettingsManager.NOTIFICATION_TYPE_SMS : SettingsManager.NOTIFICATION_TYPE_EMAIL)
+                    .compose(RxUtil.applySchedulersToObservable());
         } else if (notifications.size() == 1) {
             if (notifications.get(0).equals(notificationType)) {
                 // Remove all
                 return settingsService.enableNotifications(false)
-                        .flatMap(responseBody -> updateNotifications(SettingsManager.NOTIFICATION_TYPE_NONE));
+                        .flatMap(responseBody -> updateNotifications(SettingsManager.NOTIFICATION_TYPE_NONE))
+                        .compose(RxUtil.applySchedulersToObservable());
             } else {
                 // Notification type not present, no need to remove it
-                return fetchSettings();
+                return fetchSettings()
+                        .compose(RxUtil.applySchedulersToObservable());
             }
         } else {
             // This should never be reached
-            return fetchSettings();
+            return fetchSettings()
+                    .compose(RxUtil.applySchedulersToObservable());
         }
     }
 
@@ -155,7 +169,8 @@ public class SettingsDataManager {
      */
     private Observable<Settings> updateNotifications(int notificationType) {
         return settingsService.updateNotifications(notificationType)
-                .flatMap(responseBody -> fetchSettings());
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -164,8 +179,7 @@ public class SettingsDataManager {
      * @return A {@link Observable<Settings>} object
      */
     private Observable<Settings> fetchSettings() {
-        return settingsService.getSettings()
-                .compose(RxUtil.applySchedulersToObservable());
+        return settingsService.getSettings();
     }
 
 }

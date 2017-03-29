@@ -21,11 +21,11 @@ allprojects {
 }
 
 ext {
-    supportVersion = '25.3.0'
-    googleServicesVersion = '10.2.0'
-    rxJavaVersion = '2.0.7'
+    supportVersion = '25.3.1'
+    googleServicesVersion = '10.2.1'
+    rxJavaVersion = '2.0.8'
     rxAndroidVersion = '2.0.1'
-    daggerVersion = '2.9'
+    daggerVersion = '2.10'
     retrofitVersion = '2.2.0'
     okHttpVersion = '3.6.0'
     mockitoVersion = '2.7.17'

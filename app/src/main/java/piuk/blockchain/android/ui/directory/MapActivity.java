@@ -44,8 +44,6 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 
-//import android.util.Log;
-
 public class MapActivity extends BaseAuthActivity implements LocationListener, OnMapReadyCallback {
 
     private static final long MIN_TIME = 400;
@@ -160,20 +158,20 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
 
             Merchant b = markerValues.get(marker.getId());
 
-            String url = "http://maps.google.com/?saddr=" +
+            String url = "https://maps.google.com/?saddr=" +
                     currLocation.getLatitude() + "," + currLocation.getLongitude() +
                     "&daddr=" + markerValues.get(marker.getId()).latitude + "," + markerValues.get(marker.getId()).longitude;
             tvAddress.setText(Html.fromHtml("<a href=\"" + url + "\">" + b.address + ", " + b.city + " " + b.postalCode + "</a>"));
             tvAddress.setMovementMethod(LinkMovementMethod.getInstance());
 
-            if (b.phone != null && b.phone.trim().length() > 0) {
+            if (b.phone != null && !b.phone.trim().isEmpty()) {
                 tvTel.setText(b.phone);
                 Linkify.addLinks(tvTel, Linkify.PHONE_NUMBERS);
             } else {
                 findViewById(R.id.row_call).setVisibility(View.GONE);
             }
 
-            if (b.website != null && b.website.trim().length() > 0) {
+            if (b.website != null && !b.website.trim().isEmpty()) {
                 tvWeb.setText(b.website);
                 Linkify.addLinks(tvWeb, Linkify.WEB_URLS);
             } else {
@@ -415,7 +413,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
     }
 
     private void handleMerchantList(Double lat, Double lng, boolean doListView) {
-        if (merchantList != null && merchantList.size() > 0) {
+        if (merchantList != null && !merchantList.isEmpty()) {
             Merchant merchant;
             for (int i = 0; i < merchantList.size(); i++) {
                 merchant = merchantList.get(i);

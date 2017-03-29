@@ -33,6 +33,7 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentBalanceBinding;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
+import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
@@ -63,6 +64,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public int balanceBarHeight;
     private BalanceHeaderAdapter accountsAdapter;
     private MaterialProgressDialog progressDialog;
+    private BottomSpacerDecoration spacerDecoration;
     @Thunk OnFragmentInteractionListener interactionListener;
     @Thunk boolean isBTC = true;
     // Accounts list
@@ -87,14 +89,13 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         return fragment;
     }
 
-    protected BroadcastReceiver receiver = new BroadcastReceiver() {
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(ACTION_INTENT) && getActivity() != null) {
                 viewModel.updateAccountList();
                 viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, true);
-                transactionAdapter.onTransactionsUpdated(viewModel.getTransactionList());
-                binding.rvTransactions.getAdapter().notifyDataSetChanged();
+                viewModel.refreshFacilitatedTransactions();
                 // Check backup status on receiving funds
                 viewModel.onViewReady();
                 binding.rvTransactions.scrollToPosition(0);
@@ -144,13 +145,17 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void onResume() {
         super.onResume();
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+        }
+
         interactionListener.resetNavigationDrawer();
 
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(receiver, filter);
 
         viewModel.updateAccountList();
-        viewModel.getFacilitatedTransactions();
+        viewModel.refreshFacilitatedTransactions();
         viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, true);
 
         binding.rvTransactions.clearOnScrollListeners();
@@ -187,6 +192,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(receiver);
+
+        if (binding.swipeContainer != null) {
+            binding.swipeContainer.setRefreshing(false);
+            binding.swipeContainer.destroyDrawingCache();
+            binding.swipeContainer.clearAnimation();
+        }
     }
 
     /**
@@ -207,8 +218,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 R.drawable.vector_mobile,
                 R.string.enable,
                 true,
-                true
-        );
+                true);
 
         securityPromptDialog.setPositiveButtonListener(v -> {
             securityPromptDialog.dismiss();
@@ -240,8 +250,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 R.drawable.vector_lock,
                 R.string.security_centre_backup_positive_button,
                 true,
-                showNeverAgain
-        );
+                showNeverAgain);
 
         securityPromptDialog.setPositiveButtonListener(v -> {
             securityPromptDialog.dismiss();
@@ -340,6 +349,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         transactionAdapter = new BalanceListAdapter(
                 viewModel.getContactsTransactionMap(),
+                viewModel.getNotesTransactionMap(),
                 viewModel.getPrefsUtil(),
                 viewModel.getMonetaryUtil(),
                 viewModel.stringUtils,
@@ -348,8 +358,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 isBTC);
         transactionAdapter.setTxListClickListener(new BalanceListAdapter.BalanceListClickListener() {
             @Override
-            public void onTransactionClicked(int position) {
-                goToTransactionDetail(position);
+            public void onTransactionClicked(int correctedPosition, int absolutePosition) {
+                goToTransactionDetail(correctedPosition);
             }
 
             @Override
@@ -450,7 +460,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         List<Object> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
         transactionAdapter.onTransactionsUpdated(newTransactions);
-        transactionAdapter.onContactsMapChanged(viewModel.getContactsTransactionMap());
         binding.balanceLayout.post(() -> setToolbarOffset(0));
 
         //Display help text to user if no transactionList on selected account/address
@@ -475,6 +484,21 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
             launcherShortcutHelper.generateReceiveShortcuts();
         }
+
+        if (spacerDecoration == null) {
+            spacerDecoration = new BottomSpacerDecoration(
+                    getContext(),
+                    (int) ViewUtils.convertDpToPixel(56f, getContext()));
+        }
+        binding.rvTransactions.removeItemDecoration(spacerDecoration);
+        binding.rvTransactions.addItemDecoration(spacerDecoration);
+    }
+
+    @Override
+    public void onRefreshContactList() {
+        transactionAdapter.onContactsMapChanged(
+                viewModel.getContactsTransactionMap(),
+                viewModel.getNotesTransactionMap());
     }
 
     @Override
@@ -541,11 +565,24 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     }
 
     @Override
-    public void showDeleteFacilitatedTransactionDialog(String fctxId) {
+    public void showTransactionDeclineDialog(String fctxId) {
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
-                .setMessage(R.string.contacts_delete_pending_transaction)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.confirmDeleteFacilitatedTransaction(fctxId))
+                .setMessage(R.string.contacts_decline_pending_transaction)
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        viewModel.confirmDeclineTransaction(fctxId))
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showTransactionCancelDialog(String fctxId) {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_cancel_pending_transaction)
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        viewModel.confirmCancelTransaction(fctxId))
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
@@ -568,9 +605,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     }
 
     @Override
-    public void initiatePayment(String uri, String recipientId, String mdid, String fctxId, int defaultIndex) {
+    public void initiatePayment(String uri, String recipientId, String mdid, String fctxId) {
         if (interactionListener != null) {
-            interactionListener.onPaymentInitiated(uri, recipientId, mdid, fctxId, defaultIndex);
+            interactionListener.onPaymentInitiated(uri, recipientId, mdid, fctxId);
         }
     }
 
@@ -596,7 +633,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         void resetNavigationDrawer();
 
-        void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, int defaultIndex);
+        void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId);
 
     }
 
