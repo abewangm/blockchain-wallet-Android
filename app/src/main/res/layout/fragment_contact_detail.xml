@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
+                android:layout_marginRight="8dp"
                 android:layout_weight="1"
                 android:text="@string/contacts_rename"
                 android:theme="@style/ButtonLightBlueTheme" />
@@ -35,11 +35,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginLeft="16dp"
+                android:layout_marginLeft="8dp"
                 android:layout_marginRight="16dp"
                 android:layout_weight="1"
                 android:text="@string/contacts_delete"
-                android:theme="@style/ButtonLightBlueTheme" />
+                android:theme="@style/ButtonRedTheme" />
         </LinearLayout>
 
         <TextView

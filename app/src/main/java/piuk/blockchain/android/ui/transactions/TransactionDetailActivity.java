@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -29,25 +30,24 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.receive.RecipientAdapter;
 import piuk.blockchain.android.util.ViewUtils;
-import piuk.blockchain.android.util.annotations.Thunk;
 
 public class TransactionDetailActivity extends BaseAuthActivity implements TransactionDetailViewModel.DataListener {
 
-    @Thunk ActivityTransactionDetailsBinding mBinding;
-    private TransactionDetailViewModel mViewModel;
+    private ActivityTransactionDetailsBinding binding;
+    private TransactionDetailViewModel viewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_transaction_details);
-        mViewModel = new TransactionDetailViewModel(this);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_transaction_details);
+        viewModel = new TransactionDetailViewModel(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.transaction_detail_title);
 
-        mBinding.editIcon.setOnClickListener(v -> mBinding.descriptionField.performClick());
-        mBinding.descriptionField.setOnClickListener(v -> {
+        binding.editIcon.setOnClickListener(v -> binding.descriptionField.performClick());
+        binding.descriptionField.setOnClickListener(v -> {
             AppCompatEditText editText = new AppCompatEditText(this);
             editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
                     | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
@@ -58,7 +58,7 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
             InputFilter[] fArray = new InputFilter[1];
             fArray[0] = new InputFilter.LengthFilter(maxLength);
             editText.setFilters(fArray);
-            editText.setText(mViewModel.getTransactionNote());
+            editText.setText(viewModel.getTransactionNote());
             editText.setSelection(editText.getText().length());
 
             new AlertDialog.Builder(this, R.style.AlertDialogStyle)
@@ -66,13 +66,13 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
                     .setView(ViewUtils.getAlertDialogPaddedView(this, editText))
                     .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        mViewModel.updateTransactionNote(editText.getText().toString());
+                        viewModel.updateTransactionNote(editText.getText().toString());
                         setDescription(editText.getText().toString());
                     })
                     .show();
         });
 
-        mViewModel.onViewReady();
+        viewModel.onViewReady();
     }
 
     public static void start(Context context, Bundle args) {
@@ -85,75 +85,81 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
     public void setTransactionType(Direction type) {
         switch (type) {
             case TRANSFERRED:
-                mBinding.transactionType.setText(getResources().getString(R.string.MOVED));
+                binding.transactionType.setText(getResources().getString(R.string.MOVED));
                 break;
             case RECEIVED:
-                mBinding.transactionType.setText(getResources().getString(R.string.RECEIVED));
-                mBinding.transactionFee.setVisibility(View.GONE);
+                binding.transactionType.setText(getResources().getString(R.string.RECEIVED));
+                binding.transactionFee.setVisibility(View.GONE);
                 break;
             case SENT:
-                mBinding.transactionType.setText(getResources().getString(R.string.SENT));
+                binding.transactionType.setText(getResources().getString(R.string.SENT));
                 break;
         }
     }
 
     @Override
     public void onDataLoaded() {
-        mBinding.mainLayout.setVisibility(View.VISIBLE);
-        mBinding.loadingLayout.setVisibility(View.GONE);
+        binding.mainLayout.setVisibility(View.VISIBLE);
+        binding.loadingLayout.setVisibility(View.GONE);
     }
 
     @Override
     public void setTransactionColour(@ColorRes int colour) {
-        mBinding.transactionAmount.setTextColor(ResourcesCompat.getColor(getResources(), colour, getTheme()));
-        mBinding.transactionType.setTextColor(ResourcesCompat.getColor(getResources(), colour, getTheme()));
+        binding.transactionAmount.setTextColor(ResourcesCompat.getColor(getResources(), colour, getTheme()));
+        binding.transactionType.setTextColor(ResourcesCompat.getColor(getResources(), colour, getTheme()));
+    }
+
+    @Override
+    public void setTransactionNote(String note) {
+        binding.transactionNote.setText(note);
+        binding.transactionNoteLayout.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void setTransactionValueBtc(String value) {
-        mBinding.transactionAmount.setText(value);
+        binding.transactionAmount.setText(value);
     }
 
     @Override
     public void setTransactionValueFiat(String fiat) {
-        mBinding.transactionValue.setText(fiat);
+        binding.transactionValue.setText(fiat);
     }
 
     @Override
     public void setToAddresses(List<RecipientModel> addresses) {
         if (addresses.size() == 1) {
-            mBinding.toAddress.setText(addresses.get(0).getAddress());
+            binding.toAddress.setText(addresses.get(0).getAddress());
         } else {
-            mBinding.spinner.setVisibility(View.VISIBLE);
+            binding.spinner.setVisibility(View.VISIBLE);
             RecipientAdapter adapter = new RecipientAdapter(addresses);
-            mBinding.toAddress.setText(String.format(Locale.getDefault(), "%1s Recipients", addresses.size()));
-            mBinding.toAddress.setOnClickListener(v -> mBinding.spinner.performClick());
-            mBinding.spinner.setAdapter(adapter);
-            mBinding.spinner.setOnItemSelectedListener(null);
+            binding.toAddress.setText(String.format(Locale.getDefault(), "%1s Recipients", addresses.size()));
+            binding.toAddress.setOnClickListener(v -> binding.spinner.performClick());
+            binding.spinner.setAdapter(adapter);
+            binding.spinner.setOnItemSelectedListener(null);
         }
     }
 
     @Override
     public void setDate(String date) {
-        mBinding.date.setText(date);
+        binding.date.setText(date);
     }
 
     @Override
     public void setDescription(String description) {
-        mBinding.descriptionField.setText(description);
+        binding.descriptionField.setText(description);
     }
 
     @Override
     public void setFromAddress(String address) {
-        mBinding.fromAddress.setText(address);
+        binding.fromAddress.setText(address);
     }
 
     @Override
     public void setStatus(String status, String hash) {
-        mBinding.status.setText(status);
-        mBinding.buttonVerify.setOnClickListener(v -> {
+        binding.status.setText(status);
+        binding.buttonVerify.setOnClickListener(v -> {
             Intent viewIntent = new Intent(Intent.ACTION_VIEW);
-            viewIntent.setData(Uri.parse("https://blockchain.info/tx/" + mViewModel.getTransactionHash()));
+            viewIntent.setData(Uri.parse("https://blockchain.info/tx/" + viewModel.getTransactionHash()));
             startActivity(viewIntent);
         });
     }
@@ -171,7 +177,7 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
             case R.id.action_share:
                 Intent shareIntent = new Intent();
                 shareIntent.setAction(Intent.ACTION_SEND);
-                shareIntent.putExtra(Intent.EXTRA_TEXT, "https://blockchain.info/tx/" + mViewModel.getTransactionHash());
+                shareIntent.putExtra(Intent.EXTRA_TEXT, "https://blockchain.info/tx/" + viewModel.getTransactionHash());
                 shareIntent.setType("text/plain");
                 startActivity(Intent.createChooser(shareIntent, getString(R.string.transaction_detail_share_chooser)));
                 return true;
@@ -183,7 +189,7 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
     @Override
     public void setIsDoubleSpend(boolean isDoubleSpend) {
         if (isDoubleSpend) {
-            mBinding.doubleSpendWarning.setVisibility(View.VISIBLE);
+            binding.doubleSpendWarning.setVisibility(View.VISIBLE);
         }
     }
 
@@ -194,7 +200,7 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
 
     @Override
     public void setFee(String fee) {
-        mBinding.transactionFee.setText(String.format(Locale.getDefault(), getString(R.string.transaction_detail_fee), fee));
+        binding.transactionFee.setText(String.format(Locale.getDefault(), getString(R.string.transaction_detail_fee), fee));
     }
 
     @Override
@@ -216,6 +222,6 @@ public class TransactionDetailActivity extends BaseAuthActivity implements Trans
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mViewModel.destroy();
+        viewModel.destroy();
     }
 }

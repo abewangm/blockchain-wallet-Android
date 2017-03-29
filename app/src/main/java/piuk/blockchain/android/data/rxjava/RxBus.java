@@ -93,7 +93,7 @@ public class RxBus {
                 subject.onNext(content);
             }
         } else {
-            Log.e(TAG, "emitEvent of type " + type.getSimpleName() + " failed, as no PublishSubject was registered");
+            Log.i(TAG, "emitEvent of type " + type.getSimpleName() + " failed, as no PublishSubject was registered");
         }
     }
 }

@@ -17,9 +17,11 @@ import org.bitcoinj.crypto.DeterministicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.functions.Function;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -52,6 +54,7 @@ public class ContactsDataManager {
     private PayloadManager payloadManager;
     private PendingTransactionListStore pendingTransactionListStore;
     @VisibleForTesting HashMap<String, String> contactsTransactionMap = new HashMap<>();
+    @VisibleForTesting HashMap<String, String> notesTransactionMap = new HashMap<>();
 
     public ContactsDataManager(ContactsService contactsService,
                                PayloadManager payloadManager,
@@ -205,19 +208,17 @@ public class ContactsDataManager {
     public Completable fetchContacts() {
         return contactsService.fetchContacts()
                 .andThen(contactsService.getContactList())
-                .toList()
-                .doOnEvent((contacts, throwable) -> {
-                    contactsTransactionMap.clear();
-                    if (contacts != null) {
-                        for (Contact contact : contacts) {
-                            for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
-                                if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
-                                    contactsTransactionMap.put(tx.getTxHash(), contact.getName());
-                                }
+                .doOnNext(contact -> {
+                    for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
+                        if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
+                            contactsTransactionMap.put(tx.getTxHash(), contact.getName());
+                            if (tx.getNote() != null && !tx.getNote().isEmpty()) {
+                                notesTransactionMap.put(tx.getTxHash(), tx.getNote());
                             }
                         }
                     }
                 })
+                .toList()
                 .toCompletable()
                 .compose(RxUtil.applySchedulersToCompletable());
     }
@@ -379,7 +380,8 @@ public class ContactsDataManager {
     }
 
     /**
-     * Sends a response to a payment request.
+     * Sends a response to a payment request containing a {@link PaymentRequest}, which contains a
+     * bitcoin address belonging to the user.
      *
      * @param mdid            The recipient's MDID
      * @param paymentRequest  A {@link PaymentRequest} object
@@ -401,6 +403,30 @@ public class ContactsDataManager {
      */
     public Completable sendPaymentBroadcasted(String mdid, String txHash, String facilitatedTxId) {
         return callWithToken(() -> contactsService.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Sends a response to a payment request declining the offer of payment.
+     *
+     * @param mdid   The recipient's MDID
+     * @param fctxId The ID of the {@link FacilitatedTransaction} to be declined
+     * @return A {@link Completable} object
+     */
+    public Completable sendPaymentDeclinedResponse(String mdid, String fctxId) {
+        return callWithToken(() -> contactsService.sendPaymentDeclinedResponse(mdid, fctxId))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Informs the recipient of a payment request that the request has been cancelled.
+     *
+     * @param mdid   The recipient's MDID
+     * @param fctxId The ID of the {@link FacilitatedTransaction} to be cancelled
+     * @return A {@link Completable} object
+     */
+    public Completable sendPaymentCancelledResponse(String mdid, String fctxId) {
+        return callWithToken(() -> contactsService.sendPaymentCancelledResponse(mdid, fctxId))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -475,7 +501,9 @@ public class ContactsDataManager {
 
     /**
      * Finds and returns a stream of {@link ContactTransactionModel} objects and stores them locally
-     * where the transaction is yet to be completed, ie the hash is empty.
+     * where the transaction is yet to be completed, ie the hash is empty. Intended to be used to
+     * display a list of transactions with another user in the balance page, and therefore this list
+     * does not contain completed, cancelled or declined transactions.
      *
      * @return An {@link Observable} stream of {@link ContactTransactionModel} objects
      */
@@ -483,21 +511,21 @@ public class ContactsDataManager {
     public Observable<ContactTransactionModel> refreshFacilitatedTransactions() {
         pendingTransactionListStore.clearList();
         return getContactList()
-                .toList()
-                .toObservable()
-                .flatMap(contacts -> {
+                .flatMapIterable(contact -> {
                     ArrayList<ContactTransactionModel> transactions = new ArrayList<>();
-                    for (Contact contact : contacts) {
-                        for (FacilitatedTransaction transaction : contact.getFacilitatedTransactions().values()) {
-                            // If hash is null, transaction has not been completed
-                            if (transaction.getTxHash() == null || transaction.getTxHash().isEmpty()) {
-                                ContactTransactionModel model = new ContactTransactionModel(contact.getName(), transaction);
-                                pendingTransactionListStore.insertTransaction(model);
-                                transactions.add(model);
-                            }
+                    for (FacilitatedTransaction transaction : contact.getFacilitatedTransactions().values()) {
+                        // If hash is null, transaction has not been completed
+                        if (((transaction.getTxHash() == null) || transaction.getTxHash().isEmpty())
+                                // Filter out cancelled and declined transactions
+                                && !transaction.getState().equals(FacilitatedTransaction.STATE_CANCELLED)
+                                && !transaction.getState().equals(FacilitatedTransaction.STATE_DECLINED)) {
+
+                            ContactTransactionModel model = new ContactTransactionModel(contact.getName(), transaction);
+                            pendingTransactionListStore.insertTransaction(model);
+                            transactions.add(model);
                         }
                     }
-                    return Observable.fromIterable(transactions);
+                    return transactions;
                 });
     }
 
@@ -516,22 +544,13 @@ public class ContactsDataManager {
      * the Observable will return an empty object, but very unlikely.
      *
      * @param fctxId The {@link FacilitatedTransaction} ID.
-     * @return An {@link Observable} containing a {@link Contact} object OR potentially an empty
-     * Observable
+     * @return A {@link Single} emitting a {@link Contact} object or will emit a {@link
+     * NoSuchElementException} if the Contact isn't found.
      */
-    public Observable<Contact> getContactFromFctxId(String fctxId) {
+    public Single<Contact> getContactFromFctxId(String fctxId) {
         return getContactList()
-                .toList()
-                .toObservable()
-                .flatMap(contacts -> {
-                    for (Contact contact : contacts) {
-                        if (contact.getFacilitatedTransactions().get(fctxId) != null) {
-                            return Observable.just(contact);
-                        }
-                    }
-
-                    return Observable.empty();
-                });
+                .filter(contact -> contact.getFacilitatedTransactions().get(fctxId) != null)
+                .firstOrError();
     }
 
     /**
@@ -555,5 +574,15 @@ public class ContactsDataManager {
      */
     public HashMap<String, String> getContactsTransactionMap() {
         return contactsTransactionMap;
+    }
+
+    /**
+     * Returns a Map of {@link FacilitatedTransaction} notes keyed to Transaction hashes.
+     *
+     * @return A {@link HashMap} where the key is a {@link TransactionSummary#getHash()}, and
+     * the value is a {@link FacilitatedTransaction#getNote()}
+     */
+    public HashMap<String, String> getNotesTransactionMap() {
+        return notesTransactionMap;
     }
 }

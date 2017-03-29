@@ -31,7 +31,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SpanFormatter;
 import piuk.blockchain.android.util.StringUtils;
 
-class BalanceListAdapter extends RecyclerView.Adapter {
+public class BalanceListAdapter extends RecyclerView.Adapter {
 
     private static final int VIEW_TYPE_HEADER = 0;
     private static final int VIEW_TYPE_FCTX = 1;
@@ -46,17 +46,20 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     private boolean isBtc;
     private BalanceListClickListener listClickListener;
     private HashMap<String, String> contactsTransactionMap;
+    private HashMap<String, String> notesTransactionMap;
 
-    BalanceListAdapter(HashMap<String, String> contactsTransactionMap,
-                       PrefsUtil prefsUtil,
-                       MonetaryUtil monetaryUtil,
-                       StringUtils stringUtils,
-                       DateUtil dateUtil,
-                       double btcExchangeRate,
-                       boolean isBtc) {
+    public BalanceListAdapter(HashMap<String, String> contactsTransactionMap,
+                              HashMap<String, String> notesTransactionMap,
+                              PrefsUtil prefsUtil,
+                              MonetaryUtil monetaryUtil,
+                              StringUtils stringUtils,
+                              DateUtil dateUtil,
+                              double btcExchangeRate,
+                              boolean isBtc) {
 
         objects = new ArrayList<>();
         this.contactsTransactionMap = contactsTransactionMap;
+        this.notesTransactionMap = notesTransactionMap;
         this.prefsUtil = prefsUtil;
         this.monetaryUtil = monetaryUtil;
         this.stringUtils = stringUtils;
@@ -107,6 +110,7 @@ class BalanceListAdapter extends RecyclerView.Adapter {
     }
 
     private void bindFctxView(RecyclerView.ViewHolder holder, int position) {
+
         final FctxViewHolder fctxViewHolder = (FctxViewHolder) holder;
         final ContactTransactionModel model = (ContactTransactionModel) objects.get(position);
         final FacilitatedTransaction transaction = model.getFacilitatedTransaction();
@@ -131,75 +135,47 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         String fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         Spannable amountSpannable = getDisplaySpannable(transaction.getIntendedAmount(), fiatBalance, fiatString);
 
-        if (transaction.getState() != null
-                && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-            if (transaction.getRole() != null) {
-                if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_sending_to_contact_waiting),
-                            amountSpannable,
-                            contactName);
-                    fctxViewHolder.title.setText(display);
-                    fctxViewHolder.indicator.setVisibility(View.VISIBLE);
+        if (transaction.getState().equals(FacilitatedTransaction.STATE_DECLINED)) {
+            fctxViewHolder.title.setText(R.string.contacts_receiving_declined);
 
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_receiving_from_contact_waiting_to_accept),
-                            amountSpannable,
-                            contactName);
-                    fctxViewHolder.title.setText(display);
-                    fctxViewHolder.indicator.setVisibility(View.VISIBLE);
+        } else if (transaction.getState().equals(FacilitatedTransaction.STATE_CANCELLED)) {
+            fctxViewHolder.title.setText(R.string.contacts_receiving_cancelled);
 
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_requesting_from_contact_waiting_to_accept),
-                            amountSpannable,
-                            contactName);
-                    fctxViewHolder.title.setText(display);
+        } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+            if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
 
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_sending_to_contact_waiting),
-                            amountSpannable,
-                            contactName);
-                    fctxViewHolder.title.setText(display);
-                }
+                Spanned display = SpanFormatter.format(
+                        stringUtils.getString(R.string.contacts_receiving_from_contact_waiting_to_accept),
+                        amountSpannable,
+                        contactName);
+                fctxViewHolder.title.setText(display);
+                fctxViewHolder.indicator.setVisibility(View.VISIBLE);
+
+            } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+
+                Spanned display = SpanFormatter.format(
+                        stringUtils.getString(R.string.contacts_sending_to_contact_waiting),
+                        amountSpannable,
+                        contactName);
+                fctxViewHolder.title.setText(display);
             }
+        } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+            if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
 
-        } else if (transaction.getState() != null
-                && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-            if (transaction.getRole() != null) {
-                if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_sending_to_contact_ready_to_send),
-                            amountSpannable,
-                            contactName);
-                    fctxViewHolder.title.setText(display);
-                    fctxViewHolder.indicator.setVisibility(View.VISIBLE);
+                Spanned display = SpanFormatter.format(
+                        stringUtils.getString(R.string.contacts_payment_requested_ready_to_send),
+                        amountSpannable,
+                        contactName);
+                fctxViewHolder.title.setText(display);
+                fctxViewHolder.indicator.setVisibility(View.VISIBLE);
 
+            } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
 
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_requesting_from_contact_waiting_for_payment),
-                            amountSpannable,
-                            contactName);
-                    fctxViewHolder.title.setText(display);
-                    fctxViewHolder.indicator.setVisibility(View.VISIBLE);
-
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_requesting_from_contact_waiting_for_payment),
-                            amountSpannable,
-                            contactName);
-                    fctxViewHolder.title.setText(display);
-
-                } else if (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
-                    Spanned display = SpanFormatter.format(
-                            stringUtils.getString(R.string.contacts_sending_to_contact_ready_to_send),
-                            amountSpannable,
-                            contactName);
-                    fctxViewHolder.title.setText(display);
-                }
+                Spanned display = SpanFormatter.format(
+                        stringUtils.getString(R.string.contacts_requesting_from_contact_waiting_for_payment),
+                        amountSpannable,
+                        contactName);
+                fctxViewHolder.title.setText(display);
             }
         }
 
@@ -244,6 +220,13 @@ class BalanceListAdapter extends RecyclerView.Adapter {
                 break;
         }
 
+        if (notesTransactionMap.containsKey(tx.getHash())) {
+            txViewHolder.note.setText(notesTransactionMap.get(tx.getHash()));
+            txViewHolder.note.setVisibility(View.VISIBLE);
+        } else {
+            txViewHolder.note.setVisibility(View.GONE);
+        }
+
         txViewHolder.result.setText(getDisplaySpannable(tx.getTotal().longValue(), fiatBalance, fiatString));
 
         if (tx.getDirection() == Direction.TRANSFERRED) {
@@ -276,9 +259,10 @@ class BalanceListAdapter extends RecyclerView.Adapter {
             if (listClickListener != null) listClickListener.onValueClicked(isBtc);
         });
 
-        txViewHolder.touchView.setOnClickListener(v -> {
+        txViewHolder.itemView.setOnClickListener(v -> {
             if (listClickListener != null) {
-                listClickListener.onTransactionClicked(getRealTxPosition(txViewHolder.getAdapterPosition()));
+                listClickListener.onTransactionClicked(
+                        getRealTxPosition(txViewHolder.getAdapterPosition()), position);
             }
         });
     }
@@ -345,31 +329,31 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         return (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
     }
 
-    void onTransactionsUpdated(List<Object> objects) {
+    public void onTransactionsUpdated(List<Object> objects) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new BalanceDiffUtil(this.objects, objects));
         this.objects = objects;
         diffResult.dispatchUpdatesTo(this);
     }
 
-    void setTxListClickListener(BalanceListClickListener listClickListener) {
+    public void setTxListClickListener(BalanceListClickListener listClickListener) {
         this.listClickListener = listClickListener;
     }
 
-    void onViewFormatUpdated(boolean isBtc) {
+    public void onViewFormatUpdated(boolean isBtc) {
         if (this.isBtc != isBtc) {
             this.isBtc = isBtc;
             notifyAdapterDataSetChanged(null);
         }
     }
 
-    void onContactsMapChanged(HashMap<String, String> contactsTransactionMap) {
-        if (this.contactsTransactionMap != contactsTransactionMap) {
-            this.contactsTransactionMap = contactsTransactionMap;
-            notifyDataSetChanged();
-        }
+    public void onContactsMapChanged(HashMap<String, String> contactsTransactionMap,
+                                     HashMap<String, String> notesTransactionMap) {
+        this.contactsTransactionMap = contactsTransactionMap;
+        this.notesTransactionMap = notesTransactionMap;
+        notifyDataSetChanged();
     }
 
-    void notifyAdapterDataSetChanged(@Nullable Double btcExchangeRate) {
+    public void notifyAdapterDataSetChanged(@Nullable Double btcExchangeRate) {
         if (btcExchangeRate != null && this.btcExchangeRate != btcExchangeRate) {
             this.btcExchangeRate = btcExchangeRate;
         }
@@ -377,9 +361,9 @@ class BalanceListAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
-    interface BalanceListClickListener {
+    public interface BalanceListClickListener {
 
-        void onTransactionClicked(int position);
+        void onTransactionClicked(int correctedPosition, int absolutePosition);
 
         void onValueClicked(boolean isBtc);
 
@@ -390,20 +374,20 @@ class BalanceListAdapter extends RecyclerView.Adapter {
 
     private static class TxViewHolder extends RecyclerView.ViewHolder {
 
-        View touchView;
         TextView result;
         TextView timeSince;
         TextView direction;
         TextView watchOnly;
+        TextView note;
         ImageView doubleSpend;
 
         TxViewHolder(View view) {
             super(view);
-            touchView = view.findViewById(R.id.tx_touch_view);
             result = (TextView) view.findViewById(R.id.result);
             timeSince = (TextView) view.findViewById(R.id.ts);
             direction = (TextView) view.findViewById(R.id.direction);
             watchOnly = (TextView) view.findViewById(R.id.watch_only);
+            note = (TextView) view.findViewById(R.id.note);
             doubleSpend = (ImageView) view.findViewById(R.id.double_spend_warning);
         }
     }

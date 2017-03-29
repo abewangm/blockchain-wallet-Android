@@ -82,7 +82,7 @@ public class ContactsService {
     }
 
     /**
-     * Completely wipes your contact list from the metadata endpoint. Does not update memory.
+     * Completely wipes your contact list from the metadata endpoint. Wipes memory also.
      *
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
@@ -230,7 +230,8 @@ public class ContactsService {
     }
 
     /**
-     * Sends a response to a payment request.
+     * Sends a response to a payment request containing a {@link PaymentRequest}, which contains a
+     * bitcoin address belonging to the user.
      *
      * @param mdid            The recipient's MDID
      * @param paymentRequest  A {@link PaymentRequest} object
@@ -257,6 +258,36 @@ public class ContactsService {
     public Completable sendPaymentBroadcasted(String mdid, String txHash, String facilitatedTxId) {
         return Completable.fromCallable(() -> {
             contacts.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId);
+            return Void.TYPE;
+        });
+    }
+
+    /**
+     * Sends a response to a payment request declining the offer of payment.
+     *
+     * @param mdid   The recipient's MDID
+     * @param fctxId The ID of the {@link FacilitatedTransaction} to be declined
+     * @return A {@link Completable} object
+     */
+    @RequiresAccessToken
+    public Completable sendPaymentDeclinedResponse(String mdid, String fctxId) {
+        return Completable.fromCallable(() -> {
+            contacts.sendPaymentDeclined(mdid, fctxId);
+            return Void.TYPE;
+        });
+    }
+
+    /**
+     * Informs the recipient of a payment request that the request has been cancelled.
+     *
+     * @param mdid   The recipient's MDID
+     * @param fctxId The ID of the {@link FacilitatedTransaction} to be cancelled
+     * @return A {@link Completable} object
+     */
+    @RequiresAccessToken
+    public Completable sendPaymentCancelledResponse(String mdid, String fctxId) {
+        return Completable.fromCallable(() -> {
+            contacts.sendPaymentCancelled(mdid, fctxId);
             return Void.TYPE;
         });
     }

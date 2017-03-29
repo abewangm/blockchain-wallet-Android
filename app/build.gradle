@@ -30,7 +30,7 @@ android {
         buildConfigField "String", "STAGING_WEBSOCKET", stagingWebsocket
         buildConfigField "String", "TESTNET_WEBSOCKET", testnetWebsocket
         // Flag for Contacts feature
-        buildConfigField "boolean", "CONTACTS_ENABLED", "false"
+        buildConfigField "boolean", "CONTACTS_ENABLED", "true"
     }
     buildTypes {
         release {
@@ -189,7 +189,7 @@ dependencies {
     testCompile 'org.slf4j:slf4j-simple:1.7.20'
     testCompile "org.mockito:mockito-core:$mockitoVersion"
     testCompile 'org.hamcrest:hamcrest-junit:2.0.0.0'
-    testCompile('org.robolectric:robolectric:3.3.1') {
+    testCompile('org.robolectric:robolectric:3.3.2') {
         exclude group: 'com.google.guava'
         exclude group: 'com.google.protobuf'
     }
