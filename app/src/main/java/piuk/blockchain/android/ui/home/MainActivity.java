@@ -87,7 +87,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public static final String EXTRA_RECIPIENT_ID = "recipient_id";
     public static final String EXTRA_MDID = "mdid";
     public static final String EXTRA_FCTX_ID = "fctx_id";
-    public static final String EXTRA_DEFAULT_INDEX = "default_index";
     public static final int SCAN_URI = 2007;
 
     @Thunk boolean drawerIsOpen = false;
@@ -97,7 +96,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private MaterialProgressDialog fetchTransactionsProgress;
     private AlertDialog rootedDialog;
     private MaterialProgressDialog materialProgressDialog;
-    private OnBalanceFragmentAddedCallback balanceFragmentAddedCallback;
     private AppUtil appUtil;
     private long backPressed;
     private Toolbar toolbar;
@@ -643,7 +641,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public void onStartBalanceFragment(boolean paymentToContactMade) {
         BalanceFragment fragment = BalanceFragment.newInstance(paymentToContactMade);
         replaceFragmentWithAnimation(fragment);
-        if (balanceFragmentAddedCallback != null) balanceFragmentAddedCallback.onFragmentAdded();
         viewModel.checkIfShouldShowSurvey();
     }
 
@@ -781,16 +778,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             String mdid = getIntent().getStringExtra(EXTRA_MDID);
             String fctxId = getIntent().getStringExtra(EXTRA_FCTX_ID);
 
-            if (getCurrentFragment() != null && getCurrentFragment() instanceof BalanceFragment) {
-                startContactSendDialog(uri, recipientId, mdid, fctxId);
-            } else {
-                // Wait for fragment transaction to finish and then pop in
-                balanceFragmentAddedCallback = () -> {
-                    startContactSendDialog(uri, recipientId, mdid, fctxId);
-                    // Null-out callback as not to cause issues later
-                    balanceFragmentAddedCallback = null;
-                };
-            }
+            startContactSendDialog(uri, recipientId, mdid, fctxId);
         }
     }
 
@@ -798,12 +786,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         ContactPaymentDialog paymentDialog =
                 ContactPaymentDialog.newInstance(uri, recipientId, mdid, fctxId);
         paymentDialog.show(getSupportFragmentManager(), ContactPaymentDialog.class.getSimpleName());
-    }
-
-    private interface OnBalanceFragmentAddedCallback {
-
-        void onFragmentAdded();
-
     }
 
 }

@@ -553,8 +553,6 @@ class ContactDetailViewModelTest {
         whenever(mockPayloadDataManager.wallet).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
         whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
-        val defaultIndex = 1337
-        whenever(mockPayloadDataManager.defaultAccountIndex).thenReturn(defaultIndex)
         // Act
         subject.onTransactionClicked(fctxId)
         // Assert
@@ -562,8 +560,7 @@ class ContactDetailViewModelTest {
                 facilitatedTransaction.toBitcoinURI(),
                 contact.id,
                 contact.mdid,
-                fctxId,
-                defaultIndex)
+                fctxId)
         verifyNoMoreInteractions(mockActivity)
     }
 

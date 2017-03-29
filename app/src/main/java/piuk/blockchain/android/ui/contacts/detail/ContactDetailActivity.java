@@ -19,7 +19,6 @@ import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID;
-import static piuk.blockchain.android.ui.home.MainActivity.EXTRA_DEFAULT_INDEX;
 import static piuk.blockchain.android.ui.home.MainActivity.EXTRA_FCTX_ID;
 import static piuk.blockchain.android.ui.home.MainActivity.EXTRA_MDID;
 import static piuk.blockchain.android.ui.home.MainActivity.EXTRA_RECIPIENT_ID;
@@ -96,13 +95,12 @@ public class ContactDetailActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, int defaultIndex) {
+    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId) {
         Bundle bundle = new Bundle();
         bundle.putString(EXTRA_URI, uri);
         bundle.putString(EXTRA_RECIPIENT_ID, recipientId);
         bundle.putString(EXTRA_MDID, mdid);
         bundle.putString(EXTRA_FCTX_ID, fctxId);
-        bundle.putInt(EXTRA_DEFAULT_INDEX, defaultIndex);
         MainActivity.start(this, bundle);
     }
 

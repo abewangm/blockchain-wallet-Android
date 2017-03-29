@@ -579,7 +579,7 @@ public class ContactsDataManager {
     /**
      * Returns a Map of {@link FacilitatedTransaction} notes keyed to Transaction hashes.
      *
-     * @return A {@link HashMap} where the key is a {@link TransactionSummary#getHash()} ()}, and
+     * @return A {@link HashMap} where the key is a {@link TransactionSummary#getHash()}, and
      * the value is a {@link FacilitatedTransaction#getNote()}
      */
     public HashMap<String, String> getNotesTransactionMap() {

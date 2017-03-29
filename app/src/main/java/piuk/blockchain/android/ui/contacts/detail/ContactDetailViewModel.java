@@ -79,7 +79,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
         void showAccountChoiceDialog(List<String> accounts, String fctxId);
 
-        void initiatePayment(String uri, String recipientId, String mdid, String fctxId, int defaultIndex);
+        void initiatePayment(String uri, String recipientId, String mdid, String fctxId);
 
         void showWaitingForPaymentDialog();
 
@@ -214,8 +214,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                         transaction.toBitcoinURI(),
                         contact.getId(),
                         contact.getMdid(),
-                        transaction.getId(),
-                        payloadDataManager.getDefaultAccountIndex());
+                        transaction.getId());
             }
         }
     }
