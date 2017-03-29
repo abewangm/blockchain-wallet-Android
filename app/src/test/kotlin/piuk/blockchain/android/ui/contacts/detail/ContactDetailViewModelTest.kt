@@ -901,7 +901,7 @@ class ContactDetailViewModelTest {
     }
 
     inner class MockDataManagerModule : DataManagerModule() {
-        override fun providePayloadDataManager(payloadManager: PayloadManager?): PayloadDataManager {
+        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?): PayloadDataManager {
             return mockPayloadDataManager
         }
     }

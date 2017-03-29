@@ -106,6 +106,19 @@ public class PayloadDataManager {
         }));
     }
 
+    /**
+     * Initializes and decrypts a user's payload given valid QR code scan data.
+     *
+     * @param data A QR's URI for pairing
+     * @return A {@link Completable} object
+     */
+    public Completable handleQrCode(String data) {
+        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
+            payloadManager.initializeAndDecryptFromQR(data);
+            return Void.TYPE;
+        })).compose(RxUtil.applySchedulersToCompletable());
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // THE NEXT LOGICAL BLOCK -> TODO: ORGANISE REMAINING METHODS
     ///////////////////////////////////////////////////////////////////////////
