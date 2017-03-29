@@ -14,7 +14,7 @@ public class ConnectionApi {
         connectionEndpoint = retrofit.create(ConnectionEndpoint.class);
     }
 
-    public Observable<ResponseBody> getWebiteConnection() {
+    public Observable<ResponseBody> getWebsiteConnection() {
         return connectionEndpoint.pingWebsite();
     }
 

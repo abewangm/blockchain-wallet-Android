@@ -525,7 +525,8 @@ public class AccountViewModelTest {
 
         @Override
         protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
-                                                               PrivateKeyFactory privateKeyFactory) {
+                                                               PrivateKeyFactory privateKeyFactory,
+                                                               RxBus rxBus) {
             return accountDataManager;
         }
 

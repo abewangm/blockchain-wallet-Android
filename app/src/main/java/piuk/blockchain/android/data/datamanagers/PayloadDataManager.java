@@ -4,9 +4,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import info.blockchain.api.data.Balance;
-import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
+import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -14,6 +14,7 @@ import info.blockchain.wallet.payload.data.Wallet;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.crypto.InvalidCipherTextException;
 
 import java.io.UnsupportedEncodingException;
@@ -30,14 +31,17 @@ import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.services.PayloadService;
 
 @SuppressWarnings("WeakerAccess")
 public class PayloadDataManager {
 
+    private PayloadService payloadService;
     private PayloadManager payloadManager;
     private RxPinning rxPinning;
 
-    public PayloadDataManager(PayloadManager payloadManager, RxBus rxBus) {
+    public PayloadDataManager(PayloadService payloadService, PayloadManager payloadManager, RxBus rxBus) {
+        this.payloadService = payloadService;
         this.payloadManager = payloadManager;
         rxPinning = new RxPinning(rxBus);
     }
@@ -48,7 +52,7 @@ public class PayloadDataManager {
 
     /**
      * Decrypts and initializes a wallet from a payload String. Handles both V3 and V1 wallets. Will
-     * return a {@link DecryptionException} if the password isincorrect, otherwise can return a
+     * return a {@link DecryptionException} if the password is incorrect, otherwise can return a
      * {@link HDWalletException} which should be regarded as fatal.
      *
      * @param payload  The payload String to be decrypted
@@ -56,10 +60,8 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      */
     public Completable initializeFromPayload(String payload, String password) {
-        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
-            payloadManager.initializeAndDecryptFromPayload(payload, password);
-            return Void.TYPE;
-        }));
+        return rxPinning.call(() -> payloadService.initializeFromPayload(payload, password))
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
@@ -73,8 +75,8 @@ public class PayloadDataManager {
      * @return An {@link Observable<Wallet>}
      */
     public Observable<Wallet> restoreHdWallet(String mnemonic, String walletName, String email, String password) {
-        return rxPinning.callObservable(() -> Observable.fromCallable(() ->
-                payloadManager.recoverFromMnemonic(mnemonic, walletName, email, password)));
+        return rxPinning.call(() -> payloadService.restoreHdWallet(mnemonic, walletName, email, password))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -86,8 +88,8 @@ public class PayloadDataManager {
      * @return An {@link Observable<Wallet>}
      */
     public Observable<Wallet> createHdWallet(String password, String walletName, String email) {
-        return rxPinning.callObservable(() -> Observable.fromCallable(() ->
-                payloadManager.create(walletName, email, password)));
+        return rxPinning.call(() -> payloadService.createHdWallet(walletName, email, password))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -100,10 +102,8 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      */
     public Completable initializeAndDecrypt(String sharedKey, String guid, String password) {
-        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
-            payloadManager.initializeAndDecrypt(sharedKey, guid, password);
-            return Void.TYPE;
-        }));
+        return rxPinning.call(() -> payloadService.initializeAndDecrypt(sharedKey, guid, password))
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
@@ -113,10 +113,8 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      */
     public Completable handleQrCode(String data) {
-        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
-            payloadManager.initializeAndDecryptFromQR(data);
-            return Void.TYPE;
-        })).compose(RxUtil.applySchedulersToCompletable());
+        return rxPinning.call(() -> payloadService.handleQrCode(data))
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -140,10 +138,8 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      */
     public Completable syncPayloadWithServer() {
-        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
-            if (!payloadManager.save()) throw new ApiException("Sync failed");
-            return Void.TYPE;
-        })).compose(RxUtil.applySchedulersToCompletable());
+        return rxPinning.call(() -> payloadService.syncPayloadWithServer())
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
@@ -155,10 +151,8 @@ public class PayloadDataManager {
      * @see IgnorableDefaultObserver
      */
     public Completable updateAllTransactions() {
-        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
-            payloadManager.getAllTransactions(50, 0);
-            return Void.TYPE;
-        })).compose(RxUtil.applySchedulersToCompletable());
+        return rxPinning.call(() -> payloadService.updateAllTransactions())
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
@@ -169,10 +163,8 @@ public class PayloadDataManager {
      * @see IgnorableDefaultObserver
      */
     public Completable updateAllBalances() {
-        return rxPinning.callCompletable(() -> Completable.fromCallable(() -> {
-            payloadManager.updateAllBalances();
-            return Void.TYPE;
-        })).compose(RxUtil.applySchedulersToCompletable());
+        return rxPinning.call(() -> payloadService.updateAllBalances())
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
@@ -226,7 +218,7 @@ public class PayloadDataManager {
      * should the private key be encrypted.
      *
      * @param legacyAddress  The {@link  LegacyAddress} to generate an Elliptic Curve Key for
-     * @param secondPassword An optional second password, necessary if the private key is encrypted
+     * @param secondPassword An optional second password, necessary if the private key is ebcrypted
      * @return An Elliptic Curve Key object {@link ECKey}
      * @throws UnsupportedEncodingException Thrown if the private key is formatted incorrectly
      * @throws DecryptionException          Thrown if the supplied password is wrong
@@ -237,6 +229,18 @@ public class PayloadDataManager {
     public ECKey getAddressECKey(LegacyAddress legacyAddress, @Nullable String secondPassword)
             throws UnsupportedEncodingException, DecryptionException, InvalidCipherTextException {
         return payloadManager.getAddressECKey(legacyAddress, secondPassword);
+    }
+
+    /**
+     * Update notes for a specific transaction hash and then sync the payload to the server
+     *
+     * @param transactionHash The hash of the transaction to be updated
+     * @param notes           Transaction notes
+     * @return A {@link Completable} object
+     */
+    public Completable updateTransactionNotes(String transactionHash, String notes) {
+        return rxPinning.call(() -> payloadService.updateTransactionNotes(transactionHash, notes))
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -326,8 +330,8 @@ public class PayloadDataManager {
      * @return A {@link LinkedHashMap}
      */
     public Observable<LinkedHashMap<String, Balance>> getBalanceOfAddresses(List<String> addresses) {
-        return rxPinning.callObservable(() -> Observable.fromCallable(() ->
-                payloadManager.getBalanceOfAddresses(addresses)));
+        return rxPinning.call(() -> payloadService.getBalanceOfAddresses(addresses))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -431,6 +435,65 @@ public class PayloadDataManager {
 
         // Find corrected position
         return activeAccounts.indexOf(getWallet().getHdWallets().get(0).getAccounts().get(accountIndex));
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // CONTACTS/METADATA METHODS
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Loads previously saved nodes from the Metadata service. If none are found, the {@link
+     * Observable} returns false.
+     *
+     * @return An {@link Observable} object wrapping a boolean value, representing successfully
+     * loaded nodes
+     */
+    public Observable<Boolean> loadNodes() {
+        return rxPinning.call(() -> payloadService.loadNodes())
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Generates the metadata and shared metadata nodes if necessary.
+     *
+     * @param secondPassword An optional second password.
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable generateNodes(@Nullable String secondPassword) {
+        return rxPinning.call(() -> payloadService.generateNodes(secondPassword))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Returns a {@link MetadataNodeFactory} object which allows you to access the {@link
+     * DeterministicKey} objects needed to initialise the Contacts service.
+     *
+     * @return An {@link Observable} wrapping a {@link MetadataNodeFactory}
+     */
+    public Observable<MetadataNodeFactory> getMetadataNodeFactory() {
+        return Observable.just(payloadManager.getMetadataNodeFactory());
+    }
+
+    /**
+     * Registers the user's MDID with the metadata service.
+     *
+     * @return A {@link Completable}, ie an Observable type object specifically for methods
+     * returning void.
+     */
+    public Completable registerMdid() {
+        return rxPinning.call(() -> payloadService.registerMdid())
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Unregisters the user's MDID from the metadata service.
+     *
+     * @return A {@link Completable}, ie an Observable type object specifically for methods
+     * returning void.
+     */
+    public Completable unregisterMdid() {
+        return rxPinning.call(() -> payloadService.unregisterMdid())
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
 }

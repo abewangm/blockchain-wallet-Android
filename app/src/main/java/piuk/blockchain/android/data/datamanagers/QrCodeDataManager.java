@@ -1,12 +1,12 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
 
 import android.graphics.Bitmap;
 
 import io.reactivex.Observable;
-import piuk.blockchain.android.data.rxjava.RxUtil;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.ui.zxing.Contents;
 import piuk.blockchain.android.ui.zxing.encode.QRCodeEncoder;
 
@@ -22,24 +22,19 @@ public class QrCodeDataManager {
      */
     public Observable<Bitmap> generateQrCode(String uri, int dimensions) {
         return generateQrCodeObservable(uri, dimensions)
-                .compose(RxUtil.applySchedulersToObservable());
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     private Observable<Bitmap> generateQrCodeObservable(String uri, int dimensions) {
-        return Observable.defer(() -> {
-            Bitmap bitmap = null;
-            QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(uri, null, Contents.Type.TEXT, BarcodeFormat.QR_CODE.toString(), dimensions);
-            try {
-                bitmap = qrCodeEncoder.encodeAsBitmap();
-            } catch (WriterException e) {
-                return Observable.error(e);
-            }
-
-            if (bitmap == null) {
-                return Observable.error(new Throwable("Bitmap was null"));
-            } else {
-                return Observable.just(bitmap);
-            }
+        return Observable.fromCallable(() -> {
+            QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(
+                    uri,
+                    null,
+                    Contents.Type.TEXT,
+                    BarcodeFormat.QR_CODE.toString(),
+                    dimensions);
+            return qrCodeEncoder.encodeAsBitmap();
         });
     }
 

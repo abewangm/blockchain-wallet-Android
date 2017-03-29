@@ -70,17 +70,20 @@ public class ApiModule {
                                                                        PrefsUtil prefsUtil) {
 
         return new NotificationTokenManager(
-                new NotificationService(new WalletApi()), accessState, payloadManager, prefsUtil);
+                new NotificationService(new WalletApi()),
+                accessState,
+                payloadManager,
+                prefsUtil);
     }
 
     // TODO: 09/02/2017 This should be moved to DataManagerModule eventually
     @Provides
     @Singleton
-    protected ContactsDataManager provideContactsManager(PayloadManager payloadManager) {
+    protected ContactsDataManager provideContactsManager(RxBus rxBus) {
         return new ContactsDataManager(
                 new ContactsService(new Contacts()),
-                payloadManager,
-                new PendingTransactionListStore());
+                new PendingTransactionListStore(),
+                rxBus);
     }
 
     @Provides

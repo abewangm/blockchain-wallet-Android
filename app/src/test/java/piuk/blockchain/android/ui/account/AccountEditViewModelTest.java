@@ -895,12 +895,13 @@ public class AccountEditViewModelTest {
         }
 
         @Override
-        protected SendDataManager provideSendDataManager() {
+        protected SendDataManager provideSendDataManager(RxBus rxBus) {
             return sendDataManager;
         }
 
         @Override
         protected AccountEditDataManager provideAccountEditDataManager(PayloadDataManager payloadDataManager,
+                                                                       SendDataManager sendDataManager,
                                                                        DynamicFeeCache dynamicFeeCache) {
             return accountEditDataManager;
         }

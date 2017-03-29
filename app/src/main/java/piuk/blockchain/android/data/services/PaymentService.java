@@ -18,6 +18,7 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
+import piuk.blockchain.android.util.annotations.WebRequest;
 import retrofit2.Response;
 
 public class PaymentService {
@@ -39,6 +40,7 @@ public class PaymentService {
      * @param bigIntAmount        The actual transaction amount
      * @return An {@link Observable<String>} where the String is the transaction hash
      */
+    @WebRequest
     public Observable<String> submitPayment(SpendableUnspentOutputs unspentOutputBundle,
                                             List<ECKey> keys,
                                             String toAddress,
@@ -79,6 +81,7 @@ public class PaymentService {
      *
      * @return An {@link Observable<FeeList>}
      */
+    @WebRequest
     public Observable<FeeList> getSuggestedFee() {
         return payment.getDynamicFee();
     }
@@ -90,6 +93,7 @@ public class PaymentService {
      * @param address The address you wish to query, as a String
      * @return An {@link Observable<UnspentOutputs>}
      */
+    @WebRequest
     public Observable<UnspentOutputs> getUnspentOutputs(String address) {
         return Observable.fromCallable(() -> {
             Response<UnspentOutputs> response = payment.getUnspentCoins(Collections.singletonList(address)).execute();
@@ -174,4 +178,5 @@ public class PaymentService {
     public BigInteger estimateFee(int inputs, int outputs, BigInteger feePerKb) {
         return payment.estimatedFee(inputs, outputs, feePerKb);
     }
+
 }

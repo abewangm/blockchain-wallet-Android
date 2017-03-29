@@ -509,7 +509,7 @@ class ContactPaymentDialogViewModelTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(payloadManager: PayloadManager?): ContactsDataManager {
+        override fun provideContactsManager(rxBus: RxBus?): ContactsDataManager {
             return mockContactsDataManager
         }
     }
@@ -519,7 +519,7 @@ class ContactPaymentDialogViewModelTest {
             return mockPayloadDataManager
         }
 
-        override fun provideSendDataManager(): SendDataManager {
+        override fun provideSendDataManager(rxBus: RxBus?): SendDataManager {
             return mockSendDataManager
         }
 

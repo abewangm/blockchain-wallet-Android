@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.VisibleForTesting;
 
-import android.util.Log;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import java.util.concurrent.TimeUnit;
@@ -60,8 +59,7 @@ public class AuthDataManager {
     }
 
     public Completable updatePayload(String sharedKey, String guid, String password) {
-        return payloadDataManager.initializeAndDecrypt(sharedKey, guid, password)
-                .compose(RxUtil.applySchedulersToCompletable());
+        return payloadDataManager.initializeAndDecrypt(sharedKey, guid, password);
     }
 
     public Observable<String> validatePin(String pin) {
@@ -75,7 +73,6 @@ public class AuthDataManager {
 
     public Observable<Wallet> createHdWallet(String password, String walletName, String email) {
         return payloadDataManager.createHdWallet(password, walletName, email)
-                .compose(RxUtil.applySchedulersToObservable())
                 .doOnNext(payload -> {
                     // Successfully created and saved
                     appUtil.setNewlyCreated(true);
@@ -94,8 +91,7 @@ public class AuthDataManager {
                     appUtil.setNewlyCreated(true);
                     prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
                     appUtil.setSharedKey(payload.getSharedKey());
-                })
-                .compose(RxUtil.applySchedulersToObservable());
+                });
     }
 
     public Observable<String> startPollingAuthStatus(String guid, String sessionId) {
@@ -132,7 +128,7 @@ public class AuthDataManager {
                     prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.getWallet().getGuid());
                     appUtil.setSharedKey(payloadDataManager.getWallet().getSharedKey());
                     prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
-                }).compose(RxUtil.applySchedulersToCompletable());
+                });
     }
 
 }

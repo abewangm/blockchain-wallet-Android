@@ -12,7 +12,6 @@ import io.reactivex.Observable
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
@@ -20,6 +19,8 @@ import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.contacts.PaymentRequestType
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.*
@@ -34,7 +35,7 @@ class ContactsPaymentRequestViewModelTest {
     private lateinit var subject: ContactsPaymentRequestViewModel
     private val mockActivity: ContactsPaymentRequestViewModel.DataListener = mock()
     private val mockContactsManager: ContactsDataManager = mock()
-    private val mockPayloadManager: PayloadManager = mock(defaultAnswer = RETURNS_DEEP_STUBS)
+    private val mockPayloadDataManager: PayloadDataManager = mock()
 
     @Before
     @Throws(Exception::class)
@@ -44,7 +45,7 @@ class ContactsPaymentRequestViewModelTest {
                 Injector.getInstance(),
                 ApplicationModule(RuntimeEnvironment.application),
                 MockApiModule(),
-                DataManagerModule())
+                MockDataManagerModule())
 
         subject = ContactsPaymentRequestViewModel(mockActivity)
     }
@@ -198,7 +199,6 @@ class ContactsPaymentRequestViewModelTest {
         val accountPosition = 3
         val paymentRequestType = PaymentRequestType.REQUEST
         val receiveAddress = "RECEIVE_ADDRESS"
-        val account: Account = mock()
         val recipient = Contact().apply {
             name = contactName
             mdid = contactMdid
@@ -209,17 +209,15 @@ class ContactsPaymentRequestViewModelTest {
             this.accountPosition = accountPosition
             this.paymentRequestType = paymentRequestType
         }
-        whenever(mockPayloadManager.payload.hdWallets[0].accounts[accountPosition])
-                .thenReturn(account)
-        whenever(mockPayloadManager.getNextReceiveAddress(account))
-                .thenReturn(receiveAddress)
+        whenever(mockPayloadDataManager.getNextReceiveAddress(accountPosition))
+                .thenReturn(Observable.just(receiveAddress))
         whenever(mockContactsManager.requestSendPayment(eq(contactMdid), any()))
                 .thenReturn(Completable.complete())
         whenever(mockActivity.note).thenReturn(note)
         // Act
         subject.sendRequest()
         // Assert
-        verify(mockPayloadManager).getNextReceiveAddress(account)
+        verify(mockPayloadDataManager).getNextReceiveAddress(accountPosition)
         verify(mockContactsManager).requestSendPayment(eq(contactMdid), any<PaymentRequest>())
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).showProgressDialog()
@@ -255,7 +253,7 @@ class ContactsPaymentRequestViewModelTest {
         // Act
         subject.sendRequest()
         // Assert
-        verifyZeroInteractions(mockPayloadManager)
+        verifyZeroInteractions(mockPayloadDataManager)
         verify(mockContactsManager).requestReceivePayment(eq(contactMdid), any<RequestForPaymentRequest>())
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).showProgressDialog()
@@ -276,7 +274,6 @@ class ContactsPaymentRequestViewModelTest {
         val accountPosition = 3
         val paymentRequestType = PaymentRequestType.REQUEST
         val receiveAddress = "RECEIVE_ADDRESS"
-        val account: Account = mock()
         val recipient = Contact().apply {
             name = contactName
             mdid = contactMdid
@@ -287,17 +284,15 @@ class ContactsPaymentRequestViewModelTest {
             this.accountPosition = accountPosition
             this.paymentRequestType = paymentRequestType
         }
-        whenever(mockPayloadManager.payload.hdWallets[0].accounts[accountPosition])
-                .thenReturn(account)
-        whenever(mockPayloadManager.getNextReceiveAddress(account))
-                .thenReturn(receiveAddress)
+        whenever(mockPayloadDataManager.getNextReceiveAddress(accountPosition))
+                .thenReturn(Observable.just(receiveAddress))
         whenever(mockContactsManager.requestSendPayment(eq(contactMdid), any()))
                 .thenReturn(Completable.error { Throwable() })
         whenever(mockActivity.note).thenReturn(note)
         // Act
         subject.sendRequest()
         // Assert
-        verify(mockPayloadManager).getNextReceiveAddress(account)
+        verify(mockPayloadDataManager).getNextReceiveAddress(accountPosition)
         verify(mockContactsManager).requestSendPayment(eq(contactMdid), any<PaymentRequest>())
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).showProgressDialog()
@@ -333,7 +328,7 @@ class ContactsPaymentRequestViewModelTest {
         // Act
         subject.sendRequest()
         // Assert
-        verifyZeroInteractions(mockPayloadManager)
+        verifyZeroInteractions(mockPayloadDataManager)
         verify(mockContactsManager).requestReceivePayment(eq(contactMdid), any<RequestForPaymentRequest>())
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).showProgressDialog()
@@ -344,12 +339,14 @@ class ContactsPaymentRequestViewModelTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun providePayloadManager(): PayloadManager {
-            return mockPayloadManager
-        }
-
-        override fun provideContactsManager(payloadManager: PayloadManager?): ContactsDataManager {
+        override fun provideContactsManager(rxBus: RxBus?): ContactsDataManager {
             return mockContactsManager
+        }
+    }
+
+    inner class MockDataManagerModule : DataManagerModule() {
+        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?): PayloadDataManager {
+            return mockPayloadDataManager
         }
     }
 

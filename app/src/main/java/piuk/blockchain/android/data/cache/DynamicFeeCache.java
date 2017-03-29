@@ -4,19 +4,10 @@ import info.blockchain.wallet.api.data.FeeList;
 
 public class DynamicFeeCache {
 
-    private static DynamicFeeCache instance;
-
     private FeeList feeList;
 
     public DynamicFeeCache() {
         // No-op
-    }
-
-    public static DynamicFeeCache getInstance() {
-        if (instance == null) {
-            instance = new DynamicFeeCache();
-        }
-        return instance;
     }
 
     public FeeList getCachedDynamicFee() {
@@ -28,6 +19,6 @@ public class DynamicFeeCache {
     }
 
     public void destroy() {
-        instance = null;
+        feeList = null;
     }
 }

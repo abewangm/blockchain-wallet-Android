@@ -25,7 +25,10 @@ public class NotificationTokenManager {
     private PayloadManager payloadManager;
     private PrefsUtil prefsUtil;
 
-    public NotificationTokenManager(NotificationService notificationService, AccessState accessState, PayloadManager payloadManager, PrefsUtil prefsUtil) {
+    public NotificationTokenManager(NotificationService notificationService,
+                                    AccessState accessState,
+                                    PayloadManager payloadManager,
+                                    PrefsUtil prefsUtil) {
         this.notificationService = notificationService;
         this.accessState = accessState;
         this.payloadManager = payloadManager;

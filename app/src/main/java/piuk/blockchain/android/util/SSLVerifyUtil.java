@@ -11,8 +11,11 @@ import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 
-// openssl s_client -showcerts -connect blockchain.info:443
 
+/**
+ * <code>openssl s_client -connect api.blockchain.info:443 | openssl x509 -pubkey -noout | openssl
+ * rsa -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64</code>
+ */
 public class SSLVerifyUtil {
 
     private final RxPinning rxPinning;
@@ -30,7 +33,7 @@ public class SSLVerifyUtil {
      * which will handle the response appropriately.
      */
     public void validateSSL() {
-        rxPinning.callObservable(() -> connectionApi.getWebiteConnection())
+        rxPinning.call(() -> connectionApi.getWebsiteConnection())
                 .subscribeOn(Schedulers.io())
                 .subscribe(new IgnorableDefaultObserver<>());
     }

@@ -13,22 +13,20 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
-import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.services.PaymentService;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
 public class AccountEditDataManager {
 
     private PayloadDataManager payloadDataManager;
-    private PaymentService paymentService;
     private DynamicFeeCache dynamicFeeCache;
+    private SendDataManager sendDataManager;
 
-    public AccountEditDataManager(PaymentService paymentService,
-                                  PayloadDataManager payloadDataManager,
+    public AccountEditDataManager(PayloadDataManager payloadDataManager,
+                                  SendDataManager sendDataManager,
                                   DynamicFeeCache dynamicFeeCache) {
-        this.paymentService = paymentService;
         this.payloadDataManager = payloadDataManager;
+        this.sendDataManager = sendDataManager;
         this.dynamicFeeCache = dynamicFeeCache;
     }
 
@@ -42,7 +40,7 @@ public class AccountEditDataManager {
     public Observable<PendingTransaction> getPendingTransactionForLegacyAddress(LegacyAddress legacyAddress) {
         PendingTransaction pendingTransaction = new PendingTransaction();
 
-        return paymentService.getUnspentOutputs(legacyAddress.getAddress())
+        return sendDataManager.getUnspentOutputs(legacyAddress.getAddress())
                 .flatMap(unspentOutputs -> {
                     BigInteger suggestedFeePerKb =
                             new BigDecimal(dynamicFeeCache.getCachedDynamicFee()
@@ -50,15 +48,15 @@ public class AccountEditDataManager {
                                     .getFee())
                                     .toBigInteger();
 
-                    Pair<BigInteger, BigInteger> sweepableCoins = paymentService
-                            .getSweepableCoins(unspentOutputs, suggestedFeePerKb);
+                    Pair<BigInteger, BigInteger> sweepableCoins =
+                            sendDataManager.getSweepableCoins(unspentOutputs, suggestedFeePerKb);
                     BigInteger sweepAmount = sweepableCoins.getLeft();
 
                     // To default account
                     Account defaultAccount = payloadDataManager.getDefaultAccount();
                     pendingTransaction.sendingObject = new ItemAccount(legacyAddress.getLabel(), sweepAmount.toString(), "", sweepAmount.longValue(), legacyAddress);
                     pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", sweepAmount.longValue(), defaultAccount);
-                    pendingTransaction.unspentOutputBundle = paymentService.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
+                    pendingTransaction.unspentOutputBundle = sendDataManager.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
                     pendingTransaction.bigIntAmount = sweepAmount;
                     pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee();
 
@@ -67,8 +65,7 @@ public class AccountEditDataManager {
                 .map(receivingAddress -> {
                     pendingTransaction.receivingAddress = receivingAddress;
                     return pendingTransaction;
-                })
-                .compose(RxUtil.applySchedulersToObservable());
+                });
     }
 
     /**
@@ -89,14 +86,13 @@ public class AccountEditDataManager {
                                             BigInteger bigIntFee,
                                             BigInteger bigIntAmount) {
 
-        return paymentService.submitPayment(
+        return sendDataManager.submitPayment(
                 unspentOutputBundle,
                 keys,
                 toAddress,
                 changeAddress,
                 bigIntFee,
-                bigIntAmount)
-                .compose(RxUtil.applySchedulersToObservable());
+                bigIntAmount);
     }
 
 }

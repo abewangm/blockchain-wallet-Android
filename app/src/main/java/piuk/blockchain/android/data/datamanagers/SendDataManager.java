@@ -14,15 +14,19 @@ import java.math.BigInteger;
 import java.util.List;
 
 import io.reactivex.Observable;
+import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.PaymentService;
 
 public class SendDataManager {
 
     private PaymentService paymentService;
+    private RxPinning rxPinning;
 
-    public SendDataManager(PaymentService paymentService) {
+    public SendDataManager(PaymentService paymentService, RxBus rxBus) {
         this.paymentService = paymentService;
+        rxPinning = new RxPinning(rxBus);
     }
 
     /**
@@ -43,13 +47,13 @@ public class SendDataManager {
                                             BigInteger bigIntFee,
                                             BigInteger bigIntAmount) {
 
-        return paymentService.submitPayment(
+        return rxPinning.call(() -> paymentService.submitPayment(
                 unspentOutputBundle,
                 keys,
                 toAddress,
                 changeAddress,
                 bigIntFee,
-                bigIntAmount)
+                bigIntAmount))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -75,7 +79,7 @@ public class SendDataManager {
      * @return An {@link Observable<FeeList>}
      */
     public Observable<FeeList> getSuggestedFee() {
-        return paymentService.getSuggestedFee()
+        return rxPinning.call(() -> paymentService.getSuggestedFee())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -87,7 +91,7 @@ public class SendDataManager {
      * @return An {@link Observable<UnspentOutputs>}
      */
     public Observable<UnspentOutputs> getUnspentOutputs(String address) {
-        return paymentService.getUnspentOutputs(address)
+        return rxPinning.call(() -> paymentService.getUnspentOutputs(address))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 

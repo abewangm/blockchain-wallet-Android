@@ -163,7 +163,7 @@ public class MainViewModel extends BaseViewModel {
 
     void checkForMessages() {
         compositeDisposable.add(
-                contactsDataManager.loadNodes()
+                payloadDataManager.loadNodes()
                         .flatMapCompletable(
                                 success -> {
                                     if (success) {
@@ -255,14 +255,14 @@ public class MainViewModel extends BaseViewModel {
         final boolean finalFromNotification = fromNotification;
 
         compositeDisposable.add(
-                contactsDataManager.loadNodes()
+                payloadDataManager.loadNodes()
                         .flatMap(loaded -> {
                             if (loaded) {
-                                return contactsDataManager.getMetadataNodeFactory();
+                                return payloadDataManager.getMetadataNodeFactory();
                             } else {
                                 if (!payloadManager.getPayload().isDoubleEncryption()) {
-                                    return contactsDataManager.generateNodes(null)
-                                            .andThen(contactsDataManager.getMetadataNodeFactory());
+                                    return payloadDataManager.generateNodes(null)
+                                            .andThen(payloadDataManager.getMetadataNodeFactory());
                                 } else {
                                     throw new InvalidCredentialsException("Payload is double encrypted");
                                 }
@@ -271,7 +271,7 @@ public class MainViewModel extends BaseViewModel {
                         .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
                                 metadataNodeFactory.getMetadataNode(),
                                 metadataNodeFactory.getSharedMetadataNode()))
-                        .andThen(contactsDataManager.registerMdid())
+                        .andThen(payloadDataManager.registerMdid())
                         .andThen(contactsDataManager.publishXpub())
                         .doOnComplete(() -> rxBus.emitEvent(ContactsEvent.class, ContactsEvent.INIT))
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
