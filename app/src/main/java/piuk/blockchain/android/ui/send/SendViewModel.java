@@ -781,11 +781,15 @@ public class SendViewModel extends BaseViewModel {
         details.fiatTotal = (monetaryUtil.getFiatFormat(sendModel.fiatUnit)
                 .format(sendModel.exchangeRate * (totalFiat.doubleValue() / 1e8)));
 
-        details.isSurge = sendModel.dynamicFeeList.getDefaultFee().isSurge();// TODO: 28/02/2017 might not be selected fee
+        details.isSurge = isSurge();
         details.isLargeTransaction = isLargeTransaction();
         details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.getConsumedAmount().compareTo(BigInteger.ZERO) == 1;
 
         if (dataListener != null) dataListener.onShowPaymentDetails(details);
+    }
+
+    boolean isSurge() {
+        return sendModel.dynamicFeeList.getDefaultFee().isSurge() && !sendModel.pendingTransaction.isCustomFee;
     }
 
     /**
