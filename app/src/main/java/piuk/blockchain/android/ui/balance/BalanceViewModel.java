@@ -537,7 +537,7 @@ public class BalanceViewModel extends BaseViewModel {
                             paymentRequest.setId(fctxId);
 
                             compositeDisposable.add(
-                                    payloadDataManager.getNextReceiveAddress(getCorrectedAccountIndex(accountPosition))
+                                    payloadDataManager.getNextReceiveAddressAndReserve(getCorrectedAccountIndex(accountPosition), "Payment request "+transaction.getId())
                                             .doOnNext(paymentRequest::setAddress)
                                             .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
                                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())
