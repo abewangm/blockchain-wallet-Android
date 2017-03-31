@@ -13,6 +13,8 @@ import info.blockchain.wallet.metadata.data.Message
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import io.reactivex.Observable
+import okhttp3.MediaType
+import okhttp3.ResponseBody
 import org.bitcoinj.crypto.DeterministicKey
 import org.junit.Before
 import org.junit.Test
@@ -103,6 +105,8 @@ class ContactsDataManagerTest : RxTest() {
         val mockSharedMetadataNode: DeterministicKey = mock()
         whenever(mockMetadataNodeFactory.sharedMetadataNode).thenReturn(mockSharedMetadataNode)
         whenever(mockPayloadManager.metadataNodeFactory).thenReturn(mockMetadataNodeFactory)
+        whenever(mockPayloadManager.registerMdid(mockSharedMetadataNode))
+                .thenReturn(Observable.just(ResponseBody.create(MediaType.parse("application/json"), "")))
         // Act
         val testObserver = subject.registerMdid().test()
         // Assert
@@ -119,6 +123,8 @@ class ContactsDataManagerTest : RxTest() {
         val mockSharedMetadataNode: DeterministicKey = mock()
         whenever(mockMetadataNodeFactory.sharedMetadataNode).thenReturn(mockSharedMetadataNode)
         whenever(mockPayloadManager.metadataNodeFactory).thenReturn(mockMetadataNodeFactory)
+        whenever(mockPayloadManager.unregisterMdid(mockSharedMetadataNode))
+                .thenReturn(Observable.just(ResponseBody.create(MediaType.parse("application/json"), "")))
         // Act
         val testObserver = subject.unregisterMdid().test()
         // Assert
