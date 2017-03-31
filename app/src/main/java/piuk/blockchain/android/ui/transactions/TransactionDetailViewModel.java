@@ -274,37 +274,27 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     @VisibleForTesting
     Observable<String> getTransactionValueString(String currency, TransactionSummary transaction) {
-        if (currency.equals("USD")) {
-            return mExchangeRateFactory.getHistoricPrice(
-                    transaction.getTotal().abs().longValue(),
-                    mFiatType,
-                    transaction.getTime() * 1000)
-                    .map(aDouble -> {
-                        int stringId = -1;
-                        switch (transaction.getDirection()) {
-                            case TRANSFERRED:
-                                stringId = R.string.transaction_detail_value_at_time_transferred;
-                                break;
-                            case SENT:
-                                stringId = R.string.transaction_detail_value_at_time_sent;
-                                break;
-                            case RECEIVED:
-                                stringId = R.string.transaction_detail_value_at_time_received;
-                                break;
-                        }
-                        return mStringUtils.getString(stringId)
-                                + mExchangeRateFactory.getSymbol(mFiatType)
-                                + mMonetaryUtil.getFiatFormat(mFiatType).format(aDouble);
-                    });
-        } else {
-            return Observable.just(getTransactionValueFiat(transaction.getTotal()));
-        }
-    }
-
-    private String getTransactionValueFiat(BigInteger total) {
-        return mStringUtils.getString(R.string.transaction_detail_value)
-                + mExchangeRateFactory.getSymbol(mFiatType)
-                + mMonetaryUtil.getFiatFormat(mFiatType).format(mBtcExchangeRate * (total.abs().longValue() / 1e8));
+        return mExchangeRateFactory.getHistoricPrice(
+                transaction.getTotal().abs().longValue(),
+                currency,
+                transaction.getTime() * 1000)
+                .map(aDouble -> {
+                    int stringId = -1;
+                    switch (transaction.getDirection()) {
+                        case TRANSFERRED:
+                            stringId = R.string.transaction_detail_value_at_time_transferred;
+                            break;
+                        case SENT:
+                            stringId = R.string.transaction_detail_value_at_time_sent;
+                            break;
+                        case RECEIVED:
+                            stringId = R.string.transaction_detail_value_at_time_received;
+                            break;
+                    }
+                    return mStringUtils.getString(stringId)
+                            + mExchangeRateFactory.getSymbol(mFiatType)
+                            + mMonetaryUtil.getFiatFormat(mFiatType).format(aDouble);
+                });
     }
 
     private String getDisplayUnits() {
