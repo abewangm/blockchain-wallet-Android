@@ -5,6 +5,7 @@ import android.support.v7.app.AlertDialog;
 import android.widget.ArrayAdapter;
 
 import info.blockchain.wallet.api.PersistentUrls;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import piuk.blockchain.android.data.api.DebugSettings;
 import piuk.blockchain.android.ui.account.AccountViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppRate;
+import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
 class EnvironmentSwitcher {
@@ -21,11 +23,13 @@ class EnvironmentSwitcher {
     private Context context;
     private PrefsUtil prefsUtil;
     private DebugSettings debugSettings;
+    private AppUtil appUtil;
 
-    EnvironmentSwitcher(Context context, DebugSettings debugSettings) {
+    EnvironmentSwitcher(Context context, DebugSettings debugSettings, AppUtil appUtil, PrefsUtil prefsUtil) {
         this.context = context;
-        prefsUtil = new PrefsUtil(context);
+        this.prefsUtil = prefsUtil;
         this.debugSettings = debugSettings;
+        this.appUtil = appUtil;
     }
 
     void showEnvironmentSelectionDialog() {
@@ -70,18 +74,28 @@ class EnvironmentSwitcher {
                             break;
                     }
                 })
-                .setPositiveButton("Select", (dialog, id) -> {
-                    debugSettings.changeEnvironment(
-                            selectedEnvironment[0] != null ? selectedEnvironment[0] : PersistentUrls.Environment.PRODUCTION);
+                .setPositiveButton("Select", (dialog, id) ->
+                        new AlertDialog.Builder(context, R.style.AlertDialogStyle)
+                                .setTitle("Warning")
+                                .setMessage("The app will now restart. For the changes to take effect, " +
+                                        "please remove the app from memory (by swiping the app out of " +
+                                        "recents) otherwise you'll remain on your previously selected " +
+                                        "environment - even if the app tells you otherwise!")
+                                .setPositiveButton(android.R.string.ok, (dialog1, which) -> {
+                                    debugSettings.changeEnvironment(
+                                            selectedEnvironment[0] != null ? selectedEnvironment[0] : PersistentUrls.Environment.PRODUCTION);
 
-                    ToastCustom.makeText(
-                            context,
-                            "Environment set to " + debugSettings.getCurrentEnvironment().getName(),
-                            ToastCustom.LENGTH_SHORT,
-                            ToastCustom.TYPE_OK);
+                                    ToastCustom.makeText(
+                                            context,
+                                            "Environment set to " + debugSettings.getCurrentEnvironment().getName(),
+                                            ToastCustom.LENGTH_SHORT,
+                                            ToastCustom.TYPE_OK);
 
-                    resetAllTimers();
-                })
+                                    resetAllTimers();
+                                    appUtil.clearCredentialsAndKeepEnvironment();
+                                })
+                                .create()
+                                .show())
                 .setNegativeButton("Reset Timers", (dialogInterface, i) -> resetAllTimers())
                 .create()
                 .show();
