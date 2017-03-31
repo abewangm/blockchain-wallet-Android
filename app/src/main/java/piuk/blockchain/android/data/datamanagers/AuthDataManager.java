@@ -12,6 +12,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.util.AppUtil;
@@ -30,6 +32,7 @@ public class AuthDataManager {
     private AccessState accessState;
     private StringUtils stringUtils;
     private PayloadDataManager payloadDataManager;
+    private RxPinning rxPinning;
     @Thunk PrefsUtil prefsUtil;
     @VisibleForTesting protected int timer;
 
@@ -38,7 +41,8 @@ public class AuthDataManager {
                            WalletService walletService,
                            AppUtil appUtil,
                            AccessState accessState,
-                           StringUtils stringUtils) {
+                           StringUtils stringUtils,
+                           RxBus rxBus) {
 
         this.payloadDataManager = payloadDataManager;
         this.prefsUtil = prefsUtil;
@@ -46,15 +50,16 @@ public class AuthDataManager {
         this.appUtil = appUtil;
         this.accessState = accessState;
         this.stringUtils = stringUtils;
+        rxPinning = new RxPinning(rxBus);
     }
 
     public Observable<Response<ResponseBody>> getEncryptedPayload(String guid, String sessionId) {
-        return walletService.getEncryptedPayload(guid, sessionId)
+        return rxPinning.call(() -> walletService.getEncryptedPayload(guid, sessionId))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     public Observable<String> getSessionId(String guid) {
-        return walletService.getSessionId(guid)
+        return rxPinning.call(() -> walletService.getSessionId(guid))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -63,11 +68,12 @@ public class AuthDataManager {
     }
 
     public Observable<String> validatePin(String pin) {
-        return accessState.validatePin(pin);
+        return rxPinning.call(() -> accessState.validatePin(pin))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     public Observable<Boolean> createPin(String password, String pin) {
-        return accessState.createPin(password, pin)
+        return rxPinning.call(() -> accessState.createPin(password, pin))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 

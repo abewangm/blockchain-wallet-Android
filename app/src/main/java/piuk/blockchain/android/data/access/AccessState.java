@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
-import android.util.Log;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -28,6 +27,7 @@ import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
+// TODO: 21/03/2017 Most of this class can be refactored out
 public class AccessState {
 
     private static final long LOGOUT_TIMEOUT_MILLIS = 1000L * 30L;
@@ -90,8 +90,7 @@ public class AccessState {
                         //Invalid PIN
                         throw new InvalidCredentialsException("Validate access failed");
                     }
-                })
-                .compose(RxUtil.applySchedulersToObservable());
+                });
     }
 
     // TODO: 14/10/2016 This should be moved elsewhere

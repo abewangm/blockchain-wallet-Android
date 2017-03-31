@@ -936,7 +936,8 @@ public class PinEntryViewModelTest {
                                                          PrefsUtil prefsUtil,
                                                          AppUtil appUtil,
                                                          AccessState accessState,
-                                                         StringUtils stringUtils) {
+                                                         StringUtils stringUtils,
+                                                         RxBus rxBus) {
             return authDataManager;
         }
 

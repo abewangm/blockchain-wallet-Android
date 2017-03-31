@@ -20,6 +20,7 @@ import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -210,7 +211,7 @@ public class RecoverFundsViewModelTest {
         assertEquals(util, mAppUtil);
     }
 
-    @SuppressWarnings("SyntheticAccessorCall")
+    @SuppressWarnings({"SyntheticAccessorCall", "PrivateMemberAccessBetweenOuterAndInnerClass"})
     private class MockApplicationModule extends ApplicationModule {
 
         MockApplicationModule(Application application) {
@@ -223,7 +224,7 @@ public class RecoverFundsViewModelTest {
         }
     }
 
-    @SuppressWarnings("SyntheticAccessorCall")
+    @SuppressWarnings({"SyntheticAccessorCall", "PrivateMemberAccessBetweenOuterAndInnerClass"})
     private class MockApiModule extends ApiModule {
 
         @Override
@@ -232,7 +233,7 @@ public class RecoverFundsViewModelTest {
         }
     }
 
-    @SuppressWarnings("SyntheticAccessorCall")
+    @SuppressWarnings({"SyntheticAccessorCall", "PrivateMemberAccessBetweenOuterAndInnerClass"})
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
@@ -240,7 +241,8 @@ public class RecoverFundsViewModelTest {
                                                          PrefsUtil prefsUtil,
                                                          AppUtil appUtil,
                                                          AccessState accessState,
-                                                         StringUtils stringUtils) {
+                                                         StringUtils stringUtils,
+                                                         RxBus rxBus) {
             return mAuthDataManager;
         }
     }

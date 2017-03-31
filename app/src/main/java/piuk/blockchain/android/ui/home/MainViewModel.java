@@ -211,7 +211,7 @@ public class MainViewModel extends BaseViewModel {
 
     }
 
-    void unpair() {
+    void unPair() {
         dataListener.clearAllDynamicShortcuts();
         payloadManager.wipe();
         prefs.logOut();

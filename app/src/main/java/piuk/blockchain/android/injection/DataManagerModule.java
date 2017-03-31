@@ -47,14 +47,16 @@ public class DataManagerModule {
                                                      PrefsUtil prefsUtil,
                                                      AppUtil appUtil,
                                                      AccessState accessState,
-                                                     StringUtils stringUtils) {
+                                                     StringUtils stringUtils,
+                                                     RxBus rxBus) {
         return new AuthDataManager(
                 payloadDataManager,
                 prefsUtil,
                 new WalletService(new WalletApi()),
                 appUtil,
                 accessState,
-                stringUtils);
+                stringUtils,
+                rxBus);
     }
 
     @Provides
