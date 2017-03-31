@@ -3,6 +3,7 @@ package piuk.blockchain.android.data.datamanagers;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import android.util.Log;
 import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.exceptions.DecryptionException;
@@ -166,6 +167,20 @@ public class PayloadDataManager {
     public Observable<String> getNextReceiveAddress(int accountIndex) {
         Account account = getWallet().getHdWallets().get(0).getAccounts().get(accountIndex);
         return getNextReceiveAddress(account);
+    }
+
+    /**
+     * Returns the next Receive address for a given {@link Account object}
+     *
+     * @param accountIndex The index of the account for which you want an address to be generated
+     * @param label Label used to reserve address
+     * @return An {@link Observable} wrapping the receive address
+     */
+    public Observable<String> getNextReceiveAddressAndReserve(int accountIndex, String label) {
+        Account account = getWallet().getHdWallets().get(0).getAccounts().get(accountIndex);
+        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddressAndReserve(account, label))
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread());
     }
 
     /**

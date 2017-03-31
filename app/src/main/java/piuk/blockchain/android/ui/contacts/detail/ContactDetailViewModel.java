@@ -281,7 +281,7 @@ public class ContactDetailViewModel extends BaseViewModel {
         paymentRequest.setId(fctxId);
 
         compositeDisposable.add(
-                payloadDataManager.getNextReceiveAddress(payloadDataManager.getPositionOfAccountInActiveList(accountPosition))
+                payloadDataManager.getNextReceiveAddressAndReserve(payloadDataManager.getPositionOfAccountInActiveList(accountPosition), "Payment request "+fctxId)
                         .doOnNext(paymentRequest::setAddress)
                         .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
