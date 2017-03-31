@@ -42,7 +42,6 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -300,19 +299,6 @@ public class TransactionDetailViewModelTest extends RxTest {
                 subject.getTransactionValueString("USD", txSent).test();
         // Assert
         assertEquals("Value when sent: $1 000.00", observer.values().get(0));
-        observer.onComplete();
-        observer.assertNoErrors();
-    }
-
-    @SuppressLint("VisibleForTests")
-    @Test
-    public void getTransactionValueStringNonUsd() {
-        // Arrange
-
-        // Act
-        TestObserver<String> observer = subject.getTransactionValueString("GBP", txReceived).test();
-        // Assert
-        assertNotNull(observer.values().get(0));
         observer.onComplete();
         observer.assertNoErrors();
     }
