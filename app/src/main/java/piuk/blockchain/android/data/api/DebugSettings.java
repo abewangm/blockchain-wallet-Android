@@ -8,11 +8,7 @@ import info.blockchain.wallet.api.PersistentUrls;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
 
-import javax.inject.Inject;
-
 import piuk.blockchain.android.BuildConfig;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
 import static info.blockchain.wallet.api.PersistentUrls.Environment.DEV;
@@ -27,15 +23,15 @@ public class DebugSettings {
 
     private static final String TAG = DebugSettings.class.getSimpleName();
 
-    @Inject protected PrefsUtil prefsUtil;
-    @Inject protected AppUtil appUtil;
-    @Inject protected PersistentUrls persistentUrls;
+    private PrefsUtil prefsUtil;
+    private PersistentUrls persistentUrls;
 
-    public DebugSettings() {
-        Injector.getInstance().getAppComponent().inject(this);
+    public DebugSettings(PrefsUtil prefsUtil, PersistentUrls persistentUrls) {
+        this.prefsUtil = prefsUtil;
+        this.persistentUrls = persistentUrls;
 
         // Restore saved environment
-        String storedEnv = prefsUtil.getValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_PROD);
+        String storedEnv = this.prefsUtil.getValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_PROD);
         if (PersistentUrls.Environment.fromString(storedEnv) != null) {
             setEnvironment(PersistentUrls.Environment.fromString(storedEnv));
         } else {
@@ -71,7 +67,6 @@ public class DebugSettings {
      */
     public void changeEnvironment(@NonNull PersistentUrls.Environment environment) {
         setEnvironment(environment);
-        appUtil.clearCredentialsAndKeepEnvironment();
     }
 
     private void setEnvironment(PersistentUrls.Environment environment) {

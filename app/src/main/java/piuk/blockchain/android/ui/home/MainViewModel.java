@@ -249,8 +249,9 @@ public class MainViewModel extends BaseViewModel {
         }
 
         final String finalUri = uri;
-        if (finalUri != null || fromNotification)
+        if (finalUri != null || fromNotification) {
             dataListener.showProgressDialog(R.string.please_wait);
+        }
 
         final boolean finalFromNotification = fromNotification;
 
@@ -271,28 +272,36 @@ public class MainViewModel extends BaseViewModel {
                         .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
                                 metadataNodeFactory.getMetadataNode(),
                                 metadataNodeFactory.getSharedMetadataNode()))
-                        .andThen(payloadDataManager.registerMdid())
-                        .andThen(contactsDataManager.publishXpub())
                         .doOnComplete(() -> rxBus.emitEvent(ContactsEvent.class, ContactsEvent.INIT))
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
+                        .subscribe(
+                                () -> registerMdid(finalUri, finalFromNotification),
+                                throwable -> {
+                                    //noinspection StatementWithEmptyBody
+                                    if (throwable instanceof InvalidCredentialsException) {
+                                        // Double encrypted and not previously set up, ignore error
+                                    } else {
+                                        dataListener.showContactsRegistrationFailure();
+                                    }
+                                }));
+
+        notificationTokenManager.resendNotificationToken();
+    }
+
+    // TODO: 30/03/2017 Move this into the registerNodeForMetaDataService function
+    private void registerMdid(@Nullable String uri, boolean fromNotification) {
+        compositeDisposable.add(
+                payloadDataManager.registerMdid()
+                        .flatMapCompletable(responseBody -> contactsDataManager.publishXpub())
                         .subscribe(() -> {
-                            if (finalUri != null) {
-                                dataListener.onStartContactsActivity(finalUri);
-                            } else if (finalFromNotification) {
+                            if (uri != null) {
+                                dataListener.onStartContactsActivity(uri);
+                            } else if (fromNotification) {
                                 dataListener.onStartContactsActivity(null);
                             } else {
                                 checkForMessages();
                             }
-                        }, throwable -> {
-                            //noinspection StatementWithEmptyBody
-                            if (throwable instanceof InvalidCredentialsException) {
-                                // Double encrypted and not previously set up, ignore error
-                            } else {
-                                dataListener.showContactsRegistrationFailure();
-                            }
-                        }));
-
-        notificationTokenManager.resendNotificationToken();
+                        }, throwable -> dataListener.showContactsRegistrationFailure()));
     }
 
     private void checkIfShouldShowEmailVerification() {

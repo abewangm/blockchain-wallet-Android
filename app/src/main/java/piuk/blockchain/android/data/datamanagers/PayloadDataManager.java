@@ -27,6 +27,7 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxPinning;
@@ -477,23 +478,21 @@ public class PayloadDataManager {
     /**
      * Registers the user's MDID with the metadata service.
      *
-     * @return A {@link Completable}, ie an Observable type object specifically for methods
-     * returning void.
+     * @return An {@link Observable} wrapping a {@link ResponseBody}
      */
-    public Completable registerMdid() {
+    public Observable<ResponseBody> registerMdid() {
         return rxPinning.call(() -> payloadService.registerMdid())
-                .compose(RxUtil.applySchedulersToCompletable());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
      * Unregisters the user's MDID from the metadata service.
      *
-     * @return A {@link Completable}, ie an Observable type object specifically for methods
-     * returning void.
+     * @return An {@link Observable} wrapping a {@link ResponseBody}
      */
-    public Completable unregisterMdid() {
+    public Observable<ResponseBody> unregisterMdid() {
         return rxPinning.call(() -> payloadService.unregisterMdid())
-                .compose(RxUtil.applySchedulersToCompletable());
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
 }

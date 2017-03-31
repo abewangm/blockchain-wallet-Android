@@ -6,7 +6,6 @@ import javax.inject.Singleton;
 
 import dagger.Component;
 import piuk.blockchain.android.BlockchainApplication;
-import piuk.blockchain.android.data.api.DebugSettings;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.InstanceIdService;
@@ -38,8 +37,6 @@ public interface ApplicationComponent {
     void inject(ExchangeRateFactory exchangeRateFactory);
 
     void inject(ReceiveCurrencyHelper receiveCurrencyHelper);
-
-    void inject(DebugSettings debugSettings);
 
     void inject(PrivateKeyFactory privateKeyFactory);
 

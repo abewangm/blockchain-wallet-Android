@@ -12,6 +12,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.api.DebugSettings;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.util.AESUtilWrapper;
@@ -98,4 +99,11 @@ public class ApplicationModule {
     protected RxBus provideRxBus() {
         return new RxBus();
     }
+
+    @Provides
+    @Singleton
+    protected DebugSettings provideDebugSettings(PrefsUtil prefsUtil, PersistentUrls persistentUrls) {
+        return new DebugSettings(prefsUtil, persistentUrls);
+    }
+
 }

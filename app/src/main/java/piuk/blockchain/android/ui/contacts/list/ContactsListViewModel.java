@@ -83,10 +83,7 @@ public class ContactsListViewModel extends BaseViewModel {
                         .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
                                 metadataNodeFactory.getMetadataNode(),
                                 metadataNodeFactory.getSharedMetadataNode()))
-                        .andThen(payloadDataManager.registerMdid())
-                        .andThen(contactsDataManager.publishXpub())
-                        .subscribe(
-                                () -> attemptPageSetup(false),
+                        .subscribe(this::registerMdid,
                                 throwable -> {
                                     dataListener.setUiState(ContactsListActivity.FAILURE);
                                     if (throwable instanceof DecryptionException) {
@@ -94,6 +91,19 @@ public class ContactsListViewModel extends BaseViewModel {
                                     } else {
                                         dataListener.showToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
                                     }
+                                }));
+    }
+
+    // TODO: 30/03/2017 Move this into the registerNodeForMetaDataService function
+    private void registerMdid() {
+        compositeDisposable.add(
+                payloadDataManager.registerMdid()
+                        .flatMapCompletable(responseBody -> contactsDataManager.publishXpub())
+                        .subscribe(
+                                () -> attemptPageSetup(false),
+                                throwable -> {
+                                    dataListener.setUiState(ContactsListActivity.FAILURE);
+                                    dataListener.showToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
                                 }));
     }
 

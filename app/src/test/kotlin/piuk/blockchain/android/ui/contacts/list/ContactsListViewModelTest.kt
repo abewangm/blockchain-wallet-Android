@@ -10,6 +10,8 @@ import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
+import okhttp3.MediaType
+import okhttp3.ResponseBody
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -172,7 +174,8 @@ class ContactsListViewModelTest {
         whenever(mockNodeFactory.metadataNode).thenReturn(mock())
         whenever(mockContactsManager.initContactsService(any(), any()))
                 .thenReturn(Completable.complete())
-        whenever(mockPayloadDataManager.registerMdid()).thenReturn(Completable.complete())
+        whenever(mockPayloadDataManager.registerMdid())
+                .thenReturn(Observable.just(ResponseBody.create(MediaType.parse("application/json"), "")))
         whenever(mockContactsManager.publishXpub()).thenReturn(Completable.complete())
         val notificationObservable = PublishSubject.create<NotificationPayload>()
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
@@ -186,8 +189,8 @@ class ContactsListViewModelTest {
         verify(mockPayloadDataManager).isDoubleEncrypted
         verify(mockPayloadDataManager).generateNodes(isNull())
         verify(mockPayloadDataManager).metadataNodeFactory
-        verify(mockPayloadDataManager).registerMdid()
         verify(mockContactsManager).initContactsService(any(), any())
+        verify(mockPayloadDataManager).registerMdid()
         verify(mockContactsManager).publishXpub()
     }
 
@@ -298,8 +301,6 @@ class ContactsListViewModelTest {
         whenever(mockNodeFactory.metadataNode).thenReturn(mock())
         whenever(mockContactsManager.initContactsService(any(), any()))
                 .thenReturn(Completable.complete())
-        whenever(mockPayloadDataManager.registerMdid()).thenReturn(Completable.complete())
-        whenever(mockContactsManager.publishXpub()).thenReturn(Completable.complete())
         // Act
         subject.initContactsService(password)
         // Assert
@@ -309,8 +310,6 @@ class ContactsListViewModelTest {
         verifyNoMoreInteractions(mockActivity)
         verify(mockPayloadDataManager).generateNodes(password)
         verify(mockPayloadDataManager).metadataNodeFactory
-        verify(mockPayloadDataManager).registerMdid()
-        verify(mockContactsManager).publishXpub()
         verifyNoMoreInteractions(mockContactsManager)
     }
 
@@ -328,8 +327,6 @@ class ContactsListViewModelTest {
         whenever(mockNodeFactory.metadataNode).thenReturn(mock())
         whenever(mockContactsManager.initContactsService(any(), any()))
                 .thenReturn(Completable.complete())
-        whenever(mockPayloadDataManager.registerMdid()).thenReturn(Completable.complete())
-        whenever(mockContactsManager.publishXpub()).thenReturn(Completable.complete())
         // Act
         subject.initContactsService(password)
         // Assert
@@ -339,8 +336,6 @@ class ContactsListViewModelTest {
         verifyNoMoreInteractions(mockActivity)
         verify(mockPayloadDataManager).generateNodes(password)
         verify(mockPayloadDataManager).metadataNodeFactory
-        verify(mockPayloadDataManager).registerMdid()
-        verify(mockContactsManager).publishXpub()
         verifyNoMoreInteractions(mockContactsManager)
     }
 

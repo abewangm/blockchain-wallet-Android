@@ -18,6 +18,7 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.util.annotations.WebRequest;
@@ -271,30 +272,21 @@ public class PayloadService {
     /**
      * Registers the user's MDID with the metadata service.
      *
-     * @return A {@link Completable}, ie an Observable type object specifically for methods
-     * returning void.
+     * @return An {@link Observable} wrapping a {@link ResponseBody}
      */
     @WebRequest
-    public Completable registerMdid() {
-        return Completable.fromCallable(() -> {
-            payloadManager.registerMdid(payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
-            return Void.TYPE;
-        });
+    public Observable<ResponseBody> registerMdid() {
+        return payloadManager.registerMdid(payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
     }
 
     /**
      * Unregisters the user's MDID from the metadata service.
      *
-     * @return A {@link Completable}, ie an Observable type object specifically for methods
-     * returning void.
+     * @return An {@link Observable} wrapping a {@link ResponseBody}
      */
     @WebRequest
-    public Completable unregisterMdid() {
-        return Completable.fromCallable(() -> {
-            payloadManager.unregisterMdid(
-                    payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
-            return Void.TYPE;
-        });
+    public Observable<ResponseBody> unregisterMdid() {
+        return payloadManager.unregisterMdid(payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
     }
 
 }

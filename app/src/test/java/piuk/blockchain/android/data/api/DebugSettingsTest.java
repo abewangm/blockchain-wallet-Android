@@ -2,8 +2,8 @@ package piuk.blockchain.android.data.api;
 
 import android.app.Application;
 
-
 import info.blockchain.wallet.api.PersistentUrls;
+
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.Before;
@@ -22,11 +22,15 @@ import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
-import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
-import static info.blockchain.wallet.api.PersistentUrls.Environment.*;
-import static info.blockchain.wallet.api.PersistentUrls.*;
+import static info.blockchain.wallet.api.PersistentUrls.Environment.DEV;
+import static info.blockchain.wallet.api.PersistentUrls.Environment.PRODUCTION;
+import static info.blockchain.wallet.api.PersistentUrls.Environment.STAGING;
+import static info.blockchain.wallet.api.PersistentUrls.Environment.TESTNET;
+import static info.blockchain.wallet.api.PersistentUrls.KEY_ENV_PROD;
+import static info.blockchain.wallet.api.PersistentUrls.KEY_ENV_STAGING;
+import static info.blockchain.wallet.api.PersistentUrls.KEY_ENV_TESTNET;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,9 +42,7 @@ public class DebugSettingsTest {
 
     private DebugSettings subject;
     @Mock PrefsUtil prefsUtil;
-    @Mock AppUtil appUtil;
-    @Mock
-    PersistentUrls persistentUrls;
+    @Mock PersistentUrls persistentUrls;
 
     @Before
     public void setUp() throws Exception {
@@ -56,7 +58,7 @@ public class DebugSettingsTest {
     @Test
     public void shouldShowDebugMenu() throws Exception {
         // Arrange
-        subject = new DebugSettings();
+        subject = new DebugSettings(prefsUtil, persistentUrls);
         // Act
         boolean value = subject.shouldShowDebugMenu();
         // Assert
@@ -68,7 +70,7 @@ public class DebugSettingsTest {
         // Arrange
         when(prefsUtil.getValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_PROD)).thenReturn("");
         when(persistentUrls.getCurrentEnvironment()).thenReturn(PersistentUrls.Environment.PRODUCTION);
-        subject = new DebugSettings();
+        subject = new DebugSettings(prefsUtil, persistentUrls);
         // Act
         PersistentUrls.Environment value = subject.getCurrentEnvironment();
         // Assert
@@ -81,7 +83,7 @@ public class DebugSettingsTest {
         // Arrange
         when(prefsUtil.getValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_PROD)).thenReturn(KEY_ENV_STAGING);
         when(persistentUrls.getCurrentEnvironment()).thenReturn(STAGING);
-        subject = new DebugSettings();
+        subject = new DebugSettings(prefsUtil, persistentUrls);
         // Act
         PersistentUrls.Environment value = subject.getCurrentEnvironment();
         // Assert
@@ -95,7 +97,7 @@ public class DebugSettingsTest {
         // Arrange
         when(prefsUtil.getValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_PROD)).thenReturn(KEY_ENV_TESTNET);
         when(persistentUrls.getCurrentEnvironment()).thenReturn(TESTNET);
-        subject = new DebugSettings();
+        subject = new DebugSettings(prefsUtil, persistentUrls);
         // Act
         PersistentUrls.Environment value = subject.getCurrentEnvironment();
         // Assert
@@ -107,7 +109,7 @@ public class DebugSettingsTest {
     @Test
     public void changeEnvironmentStaging() throws Exception {
         // Arrange
-        subject = new DebugSettings();
+        subject = new DebugSettings(prefsUtil, persistentUrls);
         // Act
         subject.changeEnvironment(STAGING);
         // Assert
@@ -117,13 +119,12 @@ public class DebugSettingsTest {
         verify(persistentUrls).setCurrentWebsocketUrl(BuildConfig.STAGING_WEBSOCKET);
         verify(persistentUrls).setCurrentNetworkParams(MainNetParams.get());
         verify(persistentUrls).setCurrentEnvironment(STAGING);
-        verify(appUtil).clearCredentialsAndKeepEnvironment();
     }
 
     @Test
     public void changeEnvironmentDev() throws Exception {
         // Arrange
-        subject = new DebugSettings();
+        subject = new DebugSettings(prefsUtil, persistentUrls);
         // Act
         subject.changeEnvironment(DEV);
         // Assert
@@ -133,13 +134,12 @@ public class DebugSettingsTest {
         verify(persistentUrls).setCurrentWebsocketUrl(BuildConfig.DEV_WEBSOCKET);
         verify(persistentUrls).setCurrentNetworkParams(MainNetParams.get());
         verify(persistentUrls).setCurrentEnvironment(DEV);
-        verify(appUtil).clearCredentialsAndKeepEnvironment();
     }
 
     @Test
     public void changeEnvironmentTestNet() throws Exception {
         // Arrange
-        subject = new DebugSettings();
+        subject = new DebugSettings(prefsUtil, persistentUrls);
         // Act
         subject.changeEnvironment(TESTNET);
         // Assert
@@ -149,7 +149,6 @@ public class DebugSettingsTest {
         verify(persistentUrls).setCurrentWebsocketUrl(BuildConfig.TESTNET_WEBSOCKET);
         verify(persistentUrls).setCurrentEnvironment(TESTNET);
         verify(persistentUrls).setCurrentNetworkParams(TestNet3Params.get());
-        verify(appUtil).clearCredentialsAndKeepEnvironment();
     }
 
     private class MockApplicationModule extends ApplicationModule {
@@ -160,11 +159,6 @@ public class DebugSettingsTest {
         @Override
         protected PrefsUtil providePrefsUtil() {
             return prefsUtil;
-        }
-
-        @Override
-        protected AppUtil provideAppUtil() {
-            return appUtil;
         }
 
         @Override
