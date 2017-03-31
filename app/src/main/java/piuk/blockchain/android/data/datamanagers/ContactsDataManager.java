@@ -23,6 +23,7 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.functions.Function;
+import okhttp3.ResponseBody;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.ContactsService;
@@ -114,14 +115,11 @@ public class ContactsDataManager {
     /**
      * Registers the user's MDID with the metadata service.
      *
-     * @return A {@link Completable}, ie an Observable type object specifically for methods
-     * returning void.
+     * @return An {@link Observable} wrapping a {@link ResponseBody}
      */
-    public Completable registerMdid() {
-        return Completable.fromCallable(() -> {
-            payloadManager.registerMdid(payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
-            return Void.TYPE;
-        }).compose(RxUtil.applySchedulersToCompletable());
+    public Observable<ResponseBody> registerMdid() {
+        return payloadManager.registerMdid(payloadManager.getMetadataNodeFactory().getSharedMetadataNode())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -131,11 +129,9 @@ public class ContactsDataManager {
      * returning void.
      */
     public Completable unregisterMdid() {
-        return Completable.fromCallable(() -> {
-            payloadManager.unregisterMdid(
-                    payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
-            return Void.TYPE;
-        }).compose(RxUtil.applySchedulersToCompletable());
+        return Completable.fromObservable(
+                payloadManager.unregisterMdid(payloadManager.getMetadataNodeFactory().getSharedMetadataNode()))
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
@@ -579,8 +575,8 @@ public class ContactsDataManager {
     /**
      * Returns a Map of {@link FacilitatedTransaction} notes keyed to Transaction hashes.
      *
-     * @return A {@link HashMap} where the key is a {@link TransactionSummary#getHash()}, and
-     * the value is a {@link FacilitatedTransaction#getNote()}
+     * @return A {@link HashMap} where the key is a {@link TransactionSummary#getHash()}, and the
+     * value is a {@link FacilitatedTransaction#getNote()}
      */
     public HashMap<String, String> getNotesTransactionMap() {
         return notesTransactionMap;

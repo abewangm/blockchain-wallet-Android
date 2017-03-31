@@ -8,6 +8,8 @@ import android.support.v7.app.AlertDialog;
 import android.view.MotionEvent;
 import android.view.View;
 
+import info.blockchain.wallet.api.PersistentUrls;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -19,6 +21,7 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.pairing.PairOrCreateWalletActivity;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.PrefsUtil;
 
 
 public class LandingActivity extends BaseAuthActivity {
@@ -41,7 +44,8 @@ public class LandingActivity extends BaseAuthActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_landing);
 
-        DebugSettings debugSettings = new DebugSettings();
+        PrefsUtil prefsUtil = new PrefsUtil(this);
+        DebugSettings debugSettings = new DebugSettings(prefsUtil, PersistentUrls.getInstance());
 
         if (debugSettings.shouldShowDebugMenu()) {
             ToastCustom.makeText(
@@ -53,7 +57,8 @@ public class LandingActivity extends BaseAuthActivity {
 
             binding.buttonSettings.setVisibility(View.VISIBLE);
             binding.buttonSettings.setOnClickListener(view ->
-                    new EnvironmentSwitcher(this, debugSettings).showEnvironmentSelectionDialog());
+                    new EnvironmentSwitcher(this, debugSettings, new AppUtil(this), prefsUtil)
+                            .showEnvironmentSelectionDialog());
         }
 
         binding.create.setOnClickListener(view -> startLandingActivity(CREATE_FRAGMENT));

@@ -2,7 +2,6 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
-import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -17,6 +16,7 @@ import dagger.Provides;
 import okhttp3.OkHttpClient;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.ApiInterceptor;
+import piuk.blockchain.android.data.api.DebugSettings;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
@@ -106,10 +106,10 @@ public class ApiModule {
     protected Retrofit provideRetrofitApiInstance(OkHttpClient okHttpClient,
                                                   JacksonConverterFactory converterFactory,
                                                   RxJava2CallAdapterFactory rxJavaCallFactory,
-                                                  PersistentUrls persistentUrls) {
+                                                  DebugSettings debugSettings) {
 
         return new Retrofit.Builder()
-                .baseUrl(persistentUrls.getCurrentBaseApiUrl())
+                .baseUrl(debugSettings.getBaseApiUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .addCallAdapterFactory(rxJavaCallFactory)
@@ -122,9 +122,9 @@ public class ApiModule {
     protected Retrofit provideRetrofitBlockchainInstance(OkHttpClient okHttpClient,
                                                          JacksonConverterFactory converterFactory,
                                                          RxJava2CallAdapterFactory rxJavaCallFactory,
-                                                         PersistentUrls persistentUrls) {
+                                                         DebugSettings debugSettings) {
         return new Retrofit.Builder()
-                .baseUrl(persistentUrls.getCurrentBaseServerUrl())
+                .baseUrl(debugSettings.getBaseServerUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .addCallAdapterFactory(rxJavaCallFactory)

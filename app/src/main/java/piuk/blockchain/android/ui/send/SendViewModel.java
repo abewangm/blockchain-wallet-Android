@@ -442,6 +442,7 @@ public class SendViewModel extends BaseViewModel {
                 amountToSend.add(customFee),
                 BigInteger.ZERO);
 
+        sendModel.pendingTransaction.isCustomFee = true;
         sendModel.pendingTransaction.bigIntAmount = amountToSend;
         sendModel.pendingTransaction.unspentOutputBundle = unspentOutputBundle;
         sendModel.pendingTransaction.bigIntFee = customFee;
@@ -478,6 +479,7 @@ public class SendViewModel extends BaseViewModel {
                     amountToSend,
                     feePerKb);
 
+            sendModel.pendingTransaction.isCustomFee = false;
             sendModel.pendingTransaction.bigIntAmount = amountToSend;
             sendModel.pendingTransaction.unspentOutputBundle = unspentOutputBundle;
             sendModel.pendingTransaction.bigIntFee = sendModel.pendingTransaction.unspentOutputBundle.getAbsoluteFee();
@@ -779,11 +781,15 @@ public class SendViewModel extends BaseViewModel {
         details.fiatTotal = (monetaryUtil.getFiatFormat(sendModel.fiatUnit)
                 .format(sendModel.exchangeRate * (totalFiat.doubleValue() / 1e8)));
 
-        details.isSurge = sendModel.dynamicFeeList.getDefaultFee().isSurge();// TODO: 28/02/2017 might not be selected fee 
+        details.isSurge = isSurge();
         details.isLargeTransaction = isLargeTransaction();
         details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.getConsumedAmount().compareTo(BigInteger.ZERO) == 1;
 
         if (dataListener != null) dataListener.onShowPaymentDetails(details);
+    }
+
+    boolean isSurge() {
+        return sendModel.dynamicFeeList.getDefaultFee().isSurge() && !sendModel.pendingTransaction.isCustomFee;
     }
 
     /**
@@ -791,6 +797,11 @@ public class SendViewModel extends BaseViewModel {
      * total
      */
     boolean isLargeTransaction() {
+
+        if(sendModel.pendingTransaction.isCustomFee) {
+            return false;
+        }
+
         int txSize = sendDataManager.estimateSize(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = sendModel.absoluteSuggestedFee.doubleValue() / sendModel.pendingTransaction.bigIntAmount.doubleValue() * 100.0;
 
