@@ -10,9 +10,12 @@ import info.blockchain.wallet.settings.SettingsManager;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -27,8 +30,10 @@ import piuk.blockchain.android.util.StringUtils;
 public class SettingsViewModel extends BaseViewModel {
 
     @Inject protected FingerprintHelper fingerprintHelper;
+    @Inject protected AuthDataManager authDataManager;
     @Inject protected SettingsDataManager settingsDataManager;
     @Inject protected PayloadManager payloadManager;
+    @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected StringUtils stringUtils;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected AccessState accessState;
@@ -541,22 +546,18 @@ public class SettingsViewModel extends BaseViewModel {
         payloadManager.setTempPassword(password);
 
         compositeDisposable.add(
-                accessState.createPin(password, accessState.getPIN())
-                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
-                        .flatMap(success -> {
+                authDataManager.createPin(password, accessState.getPIN())
+                        .flatMapCompletable(success -> {
                             if (success) {
-                                return accessState.syncPayloadToServer();
+                                return payloadDataManager.syncPayloadWithServer();
                             } else {
-                                return Observable.just(false);
+                                return Completable.error(new Throwable());
                             }
                         })
-                        .subscribe(success -> {
-                            if (success) {
-                                dataListener.showToast(R.string.password_changed, ToastCustom.TYPE_OK);
-                            } else {
-                                showUpdatePasswordFailed(fallbackPassword);
-                            }
-                        }, throwable -> showUpdatePasswordFailed(fallbackPassword)));
+                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
+                        .subscribe(
+                                () -> dataListener.showToast(R.string.password_changed, ToastCustom.TYPE_OK),
+                                throwable -> showUpdatePasswordFailed(fallbackPassword)));
     }
 
     private void showUpdatePasswordFailed(@NonNull String fallbackPassword) {

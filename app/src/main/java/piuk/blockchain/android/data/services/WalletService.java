@@ -95,4 +95,17 @@ public class WalletService {
                     }
                 });
     }
+
+    /**
+     * Logs an event to the backend for analytics purposes to work out which features are used most often.
+     *
+     * @param event An event as a String
+     * @return  An {@link Observable} wrapping a {@link Status} object
+     * @see EventService
+     */
+    @WebRequest
+    public Observable<Status> logEvent(String event) {
+        return walletApi.logEvent(event);
+    }
+
 }
