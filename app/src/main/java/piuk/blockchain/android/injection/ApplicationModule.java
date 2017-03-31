@@ -70,7 +70,7 @@ public class ApplicationModule {
 
     @Provides
     protected DynamicFeeCache provideDynamicFeeCache() {
-        return DynamicFeeCache.getInstance();
+        return new DynamicFeeCache();
     }
 
     @Provides

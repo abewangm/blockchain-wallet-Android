@@ -31,6 +31,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -319,7 +320,8 @@ public class ConfirmFundsTransferViewModelTest {
         }
 
         @Override
-        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager) {
+        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager,
+                                                               RxBus rxBus) {
             return payloadDataManager;
         }
     }

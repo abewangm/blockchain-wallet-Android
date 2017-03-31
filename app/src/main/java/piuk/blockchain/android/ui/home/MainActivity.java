@@ -351,7 +351,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                         .setTitle(R.string.unpair_wallet)
                         .setMessage(R.string.ask_you_sure_unpair)
-                        .setPositiveButton(R.string.unpair, (dialog, which) -> viewModel.unpair())
+                        .setPositiveButton(R.string.unpair, (dialog, which) -> viewModel.unPair())
                         .setNegativeButton(android.R.string.cancel, null)
                         .show();
                 break;

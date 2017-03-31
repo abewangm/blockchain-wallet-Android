@@ -106,7 +106,7 @@ public class TransferFundsDataManager {
      * objects, as well as the total to send and the total fees, in that order.
      */
     public Observable<Triple<List<PendingTransaction>, Long, Long>> getTransferableFundTransactionListForDefaultAccount() {
-        return getTransferableFundTransactionList(payloadDataManager.getWallet().getHdWallets().get(0).getDefaultAccountIdx());
+        return getTransferableFundTransactionList(payloadDataManager.getDefaultAccountIndex());
     }
 
     /**

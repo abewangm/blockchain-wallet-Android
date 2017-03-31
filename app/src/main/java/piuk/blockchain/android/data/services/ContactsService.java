@@ -14,6 +14,7 @@ import java.util.List;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.util.annotations.RequiresAccessToken;
+import piuk.blockchain.android.util.annotations.WebRequest;
 
 public class ContactsService {
 
@@ -34,6 +35,7 @@ public class ContactsService {
      * @param sharedMetaDataHDNode The key for the shared metadata service
      * @return A {@link Completable} object
      */
+    @WebRequest
     public Completable initContactsService(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode) {
         return Completable.fromCallable(() -> {
             contacts.init(metaDataHDNode, sharedMetaDataHDNode);
@@ -62,6 +64,7 @@ public class ContactsService {
      *
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
+    @WebRequest
     public Completable fetchContacts() {
         return Completable.fromCallable(() -> {
             contacts.fetch();
@@ -74,6 +77,7 @@ public class ContactsService {
      *
      * @return A {@link Completable} object, ie an asynchronous void operation≈≈
      */
+    @WebRequest
     public Completable saveContacts() {
         return Completable.fromCallable(() -> {
             contacts.save();
@@ -86,6 +90,7 @@ public class ContactsService {
      *
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
+    @WebRequest
     public Completable wipeContacts() {
         return Completable.fromCallable(() -> {
             contacts.wipe();
@@ -108,6 +113,7 @@ public class ContactsService {
      *
      * @return A stream of {@link Contact} objects
      */
+    @WebRequest
     @RequiresAccessToken
     public Observable<Contact> getContactsWithUnreadPaymentRequests() {
         return Observable.defer(() -> Observable.fromIterable(contacts.digestUnreadPaymentRequests()));
@@ -119,15 +125,23 @@ public class ContactsService {
      * @param contact The {@link Contact} to be stored
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
+    @WebRequest
     public Completable addContact(Contact contact) {
-        return Completable.fromAction(() -> contacts.addContact(contact));
+        return Completable.fromCallable(() -> {
+            contacts.addContact(contact);
+            return Void.TYPE;
+        });
     }
 
     /**
      * Removes a contact from the locally stored Contacts list. Saves updated list to server.
      */
+    @WebRequest
     public Completable removeContact(Contact contact) {
-        return Completable.fromAction(() -> contacts.removeContact(contact));
+        return Completable.fromCallable(() -> {
+            contacts.removeContact(contact);
+            return Void.TYPE;
+        });
     }
 
     /**
@@ -137,8 +151,12 @@ public class ContactsService {
      * @param name      The new name for the Contact
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
+    @WebRequest
     public Completable renameContact(String contactId, String name) {
-        return Completable.fromAction(() -> contacts.renameContact(contactId, name));
+        return Completable.fromCallable(() -> {
+            contacts.renameContact(contactId, name);
+            return Void.TYPE;
+        });
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -153,6 +171,7 @@ public class ContactsService {
      * @return A {@link Contact} object, which is an updated version of the mydetails object, ie
      * it's the sender's own contact details
      */
+    @WebRequest
     @RequiresAccessToken
     public Observable<Contact> createInvitation(Contact myDetails, Contact recipientDetails) {
         return Observable.fromCallable(() -> contacts.createInvitation(myDetails, recipientDetails));
@@ -164,6 +183,7 @@ public class ContactsService {
      * @param url An invitation url
      * @return A {@link Contact} object containing the other user
      */
+    @WebRequest
     @RequiresAccessToken
     public Observable<Contact> acceptInvitation(String url) {
         return Observable.fromCallable(() -> contacts.acceptInvitationLink(url));
@@ -175,6 +195,7 @@ public class ContactsService {
      * @param url The URL which has been sent to the user
      * @return An {@link Observable} wrapping a Contact
      */
+    @WebRequest
     @RequiresAccessToken
     public Observable<Contact> readInvitationLink(String url) {
         return Observable.fromCallable(() -> contacts.readInvitationLink(url));
@@ -187,6 +208,7 @@ public class ContactsService {
      * @return An {@link Observable} wrapping a boolean value, returning true if the invitation has
      * been accepted
      */
+    @WebRequest
     @RequiresAccessToken
     public Observable<Boolean> readInvitationSent(Contact contact) {
         return Observable.fromCallable(() -> contacts.readInvitationSent(contact));
@@ -205,6 +227,7 @@ public class ContactsService {
      *                and an optional note
      * @return A {@link Completable} object
      */
+    @WebRequest
     @RequiresAccessToken
     public Completable requestSendPayment(String mdid, PaymentRequest request) {
         return Completable.fromCallable(() -> {
@@ -221,6 +244,7 @@ public class ContactsService {
      *                and an optional note, the receive address
      * @return A {@link Completable} object
      */
+    @WebRequest
     @RequiresAccessToken
     public Completable requestReceivePayment(String mdid, RequestForPaymentRequest request) {
         return Completable.fromCallable(() -> {
@@ -238,6 +262,7 @@ public class ContactsService {
      * @param facilitatedTxId The ID of the {@link FacilitatedTransaction}
      * @return A {@link Completable} object
      */
+    @WebRequest
     @RequiresAccessToken
     public Completable sendPaymentRequestResponse(String mdid, PaymentRequest paymentRequest, String facilitatedTxId) {
         return Completable.fromCallable(() -> {
@@ -254,6 +279,7 @@ public class ContactsService {
      * @param facilitatedTxId The ID of the {@link FacilitatedTransaction}
      * @return A {@link Completable} object
      */
+    @WebRequest
     @RequiresAccessToken
     public Completable sendPaymentBroadcasted(String mdid, String txHash, String facilitatedTxId) {
         return Completable.fromCallable(() -> {
@@ -269,6 +295,7 @@ public class ContactsService {
      * @param fctxId The ID of the {@link FacilitatedTransaction} to be declined
      * @return A {@link Completable} object
      */
+    @WebRequest
     @RequiresAccessToken
     public Completable sendPaymentDeclinedResponse(String mdid, String fctxId) {
         return Completable.fromCallable(() -> {
@@ -284,6 +311,7 @@ public class ContactsService {
      * @param fctxId The ID of the {@link FacilitatedTransaction} to be cancelled
      * @return A {@link Completable} object
      */
+    @WebRequest
     @RequiresAccessToken
     public Completable sendPaymentCancelledResponse(String mdid, String fctxId) {
         return Completable.fromCallable(() -> {
@@ -303,6 +331,7 @@ public class ContactsService {
      * @param mdid The MDID of the user you wish to query
      * @return A {@link Observable} wrapping a String
      */
+    @WebRequest
     public Observable<String> fetchXpub(String mdid) {
         return Observable.fromCallable(() -> contacts.fetchXpub(mdid));
     }
@@ -312,6 +341,7 @@ public class ContactsService {
      *
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
+    @WebRequest
     public Completable publishXpub() {
         return Completable.fromCallable(() -> {
             contacts.publishXpub();
@@ -330,6 +360,7 @@ public class ContactsService {
      * @param onlyNew If true, returns only the unread messages
      * @return An {@link Observable} wrapping a list of Message objects
      */
+    @WebRequest
     @RequiresAccessToken
     public Observable<List<Message>> getMessages(boolean onlyNew) {
         return Observable.fromCallable(() -> contacts.getMessages(onlyNew));
@@ -341,6 +372,7 @@ public class ContactsService {
      * @param messageId The ID of the message to be read
      * @return An {@link Observable} wrapping a {@link Message}
      */
+    @WebRequest
     @RequiresAccessToken
     public Observable<Message> readMessage(String messageId) {
         return Observable.fromCallable(() -> contacts.readMessage(messageId));
@@ -353,6 +385,7 @@ public class ContactsService {
      * @param markAsRead A flag setting the read status
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
+    @WebRequest
     @RequiresAccessToken
     public Completable markMessageAsRead(String messageId, boolean markAsRead) {
         return Completable.fromCallable(() -> {
@@ -373,6 +406,7 @@ public class ContactsService {
      * @param fctxId The FacilitatedTransaction's ID
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
+    @WebRequest
     public Completable deleteFacilitatedTransaction(String mdid, String fctxId) {
         return Completable.fromCallable(() -> {
             contacts.deleteFacilitatedTransaction(mdid, fctxId);

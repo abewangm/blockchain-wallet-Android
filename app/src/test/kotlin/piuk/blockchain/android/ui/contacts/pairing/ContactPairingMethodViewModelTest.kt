@@ -15,6 +15,7 @@ import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -86,7 +87,7 @@ class ContactPairingMethodViewModelTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(payloadManager: PayloadManager?): ContactsDataManager {
+        override fun provideContactsManager(rxBus: RxBus?): ContactsDataManager {
             return mockContactManager
         }
     }

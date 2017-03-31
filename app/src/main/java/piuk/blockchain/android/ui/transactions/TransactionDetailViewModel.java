@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -49,6 +50,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     @Inject TransactionHelper transactionHelper;
     @Inject PrefsUtil mPrefsUtil;
     @Inject PayloadManager mPayloadManager;
+    @Inject PayloadDataManager mPayloadDataManager;
     @Inject StringUtils mStringUtils;
     @Inject TransactionListDataManager mTransactionListDataManager;
     @Inject ExchangeRateFactory mExchangeRateFactory;
@@ -128,15 +130,10 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     public void updateTransactionNote(String description) {
         compositeDisposable.add(
-                mTransactionListDataManager.updateTransactionNotes(mTransaction.getHash(), description)
-                        .subscribe(aBoolean -> {
-                            if (!aBoolean) {
-                                // Save unsuccessful
-                                mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-                            } else {
-                                mDataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
-                                mDataListener.setDescription(description);
-                            }
+                mPayloadDataManager.updateTransactionNotes(mTransaction.getHash(), description)
+                        .subscribe(() -> {
+                            mDataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
+                            mDataListener.setDescription(description);
                         }, throwable -> mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
     }
 

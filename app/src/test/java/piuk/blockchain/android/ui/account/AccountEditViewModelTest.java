@@ -44,6 +44,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -882,7 +883,8 @@ public class AccountEditViewModelTest {
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
-        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager) {
+        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager,
+                                                               RxBus rxBus) {
             return payloadDataManager;
         }
 
@@ -893,12 +895,13 @@ public class AccountEditViewModelTest {
         }
 
         @Override
-        protected SendDataManager provideSendDataManager() {
+        protected SendDataManager provideSendDataManager(RxBus rxBus) {
             return sendDataManager;
         }
 
         @Override
         protected AccountEditDataManager provideAccountEditDataManager(PayloadDataManager payloadDataManager,
+                                                                       SendDataManager sendDataManager,
                                                                        DynamicFeeCache dynamicFeeCache) {
             return accountEditDataManager;
         }

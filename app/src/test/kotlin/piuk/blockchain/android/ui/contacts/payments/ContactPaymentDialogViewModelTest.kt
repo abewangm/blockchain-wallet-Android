@@ -27,6 +27,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.SendDataManager
+import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.account.ItemAccount
@@ -508,17 +509,17 @@ class ContactPaymentDialogViewModelTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(payloadManager: PayloadManager?): ContactsDataManager {
+        override fun provideContactsManager(rxBus: RxBus?): ContactsDataManager {
             return mockContactsDataManager
         }
     }
 
     inner class MockDataManagerModule : DataManagerModule() {
-        override fun providePayloadDataManager(payloadManager: PayloadManager?): PayloadDataManager {
+        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?): PayloadDataManager {
             return mockPayloadDataManager
         }
 
-        override fun provideSendDataManager(): SendDataManager {
+        override fun provideSendDataManager(rxBus: RxBus?): SendDataManager {
             return mockSendDataManager
         }
 

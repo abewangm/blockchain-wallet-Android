@@ -9,6 +9,7 @@ import piuk.blockchain.android.BlockchainApplication;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.InstanceIdService;
+import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.contacts.pairing.ContactPairingMethodViewModel;
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper;
 import piuk.blockchain.android.util.AppUtil;
@@ -48,4 +49,6 @@ public interface ApplicationComponent {
     void inject(ContactPairingMethodViewModel contactPairingMethodViewModel);
 
     void inject(FcmCallbackService fcmCallbackService);
+
+    void inject(BaseAuthActivity baseAuthActivity);
 }

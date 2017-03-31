@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
-import android.util.Log;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -28,6 +27,7 @@ import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
+// TODO: 21/03/2017 Most of this class can be refactored out
 public class AccessState {
 
     private static final long LOGOUT_TIMEOUT_MILLIS = 1000L * 30L;
@@ -41,8 +41,8 @@ public class AccessState {
     private PendingIntent logoutPendingIntent;
     private static AccessState instance;
     // TODO: 02/03/2017 Refactor me out of here
+    @Deprecated
     private static final Subject<AuthEvent> authEventSubject = PublishSubject.create();
-
 
     public void initAccessState(Context context, PrefsUtil prefs, WalletService walletService, AppUtil appUtil) {
         this.prefs = prefs;
@@ -61,11 +61,15 @@ public class AccessState {
         return instance;
     }
 
+    // TODO: 31/03/2017 Move all of the web calls out of here
+
+    @Deprecated
     public Observable<Boolean> createPin(String password, String passedPin) {
         return createPinObservable(password, passedPin)
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
+    @Deprecated
     public Observable<String> validatePin(String passedPin) {
         mPin = passedPin;
 
@@ -73,33 +77,27 @@ public class AccessState {
         String encryptedPassword = prefs.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
 
         return walletService.validateAccess(key, passedPin)
-                .flatMap(response -> {
+                .map(response -> {
                     if (response.isSuccessful()) {
-                        try {
-                            String decryptionKey = response.body().getSuccess();
+                        String decryptionKey = response.body().getSuccess();
 
-                            String decryptedPassword = AESUtil.decrypt(encryptedPassword,
-                                    decryptionKey,
-                                    AESUtil.PIN_PBKDF2_ITERATIONS);
-
-                            return Observable.just(decryptedPassword);
-                        } catch (Exception e) {
-                            throw Exceptions.propagate(new Throwable("Validate access failed", e));
-                        }
+                        return AESUtil.decrypt(encryptedPassword,
+                                decryptionKey,
+                                AESUtil.PIN_PBKDF2_ITERATIONS);
                     } else {
                         //Invalid PIN
                         throw new InvalidCredentialsException("Validate access failed");
                     }
-                })
-                .compose(RxUtil.applySchedulersToObservable());
+                });
     }
 
-    // TODO: 14/10/2016 This should be moved elsewhere
+    @Deprecated
     public Observable<Boolean> syncPayloadToServer() {
         return Observable.fromCallable(() -> PayloadManager.getInstance().save())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
+    @Deprecated
     private Observable<Boolean> createPinObservable(String password, String passedPin) {
         if (passedPin == null || passedPin.equals("0000") || passedPin.length() != 4) {
             return Observable.just(false);
@@ -194,6 +192,7 @@ public class AccessState {
     /**
      * Returns a {@link Subject} that publishes login/logout events
      */
+    @Deprecated
     public Subject<AuthEvent> getAuthEventSubject() {
         return authEventSubject;
     }

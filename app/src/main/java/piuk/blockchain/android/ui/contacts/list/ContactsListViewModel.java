@@ -78,8 +78,8 @@ public class ContactsListViewModel extends BaseViewModel {
     void initContactsService(@Nullable String secondPassword) {
         dataListener.setUiState(ContactsListActivity.LOADING);
         compositeDisposable.add(
-                contactsDataManager.generateNodes(secondPassword)
-                        .andThen(contactsDataManager.getMetadataNodeFactory())
+                payloadDataManager.generateNodes(secondPassword)
+                        .andThen(payloadDataManager.getMetadataNodeFactory())
                         .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
                                 metadataNodeFactory.getMetadataNode(),
                                 metadataNodeFactory.getSharedMetadataNode()))
@@ -97,7 +97,7 @@ public class ContactsListViewModel extends BaseViewModel {
     // TODO: 30/03/2017 Move this into the registerNodeForMetaDataService function
     private void registerMdid() {
         compositeDisposable.add(
-                contactsDataManager.registerMdid()
+                payloadDataManager.registerMdid()
                         .flatMapCompletable(responseBody -> contactsDataManager.publishXpub())
                         .subscribe(
                                 () -> attemptPageSetup(false),
@@ -227,7 +227,7 @@ public class ContactsListViewModel extends BaseViewModel {
         if (firstAttempt) {
             dataListener.setUiState(ContactsListActivity.LOADING);
             compositeDisposable.add(
-                    contactsDataManager.loadNodes()
+                    payloadDataManager.loadNodes()
                             .subscribe(
                                     success -> {
                                         if (success) {

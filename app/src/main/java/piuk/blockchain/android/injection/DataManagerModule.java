@@ -23,6 +23,7 @@ import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
 import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.services.PayloadService;
 import piuk.blockchain.android.data.services.PaymentService;
 import piuk.blockchain.android.data.services.SettingsService;
 import piuk.blockchain.android.data.services.WalletService;
@@ -46,14 +47,16 @@ public class DataManagerModule {
                                                      PrefsUtil prefsUtil,
                                                      AppUtil appUtil,
                                                      AccessState accessState,
-                                                     StringUtils stringUtils) {
+                                                     StringUtils stringUtils,
+                                                     RxBus rxBus) {
         return new AuthDataManager(
                 payloadDataManager,
                 prefsUtil,
                 new WalletService(new WalletApi()),
                 appUtil,
                 accessState,
-                stringUtils);
+                stringUtils,
+                rxBus);
     }
 
     @Provides
@@ -92,15 +95,16 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager) {
-        return new PayloadDataManager(payloadManager);
+    protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager, RxBus rxBus) {
+        return new PayloadDataManager(new PayloadService(payloadManager), payloadManager, rxBus);
     }
 
     @Provides
     @ViewModelScope
     protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
-                                                           PrivateKeyFactory privateKeyFactory) {
-        return new AccountDataManager(payloadManager, privateKeyFactory);
+                                                           PrivateKeyFactory privateKeyFactory,
+                                                           RxBus rxBus) {
+        return new AccountDataManager(new PayloadService(payloadManager), privateKeyFactory, rxBus);
     }
 
     @Provides
@@ -112,17 +116,18 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected SettingsDataManager provideSettingsDataManager() {
-        return new SettingsDataManager(new SettingsService(new SettingsManager()));
+    protected SettingsDataManager provideSettingsDataManager(RxBus rxBus) {
+        return new SettingsDataManager(new SettingsService(new SettingsManager()), rxBus);
     }
 
     @Provides
     @ViewModelScope
     protected AccountEditDataManager provideAccountEditDataManager(PayloadDataManager payloadDataManager,
+                                                                   SendDataManager sendDataManager,
                                                                    DynamicFeeCache dynamicFeeCache) {
         return new AccountEditDataManager(
-                new PaymentService(new Payment()),
                 payloadDataManager,
+                sendDataManager,
                 dynamicFeeCache);
     }
 
@@ -135,8 +140,8 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected SendDataManager provideSendDataManager() {
-        return new SendDataManager(new PaymentService(new Payment()));
+    protected SendDataManager provideSendDataManager(RxBus rxBus) {
+        return new SendDataManager(new PaymentService(new Payment()), rxBus);
     }
 
     @Provides

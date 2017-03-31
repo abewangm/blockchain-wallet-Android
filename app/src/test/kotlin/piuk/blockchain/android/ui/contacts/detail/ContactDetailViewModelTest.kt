@@ -895,13 +895,13 @@ class ContactDetailViewModelTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(payloadManager: PayloadManager?): ContactsDataManager {
+        override fun provideContactsManager(rxBus: RxBus?): ContactsDataManager {
             return mockContactsManager
         }
     }
 
     inner class MockDataManagerModule : DataManagerModule() {
-        override fun providePayloadDataManager(payloadManager: PayloadManager?): PayloadDataManager {
+        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?): PayloadDataManager {
             return mockPayloadDataManager
         }
     }

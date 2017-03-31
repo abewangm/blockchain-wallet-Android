@@ -20,7 +20,6 @@ import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
-import piuk.blockchain.android.data.services.PaymentService;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
 import static org.junit.Assert.assertEquals;
@@ -36,14 +35,14 @@ public class AccountEditDataManagerTest extends RxTest {
     private AccountEditDataManager subject;
     @Mock private PayloadDataManager payloadDataManager;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private DynamicFeeCache dynamicFeeCache;
-    @Mock private PaymentService paymentService;
+    @Mock private SendDataManager sendDataManager;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        subject = new AccountEditDataManager(paymentService, payloadDataManager, dynamicFeeCache);
+        subject = new AccountEditDataManager(payloadDataManager, sendDataManager, dynamicFeeCache);
     }
 
     @Test
@@ -58,11 +57,11 @@ public class AccountEditDataManagerTest extends RxTest {
         when(payloadDataManager.getDefaultAccount()).thenReturn(mock(Account.class));
         when(payloadDataManager.getNextReceiveAddress(any(Account.class)))
                 .thenReturn(Observable.just("address"));
-        when(paymentService.getUnspentOutputs(anyString()))
+        when(sendDataManager.getUnspentOutputs(anyString()))
                 .thenReturn(Observable.just(mock(UnspentOutputs.class)));
-        when(paymentService.getSweepableCoins(any(UnspentOutputs.class), any(BigInteger.class)))
+        when(sendDataManager.getSweepableCoins(any(UnspentOutputs.class), any(BigInteger.class)))
                 .thenReturn(sweepableCoins);
-        when(paymentService.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
+        when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
                 .thenReturn(mock(SpendableUnspentOutputs.class));
         // Act
         TestObserver<PendingTransaction> testObserver =
@@ -76,7 +75,7 @@ public class AccountEditDataManagerTest extends RxTest {
     @Test
     public void submitPayment() throws Exception {
         // Arrange
-        when(paymentService.submitPayment(
+        when(sendDataManager.submitPayment(
                 any(SpendableUnspentOutputs.class),
                 anyList(),
                 anyString(),

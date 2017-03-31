@@ -24,6 +24,7 @@ import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -502,7 +503,7 @@ public class PasswordRequiredViewModelTest extends RxTest {
         assertTrue(true);
     }
 
-    @SuppressWarnings("SyntheticAccessorCall")
+    @SuppressWarnings({"SyntheticAccessorCall", "PrivateMemberAccessBetweenOuterAndInnerClass"})
     private class MockApplicationModule extends ApplicationModule {
 
         MockApplicationModule(Application application) {
@@ -520,14 +521,16 @@ public class PasswordRequiredViewModelTest extends RxTest {
         }
     }
 
-    @SuppressWarnings("SyntheticAccessorCall")
+    @SuppressWarnings({"SyntheticAccessorCall", "PrivateMemberAccessBetweenOuterAndInnerClass"})
     private class MockDataManagerModule extends DataManagerModule {
 
         @Override
         protected AuthDataManager provideAuthDataManager(PayloadDataManager payloadDataManager,
-                                                         PrefsUtil prefsUtil, AppUtil appUtil,
+                                                         PrefsUtil prefsUtil,
+                                                         AppUtil appUtil,
                                                          AccessState accessState,
-                                                         StringUtils stringUtils) {
+                                                         StringUtils stringUtils,
+                                                         RxBus rxBus) {
             return authDataManager;
         }
     }

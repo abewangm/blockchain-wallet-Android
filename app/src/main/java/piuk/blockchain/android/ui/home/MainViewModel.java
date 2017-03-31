@@ -35,6 +35,7 @@ import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
+import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -163,7 +164,7 @@ public class MainViewModel extends BaseViewModel {
 
     void checkForMessages() {
         compositeDisposable.add(
-                contactsDataManager.loadNodes()
+                payloadDataManager.loadNodes()
                         .flatMapCompletable(
                                 success -> {
                                     if (success) {
@@ -211,7 +212,7 @@ public class MainViewModel extends BaseViewModel {
 
     }
 
-    void unpair() {
+    void unPair() {
         dataListener.clearAllDynamicShortcuts();
         payloadManager.wipe();
         prefs.logOut();
@@ -256,14 +257,14 @@ public class MainViewModel extends BaseViewModel {
         final boolean finalFromNotification = fromNotification;
 
         compositeDisposable.add(
-                contactsDataManager.loadNodes()
+                payloadDataManager.loadNodes()
                         .flatMap(loaded -> {
                             if (loaded) {
-                                return contactsDataManager.getMetadataNodeFactory();
+                                return payloadDataManager.getMetadataNodeFactory();
                             } else {
                                 if (!payloadManager.getPayload().isDoubleEncryption()) {
-                                    return contactsDataManager.generateNodes(null)
-                                            .andThen(contactsDataManager.getMetadataNodeFactory());
+                                    return payloadDataManager.generateNodes(null)
+                                            .andThen(payloadDataManager.getMetadataNodeFactory());
                                 } else {
                                     throw new InvalidCredentialsException("Payload is double encrypted");
                                 }
@@ -291,7 +292,7 @@ public class MainViewModel extends BaseViewModel {
     // TODO: 30/03/2017 Move this into the registerNodeForMetaDataService function
     private void registerMdid(@Nullable String uri, boolean fromNotification) {
         compositeDisposable.add(
-                contactsDataManager.registerMdid()
+                payloadDataManager.registerMdid()
                         .flatMapCompletable(responseBody -> contactsDataManager.publishXpub())
                         .subscribe(() -> {
                             if (uri != null) {
@@ -420,7 +421,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void logEvents() {
-        EventService handler = new EventService(prefs, new WalletApi());
+        EventService handler = new EventService(prefs, new WalletService(new WalletApi()));
         handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncryption());
         handler.logBackupEvent(payloadManager.getPayload().getHdWallets().get(0).isMnemonicVerified());
 

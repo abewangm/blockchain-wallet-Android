@@ -20,6 +20,7 @@ import org.robolectric.annotation.Config;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -286,7 +287,8 @@ public class LauncherViewModelTest {
 
     private class MockDataManagerModule extends DataManagerModule {
         @Override
-        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager) {
+        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager,
+                                                               RxBus rxBus) {
             return payloadDataManager;
         }
     }
