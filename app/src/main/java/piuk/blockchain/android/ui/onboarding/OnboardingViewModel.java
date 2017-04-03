@@ -1,0 +1,105 @@
+package piuk.blockchain.android.ui.onboarding;
+
+import android.support.annotation.Nullable;
+
+import javax.inject.Inject;
+
+import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
+import piuk.blockchain.android.util.PrefsUtil;
+
+
+@SuppressWarnings("WeakerAccess")
+public class OnboardingViewModel extends BaseViewModel {
+
+    private DataListener dataListener;
+    private String email;
+    private boolean emailVerified;
+    @Inject FingerprintHelper fingerprintHelper;
+    @Inject AccessState accessState;
+    @Inject SettingsDataManager settingsDataManager;
+    @Inject PayloadDataManager payloadDataManager;
+
+    interface DataListener {
+
+        void showFingerprintPrompt();
+
+        void showEmailPrompt();
+
+        void showFingerprintDialog(String pincode);
+
+        void showEnrollFingerprintsDialog();
+
+        void startMainActivity();
+
+    }
+
+    OnboardingViewModel(DataListener dataListener) {
+        Injector.getInstance().getDataManagerComponent().inject(this);
+        this.dataListener = dataListener;
+
+        compositeDisposable.add(
+                settingsDataManager.initSettings(
+                        payloadDataManager.getWallet().getGuid(),
+                        payloadDataManager.getWallet().getSharedKey())
+                        .subscribe(
+                                settings -> {
+                                    email = settings.getEmail();
+                                    emailVerified = settings.isEmailVerified();
+                                },
+                                throwable -> {
+                                    // No-op
+                                }));
+    }
+
+    @Override
+    public void onViewReady() {
+        if (fingerprintHelper.isHardwareDetected()) {
+            dataListener.showFingerprintPrompt();
+        } else if (!emailVerified) {
+            dataListener.showEmailPrompt();
+        } else {
+            dataListener.startMainActivity();
+        }
+    }
+
+    /**
+     * Checks status of fingerprint hardware and either prompts the user to verify their fingerprint
+     * or enroll one if the fingerprint sensor has never been set up.
+     */
+    void onEnableFingerprintClicked() {
+        if (fingerprintHelper.isFingerprintAvailable()) {
+            if (accessState.getPIN() != null && !accessState.getPIN().isEmpty()) {
+                dataListener.showFingerprintDialog(accessState.getPIN());
+            } else {
+                throw new IllegalStateException("PIN not found");
+            }
+        } else if (fingerprintHelper.isHardwareDetected()) {
+            // Hardware available but user has never set up fingerprints
+            dataListener.showEnrollFingerprintsDialog();
+        } else {
+            throw new IllegalStateException("Fingerprint hardware not available, yet functions requiring hardware called.");
+        }
+    }
+
+    /**
+     * Sets fingerprint unlock enabled and clears the encrypted PIN if {@param enabled} is false
+     *
+     * @param enabled Whether or not the fingerprint unlock feature is set up
+     */
+    void setFingerprintUnlockEnabled(boolean enabled) {
+        fingerprintHelper.setFingerprintUnlockEnabled(enabled);
+        if (!enabled) {
+            fingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
+        }
+    }
+
+    @Nullable
+    String getEmail() {
+        return email;
+    }
+}

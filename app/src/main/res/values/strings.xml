@@ -663,4 +663,13 @@
     <string name="survey_message">Would you like to fill out a short survey to help improve your wallet experience?\n\nWe value your feedback!</string>
     <string name="survey_positive_button">Take survey</string>
 
+    <!-- ONBOARDING -->
+    <string name="onboarding_fingerprint_title">Fingerprint Login</string>
+    <string name="onboarding_fingerprint_summary">Use fingerprint login instead of your PIN to authenticate and access your wallet.</string>
+    <string name="onboarding_fingerprint_enable">Enable fingerprint</string>
+    <string name="onboarding_complete_later">I\'ll do this later</string>
+    <string name="onboarding_check_inbox_title">Check Your Inbox</string>
+    <string name="onboarding_check_inbox_summary">Look for an email from Blockchain and click the verification link to complete your wallet setup.</string>
+    <string name="onboarding_verify_email">Verify email</string>
+
 </resources>

@@ -43,6 +43,8 @@ public class LauncherViewModel extends BaseViewModel {
 
         void onReEnterPassword();
 
+        void onStartOnboarding();
+
     }
 
     public LauncherViewModel(DataListener listener) {
@@ -101,7 +103,11 @@ public class LauncherViewModel extends BaseViewModel {
         } else if (isPinValidated || (mAccessState.isLoggedIn())) {
             // App has been PIN validated
             mAccessState.setIsLoggedIn(true);
-            mDataListener.onStartMainActivity();
+            if (!mPrefsUtil.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
+                mDataListener.onStartMainActivity();
+            } else {
+                mDataListener.onStartOnboarding();
+            }
         } else {
             mDataListener.onRequestPin();
         }

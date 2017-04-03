@@ -12,6 +12,7 @@ import piuk.blockchain.android.ui.auth.LandingActivity;
 import piuk.blockchain.android.ui.auth.PasswordRequiredActivity;
 import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.home.MainActivity;
+import piuk.blockchain.android.ui.onboarding.OnboardingActivity;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -76,6 +77,11 @@ public class LauncherActivity extends AppCompatActivity implements LauncherViewM
     @Override
     public void onStartMainActivity() {
         startSingleActivity(MainActivity.class);
+    }
+
+    @Override
+    public void onStartOnboarding() {
+        startSingleActivity(OnboardingActivity.class);
     }
 
     @Override
