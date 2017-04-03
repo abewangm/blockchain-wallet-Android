@@ -114,7 +114,7 @@ public class LauncherViewModel extends BaseViewModel {
                                     if (!settings.isEmailVerified()
                                             && settings.getEmail() != null
                                             && !settings.getEmail().isEmpty()) {
-                                        int visits = prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, -1);
+                                        int visits = prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0);
                                         if (visits == 1) {
                                             // Nag user to verify email after second login
                                             dataListener.onStartOnboarding(true);
