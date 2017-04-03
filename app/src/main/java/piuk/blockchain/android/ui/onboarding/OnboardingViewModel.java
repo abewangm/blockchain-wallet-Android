@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.onboarding;
 
 import android.content.Intent;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import javax.inject.Inject;
 
@@ -20,9 +21,8 @@ import static piuk.blockchain.android.ui.onboarding.OnboardingActivity.EXTRAS_EM
 public class OnboardingViewModel extends BaseViewModel {
 
     private DataListener dataListener;
-    private String email;
-    private boolean emailVerified;
     private boolean showEmailOnly;
+    @VisibleForTesting String email;
     @Inject protected FingerprintHelper fingerprintHelper;
     @Inject protected AccessState accessState;
     @Inject protected SettingsDataManager settingsDataManager;
@@ -40,8 +40,6 @@ public class OnboardingViewModel extends BaseViewModel {
 
         void showEnrollFingerprintsDialog();
 
-        void startMainActivity();
-
     }
 
     OnboardingViewModel(DataListener dataListener) {
@@ -52,7 +50,7 @@ public class OnboardingViewModel extends BaseViewModel {
     @Override
     public void onViewReady() {
         Intent intent = dataListener.getPageIntent();
-        if (intent.hasExtra(EXTRAS_EMAIL_ONLY)) {
+        if (intent != null && intent.hasExtra(EXTRAS_EMAIL_ONLY)) {
             showEmailOnly = true;
         }
 
@@ -63,7 +61,6 @@ public class OnboardingViewModel extends BaseViewModel {
                         .subscribe(
                                 settings -> {
                                     email = settings.getEmail();
-                                    emailVerified = settings.isEmailVerified();
                                     checkAppState();
                                 },
                                 throwable -> checkAppState()));
@@ -110,10 +107,8 @@ public class OnboardingViewModel extends BaseViewModel {
             dataListener.showEmailPrompt();
         } else if (fingerprintHelper.isHardwareDetected()) {
             dataListener.showFingerprintPrompt();
-        } else if (!emailVerified) {
-            dataListener.showEmailPrompt();
         } else {
-            dataListener.startMainActivity();
+            dataListener.showEmailPrompt();
         }
     }
 }

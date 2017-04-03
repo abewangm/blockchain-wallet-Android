@@ -128,8 +128,7 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
         startMainActivity();
     }
 
-    @Override
-    public void startMainActivity() {
+    private void startMainActivity() {
         dismissDialog();
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
