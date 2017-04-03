@@ -153,7 +153,7 @@ public class LauncherViewModelTest {
         when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.just(mockSettings));
         when(mockSettings.isEmailVerified()).thenReturn(false);
         when(mockSettings.getEmail()).thenReturn("email");
-        when(prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, -1)).thenReturn(1);
+        when(prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0)).thenReturn(1);
         // Act
         subject.onViewReady();
         // Assert
@@ -185,7 +185,7 @@ public class LauncherViewModelTest {
         when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.just(mockSettings));
         when(mockSettings.isEmailVerified()).thenReturn(false);
         when(mockSettings.getEmail()).thenReturn("email");
-        when(prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, -1)).thenReturn(0);
+        when(prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0)).thenReturn(0);
         // Act
         subject.onViewReady();
         // Assert

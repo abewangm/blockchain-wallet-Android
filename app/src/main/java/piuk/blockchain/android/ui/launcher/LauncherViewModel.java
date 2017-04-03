@@ -105,7 +105,10 @@ public class LauncherViewModel extends BaseViewModel {
         } else if (isPinValidated || (accessState.isLoggedIn())) {
             // App has been PIN validated
             accessState.setIsLoggedIn(true);
-            if (!appUtil.isNewlyCreated()) {
+            if (appUtil.isNewlyCreated()) {
+                appUtil.setNewlyCreated(false);
+                dataListener.onStartOnboarding(false);
+            } else {
                 compositeDisposable.add(
                         settingsDataManager.initSettings(
                                 payloadDataManager.getWallet().getGuid(),
@@ -129,8 +132,6 @@ public class LauncherViewModel extends BaseViewModel {
                                     }
                                 }, throwable -> dataListener.onStartMainActivity()));
 
-            } else {
-                dataListener.onStartOnboarding(false);
             }
         } else {
             dataListener.onRequestPin();
