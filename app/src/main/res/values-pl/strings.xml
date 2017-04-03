@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">Zaakceptuj wyższą opłatę</string>
     <string name="large_tx_high_fee_warning">"Ta transakcja wymaga wyższej opłaty dla konsumpcji "kurzu" z powodu małej kwoty reszty."</string>
 
-    <string name="transactions">Transakcje</string>
+    <string name="overview">Transakcje</string>
     <string name="invalid_password_too_short">Wprowadź więcej niż 3 znaki</string>
     <string name="change_pin_new_matches_current">Nie możesz użyć aktualnego kodu PIN jako nowego kodu PIN</string>
     <string name="account_locked_title">Konto zablokowane</string>

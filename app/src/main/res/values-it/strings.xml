@@ -409,7 +409,7 @@
     <string name="accept_higher_fee">Accetta commissioni più alte</string>
     <string name="large_tx_high_fee_warning">"Questa operazione richiede una commissione più elevata per il consumo di dust a causa della piccola quantità di resto da restituire."</string>
 
-    <string name="transactions">Transazioni</string>
+    <string name="overview">Transazioni</string>
     <string name="invalid_password_too_short">Ti invitiamo ad inserire più di 3 caratteri</string>
     <string name="change_pin_new_matches_current">Non è possibile utilizzare il PIN attualmente in uso come nuovo PIN</string>
     <string name="account_locked_title">Account bloccato</string>

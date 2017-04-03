@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">Přijmout vyšší poplatek</string>
     <string name="large_tx_high_fee_warning">„Tato transakce vyžaduje vyšší poplatek za drobné částky, které mají být vráceny.“</string>
 
-    <string name="transactions">Transakce</string>
+    <string name="overview">Transakce</string>
     <string name="invalid_password_too_short">Zadejte prosím více než 3 znaky</string>
     <string name="change_pin_new_matches_current">Svůj současný PIN nemůžete použít jako nový PIN</string>
     <string name="account_locked_title">Účet je uzamčen</string>

@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">Chấp nhận phí cao hơn</string>
     <string name="large_tx_high_fee_warning">"Giao dịch này yêu cầu phí cao hơn vì thực hiện giao dịch với số tiền quá nhỏ."</string>
 
-    <string name="transactions">Giao dịch</string>
+    <string name="overview">Giao dịch</string>
     <string name="invalid_password_too_short">Vui lòng nhập nhiều hơn 3 ký tự</string>
     <string name="change_pin_new_matches_current">Bạn không thể sử dụng mã PIN hiện tại làm mã PIN mới</string>
     <string name="account_locked_title">Tài khoản bị khóa</string>

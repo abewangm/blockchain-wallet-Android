@@ -143,7 +143,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
         // Create items
         AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.white);
-        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.transactions, R.drawable.vector_transactions, R.color.white);
+        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.overview, R.drawable.vector_transactions, R.color.white);
         AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.receive_bitcoin, R.drawable.vector_receive, R.color.white);
 
         // Add items

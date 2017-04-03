@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">Accepter des frais plus élevés</string>
     <string name="large_tx_high_fee_warning">« Le montant des modifications à rembourser étant faible, cette transaction requière des frais plus élevés pour la consommation de montants inférieurs au montant minimal accepté par le réseau bitcoin. »</string>
 
-    <string name="transactions">Transactions</string>
+    <string name="overview">Transactions</string>
     <string name="invalid_password_too_short">Veuillez entrer plus de 3 caractères</string>
     <string name="change_pin_new_matches_current">Vous ne pouvez pas utilisez votre PIN actuel comme nouveau PIN</string>
     <string name="account_locked_title">Compte bloqué</string>

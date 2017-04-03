@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">Прийняти вищу комісію</string>
     <string name="large_tx_high_fee_warning">"Ця транзакція вимагає більш високу комісію через невелику кількість змін, яку буде повернуто."</string>
 
-    <string name="transactions">Транзакції</string>
+    <string name="overview">Транзакції</string>
     <string name="invalid_password_too_short">Будь ласка, введіть більше ніж 3 знаки</string>
     <string name="change_pin_new_matches_current">Цей ПІН код не можна використовувати як новий ПІН код</string>
     <string name="account_locked_title">Акаунт заблоковано</string>
