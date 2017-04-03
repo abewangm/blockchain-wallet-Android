@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.backup;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -131,17 +130,8 @@ public class ConfirmFundsTransferDialogFragment extends AppCompatDialogFragment
             @SuppressLint("ObsoleteSdkInt")
             @Override
             public void onGlobalLayout() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    mToSpinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                } else {
-                    //Deprecated, but necessary to prevent issues on < 16
-                    //noinspection deprecation
-                    mToSpinner.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                }
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    mToSpinner.setDropDownWidth(mToSpinner.getWidth());
-                }
+                mToSpinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                mToSpinner.setDropDownWidth(mToSpinner.getWidth());
             }
         });
 

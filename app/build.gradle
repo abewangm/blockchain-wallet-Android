@@ -65,7 +65,7 @@ android {
     productFlavors {
         prod {
             // For release and testing on <API21 devices
-            minSdkVersion 14
+            minSdkVersion 16
         }
         dev {
             // For everyday work, setting minSdkVersion to 21 bypasses MultiDex, resulting in

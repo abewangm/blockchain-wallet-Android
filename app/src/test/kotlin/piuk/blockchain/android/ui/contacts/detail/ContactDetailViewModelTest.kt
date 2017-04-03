@@ -144,7 +144,7 @@ class ContactDetailViewModelTest {
         subject.onViewReady()
         notificationObservable.onNext(notificationPayload)
         // Assert
-        verify(mockActivity, times(2)).pageBundle
+        verify(mockActivity, atLeastOnce()).pageBundle
         verify(mockActivity, times(2)).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         verify(mockActivity, times(2)).finishPage()
         verifyNoMoreInteractions(mockActivity)
@@ -779,7 +779,7 @@ class ContactDetailViewModelTest {
             intendedAmount = 21 * 1000 * 1000L
         })
         val address = "ADDRESS"
-        whenever(mockPayloadDataManager.getNextReceiveAddress(accountPosition))
+        whenever(mockPayloadDataManager.getNextReceiveAddressAndReserve(eq(accountPosition), any()))
                 .thenReturn(Observable.just(address))
         whenever(mockPayloadDataManager.getPositionOfAccountInActiveList(accountPosition))
                 .thenReturn(accountPosition)
@@ -795,7 +795,7 @@ class ContactDetailViewModelTest {
         verify(mockContactsManager).sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId))
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockPayloadDataManager).getPositionOfAccountInActiveList(accountPosition)
-        verify(mockPayloadDataManager).getNextReceiveAddress(accountPosition)
+        verify(mockPayloadDataManager).getNextReceiveAddressAndReserve(eq(accountPosition), any())
         verifyNoMoreInteractions(mockPayloadDataManager)
     }
 
@@ -813,7 +813,7 @@ class ContactDetailViewModelTest {
             intendedAmount = 21 * 1000 * 1000L
         })
         val address = "ADDRESS"
-        whenever(mockPayloadDataManager.getNextReceiveAddress(accountPosition))
+        whenever(mockPayloadDataManager.getNextReceiveAddressAndReserve(eq(accountPosition), any()))
                 .thenReturn(Observable.just(address))
         whenever(mockPayloadDataManager.getPositionOfAccountInActiveList(accountPosition))
                 .thenReturn(accountPosition)
@@ -829,7 +829,7 @@ class ContactDetailViewModelTest {
         verify(mockContactsManager).sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId))
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockPayloadDataManager).getPositionOfAccountInActiveList(accountPosition)
-        verify(mockPayloadDataManager).getNextReceiveAddress(accountPosition)
+        verify(mockPayloadDataManager).getNextReceiveAddressAndReserve(eq(accountPosition), any())
         verifyNoMoreInteractions(mockPayloadDataManager)
     }
 

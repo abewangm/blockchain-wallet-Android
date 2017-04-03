@@ -898,14 +898,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         tvCountry.setText(dialCode);
         Drawable drawable = ContextCompat.getDrawable(getActivity(), flagResourceId);
         drawable.setAlpha(30);
-
-        int sdk = android.os.Build.VERSION.SDK_INT;
-        if (sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-            //noinspection deprecation
-            tvCountry.setBackgroundDrawable(drawable);
-        } else {
-            tvCountry.setBackground(drawable);
-        }
+        tvCountry.setBackground(drawable);
     }
 
     @Override

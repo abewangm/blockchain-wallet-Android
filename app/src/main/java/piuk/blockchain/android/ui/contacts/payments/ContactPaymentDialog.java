@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -135,17 +134,8 @@ public class ContactPaymentDialog extends AppCompatDialogFragment
             @SuppressLint("ObsoleteSdkInt")
             @Override
             public void onGlobalLayout() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    binding.spinnerFrom.spinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                } else {
-                    //Deprecated, but necessary to prevent issues on < 16
-                    //noinspection deprecation
-                    binding.spinnerFrom.spinner.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                }
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    binding.spinnerFrom.spinner.setDropDownWidth(binding.spinnerFrom.spinner.getWidth());
-                }
+                binding.spinnerFrom.spinner.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                binding.spinnerFrom.spinner.setDropDownWidth(binding.spinnerFrom.spinner.getWidth());
             }
         });
 
