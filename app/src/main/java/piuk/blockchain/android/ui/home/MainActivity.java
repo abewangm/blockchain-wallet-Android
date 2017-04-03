@@ -480,26 +480,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void showEmailVerificationDialog(String email) {
-        String message = String.format(getString(R.string.security_centre_email_message), email);
-        SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
-                R.string.security_centre_email_title,
-                message,
-                R.drawable.vector_email,
-                R.string.security_centre_email_check,
-                true,
-                false);
-        securityPromptDialog.showDialog(getSupportFragmentManager());
-        securityPromptDialog.setNegativeButtonListener(v -> securityPromptDialog.dismiss());
-        securityPromptDialog.setPositiveButtonListener(v -> {
-            securityPromptDialog.dismiss();
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_APP_EMAIL);
-            startActivity(Intent.createChooser(intent, getString(R.string.security_centre_email_check)));
-        });
-    }
-
-    @Override
     public void showAddEmailDialog() {
         String message = getString(R.string.security_centre_add_email_message);
         SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
@@ -516,6 +496,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             intent.putExtra(EXTRA_SHOW_ADD_EMAIL_DIALOG, true);
             startActivity(intent);
         });
+
         securityPromptDialog.setNegativeButtonListener(view -> securityPromptDialog.dismiss());
     }
 

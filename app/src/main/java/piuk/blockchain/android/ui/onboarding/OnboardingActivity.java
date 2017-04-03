@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -15,14 +16,27 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
         FingerprintPromptFragment.OnFragmentInteractionListener,
         EmailPromptFragment.OnFragmentInteractionListener {
 
+    /**
+     * Flag for showing only the email verification prompt. This is for use when signup was
+     * completed some other time, but the user hasn't verified their email yet.
+     */
+    public static final String EXTRAS_EMAIL_ONLY = "email_only";
+
     @Thunk OnboardingViewModel viewModel;
     private boolean emailLaunched = false;
+    private MaterialProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_onboarding);
         viewModel = new OnboardingViewModel(this);
+
+        progressDialog = new MaterialProgressDialog(this);
+        progressDialog.setMessage(R.string.please_wait);
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
         viewModel.onViewReady();
     }
 
@@ -35,7 +49,13 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
     }
 
     @Override
+    public Intent getPageIntent() {
+        return getIntent();
+    }
+
+    @Override
     public void showFingerprintPrompt() {
+        dismissDialog();
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.content_frame, FingerprintPromptFragment.newInstance())
@@ -44,6 +64,7 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
 
     @Override
     public void showEmailPrompt() {
+        dismissDialog();
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.content_frame, EmailPromptFragment.newInstance(viewModel.getEmail()))
@@ -109,9 +130,16 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
 
     @Override
     public void startMainActivity() {
+        dismissDialog();
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+    }
+
+    private void dismissDialog() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
     }
 
 }

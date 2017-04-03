@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.onboarding;
 
+import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import javax.inject.Inject;
@@ -12,6 +13,8 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.util.PrefsUtil;
 
+import static piuk.blockchain.android.ui.onboarding.OnboardingActivity.EXTRAS_EMAIL_ONLY;
+
 
 @SuppressWarnings("WeakerAccess")
 public class OnboardingViewModel extends BaseViewModel {
@@ -19,12 +22,15 @@ public class OnboardingViewModel extends BaseViewModel {
     private DataListener dataListener;
     private String email;
     private boolean emailVerified;
-    @Inject FingerprintHelper fingerprintHelper;
-    @Inject AccessState accessState;
-    @Inject SettingsDataManager settingsDataManager;
-    @Inject PayloadDataManager payloadDataManager;
+    private boolean showEmailOnly;
+    @Inject protected FingerprintHelper fingerprintHelper;
+    @Inject protected AccessState accessState;
+    @Inject protected SettingsDataManager settingsDataManager;
+    @Inject protected PayloadDataManager payloadDataManager;
 
     interface DataListener {
+
+        Intent getPageIntent();
 
         void showFingerprintPrompt();
 
@@ -41,6 +47,14 @@ public class OnboardingViewModel extends BaseViewModel {
     OnboardingViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
+    }
+
+    @Override
+    public void onViewReady() {
+        Intent intent = dataListener.getPageIntent();
+        if (intent.hasExtra(EXTRAS_EMAIL_ONLY)) {
+            showEmailOnly = true;
+        }
 
         compositeDisposable.add(
                 settingsDataManager.initSettings(
@@ -50,21 +64,9 @@ public class OnboardingViewModel extends BaseViewModel {
                                 settings -> {
                                     email = settings.getEmail();
                                     emailVerified = settings.isEmailVerified();
+                                    checkAppState();
                                 },
-                                throwable -> {
-                                    // No-op
-                                }));
-    }
-
-    @Override
-    public void onViewReady() {
-        if (fingerprintHelper.isHardwareDetected()) {
-            dataListener.showFingerprintPrompt();
-        } else if (!emailVerified) {
-            dataListener.showEmailPrompt();
-        } else {
-            dataListener.startMainActivity();
-        }
+                                throwable -> checkAppState()));
     }
 
     /**
@@ -101,5 +103,17 @@ public class OnboardingViewModel extends BaseViewModel {
     @Nullable
     String getEmail() {
         return email;
+    }
+
+    private void checkAppState() {
+        if (showEmailOnly) {
+            dataListener.showEmailPrompt();
+        } else if (fingerprintHelper.isHardwareDetected()) {
+            dataListener.showFingerprintPrompt();
+        } else if (!emailVerified) {
+            dataListener.showEmailPrompt();
+        } else {
+            dataListener.startMainActivity();
+        }
     }
 }
