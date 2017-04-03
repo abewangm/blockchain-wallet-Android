@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.customviews;
 
 import android.content.Context;
-import android.os.Build;
 import android.support.annotation.StringDef;
 import android.support.annotation.UiThread;
 import android.support.v4.content.ContextCompat;
@@ -42,29 +41,17 @@ public class ToastCustom {
 
         switch (type) {
             case TYPE_ERROR:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                    tv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_error));
-                else
-                    //noinspection deprecation
-                    tv.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_error));
+                tv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_error));
                 tv.setTextColor(ContextCompat.getColor(context, R.color.toast_error_text));
 
                 break;
             case TYPE_GENERAL:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                    tv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_warning));
-                else
-                    //noinspection deprecation
-                    tv.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_warning));
+                tv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_warning));
                 tv.setTextColor(ContextCompat.getColor(context, R.color.toast_warning_text));
 
                 break;
             case TYPE_OK:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                    tv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_info));
-                else
-                    //noinspection deprecation
-                    tv.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_info));
+                tv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_view_toast_info));
                 tv.setTextColor(ContextCompat.getColor(context, R.color.toast_info_text));
                 break;
         }
