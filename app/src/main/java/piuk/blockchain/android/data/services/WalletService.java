@@ -119,5 +119,4 @@ public class WalletService {
         return walletApi.getWalletOptions();
     }
 
-
 }
