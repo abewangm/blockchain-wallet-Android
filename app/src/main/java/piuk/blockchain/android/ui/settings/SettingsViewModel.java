@@ -45,8 +45,6 @@ public class SettingsViewModel extends BaseViewModel {
 
         void setUpUi();
 
-        void verifyPinCode();
-
         void showFingerprintDialog(String pincode);
 
         void showDisableFingerprintDialog();
@@ -272,19 +270,12 @@ public class SettingsViewModel extends BaseViewModel {
             // No fingerprints enrolled, prompt user to add some
             dataListener.showNoFingerprintsAddedDialog();
         } else {
-            // Verify PIN before continuing
-            dataListener.verifyPinCode();
+            if (accessState.getPIN() != null && !accessState.getPIN().isEmpty()) {
+                dataListener.showFingerprintDialog(accessState.getPIN());
+            } else {
+                throw new IllegalStateException("PIN code not found in AccessState");
+            }
         }
-    }
-
-    /**
-     * Displays fingerprint dialog after the PIN has been validated by {@link
-     * piuk.blockchain.android.ui.auth.PinEntryActivity}
-     *
-     * @param pinCode A {@link String} representing the validated PIN code
-     */
-    void pinCodeValidatedForFingerprint(String pinCode) {
-        dataListener.showFingerprintDialog(pinCode);
     }
 
     private boolean isStringValid(String string) {

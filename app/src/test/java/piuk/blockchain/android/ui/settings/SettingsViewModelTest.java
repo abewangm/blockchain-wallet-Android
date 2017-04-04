@@ -11,6 +11,7 @@ import info.blockchain.wallet.settings.SettingsManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -183,24 +184,32 @@ public class SettingsViewModelTest {
     }
 
     @Test
-    public void onFingerprintClickedVerifyPin() throws Exception {
+    public void onFingerprintClickedPinStored() throws Exception {
         // Arrange
+        String pinCode = "1234";
         when(fingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(false);
         when(fingerprintHelper.areFingerprintsEnrolled()).thenReturn(true);
+        when(accessState.getPIN()).thenReturn(pinCode);
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         // Act
         subject.onFingerprintClicked();
         // Assert
-        verify(activity).verifyPinCode();
+        verify(activity).showFingerprintDialog(captor.capture());
+        assertEquals(pinCode, captor.getValue());
     }
 
-    @Test
-    public void pinCodeValidated() throws Exception {
+    @Test(expected = IllegalStateException.class)
+    public void onFingerprintClickedPinNotFound() throws Exception {
         // Arrange
-        String pincode = "PIN_CODE";
+        when(fingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(false);
+        when(fingerprintHelper.areFingerprintsEnrolled()).thenReturn(true);
+        when(accessState.getPIN()).thenReturn(null);
         // Act
-        subject.pinCodeValidatedForFingerprint(pincode);
+        subject.onFingerprintClicked();
         // Assert
-        verify(activity).showFingerprintDialog(pincode);
+        verify(fingerprintHelper).getIfFingerprintUnlockEnabled();
+        verify(fingerprintHelper).areFingerprintsEnrolled();
+        verify(accessState).getPIN();
     }
 
     @Test
