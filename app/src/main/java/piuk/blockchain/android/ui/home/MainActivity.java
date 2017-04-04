@@ -2,8 +2,10 @@ package piuk.blockchain.android.ui.home;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
@@ -20,6 +22,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -78,6 +81,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         ContactPaymentRequestNotesFragment.FragmentInteractionListener,
         ContactPaymentDialog.OnContactPaymentDialogInteractionListener {
 
+    public static final String ACTION_SEND = "info.blockchain.wallet.ui.BalanceFragment.SEND";
+    public static final String ACTION_RECEIVE = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE";
+    public static final String ACTION_BUY = "info.blockchain.wallet.ui.BalanceFragment.BUY";
+
     private static final String SUPPORT_URI = "https://support.blockchain.com/";
     private static final int REQUEST_BACKUP = 2225;
     private static final int MERCHANT_ACTIVITY = 1;
@@ -102,11 +109,37 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private boolean paymentToContactMade = false;
     private Typeface typeface;
 
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            if (intent.getAction().equals(ACTION_SEND) && getActivity() != null) {
+                startScanActivity();
+            }
+
+            if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
+                startReceiveFragment();
+            }
+
+            if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
+                ToastCustom.makeText(getActivity(), "Coming soon", ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
+//                startBuyActivity();
+            }
+        }
+    };
+
     @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        IntentFilter filterSend = new IntentFilter(ACTION_SEND);
+        IntentFilter filterReceive = new IntentFilter(ACTION_RECEIVE);
+        IntentFilter filterBuy = new IntentFilter(ACTION_BUY);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterSend);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceive);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBuy);
 
         appUtil = new AppUtil(this);
         viewModel = new MainViewModel(this);
@@ -203,8 +236,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         viewModel.destroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        super.onDestroy();
     }
 
     @Override

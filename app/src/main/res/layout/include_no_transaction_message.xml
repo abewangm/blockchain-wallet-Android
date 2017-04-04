@@ -1,37 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
-        android:id="@+id/no_tx_message"
+    <ScrollView
+        android:id="@+id/no_tx_scrollview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="96dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <TextView
-            fontPath="fonts/Montserrat-Regular.ttf"
+        <LinearLayout
+            android:id="@+id/no_tx_message"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:alpha="0.8"
+            android:layout_height="match_parent"
+            android:layout_marginTop="72dp"
+            android:background="@color/primary_gray_lightest"
             android:gravity="center_horizontal"
-            android:text="@string/your_transactions"
-            android:textColor="@color/primary_gray_dark"
-            android:textSize="20sp" />
+            android:orientation="vertical">
 
-        <TextView
-            fontPath="fonts/Montserrat-Regular.ttf"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="32dp"
-            android:layout_marginRight="32dp"
-            android:layout_marginTop="8dp"
-            android:alpha="0.8"
-            android:gravity="center_horizontal"
-            android:text="@string/transaction_occur_when"
-            android:textColor="@color/primary_gray_dark"
-            android:textSize="16sp" />
+            <android.support.v4.view.ViewPager
+                android:id="@+id/pager_onboarding"
+                android:layout_width="match_parent"
+                android:layout_height="270dp"
+                android:paddingBottom="16dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="16dp"
+                tools:listitem="@layout/item_onboarding_page" />
 
-    </LinearLayout>
+            <RelativeLayout
+                android:id="@+id/viewPagerIndicator"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:gravity="center">
+
+                <LinearLayout
+                    android:id="@+id/viewPagerCountDots"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:orientation="horizontal" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/btn_skip_all"
+                    fontPath="fonts/Montserrat-Regular.ttf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:alpha="0.8"
+                    android:background="@android:color/transparent"
+                    android:padding="16dp"
+                    android:text="Skip All"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:background="@color/white"
+                android:orientation="vertical">
+
+                <TextView
+                    fontPath="fonts/Montserrat-Regular.ttf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:alpha="0.8"
+                    android:gravity="center_horizontal"
+                    android:text="@string/your_transactions"
+                    android:textColor="@color/primary_gray_dark"
+                    android:textSize="20sp" />
+
+                <TextView
+                    fontPath="fonts/Montserrat-Regular.ttf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="32dp"
+                    android:layout_marginRight="32dp"
+                    android:layout_marginTop="8dp"
+                    android:alpha="0.8"
+                    android:gravity="center_horizontal"
+                    android:text="@string/transaction_occur_when"
+                    android:textColor="@color/primary_gray_dark"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </ScrollView>
 </layout>
