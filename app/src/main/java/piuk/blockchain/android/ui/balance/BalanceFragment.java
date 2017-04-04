@@ -21,7 +21,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -475,7 +474,13 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         } else {
             binding.rvTransactions.setVisibility(View.GONE);
             binding.noTransactionMessage.noTxMessage.setVisibility(View.VISIBLE);
-            initOnboardingPager();
+
+            if(!viewModel.isOnboardingComplete()) {
+                initOnboardingPager();
+            } else {
+                binding.noTransactionMessage.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.GONE);
+                binding.noTransactionMessage.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
+            }
         }
 
         accountsAdapter.notifyBtcChanged(isBTC);
@@ -679,17 +684,16 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     private void initOnboardingPager() {
         OnboardingPagerAdapter adapter = new OnboardingPagerAdapter(getActivity().getSupportFragmentManager(), viewModel.getOnboardingPages());
-        binding.noTransactionMessage.pagerOnboarding.setAdapter(adapter);
-        binding.noTransactionMessage.pagerOnboarding.addOnPageChangeListener(this);
+        binding.noTransactionMessage.onboardingViewpagerLayout.pagerOnboarding.setAdapter(adapter);
+        binding.noTransactionMessage.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(this);
 
         dotsCount = adapter.getCount();
-        Log.i("vos", "dotsCount: "+dotsCount);
         dots = new ImageView[dotsCount];
-        binding.noTransactionMessage.viewPagerCountDots.removeAllViews();
+        binding.noTransactionMessage.onboardingViewpagerLayout.viewPagerCountDots.removeAllViews();
 
         for (int i = 0; i < dotsCount; i++) {
             dots[i] = new ImageView(getActivity());
-            dots[i].setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.nonselecteditem_dot));
+            dots[i].setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.nonselecteditem_dot));
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -698,10 +702,27 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
             params.setMargins(4, 0, 4, 0);
 
-            binding.noTransactionMessage.viewPagerCountDots.addView(dots[i], params);
+            binding.noTransactionMessage.onboardingViewpagerLayout.viewPagerCountDots.addView(dots[i], params);
         }
 
-        dots[0].setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.selecteditem_dot));
+        dots[0].setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selecteditem_dot));
+
+        binding.noTransactionMessage.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(
+                v -> {
+                    binding.noTransactionMessage.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.GONE);
+                    binding.noTransactionMessage.onboardingCompleteLayout.onboardingLayout.setVisibility(View.VISIBLE);
+                    viewModel.setOnboardingComplete(true);
+                });
+
+        binding.noTransactionMessage.onboardingCompleteLayout.onboardingClose.setOnClickListener(v -> {
+            binding.noTransactionMessage.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
+        });
+
+        binding.noTransactionMessage.onboardingCompleteLayout.onboardingCompleteLink.setOnClickListener(v -> {
+            binding.noTransactionMessage.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.VISIBLE);
+            binding.noTransactionMessage.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
+            binding.noTransactionMessage.onboardingViewpagerLayout.pagerOnboarding.setCurrentItem(0);
+        });
     }
 
     @Override

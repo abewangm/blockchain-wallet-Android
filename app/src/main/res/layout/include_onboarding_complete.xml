@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout
+        android:id="@+id/onboarding_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:background="@color/primary_gray_lightest">
+
+        <ImageButton
+            android:id="@+id/onboarding_close"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:tint="@color/primary_gray_light"
+            android:src="@drawable/ic_clear_white_24dp"
+            android:padding="16dp"/>
+
+
+        <ImageView
+            android:id="@+id/onboarding_complete_check"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:padding="16dp"
+            android:tint="@color/primary_blue_accent"
+            app:srcCompat="@drawable/vector_success"/>
+
+        <TextView
+            android:id="@+id/onboarding_complete_title"
+            fontPath="fonts/Montserrat-Regular.ttf"
+            style="@style/Base.DialogWindowTitle.AppCompat"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/onboarding_complete_check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.8"
+            android:textColor="@color/primary_navy_medium"
+            android:text="@string/onboarding_complete_title"/>
+
+        <TextView
+            android:id="@+id/onboarding_complete_content"
+            fontPath="fonts/Montserrat-Regular.ttf"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/onboarding_complete_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingLeft="72dp"
+            android:paddingRight="72dp"
+            android:gravity="center_horizontal"
+            android:alpha="0.8"
+            android:text="@string/onboarding_complete_content"/>
+
+        <TextView
+            android:id="@+id/onboarding_complete_link"
+            fontPath="fonts/Montserrat-Regular.ttf"
+            style="@style/Base.DialogWindowTitle.AppCompat"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/onboarding_complete_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:alpha="0.8"
+            android:textColor="@color/primary_blue_accent"
+            android:text="@string/start_over"/>
+
+    </RelativeLayout>
+</layout>

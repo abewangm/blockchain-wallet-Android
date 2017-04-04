@@ -113,7 +113,6 @@ public class OnboardingPagerFragment extends Fragment {
     }
 
     void sendBroadcast() {
-        Log.i(TAG, "sendBroadcast: ");
         Intent intent = new Intent(linkAction);
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
     }

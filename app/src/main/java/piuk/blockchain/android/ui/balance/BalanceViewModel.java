@@ -747,4 +747,12 @@ public class BalanceViewModel extends BaseViewModel {
                 R.string.current_price_btc,
                 fiatSymbol + format.format(lastPrice));
     }
+
+    public boolean isOnboardingComplete() {
+        return prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false);
+    }
+
+    public void setOnboardingComplete(boolean competed) {
+        prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, competed);
+    }
 }
