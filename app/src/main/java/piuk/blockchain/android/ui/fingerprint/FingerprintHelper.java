@@ -14,7 +14,6 @@ import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuth;
 import piuk.blockchain.android.util.PrefsUtil;
 
-// This will likely be used in different packages soon
 @SuppressWarnings("WeakerAccess")
 public class FingerprintHelper {
 
@@ -80,7 +79,7 @@ public class FingerprintHelper {
      */
     public boolean storeEncryptedData(@NonNull String key, @NonNull String data) {
         try {
-            String base64 = Base64.encodeToString(data.toString().getBytes("UTF-8"), Base64.DEFAULT);
+            String base64 = Base64.encodeToString(data.getBytes("UTF-8"), Base64.DEFAULT);
             prefsUtil.setValue(key, base64);
             return true;
         } catch (UnsupportedEncodingException e) {
