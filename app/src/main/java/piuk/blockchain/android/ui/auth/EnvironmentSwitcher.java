@@ -110,6 +110,7 @@ class EnvironmentSwitcher {
         prefsUtil.removeValue(AccountViewModel.KEY_WARN_TRANSFER_ALL);
         prefsUtil.removeValue(PrefsUtil.KEY_SURVEY_COMPLETED);
         prefsUtil.removeValue(PrefsUtil.KEY_SURVEY_VISITS);
+        prefsUtil.removeValue(PrefsUtil.KEY_APP_VISITS);
 
         AppRate.reset(context);
         AccessState.getInstance().setPIN(null);

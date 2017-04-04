@@ -37,6 +37,7 @@ interface PersistentPrefs {
     String KEY_SWIPE_TO_RECEIVE_ENABLED = "swipe_to_receive_enabled";
     String KEY_SURVEY_COMPLETED = "survey_completed";
     String KEY_SURVEY_VISITS = "survey_visits";
+    String KEY_APP_VISITS = "app_visits";
     String KEY_SCREENSHOTS_ENABLED = "screenshots_enabled";
 
     String getValue(String name, String value);

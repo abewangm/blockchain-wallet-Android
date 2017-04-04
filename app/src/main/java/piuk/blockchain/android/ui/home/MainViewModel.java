@@ -96,8 +96,6 @@ public class MainViewModel extends BaseViewModel {
 
         void kickToLauncherPage();
 
-        void showEmailVerificationDialog(String email);
-
         void showAddEmailDialog();
 
         void showProgressDialog(@StringRes int message);
@@ -306,22 +304,20 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void checkIfShouldShowEmailVerification() {
-        if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
-            compositeDisposable.add(
-                    getSettingsApi()
-                            .compose(RxUtil.applySchedulersToObservable())
-                            .subscribe(settings -> {
-                                if (!settings.isEmailVerified()) {
-                                    appUtil.setNewlyCreated(false);
-                                    String email = settings.getEmail();
-                                    if (email != null && !email.isEmpty()) {
-                                        dataListener.showEmailVerificationDialog(email);
-                                    } else {
+        compositeDisposable.add(
+                getSettingsApi()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(settings -> {
+                            if (!settings.isEmailVerified()) {
+                                appUtil.setNewlyCreated(false);
+                                String email = settings.getEmail();
+                                if (email == null || email.isEmpty()) {
+                                    if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
                                         dataListener.showAddEmailDialog();
                                     }
                                 }
-                            }, Throwable::printStackTrace));
-        }
+                            }
+                        }, Throwable::printStackTrace));
     }
 
     private Observable<Settings> getSettingsApi() {

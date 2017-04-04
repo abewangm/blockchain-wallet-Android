@@ -28,7 +28,7 @@ ext {
     daggerVersion = '2.10'
     retrofitVersion = '2.2.0'
     okHttpVersion = '3.6.0'
-    mockitoVersion = '2.7.17'
+    mockitoVersion = '2.7.21'
     kotlinVersion = '1.1.1'
 }
 
