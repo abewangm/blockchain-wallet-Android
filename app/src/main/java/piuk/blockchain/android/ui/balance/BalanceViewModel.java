@@ -149,26 +149,17 @@ public class BalanceViewModel extends BaseViewModel {
             // Check from this point forwards
             txListObservable = rxBus.register(List.class);
 
-            compositeDisposable.add(
-                    txListObservable
-                            .compose(RxUtil.applySchedulersToObservable())
-                            .subscribe(txs -> {
-                                if (hasTransactions()) {
-                                    if (!isBackedUp() && !getIfNeverPromptBackup()) {
-                                        // Show dialog and store date of dialog launch
-                                        if (getTimeOfLastSecurityPrompt() == 0) {
-                                            dataListener.showBackupPromptDialog(false);
-                                            storeTimeOfLastSecurityPrompt();
-                                        } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-                                            dataListener.showBackupPromptDialog(true);
-                                            storeTimeOfLastSecurityPrompt();
-                                        }
-                                    } else if (isBackedUp() && !getIfNeverPrompt2Fa()) {
+            if (prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0) == 3) {
+                // On third visit onwards, prompt 2FA
+                compositeDisposable.add(
+                        txListObservable
+                                .compose(RxUtil.applySchedulersToObservable())
+                                .subscribe(txs -> {
+                                    if (!getIfNeverPrompt2Fa()) {
                                         compositeDisposable.add(
                                                 settingsDataManager.initSettings(
                                                         payloadDataManager.getWallet().getGuid(),
                                                         payloadDataManager.getWallet().getSharedKey())
-                                                        .compose(RxUtil.applySchedulersToObservable())
                                                         .subscribe(settings -> {
                                                             if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
                                                                 // Show dialog for 2FA, store date of dialog launch
@@ -180,9 +171,25 @@ public class BalanceViewModel extends BaseViewModel {
                                                             }
                                                         }, Throwable::printStackTrace));
                                     }
-                                }
-
-                            }, Throwable::printStackTrace));
+                                }, Throwable::printStackTrace));
+            } else {
+                // From second visit onwards, prompt backup if not already
+                compositeDisposable.add(
+                        txListObservable
+                                .compose(RxUtil.applySchedulersToObservable())
+                                .subscribe(txs -> {
+                                    if (hasTransactions() && !isBackedUp() && !getIfNeverPromptBackup()) {
+                                        // Show dialog and store date of dialog launch
+                                        if (getTimeOfLastSecurityPrompt() == 0) {
+                                            dataListener.showBackupPromptDialog(false);
+                                            storeTimeOfLastSecurityPrompt();
+                                        } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
+                                            dataListener.showBackupPromptDialog(true);
+                                            storeTimeOfLastSecurityPrompt();
+                                        }
+                                    }
+                                }, Throwable::printStackTrace));
+            }
         }
 
         contactsEventObservable = rxBus.register(ContactsEvent.class);
@@ -537,7 +544,7 @@ public class BalanceViewModel extends BaseViewModel {
                             paymentRequest.setId(fctxId);
 
                             compositeDisposable.add(
-                                    payloadDataManager.getNextReceiveAddressAndReserve(getCorrectedAccountIndex(accountPosition), "Payment request "+transaction.getId())
+                                    payloadDataManager.getNextReceiveAddressAndReserve(getCorrectedAccountIndex(accountPosition), "Payment request " + transaction.getId())
                                             .doOnNext(paymentRequest::setAddress)
                                             .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
                                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())

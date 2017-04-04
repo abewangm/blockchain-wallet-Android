@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Wallet;
 
@@ -17,9 +18,11 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
@@ -33,6 +36,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.launcher.LauncherViewModel.INTENT_EXTRA_VERIFIED;
@@ -51,6 +55,7 @@ public class LauncherViewModelTest {
     @Mock private PrefsUtil prefsUtil;
     @Mock private AppUtil appUtil;
     @Mock private PayloadDataManager payloadDataManager;
+    @Mock private SettingsDataManager settingsDataManager;
     @Mock private AccessState accessState;
     @Mock private Intent intent;
     @Mock private Bundle extras;
@@ -73,7 +78,7 @@ public class LauncherViewModelTest {
      * Everything is good. Expected output is {@link LauncherActivity#onStartMainActivity()}
      */
     @Test
-    public void onViewReadyVerified() throws Exception {
+    public void onViewReadyVerifiedEmailVerified() throws Exception {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
@@ -85,6 +90,131 @@ public class LauncherViewModelTest {
         when(payloadDataManager.getWallet()).thenReturn(wallet);
         when(wallet.isUpgraded()).thenReturn(true);
         when(accessState.isLoggedIn()).thenReturn(true);
+        when(appUtil.isNewlyCreated()).thenReturn(false);
+        String guid = "GUID";
+        String sharedKey = "SHARED_KEY";
+        when(wallet.getGuid()).thenReturn(guid);
+        when(wallet.getSharedKey()).thenReturn(sharedKey);
+        Settings mockSettings = mock(Settings.class);
+        when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.just(mockSettings));
+        when(mockSettings.isEmailVerified()).thenReturn(true);
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(launcherActivity).onStartMainActivity();
+    }
+
+    /**
+     * Wallet is newly created. Launch onboarding process.
+     */
+    @Test
+    public void onViewReadyNewlyCreated() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
+        when(appUtil.isSane()).thenReturn(true);
+        when(payloadDataManager.getWallet()).thenReturn(wallet);
+        when(wallet.isUpgraded()).thenReturn(true);
+        when(accessState.isLoggedIn()).thenReturn(true);
+        when(appUtil.isNewlyCreated()).thenReturn(true);
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(launcherActivity).onStartOnboarding(false);
+    }
+
+    /**
+     * Everything is good, email not verified and second launch. Should start email verification nag
+     * flow.
+     */
+    @Test
+    public void onViewReadyNonVerifiedEmailNotVerifiedSecondLaunch() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
+        when(appUtil.isSane()).thenReturn(true);
+        when(payloadDataManager.getWallet()).thenReturn(wallet);
+        when(wallet.isUpgraded()).thenReturn(true);
+        when(accessState.isLoggedIn()).thenReturn(true);
+        when(appUtil.isNewlyCreated()).thenReturn(false);
+        String guid = "GUID";
+        String sharedKey = "SHARED_KEY";
+        when(wallet.getGuid()).thenReturn(guid);
+        when(wallet.getSharedKey()).thenReturn(sharedKey);
+        Settings mockSettings = mock(Settings.class);
+        when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.just(mockSettings));
+        when(mockSettings.isEmailVerified()).thenReturn(false);
+        when(mockSettings.getEmail()).thenReturn("email");
+        when(prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0)).thenReturn(1);
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(launcherActivity).onStartOnboarding(true);
+    }
+
+    /**
+     * Everything is good, email not verified but first launch. Should start MainActivity flow.
+     */
+    @Test
+    public void onViewReadyNonVerifiedEmailNotVerifiedFirstLaunch() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
+        when(appUtil.isSane()).thenReturn(true);
+        when(payloadDataManager.getWallet()).thenReturn(wallet);
+        when(wallet.isUpgraded()).thenReturn(true);
+        when(accessState.isLoggedIn()).thenReturn(true);
+        when(appUtil.isNewlyCreated()).thenReturn(false);
+        String guid = "GUID";
+        String sharedKey = "SHARED_KEY";
+        when(wallet.getGuid()).thenReturn(guid);
+        when(wallet.getSharedKey()).thenReturn(sharedKey);
+        Settings mockSettings = mock(Settings.class);
+        when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.just(mockSettings));
+        when(mockSettings.isEmailVerified()).thenReturn(false);
+        when(mockSettings.getEmail()).thenReturn("email");
+        when(prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0)).thenReturn(0);
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(launcherActivity).onStartMainActivity();
+    }
+
+    /**
+     * Everything is good, email not verified and getting {@link Settings} object failed. Should
+     * launch MainActivity.
+     */
+    @Test
+    public void onViewReadyNonVerifiedEmailSettingsFailure() throws Exception {
+        // Arrange
+        when(launcherActivity.getPageIntent()).thenReturn(intent);
+        when(intent.getExtras()).thenReturn(extras);
+        when(extras.containsKey(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
+        when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
+        when(appUtil.isSane()).thenReturn(true);
+        when(payloadDataManager.getWallet()).thenReturn(wallet);
+        when(wallet.isUpgraded()).thenReturn(true);
+        when(accessState.isLoggedIn()).thenReturn(true);
+        when(appUtil.isNewlyCreated()).thenReturn(false);
+        String guid = "GUID";
+        String sharedKey = "SHARED_KEY";
+        when(wallet.getGuid()).thenReturn(guid);
+        when(wallet.getSharedKey()).thenReturn(sharedKey);
+        when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.error(new Throwable()));
         // Act
         subject.onViewReady();
         // Assert
@@ -111,6 +241,14 @@ public class LauncherViewModelTest {
         when(payloadDataManager.getWallet()).thenReturn(wallet);
         when(wallet.isUpgraded()).thenReturn(true);
         when(accessState.isLoggedIn()).thenReturn(true);
+        when(appUtil.isNewlyCreated()).thenReturn(false);
+        String guid = "GUID";
+        String sharedKey = "SHARED_KEY";
+        when(wallet.getGuid()).thenReturn(guid);
+        when(wallet.getSharedKey()).thenReturn(sharedKey);
+        Settings mockSettings = mock(Settings.class);
+        when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.just(mockSettings));
+        when(mockSettings.isEmailVerified()).thenReturn(true);
         // Act
         subject.onViewReady();
         // Assert
@@ -156,6 +294,14 @@ public class LauncherViewModelTest {
         when(payloadDataManager.getWallet()).thenReturn(wallet);
         when(wallet.isUpgraded()).thenReturn(true);
         when(accessState.isLoggedIn()).thenReturn(true);
+        when(appUtil.isNewlyCreated()).thenReturn(false);
+        String guid = "GUID";
+        String sharedKey = "SHARED_KEY";
+        when(wallet.getGuid()).thenReturn(guid);
+        when(wallet.getSharedKey()).thenReturn(sharedKey);
+        Settings mockSettings = mock(Settings.class);
+        when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.just(mockSettings));
+        when(mockSettings.isEmailVerified()).thenReturn(true);
         // Act
         subject.onViewReady();
         // Assert
@@ -291,5 +437,11 @@ public class LauncherViewModelTest {
                                                                RxBus rxBus) {
             return payloadDataManager;
         }
+
+        @Override
+        protected SettingsDataManager provideSettingsDataManager(RxBus rxBus) {
+            return settingsDataManager;
+        }
     }
+
 }
