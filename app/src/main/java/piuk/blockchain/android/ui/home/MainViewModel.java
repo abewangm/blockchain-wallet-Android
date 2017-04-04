@@ -26,6 +26,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
+import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
@@ -65,6 +66,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected Context applicationContext;
     @Inject protected StringUtils stringUtils;
     @Inject protected SettingsDataManager settingsDataManager;
+    @Inject protected AuthDataManager authDataManager;
     @Inject protected DynamicFeeCache dynamicFeeCache;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
     @Inject protected RxBus rxBus;
@@ -352,17 +354,30 @@ public class MainViewModel extends BaseViewModel {
                         logEvents();
                         return Void.TYPE;
                     }).compose(RxUtil.applySchedulersToCompletable())
-                            .subscribe(() -> {
-                                if (dataListener != null) {
-                                    dataListener.onFetchTransactionCompleted();
-                                }
+                            .andThen(authDataManager.getWalletOptions())
+                            .flatMap(walletOptions -> settingsDataManager.initSettings(
+                                    payloadDataManager.getWallet().getGuid(),
+                                    payloadDataManager.getWallet().getSharedKey())
+                                    .doOnNext(settings -> {
+                                        if (walletOptions.getBuySellCountries().contains(settings.getCountryCode())) {
+                                            enableBuySell();
+                                        }
+                                    }))
+                            .subscribe(
+                                    settings -> {
+                                        // No-op
+                                    }, throwable -> Log.e(TAG, "preLaunchChecks: ", throwable),
+                                    () -> {
+                                        if (dataListener != null) {
+                                            dataListener.onFetchTransactionCompleted();
+                                        }
 
-                                if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
-                                    String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
-                                    prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
-                                    dataListener.onScanInput(strUri);
-                                }
-                            }));
+                                        if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
+                                            String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
+                                            prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
+                                            dataListener.onScanInput(strUri);
+                                        }
+                                    }));
         } else {
             // This should never happen, but handle the scenario anyway by starting the launcher
             // activity, which handles all login/auth/corruption scenarios itself
@@ -376,6 +391,10 @@ public class MainViewModel extends BaseViewModel {
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(feeList -> dynamicFeeCache.setCachedDynamicFee(feeList),
                                 Throwable::printStackTrace));
+    }
+
+    private void enableBuySell() {
+        // TODO: 04/04/2017 Display buy/sell hints in various places
     }
 
     @Override
