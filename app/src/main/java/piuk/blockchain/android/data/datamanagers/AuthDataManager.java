@@ -2,6 +2,7 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.VisibleForTesting;
 
+import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import java.util.concurrent.TimeUnit;
@@ -74,6 +75,11 @@ public class AuthDataManager {
 
     public Observable<Boolean> createPin(String password, String pin) {
         return rxPinning.call(() -> accessState.createPin(password, pin))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    public Observable<WalletOptions> getWalletOptions() {
+        return rxPinning.call(() -> walletService.getWalletOptions())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 

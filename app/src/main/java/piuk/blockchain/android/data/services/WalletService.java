@@ -2,6 +2,7 @@ package piuk.blockchain.android.data.services;
 
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Status;
+import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 
@@ -97,15 +98,26 @@ public class WalletService {
     }
 
     /**
-     * Logs an event to the backend for analytics purposes to work out which features are used most often.
+     * Logs an event to the backend for analytics purposes to work out which features are used most
+     * often.
      *
      * @param event An event as a String
-     * @return  An {@link Observable} wrapping a {@link Status} object
+     * @return An {@link Observable} wrapping a {@link Status} object
      * @see EventService
      */
     @WebRequest
     public Observable<Status> logEvent(String event) {
         return walletApi.logEvent(event);
     }
+
+    /**
+     * Returns a {@link WalletOptions} object, which amongst other things contains information
+     * needed for determining buy/sell regions.
+     */
+    @WebRequest
+    public Observable<WalletOptions> getWalletOptions() {
+        return walletApi.getWalletOptions();
+    }
+
 
 }
