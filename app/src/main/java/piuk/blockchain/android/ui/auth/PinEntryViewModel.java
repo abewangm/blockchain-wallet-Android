@@ -306,7 +306,6 @@ public class PinEntryViewModel extends BaseViewModel {
                             if (!mPayloadManager.getPayload().isUpgraded()) {
                                 mDataListener.goToUpgradeWalletActivity();
                             } else {
-                                Log.i("vos", "restartAppWithVerifiedPin: ");
                                 mAppUtil.restartAppWithVerifiedPin();
                             }
 
