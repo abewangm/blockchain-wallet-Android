@@ -36,9 +36,10 @@ public class AccessState {
     private PrefsUtil prefs;
     private WalletService walletService;
     private AppUtil appUtil;
-    private String mPin;
+    private String pin;
     private boolean isLoggedIn = false;
     private PendingIntent logoutPendingIntent;
+    private boolean inSepaCountry = false;
     private static AccessState instance;
     // TODO: 02/03/2017 Refactor me out of here
     @Deprecated
@@ -71,7 +72,7 @@ public class AccessState {
 
     @Deprecated
     public Observable<String> validatePin(String passedPin) {
-        mPin = passedPin;
+        pin = passedPin;
 
         String key = prefs.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
         String encryptedPassword = prefs.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
@@ -103,7 +104,7 @@ public class AccessState {
             return Observable.just(false);
         }
 
-        mPin = passedPin;
+        pin = passedPin;
         appUtil.applyPRNGFixes();
 
         return Observable.create(subscriber -> {
@@ -144,11 +145,11 @@ public class AccessState {
     }
 
     public void setPIN(@Nullable String pin) {
-        mPin = pin;
+        this.pin = pin;
     }
 
     public String getPIN() {
-        return mPin;
+        return pin;
     }
 
     /**
@@ -168,11 +169,23 @@ public class AccessState {
     }
 
     public void logout(Context context) {
-        mPin = null;
+        pin = null;
         Intent intent = new Intent(context, LogoutActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.setAction(LOGOUT_ACTION);
         context.startActivity(intent);
+    }
+
+    /**
+     * Returns whether or not a user is accessing their wallet from a SEPA country, ie should be
+     * able to see buy/sell prompts.
+     */
+    public boolean getInSepaCountry() {
+        return inSepaCountry;
+    }
+
+    public void setInSepaCountry(boolean inSepaCountry) {
+        this.inSepaCountry = inSepaCountry;
     }
 
     public boolean isLoggedIn() {

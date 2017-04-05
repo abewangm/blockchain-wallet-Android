@@ -153,7 +153,14 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected OnboardingDataManager provideOnboardingDataManager() {
-        return new OnboardingDataManager();
+    protected OnboardingDataManager provideOnboardingDataManager(SettingsDataManager settingsDataManager,
+                                                                 AuthDataManager authDataManager,
+                                                                 PayloadDataManager payloadDataManager,
+                                                                 AccessState accessState) {
+        return new OnboardingDataManager(
+                settingsDataManager,
+                authDataManager,
+                payloadDataManager,
+                accessState);
     }
 }
