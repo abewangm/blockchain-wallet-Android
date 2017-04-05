@@ -29,6 +29,7 @@ import javax.inject.Inject;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AuthEvent;
 import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
@@ -720,7 +721,7 @@ public class BalanceViewModel extends BaseViewModel {
 
         ArrayList<OnboardingPagerContent> pages = new ArrayList<>();
 
-        if (onboardingDataManager.isSepa()) {
+        if (onboardingDataManager.isSepa() && BuildConfig.BUY_BITCOIN_ENABLED) {
             pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_current_price),
                     getFormattedPriceString(),
                     stringUtils.getString(R.string.onboarding_buy_content),
