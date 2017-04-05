@@ -14,7 +14,6 @@ import android.util.Log;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
 import info.blockchain.wallet.api.WalletApi;
-
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import javax.inject.Inject;
@@ -50,6 +49,13 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Inject
     @Named("server")
     protected Lazy<Retrofit> retrofitServer;
+    @Inject
+    @Named("sfox")
+    protected Lazy<Retrofit> sfoxApi;
+    @Inject
+    @Named("coinify")
+    protected Lazy<Retrofit> coinify;
+
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected RxBus rxBus;
 
@@ -127,8 +133,12 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
     @Override
     public Retrofit getRetrofitSFOXInstance() {
-        // TODO: 20/03/2017 This will need updating shortly
-        return null;
+        return sfoxApi.get();
+    }
+
+    @Override
+    public Retrofit getRetrofitCoinifyInstance() {
+        return coinify.get();
     }
 
     @Override

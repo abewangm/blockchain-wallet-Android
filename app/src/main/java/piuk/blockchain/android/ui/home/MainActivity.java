@@ -30,12 +30,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
+import piuk.blockchain.android.ui.buy.BuyActivity;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -94,6 +96,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public static final String EXTRA_RECIPIENT_ID = "recipient_id";
     public static final String EXTRA_MDID = "mdid";
     public static final String EXTRA_FCTX_ID = "fctx_id";
+
+    public static final String EXTRA_DEFAULT_INDEX = "default_index";
+    public static final String WEB_VIEW_STATE_KEY = "web_view_state";
     public static final int SCAN_URI = 2007;
 
     @Thunk boolean drawerIsOpen = false;
@@ -108,6 +113,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private Toolbar toolbar;
     private boolean paymentToContactMade = false;
     private Typeface typeface;
+    private WebView buyWebView;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -222,6 +228,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         applyFontToNavDrawer();
         if (!BuildConfig.CONTACTS_ENABLED) {
             hideContacts();
+        }
+        if (!BuildConfig.BUY_BITCOIN_ENABLED) {
+            hideBuyBitcoin();
+        } else {
+            setupBuyWebView();
         }
     }
 
@@ -358,6 +369,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         startSendFragment(strResult, scanRoute);
     }
 
+    private Intent putWebViewState (Intent intent) {
+        Bundle state = new Bundle();
+        buyWebView.saveState(state);
+        return intent.putExtra(WEB_VIEW_STATE_KEY, state);
+    }
+
     public void selectDrawerItem(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.nav_backup:
@@ -365,6 +382,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 break;
             case R.id.nav_addresses:
                 startActivity(new Intent(MainActivity.this, AccountActivity.class));
+                break;
+            case R.id.nav_buy:
+                startActivity(putWebViewState(new Intent(MainActivity.this, BuyActivity.class)));
                 break;
             case R.id.nav_contacts:
                 ContactsListActivity.start(this, null);
@@ -674,6 +694,19 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private void hideContacts() {
         Menu menu = binding.navigationView.getMenu();
         menu.findItem(R.id.nav_contacts).setVisible(false);
+    }
+
+    private void hideBuyBitcoin() {
+        Menu menu = binding.navigationView.getMenu();
+        menu.findItem(R.id.nav_buy).setVisible(false);
+    }
+
+    private void setupBuyWebView() {
+        // Setup buy WebView
+        // TODO: 17/03/2017 Check if there's a better way to improve loading time of this webview
+        buyWebView = new WebView(this);
+        buyWebView.getSettings().setJavaScriptEnabled(true);
+        buyWebView.loadUrl("http://localhost:8080/wallet/#/intermediate");
     }
 
     private void applyFontToMenuItem(MenuItem menuItem) {

@@ -2,6 +2,7 @@ package piuk.blockchain.android.injection;
 
 import android.util.Log;
 
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -155,6 +156,36 @@ public class ApiModule {
                 .addConverterFactory(converterFactory)
                 .addCallAdapterFactory(rxJavaCallFactory)
                 .build();
+    }
+
+    @Provides
+    @Singleton
+    @Named("sfox")
+    protected Retrofit provideRetrofitSFOXInstance(OkHttpClient okHttpClient,
+        JacksonConverterFactory converterFactory,
+        RxJava2CallAdapterFactory rxJavaCallFactory,
+        PersistentUrls persistentUrls) {
+        return new Retrofit.Builder()
+            .baseUrl(persistentUrls.getCurrentSFOXUrl())
+            .client(okHttpClient)
+            .addConverterFactory(converterFactory)
+            .addCallAdapterFactory(rxJavaCallFactory)
+            .build();
+    }
+
+    @Provides
+    @Singleton
+    @Named("coinify")
+    protected Retrofit provideRetrofitCoinifyInstance(OkHttpClient okHttpClient,
+        JacksonConverterFactory converterFactory,
+        RxJava2CallAdapterFactory rxJavaCallFactory,
+        PersistentUrls persistentUrls) {
+        return new Retrofit.Builder()
+            .baseUrl(persistentUrls.getCurrentCoinifyUrl())
+            .client(okHttpClient)
+            .addConverterFactory(converterFactory)
+            .addCallAdapterFactory(rxJavaCallFactory)
+            .build();
     }
 
     @Provides

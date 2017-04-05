@@ -681,7 +681,7 @@
 
     <!-- BUY BITCOIN -->
     <string name="buy_bitcoin">Buy Bitcoin</string>
-    <string name="get_bitcoin">GET BITCOIN</string>
+    <string name="get_bitcoin">Get Bitcoin</string>
     <string name="onboarding_complete_title">That\'s it for now!</string>
     <string name="onboarding_complete_content">We’ll keep you up-to-date here with recommendations and new features.</string>
     <string name="start_over">Start Over</string>
