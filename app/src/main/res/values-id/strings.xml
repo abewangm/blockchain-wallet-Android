@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">Terima biaya yang lebih tinggi</string>
     <string name="large_tx_high_fee_warning">"Transaksi ini membutuhkan biaya yang lebih tinggi untuk recehan karena jumlah kecil dari kembalian untuk dikembalikan."</string>
 
-    <string name="transactions">Transaksi</string>
+    <string name="overview">Transaksi</string>
     <string name="invalid_password_too_short">Silakan masukkan lebih dari 3 karakter</string>
     <string name="change_pin_new_matches_current">Anda tidak dapat menggunakan PIN Anda saat ini sebagai PIN baru Anda</string>
     <string name="account_locked_title">Akun terkunci</string>

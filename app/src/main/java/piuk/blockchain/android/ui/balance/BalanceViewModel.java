@@ -17,6 +17,7 @@ import info.blockchain.wallet.payload.data.LegacyAddress;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,10 +34,13 @@ import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
+import piuk.blockchain.android.ui.home.MainActivity;
+import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
@@ -75,6 +79,9 @@ public class BalanceViewModel extends BaseViewModel {
     @Inject SettingsDataManager settingsDataManager;
     @Inject SwipeToReceiveHelper swipeToReceiveHelper;
     @Inject RxBus rxBus;
+    @Inject OnboardingDataManager onboardingDataManager;
+    @Inject protected ExchangeRateFactory exchangeRateFactory;
+    @Inject protected PrefsUtil prefs;
 
     public interface DataListener {
 
@@ -694,5 +701,58 @@ public class BalanceViewModel extends BaseViewModel {
         rxBus.unregister(NotificationPayload.class, notificationObservable);
         rxBus.unregister(List.class, txListObservable);
         super.destroy();
+    }
+
+    public ArrayList<OnboardingPagerContent> getOnboardingPages() {
+
+        ArrayList<OnboardingPagerContent> pages = new ArrayList<>();
+
+        if(onboardingDataManager.isSEPA()) {
+            pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_current_price)
+                    ,getFormattedPriceString()
+                    ,stringUtils.getString(R.string.onboarding_buy_content)
+                    ,stringUtils.getString(R.string.buy_bitcoin)
+                    , MainActivity.ACTION_BUY
+                    ,R.color.primary_blue_accent
+                    ,R.drawable.vector_buy));
+        }
+
+        //Receive bitcoin
+        pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_receive_bitcoin)
+                ,""
+                ,stringUtils.getString(R.string.onboarding_receive_content)
+                ,stringUtils.getString(R.string.receive_bitcoin)
+                , MainActivity.ACTION_RECEIVE
+                ,R.color.secondary_teal_medium
+                ,R.drawable.vector_receive));
+
+        //QR Codes
+        pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_qr_codes)
+                ,""
+                ,stringUtils.getString(R.string.onboarding_qr_codes_content)
+                ,stringUtils.getString(R.string.onboarding_scan_address)
+                , MainActivity.ACTION_SEND
+                ,R.color.primary_navy_medium
+                ,R.drawable.icon_qrcode));
+        return pages;
+    }
+
+    private String getFormattedPriceString() {
+        String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
+        double lastPrice = exchangeRateFactory.getLastPrice(fiat);
+        String fiatSymbol = exchangeRateFactory.getSymbol(fiat);
+        DecimalFormat format = new DecimalFormat();
+        format.setMinimumFractionDigits(2);
+        return stringUtils.getFormattedString(
+                R.string.current_price_btc,
+                fiatSymbol + format.format(lastPrice));
+    }
+
+    public boolean isOnboardingComplete() {
+        return prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false);
+    }
+
+    public void setOnboardingComplete(boolean competed) {
+        prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, competed);
     }
 }

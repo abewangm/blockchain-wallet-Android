@@ -11,7 +11,9 @@ import android.os.Bundle;
 import android.support.annotation.StringRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
@@ -25,12 +27,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.ui.onboarding.OnboardingPagerAdapter;
 import piuk.blockchain.android.databinding.FragmentBalanceBinding;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration;
@@ -52,7 +57,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-public class BalanceFragment extends Fragment implements BalanceViewModel.DataListener, TransactionSelectedListener {
+public class BalanceFragment extends Fragment implements BalanceViewModel.DataListener, TransactionSelectedListener, ViewPager.OnPageChangeListener {
 
     public static final String ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH";
     public static final String KEY_TRANSACTION_LIST_POSITION = "transaction_list_position";
@@ -469,6 +474,13 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         } else {
             binding.rvTransactions.setVisibility(View.GONE);
             binding.noTransactionMessage.noTxMessage.setVisibility(View.VISIBLE);
+
+            if(!viewModel.isOnboardingComplete()) {
+                initOnboardingPager();
+            } else {
+                binding.noTransactionMessage.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.GONE);
+                binding.noTransactionMessage.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
+            }
         }
 
         accountsAdapter.notifyBtcChanged(isBTC);
@@ -665,5 +677,69 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         }
 
         public abstract void onMoved(int distance);
+    }
+
+    private int dotsCount;
+    private ImageView[] dots;
+
+    private void initOnboardingPager() {
+        OnboardingPagerAdapter adapter = new OnboardingPagerAdapter(getActivity().getSupportFragmentManager(), viewModel.getOnboardingPages());
+        binding.noTransactionMessage.onboardingViewpagerLayout.pagerOnboarding.setAdapter(adapter);
+        binding.noTransactionMessage.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(this);
+
+        dotsCount = adapter.getCount();
+        dots = new ImageView[dotsCount];
+        binding.noTransactionMessage.onboardingViewpagerLayout.viewPagerCountDots.removeAllViews();
+
+        for (int i = 0; i < dotsCount; i++) {
+            dots[i] = new ImageView(getActivity());
+            dots[i].setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.nonselecteditem_dot));
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+
+            params.setMargins(4, 0, 4, 0);
+
+            binding.noTransactionMessage.onboardingViewpagerLayout.viewPagerCountDots.addView(dots[i], params);
+        }
+
+        dots[0].setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selecteditem_dot));
+
+        binding.noTransactionMessage.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(
+                v -> {
+                    binding.noTransactionMessage.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.GONE);
+                    binding.noTransactionMessage.onboardingCompleteLayout.onboardingLayout.setVisibility(View.VISIBLE);
+                    viewModel.setOnboardingComplete(true);
+                });
+
+        binding.noTransactionMessage.onboardingCompleteLayout.onboardingClose.setOnClickListener(v -> {
+            binding.noTransactionMessage.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
+        });
+
+        binding.noTransactionMessage.onboardingCompleteLayout.onboardingCompleteLink.setOnClickListener(v -> {
+            binding.noTransactionMessage.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.VISIBLE);
+            binding.noTransactionMessage.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
+            binding.noTransactionMessage.onboardingViewpagerLayout.pagerOnboarding.setCurrentItem(0);
+        });
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        //noop
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        for (int i = 0; i < dotsCount; i++) {
+            dots[i].setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.nonselecteditem_dot));
+        }
+        dots[position].setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.selecteditem_dot));
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+        //noop
     }
 }

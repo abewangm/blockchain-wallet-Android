@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">Daha yüksek ücreti kabul et</string>
     <string name="large_tx_high_fee_warning">"Bu işlem, küçük miktarda para üstü iadesi sebebiyle toz tüketimi için daha yüksek bir ücret gerektirir."</string>
 
-    <string name="transactions">İşlemler</string>
+    <string name="overview">İşlemler</string>
     <string name="invalid_password_too_short">Lütfen 3 karakterden fazla girmeyin</string>
     <string name="change_pin_new_matches_current">Mevcut PIN kodunuzu yeni PIN kodunuz olarak giremezsiniz</string>
     <string name="account_locked_title">Hesap kilitlendi</string>

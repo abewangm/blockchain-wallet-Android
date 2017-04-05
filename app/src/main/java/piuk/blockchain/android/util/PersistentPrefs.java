@@ -39,6 +39,7 @@ interface PersistentPrefs {
     String KEY_SURVEY_VISITS = "survey_visits";
     String KEY_APP_VISITS = "app_visits";
     String KEY_SCREENSHOTS_ENABLED = "screenshots_enabled";
+    String KEY_ONBOARDING_COMPLETE = "onboarding_complete";
 
     String getValue(String name, String value);
 

@@ -408,7 +408,7 @@
     <string name="large_tx_high_fee_warning">"ธุรกรรมนี้ต้องการค่าธรรมเนียมที่สูงขึ้นสำหรับการใช้ดัส เนื่องจากจะมีการคืนเงินทอนเล็กน้อย"</string>
 
 
-    <string name="transactions">ธุรกรรม</string>
+    <string name="overview">ธุรกรรม</string>
     <string name="invalid_password_too_short">โปรดกรอกมากกว่า 3 ตัวอักษร</string>
     <string name="change_pin_new_matches_current">คุณไม่สามารถใช้ PIN ปัจจุบันของคุณเป็น PIN ใหม่ได้</string>
     <string name="account_locked_title">บัญชีถูกล็อก</string>

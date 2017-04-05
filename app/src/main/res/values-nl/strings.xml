@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">Hoger tarief accepteren</string>
     <string name="large_tx_high_fee_warning">"Deze transactie vereist een hoger tarief voor dustconsumptie ten gevolg van de kleine hoeveelheid wisselgeld die kan worden teruggegeven."</string>
 
-    <string name="transactions">Transacties</string>
+    <string name="overview">Transacties</string>
     <string name="invalid_password_too_short">Voer meer dan 3 karakters in</string>
     <string name="change_pin_new_matches_current">U kunt uw huidige PIN niet gebruiken als nieuwe PIN</string>
     <string name="account_locked_title">Account geblokkeerd</string>
