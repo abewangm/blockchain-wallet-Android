@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.R;
@@ -42,7 +43,6 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -62,6 +62,7 @@ public class TransactionDetailViewModelTest extends RxTest {
     @Mock TransactionHelper transactionHelper;
     @Mock PrefsUtil prefsUtil;
     @Mock PayloadManager payloadManager;
+    @Mock PayloadDataManager payloadDataManager;
     @Mock StringUtils stringUtils;
     @Mock TransactionListDataManager transactionListDataManager;
     @Mock TransactionDetailViewModel.DataListener activity;
@@ -215,6 +216,9 @@ public class TransactionDetailViewModelTest extends RxTest {
         when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
         when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
+        HashMap<String, String> notesMap = new HashMap<>();
+        notesMap.put("txMoved_hash", "transaction_note");
+        when(contactsDataManager.getNotesTransactionMap()).thenReturn(notesMap);
         // Act
         subject.onViewReady();
         // Assert
@@ -229,6 +233,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         verify(activity).setFee(anyString());
         verify(activity).setTransactionValueBtc(anyString());
         verify(activity).setTransactionValueFiat(anyString());
+        verify(activity).setTransactionNote(anyString());
         verify(activity).onDataLoaded();
         verify(activity).setIsDoubleSpend(anyBoolean());
         verifyNoMoreInteractions(activity);
@@ -302,19 +307,6 @@ public class TransactionDetailViewModelTest extends RxTest {
 
     @SuppressLint("VisibleForTests")
     @Test
-    public void getTransactionValueStringNonUsd() {
-        // Arrange
-
-        // Act
-        TestObserver<String> observer = subject.getTransactionValueString("GBP", txReceived).test();
-        // Assert
-        assertNotNull(observer.values().get(0));
-        observer.onComplete();
-        observer.assertNoErrors();
-    }
-
-    @SuppressLint("VisibleForTests")
-    @Test
     public void getTransactionValueStringReceived() {
         // Arrange
         double price = 1000.00D;
@@ -350,13 +342,13 @@ public class TransactionDetailViewModelTest extends RxTest {
     @Test
     public void updateTransactionNoteSuccess() throws Exception {
         // Arrange
-        when(transactionListDataManager.updateTransactionNotes(anyString(), anyString()))
-                .thenReturn(Observable.just(true));
+        when(payloadDataManager.updateTransactionNotes(anyString(), anyString()))
+                .thenReturn(Completable.complete());
         subject.mTransaction = txMoved;
         // Act
         subject.updateTransactionNote("note");
         // Assert
-        verify(transactionListDataManager).updateTransactionNotes(txMoved.getHash(), "note");
+        verify(payloadDataManager).updateTransactionNotes(txMoved.getHash(), "note");
         //noinspection WrongConstant
         verify(activity).showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
         verify(activity).setDescription("note");
@@ -365,27 +357,13 @@ public class TransactionDetailViewModelTest extends RxTest {
     @Test
     public void updateTransactionNoteFailure() throws Exception {
         // Arrange
-        when(transactionListDataManager.updateTransactionNotes(anyString(), anyString()))
-                .thenReturn(Observable.just(false));
+        when(payloadDataManager.updateTransactionNotes(anyString(), anyString()))
+                .thenReturn(Completable.error(new Throwable()));
         subject.mTransaction = txMoved;
         // Act
         subject.updateTransactionNote("note");
         // Assert
-        verify(transactionListDataManager).updateTransactionNotes(txMoved.getHash(), "note");
-        //noinspection WrongConstant
-        verify(activity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-    }
-
-    @Test
-    public void updateTransactionNoteException() throws Exception {
-        // Arrange
-        when(transactionListDataManager.updateTransactionNotes(anyString(), anyString()))
-                .thenReturn(Observable.error(new Throwable()));
-        subject.mTransaction = txMoved;
-        // Act
-        subject.updateTransactionNote("note");
-        // Assert
-        verify(transactionListDataManager).updateTransactionNotes(txMoved.getHash(), "note");
+        verify(payloadDataManager).updateTransactionNotes(txMoved.getHash(), "note");
         //noinspection WrongConstant
         verify(activity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
     }
@@ -541,7 +519,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         }
 
         @Override
-        protected ContactsDataManager provideContactsManager(PayloadManager payloadManager) {
+        protected ContactsDataManager provideContactsManager(RxBus rxBus) {
             return contactsDataManager;
         }
     }
@@ -557,6 +535,11 @@ public class TransactionDetailViewModelTest extends RxTest {
         @Override
         protected TransactionHelper provideTransactionHelper(PayloadDataManager payloadDataManager) {
             return transactionHelper;
+        }
+
+        @Override
+        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager, RxBus rxBus) {
+            return payloadDataManager;
         }
     }
 

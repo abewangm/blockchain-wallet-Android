@@ -4,8 +4,6 @@
     <string name="backup_wallet">Backup funds</string>
     <string name="upgrade_wallet">Upgrade</string>
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="current_price_millibits">1 mBTC = %1$s</string>
-    <string name="current_price_bits">1 bit = %1$s</string>
 
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Settings</string>
@@ -16,7 +14,7 @@
 
     <string name="send_bitcoin">Send</string>
     <string name="receive_bitcoin">Receive</string>
-    <string name="transactions">Transactions</string>
+    <string name="overview">Overview</string>
 
     <string name="cancel">Cancel</string>
     <string name="yes">Yes</string>
@@ -231,7 +229,7 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="check_email_to_auth_login">Please check your email to approve this login attempt.</string>
     <string name="transaction_fee">Transaction Fee</string>
-    <string name="your_transactions">Your Transactions</string>
+    <string name="your_transactions">No Transactions</string>
     <string name="transaction_occur_when">Transactions occur when you receive and send bitcoin.</string>
     <string name="click">Click</string>
     <string name="to_start_sending_and_receiving_btc">to start sending and receiving bitcoin.</string>
@@ -496,6 +494,7 @@
     <string name="transaction_detail_double_spend">May be at risk for a double spend.</string>
     <string name="transaction_detail_verify">Verify on Blockchain.info</string>
     <string name="transaction_detail_share_chooser">Share transaction details</string>
+    <string name="transaction_detail_contact_note">Note</string>
 
     <!-- SECURITY CENTRE -->
     <string name="security_centre_email_title">Check your email</string>
@@ -635,15 +634,21 @@
     <string name="contacts_transaction_history">Transaction History</string>
     <string name="contacts_request_money_receive">Send request to contact</string>
     <string name="contacts_no_confirmed_contacts_found">No confirmed contacts found!</string>
-    <string name="contacts_delete_pending_transaction">Are you sure you want to delete this pending transaction? Please note this will not delete the request from your contact\'s device. No bitcoin will be lost.</string>
+    <string name="contacts_decline_pending_transaction">Are you sure you want to decline this pending transaction?</string>
+    <string name="contacts_cancel_pending_transaction">Are you sure you want to cancel this pending transaction?</string>
     <string name="contacts_pending_transaction_delete_success">Pending transaction successfully deleted</string>
     <string name="contacts_pending_transaction_delete_failure">Pending transaction deletion failed</string>
+    <string name="contacts_pending_transaction_decline_success">Pending transaction successfully declined</string>
+    <string name="contacts_pending_transaction_decline_failure">Pending transaction declination failed</string>
+    <string name="contacts_pending_transaction_cancel_success">Pending transaction successfully cancelled</string>
+    <string name="contacts_pending_transaction_cancel_failure">Pending transaction cancellation failed</string>
     <!-- CONTACTS PENDING TRANSACTION STRINGS -->
-    <string name="contacts_sending_to_contact_ready_to_send">Sending %1$s to %2$s\nReady to send</string>
     <string name="contacts_sending_to_contact_waiting">Sending %1$s to %2$s\nWaiting for %2$s to accept</string>
+    <string name="contacts_payment_requested_ready_to_send">%1$s requested by %2$s\nReady to send</string>
     <string name="contacts_requesting_from_contact_waiting_for_payment">Requested %1$s from %2$s\nWaiting for payment</string>
-    <string name="contacts_requesting_from_contact_waiting_to_accept">Requested %1$s from %2$s\nWaiting for %2$s to accept</string>
     <string name="contacts_receiving_from_contact_waiting_to_accept">Receiving %1$s from %2$s\nWaiting for you to accept</string>
+    <string name="contacts_receiving_declined">Payment declined</string>
+    <string name="contacts_receiving_cancelled">Payment cancelled</string>
     <string name="contacts_send_complete">Sent %1$s to %2$s</string>
     <string name="contacts_receive_complete">Received %1$s from %2$s</string>
     <string name="contacts_received">Received from %1$s</string>
@@ -658,5 +663,27 @@
     <string name="survey_message">Would you like to fill out a short survey to help improve your wallet experience?\n\nWe value your feedback!</string>
     <string name="survey_positive_button">Take survey</string>
 
-    <string name="buy">Buy Bitcoin</string>
+    <!-- ONBOARDING -->
+    <string name="onboarding_fingerprint_title">Fingerprint Login</string>
+    <string name="onboarding_fingerprint_summary">Use fingerprint login instead of your PIN to authenticate and access your wallet.</string>
+    <string name="onboarding_fingerprint_enable">Enable fingerprint</string>
+    <string name="onboarding_complete_later">I\'ll do this later</string>
+    <string name="onboarding_check_inbox_title">Check Your Inbox</string>
+    <string name="onboarding_check_inbox_summary">Look for an email from Blockchain and click the verification link to complete your wallet setup.</string>
+    <string name="onboarding_verify_email">Verify email</string>
+    <string name="onboarding_receive_bitcoin">Receive Bitcoin</string>
+    <string name="onboarding_current_price">Current Price:</string>
+    <string name="onboarding_qr_codes">QR Codes</string>
+    <string name="onboarding_scan_address">Scan Address</string>
+    <string name="onboarding_buy_content">We work with exchange partners all over the world, so you can buy bitcoin directly from your wallet.</string>
+    <string name="onboarding_receive_content">Send your wallet address to a friend to request bitcoin. An address is a string of random letters and numbers that change for each transaction.</string>
+    <string name="onboarding_qr_codes_content">An address can also be shown as a QR code. Scan a friend’s QR code to quickly capture their wallet address.</string>
+
+    <!-- BUY BITCOIN -->
+    <string name="buy_bitcoin">Buy Bitcoin</string>
+    <string name="get_bitcoin">Get Bitcoin</string>
+    <string name="onboarding_complete_title">That\'s it for now!</string>
+    <string name="onboarding_complete_content">We’ll keep you up-to-date here with recommendations and new features.</string>
+    <string name="start_over">Start Over</string>
+
 </resources>

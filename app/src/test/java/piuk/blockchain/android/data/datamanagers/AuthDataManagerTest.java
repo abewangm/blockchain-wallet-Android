@@ -1,5 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import org.junit.Before;
@@ -17,6 +18,7 @@ import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -45,6 +47,7 @@ public class AuthDataManagerTest extends RxTest {
     @Mock private AppUtil appUtil;
     @Mock private AccessState accessState;
     @Mock private StringUtils stringUtils;
+    @Mock private RxBus rxBus;
     @InjectMocks private AuthDataManager subject;
 
     @Before
@@ -122,6 +125,20 @@ public class AuthDataManagerTest extends RxTest {
         observer.assertComplete();
         observer.assertValue(true);
         observer.assertNoErrors();
+    }
+
+    @Test
+    public void getWalletOptions() throws Exception {
+        // Arrange
+        WalletOptions walletOptions = new WalletOptions();
+        when(walletService.getWalletOptions()).thenReturn(Observable.just(walletOptions));
+        // Act
+        TestObserver<WalletOptions> observer = subject.getWalletOptions().test();
+        // Assert
+        verify(walletService).getWalletOptions();
+        observer.assertComplete();
+        observer.assertNoErrors();
+        observer.assertValue(walletOptions);
     }
 
     @Test

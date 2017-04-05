@@ -16,6 +16,7 @@ import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.FragmentContactPaymentRequestNotesBinding;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.ViewUtils;
 
 public class ContactPaymentRequestNotesFragment extends Fragment implements
         ContactsPaymentRequestViewModel.DataListener {
@@ -62,7 +63,10 @@ public class ContactPaymentRequestNotesFragment extends Fragment implements
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ContactsPaymentRequestViewModel(this);
-        binding.buttonNext.setOnClickListener(v -> viewModel.sendRequest());
+        binding.buttonNext.setOnClickListener(v -> {
+            viewModel.sendRequest();
+            ViewUtils.hideKeyboard(getActivity());
+        });
 
         viewModel.onViewReady();
     }

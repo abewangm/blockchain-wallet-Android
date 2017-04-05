@@ -44,7 +44,7 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
         binding = DataBindingUtil.setContentView(this, R.layout.activity_buy);
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar_general);
-        setupToolbar(toolbar, R.string.buy);
+        setupToolbar(toolbar, R.string.buy_bitcoin);
 
         compositeDisposable = new CompositeDisposable();
         sfoxApi = new SFOXApi();

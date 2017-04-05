@@ -98,7 +98,6 @@ public class TransactionListDataManager {
      * @return A BTC value as a long.
      */
     public long getBtcBalance(Object object) {
-
         long result = 0;
 
         if (object instanceof ConsolidatedAccount) {
@@ -149,16 +148,12 @@ public class TransactionListDataManager {
     }
 
     /**
-     * Update notes for a specific transaction hash and then sync the payload to the server
-     *
-     * @param transactionHash The hash of the transaction to be updated
-     * @param notes           Transaction notes
-     * @return If save was successful
+     * Returns a {@link HashMap} where a {@link TransactionSummary} hash is used as a key against
+     * the confirmation number. This is for displaying the confirmation number in the Contacts page.
+     * Please note that this is deliberately not cleared when switching accounts.
      */
-    public Observable<Boolean> updateTransactionNotes(String transactionHash, String notes) {
-        payloadManager.getPayload().getTxNotes().put(transactionHash, notes);
-        return Observable.fromCallable(() -> payloadManager.save())
-                .compose(RxUtil.applySchedulersToObservable());
+    public HashMap<String, Integer> getTxConfirmationsMap() {
+        return transactionListStore.getTxConfirmationsMap();
     }
 
     private void insertTransactionList(List<TransactionSummary> txList) {
@@ -166,14 +161,11 @@ public class TransactionListDataManager {
         clearTransactionList();
         txList.addAll(pendingTxs);
         transactionListStore.insertTransactions(txList);
-        transactionListStore.sort(new TransactionSummary.TxMostRecentDateComparator());
         rxBus.emitEvent(List.class, transactionListStore.getList());
     }
 
     /**
      * Gets list of transactions that have been published but delivery has not yet been confirmed.
-     * @param newlyFetchedTxs
-     * @return
      */
     private List<TransactionSummary> getRemainingPendingTransactionList(List<TransactionSummary> newlyFetchedTxs) {
         HashMap<String, TransactionSummary> pendingMap = new HashMap<>();

@@ -11,6 +11,7 @@ import info.blockchain.wallet.settings.SettingsManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -19,11 +20,15 @@ import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -31,6 +36,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
+import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
@@ -56,8 +62,10 @@ public class SettingsViewModelTest {
     private SettingsViewModel subject;
     @Mock private SettingsViewModel.DataListener activity;
     @Mock private FingerprintHelper fingerprintHelper;
+    @Mock private AuthDataManager authDataManager;
     @Mock private SettingsDataManager settingsDataManager;
     @Mock private PayloadManager payloadManager;
+    @Mock private PayloadDataManager payloadDataManager;
     @Mock private StringUtils stringUtils;
     @Mock private PrefsUtil prefsUtil;
     @Mock private AccessState accessState;
@@ -176,24 +184,32 @@ public class SettingsViewModelTest {
     }
 
     @Test
-    public void onFingerprintClickedVerifyPin() throws Exception {
+    public void onFingerprintClickedPinStored() throws Exception {
         // Arrange
+        String pinCode = "1234";
         when(fingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(false);
         when(fingerprintHelper.areFingerprintsEnrolled()).thenReturn(true);
+        when(accessState.getPIN()).thenReturn(pinCode);
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         // Act
         subject.onFingerprintClicked();
         // Assert
-        verify(activity).verifyPinCode();
+        verify(activity).showFingerprintDialog(captor.capture());
+        assertEquals(pinCode, captor.getValue());
     }
 
-    @Test
-    public void pinCodeValidated() throws Exception {
+    @Test(expected = IllegalStateException.class)
+    public void onFingerprintClickedPinNotFound() throws Exception {
         // Arrange
-        String pincode = "PIN_CODE";
+        when(fingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(false);
+        when(fingerprintHelper.areFingerprintsEnrolled()).thenReturn(true);
+        when(accessState.getPIN()).thenReturn(null);
         // Act
-        subject.pinCodeValidatedForFingerprint(pincode);
+        subject.onFingerprintClicked();
         // Assert
-        verify(activity).showFingerprintDialog(pincode);
+        verify(fingerprintHelper).getIfFingerprintUnlockEnabled();
+        verify(fingerprintHelper).areFingerprintsEnrolled();
+        verify(accessState).getPIN();
     }
 
     @Test
@@ -579,7 +595,6 @@ public class SettingsViewModelTest {
         verify(settingsDataManager).enableNotification(SettingsManager.NOTIFICATION_TYPE_EMAIL, notifications);
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
-        verifyNoMoreInteractions(activity);
     }
 
     @Test
@@ -602,15 +617,15 @@ public class SettingsViewModelTest {
         String oldPassword = "OLD_PASSWORD";
         String pin = "PIN";
         when(accessState.getPIN()).thenReturn(pin);
-        when(accessState.createPin(newPassword, pin)).thenReturn(Observable.just(true));
-        when(accessState.syncPayloadToServer()).thenReturn(Observable.just(true));
+        when(authDataManager.createPin(newPassword, pin)).thenReturn(Observable.just(true));
+        when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.complete());
         // Act
         subject.updatePassword(newPassword, oldPassword);
         // Assert
         //noinspection ResultOfMethodCallIgnored
         verify(accessState).getPIN();
-        verify(accessState).createPin(newPassword, pin);
-        verify(accessState).syncPayloadToServer();
+        verify(authDataManager).createPin(newPassword, pin);
+        verify(payloadDataManager).syncPayloadWithServer();
         verify(activity).showProgressDialog(anyInt());
         verify(activity).hideProgressDialog();
         //noinspection WrongConstant
@@ -624,13 +639,13 @@ public class SettingsViewModelTest {
         String oldPassword = "OLD_PASSWORD";
         String pin = "PIN";
         when(accessState.getPIN()).thenReturn(pin);
-        when(accessState.createPin(newPassword, pin)).thenReturn(Observable.just(false));
+        when(authDataManager.createPin(newPassword, pin)).thenReturn(Observable.just(false));
         // Act
         subject.updatePassword(newPassword, oldPassword);
         // Assert
         //noinspection ResultOfMethodCallIgnored
         verify(accessState).getPIN();
-        verify(accessState).createPin(newPassword, pin);
+        verify(authDataManager).createPin(newPassword, pin);
         verify(payloadManager).setTempPassword(newPassword);
         verify(activity).showProgressDialog(anyInt());
         verify(activity).hideProgressDialog();
@@ -645,13 +660,13 @@ public class SettingsViewModelTest {
         String oldPassword = "OLD_PASSWORD";
         String pin = "PIN";
         when(accessState.getPIN()).thenReturn(pin);
-        when(accessState.createPin(newPassword, pin)).thenReturn(Observable.error(new Throwable()));
+        when(authDataManager.createPin(newPassword, pin)).thenReturn(Observable.error(new Throwable()));
         // Act
         subject.updatePassword(newPassword, oldPassword);
         // Assert
         //noinspection ResultOfMethodCallIgnored
         verify(accessState).getPIN();
-        verify(accessState).createPin(newPassword, pin);
+        verify(authDataManager).createPin(newPassword, pin);
         verify(payloadManager).setTempPassword(newPassword);
         verify(payloadManager).setTempPassword(oldPassword);
         verify(activity).showProgressDialog(anyInt());
@@ -667,8 +682,23 @@ public class SettingsViewModelTest {
         }
 
         @Override
-        protected SettingsDataManager provideSettingsDataManager() {
+        protected SettingsDataManager provideSettingsDataManager(RxBus rxBus) {
             return settingsDataManager;
+        }
+
+        @Override
+        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager, RxBus rxBus) {
+            return payloadDataManager;
+        }
+
+        @Override
+        protected AuthDataManager provideAuthDataManager(PayloadDataManager payloadDataManager,
+                                                         PrefsUtil prefsUtil,
+                                                         AppUtil appUtil,
+                                                         AccessState accessState,
+                                                         StringUtils stringUtils,
+                                                         RxBus rxBus) {
+            return authDataManager;
         }
     }
 

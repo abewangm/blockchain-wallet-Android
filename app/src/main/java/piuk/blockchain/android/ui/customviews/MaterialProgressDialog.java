@@ -7,7 +7,6 @@ import android.graphics.PorterDuff;
 import android.os.Build;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -26,9 +25,7 @@ public class MaterialProgressDialog {
      * @param context The Activity Context
      */
     public MaterialProgressDialog(Context context) {
-
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View layout = inflater.inflate(R.layout.progress_dialog_compat, null);
+        View layout = View.inflate(context, R.layout.progress_dialog_compat, null);
 
         mMessageTextView = (TextView) layout.findViewById(R.id.message);
         ProgressBar progressBar = (ProgressBar) layout.findViewById(R.id.progress_bar);

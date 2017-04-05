@@ -4,14 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog.Builder;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,12 +23,10 @@ import android.widget.TextView;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.PasswordUtil;
 
-import io.reactivex.Completable;
 import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
-import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.databinding.ActivityUpgradeWalletBinding;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
@@ -180,10 +176,10 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                         if (success) {
                             if (new OSUtil(UpgradeWalletActivity.this).isServiceRunning(WebSocketService.class)) {
                                 stopService(new Intent(UpgradeWalletActivity.this,
-                                    WebSocketService.class));
+                                        WebSocketService.class));
                             }
                             startService(new Intent(UpgradeWalletActivity.this,
-                                WebSocketService.class));
+                                    WebSocketService.class));
 
                             payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(0).setLabel(getResources().getString(R.string.default_wallet_name));
                             onUpgradeCompleted();
@@ -272,12 +268,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
     }
 
     private void setBackGround(View view, int res) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            //noinspection deprecation
-            view.setBackgroundDrawable(ContextCompat.getDrawable(this, res));
-        } else {
-            view.setBackground(ContextCompat.getDrawable(this, res));
-        }
+        view.setBackground(ContextCompat.getDrawable(this, res));
     }
 
     private static class CustomPagerAdapter extends PagerAdapter {

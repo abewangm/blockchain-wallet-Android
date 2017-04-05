@@ -16,6 +16,7 @@ import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.services.SettingsService;
 
 import static org.junit.Assert.assertEquals;
@@ -28,13 +29,14 @@ public class SettingsDataManagerTest extends RxTest {
 
     private SettingsDataManager subject;
     @Mock private SettingsService settingsService;
+    @Mock private RxBus rxBus;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        subject = new SettingsDataManager(settingsService);
+        subject = new SettingsDataManager(settingsService, rxBus);
     }
 
     @Test

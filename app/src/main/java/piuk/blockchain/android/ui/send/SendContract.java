@@ -46,11 +46,11 @@ interface SendContract {
 
         void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
-        void onShowTransactionSuccess(@Nullable String mdid, String hash, @Nullable String fctxId, long transactionValue);
+        void onShowTransactionSuccess(String hash, long transactionValue);
 
         void onShowBIP38PassphrasePrompt(String scanData);
 
-        void finishPage(boolean paymentToContactMade);
+        void finishPage();
 
         void setContactName(String name);
 
@@ -78,7 +78,6 @@ interface SendContract {
 
         void navigateToAddNote(String contactId, PaymentRequestType paymentRequestType, long satoshis);
 
-        void lockDestination();
     }
 
 }

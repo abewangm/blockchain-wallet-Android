@@ -1,0 +1,69 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="piuk.blockchain.android.ui.onboarding.FingerprintPromptFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:background="@color/primary_navy_medium">
+
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/fingerprint_login_title"
+                android:tint="@color/white"
+                app:srcCompat="@drawable/vector_fingerprint" />
+
+        </FrameLayout>
+
+        <TextView
+            style="@style/OnboardingHeader"
+            android:layout_marginTop="16dp"
+            android:text="@string/onboarding_fingerprint_title" />
+
+        <TextView
+            style="@style/OnBoardingDetail"
+            android:gravity="center"
+            android:text="@string/onboarding_fingerprint_summary" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:gravity="bottom"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/button_enable"
+                style="@style/ButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="64dp"
+                android:layout_marginRight="64dp"
+                android:text="@string/onboarding_fingerprint_enable"
+                android:theme="@style/ButtonLightBlueTheme" />
+
+            <TextView
+                android:id="@+id/button_later"
+                fontPath="fonts/Montserrat-Regular.ttf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:padding="16dp"
+                android:text="@string/onboarding_complete_later"
+                android:textColor="@color/product_gray_hint"
+                android:textSize="16sp"
+                tools:ignore="MissingPrefix" />
+
+        </LinearLayout>
+    </LinearLayout>
+</layout>

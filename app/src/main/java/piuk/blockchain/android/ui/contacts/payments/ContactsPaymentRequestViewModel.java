@@ -8,16 +8,14 @@ import android.support.annotation.VisibleForTesting;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
-import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payload.data.Account;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -32,8 +30,8 @@ import static piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequest
 public class ContactsPaymentRequestViewModel extends BaseViewModel {
 
     private DataListener dataListener;
-    @Inject ContactsDataManager contactsDataManager;
-    @Inject PayloadManager payloadManager;
+    @Inject protected ContactsDataManager contactsDataManager;
+    @Inject protected PayloadDataManager payloadDataManager;
     @VisibleForTesting Contact recipient;
     @VisibleForTesting long satoshis;
     @VisibleForTesting int accountPosition;
@@ -92,7 +90,7 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
                 PaymentRequest paymentRequest = new PaymentRequest(satoshis, dataListener.getNote());
 
                 compositeDisposable.add(
-                        getNextReceiveAddress(accountPosition)
+                        payloadDataManager.getNextReceiveAddress(accountPosition)
                                 .doOnNext(paymentRequest::setAddress)
                                  // Request that the other person sends payment
                                 .flatMapCompletable(s -> contactsDataManager.requestSendPayment(recipient.getMdid(), paymentRequest))
@@ -134,11 +132,6 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
                                         dataListener.finishPage();
                                     }
                                 }));
-    }
-
-    private Observable<String> getNextReceiveAddress(int defaultIndex) {
-        Account account = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultIndex);
-        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddress(account));
     }
 
 }

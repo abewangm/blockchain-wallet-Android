@@ -187,8 +187,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
                         })
                         .subscribe(
                                 () -> mDataListener.showToast(R.string.transfer_archive, ToastCustom.TYPE_OK),
-                                throwable -> mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR))
-        );
+                                throwable -> mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
     }
 
     private int getAdjustedAccountPosition(int position) {

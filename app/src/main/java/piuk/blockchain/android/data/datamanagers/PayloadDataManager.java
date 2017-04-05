@@ -4,19 +4,22 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import info.blockchain.api.data.Balance;
-import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
+import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
+import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.crypto.InvalidCipherTextException;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -24,16 +27,24 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
+import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.services.PayloadService;
 
 @SuppressWarnings("WeakerAccess")
 public class PayloadDataManager {
 
+    private PayloadService payloadService;
     private PayloadManager payloadManager;
+    private RxPinning rxPinning;
 
-    public PayloadDataManager(PayloadManager payloadManager) {
+    public PayloadDataManager(PayloadService payloadService, PayloadManager payloadManager, RxBus rxBus) {
+        this.payloadService = payloadService;
         this.payloadManager = payloadManager;
+        rxPinning = new RxPinning(rxBus);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -42,7 +53,7 @@ public class PayloadDataManager {
 
     /**
      * Decrypts and initializes a wallet from a payload String. Handles both V3 and V1 wallets. Will
-     * return a {@link DecryptionException} if the password isincorrect, otherwise can return a
+     * return a {@link DecryptionException} if the password is incorrect, otherwise can return a
      * {@link HDWalletException} which should be regarded as fatal.
      *
      * @param payload  The payload String to be decrypted
@@ -50,10 +61,8 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      */
     public Completable initializeFromPayload(String payload, String password) {
-        return Completable.fromCallable(() -> {
-            payloadManager.initializeAndDecryptFromPayload(payload, password);
-            return Void.TYPE;
-        });
+        return rxPinning.call(() -> payloadService.initializeFromPayload(payload, password))
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
@@ -67,8 +76,8 @@ public class PayloadDataManager {
      * @return An {@link Observable<Wallet>}
      */
     public Observable<Wallet> restoreHdWallet(String mnemonic, String walletName, String email, String password) {
-        return Observable.fromCallable(() ->
-                payloadManager.recoverFromMnemonic(mnemonic, walletName, email, password));
+        return rxPinning.call(() -> payloadService.restoreHdWallet(mnemonic, walletName, email, password))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -80,7 +89,8 @@ public class PayloadDataManager {
      * @return An {@link Observable<Wallet>}
      */
     public Observable<Wallet> createHdWallet(String password, String walletName, String email) {
-        return Observable.fromCallable(() -> payloadManager.create(walletName, email, password));
+        return rxPinning.call(() -> payloadService.createHdWallet(password, walletName, email))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -93,10 +103,19 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      */
     public Completable initializeAndDecrypt(String sharedKey, String guid, String password) {
-        return Completable.fromCallable(() -> {
-            payloadManager.initializeAndDecrypt(sharedKey, guid, password);
-            return Void.TYPE;
-        });
+        return rxPinning.call(() -> payloadService.initializeAndDecrypt(sharedKey, guid, password))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Initializes and decrypts a user's payload given valid QR code scan data.
+     *
+     * @param data A QR's URI for pairing
+     * @return A {@link Completable} object
+     */
+    public Completable handleQrCode(String data) {
+        return rxPinning.call(() -> payloadService.handleQrCode(data))
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -120,36 +139,58 @@ public class PayloadDataManager {
      * @return A {@link Completable} object
      */
     public Completable syncPayloadWithServer() {
-        return Completable.fromCallable(() -> {
-            if (!payloadManager.save()) throw new ApiException("Sync failed");
-            return Void.TYPE;
-        }).compose(RxUtil.applySchedulersToCompletable());
+        return rxPinning.call(() -> payloadService.syncPayloadWithServer())
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
-     * Returns {@link Completable} which updates balances and transactions in the PayloadManager.
+     * Returns {@link Completable} which updates transactions in the PayloadManager.
      * Completable returns no value, and is used to call functions that return void but have side
      * effects.
      *
      * @return A {@link Completable} object
      * @see IgnorableDefaultObserver
      */
-    public Completable updateBalancesAndTransactions() {
-        return Completable.fromCallable(() -> {
-            payloadManager.getAllTransactions(50, 0);
-            return Void.TYPE;
-        }).compose(RxUtil.applySchedulersToCompletable());
+    public Completable updateAllTransactions() {
+        return rxPinning.call(() -> payloadService.updateAllTransactions())
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Returns a {@link Completable} which updates all balances in the PayloadManager. Completable
+     * returns no value, and is used to call functions that return void but have side effects.
+     *
+     * @return A {@link Completable} object
+     * @see IgnorableDefaultObserver
+     */
+    public Completable updateAllBalances() {
+        return rxPinning.call(() -> payloadService.updateAllBalances())
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
      * Returns the next Receive address for a given account index.
      *
-     * @param defaultIndex The index of the account for which you want an address to be generated
+     * @param accountIndex The index of the account for which you want an address to be generated
      * @return An {@link Observable} wrapping the receive address
      */
-    public Observable<String> getNextReceiveAddress(int defaultIndex) {
-        Account account = getWallet().getHdWallets().get(0).getAccounts().get(defaultIndex);
+    public Observable<String> getNextReceiveAddress(int accountIndex) {
+        Account account = getWallet().getHdWallets().get(0).getAccounts().get(accountIndex);
         return getNextReceiveAddress(account);
+    }
+
+    /**
+     * Returns the next Receive address for a given {@link Account object}
+     *
+     * @param accountIndex The index of the account for which you want an address to be generated
+     * @param label Label used to reserve address
+     * @return An {@link Observable} wrapping the receive address
+     */
+    public Observable<String> getNextReceiveAddressAndReserve(int accountIndex, String label) {
+        Account account = getWallet().getHdWallets().get(0).getAccounts().get(accountIndex);
+        return Observable.fromCallable(() -> payloadManager.getNextReceiveAddressAndReserve(account, label))
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread());
     }
 
     /**
@@ -165,11 +206,34 @@ public class PayloadDataManager {
     }
 
     /**
+     * Returns the next Change address for a given account index.
+     *
+     * @param accountIndex The index of the account for which you want an address to be generated
+     * @return An {@link Observable} wrapping the receive address
+     */
+    public Observable<String> getNextChangeAddress(int accountIndex) {
+        Account account = getWallet().getHdWallets().get(0).getAccounts().get(accountIndex);
+        return getNextChangeAddress(account);
+    }
+
+    /**
+     * Returns the next Change address for a given {@link Account object}
+     *
+     * @param account The {@link Account} for which you want an address to be generated
+     * @return An {@link Observable} wrapping the receive address
+     */
+    public Observable<String> getNextChangeAddress(Account account) {
+        return Observable.fromCallable(() -> payloadManager.getNextChangeAddress(account))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    /**
      * Returns an {@link ECKey} for a given {@link LegacyAddress}, optionally with a second password
      * should the private key be encrypted.
      *
      * @param legacyAddress  The {@link  LegacyAddress} to generate an Elliptic Curve Key for
-     * @param secondPassword An optional second password, necessary if the private key is encrypted
+     * @param secondPassword An optional second password, necessary if the private key is ebcrypted
      * @return An Elliptic Curve Key object {@link ECKey}
      * @throws UnsupportedEncodingException Thrown if the private key is formatted incorrectly
      * @throws DecryptionException          Thrown if the supplied password is wrong
@@ -180,6 +244,18 @@ public class PayloadDataManager {
     public ECKey getAddressECKey(LegacyAddress legacyAddress, @Nullable String secondPassword)
             throws UnsupportedEncodingException, DecryptionException, InvalidCipherTextException {
         return payloadManager.getAddressECKey(legacyAddress, secondPassword);
+    }
+
+    /**
+     * Update notes for a specific transaction hash and then sync the payload to the server
+     *
+     * @param transactionHash The hash of the transaction to be updated
+     * @param notes           Transaction notes
+     * @return A {@link Completable} object
+     */
+    public Completable updateTransactionNotes(String transactionHash, String notes) {
+        return rxPinning.call(() -> payloadService.updateTransactionNotes(transactionHash, notes))
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -198,6 +274,22 @@ public class PayloadDataManager {
         return getWallet().getHdWallets().get(0).getAccount(getDefaultAccountIndex());
     }
 
+    /**
+     * Returns a list of {@link ECKey} objects for signing transactions.
+     *
+     * @param account             The {@link Account} that you wish to send funds from
+     * @param unspentOutputBundle A {@link SpendableUnspentOutputs} bundle for a given Account
+     * @return A list of {@link ECKey} objects
+     * @throws Exception Will be thrown if there are issues with the private keys
+     */
+    public List<ECKey> getHDKeysForSigning(Account account, SpendableUnspentOutputs unspentOutputBundle)
+            throws Exception {
+        return payloadManager.getPayload()
+                .getHdWallets()
+                .get(0)
+                .getHDKeysForSigning(account, unspentOutputBundle);
+    }
+
     public String getPayloadChecksum() {
         return payloadManager.getPayloadChecksum();
     }
@@ -208,6 +300,14 @@ public class PayloadDataManager {
 
     public BigInteger getImportedAddressesBalance() {
         return payloadManager.getImportedAddressesBalance();
+    }
+
+    public boolean isDoubleEncrypted() {
+        return getWallet().isDoubleEncryption();
+    }
+
+    public Account getAccount(int accountPosition) {
+        return getWallet().getHdWallets().get(0).getAccount(accountPosition);
     }
 
     /**
@@ -245,15 +345,16 @@ public class PayloadDataManager {
      * @return A {@link LinkedHashMap}
      */
     public Observable<LinkedHashMap<String, Balance>> getBalanceOfAddresses(List<String> addresses) {
-        return Observable.fromCallable(() -> payloadManager.getBalanceOfAddresses(addresses));
+        return rxPinning.call(() -> payloadService.getBalanceOfAddresses(addresses))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
      * Updates the balance of the address as well as that of the entire wallet. To be called after a
      * successful sweep to ensure that balances are displayed correctly before syncing the wallet.
      *
-     * @param address An address from which you've just spent funds
-     * @param spentAmount   The spent amount as a long
+     * @param address     An address from which you've just spent funds
+     * @param spentAmount The spent amount as a long
      * @throws Exception Thrown if the address isn't found
      */
     public void subtractAmountFromAddressBalance(String address, long spentAmount) throws Exception {
@@ -297,6 +398,115 @@ public class PayloadDataManager {
      */
     public boolean isOwnHDAddress(String address) {
         return payloadManager.isOwnHDAddress(address);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // HELPER METHODS
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Returns the index for an {@link Account}, assuming that the supplied position was gotten from
+     * a list of only those Accounts which are active.
+     *
+     * @param position The position of the {@link Account} that you want to select from a list of
+     *                 active Accounts
+     * @return The position of the {@link Account} within the full list of Accounts
+     */
+    public int getPositionOfAccountFromActiveList(int position) {
+        List<Account> accounts = getWallet().getHdWallets().get(0).getAccounts();
+        int adjustedPosition = 0;
+        for (int i = 0; i < accounts.size(); i++) {
+            Account account = accounts.get(i);
+            if (!account.isArchived()) {
+                if (position == adjustedPosition) {
+                    return i;
+                }
+                adjustedPosition++;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Returns the index for an {@link Account} in a list of active-only Accounts, where the
+     * supplied {@code accountIndex} is the position of the Account in the full list of both active
+     * and archived Accounts.
+     *
+     * @param accountIndex The position of an {@link Account} in the full list of Accounts
+     * @return The Account's position within a list of active-only Accounts. Will be -1 if you
+     * attempt to find the position of an archived Account
+     */
+    public int getPositionOfAccountInActiveList(int accountIndex) {
+        // Filter accounts by active
+        List<Account> activeAccounts = new ArrayList<>();
+        List<Account> accounts = getWallet().getHdWallets().get(0).getAccounts();
+        for (int i = 0; i < accounts.size(); i++) {
+            Account account = accounts.get(i);
+            if (!account.isArchived()) {
+                activeAccounts.add(account);
+            }
+        }
+
+        // Find corrected position
+        return activeAccounts.indexOf(getWallet().getHdWallets().get(0).getAccounts().get(accountIndex));
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // CONTACTS/METADATA METHODS
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Loads previously saved nodes from the Metadata service. If none are found, the {@link
+     * Observable} returns false.
+     *
+     * @return An {@link Observable} object wrapping a boolean value, representing successfully
+     * loaded nodes
+     */
+    public Observable<Boolean> loadNodes() {
+        return rxPinning.call(() -> payloadService.loadNodes())
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Generates the metadata and shared metadata nodes if necessary.
+     *
+     * @param secondPassword An optional second password.
+     * @return A {@link Completable} object, ie an asynchronous void operation
+     */
+    public Completable generateNodes(@Nullable String secondPassword) {
+        return rxPinning.call(() -> payloadService.generateNodes(secondPassword))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Returns a {@link MetadataNodeFactory} object which allows you to access the {@link
+     * DeterministicKey} objects needed to initialise the Contacts service.
+     *
+     * @return An {@link Observable} wrapping a {@link MetadataNodeFactory}
+     */
+    public Observable<MetadataNodeFactory> getMetadataNodeFactory() {
+        return Observable.just(payloadManager.getMetadataNodeFactory());
+    }
+
+    /**
+     * Registers the user's MDID with the metadata service.
+     *
+     * @return An {@link Observable} wrapping a {@link ResponseBody}
+     */
+    public Observable<ResponseBody> registerMdid() {
+        return rxPinning.call(() -> payloadService.registerMdid())
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Unregisters the user's MDID from the metadata service.
+     *
+     * @return An {@link Observable} wrapping a {@link ResponseBody}
+     */
+    public Observable<ResponseBody> unregisterMdid() {
+        return rxPinning.call(() -> payloadService.unregisterMdid())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
 }

@@ -2,8 +2,10 @@ package piuk.blockchain.android.ui.home;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
@@ -12,6 +14,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -19,6 +22,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -52,6 +56,7 @@ import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
+import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -68,7 +73,6 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-import static piuk.blockchain.android.data.services.EventService.EVENT_TX_INPUT_FROM_CONTACTS;
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
 import static piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG;
 
@@ -76,7 +80,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         MainViewModel.DataListener,
         SendFragment.OnSendFragmentInteractionListener,
         ReceiveFragment.OnReceiveFragmentInteractionListener,
-        ContactPaymentRequestNotesFragment.FragmentInteractionListener {
+        ContactPaymentRequestNotesFragment.FragmentInteractionListener,
+        ContactPaymentDialog.OnContactPaymentDialogInteractionListener {
+
+    public static final String ACTION_SEND = "info.blockchain.wallet.ui.BalanceFragment.SEND";
+    public static final String ACTION_RECEIVE = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE";
+    public static final String ACTION_BUY = "info.blockchain.wallet.ui.BalanceFragment.BUY";
 
     private static final String SUPPORT_URI = "https://support.blockchain.com/";
     private static final int REQUEST_BACKUP = 2225;
@@ -87,6 +96,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public static final String EXTRA_RECIPIENT_ID = "recipient_id";
     public static final String EXTRA_MDID = "mdid";
     public static final String EXTRA_FCTX_ID = "fctx_id";
+
     public static final String EXTRA_DEFAULT_INDEX = "default_index";
     public static final String WEB_VIEW_STATE_KEY = "web_view_state";
     public static final int SCAN_URI = 2007;
@@ -98,7 +108,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private MaterialProgressDialog fetchTransactionsProgress;
     private AlertDialog rootedDialog;
     private MaterialProgressDialog materialProgressDialog;
-    private OnBalanceFragmentAddedCallback balanceFragmentAddedCallback;
     private AppUtil appUtil;
     private long backPressed;
     private Toolbar toolbar;
@@ -106,11 +115,37 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private Typeface typeface;
     private WebView buyWebView;
 
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            if (intent.getAction().equals(ACTION_SEND) && getActivity() != null) {
+                startScanActivity();
+            }
+
+            if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
+                binding.bottomNavigation.setCurrentItem(2);
+            }
+
+            if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
+                ToastCustom.makeText(getActivity(), "Buy Bitcoin coming soon!", ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
+//                startBuyActivity();
+            }
+        }
+    };
+
     @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        IntentFilter filterSend = new IntentFilter(ACTION_SEND);
+        IntentFilter filterReceive = new IntentFilter(ACTION_RECEIVE);
+        IntentFilter filterBuy = new IntentFilter(ACTION_BUY);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterSend);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceive);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBuy);
 
         appUtil = new AppUtil(this);
         viewModel = new MainViewModel(this);
@@ -147,7 +182,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
         // Create items
         AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.white);
-        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.transactions, R.drawable.vector_transactions, R.color.white);
+        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.overview, R.drawable.vector_transactions, R.color.white);
         AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.receive_bitcoin, R.drawable.vector_receive, R.color.white);
 
         // Add items
@@ -212,8 +247,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         viewModel.destroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        super.onDestroy();
     }
 
     @Override
@@ -369,7 +405,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                         .setTitle(R.string.unpair_wallet)
                         .setMessage(R.string.ask_you_sure_unpair)
-                        .setPositiveButton(R.string.unpair, (dialog, which) -> viewModel.unpair())
+                        .setPositiveButton(R.string.unpair, (dialog, which) -> viewModel.unPair())
                         .setNegativeButton(android.R.string.cancel, null)
                         .show();
                 break;
@@ -427,7 +463,14 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             boolean enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
             if (!enabled) {
-                EnableGeo.displayGPSPrompt(this);
+                String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
+                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                        .setMessage(getActivity().getString(R.string.enable_geo))
+                        .setPositiveButton(android.R.string.ok, (d, id) ->
+                                getActivity().startActivity(new Intent(action)))
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .create()
+                        .show();
             } else {
                 Intent intent = new Intent(MainActivity.this, piuk.blockchain.android.ui.directory.MapActivity.class);
                 startActivityForResult(intent, MERCHANT_ACTIVITY);
@@ -491,26 +534,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void showEmailVerificationDialog(String email) {
-        String message = String.format(getString(R.string.security_centre_email_message), email);
-        SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
-                R.string.security_centre_email_title,
-                message,
-                R.drawable.vector_email,
-                R.string.security_centre_email_check,
-                true,
-                false);
-        securityPromptDialog.showDialog(getSupportFragmentManager());
-        securityPromptDialog.setNegativeButtonListener(v -> securityPromptDialog.dismiss());
-        securityPromptDialog.setPositiveButtonListener(v -> {
-            securityPromptDialog.dismiss();
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_APP_EMAIL);
-            startActivity(Intent.createChooser(intent, getString(R.string.security_centre_email_check)));
-        });
-    }
-
-    @Override
     public void showAddEmailDialog() {
         String message = getString(R.string.security_centre_add_email_message);
         SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
@@ -527,6 +550,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             intent.putExtra(EXTRA_SHOW_ADD_EMAIL_DIALOG, true);
             startActivity(intent);
         });
+
         securityPromptDialog.setNegativeButtonListener(view -> securityPromptDialog.dismiss());
     }
 
@@ -566,17 +590,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         final String message = getString(R.string.check_connectivity_exit);
         builder.setMessage(message)
                 .setCancelable(false)
-                .setPositiveButton(R.string.dialog_continue,
-                        (d, id) -> {
-                            d.dismiss();
-                            Class c = null;
-                            if (new PrefsUtil(MainActivity.this).getValue(PrefsUtil.KEY_GUID, "").length() < 1) {
-                                c = LandingActivity.class;
-                            } else {
-                                c = PinEntryActivity.class;
-                            }
-                            startSingleActivity(c);
-                        });
+                .setPositiveButton(R.string.dialog_continue, (d, id) -> {
+                    Class activityClass;
+                    if (new PrefsUtil(MainActivity.this).getValue(PrefsUtil.KEY_GUID, "").isEmpty()) {
+                        activityClass = LandingActivity.class;
+                    } else {
+                        activityClass = PinEntryActivity.class;
+                    }
+                    startSingleActivity(activityClass);
+                });
 
         if (!isFinishing()) {
             builder.create().show();
@@ -584,8 +606,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, int defaultIndex) {
-        startSendFragmentFromIntent(uri, recipientId, mdid, fctxId, defaultIndex);
+    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId) {
+        startContactSendDialog(uri, recipientId, mdid, fctxId);
+    }
+
+    @Override
+    public void onContactPaymentDialogClosed(boolean paymentToContactMade) {
+        this.paymentToContactMade = paymentToContactMade;
     }
 
     @Override
@@ -649,7 +676,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public void onStartBalanceFragment(boolean paymentToContactMade) {
         BalanceFragment fragment = BalanceFragment.newInstance(paymentToContactMade);
         replaceFragmentWithAnimation(fragment);
-        if (balanceFragmentAddedCallback != null) balanceFragmentAddedCallback.onFragmentAdded();
         viewModel.checkIfShouldShowSurvey();
     }
 
@@ -712,16 +738,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void showPaymentMismatchDialog(@StringRes int message) {
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, null)
-                .create()
-                .show();
-    }
-
-    @Override
     public void showBroadcastSuccessDialog() {
         if (getCurrentFragment() instanceof BalanceFragment) {
             ((BalanceFragment) getCurrentFragment()).refreshFacilitatedTransactions();
@@ -736,9 +752,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void onSendFragmentClose(boolean paymentToContactMade) {
-        // Flag to prevent reloading of transactions whilst broadcasting payment to prevent race condition
-        this.paymentToContactMade = paymentToContactMade;
+    public void onSendFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
     }
 
@@ -793,14 +807,16 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private void replaceFragmentWithAnimation(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-        transaction.replace(R.id.content_frame, fragment).commitAllowingStateLoss();
+        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+                .replace(R.id.content_frame, fragment)
+                .commitAllowingStateLoss();
     }
 
     private void addFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.content_frame, fragment).commitAllowingStateLoss();
+        fragmentManager.beginTransaction()
+                .add(R.id.content_frame, fragment)
+                .commitAllowingStateLoss();
     }
 
     private void handleIncomingIntent() {
@@ -809,32 +825,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             String recipientId = getIntent().getStringExtra(EXTRA_RECIPIENT_ID);
             String mdid = getIntent().getStringExtra(EXTRA_MDID);
             String fctxId = getIntent().getStringExtra(EXTRA_FCTX_ID);
-            int accountPosition = getIntent().getIntExtra(EXTRA_DEFAULT_INDEX, -1);
 
-            if (getCurrentFragment() != null && getCurrentFragment() instanceof BalanceFragment) {
-                startSendFragmentFromIntent(uri, recipientId, mdid, fctxId, accountPosition);
-            } else {
-                // Wait for fragment transaction to finish and then pop in
-                balanceFragmentAddedCallback = () -> {
-                    startSendFragmentFromIntent(uri, recipientId, mdid, fctxId, accountPosition);
-                    // Null-out callback as not to cause issues later
-                    balanceFragmentAddedCallback = null;
-                };
-            }
+            startContactSendDialog(uri, recipientId, mdid, fctxId);
         }
     }
 
-    private void startSendFragmentFromIntent(String uri, String recipientId, String mdid, String fctxId, int accountPosition) {
-        SendFragment sendFragment = SendFragment.newInstance(uri, recipientId, mdid, fctxId,
-            EVENT_TX_INPUT_FROM_CONTACTS, accountPosition);
-        replaceFragmentWithAnimation(sendFragment);
-        binding.bottomNavigation.restoreBottomNavigation();
-    }
-
-    private interface OnBalanceFragmentAddedCallback {
-
-        void onFragmentAdded();
-
+    private void startContactSendDialog(String uri, String recipientId, String mdid, String fctxId) {
+        ContactPaymentDialog paymentDialog =
+                ContactPaymentDialog.newInstance(uri, recipientId, mdid, fctxId);
+        paymentDialog.show(getSupportFragmentManager(), ContactPaymentDialog.class.getSimpleName());
     }
 
 }

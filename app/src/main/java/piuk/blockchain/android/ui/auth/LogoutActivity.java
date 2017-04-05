@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.websocket.WebSocketService;
-import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
@@ -31,14 +30,8 @@ public class LogoutActivity extends AppCompatActivity {
                     stopService(intent);
                 }
 
-                if (AndroidUtils.is16orHigher()) {
-                    AccessState.getInstance().setIsLoggedIn(false);
-                    finishAffinity();
-                } else {
-                    finish();
-                    // Shouldn't call System.exit(0) if it can be avoided
-                    System.exit(0);
-                }
+                AccessState.getInstance().setIsLoggedIn(false);
+                finishAffinity();
             }
         }
     }

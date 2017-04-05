@@ -19,20 +19,21 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 
-import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentContactDetailBinding;
+import piuk.blockchain.android.ui.balance.BalanceListAdapter;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.DateUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
+
+import static piuk.blockchain.android.ui.balance.BalanceFragment.SHOW_BTC;
+import static piuk.blockchain.android.ui.send.SendViewModel.SHOW_FIAT;
 
 
 public class ContactDetailFragment extends Fragment implements ContactDetailViewModel.DataListener {
@@ -40,9 +41,9 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
     private static final String ARGUMENT_CONTACT_ID = "contact_id";
 
     @Thunk ContactDetailViewModel viewModel;
+    @Thunk BalanceListAdapter transactionAdapter;
     private FragmentContactDetailBinding binding;
     private MaterialProgressDialog progressDialog;
-    private ContactTransactionAdapter transactionAdapter;
     private OnFragmentInteractionListener listener;
 
     public ContactDetailFragment() {
@@ -119,22 +120,38 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
     }
 
     @Override
-    public void showDeleteFacilitatedTransactionDialog(String fctxId) {
+    public void showTransactionDeclineDialog(String fctxId) {
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
-                .setMessage(R.string.contacts_delete_pending_transaction)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.confirmDeleteFacilitatedTransaction(fctxId))
+                .setMessage(R.string.contacts_decline_pending_transaction)
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        viewModel.confirmDeclineTransaction(fctxId))
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
     }
 
     @Override
-    public void onTransactionsUpdated(List<FacilitatedTransaction> transactions, String contactName) {
+    public void showTransactionCancelDialog(String fctxId) {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_cancel_pending_transaction)
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        viewModel.confirmCancelTransaction(fctxId))
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void onTransactionsUpdated(List<Object> transactions) {
         if (transactionAdapter == null) {
-            setUpAdapter(contactName);
+            setUpAdapter();
         }
 
+        transactionAdapter.onContactsMapChanged(
+                viewModel.getContactsTransactionMap(),
+                viewModel.getNotesTransactionMap());
         transactionAdapter.onTransactionsUpdated(transactions);
         if (!transactions.isEmpty()) {
             binding.recyclerView.setVisibility(View.VISIBLE);
@@ -145,24 +162,45 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
         }
     }
 
-    private void setUpAdapter(String contactName) {
+    private void setUpAdapter() {
         String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
 
-        transactionAdapter = new ContactTransactionAdapter(
-                new ArrayList<>(),
-                contactName,
-                new StringUtils(getActivity()),
+        int balanceDisplayState =
+                viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+        boolean isBTC = balanceDisplayState != SHOW_FIAT;
+
+        transactionAdapter = new BalanceListAdapter(
+                viewModel.getContactsTransactionMap(),
+                viewModel.getNotesTransactionMap(),
                 viewModel.getPrefsUtil(),
-                lastPrice);
-        transactionAdapter.setClickListener(new ContactTransactionAdapter.TransactionClickListener() {
+                viewModel.getMonetaryUtil(),
+                viewModel.getStringUtils(),
+                new DateUtil(getContext()),
+                lastPrice,
+                isBTC);
+
+        transactionAdapter.setTxListClickListener(new BalanceListAdapter.BalanceListClickListener() {
             @Override
-            public void onClick(String fctxId) {
+            public void onTransactionClicked(int correctedPosition, int absolutePosition) {
+                viewModel.onCompletedTransactionClicked(absolutePosition);
+            }
+
+            @Override
+            public void onValueClicked(boolean isBtc) {
+                viewModel.getPrefsUtil().setValue(
+                        PrefsUtil.KEY_BALANCE_DISPLAY_STATE,
+                        isBtc ? SHOW_BTC : SHOW_FIAT);
+                transactionAdapter.onViewFormatUpdated(isBtc);
+            }
+
+            @Override
+            public void onFctxClicked(String fctxId) {
                 viewModel.onTransactionClicked(fctxId);
             }
 
             @Override
-            public void onLongClick(String fctxId) {
+            public void onFctxLongClicked(String fctxId) {
                 viewModel.onTransactionLongClicked(fctxId);
             }
         });
@@ -170,8 +208,6 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
         binding.recyclerView.setAdapter(transactionAdapter);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
-
-
 
     @Override
     public void showProgressDialog() {
@@ -260,9 +296,9 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
     }
 
     @Override
-    public void initiatePayment(String uri, String recipientId, String mdid, String fctxId, int defaultIndex) {
+    public void initiatePayment(String uri, String recipientId, String mdid, String fctxId) {
         if (listener != null) {
-            listener.onPaymentInitiated(uri, recipientId, mdid, fctxId, defaultIndex);
+            listener.onPaymentInitiated(uri, recipientId, mdid, fctxId);
         }
     }
 
@@ -271,7 +307,6 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
         ((ContactDetailActivity) getActivity()).setupToolbar(
                 ((ContactDetailActivity) getActivity()).getToolbar(), name);
         binding.textviewTransactionListHeader.setText(getString(R.string.contacts_detail_transactions, name));
-        if (transactionAdapter != null) transactionAdapter.onNameUpdated(name);
     }
 
     @Override
@@ -300,7 +335,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
 
         void onFinishPageCalled();
 
-        void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId, int defaultIndex);
+        void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId);
 
         void onShowTransactionDetailCalled(String hash);
 

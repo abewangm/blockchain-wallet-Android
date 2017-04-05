@@ -17,10 +17,16 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
+import javax.inject.Inject;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.connectivity.ConnectionEvent;
+import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ApplicationLifeCycle;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -32,10 +38,16 @@ import piuk.blockchain.android.util.SSLVerifyUtil;
 @SuppressLint("Registered")
 public class BaseAuthActivity extends AppCompatActivity {
 
-    private AlertDialog mAlertDialog;
-    private SSLVerifyUtil mSSLVerifyUtil = new SSLVerifyUtil(this);
-    private PrefsUtil mPrefsUtil;
     private static CompositeDisposable compositeDisposable;
+    private static Observable<ConnectionEvent> connectionEventObservable;
+    private AlertDialog mAlertDialog;
+    @Inject protected SSLVerifyUtil mSSLVerifyUtil;
+    @Inject protected PrefsUtil mPrefsUtil;
+    @Inject protected RxBus rxBus;
+
+    {
+        Injector.getInstance().getAppComponent().inject(this);
+    }
 
     @CallSuper
     @Override
@@ -46,28 +58,17 @@ public class BaseAuthActivity extends AppCompatActivity {
 
         compositeDisposable = new CompositeDisposable();
 
-        // Subscribe to SSL pinning events
+        connectionEventObservable = rxBus.register(ConnectionEvent.class);
         compositeDisposable.add(
-                mSSLVerifyUtil.getSslPinningSubject()
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(sslEvent -> {
-                                    switch (sslEvent) {
-                                        case SERVER_DOWN:
-                                            showAlertDialog(getString(R.string.ssl_no_connection), false);
-                                            break;
-                                        case PINNING_FAIL:
-                                            showAlertDialog(getString(R.string.ssl_pinning_invalid), true);
-                                            break;
-                                        case NO_CONNECTION:
-                                            showAlertDialog(getString(R.string.ssl_no_connection), false);
-                                            break;
-                                        case SUCCESS:
-                                            // No-op
-                                        default:
-                                            // No-op
-                                    }
-                                },
-                                Throwable::printStackTrace));
+                connectionEventObservable
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(connectionEvent -> {
+                            if (connectionEvent.equals(ConnectionEvent.PINNING_FAIL)) {
+                                showAlertDialog(getString(R.string.ssl_pinning_invalid), true);
+                            } else {
+                                showAlertDialog(getString(R.string.ssl_no_connection), false);
+                            }
+                        }));
     }
 
     /**
@@ -96,6 +97,8 @@ public class BaseAuthActivity extends AppCompatActivity {
             toolbar.setTitle(CalligraphyUtils.applyTypefaceSpan(
                     title,
                     TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        } else {
+            toolbar.setTitle(title);
         }
 
         setSupportActionBar(toolbar);
@@ -115,6 +118,8 @@ public class BaseAuthActivity extends AppCompatActivity {
             actionBar.setTitle(CalligraphyUtils.applyTypefaceSpan(
                     getString(title),
                     TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        } else {
+            actionBar.setTitle(title);
         }
     }
 
@@ -144,6 +149,7 @@ public class BaseAuthActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        rxBus.unregister(ConnectionEvent.class, connectionEventObservable);
         compositeDisposable.clear();
         if (mAlertDialog != null) {
             mAlertDialog.dismiss();
@@ -194,7 +200,6 @@ public class BaseAuthActivity extends AppCompatActivity {
         builder.setNegativeButton(R.string.exit, (d, id) -> finish());
 
         mAlertDialog = builder.create();
-
         if (!isFinishing()) {
             mAlertDialog.show();
         }

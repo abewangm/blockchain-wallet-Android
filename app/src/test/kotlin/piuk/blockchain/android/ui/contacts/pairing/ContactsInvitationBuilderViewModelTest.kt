@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.contacts.pairing
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.metadata.data.Invitation
-import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Observable
 import org.junit.Before
 import org.junit.Test
@@ -14,6 +13,7 @@ import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -269,7 +269,7 @@ class ContactsInvitationBuilderViewModelTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(payloadManager: PayloadManager?): ContactsDataManager {
+        override fun provideContactsManager(rxBus: RxBus?): ContactsDataManager {
             return mockContactManager
         }
     }

@@ -7,11 +7,13 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import info.blockchain.wallet.payload.PayloadManager;
-
 import info.blockchain.wallet.payload.data.Wallet;
+
 import io.reactivex.Completable;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.access.AuthEvent;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.NotificationService;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -24,12 +26,18 @@ public class NotificationTokenManager {
     private AccessState accessState;
     private PayloadManager payloadManager;
     private PrefsUtil prefsUtil;
+    private RxBus rxBus;
 
-    public NotificationTokenManager(NotificationService notificationService, AccessState accessState, PayloadManager payloadManager, PrefsUtil prefsUtil) {
+    public NotificationTokenManager(NotificationService notificationService,
+                                    AccessState accessState,
+                                    PayloadManager payloadManager,
+                                    PrefsUtil prefsUtil,
+                                    RxBus rxBus) {
         this.notificationService = notificationService;
         this.accessState = accessState;
         this.payloadManager = payloadManager;
         this.prefsUtil = prefsUtil;
+        this.rxBus = rxBus;
     }
 
     /**
@@ -44,8 +52,8 @@ public class NotificationTokenManager {
             sendFirebaseToken(token);
         } else {
             // Store token and send once login event happens
-            accessState.getAuthEventSubject().subscribe(authEvent -> {
-                if (authEvent == AccessState.AuthEvent.LOGIN) {
+            rxBus.register(AuthEvent.class).subscribe(authEvent -> {
+                if (authEvent == AuthEvent.LOGIN) {
                     // Send token
                     sendFirebaseToken(token);
                 }
@@ -64,7 +72,7 @@ public class NotificationTokenManager {
      * @return The Firebase token
      */
     @Nullable
-    public String getFirebaseToken() {
+    private String getFirebaseToken() {
         return !prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "").isEmpty()
                 ? prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "")
                 : FirebaseInstanceId.getInstance().getToken();

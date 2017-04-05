@@ -258,37 +258,27 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         // Import Address button at first position after wallets
         accountsAndImportedList.add(new AccountItem(AccountItem.TYPE_IMPORT_ADDRESS_BUTTON));
 
-        ConsolidatedAccount consolidatedAccount = null;
-        if (!payloadManager.getPayload().getLegacyAddressList().isEmpty()) {
+        legacy = payloadManager.getPayload().getLegacyAddressList();
+        for (int j = 0; j < legacy.size(); j++) {
 
-            consolidatedAccount = new ConsolidatedAccount(getString(R.string.imported_addresses),
-                    payloadManager.getPayload().getLegacyAddressList(),
-                    payloadManager.getImportedAddressesBalance().longValue());
-        }
+            String label = legacy.get(j).getLabel();
+            String address = legacy.get(j).getAddress();
+            String balance = getAddressBalance(j);
 
-        if (consolidatedAccount != null) {
-            legacy = consolidatedAccount.getLegacyAddresses();
-            for (int j = 0; j < legacy.size(); j++) {
+            if (label != null && label.length() > ADDRESS_LABEL_MAX_LENGTH)
+                label = label.substring(0, ADDRESS_LABEL_MAX_LENGTH) + "...";
+            if (label == null || label.isEmpty()) label = "";
+            if (address == null || address.isEmpty()) address = "";
 
-                String label = legacy.get(j).getLabel();
-                String address = legacy.get(j).getAddress();
-                String balance = getAddressBalance(j);
-
-                if (label != null && label.length() > ADDRESS_LABEL_MAX_LENGTH)
-                    label = label.substring(0, ADDRESS_LABEL_MAX_LENGTH) + "...";
-                if (label == null || label.isEmpty()) label = "";
-                if (address == null || address.isEmpty()) address = "";
-
-                accountsAndImportedList.add(new AccountItem(correctedPosition,
-                        label,
-                        address,
-                        balance,
-                        legacy.get(j).getTag() == LegacyAddress.ARCHIVED_ADDRESS,
-                        legacy.get(j).isWatchOnly(),
-                        false,
-                        AccountItem.TYPE_ACCOUNT));
-                correctedPosition++;
-            }
+            accountsAndImportedList.add(new AccountItem(correctedPosition,
+                    label,
+                    address,
+                    balance,
+                    legacy.get(j).getTag() == LegacyAddress.ARCHIVED_ADDRESS,
+                    legacy.get(j).isWatchOnly(),
+                    false,
+                    AccountItem.TYPE_ACCOUNT));
+            correctedPosition++;
         }
 
         if (accountsAdapter == null) {

@@ -9,7 +9,6 @@ import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.payload.PayloadManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +18,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -34,9 +34,9 @@ public class ContactsListViewModel extends BaseViewModel {
     private DataListener dataListener;
     private Observable<NotificationPayload> notificationObservable;
     @VisibleForTesting String link;
-    @Inject ContactsDataManager contactsDataManager;
-    @Inject PayloadManager payloadManager;
-    @Inject RxBus rxBus;
+    @Inject protected ContactsDataManager contactsDataManager;
+    @Inject protected PayloadDataManager payloadDataManager;
+    @Inject protected RxBus rxBus;
 
     interface DataListener {
 
@@ -78,15 +78,12 @@ public class ContactsListViewModel extends BaseViewModel {
     void initContactsService(@Nullable String secondPassword) {
         dataListener.setUiState(ContactsListActivity.LOADING);
         compositeDisposable.add(
-                contactsDataManager.generateNodes(secondPassword)
-                        .andThen(contactsDataManager.getMetadataNodeFactory())
+                payloadDataManager.generateNodes(secondPassword)
+                        .andThen(payloadDataManager.getMetadataNodeFactory())
                         .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
                                 metadataNodeFactory.getMetadataNode(),
                                 metadataNodeFactory.getSharedMetadataNode()))
-                        .andThen(contactsDataManager.registerMdid())
-                        .andThen(contactsDataManager.publishXpub())
-                        .subscribe(
-                                () -> attemptPageSetup(false),
+                        .subscribe(this::registerMdid,
                                 throwable -> {
                                     dataListener.setUiState(ContactsListActivity.FAILURE);
                                     if (throwable instanceof DecryptionException) {
@@ -94,6 +91,19 @@ public class ContactsListViewModel extends BaseViewModel {
                                     } else {
                                         dataListener.showToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
                                     }
+                                }));
+    }
+
+    // TODO: 30/03/2017 Move this into the registerNodeForMetaDataService function
+    private void registerMdid() {
+        compositeDisposable.add(
+                payloadDataManager.registerMdid()
+                        .flatMapCompletable(responseBody -> contactsDataManager.publishXpub())
+                        .subscribe(
+                                () -> attemptPageSetup(false),
+                                throwable -> {
+                                    dataListener.setUiState(ContactsListActivity.FAILURE);
+                                    dataListener.showToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
                                 }));
     }
 
@@ -217,7 +227,7 @@ public class ContactsListViewModel extends BaseViewModel {
         if (firstAttempt) {
             dataListener.setUiState(ContactsListActivity.LOADING);
             compositeDisposable.add(
-                    contactsDataManager.loadNodes()
+                    payloadDataManager.loadNodes()
                             .subscribe(
                                     success -> {
                                         if (success) {
@@ -228,7 +238,7 @@ public class ContactsListViewModel extends BaseViewModel {
                                             }
                                         } else {
                                             // Not set up, most likely has a second password enabled
-                                            if (payloadManager.getPayload().isDoubleEncryption()) {
+                                            if (payloadDataManager.isDoubleEncrypted()) {
                                                 dataListener.showSecondPasswordDialog();
                                                 dataListener.setUiState(ContactsListActivity.FAILURE);
                                             } else {

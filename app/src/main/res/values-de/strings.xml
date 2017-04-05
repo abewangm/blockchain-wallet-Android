@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">Höhere Gebühr akzeptieren</string>
     <string name="large_tx_high_fee_warning">„Da der zurückzugebene Wechselbetrag klein ist, erfordert diese Transaktion eine höhere Gebühr für Kleinstsummenkonsum.“</string>
 
-    <string name="transactions">Transaktionen</string>
+    <string name="overview">Transaktionen</string>
     <string name="invalid_password_too_short">Bitte geben Sie mehr als 3 Buchstaben ein</string>
     <string name="change_pin_new_matches_current">Ihre derzeitige PIN kann nicht als neue PIN verwendet werden</string>
     <string name="account_locked_title">Konto gesperrt</string>

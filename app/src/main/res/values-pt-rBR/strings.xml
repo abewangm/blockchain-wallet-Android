@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">Aceitar taxa mais alta</string>
     <string name="large_tx_high_fee_warning">"Esta transação requer uma taxa mais alta para gasto residual devido ao baixo valor de troco a ser devolvido."</string>
 
-    <string name="transactions">Transações</string>
+    <string name="overview">Transações</string>
     <string name="invalid_password_too_short">Favor inserir mais de 3 caracteres</string>
     <string name="change_pin_new_matches_current">Você não pode usar seu PIN atual como seu novo PIN</string>
     <string name="account_locked_title">Conta bloqueada</string>

@@ -5,7 +5,7 @@ import android.support.annotation.CallSuper;
 import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.injection.Injector;
 
-public abstract class BaseViewModel {
+public abstract class BaseViewModel implements ViewModel {
 
     public CompositeDisposable compositeDisposable;
 
@@ -16,6 +16,7 @@ public abstract class BaseViewModel {
     public abstract void onViewReady();
 
     @CallSuper
+    @Override
     public void destroy() {
         /** Clear all subscriptions so that:
          * 1) all processes are cancelled

@@ -1,27 +1,28 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
-import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
-import info.blockchain.wallet.payload.PayloadManager;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.functions.Function;
+import io.reactivex.Single;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
+import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.rxjava.RxLambdas;
+import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.ContactsService;
 import piuk.blockchain.android.data.stores.PendingTransactionListStore;
@@ -30,60 +31,39 @@ import piuk.blockchain.android.data.stores.PendingTransactionListStore;
  * A manager for handling all Metadata/Shared Metadata/Contacts based operations. Using this class
  * requires careful initialisation, which should be done as follows:
  *
- * 1) Load the metadata nodes from the metadata service using {@link this#loadNodes()}. This will
- * return false if the nodes cannot be found.
+ * 1) Load the metadata nodes from the metadata service using {@link
+ * PayloadDataManager#loadNodes()}. This will return false if the nodes cannot be found.
  *
  * 2) Generate nodes if necessary. If step 1 returns false, the nodes must be generated using {@link
- * this#generateNodes(String)}. In theory, this means that the nodes only need to be generated once,
- * and thus users with a second password only need to be prompted to enter their password once.
+ * PayloadDataManager#generateNodes(String)}. In theory, this means that the nodes only need to be
+ * generated once, and thus users with a second password only need to be prompted to enter their
+ * password once.
  *
  * 3) Init the Contacts Service using {@link this#initContactsService(DeterministicKey,
- * DeterministicKey)}, passing in the appropriate nodes loaded by {@link this#loadNodes()}.
+ * DeterministicKey)}, passing in the appropriate nodes loaded by {@link
+ * PayloadDataManager#loadNodes()}.
  *
  * 4) Register the user's derived MDID with the Shared Metadata service using {@link
- * this#registerMdid()}.
+ * PayloadDataManager#registerMdid()}.
  *
- * 5) Finally, publish the user's XPub to the Shared Metadata service via {@link this#publishXpub()}
+ * 5) Finally, publish the user's XPub to the Shared Metadata service via {@link
+ * this#publishXpub()}
  */
 @SuppressWarnings({"WeakerAccess", "AnonymousInnerClassMayBeStatic"})
 public class ContactsDataManager {
 
     private ContactsService contactsService;
-    private PayloadManager payloadManager;
     private PendingTransactionListStore pendingTransactionListStore;
+    private RxPinning rxPinning;
     @VisibleForTesting HashMap<String, String> contactsTransactionMap = new HashMap<>();
+    @VisibleForTesting HashMap<String, String> notesTransactionMap = new HashMap<>();
 
     public ContactsDataManager(ContactsService contactsService,
-                               PayloadManager payloadManager,
-                               PendingTransactionListStore pendingTransactionListStore) {
+                               PendingTransactionListStore pendingTransactionListStore,
+                               RxBus rxBus) {
         this.contactsService = contactsService;
-        this.payloadManager = payloadManager;
         this.pendingTransactionListStore = pendingTransactionListStore;
-    }
-
-    /**
-     * Loads previously saved nodes from the Metadata service. If none are found, the {@link
-     * Observable} returns false.
-     *
-     * @return An {@link Observable} object wrapping a boolean value, representing successfully
-     * loaded nodes
-     */
-    public Observable<Boolean> loadNodes() {
-        return Observable.fromCallable(() -> payloadManager.loadNodes())
-                .compose(RxUtil.applySchedulersToObservable());
-    }
-
-    /**
-     * Generates the metadata and shared metadata nodes if necessary.
-     *
-     * @param secondPassword An optional second password.
-     * @return A {@link Completable} object, ie an asynchronous void operation
-     */
-    public Completable generateNodes(@Nullable String secondPassword) {
-        return Completable.fromCallable(() -> {
-            payloadManager.generateNodes(secondPassword);
-            return Void.TYPE;
-        }).compose(RxUtil.applySchedulersToCompletable());
+        rxPinning = new RxPinning(rxBus);
     }
 
     /**
@@ -94,101 +74,16 @@ public class ContactsDataManager {
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
     public Completable initContactsService(DeterministicKey metadataNode, DeterministicKey sharedMetadataNode) {
-        return contactsService.initContactsService(metadataNode, sharedMetadataNode)
+        return rxPinning.call(() -> contactsService.initContactsService(metadataNode, sharedMetadataNode))
                 .compose(RxUtil.applySchedulersToCompletable());
-    }
-
-    /**
-     * Returns a {@link MetadataNodeFactory} object which allows you to access the {@link
-     * DeterministicKey} objects needed to initialise the Contacts service.
-     *
-     * @return An {@link Observable} wrapping a {@link MetadataNodeFactory}
-     */
-    public Observable<MetadataNodeFactory> getMetadataNodeFactory() {
-        return Observable.just(payloadManager.getMetadataNodeFactory());
-    }
-
-    /**
-     * Registers the user's MDID with the metadata service.
-     *
-     * @return A {@link Completable}, ie an Observable type object specifically for methods
-     * returning void.
-     */
-    public Completable registerMdid() {
-        return Completable.fromCallable(() -> {
-            payloadManager.registerMdid(payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
-            return Void.TYPE;
-        }).compose(RxUtil.applySchedulersToCompletable());
-    }
-
-    /**
-     * Unregisters the user's MDID from the metadata service.
-     *
-     * @return A {@link Completable}, ie an Observable type object specifically for methods
-     * returning void.
-     */
-    public Completable unregisterMdid() {
-        return Completable.fromCallable(() -> {
-            payloadManager.unregisterMdid(
-                    payloadManager.getMetadataNodeFactory().getSharedMetadataNode());
-            return Void.TYPE;
-        }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
      * Invalidates the access token for re-authing, if needed.
      */
     private Completable invalidate() {
-        return contactsService.invalidate()
+        return rxPinning.call(() -> contactsService.invalidate())
                 .compose(RxUtil.applySchedulersToCompletable());
-    }
-
-    /**
-     * Calls a function and invalidates the access token on failure before calling the original
-     * function again, which will trigger getting another access token.
-     */
-    private <T> Observable<T> callWithToken(ObservableTokenRequest<T> function) {
-        ObservableTokenFunction<T> tokenFunction = new ObservableTokenFunction<T>() {
-            @Override
-            public Observable<T> apply(Void empty) {
-                return function.apply();
-            }
-        };
-
-        return Observable.defer(() -> tokenFunction.apply(null))
-                .doOnError(throwable -> invalidate())
-                .retry(1);
-    }
-
-    private Completable callWithToken(CompletableTokenRequest function) {
-        CompletableTokenFunction tokenFunction = new CompletableTokenFunction() {
-            @Override
-            public Completable apply(Void aVoid) {
-                return function.apply();
-            }
-        };
-
-        return Completable.defer(() -> tokenFunction.apply(null))
-                .doOnError(throwable -> invalidate())
-                .retry(1);
-    }
-
-    // For collapsing into Lambdas
-    private interface ObservableTokenRequest<T> {
-        Observable<T> apply();
-    }
-
-    // For collapsing into Lambdas
-    private interface CompletableTokenRequest {
-        Completable apply();
-    }
-
-    abstract static class ObservableTokenFunction<T> implements Function<Void, Observable<T>> {
-        public abstract Observable<T> apply(Void empty);
-    }
-
-    abstract static class CompletableTokenFunction implements Function<Void, Completable> {
-        public abstract Completable apply(Void empty);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -203,21 +98,19 @@ public class ContactsDataManager {
      */
     @SuppressWarnings("Convert2streamapi")
     public Completable fetchContacts() {
-        return contactsService.fetchContacts()
+        return rxPinning.call(() -> contactsService.fetchContacts())
                 .andThen(contactsService.getContactList())
-                .toList()
-                .doOnEvent((contacts, throwable) -> {
-                    contactsTransactionMap.clear();
-                    if (contacts != null) {
-                        for (Contact contact : contacts) {
-                            for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
-                                if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
-                                    contactsTransactionMap.put(tx.getTxHash(), contact.getName());
-                                }
+                .doOnNext(contact -> {
+                    for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
+                        if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
+                            contactsTransactionMap.put(tx.getTxHash(), contact.getName());
+                            if (tx.getNote() != null && !tx.getNote().isEmpty()) {
+                                notesTransactionMap.put(tx.getTxHash(), tx.getNote());
                             }
                         }
                     }
                 })
+                .toList()
                 .toCompletable()
                 .compose(RxUtil.applySchedulersToCompletable());
     }
@@ -228,7 +121,7 @@ public class ContactsDataManager {
      * @return A {@link Completable} object, ie an asynchronous void operation≈≈
      */
     public Completable saveContacts() {
-        return contactsService.saveContacts()
+        return rxPinning.call(() -> contactsService.saveContacts())
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -238,7 +131,7 @@ public class ContactsDataManager {
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
     public Completable wipeContacts() {
-        return contactsService.wipeContacts()
+        return rxPinning.call(() -> contactsService.wipeContacts())
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -270,7 +163,7 @@ public class ContactsDataManager {
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
     public Completable addContact(Contact contact) {
-        return contactsService.addContact(contact)
+        return rxPinning.call(() -> contactsService.addContact(contact))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -281,7 +174,7 @@ public class ContactsDataManager {
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
     public Completable removeContact(Contact contact) {
-        return contactsService.removeContact(contact)
+        return rxPinning.call(() -> contactsService.removeContact(contact))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -293,7 +186,7 @@ public class ContactsDataManager {
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
     public Completable renameContact(String contactId, String name) {
-        return contactsService.renameContact(contactId, name)
+        return rxPinning.call(() -> contactsService.renameContact(contactId, name))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -379,7 +272,8 @@ public class ContactsDataManager {
     }
 
     /**
-     * Sends a response to a payment request.
+     * Sends a response to a payment request containing a {@link PaymentRequest}, which contains a
+     * bitcoin address belonging to the user.
      *
      * @param mdid            The recipient's MDID
      * @param paymentRequest  A {@link PaymentRequest} object
@@ -404,6 +298,30 @@ public class ContactsDataManager {
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
+    /**
+     * Sends a response to a payment request declining the offer of payment.
+     *
+     * @param mdid   The recipient's MDID
+     * @param fctxId The ID of the {@link FacilitatedTransaction} to be declined
+     * @return A {@link Completable} object
+     */
+    public Completable sendPaymentDeclinedResponse(String mdid, String fctxId) {
+        return callWithToken(() -> contactsService.sendPaymentDeclinedResponse(mdid, fctxId))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Informs the recipient of a payment request that the request has been cancelled.
+     *
+     * @param mdid   The recipient's MDID
+     * @param fctxId The ID of the {@link FacilitatedTransaction} to be cancelled
+     * @return A {@link Completable} object
+     */
+    public Completable sendPaymentCancelledResponse(String mdid, String fctxId) {
+        return callWithToken(() -> contactsService.sendPaymentCancelledResponse(mdid, fctxId))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // XPUB AND MDID HANDLING
     ///////////////////////////////////////////////////////////////////////////
@@ -416,7 +334,7 @@ public class ContactsDataManager {
      * @return A {@link Observable} wrapping a String
      */
     public Observable<String> fetchXpub(String mdid) {
-        return contactsService.fetchXpub(mdid)
+        return rxPinning.call(() -> contactsService.fetchXpub(mdid))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -426,7 +344,7 @@ public class ContactsDataManager {
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
     public Completable publishXpub() {
-        return contactsService.publishXpub()
+        return rxPinning.call(() -> contactsService.publishXpub())
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -475,7 +393,9 @@ public class ContactsDataManager {
 
     /**
      * Finds and returns a stream of {@link ContactTransactionModel} objects and stores them locally
-     * where the transaction is yet to be completed, ie the hash is empty.
+     * where the transaction is yet to be completed, ie the hash is empty. Intended to be used to
+     * display a list of transactions with another user in the balance page, and therefore this list
+     * does not contain completed, cancelled or declined transactions.
      *
      * @return An {@link Observable} stream of {@link ContactTransactionModel} objects
      */
@@ -483,21 +403,21 @@ public class ContactsDataManager {
     public Observable<ContactTransactionModel> refreshFacilitatedTransactions() {
         pendingTransactionListStore.clearList();
         return getContactList()
-                .toList()
-                .toObservable()
-                .flatMap(contacts -> {
+                .flatMapIterable(contact -> {
                     ArrayList<ContactTransactionModel> transactions = new ArrayList<>();
-                    for (Contact contact : contacts) {
-                        for (FacilitatedTransaction transaction : contact.getFacilitatedTransactions().values()) {
-                            // If hash is null, transaction has not been completed
-                            if (transaction.getTxHash() == null || transaction.getTxHash().isEmpty()) {
-                                ContactTransactionModel model = new ContactTransactionModel(contact.getName(), transaction);
-                                pendingTransactionListStore.insertTransaction(model);
-                                transactions.add(model);
-                            }
+                    for (FacilitatedTransaction transaction : contact.getFacilitatedTransactions().values()) {
+                        // If hash is null, transaction has not been completed
+                        if (((transaction.getTxHash() == null) || transaction.getTxHash().isEmpty())
+                                // Filter out cancelled and declined transactions
+                                && !transaction.getState().equals(FacilitatedTransaction.STATE_CANCELLED)
+                                && !transaction.getState().equals(FacilitatedTransaction.STATE_DECLINED)) {
+
+                            ContactTransactionModel model = new ContactTransactionModel(contact.getName(), transaction);
+                            pendingTransactionListStore.insertTransaction(model);
+                            transactions.add(model);
                         }
                     }
-                    return Observable.fromIterable(transactions);
+                    return transactions;
                 });
     }
 
@@ -516,22 +436,13 @@ public class ContactsDataManager {
      * the Observable will return an empty object, but very unlikely.
      *
      * @param fctxId The {@link FacilitatedTransaction} ID.
-     * @return An {@link Observable} containing a {@link Contact} object OR potentially an empty
-     * Observable
+     * @return A {@link Single} emitting a {@link Contact} object or will emit a {@link
+     * NoSuchElementException} if the Contact isn't found.
      */
-    public Observable<Contact> getContactFromFctxId(String fctxId) {
+    public Single<Contact> getContactFromFctxId(String fctxId) {
         return getContactList()
-                .toList()
-                .toObservable()
-                .flatMap(contacts -> {
-                    for (Contact contact : contacts) {
-                        if (contact.getFacilitatedTransactions().get(fctxId) != null) {
-                            return Observable.just(contact);
-                        }
-                    }
-
-                    return Observable.empty();
-                });
+                .filter(contact -> contact.getFacilitatedTransactions().get(fctxId) != null)
+                .firstOrError();
     }
 
     /**
@@ -543,7 +454,7 @@ public class ContactsDataManager {
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
     public Completable deleteFacilitatedTransaction(String mdid, String fctxId) {
-        return contactsService.deleteFacilitatedTransaction(mdid, fctxId)
+        return callWithToken(() -> contactsService.deleteFacilitatedTransaction(mdid, fctxId))
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
@@ -556,4 +467,73 @@ public class ContactsDataManager {
     public HashMap<String, String> getContactsTransactionMap() {
         return contactsTransactionMap;
     }
+
+    /**
+     * Returns a Map of {@link FacilitatedTransaction} notes keyed to Transaction hashes.
+     *
+     * @return A {@link HashMap} where the key is a {@link TransactionSummary#getHash()}, and the
+     * value is a {@link FacilitatedTransaction#getNote()}
+     */
+    public HashMap<String, String> getNotesTransactionMap() {
+        return notesTransactionMap;
+    }
+
+    /**
+     * Clears all data in the {@link PendingTransactionListStore}.
+     */
+    public void resetContacts() {
+        contactsService.destroy();
+        pendingTransactionListStore.clearList();
+        notesTransactionMap.clear();
+        contactsTransactionMap.clear();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // TOKEN FUNCTIONS
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Calls a function and invalidates the access token on failure before calling the original
+     * function again, which will trigger getting another access token. Called via {@link RxPinning}
+     * which propagates an error to the UI when SSL pinning fails.
+     */
+    private <T> Observable<T> callWithToken(RxLambdas.ObservableRequest<T> function) {
+        RxLambdas.ObservableFunction<T> tokenFunction = new RxLambdas.ObservableFunction<T>() {
+            @Override
+            public Observable<T> apply(Void empty) {
+                return function.apply();
+            }
+        };
+
+        return rxPinning.call(() -> getRetry(tokenFunction));
+    }
+
+    /**
+     * Calls a function and invalidates the access token on failure before calling the original
+     * function again, which will trigger getting another access token. Called via {@link RxPinning}
+     * which propagates an error to the UI when SSL pinning fails.
+     */
+    private Completable callWithToken(RxLambdas.CompletableRequest function) {
+        RxLambdas.CompletableFunction tokenFunction = new RxLambdas.CompletableFunction() {
+            @Override
+            public Completable apply(Void aVoid) {
+                return function.apply();
+            }
+        };
+
+        return rxPinning.call(() -> getRetry(tokenFunction));
+    }
+
+    private <T> Observable<T> getRetry(RxLambdas.ObservableFunction<T> tokenFunction) {
+        return Observable.defer(() -> tokenFunction.apply(null))
+                .doOnError(throwable -> invalidate())
+                .retry(1);
+    }
+
+    private Completable getRetry(RxLambdas.CompletableFunction tokenFunction) {
+        return Completable.defer(() -> tokenFunction.apply(null))
+                .doOnError(throwable -> invalidate())
+                .retry(1);
+    }
+
 }

@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">接受更高的费用</string>
     <string name="large_tx_high_fee_warning">“该交易要求更高的费用用于因为返回少量变化而造成的微额量消费”。</string>
 
-    <string name="transactions">交易</string>
+    <string name="overview">交易</string>
     <string name="invalid_password_too_short">请输入3个以上的字符</string>
     <string name="change_pin_new_matches_current">您不能使用当前的 PIN 码作为您的新 PIN 码</string>
     <string name="account_locked_title">帐户已被锁定</string>

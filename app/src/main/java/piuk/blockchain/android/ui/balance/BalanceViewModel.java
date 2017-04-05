@@ -17,6 +17,7 @@ import info.blockchain.wallet.payload.data.LegacyAddress;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,10 +30,12 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AuthEvent;
 import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
@@ -45,6 +48,8 @@ import piuk.blockchain.android.ui.account.ConsolidatedAccount.Type;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.home.MainActivity;
+import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -63,6 +68,7 @@ public class BalanceViewModel extends BaseViewModel {
     private Observable<ContactsEvent> contactsEventObservable;
     private Observable<NotificationPayload> notificationObservable;
     private Observable<List> txListObservable;
+    private Observable<AuthEvent> authEventObservable;
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
     private List<Object> displayList;
@@ -75,6 +81,9 @@ public class BalanceViewModel extends BaseViewModel {
     @Inject SettingsDataManager settingsDataManager;
     @Inject SwipeToReceiveHelper swipeToReceiveHelper;
     @Inject RxBus rxBus;
+    @Inject OnboardingDataManager onboardingDataManager;
+    @Inject protected ExchangeRateFactory exchangeRateFactory;
+    @Inject protected PrefsUtil prefs;
 
     public interface DataListener {
 
@@ -97,6 +106,8 @@ public class BalanceViewModel extends BaseViewModel {
 
         void onRefreshBalanceAndTransactions();
 
+        void onRefreshContactList();
+
         void showBackupPromptDialog(boolean showNeverAgain);
 
         void show2FaDialog();
@@ -109,7 +120,7 @@ public class BalanceViewModel extends BaseViewModel {
 
         void showAccountChoiceDialog(List<String> accounts, String fctxId);
 
-        void initiatePayment(String uri, String recipientId, String mdid, String fctxId, int defaultIndex);
+        void initiatePayment(String uri, String recipientId, String mdid, String fctxId);
 
         void showWaitingForPaymentDialog();
 
@@ -123,7 +134,13 @@ public class BalanceViewModel extends BaseViewModel {
 
         void showFctxRequiringAttention(int number);
 
-        void showDeleteFacilitatedTransactionDialog(String fctxId);
+        void showTransactionDeclineDialog(String fctxId);
+
+        void showTransactionCancelDialog(String fctxId);
+
+        void startBuyActivity();
+
+        void startReceiveFragment();
     }
 
     public BalanceViewModel(DataListener dataListener) {
@@ -144,26 +161,17 @@ public class BalanceViewModel extends BaseViewModel {
             // Check from this point forwards
             txListObservable = rxBus.register(List.class);
 
-            compositeDisposable.add(
-                    txListObservable
-                            .compose(RxUtil.applySchedulersToObservable())
-                            .subscribe(txs -> {
-                                if (hasTransactions()) {
-                                    if (!isBackedUp() && !getIfNeverPromptBackup()) {
-                                        // Show dialog and store date of dialog launch
-                                        if (getTimeOfLastSecurityPrompt() == 0) {
-                                            dataListener.showBackupPromptDialog(false);
-                                            storeTimeOfLastSecurityPrompt();
-                                        } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-                                            dataListener.showBackupPromptDialog(true);
-                                            storeTimeOfLastSecurityPrompt();
-                                        }
-                                    } else if (isBackedUp() && !getIfNeverPrompt2Fa()) {
+            if (prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0) == 3) {
+                // On third visit onwards, prompt 2FA
+                compositeDisposable.add(
+                        txListObservable
+                                .compose(RxUtil.applySchedulersToObservable())
+                                .subscribe(txs -> {
+                                    if (!getIfNeverPrompt2Fa()) {
                                         compositeDisposable.add(
                                                 settingsDataManager.initSettings(
                                                         payloadDataManager.getWallet().getGuid(),
                                                         payloadDataManager.getWallet().getSharedKey())
-                                                        .compose(RxUtil.applySchedulersToObservable())
                                                         .subscribe(settings -> {
                                                             if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
                                                                 // Show dialog for 2FA, store date of dialog launch
@@ -175,13 +183,36 @@ public class BalanceViewModel extends BaseViewModel {
                                                             }
                                                         }, Throwable::printStackTrace));
                                     }
-                                }
-
-                            }, Throwable::printStackTrace));
+                                }, Throwable::printStackTrace));
+            } else {
+                // From second visit onwards, prompt backup if not already
+                compositeDisposable.add(
+                        txListObservable
+                                .compose(RxUtil.applySchedulersToObservable())
+                                .subscribe(txs -> {
+                                    if (hasTransactions() && !isBackedUp() && !getIfNeverPromptBackup()) {
+                                        // Show dialog and store date of dialog launch
+                                        if (getTimeOfLastSecurityPrompt() == 0) {
+                                            dataListener.showBackupPromptDialog(false);
+                                            storeTimeOfLastSecurityPrompt();
+                                        } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
+                                            dataListener.showBackupPromptDialog(true);
+                                            storeTimeOfLastSecurityPrompt();
+                                        }
+                                    }
+                                }, Throwable::printStackTrace));
+            }
         }
 
         contactsEventObservable = rxBus.register(ContactsEvent.class);
         contactsEventObservable.subscribe(contactsEvent -> refreshFacilitatedTransactions());
+
+        authEventObservable = rxBus.register(AuthEvent.class);
+        authEventObservable.subscribe(authEvent -> {
+            displayList.clear();
+            transactionListDataManager.clearTransactionList();
+            contactsDataManager.resetContacts();
+        });
 
         notificationObservable = rxBus.register(NotificationPayload.class);
         notificationObservable
@@ -316,9 +347,13 @@ public class BalanceViewModel extends BaseViewModel {
         return contactsDataManager.getContactsTransactionMap();
     }
 
+    HashMap<String, String> getNotesTransactionMap() {
+        return contactsDataManager.getNotesTransactionMap();
+    }
+
     void onTransactionListRefreshed() {
         compositeDisposable.add(
-                payloadDataManager.updateBalancesAndTransactions()
+                payloadDataManager.updateAllTransactions()
                         .doOnSubscribe(disposable -> dataListener.setShowRefreshing(true))
                         .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
                         .subscribe(() -> {
@@ -341,18 +376,25 @@ public class BalanceViewModel extends BaseViewModel {
         }
 
         //Update balance
-        long btcBalance = transactionListDataManager.getBtcBalance(object);
-        String balanceTotal = getBalanceString(isBTC, btcBalance);
+        final Object finalObject = object;
+        compositeDisposable.add(
+                payloadDataManager.updateAllBalances()
+                        .subscribe(() -> {
+                            long btcBalance = transactionListDataManager.getBtcBalance(finalObject);
+                            String balanceTotal = getBalanceString(isBTC, btcBalance);
 
-        if (dataListener != null) {
-            dataListener.updateBalance(balanceTotal);
-        }
+                            if (dataListener != null) {
+                                dataListener.updateBalance(balanceTotal);
+                            }
+                        }));
 
         if (fetchTransactions) {
             //Update transactions
             compositeDisposable.add(
                     transactionListDataManager.fetchTransactions(object, 50, 0)
-                            .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
+                            .doAfterTerminate(() -> {
+                                if (dataListener != null) dataListener.setShowRefreshing(false);
+                            })
                             .subscribe(
                                     this::insertTransactionsAndDisplay,
                                     throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
@@ -383,6 +425,7 @@ public class BalanceViewModel extends BaseViewModel {
                     contactsDataManager.fetchContacts()
                             .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
                             .toList()
+                            .doOnSuccess(contacts -> dataListener.onRefreshContactList())
                             .flatMapObservable(contacts -> contactsDataManager.refreshFacilitatedTransactions())
                             .toList()
                             .subscribe(
@@ -391,10 +434,14 @@ public class BalanceViewModel extends BaseViewModel {
         }
     }
 
+    /**
+     * Cached transactions. To be called sometime in the future
+     */
     void getFacilitatedTransactions() {
         compositeDisposable.add(
                 contactsDataManager.getFacilitatedTransactions()
                         .toList()
+                        .doOnSuccess(contacts -> dataListener.onRefreshContactList())
                         .subscribe(
                                 this::handlePendingTransactions,
                                 Throwable::printStackTrace));
@@ -412,22 +459,19 @@ public class BalanceViewModel extends BaseViewModel {
 
                                 // Payment request sent, waiting for address from recipient
                                 if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                                        && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)
-                                        || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR))) {
+                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
 
                                     dataListener.showWaitingForAddressDialog();
 
                                     // Payment request sent, waiting for payment
                                 } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                                        && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)
-                                        || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR))) {
+                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
 
                                     dataListener.showWaitingForPaymentDialog();
 
                                     // Received payment request, need to send address to sender
                                 } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                                        && (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)
-                                        || transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER))) {
+                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
 
                                     List<String> accountNames = new ArrayList<>();
                                     //noinspection Convert2streamapi
@@ -436,6 +480,7 @@ public class BalanceViewModel extends BaseViewModel {
                                             accountNames.add(account.getLabel());
                                         }
                                     }
+
                                     if (accountNames.size() == 1) {
                                         // Only one account, ask if you want to send an address
                                         dataListener.showSendAddressDialog(fctxId);
@@ -446,33 +491,64 @@ public class BalanceViewModel extends BaseViewModel {
 
                                     // Waiting for payment
                                 } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                                        && (transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)
-                                        || transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER))) {
+                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
 
                                     dataListener.initiatePayment(
                                             transaction.toBitcoinURI(),
                                             contact.getId(),
                                             contact.getMdid(),
-                                            transaction.getId(),
-                                            payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx());
+                                            transaction.getId());
                                 }
                             }
                         }, throwable -> dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)));
     }
 
     void onPendingTransactionLongClicked(String fctxId) {
-        dataListener.showDeleteFacilitatedTransactionDialog(fctxId);
+        compositeDisposable.add(
+                contactsDataManager.getFacilitatedTransactions()
+                        .filter(contactTransactionModel -> contactTransactionModel.getFacilitatedTransaction().getId().equals(fctxId))
+                        .subscribe(contactTransactionModel -> {
+                            FacilitatedTransaction fctx = contactTransactionModel.getFacilitatedTransaction();
+
+                            if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+                                    dataListener.showTransactionDeclineDialog(fctxId);
+                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+                                    dataListener.showTransactionCancelDialog(fctxId);
+                                }
+
+                            } else if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+                                    dataListener.showTransactionDeclineDialog(fctxId);
+                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
+                                    dataListener.showTransactionCancelDialog(fctxId);
+                                }
+                            }
+                        }, throwable -> {
+                            // No-op
+                        }));
     }
 
-    void confirmDeleteFacilitatedTransaction(String fctxId) {
+    void confirmDeclineTransaction(String fctxId) {
         compositeDisposable.add(
                 contactsDataManager.getContactFromFctxId(fctxId)
-                        .flatMapCompletable(contact -> contactsDataManager.deleteFacilitatedTransaction(contact.getMdid(), fctxId))
+                        .flatMapCompletable(contact -> contactsDataManager.sendPaymentDeclinedResponse(contact.getMdid(), fctxId))
                         .doOnError(throwable -> contactsDataManager.fetchContacts())
                         .doAfterTerminate(this::refreshFacilitatedTransactions)
                         .subscribe(
-                                () -> dataListener.showToast(R.string.contacts_pending_transaction_delete_success, ToastCustom.TYPE_OK),
-                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_delete_failure, ToastCustom.TYPE_ERROR)));
+                                () -> dataListener.showToast(R.string.contacts_pending_transaction_decline_success, ToastCustom.TYPE_OK),
+                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_decline_failure, ToastCustom.TYPE_ERROR)));
+    }
+
+    void confirmCancelTransaction(String fctxId) {
+        compositeDisposable.add(
+                contactsDataManager.getContactFromFctxId(fctxId)
+                        .flatMapCompletable(contact -> contactsDataManager.sendPaymentCancelledResponse(contact.getMdid(), fctxId))
+                        .doOnError(throwable -> contactsDataManager.fetchContacts())
+                        .doAfterTerminate(this::refreshFacilitatedTransactions)
+                        .subscribe(
+                                () -> dataListener.showToast(R.string.contacts_pending_transaction_cancel_success, ToastCustom.TYPE_OK),
+                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_cancel_failure, ToastCustom.TYPE_ERROR)));
     }
 
     void onAccountChosen(int accountPosition, String fctxId) {
@@ -487,7 +563,7 @@ public class BalanceViewModel extends BaseViewModel {
                             paymentRequest.setId(fctxId);
 
                             compositeDisposable.add(
-                                    payloadDataManager.getNextReceiveAddress(getCorrectedAccountIndex(accountPosition))
+                                    payloadDataManager.getNextReceiveAddressAndReserve(getCorrectedAccountIndex(accountPosition), "Payment request " + transaction.getId())
                                             .doOnNext(paymentRequest::setAddress)
                                             .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
                                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())
@@ -594,17 +670,11 @@ public class BalanceViewModel extends BaseViewModel {
         int value = 0;
         for (ContactTransactionModel transactionModel : facilitatedTransactions) {
             FacilitatedTransaction transaction = transactionModel.getFacilitatedTransaction();
-            if (transaction.getState() != null
-                    && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                    && transaction.getRole() != null
-                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
-                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
+            if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
                 value++;
-            } else if (transaction.getState() != null
-                    && transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                    && transaction.getRole() != null
-                    && (transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)
-                    || transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER))) {
+            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
                 value++;
             }
         }
@@ -642,6 +712,68 @@ public class BalanceViewModel extends BaseViewModel {
         rxBus.unregister(ContactsEvent.class, contactsEventObservable);
         rxBus.unregister(NotificationPayload.class, notificationObservable);
         rxBus.unregister(List.class, txListObservable);
+        rxBus.unregister(AuthEvent.class, authEventObservable);
         super.destroy();
+    }
+
+    public ArrayList<OnboardingPagerContent> getOnboardingPages() {
+
+        ArrayList<OnboardingPagerContent> pages = new ArrayList<>();
+
+        if (onboardingDataManager.isSepa()) {
+            pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_current_price),
+                    getFormattedPriceString(),
+                    stringUtils.getString(R.string.onboarding_buy_content),
+                    stringUtils.getString(R.string.buy_bitcoin),
+                    MainActivity.ACTION_BUY,
+                    R.color.primary_blue_accent,
+                    R.drawable.vector_buy));
+        }
+
+        //Receive bitcoin
+        pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_receive_bitcoin),
+                "",
+                stringUtils.getString(R.string.onboarding_receive_content),
+                stringUtils.getString(R.string.receive_bitcoin),
+                MainActivity.ACTION_RECEIVE,
+                R.color.secondary_teal_medium,
+                R.drawable.vector_receive));
+
+        //QR Codes
+        pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_qr_codes),
+                "",
+                stringUtils.getString(R.string.onboarding_qr_codes_content),
+                stringUtils.getString(R.string.onboarding_scan_address),
+                MainActivity.ACTION_SEND,
+                R.color.primary_navy_medium,
+                R.drawable.icon_qrcode));
+        return pages;
+    }
+
+    private String getFormattedPriceString() {
+        String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
+        double lastPrice = exchangeRateFactory.getLastPrice(fiat);
+        String fiatSymbol = exchangeRateFactory.getSymbol(fiat);
+        DecimalFormat format = new DecimalFormat();
+        format.setMinimumFractionDigits(2);
+        return stringUtils.getFormattedString(
+                R.string.current_price_btc,
+                fiatSymbol + format.format(lastPrice));
+    }
+
+    public boolean isOnboardingComplete() {
+        return prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false);
+    }
+
+    public void setOnboardingComplete(boolean competed) {
+        prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, competed);
+    }
+
+    public void getBitcoinClicked() {
+        if(onboardingDataManager.isSepa()) {
+            dataListener.startBuyActivity();
+        } else {
+            dataListener.startReceiveFragment();
+        }
     }
 }

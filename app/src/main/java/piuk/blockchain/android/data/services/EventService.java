@@ -1,7 +1,5 @@
 package piuk.blockchain.android.data.services;
 
-import info.blockchain.wallet.api.WalletApi;
-
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.util.PrefsUtil;
 
@@ -19,9 +17,9 @@ public class EventService {
     public static final String EVENT_TX_INPUT_FROM_CONTACTS = "wallet_android_tx_from_contacts";
 
     private PrefsUtil prefsUtil;
-    private WalletApi walletApi;
+    private WalletService walletApi;
 
-    public EventService(PrefsUtil prefsUtil, WalletApi walletApi) {
+    public EventService(PrefsUtil prefsUtil, WalletService walletApi) {
         this.walletApi = walletApi;
         this.prefsUtil = prefsUtil;
     }
@@ -49,7 +47,6 @@ public class EventService {
     }
 
     private void logEvent(String eventName) {
-
         walletApi.logEvent(eventName)
                 .subscribeOn(Schedulers.io())
                 .subscribe(response -> {

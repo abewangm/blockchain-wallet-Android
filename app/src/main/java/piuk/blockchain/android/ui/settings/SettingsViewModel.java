@@ -10,9 +10,12 @@ import info.blockchain.wallet.settings.SettingsManager;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -27,8 +30,10 @@ import piuk.blockchain.android.util.StringUtils;
 public class SettingsViewModel extends BaseViewModel {
 
     @Inject protected FingerprintHelper fingerprintHelper;
+    @Inject protected AuthDataManager authDataManager;
     @Inject protected SettingsDataManager settingsDataManager;
     @Inject protected PayloadManager payloadManager;
+    @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected StringUtils stringUtils;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected AccessState accessState;
@@ -39,8 +44,6 @@ public class SettingsViewModel extends BaseViewModel {
     interface DataListener {
 
         void setUpUi();
-
-        void verifyPinCode();
 
         void showFingerprintDialog(String pincode);
 
@@ -267,19 +270,12 @@ public class SettingsViewModel extends BaseViewModel {
             // No fingerprints enrolled, prompt user to add some
             dataListener.showNoFingerprintsAddedDialog();
         } else {
-            // Verify PIN before continuing
-            dataListener.verifyPinCode();
+            if (accessState.getPIN() != null && !accessState.getPIN().isEmpty()) {
+                dataListener.showFingerprintDialog(accessState.getPIN());
+            } else {
+                throw new IllegalStateException("PIN code not found in AccessState");
+            }
         }
-    }
-
-    /**
-     * Displays fingerprint dialog after the PIN has been validated by {@link
-     * piuk.blockchain.android.ui.auth.PinEntryActivity}
-     *
-     * @param pinCode A {@link String} representing the validated PIN code
-     */
-    void pinCodeValidatedForFingerprint(String pinCode) {
-        dataListener.showFingerprintDialog(pinCode);
     }
 
     private boolean isStringValid(String string) {
@@ -436,11 +432,13 @@ public class SettingsViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
         compositeDisposable.add(
                 settingsDataManager.verifySms(code)
-                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
+                        .doAfterTerminate(() -> {
+                            dataListener.hideProgressDialog();
+                            updateUi();
+                        })
                         .subscribe(settings -> {
                             this.settings = settings;
                             dataListener.showDialogSmsVerified();
-                            updateUi();
                         }, throwable -> dataListener.showWarningDialog(R.string.verify_sms_failed)));
     }
 
@@ -452,10 +450,10 @@ public class SettingsViewModel extends BaseViewModel {
     void updateTor(boolean blocked) {
         compositeDisposable.add(
                 settingsDataManager.updateTor(blocked)
-                        .subscribe(settings -> {
-                            this.settings = settings;
-                            updateUi();
-                        }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                        .doAfterTerminate(this::updateUi)
+                        .subscribe(
+                                settings -> this.settings = settings,
+                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     /**
@@ -467,10 +465,10 @@ public class SettingsViewModel extends BaseViewModel {
     void updateTwoFa(int type) {
         compositeDisposable.add(
                 settingsDataManager.updateTwoFactor(type)
-                        .subscribe(settings -> {
-                            this.settings = settings;
-                            updateUi();
-                        }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                        .doAfterTerminate(this::updateUi)
+                        .subscribe(
+                                settings -> this.settings = settings,
+                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     /**
@@ -500,10 +498,10 @@ public class SettingsViewModel extends BaseViewModel {
                                 return settingsDataManager.disableNotification(type, settings.getNotificationsType());
                             }
                         })
-                        .subscribe(settings -> {
-                            this.settings = settings;
-                            updateUi();
-                        }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                        .doAfterTerminate(this::updateUi)
+                        .subscribe(
+                                settings -> this.settings = settings,
+                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     private boolean isNotificationTypeEnabled(int type) {
@@ -539,22 +537,18 @@ public class SettingsViewModel extends BaseViewModel {
         payloadManager.setTempPassword(password);
 
         compositeDisposable.add(
-                accessState.createPin(password, accessState.getPIN())
-                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
-                        .flatMap(success -> {
+                authDataManager.createPin(password, accessState.getPIN())
+                        .flatMapCompletable(success -> {
                             if (success) {
-                                return accessState.syncPayloadToServer();
+                                return payloadDataManager.syncPayloadWithServer();
                             } else {
-                                return Observable.just(false);
+                                return Completable.error(new Throwable());
                             }
                         })
-                        .subscribe(success -> {
-                            if (success) {
-                                dataListener.showToast(R.string.password_changed, ToastCustom.TYPE_OK);
-                            } else {
-                                showUpdatePasswordFailed(fallbackPassword);
-                            }
-                        }, throwable -> showUpdatePasswordFailed(fallbackPassword)));
+                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
+                        .subscribe(
+                                () -> dataListener.showToast(R.string.password_changed, ToastCustom.TYPE_OK),
+                                throwable -> showUpdatePasswordFailed(fallbackPassword)));
     }
 
     private void showUpdatePasswordFailed(@NonNull String fallbackPassword) {

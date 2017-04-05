@@ -6,12 +6,14 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
+import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.HDWallet
 import info.blockchain.wallet.payload.data.Wallet
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
 import org.junit.Before
 import org.junit.Test
@@ -21,14 +23,21 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
+import piuk.blockchain.android.data.contacts.ContactTransactionModel
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.StringUtils
+import java.util.*
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
+import kotlin.test.assertTrue
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
@@ -37,7 +46,7 @@ class ContactDetailViewModelTest {
     private lateinit var subject: ContactDetailViewModel
     private val mockActivity: ContactDetailViewModel.DataListener = mock()
     private val mockContactsManager: ContactsDataManager = mock()
-    private val mockPayloadManager: PayloadManager = mock()
+    private val mockPayloadDataManager: PayloadDataManager = mock()
     private val mockPrefsUtil: PrefsUtil = mock()
     private val mockRxBus: RxBus = mock()
 
@@ -49,7 +58,7 @@ class ContactDetailViewModelTest {
                 Injector.getInstance(),
                 MockApplicationModule(RuntimeEnvironment.application),
                 MockApiModule(),
-                DataManagerModule())
+                MockDataManagerModule())
 
         subject = ContactDetailViewModel(mockActivity)
     }
@@ -115,7 +124,7 @@ class ContactDetailViewModelTest {
         // Assert
         verify(mockActivity).pageBundle
         verify(mockActivity).updateContactName(contactName)
-        verify(mockActivity, times(2)).onTransactionsUpdated(any(), eq(contactName))
+        verify(mockActivity, times(2)).onTransactionsUpdated(any())
         verifyNoMoreInteractions(mockActivity)
         verify(mockContactsManager).contactList
         verify(mockContactsManager).fetchContacts()
@@ -135,7 +144,7 @@ class ContactDetailViewModelTest {
         subject.onViewReady()
         notificationObservable.onNext(notificationPayload)
         // Assert
-        verify(mockActivity, times(2)).pageBundle
+        verify(mockActivity, atLeastOnce()).pageBundle
         verify(mockActivity, times(2)).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         verify(mockActivity, times(2)).finishPage()
         verifyNoMoreInteractions(mockActivity)
@@ -198,9 +207,56 @@ class ContactDetailViewModelTest {
         // Arrange
 
         // Act
-        val result = subject.prefsUtil
+        val result = subject.getPrefsUtil()
         // Assert
         result equals mockPrefsUtil
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun getContactsTransactionMap() {
+        // Arrange
+        whenever(mockContactsManager.contactsTransactionMap).thenReturn(HashMap())
+        // Act
+        val result = subject.contactsTransactionMap
+        // Assert
+        verify(mockContactsManager).contactsTransactionMap
+        assertTrue { result is HashMap }
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun getNotesTransactionMap() {
+        // Arrange
+        whenever(mockContactsManager.notesTransactionMap).thenReturn(HashMap())
+        // Act
+        val result = subject.notesTransactionMap
+        // Assert
+        verify(mockContactsManager).notesTransactionMap
+        assertTrue { result is HashMap }
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun getMonetaryUtil() {
+        // Arrange
+
+        // Act
+        val result = subject.monetaryUtil
+        // Assert
+        verify(mockPrefsUtil).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+        assertTrue { result is MonetaryUtil }
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun getStringUtils() {
+        // Arrange
+
+        // Act
+        val result = subject.getStringUtils()
+        // Assert
+        assertTrue { result is StringUtils }
     }
 
     @Test
@@ -321,24 +377,36 @@ class ContactDetailViewModelTest {
     @Throws(Exception::class)
     fun onContactRenamedShouldShowSuccess() {
         // Arrange
-        val newName = "CONTACT_NAME"
+        val newName = "NEW_NAME"
+        val oldName = "OLD_NAME"
         val contactId = "CONTACT_ID"
         val contact = Contact().apply {
-            name = ""
+            name = oldName
             id = contactId
         }
         subject.contact = contact
+        val bundle = Bundle()
+        bundle.putString(KEY_BUNDLE_CONTACT_ID, contactId)
+        whenever(mockActivity.pageBundle).thenReturn(bundle)
         whenever(mockContactsManager.renameContact(contactId, newName))
                 .thenReturn(Completable.complete())
+        whenever(mockContactsManager.contactList).thenReturn(Observable.just(contact))
+        whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
+        val notificationObservable = PublishSubject.create<NotificationPayload>()
+        whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         // Act
         subject.onContactRenamed(newName)
         // Assert
+        verify(mockActivity).pageBundle
         verify(mockActivity).showProgressDialog()
         verify(mockActivity).dismissProgressDialog()
-        verify(mockActivity).updateContactName(newName)
+        verify(mockActivity).updateContactName(oldName)
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_OK))
+        verify(mockActivity, times(2)).onTransactionsUpdated(any())
         verifyNoMoreInteractions(mockActivity)
         verify(mockContactsManager).renameContact(contactId, newName)
+        verify(mockContactsManager).contactList
+        verify(mockContactsManager).fetchContacts()
         verifyNoMoreInteractions(mockContactsManager)
     }
 
@@ -375,53 +443,9 @@ class ContactDetailViewModelTest {
         verifyNoMoreInteractions(mockActivity)
     }
 
-    /**
-     * Only exists to get 100% coverage
-     */
-    @Test
-    @Throws(Exception::class)
-    fun onTransactionClickedShouldShowWaitingForAddressSecondBranch() {
-        // Arrange
-        val fctxId = "FCTX_ID"
-        val contact = Contact()
-        subject.contact = contact
-        contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
-            id = fctxId
-            state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-            role = FacilitatedTransaction.ROLE_PR_INITIATOR
-        })
-        // Act
-        subject.onTransactionClicked(fctxId)
-        // Assert
-        verify(mockActivity).showWaitingForAddressDialog()
-        verifyNoMoreInteractions(mockActivity)
-    }
-
     @Test
     @Throws(Exception::class)
     fun onTransactionClickedShouldShowWaitingForPayment() {
-        // Arrange
-        val fctxId = "FCTX_ID"
-        val contact = Contact()
-        subject.contact = contact
-        contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
-            id = fctxId
-            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-            role = FacilitatedTransaction.ROLE_RPR_INITIATOR
-        })
-        // Act
-        subject.onTransactionClicked(fctxId)
-        // Assert
-        verify(mockActivity).showWaitingForPaymentDialog()
-        verifyNoMoreInteractions(mockActivity)
-    }
-
-    /**
-     * Only exists to get 100% coverage
-     */
-    @Test
-    @Throws(Exception::class)
-    fun onTransactionClickedShouldShowWaitingForPaymentSecondBranch() {
         // Arrange
         val fctxId = "FCTX_ID"
         val contact = Contact()
@@ -442,17 +466,12 @@ class ContactDetailViewModelTest {
     @Throws(Exception::class)
     fun onTransactionClickedShouldShowTxDetail() {
         // Arrange
-        val fctxId = "FCTX_ID"
         val txHash = "TX_HASH"
-        val contact = Contact()
-        subject.contact = contact
-        contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
-            id = fctxId
-            state = FacilitatedTransaction.STATE_PAYMENT_BROADCASTED
-            this.txHash = txHash
-        })
+        val transactionPosition = 0
+        val summary = TransactionSummary().apply { hash = txHash }
+        subject.displayList.add(summary)
         // Act
-        subject.onTransactionClicked(fctxId)
+        subject.onCompletedTransactionClicked(transactionPosition)
         // Assert
         verify(mockActivity).showTransactionDetail(txHash)
         verifyNoMoreInteractions(mockActivity)
@@ -471,7 +490,7 @@ class ContactDetailViewModelTest {
             role = FacilitatedTransaction.ROLE_PR_RECEIVER
         })
         val mockPayload: Wallet = mock()
-        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
+        whenever(mockPayloadDataManager.wallet).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
         whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         val account0 = Account().apply { isArchived = true }
@@ -495,10 +514,10 @@ class ContactDetailViewModelTest {
         contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
             id = fctxId
             state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
+            role = FacilitatedTransaction.ROLE_PR_RECEIVER
         })
         val mockPayload: Wallet = mock()
-        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
+        whenever(mockPayloadDataManager.wallet).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
         whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
         val accountLabel0 = "ACCOUNT_0"
@@ -525,53 +544,15 @@ class ContactDetailViewModelTest {
         val facilitatedTransaction = FacilitatedTransaction().apply {
             id = fctxId
             state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-            role = FacilitatedTransaction.ROLE_PR_RECEIVER
-            intendedAmount = 0L
-            address = ""
-        }
-        contact.addFacilitatedTransaction(facilitatedTransaction)
-        val mockPayload: Wallet = mock()
-        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
-        val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
-        val defaultIndex = 1337
-        whenever(mockHdWallet.defaultAccountIdx).thenReturn(defaultIndex)
-        // Act
-        subject.onTransactionClicked(fctxId)
-        // Assert
-        verify(mockActivity).initiatePayment(
-                facilitatedTransaction.toBitcoinURI(),
-                contact.id,
-                contact.mdid,
-                fctxId,
-                defaultIndex)
-        verifyNoMoreInteractions(mockActivity)
-    }
-
-    /**
-     * Only exists to get 100% coverage
-     */
-    @Test
-    @Throws(Exception::class)
-    fun onTransactionClickedShouldInitiatePaymentSecondBranch() {
-        // Arrange
-        val fctxId = "FCTX_ID"
-        val contact = Contact()
-        subject.contact = contact
-        val facilitatedTransaction = FacilitatedTransaction().apply {
-            id = fctxId
-            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
             role = FacilitatedTransaction.ROLE_RPR_RECEIVER
             intendedAmount = 0L
             address = ""
         }
         contact.addFacilitatedTransaction(facilitatedTransaction)
         val mockPayload: Wallet = mock()
-        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
+        whenever(mockPayloadDataManager.wallet).thenReturn(mockPayload)
         val mockHdWallet: HDWallet = mock()
         whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
-        val defaultIndex = 1337
-        whenever(mockHdWallet.defaultAccountIdx).thenReturn(defaultIndex)
         // Act
         subject.onTransactionClicked(fctxId)
         // Assert
@@ -579,61 +560,208 @@ class ContactDetailViewModelTest {
                 facilitatedTransaction.toBitcoinURI(),
                 contact.id,
                 contact.mdid,
-                fctxId,
-                defaultIndex)
+                fctxId)
         verifyNoMoreInteractions(mockActivity)
     }
 
     @Test
     @Throws(Exception::class)
-    fun onTransactionLongClicked() {
+    fun onTransactionLongClickedError() {
         // Arrange
         val fctxId = "FCTX_ID"
+        whenever(mockContactsManager.facilitatedTransactions)
+                .thenReturn(Observable.error { Throwable() })
         // Act
         subject.onTransactionLongClicked(fctxId)
         // Assert
-        verify(mockActivity).showDeleteFacilitatedTransactionDialog(fctxId)
+        verify(mockContactsManager).facilitatedTransactions
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        verify(mockActivity).finishPage()
         verifyNoMoreInteractions(mockActivity)
     }
 
     @Test
     @Throws(Exception::class)
-    fun confirmDeleteFacilitatedTransactionShouldShowSuccess() {
+    fun onTransactionLongClickedWaitingForAddressPrRec() {
         // Arrange
         val fctxId = "FCTX_ID"
-        val contact = Contact()
-        whenever(mockContactsManager.getContactFromFctxId(fctxId))
-                .thenReturn(Observable.just(contact))
-        whenever(mockContactsManager.deleteFacilitatedTransaction(contact.mdid, fctxId))
-                .thenReturn(Completable.complete())
+        val transaction = FacilitatedTransaction().apply {
+            id = fctxId
+            role = FacilitatedTransaction.ROLE_PR_RECEIVER
+            state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
+        }
+        val contactTransaction = ContactTransactionModel("", transaction)
+        whenever(mockContactsManager.facilitatedTransactions)
+                .thenReturn(Observable.fromIterable(listOf(contactTransaction)))
         // Act
-        subject.confirmDeleteFacilitatedTransaction(fctxId)
+        subject.onTransactionLongClicked(fctxId)
         // Assert
-        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_OK))
-        verify(mockContactsManager).getContactFromFctxId(fctxId)
-        verify(mockContactsManager).deleteFacilitatedTransaction(contact.mdid, fctxId)
-        // More interactions as page is set up again, but we're not testing those
+        verify(mockContactsManager).facilitatedTransactions
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity).showTransactionDeclineDialog(fctxId)
+        verifyNoMoreInteractions(mockActivity)
     }
 
     @Test
     @Throws(Exception::class)
-    fun confirmDeleteFacilitatedTransactionShouldShowFailure() {
+    fun onTransactionLongClickedWaitingForAddressRprInit() {
         // Arrange
         val fctxId = "FCTX_ID"
-        val contact = Contact()
+        val transaction = FacilitatedTransaction().apply {
+            id = fctxId
+            role = FacilitatedTransaction.ROLE_RPR_INITIATOR
+            state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
+        }
+        val contactTransaction = ContactTransactionModel("", transaction)
+        whenever(mockContactsManager.facilitatedTransactions)
+                .thenReturn(Observable.fromIterable(listOf(contactTransaction)))
+        // Act
+        subject.onTransactionLongClicked(fctxId)
+        // Assert
+        verify(mockContactsManager).facilitatedTransactions
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity).showTransactionCancelDialog(fctxId)
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onTransactionLongClickedWaitingForPaymentRprRec() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val transaction = FacilitatedTransaction().apply {
+            id = fctxId
+            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
+            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+        }
+        val contactTransaction = ContactTransactionModel("", transaction)
+        whenever(mockContactsManager.facilitatedTransactions)
+                .thenReturn(Observable.fromIterable(listOf(contactTransaction)))
+        // Act
+        subject.onTransactionLongClicked(fctxId)
+        // Assert
+        verify(mockContactsManager).facilitatedTransactions
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity).showTransactionDeclineDialog(fctxId)
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onTransactionLongClickedWaitingForPaymentPrInit() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val transaction = FacilitatedTransaction().apply {
+            id = fctxId
+            role = FacilitatedTransaction.ROLE_PR_INITIATOR
+            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+        }
+        val contactTransaction = ContactTransactionModel("", transaction)
+        whenever(mockContactsManager.facilitatedTransactions)
+                .thenReturn(Observable.fromIterable(listOf(contactTransaction)))
+        // Act
+        subject.onTransactionLongClicked(fctxId)
+        // Assert
+        verify(mockContactsManager).facilitatedTransactions
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity).showTransactionCancelDialog(fctxId)
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun confirmDeclineTransactionShouldShowSuccessful() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val contactMdid = "CONTACT_MDID"
+        val contact = Contact().apply { mdid = contactMdid }
         whenever(mockContactsManager.getContactFromFctxId(fctxId))
-                .thenReturn(Observable.just(contact))
-        whenever(mockContactsManager.deleteFacilitatedTransaction(contact.mdid, fctxId))
+                .thenReturn(Single.just(contact))
+        whenever(mockContactsManager.sendPaymentDeclinedResponse(contactMdid, fctxId))
+                .thenReturn(Completable.complete())
+        subject.contact = contact
+        // Act
+        subject.confirmDeclineTransaction(fctxId)
+        // Assert
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_OK))
+        verify(mockActivity).finishPage()
+        // More interactions as page is set up again, but we're not testing those
+        verify(mockContactsManager).getContactFromFctxId(fctxId)
+        verify(mockContactsManager).sendPaymentDeclinedResponse(contactMdid, fctxId)
+        verifyNoMoreInteractions(mockContactsManager)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun confirmDeclineTransactionShouldShowFailure() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val contactMdid = "CONTACT_MDID"
+        val contact = Contact().apply { mdid = contactMdid }
+        whenever(mockContactsManager.getContactFromFctxId(fctxId))
+                .thenReturn(Single.just(contact))
+        whenever(mockContactsManager.sendPaymentDeclinedResponse(contactMdid, fctxId))
                 .thenReturn(Completable.error { Throwable() })
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
+        subject.contact = contact
         // Act
-        subject.confirmDeleteFacilitatedTransaction(fctxId)
+        subject.confirmDeclineTransaction(fctxId)
+        // Act
         // Assert
         verify(mockActivity, times(2)).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         // More interactions as page is set up again, but we're not testing those
         verify(mockContactsManager).getContactFromFctxId(fctxId)
+        verify(mockContactsManager).sendPaymentDeclinedResponse(contactMdid, fctxId)
         verify(mockContactsManager).fetchContacts()
-        verify(mockContactsManager).deleteFacilitatedTransaction(contact.mdid, fctxId)
+        verifyNoMoreInteractions(mockContactsManager)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun confirmCancelTransactionShouldShowSuccessful() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val contactMdid = "CONTACT_MDID"
+        val contact = Contact().apply { mdid = contactMdid }
+        whenever(mockContactsManager.getContactFromFctxId(fctxId))
+                .thenReturn(Single.just(contact))
+        whenever(mockContactsManager.sendPaymentCancelledResponse(contactMdid, fctxId))
+                .thenReturn(Completable.complete())
+        subject.contact = contact
+        // Act
+        subject.confirmCancelTransaction(fctxId)
+        // Assert
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_OK))
+        verify(mockActivity).finishPage()
+        // More interactions as page is set up again, but we're not testing those
+        verify(mockContactsManager).getContactFromFctxId(fctxId)
+        verify(mockContactsManager).sendPaymentCancelledResponse(contactMdid, fctxId)
+        verifyNoMoreInteractions(mockContactsManager)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun confirmCancelTransactionShouldShowFailure() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val contactMdid = "CONTACT_MDID"
+        val contact = Contact().apply { mdid = contactMdid }
+        whenever(mockContactsManager.getContactFromFctxId(fctxId))
+                .thenReturn(Single.just(contact))
+        whenever(mockContactsManager.sendPaymentCancelledResponse(contactMdid, fctxId))
+                .thenReturn(Completable.error { Throwable() })
+        whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
+        subject.contact = contact
+        // Act
+        subject.confirmCancelTransaction(fctxId)
+        // Act
+        // Assert
+        verify(mockActivity, times(2)).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        // More interactions as page is set up again, but we're not testing those
+        verify(mockContactsManager).getContactFromFctxId(fctxId)
+        verify(mockContactsManager).sendPaymentCancelledResponse(contactMdid, fctxId)
+        verify(mockContactsManager).fetchContacts()
         verifyNoMoreInteractions(mockContactsManager)
     }
 
@@ -651,13 +779,10 @@ class ContactDetailViewModelTest {
             intendedAmount = 21 * 1000 * 1000L
         })
         val address = "ADDRESS"
-        val account = Account()
-        whenever(mockPayloadManager.getNextReceiveAddress(account)).thenReturn(address)
-        val mockPayload: Wallet = mock()
-        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
-        val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
-        whenever(mockHdWallet.accounts).thenReturn(listOf(account))
+        whenever(mockPayloadDataManager.getNextReceiveAddressAndReserve(eq(accountPosition), any()))
+                .thenReturn(Observable.just(address))
+        whenever(mockPayloadDataManager.getPositionOfAccountInActiveList(accountPosition))
+                .thenReturn(accountPosition)
         whenever(mockContactsManager.sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId)))
                 .thenReturn(Completable.complete())
         // Act
@@ -669,6 +794,9 @@ class ContactDetailViewModelTest {
         // More interactions as page is set up again, but we're not testing those
         verify(mockContactsManager).sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId))
         verifyNoMoreInteractions(mockContactsManager)
+        verify(mockPayloadDataManager).getPositionOfAccountInActiveList(accountPosition)
+        verify(mockPayloadDataManager).getNextReceiveAddressAndReserve(eq(accountPosition), any())
+        verifyNoMoreInteractions(mockPayloadDataManager)
     }
 
     @Test
@@ -685,13 +813,10 @@ class ContactDetailViewModelTest {
             intendedAmount = 21 * 1000 * 1000L
         })
         val address = "ADDRESS"
-        val account = Account()
-        whenever(mockPayloadManager.getNextReceiveAddress(account)).thenReturn(address)
-        val mockPayload: Wallet = mock()
-        whenever(mockPayloadManager.payload).thenReturn(mockPayload)
-        val mockHdWallet: HDWallet = mock()
-        whenever(mockPayload.hdWallets).thenReturn(listOf(mockHdWallet))
-        whenever(mockHdWallet.accounts).thenReturn(listOf(account))
+        whenever(mockPayloadDataManager.getNextReceiveAddressAndReserve(eq(accountPosition), any()))
+                .thenReturn(Observable.just(address))
+        whenever(mockPayloadDataManager.getPositionOfAccountInActiveList(accountPosition))
+                .thenReturn(accountPosition)
         whenever(mockContactsManager.sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId)))
                 .thenReturn(Completable.error { Throwable() })
         // Act
@@ -703,6 +828,49 @@ class ContactDetailViewModelTest {
         // More interactions as page is set up again, but we're not testing those
         verify(mockContactsManager).sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId))
         verifyNoMoreInteractions(mockContactsManager)
+        verify(mockPayloadDataManager).getPositionOfAccountInActiveList(accountPosition)
+        verify(mockPayloadDataManager).getNextReceiveAddressAndReserve(eq(accountPosition), any())
+        verifyNoMoreInteractions(mockPayloadDataManager)
+    }
+
+    @Suppress("CAST_NEVER_SUCCEEDS")
+    @Test
+    @Throws(Exception::class)
+    fun sortAndUpdateTransactions() {
+        // Arrange
+        val contactName = "CONTACT_NAME"
+        val contact = Contact().apply { name = contactName }
+        subject.contact = contact
+        val txHash0 = "TX_HASH_0"
+        val txHash1 = "TX_HASH_1"
+        val fctx0 = FacilitatedTransaction().apply {
+            txHash = txHash0
+            lastUpdated = 1337L
+            intendedAmount = 1337L
+            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
+        }
+        val fctx1 = FacilitatedTransaction().apply {
+            txHash = txHash1
+            lastUpdated = 1337L
+            intendedAmount = 1337L
+            role = FacilitatedTransaction.ROLE_PR_INITIATOR
+        }
+        val fctx2 = FacilitatedTransaction().apply {
+            txHash = null
+            lastUpdated = 1337L
+            intendedAmount = 1337L
+        }
+        val values = listOf(fctx0, fctx1, fctx2)
+        val captor = argumentCaptor<List<JvmType.Object>>()
+        // Act
+        subject.sortAndUpdateTransactions(values)
+        // Assert
+        verify(mockActivity).onTransactionsUpdated(captor.capture())
+        verifyZeroInteractions(mockActivity)
+        val list = captor.firstValue
+        (list[0] as ContactTransactionModel).contactName equals contactName
+        (list[1] as TransactionSummary).hash equals txHash1
+        (list[2] as TransactionSummary).hash equals txHash0
     }
 
     @Test
@@ -727,12 +895,14 @@ class ContactDetailViewModelTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun providePayloadManager(): PayloadManager {
-            return mockPayloadManager
-        }
-
-        override fun provideContactsManager(payloadManager: PayloadManager?): ContactsDataManager {
+        override fun provideContactsManager(rxBus: RxBus?): ContactsDataManager {
             return mockContactsManager
+        }
+    }
+
+    inner class MockDataManagerModule : DataManagerModule() {
+        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?): PayloadDataManager {
+            return mockPayloadDataManager
         }
     }
 

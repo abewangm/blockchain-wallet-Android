@@ -2,13 +2,11 @@ package piuk.blockchain.android.ui.pairing;
 
 import android.support.annotation.StringRes;
 
-import info.blockchain.wallet.payload.PayloadManager;
-
 import javax.inject.Inject;
+import javax.net.ssl.SSLPeerUnverifiedException;
 
-import io.reactivex.Observable;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -18,7 +16,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 public class PairingViewModel extends BaseViewModel {
 
     @Inject protected AppUtil appUtil;
-    @Inject protected PayloadManager payloadManager;
+    @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected PrefsUtil prefsUtil;
     private DataListener dataListener;
 
@@ -45,32 +43,26 @@ public class PairingViewModel extends BaseViewModel {
     }
 
     void pairWithQR(String raw) {
-        dataListener.showProgressDialog(R.string.please_wait);
-
         appUtil.clearCredentials();
 
         compositeDisposable.add(
-                handleQrCode(raw)
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe((voidType) -> {
-                            dataListener.dismissProgressDialog();
-
-                            prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadManager.getPayload().getGuid());
+                payloadDataManager.handleQrCode(raw)
+                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.please_wait))
+                        .doOnComplete(() -> appUtil.setSharedKey(payloadDataManager.getWallet().getSharedKey()))
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .subscribe(() -> {
+                            prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.getWallet().getGuid());
                             prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
                             dataListener.startPinEntryActivity();
-
                         }, throwable -> {
-                            dataListener.dismissProgressDialog();
-                            dataListener.showToast(R.string.pairing_failed, ToastCustom.TYPE_ERROR);
-                            appUtil.clearCredentialsAndRestart();
+                            if (throwable instanceof SSLPeerUnverifiedException) {
+                                // BaseActivity handles message
+                                appUtil.clearCredentials();
+                            } else {
+                                dataListener.showToast(R.string.pairing_failed, ToastCustom.TYPE_ERROR);
+                                appUtil.clearCredentialsAndRestart();
+                            }
                         }));
     }
 
-    private Observable handleQrCode(String data) {
-        return Observable.fromCallable(() -> {
-            payloadManager.initializeAndDecryptFromQR(data);
-            appUtil.setSharedKey(payloadManager.getPayload().getSharedKey());
-            return Void.TYPE;
-        });
-    }
 }

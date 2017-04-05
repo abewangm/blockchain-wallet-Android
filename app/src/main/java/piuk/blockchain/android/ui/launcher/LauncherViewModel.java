@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.util.AppUtil;
@@ -21,11 +22,12 @@ public class LauncherViewModel extends BaseViewModel {
 
     public static final String INTENT_EXTRA_VERIFIED = "verified";
 
-    @Inject protected AppUtil mAppUtil;
-    @Inject protected PayloadDataManager mPayloadDataManager;
-    @Inject protected PrefsUtil mPrefsUtil;
-    @Inject protected AccessState mAccessState;
-    private DataListener mDataListener;
+    @Inject protected AppUtil appUtil;
+    @Inject protected PayloadDataManager payloadDataManager;
+    @Inject protected PrefsUtil prefsUtil;
+    @Inject protected AccessState accessState;
+    @Inject protected SettingsDataManager settingsDataManager;
+    private DataListener dataListener;
 
     public interface DataListener {
 
@@ -43,30 +45,32 @@ public class LauncherViewModel extends BaseViewModel {
 
         void onReEnterPassword();
 
+        void onStartOnboarding(boolean emailOnly);
+
     }
 
     public LauncherViewModel(DataListener listener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
-        mDataListener = listener;
+        dataListener = listener;
     }
 
     @Override
     public void onViewReady() {
         // Store incoming URI if needed
-        Intent intent = mDataListener.getPageIntent();
+        Intent intent = dataListener.getPageIntent();
         String action = intent.getAction();
         String scheme = intent.getScheme();
         String intentData = intent.getDataString();
         if (action != null && Intent.ACTION_VIEW.equals(action) && scheme != null && scheme.equals("bitcoin")) {
-            mPrefsUtil.setValue(PrefsUtil.KEY_SCHEME_URL, intent.getData().toString());
+            prefsUtil.setValue(PrefsUtil.KEY_SCHEME_URL, intent.getData().toString());
         }
 
         if (action != null && Intent.ACTION_VIEW.equals(action) && intentData != null && intentData.contains("blockchain")) {
-            mPrefsUtil.setValue(PrefsUtil.KEY_METADATA_URI, intentData);
+            prefsUtil.setValue(PrefsUtil.KEY_METADATA_URI, intentData);
         }
 
         if (intent.hasExtra(EXTRA_CONTACT_ACCEPTED)) {
-            mPrefsUtil.setValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION, true);
+            prefsUtil.setValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION, true);
         }
 
         boolean isPinValidated = false;
@@ -75,41 +79,68 @@ public class LauncherViewModel extends BaseViewModel {
             isPinValidated = extras.getBoolean(INTENT_EXTRA_VERIFIED);
         }
 
-        boolean hasLoggedOut = mPrefsUtil.getValue(PrefsUtil.LOGGED_OUT, false);
+        boolean hasLoggedOut = prefsUtil.getValue(PrefsUtil.LOGGED_OUT, false);
 
-        if (mPrefsUtil.getValue(PrefsUtil.KEY_GUID, "").isEmpty()) {
+        if (prefsUtil.getValue(PrefsUtil.KEY_GUID, "").isEmpty()) {
             // No GUID? Treat as new installation
-            mDataListener.onNoGuid();
+            dataListener.onNoGuid();
 
         } else if (hasLoggedOut) {
             // User has logged out recently. Show password reentry page
-            mDataListener.onReEnterPassword();
+            dataListener.onReEnterPassword();
 
-        } else if (mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "").isEmpty()) {
+        } else if (prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "").isEmpty()) {
             // No PIN ID? Treat as installed app without confirmed PIN
-            mDataListener.onRequestPin();
+            dataListener.onRequestPin();
 
-        } else if (!mAppUtil.isSane()) {
+        } else if (!appUtil.isSane()) {
             // Installed app, check sanity
-            mDataListener.onCorruptPayload();
+            dataListener.onCorruptPayload();
 
-        } else if (isPinValidated && !mPayloadDataManager.getWallet().isUpgraded()) {
+        } else if (isPinValidated && !payloadDataManager.getWallet().isUpgraded()) {
             // Legacy app has not been prompted for upgrade
-            mAccessState.setIsLoggedIn(true);
-            mDataListener.onRequestUpgrade();
+            accessState.setIsLoggedIn(true);
+            dataListener.onRequestUpgrade();
 
-        } else if (isPinValidated || (mAccessState.isLoggedIn())) {
+        } else if (isPinValidated || (accessState.isLoggedIn())) {
             // App has been PIN validated
-            mAccessState.setIsLoggedIn(true);
-            mDataListener.onStartMainActivity();
+            accessState.setIsLoggedIn(true);
+            if (appUtil.isNewlyCreated()) {
+                appUtil.setNewlyCreated(false);
+                dataListener.onStartOnboarding(false);
+            } else {
+                compositeDisposable.add(
+                        settingsDataManager.initSettings(
+                                payloadDataManager.getWallet().getGuid(),
+                                payloadDataManager.getWallet().getSharedKey())
+                                .subscribe(settings -> {
+                                    if (!settings.isEmailVerified()
+                                            && settings.getEmail() != null
+                                            && !settings.getEmail().isEmpty()) {
+                                        int visits = prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0);
+                                        if (visits == 1) {
+                                            // Nag user to verify email after second login
+                                            dataListener.onStartOnboarding(true);
+                                        } else {
+                                            dataListener.onStartMainActivity();
+                                        }
+
+                                        visits++;
+                                        prefsUtil.setValue(PrefsUtil.KEY_APP_VISITS, visits);
+                                    } else {
+                                        dataListener.onStartMainActivity();
+                                    }
+                                }, throwable -> dataListener.onStartMainActivity()));
+
+            }
         } else {
-            mDataListener.onRequestPin();
+            dataListener.onRequestPin();
         }
     }
 
     @NonNull
     public AppUtil getAppUtil() {
-        return mAppUtil;
+        return appUtil;
     }
 
 }

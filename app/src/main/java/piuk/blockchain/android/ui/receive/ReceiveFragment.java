@@ -40,7 +40,6 @@ import android.widget.RelativeLayout;
 
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.contacts.data.Contact;
-
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
@@ -157,10 +156,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((BaseAuthActivity) getActivity()).setupToolbar(
                     ((MainActivity) getActivity()).getSupportActionBar(), R.string.receive_bitcoin);
-
-            ViewUtils.setElevation(
-                    getActivity().findViewById(R.id.appbar_layout),
-                    ViewUtils.convertDpToPixel(5F, getContext()));
         } else {
             finishPage();
         }
@@ -216,7 +211,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     }
 
     private TextWatcher btcTextWatcher = new TextWatcher() {
-
         @Override
         public void afterTextChanged(Editable s) {
             String input = s.toString();
@@ -252,7 +246,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     };
 
     private TextWatcher fiatTextWatcher = new TextWatcher() {
-
         @Override
         public void afterTextChanged(Editable s) {
             String input = s.toString();
@@ -345,20 +338,20 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         // Disable send to contact button if not using HD account
         binding.buttonSendToContact.setEnabled(object instanceof Account);
 
-        String label = "";
+        String label;
         String receiveAddress = null;
         if (object instanceof LegacyAddress) {
             LegacyAddress legacyAddress = (LegacyAddress) object;
             receiveAddress = legacyAddress.getAddress();
             label = legacyAddress.getLabel();
-            if(label.isEmpty()){
+            if (label == null || label.isEmpty()) {
                 label = receiveAddress;
             }
         } else {
             Account account = (Account) object;
             viewModel.getV3ReceiveAddress(account);
             label = account.getLabel();
-            if(label.isEmpty()){
+            if (label == null || label.isEmpty()) {
                 label = account.getXpub();
             }
         }
@@ -369,11 +362,10 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
     @Override
     public void updateReceiveAddress(String receiveAddress) {
-
         binding.receivingAddress.setText(receiveAddress);
 
         long amountLong = viewModel.getCurrencyHelper().getLongAmount(
-            binding.amountContainer.amountBtc.getText().toString());
+                binding.amountContainer.amountBtc.getText().toString());
 
         BigInteger amountBigInt = viewModel.getCurrencyHelper().getUndenominatedAmount(amountLong);
 

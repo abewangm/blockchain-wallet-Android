@@ -4,7 +4,6 @@ import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
-import info.blockchain.wallet.payload.data.Wallet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +17,6 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.BlockchainTestApplication;
@@ -30,7 +28,6 @@ import piuk.blockchain.android.ui.account.ConsolidatedAccount;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -250,7 +247,6 @@ public class TransactionListDataManagerTest extends RxTest {
         assertEquals(0L, value);
     }
 
-
     @Test
     public void getTxFromHashFound() {
         // Arrange
@@ -287,22 +283,6 @@ public class TransactionListDataManagerTest extends RxTest {
         testObserver.assertTerminated();
         testObserver.assertNoValues();
         testObserver.assertError(NullPointerException.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void updateTransactionNotes() throws Exception {
-        // Arrange
-        Wallet mockWallet = mock(Wallet.class);
-        when(mockWallet.getTxNotes()).thenReturn(mock(Map.class));
-        when(payloadManager.getPayload()).thenReturn(mockWallet);
-        when(payloadManager.save()).thenReturn(true);
-        // Act
-        TestObserver<Boolean> observer = subject.updateTransactionNotes("hash", "notes").test();
-        // Assert
-        observer.assertComplete();
-        observer.assertNoErrors();
-        observer.assertValue(true);
     }
 
 }

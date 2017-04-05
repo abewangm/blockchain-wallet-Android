@@ -176,13 +176,16 @@ class WebSocketHandler {
 
     @Thunk
     void updateBalancesAndTransactions() {
-        payloadDataManager.updateBalancesAndTransactions()
-                .doOnComplete(() -> {
-                    Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-                })
-                .compose(RxUtil.applySchedulersToCompletable())
+        payloadDataManager.updateAllBalances()
+                .andThen(payloadDataManager.updateAllTransactions())
+                .doOnComplete(this::sendBroadcast)
                 .subscribe(new IgnorableDefaultObserver<>());
+    }
+
+    @Thunk
+    void sendBroadcast() {
+        Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
     private Completable connectToWebSocket() {
@@ -202,12 +205,17 @@ class WebSocketHandler {
 
                         @Override
                         public void onTextMessage(WebSocket websocket, String message) {
-                            JSONObject jsonObject;
-                            try {
-                                jsonObject = new JSONObject(message);
-                                attemptParseMessage(message, jsonObject);
-                            } catch (JSONException je) {
-                                Log.e(TAG, "onTextMessage: ", je);
+                            if (payloadDataManager.getWallet() != null) {
+                                JSONObject jsonObject;
+                                try {
+                                    jsonObject = new JSONObject(message);
+                                    attemptParseMessage(message, jsonObject);
+                                } catch (JSONException je) {
+                                    Log.e(TAG, "onTextMessage: ", je);
+                                }
+                            } else {
+                                // Ignore content and broadcast anyway so that SwipeToReceive can update
+                                sendBroadcast();
                             }
                         }
 
@@ -220,7 +228,6 @@ class WebSocketHandler {
                     }).connect();
 
             subscribe();
-            // Necessary but meaningless return type for Completable
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }
@@ -330,7 +337,7 @@ class WebSocketHandler {
             payloadDataManager.initializeAndDecrypt(
                     payloadDataManager.getWallet().getSharedKey(),
                     payloadDataManager.getWallet().getGuid(),
-                    payloadDataManager.getTempPassword());
+                    payloadDataManager.getTempPassword()).subscribe(this::updateBalancesAndTransactions);
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }

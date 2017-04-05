@@ -2,7 +2,7 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.VisibleForTesting;
 
-import android.util.Log;
+import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import java.util.concurrent.TimeUnit;
@@ -13,6 +13,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.util.AppUtil;
@@ -31,6 +33,7 @@ public class AuthDataManager {
     private AccessState accessState;
     private StringUtils stringUtils;
     private PayloadDataManager payloadDataManager;
+    private RxPinning rxPinning;
     @Thunk PrefsUtil prefsUtil;
     @VisibleForTesting protected int timer;
 
@@ -39,7 +42,8 @@ public class AuthDataManager {
                            WalletService walletService,
                            AppUtil appUtil,
                            AccessState accessState,
-                           StringUtils stringUtils) {
+                           StringUtils stringUtils,
+                           RxBus rxBus) {
 
         this.payloadDataManager = payloadDataManager;
         this.prefsUtil = prefsUtil;
@@ -47,35 +51,40 @@ public class AuthDataManager {
         this.appUtil = appUtil;
         this.accessState = accessState;
         this.stringUtils = stringUtils;
+        rxPinning = new RxPinning(rxBus);
     }
 
     public Observable<Response<ResponseBody>> getEncryptedPayload(String guid, String sessionId) {
-        return walletService.getEncryptedPayload(guid, sessionId)
+        return rxPinning.call(() -> walletService.getEncryptedPayload(guid, sessionId))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     public Observable<String> getSessionId(String guid) {
-        return walletService.getSessionId(guid)
+        return rxPinning.call(() -> walletService.getSessionId(guid))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     public Completable updatePayload(String sharedKey, String guid, String password) {
-        return payloadDataManager.initializeAndDecrypt(sharedKey, guid, password)
-                .compose(RxUtil.applySchedulersToCompletable());
+        return payloadDataManager.initializeAndDecrypt(sharedKey, guid, password);
     }
 
     public Observable<String> validatePin(String pin) {
-        return accessState.validatePin(pin);
+        return rxPinning.call(() -> accessState.validatePin(pin))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     public Observable<Boolean> createPin(String password, String pin) {
-        return accessState.createPin(password, pin)
+        return rxPinning.call(() -> accessState.createPin(password, pin))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    public Observable<WalletOptions> getWalletOptions() {
+        return rxPinning.call(() -> walletService.getWalletOptions())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     public Observable<Wallet> createHdWallet(String password, String walletName, String email) {
         return payloadDataManager.createHdWallet(password, walletName, email)
-                .compose(RxUtil.applySchedulersToObservable())
                 .doOnNext(payload -> {
                     // Successfully created and saved
                     appUtil.setNewlyCreated(true);
@@ -94,8 +103,7 @@ public class AuthDataManager {
                     appUtil.setNewlyCreated(true);
                     prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
                     appUtil.setSharedKey(payload.getSharedKey());
-                })
-                .compose(RxUtil.applySchedulersToObservable());
+                });
     }
 
     public Observable<String> startPollingAuthStatus(String guid, String sessionId) {
@@ -132,7 +140,7 @@ public class AuthDataManager {
                     prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.getWallet().getGuid());
                     appUtil.setSharedKey(payloadDataManager.getWallet().getSharedKey());
                     prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
-                }).compose(RxUtil.applySchedulersToCompletable());
+                });
     }
 
 }

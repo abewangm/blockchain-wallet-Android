@@ -6,15 +6,19 @@ import info.blockchain.wallet.settings.SettingsManager;
 import java.util.List;
 
 import io.reactivex.Observable;
+import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.SettingsService;
 
 public class SettingsDataManager {
 
     private SettingsService settingsService;
+    private RxPinning rxPinning;
 
-    public SettingsDataManager(SettingsService settingsService) {
+    public SettingsDataManager(SettingsService settingsService, RxBus rxBus) {
         this.settingsService = settingsService;
+        rxPinning = new RxPinning(rxBus);
     }
 
     /**
@@ -26,7 +30,8 @@ public class SettingsDataManager {
      */
     public Observable<Settings> initSettings(String guid, String sharedKey) {
         settingsService.initSettings(guid, sharedKey);
-        return fetchSettings();
+        return rxPinning.call(this::fetchSettings)
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -36,8 +41,9 @@ public class SettingsDataManager {
      * @return {@link Observable<Settings>} wrapping the Settings object
      */
     public Observable<Settings> updateEmail(String email) {
-        return settingsService.updateEmail(email)
-                .flatMap(responseBody -> fetchSettings());
+        return rxPinning.call(() -> settingsService.updateEmail(email))
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -47,8 +53,9 @@ public class SettingsDataManager {
      * @return {@link Observable<Settings>} wrapping the Settings object
      */
     public Observable<Settings> updateSms(String sms) {
-        return settingsService.updateSms(sms)
-                .flatMap(responseBody -> fetchSettings());
+        return rxPinning.call(() -> settingsService.updateSms(sms))
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -59,8 +66,9 @@ public class SettingsDataManager {
      * @return {@link Observable<Settings>} wrapping the Settings object
      */
     public Observable<Settings> verifySms(String code) {
-        return settingsService.verifySms(code)
-                .flatMap(responseBody -> fetchSettings());
+        return rxPinning.call(() -> settingsService.verifySms(code))
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -70,8 +78,9 @@ public class SettingsDataManager {
      * @return {@link Observable<Settings>} wrapping the Settings object
      */
     public Observable<Settings> updateTor(boolean blocked) {
-        return settingsService.updateTor(blocked)
-                .flatMap(responseBody -> fetchSettings());
+        return rxPinning.call(() -> settingsService.updateTor(blocked))
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -82,8 +91,9 @@ public class SettingsDataManager {
      * @see SettingsManager for notification types
      */
     public Observable<Settings> updateTwoFactor(int authType) {
-        return settingsService.updateTwoFactor(authType)
-                .flatMap(responseBody -> fetchSettings());
+        return rxPinning.call(() -> settingsService.updateTwoFactor(authType))
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -97,19 +107,22 @@ public class SettingsDataManager {
     public Observable<Settings> enableNotification(int notificationType, List<Integer> notifications) {
         if (notifications.isEmpty() || notifications.contains(SettingsManager.NOTIFICATION_TYPE_NONE)) {
             // No notification type registered, enable
-            return settingsService.enableNotifications(true)
-                    .flatMap(responseBody -> updateNotifications(notificationType));
+            return rxPinning.call(() -> settingsService.enableNotifications(true))
+                    .flatMap(responseBody -> updateNotifications(notificationType))
+                    .compose(RxUtil.applySchedulersToObservable());
         } else if (notifications.size() == 1
                 && ((notifications.contains(SettingsManager.NOTIFICATION_TYPE_EMAIL)
                 && notificationType == SettingsManager.NOTIFICATION_TYPE_SMS)
                 || (notifications.contains(SettingsManager.NOTIFICATION_TYPE_SMS)
                 && notificationType == SettingsManager.NOTIFICATION_TYPE_EMAIL))) {
             // Contains another type already, send "All"
-            return settingsService.enableNotifications(true)
-                    .flatMap(responseBody -> updateNotifications(SettingsManager.NOTIFICATION_TYPE_ALL));
+            return rxPinning.call(() -> settingsService.enableNotifications(true))
+                    .flatMap(responseBody -> updateNotifications(SettingsManager.NOTIFICATION_TYPE_ALL))
+                    .compose(RxUtil.applySchedulersToObservable());
         } else {
-            return settingsService.enableNotifications(true)
-                    .flatMap(responseBody -> fetchSettings());
+            return rxPinning.call(() -> settingsService.enableNotifications(true))
+                    .flatMap(responseBody -> fetchSettings())
+                    .compose(RxUtil.applySchedulersToObservable());
         }
     }
 
@@ -124,25 +137,30 @@ public class SettingsDataManager {
     public Observable<Settings> disableNotification(int notificationType, List<Integer> notifications) {
         if (notifications.isEmpty() || notifications.contains(SettingsManager.NOTIFICATION_TYPE_NONE)) {
             // No notifications anyway, return Settings
-            return fetchSettings();
+            return rxPinning.call(this::fetchSettings)
+                    .compose(RxUtil.applySchedulersToObservable());
         } else if (notifications.contains(SettingsManager.NOTIFICATION_TYPE_ALL)
                 || (notifications.contains(SettingsManager.NOTIFICATION_TYPE_EMAIL)
                 && notifications.contains(SettingsManager.NOTIFICATION_TYPE_SMS))) {
             // All types enabled, disable passed type and enable other
             return updateNotifications(notificationType == SettingsManager.NOTIFICATION_TYPE_EMAIL
-                    ? SettingsManager.NOTIFICATION_TYPE_SMS : SettingsManager.NOTIFICATION_TYPE_EMAIL);
+                    ? SettingsManager.NOTIFICATION_TYPE_SMS : SettingsManager.NOTIFICATION_TYPE_EMAIL)
+                    .compose(RxUtil.applySchedulersToObservable());
         } else if (notifications.size() == 1) {
             if (notifications.get(0).equals(notificationType)) {
                 // Remove all
-                return settingsService.enableNotifications(false)
-                        .flatMap(responseBody -> updateNotifications(SettingsManager.NOTIFICATION_TYPE_NONE));
+                return rxPinning.call(() -> settingsService.enableNotifications(false))
+                        .flatMap(responseBody -> updateNotifications(SettingsManager.NOTIFICATION_TYPE_NONE))
+                        .compose(RxUtil.applySchedulersToObservable());
             } else {
                 // Notification type not present, no need to remove it
-                return fetchSettings();
+                return rxPinning.call(this::fetchSettings)
+                        .compose(RxUtil.applySchedulersToObservable());
             }
         } else {
             // This should never be reached
-            return fetchSettings();
+            return rxPinning.call(this::fetchSettings)
+                    .compose(RxUtil.applySchedulersToObservable());
         }
     }
 
@@ -154,8 +172,9 @@ public class SettingsDataManager {
      * @see SettingsManager for notification types
      */
     private Observable<Settings> updateNotifications(int notificationType) {
-        return settingsService.updateNotifications(notificationType)
-                .flatMap(responseBody -> fetchSettings());
+        return rxPinning.call(() -> settingsService.updateNotifications(notificationType))
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -164,8 +183,7 @@ public class SettingsDataManager {
      * @return A {@link Observable<Settings>} object
      */
     private Observable<Settings> fetchSettings() {
-        return settingsService.getSettings()
-                .compose(RxUtil.applySchedulersToObservable());
+        return settingsService.getSettings();
     }
 
 }

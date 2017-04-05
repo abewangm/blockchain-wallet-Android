@@ -17,24 +17,9 @@ public class PendingTransaction {
     public BigInteger bigIntFee;
     public BigInteger bigIntAmount;
     public int addressToReceiveIndex;
+    public boolean isCustomFee;
 
     public boolean isHD() {
         return (sendingObject.accountObject instanceof Account);
-    }
-
-    @Override
-    public String toString() {
-        return "PendingTransaction{" +
-                "\nunspentOutputBundle.getAbsoluteFee()=" + unspentOutputBundle.getAbsoluteFee() +
-                "\nunspentOutputBundle.getConsumedAmount()=" + unspentOutputBundle.getConsumedAmount() +
-                "\nunspentOutputBundle.getSpendableOutputs().size()=" + unspentOutputBundle.getSpendableOutputs().size() +
-                ",\nsendingObject=" + sendingObject +
-                ",\nreceivingObject=" + receivingObject +
-                ",\nnote='" + note + '\'' +
-                ",\nreceivingAddress='" + receivingAddress + '\'' +
-                ",\nbigIntFee=" + bigIntFee +
-                ",\nbigIntAmount=" + bigIntAmount +
-                ",\naddressToReceiveIndex=" + addressToReceiveIndex +
-                '}';
     }
 }

@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.receive;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
-import android.content.Context;
 import android.graphics.Bitmap;
 
 import info.blockchain.wallet.payload.PayloadManager;
@@ -26,11 +25,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import javax.inject.Named;
+
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -43,6 +45,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
+import retrofit2.Retrofit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -357,7 +360,8 @@ public class ReceiveViewModelTest {
 
     private class MockApiModule extends ApiModule {
         @Override
-        protected SSLVerifyUtil provideSSlVerifyUtil(Context context) {
+        protected SSLVerifyUtil provideSSlVerifyUtil(@Named("server") Retrofit retrofit,
+                                                     RxBus rxBus) {
             return sslVerifyUtil;
         }
     }
@@ -377,7 +381,8 @@ public class ReceiveViewModelTest {
         }
 
         @Override
-        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager) {
+        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager,
+                                                               RxBus rxBus) {
             return payloadDataManager;
         }
     }

@@ -679,7 +679,7 @@ public class AccountEditViewModel extends BaseViewModel {
                 payloadDataManager.syncPayloadWithServer()
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .subscribe(() -> {
-                            payloadDataManager.updateBalancesAndTransactions()
+                            payloadDataManager.updateAllTransactions()
                                     .subscribe(new IgnorableDefaultObserver<>());
 
                             setArchive(isArchived);

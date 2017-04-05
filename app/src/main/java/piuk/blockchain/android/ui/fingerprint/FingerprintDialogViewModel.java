@@ -104,7 +104,7 @@ public class FingerprintDialogViewModel extends BaseViewModel implements Fingerp
 
     @Override
     public void onAuthenticated(@Nullable String data) {
-        dataListener.setIcon(R.drawable.ic_fingerprint_success);
+        dataListener.setIcon(R.drawable.vector_fingerprint_success);
         dataListener.setStatusTextColor(R.color.primary_blue_accent);
         dataListener.setStatusText(R.string.fingerprint_success);
         dataListener.onAuthenticated(data);
@@ -144,7 +144,7 @@ public class FingerprintDialogViewModel extends BaseViewModel implements Fingerp
     }
 
     private void setFailureState(@StringRes Integer status, @StringRes Integer description) {
-        dataListener.setIcon(R.drawable.ic_fingerprint_error);
+        dataListener.setIcon(R.drawable.vector_fingerprint_error);
         dataListener.setStatusTextColor(R.color.product_red_medium);
         if (status != null) dataListener.setStatusText(status);
         if (description != null) dataListener.setDescriptionText(description);

@@ -20,13 +20,13 @@ import static junit.framework.TestCase.assertEquals;
 @RunWith(RobolectricTestRunner.class)
 public class QrCodeDataManagerTest extends RxTest {
 
-    private QrCodeDataManager mSubject;
+    private QrCodeDataManager subject;
     private static final String TEST_URI = "bitcoin://1234567890";
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        mSubject = new QrCodeDataManager();
+        subject = new QrCodeDataManager();
     }
 
     @Test
@@ -34,7 +34,8 @@ public class QrCodeDataManagerTest extends RxTest {
         // Arrange
 
         // Act
-        TestObserver<Bitmap> observer = mSubject.generateQrCode(TEST_URI, 100).test();
+        TestObserver<Bitmap> observer = subject.generateQrCode(TEST_URI, 100).test();
+        getTestScheduler().triggerActions();
         // Assert
         Bitmap bitmap = observer.values().get(0);
         assertNotNull(bitmap);
@@ -42,26 +43,6 @@ public class QrCodeDataManagerTest extends RxTest {
         assertEquals(100, bitmap.getHeight());
         observer.assertComplete();
         observer.assertNoErrors();
-    }
-
-    @Test
-    public void generateQrCodeNullUri() throws Exception {
-        // Arrange
-
-        // Act
-        TestObserver<Bitmap> observer = mSubject.generateQrCode(null, 100).test();
-        // Assert
-        observer.assertError(Throwable.class);
-    }
-
-    @Test
-    public void generateQrCodeInvalidDimensions() throws Exception {
-        // Arrange
-
-        // Act
-        TestObserver<Bitmap> observer = mSubject.generateQrCode(TEST_URI, -1).test();
-        // Assert
-        observer.assertError(Throwable.class);
     }
 
 }

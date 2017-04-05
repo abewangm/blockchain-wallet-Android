@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.Nullable;
 
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.util.PrivateKeyFactory;
@@ -11,16 +10,21 @@ import org.bitcoinj.core.ECKey;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.services.PayloadService;
 
 public class AccountDataManager {
 
-    private PayloadManager payloadManager;
+    private PayloadService payloadService;
     private PrivateKeyFactory privateKeyFactory;
+    private RxPinning rxPinning;
 
-    public AccountDataManager(PayloadManager payloadManager, PrivateKeyFactory privateKeyFactory) {
-        this.payloadManager = payloadManager;
+    public AccountDataManager(PayloadService payloadService, PrivateKeyFactory privateKeyFactory, RxBus rxBus) {
+        this.payloadService = payloadService;
         this.privateKeyFactory = privateKeyFactory;
+        rxPinning = new RxPinning(rxBus);
     }
 
     /**
@@ -31,7 +35,7 @@ public class AccountDataManager {
      * @return An {@link Observable<Account>} wrapping the newly created Account
      */
     public Observable<Account> createNewAccount(String accountLabel, @Nullable String secondPassword) {
-        return Observable.fromCallable(() -> payloadManager.addAccount(accountLabel, secondPassword))
+        return rxPinning.call(() -> payloadService.createNewAccount(accountLabel, secondPassword))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -44,7 +48,7 @@ public class AccountDataManager {
      * @return An {@link Observable<Boolean>} representing a successful save
      */
     public Observable<LegacyAddress> setPrivateKey(ECKey key, @Nullable String secondPassword) {
-        return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword))
+        return rxPinning.call(() -> payloadService.setPrivateKey(key, secondPassword))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -55,7 +59,7 @@ public class AccountDataManager {
      * @param secondPassword An optional double encryption password
      */
     public Observable<LegacyAddress> setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword) {
-        return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword))
+        return rxPinning.call(() -> payloadService.setKeyForLegacyAddress(key, secondPassword))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -67,10 +71,8 @@ public class AccountDataManager {
      * @return {@link Observable<Boolean>} representing a successful save
      */
     public Completable updateLegacyAddress(LegacyAddress legacyAddress) {
-        return Completable.fromCallable(() -> {
-            payloadManager.addLegacyAddress(legacyAddress);
-            return Void.TYPE;
-        });
+        return rxPinning.call(() -> payloadService.updateLegacyAddress(legacyAddress))
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**

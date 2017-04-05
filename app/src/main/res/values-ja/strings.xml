@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">より高額な費用に同意する</string>
     <string name="large_tx_high_fee_warning">"この取引では少額の釣り銭金額が払い戻されるため、ダスト消費により高額な手数料が必要です。"</string>
 
-    <string name="transactions">取引</string>
+    <string name="overview">取引</string>
     <string name="invalid_password_too_short">3文字以上入力してください</string>
     <string name="change_pin_new_matches_current">新規PINに以前のPINを使うことはできません</string>
     <string name="account_locked_title">アカウントがロックされています</string>

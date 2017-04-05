@@ -8,61 +8,34 @@ import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest
-import info.blockchain.wallet.metadata.MetadataNodeFactory
 import info.blockchain.wallet.metadata.data.Message
-import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.subjects.PublishSubject
 import org.bitcoinj.crypto.DeterministicKey
 import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.contacts.ContactTransactionModel
+import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.services.ContactsService
 import piuk.blockchain.android.data.stores.PendingTransactionListStore
 import piuk.blockchain.android.equals
+import java.util.*
+import kotlin.test.assertNull
 
 class ContactsDataManagerTest : RxTest() {
 
     private lateinit var subject: ContactsDataManager
     private val mockContactsService: ContactsService = mock()
-    private val mockPayloadManager: PayloadManager = mock()
     private val mockPendingTransactionListStore: PendingTransactionListStore = mock()
+    private val mockRxBus: RxBus = mock()
 
     @Before
     @Throws(Exception::class)
     override fun setUp() {
         super.setUp()
 
-        subject = ContactsDataManager(mockContactsService, mockPayloadManager, mockPendingTransactionListStore)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun loadNodes() {
-        // Arrange
-        whenever(mockPayloadManager.loadNodes()).thenReturn(true)
-        // Act
-        val testObserver = subject.loadNodes().test()
-        // Assert
-        verify(mockPayloadManager).loadNodes()
-        testObserver.assertComplete()
-        testObserver.assertNoErrors()
-        testObserver.values()[0] equals true
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun generateNodes() {
-        // Arrange
-        val secondPassword = "SECOND_PASSWORD"
-        // Act
-        val testObserver = subject.generateNodes(secondPassword).test()
-        // Assert
-        verify(mockPayloadManager).generateNodes(secondPassword)
-        testObserver.assertComplete()
-        testObserver.assertNoErrors()
+        subject = ContactsDataManager(mockContactsService, mockPendingTransactionListStore, mockRxBus)
     }
 
     @Test
@@ -77,52 +50,6 @@ class ContactsDataManagerTest : RxTest() {
         val testObserver = subject.initContactsService(mockMetadataNode, mockSharedMetadataNode).test()
         // Assert
         verify(mockContactsService).initContactsService(mockMetadataNode, mockSharedMetadataNode)
-        testObserver.assertComplete()
-        testObserver.assertNoErrors()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun getMetadataNodeFactory() {
-        // Arrange
-        val mockMetadataNodeFactory: MetadataNodeFactory = mock()
-        whenever(mockPayloadManager.metadataNodeFactory).thenReturn(mockMetadataNodeFactory)
-        // Act
-        val testObserver = subject.metadataNodeFactory.test()
-        // Assert
-        testObserver.assertComplete()
-        testObserver.assertNoErrors()
-        testObserver.values()[0] equals mockMetadataNodeFactory
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun registerMdid() {
-        // Arrange
-        val mockMetadataNodeFactory: MetadataNodeFactory = mock()
-        val mockSharedMetadataNode: DeterministicKey = mock()
-        whenever(mockMetadataNodeFactory.sharedMetadataNode).thenReturn(mockSharedMetadataNode)
-        whenever(mockPayloadManager.metadataNodeFactory).thenReturn(mockMetadataNodeFactory)
-        // Act
-        val testObserver = subject.registerMdid().test()
-        // Assert
-        verify(mockPayloadManager).registerMdid(mockSharedMetadataNode)
-        testObserver.assertComplete()
-        testObserver.assertNoErrors()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun unregisterMdid() {
-        // Arrange
-        val mockMetadataNodeFactory: MetadataNodeFactory = mock()
-        val mockSharedMetadataNode: DeterministicKey = mock()
-        whenever(mockMetadataNodeFactory.sharedMetadataNode).thenReturn(mockSharedMetadataNode)
-        whenever(mockPayloadManager.metadataNodeFactory).thenReturn(mockMetadataNodeFactory)
-        // Act
-        val testObserver = subject.unregisterMdid().test()
-        // Assert
-        verify(mockPayloadManager).unregisterMdid(mockSharedMetadataNode)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
     }
@@ -395,6 +322,38 @@ class ContactsDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
+    fun sendPaymentDeclinedResponse() {
+        // Arrange
+        val mdid = "MDID"
+        val fctxId = "FCTX_ID"
+        whenever(mockContactsService.sendPaymentDeclinedResponse(mdid, fctxId))
+                .thenReturn(Completable.complete())
+        // Act
+        val testObserver = subject.sendPaymentDeclinedResponse(mdid, fctxId).test()
+        // Assert
+        verify(mockContactsService).sendPaymentDeclinedResponse(mdid, fctxId)
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun sendPaymentCancelledResponse() {
+        // Arrange
+        val mdid = "MDID"
+        val fctxId = "FCTX_ID"
+        whenever(mockContactsService.sendPaymentCancelledResponse(mdid, fctxId))
+                .thenReturn(Completable.complete())
+        // Act
+        val testObserver = subject.sendPaymentCancelledResponse(mdid, fctxId).test()
+        // Assert
+        verify(mockContactsService).sendPaymentCancelledResponse(mdid, fctxId)
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun fetchXpub() {
         // Arrange
         val mdid = "MDID"
@@ -477,22 +436,61 @@ class ContactsDataManagerTest : RxTest() {
     @Throws(Exception::class)
     fun refreshFacilitatedTransactions() {
         // Arrange
-        // Has completed transaction
-        val contact0 = Contact()
-        contact0.name = "contact0"
-        val facilitatedTransaction0 = FacilitatedTransaction()
-        facilitatedTransaction0.txHash = "TX_HASH"
+        // Has completed transaction, should be filtered out
+        val contact0 = Contact().apply { name = "contact0" }
+        val facilitatedTransaction0 = FacilitatedTransaction().apply {
+            txHash = "TX_HASH"
+            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+        }
         contact0.addFacilitatedTransaction(facilitatedTransaction0)
         // Has pending transaction, ie not completed
-        val contact1 = Contact()
-        contact1.name = "contact1"
-        val facilitatedTransaction1 = FacilitatedTransaction()
+        val contact1 = Contact().apply { name = "contact1" }
+        val facilitatedTransaction1 = FacilitatedTransaction().apply {
+            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+        }
         contact1.addFacilitatedTransaction(facilitatedTransaction1)
         // Has no transactions
-        val contact2 = Contact()
-        contact2.name = "contact2"
-        whenever(mockContactsService.contactList).thenReturn(
-                Observable.fromIterable(listOf(contact0, contact1, contact2)))
+        val contact2 = Contact().apply { name = "contact2" }
+        whenever(mockContactsService.contactList)
+                .thenReturn(Observable.fromIterable(listOf(contact0, contact1, contact2)))
+        // Act
+        val testObserver = subject.refreshFacilitatedTransactions().toList().test()
+        // Assert
+        verify(mockContactsService).contactList
+        verify(mockPendingTransactionListStore).insertTransaction(any<ContactTransactionModel>())
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.values()[0].size equals 1
+        val contactTransactionModel = testObserver.values()[0][0]
+        contactTransactionModel.contactName equals contact1.name
+        contactTransactionModel.facilitatedTransaction equals facilitatedTransaction1
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun refreshFacilitatedTransactionsFiltersOutDeclined() {
+        // Arrange
+        // Has declined transaction - should be filtered out
+        val contact0 = Contact().apply { name = "contact0" }
+        val facilitatedTransaction0 = FacilitatedTransaction().apply {
+            txHash = "TX_HASH"
+            state = FacilitatedTransaction.STATE_DECLINED
+        }
+        contact0.addFacilitatedTransaction(facilitatedTransaction0)
+        // Has pending transaction, ie not completed
+        val contact1 = Contact().apply { name = "contact1" }
+        val facilitatedTransaction1 = FacilitatedTransaction().apply {
+            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+        }
+        contact1.addFacilitatedTransaction(facilitatedTransaction1)
+        // Has cancelled transaction, should be filtered out
+        val contact2 = Contact().apply { name = "contact2" }
+        val facilitatedTransaction2 = FacilitatedTransaction().apply {
+            state = FacilitatedTransaction.STATE_CANCELLED
+        }
+        contact2.addFacilitatedTransaction(facilitatedTransaction2)
+        whenever(mockContactsService.contactList)
+                .thenReturn(Observable.fromIterable(listOf(contact0, contact1, contact2)))
         // Act
         val testObserver = subject.refreshFacilitatedTransactions().toList().test()
         // Assert
@@ -551,6 +549,31 @@ class ContactsDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
+    fun getContactFromFctxIdNotFound() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val facilitatedTransaction0 = FacilitatedTransaction()
+        val facilitatedTransaction1 = FacilitatedTransaction()
+        val facilitatedTransaction2 = FacilitatedTransaction()
+        val contact0 = Contact()
+        contact0.addFacilitatedTransaction(facilitatedTransaction0)
+        contact0.addFacilitatedTransaction(facilitatedTransaction1)
+        contact0.addFacilitatedTransaction(facilitatedTransaction2)
+        val contact1 = Contact()
+        val contact2 = Contact()
+        whenever(mockContactsService.contactList)
+                .thenReturn(Observable.fromIterable(listOf(contact0, contact1, contact2)))
+        // Act
+        val testObserver = subject.getContactFromFctxId(fctxId).test()
+        // Assert
+        verify(mockContactsService).contactList
+        testObserver.assertError(NoSuchElementException::class.java)
+        testObserver.assertNotComplete()
+        testObserver.assertNoValues()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun deleteFacilitatedTransaction() {
         // Arrange
         val mdid = "MDID"
@@ -573,6 +596,31 @@ class ContactsDataManagerTest : RxTest() {
         val result = subject.getContactsTransactionMap()
         // Assert
         result equals subject.contactsTransactionMap
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun getNotesTransactionMap() {
+        // Arrange
+
+        // Act
+        val result = subject.getNotesTransactionMap()
+        // Assert
+        result equals subject.notesTransactionMap
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun resetContacts() {
+        // Arrange
+
+        // Act
+        subject.resetContacts()
+        // Assert
+        verify(mockPendingTransactionListStore).clearList()
+        verify(mockContactsService).destroy()
+        subject.notesTransactionMap.size equals 0
+        subject.contactsTransactionMap.size equals 0
     }
 
 }

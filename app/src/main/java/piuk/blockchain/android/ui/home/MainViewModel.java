@@ -27,6 +27,7 @@ import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
@@ -35,12 +36,12 @@ import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
+import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
-import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
@@ -53,7 +54,6 @@ public class MainViewModel extends BaseViewModel {
 
     private DataListener dataListener;
     private OSUtil osUtil;
-    private MonetaryUtil monetaryUtil;
     private Observable<NotificationPayload> notificationObservable;
     @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
@@ -66,6 +66,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected Context applicationContext;
     @Inject protected StringUtils stringUtils;
     @Inject protected SettingsDataManager settingsDataManager;
+    @Inject protected OnboardingDataManager onboardingDataManager;
     @Inject protected DynamicFeeCache dynamicFeeCache;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
     @Inject protected RxBus rxBus;
@@ -97,8 +98,6 @@ public class MainViewModel extends BaseViewModel {
 
         void kickToLauncherPage();
 
-        void showEmailVerificationDialog(String email);
-
         void showAddEmailDialog();
 
         void showProgressDialog(@StringRes int message);
@@ -115,8 +114,6 @@ public class MainViewModel extends BaseViewModel {
 
         void showBroadcastSuccessDialog();
 
-        void showPaymentMismatchDialog(@StringRes int message);
-
         void updateCurrentPrice(String price);
     }
 
@@ -124,7 +121,6 @@ public class MainViewModel extends BaseViewModel {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
         osUtil = new OSUtil(applicationContext);
-        monetaryUtil = new MonetaryUtil(getCurrentBitcoinFormat());
     }
 
     @Override
@@ -140,8 +136,6 @@ public class MainViewModel extends BaseViewModel {
     }
 
     void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
-        dataListener.showProgressDialog(R.string.contacts_broadcasting_payment);
-
         compositeDisposable.add(
                 // Get contacts
                 contactsDataManager.getContactList()
@@ -151,25 +145,15 @@ public class MainViewModel extends BaseViewModel {
                         .flatMap(contact -> Observable.just(contact.getFacilitatedTransactions().get(facilitatedTxId)))
                         // Check the payment value was appropriate
                         .flatMapCompletable(transaction -> {
-                            // Too much sent
-                            if (transactionValue > transaction.getIntendedAmount()) {
-                                dataListener.showPaymentMismatchDialog(R.string.contacts_too_much_sent);
-                                return Completable.complete();
-                                // Too little sent
-                            } else if (transactionValue < transaction.getIntendedAmount()) {
-                                dataListener.showPaymentMismatchDialog(R.string.contacts_too_little_sent);
-                                return Completable.complete();
-                                // Correct amount sent
-                            } else {
-                                // Broadcast payment to shared metadata service
-                                return contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
-                                        // Show successfully broadcast
-                                        .doOnComplete(() -> dataListener.showBroadcastSuccessDialog())
-                                        // Show retry dialog if broadcast failed
-                                        .doOnError(throwable -> dataListener.showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
-                            }
+                            // Broadcast payment to shared metadata service
+                            return contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
+                                    // Show successfully broadcast
+                                    .doOnComplete(() -> dataListener.showBroadcastSuccessDialog())
+                                    // Show retry dialog if broadcast failed
+                                    .doOnError(throwable -> dataListener.showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
                         })
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
+                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.contacts_broadcasting_payment))
                         .subscribe(
                                 () -> {
                                     // No-op
@@ -180,7 +164,7 @@ public class MainViewModel extends BaseViewModel {
 
     void checkForMessages() {
         compositeDisposable.add(
-                contactsDataManager.loadNodes()
+                payloadDataManager.loadNodes()
                         .flatMapCompletable(
                                 success -> {
                                     if (success) {
@@ -228,10 +212,11 @@ public class MainViewModel extends BaseViewModel {
 
     }
 
-    void unpair() {
+    void unPair() {
         dataListener.clearAllDynamicShortcuts();
         payloadManager.wipe();
         prefs.logOut();
+        accessState.unpairWallet();
         appUtil.restartApp();
         accessState.setPIN(null);
     }
@@ -266,20 +251,21 @@ public class MainViewModel extends BaseViewModel {
         }
 
         final String finalUri = uri;
-        if (finalUri != null || fromNotification)
+        if (finalUri != null || fromNotification) {
             dataListener.showProgressDialog(R.string.please_wait);
+        }
 
         final boolean finalFromNotification = fromNotification;
 
         compositeDisposable.add(
-                contactsDataManager.loadNodes()
+                payloadDataManager.loadNodes()
                         .flatMap(loaded -> {
                             if (loaded) {
-                                return contactsDataManager.getMetadataNodeFactory();
+                                return payloadDataManager.getMetadataNodeFactory();
                             } else {
                                 if (!payloadManager.getPayload().isDoubleEncryption()) {
-                                    return contactsDataManager.generateNodes(null)
-                                            .andThen(contactsDataManager.getMetadataNodeFactory());
+                                    return payloadDataManager.generateNodes(null)
+                                            .andThen(payloadDataManager.getMetadataNodeFactory());
                                 } else {
                                     throw new InvalidCredentialsException("Payload is double encrypted");
                                 }
@@ -288,47 +274,53 @@ public class MainViewModel extends BaseViewModel {
                         .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
                                 metadataNodeFactory.getMetadataNode(),
                                 metadataNodeFactory.getSharedMetadataNode()))
-                        .andThen(contactsDataManager.registerMdid())
-                        .andThen(contactsDataManager.publishXpub())
                         .doOnComplete(() -> rxBus.emitEvent(ContactsEvent.class, ContactsEvent.INIT))
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
-                        .subscribe(() -> {
-                            if (finalUri != null) {
-                                dataListener.onStartContactsActivity(finalUri);
-                            } else if (finalFromNotification) {
-                                dataListener.onStartContactsActivity(null);
-                            } else {
-                                checkForMessages();
-                            }
-                        }, throwable -> {
-                            //noinspection StatementWithEmptyBody
-                            if (throwable instanceof InvalidCredentialsException) {
-                                // Double encrypted and not previously set up, ignore error
-                            } else {
-                                dataListener.showContactsRegistrationFailure();
-                            }
-                        }));
+                        .subscribe(
+                                () -> registerMdid(finalUri, finalFromNotification),
+                                throwable -> {
+                                    //noinspection StatementWithEmptyBody
+                                    if (throwable instanceof InvalidCredentialsException) {
+                                        // Double encrypted and not previously set up, ignore error
+                                    } else {
+                                        dataListener.showContactsRegistrationFailure();
+                                    }
+                                }));
 
         notificationTokenManager.resendNotificationToken();
     }
 
+    // TODO: 30/03/2017 Move this into the registerNodeForMetaDataService function
+    private void registerMdid(@Nullable String uri, boolean fromNotification) {
+        compositeDisposable.add(
+                payloadDataManager.registerMdid()
+                        .flatMapCompletable(responseBody -> contactsDataManager.publishXpub())
+                        .subscribe(() -> {
+                            if (uri != null) {
+                                dataListener.onStartContactsActivity(uri);
+                            } else if (fromNotification) {
+                                dataListener.onStartContactsActivity(null);
+                            } else {
+                                checkForMessages();
+                            }
+                        }, throwable -> dataListener.showContactsRegistrationFailure()));
+    }
+
     private void checkIfShouldShowEmailVerification() {
-        if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
-            compositeDisposable.add(
-                    getSettingsApi()
-                            .compose(RxUtil.applySchedulersToObservable())
-                            .subscribe(settings -> {
-                                if (settings.isEmailVerified()) {
-                                    appUtil.setNewlyCreated(false);
-                                    String email = settings.getEmail();
-                                    if (email != null && !email.isEmpty()) {
-                                        dataListener.showEmailVerificationDialog(email);
-                                    } else {
+        compositeDisposable.add(
+                getSettingsApi()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(settings -> {
+                            if (!settings.isEmailVerified()) {
+                                appUtil.setNewlyCreated(false);
+                                String email = settings.getEmail();
+                                if (email == null || email.isEmpty()) {
+                                    if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
                                         dataListener.showAddEmailDialog();
                                     }
                                 }
-                            }, Throwable::printStackTrace));
-        }
+                            }
+                        }, Throwable::printStackTrace));
     }
 
     private Observable<Settings> getSettingsApi() {
@@ -363,7 +355,8 @@ public class MainViewModel extends BaseViewModel {
                         logEvents();
                         return Void.TYPE;
                     }).compose(RxUtil.applySchedulersToCompletable())
-                            .subscribe(() -> {
+                            .andThen(onboardingDataManager.getIfSepaCountry())
+                            .doAfterTerminate(() -> {
                                 if (dataListener != null) {
                                     dataListener.onFetchTransactionCompleted();
                                 }
@@ -373,7 +366,14 @@ public class MainViewModel extends BaseViewModel {
                                     prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
                                     dataListener.onScanInput(strUri);
                                 }
-                            }));
+                            })
+                            .subscribe(
+                                    sepaCountry -> {
+                                        if (sepaCountry) enableBuySell();
+                                    },
+                                    throwable -> {
+                                        Log.e(TAG, "preLaunchChecks: ", throwable);
+                                    }));
         } else {
             // This should never happen, but handle the scenario anyway by starting the launcher
             // activity, which handles all login/auth/corruption scenarios itself
@@ -387,6 +387,10 @@ public class MainViewModel extends BaseViewModel {
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(feeList -> dynamicFeeCache.setCachedDynamicFee(feeList),
                                 Throwable::printStackTrace));
+    }
+
+    private void enableBuySell() {
+        // TODO: 04/04/2017 Display buy/sell hints in various places
     }
 
     @Override
@@ -404,31 +408,14 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private String getFormattedPriceString() {
-        monetaryUtil.updateUnit(getCurrentBitcoinFormat());
         String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
         double lastPrice = exchangeRateFactory.getLastPrice(fiat);
         String fiatSymbol = exchangeRateFactory.getSymbol(fiat);
         DecimalFormat format = new DecimalFormat();
         format.setMinimumFractionDigits(2);
-
-        switch (getCurrentBitcoinFormat()) {
-            case MonetaryUtil.MICRO_BTC:
-                return stringUtils.getFormattedString(
-                        R.string.current_price_bits,
-                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
-            case MonetaryUtil.MILLI_BTC:
-                return stringUtils.getFormattedString(
-                        R.string.current_price_millibits,
-                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
-            default:
-                return stringUtils.getFormattedString(
-                        R.string.current_price_btc,
-                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
-        }
-    }
-
-    private int getCurrentBitcoinFormat() {
-        return prefs.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
+        return stringUtils.getFormattedString(
+                R.string.current_price_btc,
+                fiatSymbol + format.format(lastPrice));
     }
 
     private void startWebSocketService() {
@@ -445,7 +432,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void logEvents() {
-        EventService handler = new EventService(prefs, new WalletApi());
+        EventService handler = new EventService(prefs, new WalletService(new WalletApi()));
         handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncryption());
         handler.logBackupEvent(payloadManager.getPayload().getHdWallets().get(0).isMnemonicVerified());
 
