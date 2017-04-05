@@ -117,11 +117,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             }
 
             if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
-                startReceiveFragment();
+                binding.bottomNavigation.setCurrentItem(2);
             }
 
             if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
-                ToastCustom.makeText(getActivity(), "Coming soon", ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
+                ToastCustom.makeText(getActivity(), "Buy Bitcoin coming soon!", ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
 //                startBuyActivity();
             }
         }

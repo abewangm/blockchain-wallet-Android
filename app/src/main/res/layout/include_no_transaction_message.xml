@@ -30,6 +30,9 @@
                 android:layout_height="match_parent"
                 android:background="@color/white"
                 android:gravity="center_horizontal"
+                android:paddingLeft="72dp"
+                android:paddingRight="72dp"
+                android:paddingBottom="72dp"
                 android:orientation="vertical">
 
                 <TextView
@@ -49,13 +52,21 @@
                     fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="72dp"
-                    android:layout_marginRight="72dp"
                     android:layout_marginTop="8dp"
                     android:alpha="0.8"
                     android:gravity="center_horizontal"
                     android:text="@string/transaction_occur_when"
                     android:textColor="@color/primary_gray_dark" />
+
+                <Button
+                    android:id="@+id/button_get_bitcoin"
+                    style="@style/ButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/get_bitcoin"
+                    android:theme="@style/ButtonLightBlueTheme" />
 
             </LinearLayout>
         </LinearLayout>

@@ -401,6 +401,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 R.color.product_green_medium,
                 R.color.primary_blue_medium,
                 R.color.product_red_medium);
+
+        binding.noTransactionInclude.buttonGetBitcoin.setOnClickListener(v -> viewModel.getBitcoinClicked());
     }
 
     @Override
@@ -446,20 +448,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         transactionAdapter.onTransactionsUpdated(newTransactions);
 
         //Display help text to user if no transactionList on selected account/address
-        if (!viewModel.getTransactionList().isEmpty()) {
-            binding.swipeContainer.setVisibility(View.VISIBLE);
-            binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.GONE);
-        } else {
-            binding.swipeContainer.setVisibility(View.GONE);
-            binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.VISIBLE);
-
-            if(!viewModel.isOnboardingComplete()) {
-                initOnboardingPager();
-            } else {
-                binding.noTransactionInclude.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.GONE);
-                binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
-            }
-        }
+        handleTransactionsVisibility();
 
         accountsAdapter.notifyBtcChanged(isBTC);
         binding.rvTransactions.scrollToPosition(0);
@@ -482,6 +471,23 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         }
         binding.rvTransactions.removeItemDecoration(spacerDecoration);
         binding.rvTransactions.addItemDecoration(spacerDecoration);
+    }
+
+    private void handleTransactionsVisibility() {
+        if (!viewModel.getTransactionList().isEmpty()) {
+            binding.swipeContainer.setVisibility(View.VISIBLE);
+            binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.GONE);
+        } else {
+            binding.swipeContainer.setVisibility(View.GONE);
+            binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.VISIBLE);
+
+            if(!viewModel.isOnboardingComplete()) {
+                initOnboardingPager();
+            } else {
+                binding.noTransactionInclude.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.GONE);
+                binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
+            }
+        }
     }
 
     @Override
@@ -690,5 +696,17 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void onPageScrollStateChanged(int state) {
         //noop
+    }
+
+    @Override
+    public void startBuyActivity() {
+        Intent intent = new Intent(MainActivity.ACTION_BUY);
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+    }
+
+    @Override
+    public void startReceiveFragment() {
+        Intent intent = new Intent(MainActivity.ACTION_RECEIVE);
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
     }
 }
