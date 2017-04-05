@@ -707,7 +707,7 @@ public class BalanceViewModel extends BaseViewModel {
 
         ArrayList<OnboardingPagerContent> pages = new ArrayList<>();
 
-        if(onboardingDataManager.isSEPA()) {
+        if(onboardingDataManager.isSepa()) {
             pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_current_price)
                     ,getFormattedPriceString()
                     ,stringUtils.getString(R.string.onboarding_buy_content)

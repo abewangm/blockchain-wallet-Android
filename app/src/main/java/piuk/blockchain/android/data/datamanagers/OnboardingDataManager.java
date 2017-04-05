@@ -24,7 +24,7 @@ public class OnboardingDataManager {
      * Returns whether or not a user is accessing their wallet from a SEPA country, ie should be
      * able to see buy/sell prompts.
      */
-    public boolean isSEPA() {
+    public boolean isSepa() {
         return accessState.getInSepaCountry();
     }
 
