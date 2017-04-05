@@ -216,6 +216,7 @@ public class MainViewModel extends BaseViewModel {
         dataListener.clearAllDynamicShortcuts();
         payloadManager.wipe();
         prefs.logOut();
+        accessState.unpairWallet();
         appUtil.restartApp();
         accessState.setPIN(null);
     }
@@ -355,21 +356,23 @@ public class MainViewModel extends BaseViewModel {
                         return Void.TYPE;
                     }).compose(RxUtil.applySchedulersToCompletable())
                             .andThen(onboardingDataManager.getIfSepaCountry())
+                            .doAfterTerminate(() -> {
+                                if (dataListener != null) {
+                                    dataListener.onFetchTransactionCompleted();
+                                }
+
+                                if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
+                                    String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
+                                    prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
+                                    dataListener.onScanInput(strUri);
+                                }
+                            })
                             .subscribe(
                                     sepaCountry -> {
                                         if (sepaCountry) enableBuySell();
                                     },
-                                    throwable -> Log.e(TAG, "preLaunchChecks: ", throwable),
-                                    () -> {
-                                        if (dataListener != null) {
-                                            dataListener.onFetchTransactionCompleted();
-                                        }
-
-                                        if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
-                                            String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
-                                            prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
-                                            dataListener.onScanInput(strUri);
-                                        }
+                                    throwable -> {
+                                        Log.e(TAG, "preLaunchChecks: ", throwable);
                                     }));
         } else {
             // This should never happen, but handle the scenario anyway by starting the launcher

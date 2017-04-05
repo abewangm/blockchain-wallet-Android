@@ -63,13 +63,15 @@ public class ApiModule {
     @Singleton
     protected NotificationTokenManager provideNotificationTokenManager(AccessState accessState,
                                                                        PayloadManager payloadManager,
-                                                                       PrefsUtil prefsUtil) {
+                                                                       PrefsUtil prefsUtil,
+                                                                       RxBus rxBus) {
 
         return new NotificationTokenManager(
                 new NotificationService(new WalletApi()),
                 accessState,
                 payloadManager,
-                prefsUtil);
+                prefsUtil,
+                rxBus);
     }
 
     // TODO: 09/02/2017 This should be moved to DataManagerModule eventually

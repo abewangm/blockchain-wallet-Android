@@ -96,6 +96,17 @@ class ContactsServiceTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
+    fun destroy() {
+        // Arrange
+
+        // Act
+        subject.destroy()
+        // Assert
+        verify(mockContacts).destroy()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun getContactList() {
         // Arrange
         val map = HashMap<String, Contact>()

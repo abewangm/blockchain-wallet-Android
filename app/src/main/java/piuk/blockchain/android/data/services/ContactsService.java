@@ -99,6 +99,13 @@ public class ContactsService {
     }
 
     /**
+     * Resets the {@link Contacts} object to prevent issues when logging in/out.
+     */
+    public void destroy() {
+        contacts.destroy();
+    }
+
+    /**
      * Returns a stream of {@link Contact} objects, comprising a list of users. List can be empty.
      *
      * @return A stream of {@link Contact} objects
