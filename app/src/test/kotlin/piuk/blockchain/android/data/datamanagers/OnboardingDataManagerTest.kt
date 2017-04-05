@@ -14,32 +14,32 @@ import piuk.blockchain.android.equals
 class OnboardingDataManagerTest: RxTest() {
 
     private lateinit var subject: OnboardingDataManager
-    private val settingsDataManager: SettingsDataManager = mock()
-    private val authDataManager: AuthDataManager = mock()
-    private val payloadDataManager: PayloadDataManager = mock(defaultAnswer = RETURNS_DEEP_STUBS)
-    private val accessState: AccessState = mock()
+    private val mockSettingsDataManager: SettingsDataManager = mock()
+    private val mockAuthDataManager: AuthDataManager = mock()
+    private val mockPayloadDataManager: PayloadDataManager = mock(defaultAnswer = RETURNS_DEEP_STUBS)
+    private val mockAccessState: AccessState = mock()
 
     @Before
     @Throws(Exception::class)
     override fun setUp() {
         super.setUp()
 
-        subject = OnboardingDataManager(settingsDataManager,
-                authDataManager,
-                payloadDataManager,
-                accessState)
+        subject = OnboardingDataManager(mockSettingsDataManager,
+                mockAuthDataManager,
+                mockPayloadDataManager,
+                mockAccessState)
     }
 
     @Test
     @Throws(Exception::class)
     fun isSEPA() {
         // Arrange
-        whenever(accessState.inSepaCountry).thenReturn(true)
+        whenever(mockAccessState.inSepaCountry).thenReturn(true)
         // Act
         val result = subject.isSepa
         // Assert
-        verify(accessState).inSepaCountry
-        verifyNoMoreInteractions(accessState)
+        verify(mockAccessState).inSepaCountry
+        verifyNoMoreInteractions(mockAccessState)
         result equals true
     }
 
@@ -51,24 +51,24 @@ class OnboardingDataManagerTest: RxTest() {
         val mockSettings: Settings = mock()
         val guid = "GUID"
         val sharedKey = "SHARED_KEY"
-        whenever(authDataManager.walletOptions).thenReturn(Observable.just(mockWalletOptions))
-        whenever(payloadDataManager.wallet.guid).thenReturn(guid)
-        whenever(payloadDataManager.wallet.sharedKey).thenReturn(sharedKey)
-        whenever(settingsDataManager.initSettings(guid, sharedKey))
+        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(mockWalletOptions))
+        whenever(mockPayloadDataManager.wallet.guid).thenReturn(guid)
+        whenever(mockPayloadDataManager.wallet.sharedKey).thenReturn(sharedKey)
+        whenever(mockSettingsDataManager.initSettings(guid, sharedKey))
                 .thenReturn(Observable.just(mockSettings))
         whenever(mockWalletOptions.buySellCountries).thenReturn(listOf("GB"))
         whenever(mockSettings.countryCode).thenReturn("GB")
         // Act
         val testObserver = subject.ifSepaCountry.test()
         // Assert
-        verify(authDataManager).walletOptions
-        verifyNoMoreInteractions(authDataManager)
-        verify(payloadDataManager, atLeastOnce()).wallet
-        verifyNoMoreInteractions(payloadDataManager)
-        verify(settingsDataManager).initSettings(guid, sharedKey)
-        verifyNoMoreInteractions(settingsDataManager)
-        verify(accessState).inSepaCountry = true
-        verifyNoMoreInteractions(accessState)
+        verify(mockAuthDataManager).walletOptions
+        verifyNoMoreInteractions(mockAuthDataManager)
+        verify(mockPayloadDataManager, atLeastOnce()).wallet
+        verifyNoMoreInteractions(mockPayloadDataManager)
+        verify(mockSettingsDataManager).initSettings(guid, sharedKey)
+        verifyNoMoreInteractions(mockSettingsDataManager)
+        verify(mockAccessState).inSepaCountry = true
+        verifyNoMoreInteractions(mockAccessState)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
         testObserver.assertValue(true)

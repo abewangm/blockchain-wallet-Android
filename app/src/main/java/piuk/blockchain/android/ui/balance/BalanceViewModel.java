@@ -30,6 +30,7 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AuthEvent;
 import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
@@ -39,8 +40,6 @@ import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
-import piuk.blockchain.android.ui.home.MainActivity;
-import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
@@ -49,6 +48,8 @@ import piuk.blockchain.android.ui.account.ConsolidatedAccount.Type;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.home.MainActivity;
+import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -67,6 +68,7 @@ public class BalanceViewModel extends BaseViewModel {
     private Observable<ContactsEvent> contactsEventObservable;
     private Observable<NotificationPayload> notificationObservable;
     private Observable<List> txListObservable;
+    private Observable<AuthEvent> authEventObservable;
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
     private List<Object> displayList;
@@ -204,6 +206,13 @@ public class BalanceViewModel extends BaseViewModel {
 
         contactsEventObservable = rxBus.register(ContactsEvent.class);
         contactsEventObservable.subscribe(contactsEvent -> refreshFacilitatedTransactions());
+
+        authEventObservable = rxBus.register(AuthEvent.class);
+        authEventObservable.subscribe(authEvent -> {
+            displayList.clear();
+            transactionListDataManager.clearTransactionList();
+            contactsDataManager.resetContacts();
+        });
 
         notificationObservable = rxBus.register(NotificationPayload.class);
         notificationObservable
@@ -703,6 +712,7 @@ public class BalanceViewModel extends BaseViewModel {
         rxBus.unregister(ContactsEvent.class, contactsEventObservable);
         rxBus.unregister(NotificationPayload.class, notificationObservable);
         rxBus.unregister(List.class, txListObservable);
+        rxBus.unregister(AuthEvent.class, authEventObservable);
         super.destroy();
     }
 
@@ -710,33 +720,33 @@ public class BalanceViewModel extends BaseViewModel {
 
         ArrayList<OnboardingPagerContent> pages = new ArrayList<>();
 
-        if(onboardingDataManager.isSepa()) {
-            pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_current_price)
-                    ,getFormattedPriceString()
-                    ,stringUtils.getString(R.string.onboarding_buy_content)
-                    ,stringUtils.getString(R.string.buy_bitcoin)
-                    , MainActivity.ACTION_BUY
-                    ,R.color.primary_blue_accent
-                    ,R.drawable.vector_buy));
+        if (onboardingDataManager.isSepa()) {
+            pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_current_price),
+                    getFormattedPriceString(),
+                    stringUtils.getString(R.string.onboarding_buy_content),
+                    stringUtils.getString(R.string.buy_bitcoin),
+                    MainActivity.ACTION_BUY,
+                    R.color.primary_blue_accent,
+                    R.drawable.vector_buy));
         }
 
         //Receive bitcoin
-        pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_receive_bitcoin)
-                ,""
-                ,stringUtils.getString(R.string.onboarding_receive_content)
-                ,stringUtils.getString(R.string.receive_bitcoin)
-                , MainActivity.ACTION_RECEIVE
-                ,R.color.secondary_teal_medium
-                ,R.drawable.vector_receive));
+        pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_receive_bitcoin),
+                "",
+                stringUtils.getString(R.string.onboarding_receive_content),
+                stringUtils.getString(R.string.receive_bitcoin),
+                MainActivity.ACTION_RECEIVE,
+                R.color.secondary_teal_medium,
+                R.drawable.vector_receive));
 
         //QR Codes
-        pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_qr_codes)
-                ,""
-                ,stringUtils.getString(R.string.onboarding_qr_codes_content)
-                ,stringUtils.getString(R.string.onboarding_scan_address)
-                , MainActivity.ACTION_SEND
-                ,R.color.primary_navy_medium
-                ,R.drawable.icon_qrcode));
+        pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_qr_codes),
+                "",
+                stringUtils.getString(R.string.onboarding_qr_codes_content),
+                stringUtils.getString(R.string.onboarding_scan_address),
+                MainActivity.ACTION_SEND,
+                R.color.primary_navy_medium,
+                R.drawable.icon_qrcode));
         return pages;
     }
 
