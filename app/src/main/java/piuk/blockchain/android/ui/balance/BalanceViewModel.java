@@ -136,6 +136,9 @@ public class BalanceViewModel extends BaseViewModel {
 
         void showTransactionCancelDialog(String fctxId);
 
+        void startBuyActivity();
+
+        void startReceiveFragment();
     }
 
     public BalanceViewModel(DataListener dataListener) {
@@ -754,5 +757,13 @@ public class BalanceViewModel extends BaseViewModel {
 
     public void setOnboardingComplete(boolean competed) {
         prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, competed);
+    }
+
+    public void getBitcoinClicked() {
+        if(onboardingDataManager.isSepa()) {
+            dataListener.startBuyActivity();
+        } else {
+            dataListener.startReceiveFragment();
+        }
     }
 }
