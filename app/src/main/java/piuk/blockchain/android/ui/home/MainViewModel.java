@@ -26,8 +26,8 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
-import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
@@ -66,7 +66,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected Context applicationContext;
     @Inject protected StringUtils stringUtils;
     @Inject protected SettingsDataManager settingsDataManager;
-    @Inject protected AuthDataManager authDataManager;
+    @Inject protected OnboardingDataManager onboardingDataManager;
     @Inject protected DynamicFeeCache dynamicFeeCache;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
     @Inject protected RxBus rxBus;
@@ -354,19 +354,12 @@ public class MainViewModel extends BaseViewModel {
                         logEvents();
                         return Void.TYPE;
                     }).compose(RxUtil.applySchedulersToCompletable())
-                            .andThen(authDataManager.getWalletOptions())
-                            .flatMap(walletOptions -> settingsDataManager.initSettings(
-                                    payloadDataManager.getWallet().getGuid(),
-                                    payloadDataManager.getWallet().getSharedKey())
-                                    .doOnNext(settings -> {
-                                        if (walletOptions.getBuySellCountries().contains(settings.getCountryCode())) {
-                                            enableBuySell();
-                                        }
-                                    }))
+                            .andThen(onboardingDataManager.getIfSepaCountry())
                             .subscribe(
-                                    settings -> {
-                                        // No-op
-                                    }, throwable -> Log.e(TAG, "preLaunchChecks: ", throwable),
+                                    sepaCountry -> {
+                                        if (sepaCountry) enableBuySell();
+                                    },
+                                    throwable -> Log.e(TAG, "preLaunchChecks: ", throwable),
                                     () -> {
                                         if (dataListener != null) {
                                             dataListener.onFetchTransactionCompleted();
