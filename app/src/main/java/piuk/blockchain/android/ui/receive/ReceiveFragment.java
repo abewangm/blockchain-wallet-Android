@@ -156,10 +156,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((BaseAuthActivity) getActivity()).setupToolbar(
                     ((MainActivity) getActivity()).getSupportActionBar(), R.string.receive_bitcoin);
-
-            ViewUtils.setElevation(
-                    getActivity().findViewById(R.id.appbar_layout),
-                    ViewUtils.convertDpToPixel(5F, getContext()));
         } else {
             finishPage();
         }

@@ -9,7 +9,6 @@ import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -21,6 +20,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -66,7 +66,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public static final int SHOW_BTC = 1;
     private static final int SHOW_FIAT = 2;
     private int balanceDisplayState = SHOW_BTC;
-    public int balanceBarHeight;
     private BalanceHeaderAdapter accountsAdapter;
     private MaterialProgressDialog progressDialog;
     private BottomSpacerDecoration spacerDecoration;
@@ -80,7 +79,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Thunk FragmentBalanceBinding binding;
     @Thunk BalanceViewModel viewModel;
-    @Thunk AppBarLayout appBarLayout;
 
     public BalanceFragment() {
         // Required empty constructor
@@ -118,8 +116,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         balanceDisplayState = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
         isBTC = balanceDisplayState != SHOW_FIAT;
 
-        balanceBarHeight = (int) getResources().getDimension(R.dimen.balance_bar_height);
-
         setupViews();
 
         if (getArguments() == null || !getArguments().getBoolean(ARGUMENT_BROADCASTING_PAYMENT, false)) {
@@ -136,14 +132,13 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     }
 
     private void setAccountSpinner() {
-        appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.appbar_layout);
         ((AppCompatActivity) getContext()).setSupportActionBar((Toolbar) getActivity().findViewById(R.id.toolbar_general));
 
         if (viewModel.getActiveAccountAndAddressList().size() > 1) {
             accountSpinner.setVisibility(View.VISIBLE);
         } else if (!viewModel.getActiveAccountAndAddressList().isEmpty()) {
             accountSpinner.setSelection(0);
-            accountSpinner.setVisibility(View.GONE);
+            accountSpinner.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -164,12 +159,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, true);
 
         binding.rvTransactions.clearOnScrollListeners();
-        binding.rvTransactions.addOnScrollListener(new CollapseActionbarScrollListener() {
-            @Override
-            public void onMoved(int distance) {
-                setToolbarOffset(distance);
-            }
-        });
 
         String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiat);
@@ -300,7 +289,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     private void setupViews() {
         setShowRefreshing(true);
-        binding.noTransactionMessage.noTxMessage.setVisibility(View.GONE);
+        binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.GONE);
 
         binding.balance.setOnTouchListener((v, event) -> {
             if (balanceDisplayState == SHOW_BTC) {
@@ -430,16 +419,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     }
 
     @Thunk
-    void setToolbarOffset(int distance) {
-        binding.balanceLayout.setTranslationY(-distance);
-        if (distance > 1) {
-            ViewUtils.setElevation(appBarLayout, ViewUtils.convertDpToPixel(5F, getActivity()));
-        } else {
-            ViewUtils.setElevation(appBarLayout, 0F);
-        }
-    }
-
-    @Thunk
     void goToTransactionDetail(int position) {
         Bundle bundle = new Bundle();
         bundle.putInt(KEY_TRANSACTION_LIST_POSITION, position);
@@ -465,21 +444,20 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         List<Object> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
         transactionAdapter.onTransactionsUpdated(newTransactions);
-        binding.balanceLayout.post(() -> setToolbarOffset(0));
 
         //Display help text to user if no transactionList on selected account/address
         if (!viewModel.getTransactionList().isEmpty()) {
-            binding.rvTransactions.setVisibility(View.VISIBLE);
-            binding.noTransactionMessage.noTxMessage.setVisibility(View.GONE);
+            binding.swipeContainer.setVisibility(View.VISIBLE);
+            binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.GONE);
         } else {
-            binding.rvTransactions.setVisibility(View.GONE);
-            binding.noTransactionMessage.noTxMessage.setVisibility(View.VISIBLE);
+            binding.swipeContainer.setVisibility(View.GONE);
+            binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.VISIBLE);
 
             if(!viewModel.isOnboardingComplete()) {
                 initOnboardingPager();
             } else {
-                binding.noTransactionMessage.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.GONE);
-                binding.noTransactionMessage.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
+                binding.noTransactionInclude.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.GONE);
+                binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
             }
         }
 
@@ -649,47 +627,17 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     }
 
-    abstract class CollapseActionbarScrollListener extends RecyclerView.OnScrollListener {
-
-        private int toolbarOffset = 0;
-
-        CollapseActionbarScrollListener() {
-            // Empty Constructor
-        }
-
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-            if ((toolbarOffset < balanceBarHeight && dy > 0) || (toolbarOffset > 0 && dy < 0)) {
-                toolbarOffset += dy;
-            }
-
-            clipToolbarOffset();
-            onMoved(toolbarOffset);
-        }
-
-        private void clipToolbarOffset() {
-            if (toolbarOffset > balanceBarHeight) {
-                toolbarOffset = balanceBarHeight;
-            } else if (toolbarOffset < 0) {
-                toolbarOffset = 0;
-            }
-        }
-
-        public abstract void onMoved(int distance);
-    }
-
     private int dotsCount;
     private ImageView[] dots;
 
     private void initOnboardingPager() {
         OnboardingPagerAdapter adapter = new OnboardingPagerAdapter(getActivity().getSupportFragmentManager(), viewModel.getOnboardingPages());
-        binding.noTransactionMessage.onboardingViewpagerLayout.pagerOnboarding.setAdapter(adapter);
-        binding.noTransactionMessage.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(this);
+        binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setAdapter(adapter);
+        binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(this);
 
         dotsCount = adapter.getCount();
         dots = new ImageView[dotsCount];
-        binding.noTransactionMessage.onboardingViewpagerLayout.viewPagerCountDots.removeAllViews();
+        binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerCountDots.removeAllViews();
 
         for (int i = 0; i < dotsCount; i++) {
             dots[i] = new ImageView(getActivity());
@@ -702,26 +650,27 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
             params.setMargins(4, 0, 4, 0);
 
-            binding.noTransactionMessage.onboardingViewpagerLayout.viewPagerCountDots.addView(dots[i], params);
+            binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerCountDots.addView(dots[i], params);
         }
 
         dots[0].setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selecteditem_dot));
 
-        binding.noTransactionMessage.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(
+        binding.noTransactionInclude.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(
                 v -> {
-                    binding.noTransactionMessage.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.GONE);
-                    binding.noTransactionMessage.onboardingCompleteLayout.onboardingLayout.setVisibility(View.VISIBLE);
+                    binding.noTransactionInclude.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.GONE);
+                    binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.VISIBLE);
                     viewModel.setOnboardingComplete(true);
                 });
 
-        binding.noTransactionMessage.onboardingCompleteLayout.onboardingClose.setOnClickListener(v -> {
-            binding.noTransactionMessage.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
+        binding.noTransactionInclude.onboardingCompleteLayout.onboardingClose.setOnClickListener(v -> {
+            binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
         });
 
-        binding.noTransactionMessage.onboardingCompleteLayout.onboardingCompleteLink.setOnClickListener(v -> {
-            binding.noTransactionMessage.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.VISIBLE);
-            binding.noTransactionMessage.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
-            binding.noTransactionMessage.onboardingViewpagerLayout.pagerOnboarding.setCurrentItem(0);
+        binding.noTransactionInclude.onboardingCompleteLayout.onboardingCompleteLink.setOnClickListener(v -> {
+            binding.noTransactionInclude.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.VISIBLE);
+            binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.GONE);
+            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setCurrentItem(0);
+            viewModel.setOnboardingComplete(false);
         });
     }
 

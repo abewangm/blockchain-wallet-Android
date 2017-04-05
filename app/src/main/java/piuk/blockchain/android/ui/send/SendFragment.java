@@ -190,13 +190,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((BaseAuthActivity) getActivity()).setupToolbar(
                     ((MainActivity) getActivity()).getSupportActionBar(), R.string.send_bitcoin);
-
-            AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.appbar_layout);
-            if (appBarLayout != null) {
-                ViewUtils.setElevation(
-                        getActivity().findViewById(R.id.appbar_layout),
-                        ViewUtils.convertDpToPixel(5F, getContext()));
-            }
         } else {
             finishPage();
         }
