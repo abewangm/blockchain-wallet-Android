@@ -483,7 +483,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             if (!viewModel.isOnboardingComplete()) {
                 initOnboardingPager();
             } else {
-                binding.noTransactionInclude.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.GONE);
+                binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
             }
         }
     }
