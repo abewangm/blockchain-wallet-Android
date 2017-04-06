@@ -9,11 +9,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <android.support.v4.view.ViewPager
+        <piuk.blockchain.android.ui.customviews.LockableViewPager
             android:id="@+id/pager_onboarding"
             android:layout_width="match_parent"
             android:layout_height="240dp"
-            tools:listitem="@layout/item_onboarding_page" />
+            tools:listitem="@layout/fragment_onboarding_pager" />
 
         <RelativeLayout
             android:id="@+id/viewPagerIndicator"

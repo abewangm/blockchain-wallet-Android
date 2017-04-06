@@ -21,6 +21,8 @@ public class OnboardingPagerAdapter extends FragmentPagerAdapter {
         for (OnboardingPagerContent page : pages) {
             fragments.add(OnboardingPagerFragment.newInstance(page));
         }
+        // Add empty fragment
+        fragments.add(new Fragment());
         notifyDataSetChanged();
     }
 
@@ -33,4 +35,5 @@ public class OnboardingPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         return fragments.get(position);
     }
+
 }

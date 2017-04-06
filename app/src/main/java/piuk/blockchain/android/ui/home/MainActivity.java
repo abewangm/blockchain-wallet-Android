@@ -37,7 +37,6 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
-import piuk.blockchain.android.ui.buy.BuyActivity;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -55,6 +54,7 @@ import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.buy.BuyActivity;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment;
@@ -97,14 +97,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public static final String EXTRA_MDID = "mdid";
     public static final String EXTRA_FCTX_ID = "fctx_id";
 
-    public static final String EXTRA_DEFAULT_INDEX = "default_index";
     public static final String WEB_VIEW_STATE_KEY = "web_view_state";
     public static final int SCAN_URI = 2007;
 
     @Thunk boolean drawerIsOpen = false;
 
     private MainViewModel viewModel;
-    private ActivityMainBinding binding;
+    @Thunk ActivityMainBinding binding;
     private MaterialProgressDialog fetchTransactionsProgress;
     private AlertDialog rootedDialog;
     private MaterialProgressDialog materialProgressDialog;
@@ -120,13 +119,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(ACTION_SEND) && getActivity() != null) {
                 startScanActivity();
-            }
-
-            if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
+            } else if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
                 binding.bottomNavigation.setCurrentItem(2);
-            }
-
-            if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
+            } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
                 ToastCustom.makeText(getActivity(), "Buy Bitcoin coming soon!", ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
 //                startBuyActivity();
             }
@@ -356,7 +351,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         ToastCustom.makeText(getActivity(), getString(R.string.exit_confirm), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
     }
 
-    private void startScanActivity() {
+    @Thunk
+    void startScanActivity() {
         if (!appUtil.isCameraOpen()) {
             Intent intent = new Intent(MainActivity.this, CaptureActivity.class);
             startActivityForResult(intent, SCAN_URI);
@@ -369,7 +365,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         startSendFragment(strResult, scanRoute);
     }
 
-    private Intent putWebViewState (Intent intent) {
+    private Intent putWebViewState(Intent intent) {
         Bundle state = new Bundle();
         buyWebView.saveState(state);
         return intent.putExtra(WEB_VIEW_STATE_KEY, state);
@@ -529,7 +525,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         }, 500);
     }
 
-    private Context getActivity() {
+    @Thunk
+    Context getActivity() {
         return this;
     }
 

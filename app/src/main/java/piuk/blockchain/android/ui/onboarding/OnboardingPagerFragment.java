@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.onboarding;
 
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -8,10 +9,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.databinding.FragmentOnboardingPagerBinding;
 
 public class OnboardingPagerFragment extends Fragment {
 
@@ -53,53 +53,50 @@ public class OnboardingPagerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View layoutView = inflater.inflate(R.layout.item_onboarding_page, container, false);
-
-        TextView tvHeading1 = ((TextView) layoutView.findViewById(R.id.tv_heading_1));
-        TextView tvHeading2 = ((TextView) layoutView.findViewById(R.id.tv_heading_2));
-        TextView tvContent = ((TextView) layoutView.findViewById(R.id.tv_content));
-        TextView tvLink = ((TextView) layoutView.findViewById(R.id.tv_link));
-        ImageView ivIcon = ((ImageView) layoutView.findViewById(R.id.iv_icon));
+        final FragmentOnboardingPagerBinding binding = DataBindingUtil.inflate(inflater,
+                R.layout.fragment_onboarding_pager,
+                container,
+                false);
 
         //Set text
         if (heading1 == null || heading1.isEmpty()) {
-            tvHeading1.setVisibility(View.GONE);
+            binding.tvHeading1.setVisibility(View.GONE);
         } else {
-            tvHeading1.setText(heading1);
+            binding.tvHeading1.setText(heading1);
         }
 
         if (heading2 == null || heading2.isEmpty()) {
-            tvHeading2.setVisibility(View.GONE);
+            binding.tvHeading2.setVisibility(View.GONE);
         } else {
-            tvHeading2.setText(heading2);
+            binding.tvHeading2.setText(heading2);
         }
 
         if (content == null || content.isEmpty()) {
-            tvContent.setVisibility(View.GONE);
+            binding.tvContent.setVisibility(View.GONE);
         } else {
-            tvContent.setText(content);
+            binding.tvContent.setText(content);
         }
 
         if (link == null || link.isEmpty()) {
-            tvLink.setVisibility(View.GONE);
+            binding.tvLink.setVisibility(View.GONE);
         } else {
-            tvLink.setText(link);
+            binding.tvLink.setText(link);
         }
 
         //Set icon
-        ivIcon.setImageResource(iconResource);
+        binding.ivIcon.setImageResource(iconResource);
 
         //Set color
-        tvHeading1.setTextColor(ContextCompat.getColor(getActivity(), colorResource));
-        tvHeading2.setTextColor(ContextCompat.getColor(getActivity(), colorResource));
-        tvLink.setTextColor(ContextCompat.getColor(getActivity(), colorResource));
+        binding.tvHeading1.setTextColor(ContextCompat.getColor(getActivity(), colorResource));
+        binding.tvHeading2.setTextColor(ContextCompat.getColor(getActivity(), colorResource));
+        binding.tvLink.setTextColor(ContextCompat.getColor(getActivity(), colorResource));
 
-        tvLink.setOnClickListener(v -> sendBroadcast());
+        binding.tvLink.setOnClickListener(v -> sendBroadcast());
 
-        return layoutView;
+        return binding.getRoot();
     }
 
-    void sendBroadcast() {
+    private void sendBroadcast() {
         Intent intent = new Intent(linkAction);
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
     }
