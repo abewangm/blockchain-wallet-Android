@@ -3,7 +3,6 @@ package piuk.blockchain.android.data.datamanagers;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import android.util.Log;
 import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
@@ -90,7 +89,7 @@ public class PayloadDataManager {
      * @return An {@link Observable<Wallet>}
      */
     public Observable<Wallet> createHdWallet(String password, String walletName, String email) {
-        return rxPinning.call(() -> payloadService.createHdWallet(walletName, email, password))
+        return rxPinning.call(() -> payloadService.createHdWallet(password, walletName, email))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
