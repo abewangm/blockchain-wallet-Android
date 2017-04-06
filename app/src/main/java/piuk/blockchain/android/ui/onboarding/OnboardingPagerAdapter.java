@@ -1,26 +1,39 @@
 package piuk.blockchain.android.ui.onboarding;
 
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class OnboardingPagerAdapter extends FragmentPagerAdapter{
+public class OnboardingPagerAdapter extends FragmentPagerAdapter {
 
-    ArrayList<OnboardingPagerContent> pages;
+    private List<Fragment> fragments = new ArrayList<>();
 
-    public OnboardingPagerAdapter(FragmentManager fm, ArrayList<OnboardingPagerContent> pages) {
+    public OnboardingPagerAdapter(FragmentManager fm, List<OnboardingPagerContent> pages) {
         super(fm);
-        this.pages = pages;
+        notifyPagesChanged(pages);
+    }
+
+    public void notifyPagesChanged(List<OnboardingPagerContent> pages) {
+        fragments.clear();
+        for (OnboardingPagerContent page : pages) {
+            fragments.add(OnboardingPagerFragment.newInstance(page));
+        }
+        // Add empty fragment
+        fragments.add(new Fragment());
+        notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        return pages.size();
+        return fragments.size();
     }
 
     @Override
-    public android.support.v4.app.Fragment getItem(int position) {
-        return OnboardingPagerFragment.init(pages.get(position));
+    public Fragment getItem(int position) {
+        return fragments.get(position);
     }
+
 }

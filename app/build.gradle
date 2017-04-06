@@ -175,6 +175,8 @@ dependencies {
     // Logging
     prodCompile 'org.slf4j:slf4j-nop:1.7.20'
     devCompile 'org.slf4j:slf4j-simple:1.7.20'
+    // ViewPager Indicator
+    compile 'me.relex:circleindicator:1.2.2@aar'
 
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'

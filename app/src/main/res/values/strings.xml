@@ -680,10 +680,11 @@
     <string name="onboarding_qr_codes_content">An address can also be shown as a QR code. Scan a friend’s QR code to quickly capture their wallet address.</string>
 
     <!-- BUY BITCOIN -->
-    <string name="buy_bitcoin">Buy Bitcoin</string>
-    <string name="get_bitcoin">Get Bitcoin</string>
+    <string name="onboarding_buy_bitcoin">Buy Bitcoin</string>
+    <string name="onboarding_get_bitcoin">Get Bitcoin</string>
     <string name="onboarding_complete_title">That\'s it for now!</string>
     <string name="onboarding_complete_content">We’ll keep you up-to-date here with recommendations and new features.</string>
-    <string name="start_over">Start Over</string>
+    <string name="onboarding_start_over">Start Over</string>
+    <string name="onboarding_skip_all">Skip All</string>
 
 </resources>

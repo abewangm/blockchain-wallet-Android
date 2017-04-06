@@ -5,25 +5,28 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.webkit.WebView;
+
 import info.blockchain.wallet.api.trade.coinify.CoinifyApi;
 import info.blockchain.wallet.api.trade.sfox.SFOXApi;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.MetadataUtil;
-import io.reactivex.disposables.CompositeDisposable;
+
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.util.encoders.Hex;
+
+import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.databinding.ActivityBuyBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.home.MainActivity;
-import piuk.blockchain.android.util.annotations.Thunk;
 
 public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<String> {
+
     public static final String TAG = BuyActivity.class.getSimpleName();
-    private final String JS_INTERFACE_NAME = "android";
-    private final int METADATA_TYPE_EXTERNAL = 3;
+    private static final String JS_INTERFACE_NAME = "android";
+    private static final int METADATA_TYPE_EXTERNAL = 3;
     private FrontendJavascriptManager frontendJavascriptManager;
     private PayloadManager payloadManager;
 
@@ -34,17 +37,15 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
     private SFOXApi sfoxApi;
     private CoinifyApi coinifyApi;
     private CompositeDisposable compositeDisposable;
-
-    @Thunk
-    ActivityBuyBinding binding;
+    private ActivityBuyBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_buy);
 
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar_general);
-        setupToolbar(toolbar, R.string.buy_bitcoin);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        setupToolbar(toolbar, R.string.onboarding_buy_bitcoin);
 
         compositeDisposable = new CompositeDisposable();
         sfoxApi = new SFOXApi();
@@ -71,11 +72,13 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
         if (didBuyBitcoin) {
             // Should reload buy metadata, watch for new trade
         }
+
+        compositeDisposable.clear();
     }
 
     private Metadata getBuyMetadata() throws Exception {
         DeterministicKey masterKey = payloadManager.getPayload().getHdWallets().get(0)
-            .getMasterKey();
+                .getMasterKey();
         DeterministicKey metadataHDNode = MetadataUtil.deriveMetadataNode(masterKey);
         return new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXTERNAL).build();
     }
@@ -106,17 +109,17 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
 
     public void onFrontendInitialized() {
         Log.d(TAG, "onFrontendInitialized: done");
-        this.frontendInitialized = true;
+        frontendInitialized = true;
         activateIfReady();
     }
 
     public void onBuyCompleted() {
         Log.d(TAG, "onBuyCompleted: done");
-        this.didBuyBitcoin = true;
+        didBuyBitcoin = true;
     }
 
     private void activateIfReady() {
-        if (this.isReady()) {
+        if (isReady()) {
             try {
                 String metadata = buyMetadata.getMetadata();
                 byte[] magicHash = buyMetadata.getMagicHash();
@@ -125,7 +128,7 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
                         payloadManager.getPayload().toJson(),
                         metadata == null ? "" : metadata,
                         magicHash == null ? "" : Hex.toHexString(magicHash),
-                        payloadManager.getTempPassword().toString()
+                        payloadManager.getTempPassword()
                 );
             } catch (Exception e) {
                 Log.d(TAG, "activateIfReady error: " + e.getMessage());
@@ -134,7 +137,7 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
     }
 
     public boolean isReady() {
-        return this.frontendInitialized && this.buyMetadata != null;
+        return frontendInitialized && buyMetadata != null;
     }
 
     @Override
@@ -144,26 +147,24 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
     }
 
     public void fetchTransaction(String accountToken) {
-
         compositeDisposable.add(
-            sfoxApi.getTransactions(accountToken)
-                .compose(RxUtil.applySchedulersToObservable())
-                .subscribe(
-                    transactionList -> {
-                        //do stuff
-                    },
-                    Throwable::printStackTrace));
+                sfoxApi.getTransactions(accountToken)
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(
+                                transactionList -> {
+                                    //do stuff
+                                },
+                                Throwable::printStackTrace));
     }
 
     public void fetchTrades(String accessToken) {
-
         compositeDisposable.add(
-            coinifyApi.getTrades(accessToken)
-                .compose(RxUtil.applySchedulersToObservable())
-                .subscribe(
-                    tradesList -> {
-                        //do stuff
-                    },
-                    Throwable::printStackTrace));
+                coinifyApi.getTrades(accessToken)
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(
+                                tradesList -> {
+                                    //do stuff
+                                },
+                                Throwable::printStackTrace));
     }
 }

@@ -1,39 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <android.support.v4.widget.NestedScrollView
         android:id="@+id/no_tx_message_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
         android:animateLayoutChanges="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:visibility="gone"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:visibility="visible">
 
         <LinearLayout
+            android:animateLayoutChanges="true"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/primary_gray_lightest"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
-            <include
-                android:id="@+id/onboarding_viewpager_layout"
-                layout="@layout/include_onboarding_viewpager" />
+            <FrameLayout
+                android:id="@+id/framelayout_onboarding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <include
-                android:id="@+id/onboarding_complete_layout"
-                layout="@layout/include_onboarding_complete" />
+                <include
+                    android:id="@+id/onboarding_complete_layout"
+                    layout="@layout/fragment_onboarding_complete" />
+
+                <include
+                    android:id="@+id/onboarding_viewpager_layout"
+                    layout="@layout/include_onboarding_viewpager" />
+
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/white"
                 android:gravity="center_horizontal"
-                android:paddingLeft="72dp"
-                android:paddingRight="72dp"
+                android:orientation="vertical"
                 android:paddingBottom="72dp"
-                android:orientation="vertical">
+                android:paddingLeft="72dp"
+                android:paddingRight="72dp">
 
                 <TextView
                     android:id="@+id/no_tx_title"
@@ -63,9 +73,9 @@
                     style="@style/ButtonStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/get_bitcoin"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/onboarding_get_bitcoin"
                     android:theme="@style/ButtonLightBlueTheme" />
 
             </LinearLayout>
