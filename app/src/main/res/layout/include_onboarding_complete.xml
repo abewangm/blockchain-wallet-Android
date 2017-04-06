@@ -68,7 +68,7 @@
             android:padding="16dp"
             android:alpha="0.8"
             android:textColor="@color/primary_blue_accent"
-            android:text="@string/start_over"/>
+            android:text="@string/onboarding_start_over"/>
 
     </RelativeLayout>
 </layout>

@@ -716,18 +716,18 @@ public class BalanceViewModel extends BaseViewModel {
         super.destroy();
     }
 
-    public ArrayList<OnboardingPagerContent> getOnboardingPages() {
+    public List<OnboardingPagerContent> getOnboardingPages() {
 
-        ArrayList<OnboardingPagerContent> pages = new ArrayList<>();
+        List<OnboardingPagerContent> pages = new ArrayList<>();
 
         if (onboardingDataManager.isSepa()) {
             pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_current_price),
                     getFormattedPriceString(),
                     stringUtils.getString(R.string.onboarding_buy_content),
-                    stringUtils.getString(R.string.buy_bitcoin),
+                    stringUtils.getString(R.string.onboarding_buy_bitcoin),
                     MainActivity.ACTION_BUY,
                     R.color.primary_blue_accent,
-                    R.drawable.vector_buy));
+                    R.drawable.vector_buy_offset));
         }
 
         //Receive bitcoin
@@ -737,7 +737,7 @@ public class BalanceViewModel extends BaseViewModel {
                 stringUtils.getString(R.string.receive_bitcoin),
                 MainActivity.ACTION_RECEIVE,
                 R.color.secondary_teal_medium,
-                R.drawable.vector_receive));
+                R.drawable.vector_receive_offset));
 
         //QR Codes
         pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_qr_codes),
@@ -746,7 +746,7 @@ public class BalanceViewModel extends BaseViewModel {
                 stringUtils.getString(R.string.onboarding_scan_address),
                 MainActivity.ACTION_SEND,
                 R.color.primary_navy_medium,
-                R.drawable.icon_qrcode));
+                R.drawable.vector_qr_offset));
         return pages;
     }
 
@@ -770,7 +770,7 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     public void getBitcoinClicked() {
-        if(onboardingDataManager.isSepa()) {
+        if (onboardingDataManager.isSepa()) {
             dataListener.startBuyActivity();
         } else {
             dataListener.startReceiveFragment();

@@ -5,37 +5,25 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import javax.inject.Inject;
-
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.balance.BalanceFragment;
-import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.home.MainActivity;
-import piuk.blockchain.android.ui.zxing.CaptureActivity;
-import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.annotations.Thunk;
 
 public class OnboardingPagerFragment extends Fragment {
 
-    private final String TAG = getClass().getName();
+    private String heading1;
+    private String heading2;
+    private String content;
+    private String link;
+    private int iconResource;
+    private int colorResource;
+    private String linkAction;
 
-    public String heading1;
-    public String heading2;
-    public String content;
-    public String link;
-    public int iconResource;
-    public int colorResource;
-    public String linkAction;
-
-    static OnboardingPagerFragment init(OnboardingPagerContent pageContent) {
+    static OnboardingPagerFragment newInstance(OnboardingPagerContent pageContent) {
         OnboardingPagerFragment frag = new OnboardingPagerFragment();
         Bundle args = new Bundle();
         args.putString("heading1", pageContent.heading1);
@@ -74,25 +62,25 @@ public class OnboardingPagerFragment extends Fragment {
         ImageView ivIcon = ((ImageView) layoutView.findViewById(R.id.iv_icon));
 
         //Set text
-        if(heading1 == null || heading1.isEmpty()) {
+        if (heading1 == null || heading1.isEmpty()) {
             tvHeading1.setVisibility(View.GONE);
         } else {
             tvHeading1.setText(heading1);
         }
 
-        if(heading2 == null || heading2.isEmpty()) {
+        if (heading2 == null || heading2.isEmpty()) {
             tvHeading2.setVisibility(View.GONE);
         } else {
             tvHeading2.setText(heading2);
         }
 
-        if(content == null || content.isEmpty()) {
+        if (content == null || content.isEmpty()) {
             tvContent.setVisibility(View.GONE);
         } else {
             tvContent.setText(content);
         }
 
-        if(link == null || link.isEmpty()) {
+        if (link == null || link.isEmpty()) {
             tvLink.setVisibility(View.GONE);
         } else {
             tvLink.setText(link);
@@ -102,7 +90,6 @@ public class OnboardingPagerFragment extends Fragment {
         ivIcon.setImageResource(iconResource);
 
         //Set color
-        ivIcon.setColorFilter(ContextCompat.getColor(getActivity(), colorResource));
         tvHeading1.setTextColor(ContextCompat.getColor(getActivity(), colorResource));
         tvHeading2.setTextColor(ContextCompat.getColor(getActivity(), colorResource));
         tvLink.setTextColor(ContextCompat.getColor(getActivity(), colorResource));
