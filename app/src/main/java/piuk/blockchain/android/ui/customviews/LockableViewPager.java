@@ -22,7 +22,6 @@ public class LockableViewPager extends ViewPager {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
         return enabled && super.onInterceptTouchEvent(event);
-
     }
 
     public void setPagingEnabled(boolean enabled) {

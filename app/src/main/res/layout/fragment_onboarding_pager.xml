@@ -33,6 +33,7 @@
                     tools:src="@drawable/vector_buy_offset" />
 
                 <LinearLayout
+                    android:id="@+id/layout_main"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
@@ -81,6 +82,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
+                    android:layout_below="@+id/layout_main"
                     android:layout_toRightOf="@id/iv_icon"
                     android:gravity="center"
                     android:padding="16dp"
