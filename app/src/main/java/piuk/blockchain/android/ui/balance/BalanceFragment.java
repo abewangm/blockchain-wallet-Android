@@ -639,6 +639,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                     if (position == viewModel.getOnboardingPages().size()) {
                         binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setPagingEnabled(false);
+                        viewModel.setOnboardingComplete(true);
                     } else if (position == viewModel.getOnboardingPages().size() - 1) {
                         binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.VISIBLE);
                         binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1 - positionOffset);
