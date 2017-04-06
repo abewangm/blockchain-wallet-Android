@@ -20,6 +20,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
@@ -115,6 +116,8 @@ public class MainViewModel extends BaseViewModel {
         void showBroadcastSuccessDialog();
 
         void updateCurrentPrice(String price);
+
+        void setBuyBitcoinVisible(boolean hide);
     }
 
     public MainViewModel(DataListener dataListener) {
@@ -368,8 +371,10 @@ public class MainViewModel extends BaseViewModel {
                                 }
                             })
                             .subscribe(
-                                    sepaCountry -> {
-                                        if (sepaCountry) enableBuySell();
+                                    isSepaCountry -> {
+                                        if (isSepaCountry && BuildConfig.BUY_BITCOIN_ENABLED) {
+                                            enableBuySell();
+                                        }
                                     },
                                     throwable -> {
                                         Log.e(TAG, "preLaunchChecks: ", throwable);
@@ -390,7 +395,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void enableBuySell() {
-        // TODO: 04/04/2017 Display buy/sell hints in various places
+        dataListener.setBuyBitcoinVisible(true);
     }
 
     @Override
