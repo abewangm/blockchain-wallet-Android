@@ -127,8 +127,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             }
 
             if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
-                ToastCustom.makeText(getActivity(), "Buy Bitcoin coming soon!", ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
-//                startBuyActivity();
+                startActivity(putWebViewState(new Intent(MainActivity.this, BuyActivity.class)));
             }
         }
     };
@@ -230,7 +229,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             hideContacts();
         }
         if (!BuildConfig.BUY_BITCOIN_ENABLED) {
-            hideBuyBitcoin();
+            //Hide Buy Bitcoin
+            setBuyBitcoinVisible(false);
         } else {
             setupBuyWebView();
         }
@@ -696,9 +696,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         menu.findItem(R.id.nav_contacts).setVisible(false);
     }
 
-    private void hideBuyBitcoin() {
+    @Override
+    public void setBuyBitcoinVisible(boolean visible) {
         Menu menu = binding.navigationView.getMenu();
-        menu.findItem(R.id.nav_buy).setVisible(false);
+        menu.findItem(R.id.nav_buy).setVisible(visible);
     }
 
     private void setupBuyWebView() {
