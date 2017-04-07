@@ -47,6 +47,7 @@ public class FrontendJavascriptManager {
 
     private void executeScript(String script) {
         Log.d(TAG, "Executing: " + script);
+        // TODO: 06/04/2017 evaluateJavascript isn't available on pre-19 devices
         webView.post(() -> webView.evaluateJavascript(script, frontendJavascript));
     }
 

@@ -482,8 +482,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
             if (!viewModel.isOnboardingComplete()) {
                 initOnboardingPager();
+                binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.VISIBLE);
             } else {
                 binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
+                binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -670,11 +672,13 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         binding.noTransactionInclude.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(v -> {
             binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
+            binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
             viewModel.setOnboardingComplete(true);
         });
 
         binding.noTransactionInclude.onboardingCompleteLayout.onboardingClose.setOnClickListener(v -> {
             binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
+            binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
             viewModel.setOnboardingComplete(true);
         });
 
@@ -685,6 +689,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setCurrentItem(0);
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setPagingEnabled(true);
             binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1.0f);
+            binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
             viewModel.setOnboardingComplete(false);
         });
     }
