@@ -635,34 +635,35 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     private void initOnboardingPager() {
         if (onboardingPagerAdapter == null) {
-            onboardingPagerAdapter = new OnboardingPagerAdapter(getActivity().getSupportFragmentManager(), viewModel.getOnboardingPages());
-            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                    if (position == viewModel.getOnboardingPages().size()) {
-                        binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setPagingEnabled(false);
-                        viewModel.setOnboardingComplete(true);
-                    } else if (position == viewModel.getOnboardingPages().size() - 1) {
-                        binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.VISIBLE);
-                        binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1 - positionOffset);
-                        binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setAlpha(positionOffset);
-                    } else {
-                        binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setVisibility(View.VISIBLE);
-                        binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.INVISIBLE);
-                        binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1.0f);
-                    }
-                }
+            onboardingPagerAdapter = new OnboardingPagerAdapter(getContext());
+            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(
+                    new ViewPager.OnPageChangeListener() {
+                        @Override
+                        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                            if (position == viewModel.getOnboardingPages().size()) {
+                                binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setPagingEnabled(false);
+                                viewModel.setOnboardingComplete(true);
+                            } else if (position == viewModel.getOnboardingPages().size() - 1) {
+                                binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.VISIBLE);
+                                binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1 - positionOffset);
+                                binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setAlpha(positionOffset);
+                            } else {
+                                binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setVisibility(View.VISIBLE);
+                                binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.INVISIBLE);
+                                binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1.0f);
+                            }
+                        }
 
-                @Override
-                public void onPageSelected(int position) {
-                    // No-op
-                }
+                        @Override
+                        public void onPageSelected(int position) {
+                            // No-op
+                        }
 
-                @Override
-                public void onPageScrollStateChanged(int state) {
-                    // No-op
-                }
-            });
+                        @Override
+                        public void onPageScrollStateChanged(int state) {
+                            // No-op
+                        }
+                    });
         } else {
             onboardingPagerAdapter.notifyPagesChanged(viewModel.getOnboardingPages());
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setAdapter(onboardingPagerAdapter);
