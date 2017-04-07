@@ -9,6 +9,11 @@ public class LockableViewPager extends ViewPager {
 
     private boolean enabled;
 
+    public LockableViewPager(Context context) {
+        super(context);
+        enabled = true;
+    }
+
     public LockableViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
         enabled = true;

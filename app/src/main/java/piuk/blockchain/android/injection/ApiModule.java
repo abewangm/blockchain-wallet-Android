@@ -2,7 +2,6 @@ package piuk.blockchain.android.injection;
 
 import android.util.Log;
 
-import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -136,7 +135,7 @@ public class ApiModule {
                                                   DebugSettings debugSettings) {
 
         return new Retrofit.Builder()
-                .baseUrl(debugSettings.getBaseApiUrl())
+                .baseUrl(debugSettings.getCurrentApiUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .addCallAdapterFactory(rxJavaCallFactory)
@@ -151,7 +150,7 @@ public class ApiModule {
                                                          RxJava2CallAdapterFactory rxJavaCallFactory,
                                                          DebugSettings debugSettings) {
         return new Retrofit.Builder()
-                .baseUrl(debugSettings.getBaseServerUrl())
+                .baseUrl(debugSettings.getCurrentServerUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .addCallAdapterFactory(rxJavaCallFactory)
@@ -162,30 +161,30 @@ public class ApiModule {
     @Singleton
     @Named("sfox")
     protected Retrofit provideRetrofitSFOXInstance(OkHttpClient okHttpClient,
-        JacksonConverterFactory converterFactory,
-        RxJava2CallAdapterFactory rxJavaCallFactory,
-        PersistentUrls persistentUrls) {
+                                                   JacksonConverterFactory converterFactory,
+                                                   RxJava2CallAdapterFactory rxJavaCallFactory,
+                                                   DebugSettings debugSettings) {
         return new Retrofit.Builder()
-            .baseUrl(persistentUrls.getCurrentSFOXUrl())
-            .client(okHttpClient)
-            .addConverterFactory(converterFactory)
-            .addCallAdapterFactory(rxJavaCallFactory)
-            .build();
+                .baseUrl(debugSettings.getCurrentSFOXUrl())
+                .client(okHttpClient)
+                .addConverterFactory(converterFactory)
+                .addCallAdapterFactory(rxJavaCallFactory)
+                .build();
     }
 
     @Provides
     @Singleton
     @Named("coinify")
     protected Retrofit provideRetrofitCoinifyInstance(OkHttpClient okHttpClient,
-        JacksonConverterFactory converterFactory,
-        RxJava2CallAdapterFactory rxJavaCallFactory,
-        PersistentUrls persistentUrls) {
+                                                      JacksonConverterFactory converterFactory,
+                                                      RxJava2CallAdapterFactory rxJavaCallFactory,
+                                                      DebugSettings debugSettings) {
         return new Retrofit.Builder()
-            .baseUrl(persistentUrls.getCurrentCoinifyUrl())
-            .client(okHttpClient)
-            .addConverterFactory(converterFactory)
-            .addCallAdapterFactory(rxJavaCallFactory)
-            .build();
+                .baseUrl(debugSettings.getCurrentCoinifyUrl())
+                .client(okHttpClient)
+                .addConverterFactory(converterFactory)
+                .addCallAdapterFactory(rxJavaCallFactory)
+                .build();
     }
 
     @Provides

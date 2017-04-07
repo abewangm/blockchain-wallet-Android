@@ -91,7 +91,7 @@ public class OnboardingPagerFragment extends Fragment {
         binding.tvHeading2.setTextColor(ContextCompat.getColor(getActivity(), colorResource));
         binding.tvLink.setTextColor(ContextCompat.getColor(getActivity(), colorResource));
 
-        binding.tvLink.setOnClickListener(v -> sendBroadcast());
+        binding.getRoot().setOnClickListener(v -> sendBroadcast());
 
         return binding.getRoot();
     }
