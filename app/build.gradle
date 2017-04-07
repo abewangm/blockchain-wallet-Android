@@ -80,6 +80,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     lintOptions {
+        disable 'MissingTranslation'
         checkReleaseBuilds true
         abortOnError false
         fatal 'StopShip'

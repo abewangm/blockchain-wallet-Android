@@ -55,28 +55,14 @@ public class OnboardingPagerAdapter extends PagerAdapter {
             int colorResource = pagerContent.colorResource;
             String linkAction = pagerContent.linkAction;
 
-            if (heading1 == null || heading1.isEmpty()) {
-                binding.tvHeading1.setVisibility(View.GONE);
-            } else {
-                binding.tvHeading1.setText(heading1);
-            }
+            binding.tvHeading1.setText(heading1);
+            binding.tvContent.setText(content);
+            binding.tvLink.setText(link);
 
             if (heading2 == null || heading2.isEmpty()) {
                 binding.tvHeading2.setVisibility(View.GONE);
             } else {
                 binding.tvHeading2.setText(heading2);
-            }
-
-            if (content == null || content.isEmpty()) {
-                binding.tvContent.setVisibility(View.GONE);
-            } else {
-                binding.tvContent.setText(content);
-            }
-
-            if (link == null || link.isEmpty()) {
-                binding.tvLink.setVisibility(View.GONE);
-            } else {
-                binding.tvLink.setText(link);
             }
 
             // Set icon
