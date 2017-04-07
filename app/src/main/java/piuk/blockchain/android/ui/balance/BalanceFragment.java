@@ -682,14 +682,13 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             viewModel.setOnboardingComplete(true);
         });
 
-        binding.noTransactionInclude.onboardingCompleteLayout.onboardingCompleteLink.setOnClickListener(v -> {
+        binding.noTransactionInclude.onboardingCompleteLayout.buttonStartOver.setOnClickListener(v -> {
             binding.noTransactionInclude.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.VISIBLE);
             binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setVisibility(View.VISIBLE);
             binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.INVISIBLE);
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setCurrentItem(0);
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setPagingEnabled(true);
             binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1.0f);
-            binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
             viewModel.setOnboardingComplete(false);
         });
     }

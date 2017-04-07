@@ -61,7 +61,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/onboarding_complete_link"
+            android:id="@+id/button_start_over"
             style="@style/Base.DialogWindowTitle.AppCompat"
             fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
