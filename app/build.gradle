@@ -182,13 +182,12 @@ dependencies {
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile "org.mockito:mockito-core:$mockitoVersion"
-    androidTestCompile 'com.jayway.android.robotium:robotium-solo:5.6.3'
     androidTestCompile "com.android.support:support-annotations:$supportVersion"
-    androidTestCompile 'com.android.support.test:rules:0.5'
-    androidTestCompile('com.android.support.test:runner:0.5') {
+    androidTestCompile 'com.android.support.test:rules:0.6-alpha'
+    androidTestCompile('com.android.support.test:runner:0.6-alpha') {
         exclude module: 'support-annotations'
     }
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.3-alpha') {
         exclude group: 'javax.inject', module: 'support-annotations'
     }
 
