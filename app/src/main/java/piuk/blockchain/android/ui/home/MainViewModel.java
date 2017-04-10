@@ -376,9 +376,7 @@ public class MainViewModel extends BaseViewModel {
                                             enableBuySell();
                                         }
                                     },
-                                    throwable -> {
-                                        Log.e(TAG, "preLaunchChecks: ", throwable);
-                                    }));
+                                    throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
         } else {
             // This should never happen, but handle the scenario anyway by starting the launcher
             // activity, which handles all login/auth/corruption scenarios itself

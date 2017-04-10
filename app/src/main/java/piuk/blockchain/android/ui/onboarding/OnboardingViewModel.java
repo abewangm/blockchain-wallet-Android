@@ -51,7 +51,7 @@ public class OnboardingViewModel extends BaseViewModel {
     public void onViewReady() {
         Intent intent = dataListener.getPageIntent();
         if (intent != null && intent.hasExtra(EXTRAS_EMAIL_ONLY)) {
-            showEmailOnly = true;
+            showEmailOnly = intent.getBooleanExtra(EXTRAS_EMAIL_ONLY, false);
         }
 
         compositeDisposable.add(

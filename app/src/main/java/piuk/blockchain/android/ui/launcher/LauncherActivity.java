@@ -84,8 +84,8 @@ public class LauncherActivity extends AppCompatActivity implements LauncherViewM
     @Override
     public void onStartOnboarding(boolean emailOnly) {
         Bundle bundle = new Bundle();
-        bundle.putBoolean(EXTRAS_EMAIL_ONLY, true);
-        startSingleActivity(OnboardingActivity.class, null);
+        bundle.putBoolean(EXTRAS_EMAIL_ONLY, emailOnly);
+        startSingleActivity(OnboardingActivity.class, bundle);
     }
 
     @Override
