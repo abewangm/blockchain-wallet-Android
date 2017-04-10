@@ -50,13 +50,23 @@ public class DebugSettings {
     }
 
     @NonNull
-    public String getBaseServerUrl() {
+    public String getCurrentServerUrl() {
         return persistentUrls.getCurrentBaseServerUrl();
     }
 
     @NonNull
-    public String getBaseApiUrl() {
+    public String getCurrentApiUrl() {
         return persistentUrls.getCurrentBaseApiUrl();
+    }
+
+    @NonNull
+    public String getCurrentSFOXUrl() {
+        return persistentUrls.getCurrentSFOXUrl();
+    }
+
+    @NonNull
+    public String getCurrentCoinifyUrl() {
+        return persistentUrls.getCurrentCoinifyUrl();
     }
 
     /**

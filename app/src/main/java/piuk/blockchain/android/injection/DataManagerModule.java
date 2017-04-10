@@ -15,6 +15,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
@@ -148,5 +149,18 @@ public class DataManagerModule {
     @ViewModelScope
     protected TransactionHelper provideTransactionHelper(PayloadDataManager payloadDataManager) {
         return new TransactionHelper(payloadDataManager);
+    }
+
+    @Provides
+    @ViewModelScope
+    protected OnboardingDataManager provideOnboardingDataManager(SettingsDataManager settingsDataManager,
+                                                                 AuthDataManager authDataManager,
+                                                                 PayloadDataManager payloadDataManager,
+                                                                 AccessState accessState) {
+        return new OnboardingDataManager(
+                settingsDataManager,
+                authDataManager,
+                payloadDataManager,
+                accessState);
     }
 }

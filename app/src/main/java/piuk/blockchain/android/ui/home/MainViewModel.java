@@ -20,6 +20,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
@@ -27,6 +28,7 @@ import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
@@ -65,6 +67,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected Context applicationContext;
     @Inject protected StringUtils stringUtils;
     @Inject protected SettingsDataManager settingsDataManager;
+    @Inject protected OnboardingDataManager onboardingDataManager;
     @Inject protected DynamicFeeCache dynamicFeeCache;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
     @Inject protected RxBus rxBus;
@@ -96,8 +99,6 @@ public class MainViewModel extends BaseViewModel {
 
         void kickToLauncherPage();
 
-        void showEmailVerificationDialog(String email);
-
         void showAddEmailDialog();
 
         void showProgressDialog(@StringRes int message);
@@ -115,6 +116,8 @@ public class MainViewModel extends BaseViewModel {
         void showBroadcastSuccessDialog();
 
         void updateCurrentPrice(String price);
+
+        void setBuyBitcoinVisible(boolean hide);
     }
 
     public MainViewModel(DataListener dataListener) {
@@ -216,6 +219,7 @@ public class MainViewModel extends BaseViewModel {
         dataListener.clearAllDynamicShortcuts();
         payloadManager.wipe();
         prefs.logOut();
+        accessState.unpairWallet();
         appUtil.restartApp();
         accessState.setPIN(null);
     }
@@ -306,22 +310,20 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void checkIfShouldShowEmailVerification() {
-        if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
-            compositeDisposable.add(
-                    getSettingsApi()
-                            .compose(RxUtil.applySchedulersToObservable())
-                            .subscribe(settings -> {
-                                if (!settings.isEmailVerified()) {
-                                    appUtil.setNewlyCreated(false);
-                                    String email = settings.getEmail();
-                                    if (email != null && !email.isEmpty()) {
-                                        dataListener.showEmailVerificationDialog(email);
-                                    } else {
+        compositeDisposable.add(
+                getSettingsApi()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(settings -> {
+                            if (!settings.isEmailVerified()) {
+                                appUtil.setNewlyCreated(false);
+                                String email = settings.getEmail();
+                                if (email == null || email.isEmpty()) {
+                                    if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
                                         dataListener.showAddEmailDialog();
                                     }
                                 }
-                            }, Throwable::printStackTrace));
-        }
+                            }
+                        }, Throwable::printStackTrace));
     }
 
     private Observable<Settings> getSettingsApi() {
@@ -356,7 +358,8 @@ public class MainViewModel extends BaseViewModel {
                         logEvents();
                         return Void.TYPE;
                     }).compose(RxUtil.applySchedulersToCompletable())
-                            .subscribe(() -> {
+                            .andThen(onboardingDataManager.getIfSepaCountry())
+                            .doAfterTerminate(() -> {
                                 if (dataListener != null) {
                                     dataListener.onFetchTransactionCompleted();
                                 }
@@ -366,7 +369,14 @@ public class MainViewModel extends BaseViewModel {
                                     prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
                                     dataListener.onScanInput(strUri);
                                 }
-                            }));
+                            })
+                            .subscribe(
+                                    isSepaCountry -> {
+                                        if (isSepaCountry && BuildConfig.BUY_BITCOIN_ENABLED) {
+                                            enableBuySell();
+                                        }
+                                    },
+                                    throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
         } else {
             // This should never happen, but handle the scenario anyway by starting the launcher
             // activity, which handles all login/auth/corruption scenarios itself
@@ -380,6 +390,10 @@ public class MainViewModel extends BaseViewModel {
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(feeList -> dynamicFeeCache.setCachedDynamicFee(feeList),
                                 Throwable::printStackTrace));
+    }
+
+    private void enableBuySell() {
+        dataListener.setBuyBitcoinVisible(true);
     }
 
     @Override

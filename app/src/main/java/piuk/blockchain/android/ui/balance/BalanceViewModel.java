@@ -17,6 +17,7 @@ import info.blockchain.wallet.payload.data.LegacyAddress;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,11 +29,14 @@ import javax.inject.Inject;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AuthEvent;
 import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
@@ -45,6 +49,8 @@ import piuk.blockchain.android.ui.account.ConsolidatedAccount.Type;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.home.MainActivity;
+import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -63,6 +69,7 @@ public class BalanceViewModel extends BaseViewModel {
     private Observable<ContactsEvent> contactsEventObservable;
     private Observable<NotificationPayload> notificationObservable;
     private Observable<List> txListObservable;
+    private Observable<AuthEvent> authEventObservable;
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
     private List<Object> displayList;
@@ -75,6 +82,9 @@ public class BalanceViewModel extends BaseViewModel {
     @Inject SettingsDataManager settingsDataManager;
     @Inject SwipeToReceiveHelper swipeToReceiveHelper;
     @Inject RxBus rxBus;
+    @Inject OnboardingDataManager onboardingDataManager;
+    @Inject protected ExchangeRateFactory exchangeRateFactory;
+    @Inject protected PrefsUtil prefs;
 
     public interface DataListener {
 
@@ -129,6 +139,9 @@ public class BalanceViewModel extends BaseViewModel {
 
         void showTransactionCancelDialog(String fctxId);
 
+        void startBuyActivity();
+
+        void startReceiveFragment();
     }
 
     public BalanceViewModel(DataListener dataListener) {
@@ -149,26 +162,17 @@ public class BalanceViewModel extends BaseViewModel {
             // Check from this point forwards
             txListObservable = rxBus.register(List.class);
 
-            compositeDisposable.add(
-                    txListObservable
-                            .compose(RxUtil.applySchedulersToObservable())
-                            .subscribe(txs -> {
-                                if (hasTransactions()) {
-                                    if (!isBackedUp() && !getIfNeverPromptBackup()) {
-                                        // Show dialog and store date of dialog launch
-                                        if (getTimeOfLastSecurityPrompt() == 0) {
-                                            dataListener.showBackupPromptDialog(false);
-                                            storeTimeOfLastSecurityPrompt();
-                                        } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-                                            dataListener.showBackupPromptDialog(true);
-                                            storeTimeOfLastSecurityPrompt();
-                                        }
-                                    } else if (isBackedUp() && !getIfNeverPrompt2Fa()) {
+            if (prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0) == 3) {
+                // On third visit onwards, prompt 2FA
+                compositeDisposable.add(
+                        txListObservable
+                                .compose(RxUtil.applySchedulersToObservable())
+                                .subscribe(txs -> {
+                                    if (!getIfNeverPrompt2Fa()) {
                                         compositeDisposable.add(
                                                 settingsDataManager.initSettings(
                                                         payloadDataManager.getWallet().getGuid(),
                                                         payloadDataManager.getWallet().getSharedKey())
-                                                        .compose(RxUtil.applySchedulersToObservable())
                                                         .subscribe(settings -> {
                                                             if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
                                                                 // Show dialog for 2FA, store date of dialog launch
@@ -180,13 +184,36 @@ public class BalanceViewModel extends BaseViewModel {
                                                             }
                                                         }, Throwable::printStackTrace));
                                     }
-                                }
-
-                            }, Throwable::printStackTrace));
+                                }, Throwable::printStackTrace));
+            } else {
+                // From second visit onwards, prompt backup if not already
+                compositeDisposable.add(
+                        txListObservable
+                                .compose(RxUtil.applySchedulersToObservable())
+                                .subscribe(txs -> {
+                                    if (hasTransactions() && !isBackedUp() && !getIfNeverPromptBackup()) {
+                                        // Show dialog and store date of dialog launch
+                                        if (getTimeOfLastSecurityPrompt() == 0) {
+                                            dataListener.showBackupPromptDialog(false);
+                                            storeTimeOfLastSecurityPrompt();
+                                        } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
+                                            dataListener.showBackupPromptDialog(true);
+                                            storeTimeOfLastSecurityPrompt();
+                                        }
+                                    }
+                                }, Throwable::printStackTrace));
+            }
         }
 
         contactsEventObservable = rxBus.register(ContactsEvent.class);
         contactsEventObservable.subscribe(contactsEvent -> refreshFacilitatedTransactions());
+
+        authEventObservable = rxBus.register(AuthEvent.class);
+        authEventObservable.subscribe(authEvent -> {
+            displayList.clear();
+            transactionListDataManager.clearTransactionList();
+            contactsDataManager.resetContacts();
+        });
 
         notificationObservable = rxBus.register(NotificationPayload.class);
         notificationObservable
@@ -537,7 +564,7 @@ public class BalanceViewModel extends BaseViewModel {
                             paymentRequest.setId(fctxId);
 
                             compositeDisposable.add(
-                                    payloadDataManager.getNextReceiveAddressAndReserve(getCorrectedAccountIndex(accountPosition), "Payment request "+transaction.getId())
+                                    payloadDataManager.getNextReceiveAddressAndReserve(getCorrectedAccountIndex(accountPosition), "Payment request " + transaction.getId())
                                             .doOnNext(paymentRequest::setAddress)
                                             .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
                                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())
@@ -686,6 +713,68 @@ public class BalanceViewModel extends BaseViewModel {
         rxBus.unregister(ContactsEvent.class, contactsEventObservable);
         rxBus.unregister(NotificationPayload.class, notificationObservable);
         rxBus.unregister(List.class, txListObservable);
+        rxBus.unregister(AuthEvent.class, authEventObservable);
         super.destroy();
+    }
+
+    public List<OnboardingPagerContent> getOnboardingPages() {
+
+        List<OnboardingPagerContent> pages = new ArrayList<>();
+
+        if (onboardingDataManager.isSepa() && BuildConfig.BUY_BITCOIN_ENABLED) {
+            pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_current_price),
+                    getFormattedPriceString(),
+                    stringUtils.getString(R.string.onboarding_buy_content),
+                    stringUtils.getString(R.string.onboarding_buy_bitcoin),
+                    MainActivity.ACTION_BUY,
+                    R.color.primary_blue_accent,
+                    R.drawable.vector_buy_offset));
+        }
+
+        //Receive bitcoin
+        pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_receive_bitcoin),
+                "",
+                stringUtils.getString(R.string.onboarding_receive_content),
+                stringUtils.getString(R.string.receive_bitcoin),
+                MainActivity.ACTION_RECEIVE,
+                R.color.secondary_teal_medium,
+                R.drawable.vector_receive_offset));
+
+        //QR Codes
+        pages.add(new OnboardingPagerContent(stringUtils.getString(R.string.onboarding_qr_codes),
+                "",
+                stringUtils.getString(R.string.onboarding_qr_codes_content),
+                stringUtils.getString(R.string.onboarding_scan_address),
+                MainActivity.ACTION_SEND,
+                R.color.primary_navy_medium,
+                R.drawable.vector_qr_offset));
+        return pages;
+    }
+
+    private String getFormattedPriceString() {
+        String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
+        double lastPrice = exchangeRateFactory.getLastPrice(fiat);
+        String fiatSymbol = exchangeRateFactory.getSymbol(fiat);
+        DecimalFormat format = new DecimalFormat();
+        format.setMinimumFractionDigits(2);
+        return stringUtils.getFormattedString(
+                R.string.current_price_btc,
+                fiatSymbol + format.format(lastPrice));
+    }
+
+    public boolean isOnboardingComplete() {
+        return prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false);
+    }
+
+    public void setOnboardingComplete(boolean competed) {
+        prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, competed);
+    }
+
+    public void getBitcoinClicked() {
+        if (onboardingDataManager.isSepa()) {
+            dataListener.startBuyActivity();
+        } else {
+            dataListener.startReceiveFragment();
+        }
     }
 }

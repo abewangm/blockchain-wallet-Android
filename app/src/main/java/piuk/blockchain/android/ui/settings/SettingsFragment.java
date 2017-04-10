@@ -61,7 +61,6 @@ import piuk.blockchain.android.util.annotations.Thunk;
 import static android.app.Activity.RESULT_OK;
 import static piuk.blockchain.android.R.string.email;
 import static piuk.blockchain.android.R.string.success;
-import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATED_PIN;
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.REQUEST_CODE_VALIDATE_PIN;
 
@@ -73,7 +72,6 @@ public class SettingsFragment extends PreferenceFragmentCompat
     public static final String EXTRA_SHOW_ADD_EMAIL_DIALOG = "show_add_email_dialog";
     public static final String URL_TOS_POLICY = "https://blockchain.com/terms";
     public static final String URL_PRIVACY_POLICY = "https://blockchain.com/privacy";
-    public static final int REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT = 1984;
 
     // Profile
     private Preference guidPref;
@@ -387,13 +385,6 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     @Override
-    public void verifyPinCode() {
-        Intent intent = new Intent(getActivity(), PinEntryActivity.class);
-        intent.putExtra(KEY_VALIDATING_PIN_FOR_RESULT, true);
-        startActivityForResult(intent, REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT);
-    }
-
-    @Override
     public void showFingerprintDialog(String pincode) {
         FingerprintDialog dialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
         dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
@@ -589,9 +580,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     .setNegativeButton(android.R.string.cancel, null);
 
             if (!viewModel.isSmsVerified() && !viewModel.getSms().isEmpty()) {
-                alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) -> {
-                    viewModel.updateSms(viewModel.getSms());
-                });
+                alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) ->
+                        viewModel.updateSms(viewModel.getSms()));
             }
 
             AlertDialog dialog = alertDialogSmsBuilder.create();
@@ -703,8 +693,6 @@ public class SettingsFragment extends PreferenceFragmentCompat
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_VALIDATE_PIN && resultCode == RESULT_OK) {
             viewModel.pinCodeValidatedForChange();
-        } else if (requestCode == REQUEST_CODE_VALIDATE_PIN_FOR_FINGERPRINT && resultCode == RESULT_OK) {
-            viewModel.pinCodeValidatedForFingerprint(data.getStringExtra(KEY_VALIDATED_PIN));
         }
     }
 

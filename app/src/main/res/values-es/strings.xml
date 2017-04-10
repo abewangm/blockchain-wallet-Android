@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">Aceptar la comisión más alta</string>
     <string name="large_tx_high_fee_warning">"Esta transacción requiere una comisión más alta para el consumo 'polvo', debido al bajo monto del cambio a devolver."</string>
 
-    <string name="transactions">Transacciones</string>
+    <string name="overview">Transacciones</string>
     <string name="invalid_password_too_short">Por favor, ingrese más de 3 caracteres</string>
     <string name="change_pin_new_matches_current">No puede usar su PIN actual como PIN nuevo</string>
     <string name="account_locked_title">Cuenta bloqueada</string>

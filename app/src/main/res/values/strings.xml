@@ -14,7 +14,7 @@
 
     <string name="send_bitcoin">Send</string>
     <string name="receive_bitcoin">Receive</string>
-    <string name="transactions">Transactions</string>
+    <string name="overview">Overview</string>
 
     <string name="cancel">Cancel</string>
     <string name="yes">Yes</string>
@@ -229,7 +229,7 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="check_email_to_auth_login">Please check your email to approve this login attempt.</string>
     <string name="transaction_fee">Transaction Fee</string>
-    <string name="your_transactions">Your Transactions</string>
+    <string name="your_transactions">No Transactions</string>
     <string name="transaction_occur_when">Transactions occur when you receive and send bitcoin.</string>
     <string name="click">Click</string>
     <string name="to_start_sending_and_receiving_btc">to start sending and receiving bitcoin.</string>
@@ -662,5 +662,29 @@
     <!-- SURVEY PROMPT -->
     <string name="survey_message">Would you like to fill out a short survey to help improve your wallet experience?\n\nWe value your feedback!</string>
     <string name="survey_positive_button">Take survey</string>
+
+    <!-- ONBOARDING -->
+    <string name="onboarding_fingerprint_title">Fingerprint Login</string>
+    <string name="onboarding_fingerprint_summary">Use fingerprint login instead of your PIN to authenticate and access your wallet.</string>
+    <string name="onboarding_fingerprint_enable">Enable fingerprint</string>
+    <string name="onboarding_complete_later">I\'ll do this later</string>
+    <string name="onboarding_check_inbox_title">Check Your Inbox</string>
+    <string name="onboarding_check_inbox_summary">Look for an email from Blockchain and click the verification link to complete your wallet setup.</string>
+    <string name="onboarding_verify_email">Verify email</string>
+    <string name="onboarding_receive_bitcoin">Receive Bitcoin</string>
+    <string name="onboarding_current_price">Current Price:</string>
+    <string name="onboarding_qr_codes">QR Codes</string>
+    <string name="onboarding_scan_address">Scan Address</string>
+    <string name="onboarding_buy_content">We work with exchange partners all over the world, so you can buy bitcoin directly from your wallet.</string>
+    <string name="onboarding_receive_content">Send your wallet address to a friend to request bitcoin. An address is a string of random letters and numbers that change for each transaction.</string>
+    <string name="onboarding_qr_codes_content">An address can also be shown as a QR code. Scan a friend’s QR code to quickly capture their wallet address.</string>
+
+    <!-- BUY BITCOIN -->
+    <string name="onboarding_buy_bitcoin">Buy Bitcoin</string>
+    <string name="onboarding_get_bitcoin">Get Bitcoin</string>
+    <string name="onboarding_complete_title">That\'s it for now!</string>
+    <string name="onboarding_complete_content">We’ll keep you up-to-date here with recommendations and new features.</string>
+    <string name="onboarding_start_over">Start Over</string>
+    <string name="onboarding_skip_all">Skip All</string>
 
 </resources>

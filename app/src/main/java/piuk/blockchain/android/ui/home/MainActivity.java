@@ -2,8 +2,10 @@ package piuk.blockchain.android.ui.home;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
@@ -20,6 +22,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -27,6 +30,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
@@ -50,6 +54,7 @@ import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.buy.BuyActivity;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment;
@@ -78,6 +83,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         ContactPaymentRequestNotesFragment.FragmentInteractionListener,
         ContactPaymentDialog.OnContactPaymentDialogInteractionListener {
 
+    public static final String ACTION_SEND = "info.blockchain.wallet.ui.BalanceFragment.SEND";
+    public static final String ACTION_RECEIVE = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE";
+    public static final String ACTION_BUY = "info.blockchain.wallet.ui.BalanceFragment.BUY";
+
     private static final String SUPPORT_URI = "https://support.blockchain.com/";
     private static final int REQUEST_BACKUP = 2225;
     private static final int MERCHANT_ACTIVITY = 1;
@@ -87,12 +96,14 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public static final String EXTRA_RECIPIENT_ID = "recipient_id";
     public static final String EXTRA_MDID = "mdid";
     public static final String EXTRA_FCTX_ID = "fctx_id";
+
+    public static final String WEB_VIEW_STATE_KEY = "web_view_state";
     public static final int SCAN_URI = 2007;
 
     @Thunk boolean drawerIsOpen = false;
 
     private MainViewModel viewModel;
-    private ActivityMainBinding binding;
+    @Thunk ActivityMainBinding binding;
     private MaterialProgressDialog fetchTransactionsProgress;
     private AlertDialog rootedDialog;
     private MaterialProgressDialog materialProgressDialog;
@@ -101,12 +112,34 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private Toolbar toolbar;
     private boolean paymentToContactMade = false;
     private Typeface typeface;
+    private WebView buyWebView;
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            if (intent.getAction().equals(ACTION_SEND) && getActivity() != null) {
+                startScanActivity();
+            } else if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
+                binding.bottomNavigation.setCurrentItem(2);
+            } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
+                startActivity(putWebViewState(new Intent(MainActivity.this, BuyActivity.class)));
+            }
+        }
+    };
 
     @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        IntentFilter filterSend = new IntentFilter(ACTION_SEND);
+        IntentFilter filterReceive = new IntentFilter(ACTION_RECEIVE);
+        IntentFilter filterBuy = new IntentFilter(ACTION_BUY);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterSend);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceive);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBuy);
 
         appUtil = new AppUtil(this);
         viewModel = new MainViewModel(this);
@@ -143,7 +176,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
         // Create items
         AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.white);
-        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.transactions, R.drawable.vector_transactions, R.color.white);
+        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.overview, R.drawable.vector_transactions, R.color.white);
         AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.receive_bitcoin, R.drawable.vector_receive, R.color.white);
 
         // Add items
@@ -190,6 +223,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         if (!BuildConfig.CONTACTS_ENABLED) {
             hideContacts();
         }
+        if (!BuildConfig.BUY_BITCOIN_ENABLED) {
+            //Hide Buy Bitcoin
+            setBuyBitcoinVisible(false);
+        } else {
+            setupBuyWebView();
+        }
     }
 
     @SuppressLint("NewApi")
@@ -203,8 +242,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         viewModel.destroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        super.onDestroy();
     }
 
     @Override
@@ -311,7 +351,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         ToastCustom.makeText(getActivity(), getString(R.string.exit_confirm), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
     }
 
-    private void startScanActivity() {
+    @Thunk
+    void startScanActivity() {
         if (!appUtil.isCameraOpen()) {
             Intent intent = new Intent(MainActivity.this, CaptureActivity.class);
             startActivityForResult(intent, SCAN_URI);
@@ -324,6 +365,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         startSendFragment(strResult, scanRoute);
     }
 
+    private Intent putWebViewState(Intent intent) {
+        Bundle state = new Bundle();
+        buyWebView.saveState(state);
+        return intent.putExtra(WEB_VIEW_STATE_KEY, state);
+    }
+
     public void selectDrawerItem(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.nav_backup:
@@ -331,6 +378,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 break;
             case R.id.nav_addresses:
                 startActivity(new Intent(MainActivity.this, AccountActivity.class));
+                break;
+            case R.id.nav_buy:
+                startActivity(putWebViewState(new Intent(MainActivity.this, BuyActivity.class)));
                 break;
             case R.id.nav_contacts:
                 ContactsListActivity.start(this, null);
@@ -475,28 +525,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         }, 500);
     }
 
-    private Context getActivity() {
+    @Thunk
+    Context getActivity() {
         return this;
-    }
-
-    @Override
-    public void showEmailVerificationDialog(String email) {
-        String message = String.format(getString(R.string.security_centre_email_message), email);
-        SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
-                R.string.security_centre_email_title,
-                message,
-                R.drawable.vector_email,
-                R.string.security_centre_email_check,
-                true,
-                false);
-        securityPromptDialog.showDialog(getSupportFragmentManager());
-        securityPromptDialog.setNegativeButtonListener(v -> securityPromptDialog.dismiss());
-        securityPromptDialog.setPositiveButtonListener(v -> {
-            securityPromptDialog.dismiss();
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_APP_EMAIL);
-            startActivity(Intent.createChooser(intent, getString(R.string.security_centre_email_check)));
-        });
     }
 
     @Override
@@ -516,6 +547,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             intent.putExtra(EXTRA_SHOW_ADD_EMAIL_DIALOG, true);
             startActivity(intent);
         });
+
         securityPromptDialog.setNegativeButtonListener(view -> securityPromptDialog.dismiss());
     }
 
@@ -659,6 +691,20 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private void hideContacts() {
         Menu menu = binding.navigationView.getMenu();
         menu.findItem(R.id.nav_contacts).setVisible(false);
+    }
+
+    @Override
+    public void setBuyBitcoinVisible(boolean visible) {
+        Menu menu = binding.navigationView.getMenu();
+        menu.findItem(R.id.nav_buy).setVisible(visible);
+    }
+
+    private void setupBuyWebView() {
+        // Setup buy WebView
+        // TODO: 17/03/2017 Check if there's a better way to improve loading time of this webview
+        buyWebView = new WebView(this);
+        buyWebView.getSettings().setJavaScriptEnabled(true);
+        buyWebView.loadUrl("http://localhost:8080/wallet/#/intermediate");
     }
 
     private void applyFontToMenuItem(MenuItem menuItem) {

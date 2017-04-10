@@ -14,7 +14,6 @@ import android.util.Log;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
 import info.blockchain.wallet.api.WalletApi;
-
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import javax.inject.Inject;
@@ -24,6 +23,7 @@ import dagger.Lazy;
 import io.reactivex.plugins.RxJavaPlugins;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AndroidUtils;
@@ -49,6 +49,15 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Inject
     @Named("server")
     protected Lazy<Retrofit> retrofitServer;
+    @Inject
+    @Named("sfox")
+    protected Lazy<Retrofit> sfoxApi;
+    @Inject
+    @Named("coinify")
+    protected Lazy<Retrofit> coinify;
+
+    @Inject protected PrefsUtil prefsUtil;
+    @Inject protected RxBus rxBus;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -82,9 +91,10 @@ public class BlockchainApplication extends Application implements FrameworkInter
         AppUtil appUtil = new AppUtil(this);
 
         AccessState.getInstance().initAccessState(this,
-                new PrefsUtil(this),
+                prefsUtil,
                 new WalletService(new WalletApi()),
-                appUtil);
+                appUtil,
+                rxBus);
 
         // Apply PRNG fixes on app start if needed
         appUtil.applyPRNGFixes();
@@ -123,8 +133,12 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
     @Override
     public Retrofit getRetrofitSFOXInstance() {
-        // TODO: 20/03/2017 This will need updating shortly
-        return null;
+        return sfoxApi.get();
+    }
+
+    @Override
+    public Retrofit getRetrofitCoinifyInstance() {
+        return coinify.get();
     }
 
     @Override

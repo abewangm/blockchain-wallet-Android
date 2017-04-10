@@ -17,8 +17,7 @@ import java.security.SecureRandom;
 
 import io.reactivex.Observable;
 import io.reactivex.exceptions.Exceptions;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.ui.auth.LogoutActivity;
@@ -36,18 +35,18 @@ public class AccessState {
     private PrefsUtil prefs;
     private WalletService walletService;
     private AppUtil appUtil;
-    private String mPin;
+    private RxBus rxBus;
+    private String pin;
     private boolean isLoggedIn = false;
     private PendingIntent logoutPendingIntent;
+    private boolean inSepaCountry = false;
     private static AccessState instance;
-    // TODO: 02/03/2017 Refactor me out of here
-    @Deprecated
-    private static final Subject<AuthEvent> authEventSubject = PublishSubject.create();
 
-    public void initAccessState(Context context, PrefsUtil prefs, WalletService walletService, AppUtil appUtil) {
+    public void initAccessState(Context context, PrefsUtil prefs, WalletService walletService, AppUtil appUtil, RxBus rxBus) {
         this.prefs = prefs;
         this.walletService = walletService;
         this.appUtil = appUtil;
+        this.rxBus = rxBus;
 
         Intent intent = new Intent(context, LogoutActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -71,7 +70,7 @@ public class AccessState {
 
     @Deprecated
     public Observable<String> validatePin(String passedPin) {
-        mPin = passedPin;
+        pin = passedPin;
 
         String key = prefs.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
         String encryptedPassword = prefs.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
@@ -103,7 +102,7 @@ public class AccessState {
             return Observable.just(false);
         }
 
-        mPin = passedPin;
+        pin = passedPin;
         appUtil.applyPRNGFixes();
 
         return Observable.create(subscriber -> {
@@ -115,8 +114,8 @@ public class AccessState {
             String value = new String(Hex.encode(bytes), "UTF-8");
 
             walletService.setAccessKey(key, value, passedPin)
-                    .subscribe(call -> {
-                        if (call.isSuccessful()) {
+                    .subscribe(response -> {
+                        if (response.isSuccessful()) {
                             String encryptionKey = Hex.toHexString(value.getBytes("UTF-8"));
 
                             String encryptedPassword = new AESUtilWrapper().encrypt(
@@ -131,7 +130,7 @@ public class AccessState {
                                 subscriber.onComplete();
                             }
                         } else {
-                            throw Exceptions.propagate(new Throwable("Validate access failed: " + call.errorBody().string()));
+                            throw Exceptions.propagate(new Throwable("Validate access failed: " + response.errorBody().string()));
                         }
 
                     }, throwable -> {
@@ -144,11 +143,11 @@ public class AccessState {
     }
 
     public void setPIN(@Nullable String pin) {
-        mPin = pin;
+        this.pin = pin;
     }
 
     public String getPIN() {
-        return mPin;
+        return pin;
     }
 
     /**
@@ -168,11 +167,23 @@ public class AccessState {
     }
 
     public void logout(Context context) {
-        mPin = null;
+        pin = null;
         Intent intent = new Intent(context, LogoutActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.setAction(LOGOUT_ACTION);
         context.startActivity(intent);
+    }
+
+    /**
+     * Returns whether or not a user is accessing their wallet from a SEPA country, ie should be
+     * able to see buy/sell prompts.
+     */
+    public boolean getInSepaCountry() {
+        return inSepaCountry;
+    }
+
+    public void setInSepaCountry(boolean inSepaCountry) {
+        this.inSepaCountry = inSepaCountry;
     }
 
     public boolean isLoggedIn() {
@@ -183,23 +194,14 @@ public class AccessState {
         prefs.logIn();
         isLoggedIn = loggedIn;
         if (isLoggedIn) {
-            authEventSubject.onNext(AuthEvent.LOGIN);
+            rxBus.emitEvent(AuthEvent.class, AuthEvent.LOGIN);
         } else {
-            authEventSubject.onNext(AuthEvent.LOGOUT);
+            rxBus.emitEvent(AuthEvent.class, AuthEvent.LOGOUT);
         }
     }
 
-    /**
-     * Returns a {@link Subject} that publishes login/logout events
-     */
-    @Deprecated
-    public Subject<AuthEvent> getAuthEventSubject() {
-        return authEventSubject;
+    public void unpairWallet() {
+        rxBus.emitEvent(AuthEvent.class, AuthEvent.UNPAIR);
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public enum AuthEvent {
-        LOGIN,
-        LOGOUT
-    }
 }

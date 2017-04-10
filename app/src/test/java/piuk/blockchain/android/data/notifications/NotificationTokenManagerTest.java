@@ -1,8 +1,8 @@
 package piuk.blockchain.android.data.notifications;
 
 import info.blockchain.wallet.payload.PayloadManager;
-
 import info.blockchain.wallet.payload.data.Wallet;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,12 +12,12 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import io.reactivex.Completable;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.access.AccessState.AuthEvent;
+import piuk.blockchain.android.data.access.AuthEvent;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.services.NotificationService;
 import piuk.blockchain.android.util.PrefsUtil;
 
@@ -35,12 +35,13 @@ public class NotificationTokenManagerTest {
     @Mock private AccessState accessState;
     @Mock private PayloadManager payloadManager;
     @Mock private PrefsUtil prefsUtil;
+    @Mock private RxBus rxBus;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        subject = new NotificationTokenManager(notificationService, accessState, payloadManager, prefsUtil);
+        subject = new NotificationTokenManager(notificationService, accessState, payloadManager, prefsUtil, rxBus);
     }
 
     @Test
@@ -70,15 +71,14 @@ public class NotificationTokenManagerTest {
         when(mockPayload.getGuid()).thenReturn("guid");
         when(mockPayload.getSharedKey()).thenReturn("sharedKey");
         when(payloadManager.getPayload()).thenReturn(mockPayload);
-        Subject<AuthEvent> testSubject = PublishSubject.create();
-        when(accessState.getAuthEventSubject()).thenReturn(testSubject);
+        Observable<AuthEvent> authEventObservable = Observable.just(AuthEvent.LOGIN);
+        when(rxBus.register(AuthEvent.class)).thenReturn(authEventObservable);
         when(notificationService.sendNotificationToken(anyString(), anyString(), anyString())).thenReturn(Completable.complete());
         // Act
         subject.storeAndUpdateToken("token");
-        testSubject.onNext(AuthEvent.LOGIN);
         // Assert
         verify(accessState).isLoggedIn();
-        verify(accessState).getAuthEventSubject();
+        verify(rxBus).register(AuthEvent.class);
         verify(payloadManager).getPayload();
         verify(notificationService).sendNotificationToken(anyString(), anyString(), anyString());
     }

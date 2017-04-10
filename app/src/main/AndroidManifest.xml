@@ -125,6 +125,13 @@
         <activity
             android:name=".ui.chooser.AccountChooserActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".ui.onboarding.OnboardingActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+
+        <activity
+          android:name=".ui.buy.BuyActivity"
+          android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <service
             android:name=".data.websocket.WebSocketService"
@@ -173,7 +180,6 @@
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-
     </application>
 
 </manifest>

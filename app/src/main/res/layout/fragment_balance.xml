@@ -1,45 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- MAIN CONTENT -->
-    <!-- This wrapper prevents the SwipeRefreshLayout from interrupting Fragment transactions -->
-    <!-- See: http://stackoverflow.com/a/30576574/3245482 -->
-    <FrameLayout
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
 
-        <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/swipe_container"
+        <!-- HEADER LAYOUT -->
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/app_bar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="@dimen/balance_bar_height"
+            android:fitsSystemWindows="true"
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-            <FrameLayout
-                android:id="@+id/balance_main_content"
+            <android.support.design.widget.CollapsingToolbarLayout
+                android:id="@+id/toolbar_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/white">
+                android:fitsSystemWindows="true"
+                app:contentScrim="?attr/colorPrimary"
+                app:titleEnabled="false"
+                android:elevation="0dp"
+                app:layout_scrollFlags="snap|scroll|exitUntilCollapsed">
 
-                <include
-                    android:id="@+id/no_transaction_message"
-                    layout="@layout/include_no_transaction_message"
-                    tools:visibility="gone" />
-
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/rvTransactions"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clipToPadding="false"
-                    android:paddingTop="@dimen/balance_bar_height" />
-
-                <!-- Balance -->
                 <RelativeLayout
                     android:id="@+id/balance_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/balance_bar_height"
-                    android:background="@color/primary_navy_medium"
-                    android:elevation="5dp"
-                    android:gravity="center_vertical">
+                    android:layout_height="wrap_content"
+                    app:layout_collapseMode="parallax"
+                    android:fitsSystemWindows="true"
+                    android:layout_gravity="bottom">
 
                     <TextView
                         android:id="@+id/balance"
@@ -65,7 +58,41 @@
                         android:theme="@style/SpinnerWhite"
                         tools:text="All wallets" />
                 </RelativeLayout>
-            </FrameLayout>
-        </android.support.v4.widget.SwipeRefreshLayout>
-    </FrameLayout>
+
+            </android.support.design.widget.CollapsingToolbarLayout>
+        </android.support.design.widget.AppBarLayout>
+
+        <!-- CONTENT LAYOUT -->
+        <!-- This wrapper prevents the SwipeRefreshLayout from interrupting Fragment transactions -->
+        <!-- See: http://stackoverflow.com/a/30576574/3245482 -->
+        <FrameLayout
+            android:id="@+id/main_content_framelayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:id="@+id/swipe_container"
+                android:animateLayoutChanges="true"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rvTransactions"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    tools:listitem="@layout/item_balance" />
+
+            </android.support.v4.widget.SwipeRefreshLayout>
+
+            <!-- NO TRANSACTION LAYOUT -->
+            <include
+                android:id="@+id/no_transaction_include"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                layout="@layout/include_no_transaction_message"/>
+
+        </FrameLayout>
+
+    </android.support.design.widget.CoordinatorLayout>
 </layout>

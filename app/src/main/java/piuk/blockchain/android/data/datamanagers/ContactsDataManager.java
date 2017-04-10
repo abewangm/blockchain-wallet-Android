@@ -478,6 +478,16 @@ public class ContactsDataManager {
         return notesTransactionMap;
     }
 
+    /**
+     * Clears all data in the {@link PendingTransactionListStore}.
+     */
+    public void resetContacts() {
+        contactsService.destroy();
+        pendingTransactionListStore.clearList();
+        notesTransactionMap.clear();
+        contactsTransactionMap.clear();
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // TOKEN FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////

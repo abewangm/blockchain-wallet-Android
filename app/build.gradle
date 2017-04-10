@@ -29,8 +29,10 @@ android {
         buildConfigField "String", "DEV_WEBSOCKET", devWebsocket
         buildConfigField "String", "STAGING_WEBSOCKET", stagingWebsocket
         buildConfigField "String", "TESTNET_WEBSOCKET", testnetWebsocket
-        // Flag for Contacts feature
+
+        // Flag for Buy and Contacts feature
         buildConfigField "boolean", "CONTACTS_ENABLED", "true"
+        buildConfigField "boolean", "BUY_BITCOIN_ENABLED", "true"
     }
     buildTypes {
         release {
@@ -78,6 +80,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     lintOptions {
+        disable 'MissingTranslation'
         checkReleaseBuilds true
         abortOnError false
         fatal 'StopShip'
@@ -170,8 +173,11 @@ dependencies {
     compile 'uk.co.chrisjenx:calligraphy:2.2.0'
     // GSON
     compile 'com.google.code.gson:gson:2.8.0'
-    //Logging
-    compile 'org.slf4j:slf4j-simple:1.7.20'
+    // Logging
+    prodCompile 'org.slf4j:slf4j-nop:1.7.20'
+    devCompile 'org.slf4j:slf4j-simple:1.7.20'
+    // ViewPager Indicator
+    compile 'me.relex:circleindicator:1.2.2@aar'
 
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
@@ -197,7 +203,9 @@ dependencies {
     // Unit Tests in Kotlin
     testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testCompile 'com.nhaarman:mockito-kotlin:1.3.0'
+    testCompile("com.nhaarman:mockito-kotlin:1.4.0") {
+        exclude module: 'kotlin-stdlib'
+    }
 }
 
 buildscript {
@@ -207,7 +215,6 @@ buildscript {
 
     dependencies {
         classpath 'me.tatarka:gradle-retrolambda:3.4.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
 

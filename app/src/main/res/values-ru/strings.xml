@@ -407,7 +407,7 @@
     <string name="accept_higher_fee">Принять более высокую комиссию</string>
     <string name="large_tx_high_fee_warning">"Эта транзакция требует более высокой комиссии за поглощение незначительных сумм в связи с малым количеством выдаваемой сдачи."</string>
 
-    <string name="transactions">Транзакции</string>
+    <string name="overview">Транзакции</string>
     <string name="invalid_password_too_short">Нужно ввести более 3 символов</string>
     <string name="change_pin_new_matches_current">Нельзя использовать текущий PIN как новый PIN</string>
     <string name="account_locked_title">Аккаунт заблокирован</string>

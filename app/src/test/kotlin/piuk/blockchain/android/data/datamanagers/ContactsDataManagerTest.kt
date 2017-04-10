@@ -21,6 +21,7 @@ import piuk.blockchain.android.data.services.ContactsService
 import piuk.blockchain.android.data.stores.PendingTransactionListStore
 import piuk.blockchain.android.equals
 import java.util.*
+import kotlin.test.assertNull
 
 class ContactsDataManagerTest : RxTest() {
 
@@ -606,6 +607,20 @@ class ContactsDataManagerTest : RxTest() {
         val result = subject.getNotesTransactionMap()
         // Assert
         result equals subject.notesTransactionMap
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun resetContacts() {
+        // Arrange
+
+        // Act
+        subject.resetContacts()
+        // Assert
+        verify(mockPendingTransactionListStore).clearList()
+        verify(mockContactsService).destroy()
+        subject.notesTransactionMap.size equals 0
+        subject.contactsTransactionMap.size equals 0
     }
 
 }
