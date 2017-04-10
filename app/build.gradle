@@ -203,7 +203,9 @@ dependencies {
     // Unit Tests in Kotlin
     testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testCompile 'com.nhaarman:mockito-kotlin:1.4.0'
+    testCompile("com.nhaarman:mockito-kotlin:1.4.0") {
+        exclude module: 'kotlin-stdlib'
+    }
 }
 
 buildscript {
@@ -213,7 +215,6 @@ buildscript {
 
     dependencies {
         classpath 'me.tatarka:gradle-retrolambda:3.4.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
 

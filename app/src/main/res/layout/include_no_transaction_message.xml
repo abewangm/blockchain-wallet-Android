@@ -27,6 +27,13 @@
                 android:visibility="gone"
                 tools:visibility="visible">
 
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    android:layout_marginBottom="16dp"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
                 <include
                     android:id="@+id/onboarding_complete_layout"
                     layout="@layout/fragment_onboarding_complete" />

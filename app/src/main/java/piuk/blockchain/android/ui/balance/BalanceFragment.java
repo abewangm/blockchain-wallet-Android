@@ -657,7 +657,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                         @Override
                         public void onPageSelected(int position) {
                             // No-op
-                        }
+                        }   
 
                         @Override
                         public void onPageScrollStateChanged(int state) {
@@ -667,6 +667,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         } else {
             onboardingPagerAdapter.notifyPagesChanged(viewModel.getOnboardingPages());
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setAdapter(onboardingPagerAdapter);
+            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.post(() ->
+                    binding.noTransactionInclude.progressBar.setVisibility(View.GONE));
             binding.noTransactionInclude.onboardingViewpagerLayout.indicator.setViewPager(
                     binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding);
         }
