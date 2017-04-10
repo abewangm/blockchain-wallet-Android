@@ -56,7 +56,6 @@ public class TransactionDetailViewModel extends BaseViewModel {
     @Inject ExchangeRateFactory mExchangeRateFactory;
     @Inject ContactsDataManager mContactsDataManager;
 
-    private double mBtcExchangeRate;
     private String mFiatType;
 
     @VisibleForTesting TransactionSummary mTransaction;
@@ -103,7 +102,6 @@ public class TransactionDetailViewModel extends BaseViewModel {
         mMonetaryUtil = new MonetaryUtil(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
 
         mFiatType = mPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        mBtcExchangeRate = mExchangeRateFactory.getLastPrice(mFiatType);
     }
 
     @Override
