@@ -103,7 +103,7 @@
 
     <string name="support">Ayuda</string>
     <string name="rate_us">Califícanos</string>
-    <string name="about">Monedero Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Monedero Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Aplicación gratuita para comerciante</string>
     <string name="password_or_wipe">Entrar introduciendo tu contraseña u olvidar este monedero</string>
     <string name="use_password">Usar contraseña</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Descifrando el monedero...</string>
     <string name="password_unchanged">Contraseña sin cambios</string>
     <string name="password_changed">Contraseñada cambiada</string>
-    <string name="verify_email2">Tu dirección de correo electrónico verificada se utiliza para enviar códigos de inicio de sesión cuando se detecta actividad sospechosa o inusual, para recordarte tu ID de inicio de sesión de monedero y para enviar avisos de pago de Bitcoin cuando recibas los fondos. No utilizaremos tu dirección de correo electrónico para fines de mercadeo y/o publicidad.</string>
+    <string name="verify_email2">Tu dirección de correo electrónico verificada se utiliza para enviar códigos de inicio de sesión cuando se detecta actividad sospechosa o inusual, para recordarte tu ID de inicio de sesión de monedero y para enviar avisos de pago de Bitcoin cuando recibas los fondos.</string>
     <string name="disable_root_warning">Desactivar la advertencia de dispositivo con sistema operativo modificado</string>
 
     <string name="show_balance">Mostrar saldo</string>
@@ -366,8 +366,6 @@
     <string name="two_fa">Verificación de 2 pasos</string>
     <string name="tor_requests">Bloquear solicitudes de Tor</string>
     <string name="tor_summary">¿Te gustaría bloquear aquellas direcciones IP que son conocidas por formar parte de la red de anonimidad Tor, para evitar que accedan a tu monedero? La red Tor es usada con frecuencia por piratas informáticos que intentan acceder a los monederos de los usuarios de Blockchain.</string>
-    <string name="password_hint">Sugerencia para la contraseña</string>
-    <string name="password_hint_summary">Tu monedero Blockchain nunca comunica tu contraseña a nuestros servidores. Esto significa que no tenemos idea de cuál pueda ser tu contraseña y no podemos restablecerla si la olvidas. Crea una sugerencia de contraseña recordable que podamos enviar a tu dirección de correo verificada en caso de que olvides tu contraseña.</string>
     <string name="change_password">Cambiar contraseña</string>
     <string name="change_password_summary">Tu contraseña nunca es compartida con nuestros servidores, lo que significa que no podemos ayudarte a restablecerla si la olvidas. Asegúrate de anotar tu frase de recuperación para restaurar el acceso a tu monedero en caso de que pierdas tu contraseña.</string>
     <string name="verify_email_notice">Hemos enviado un enlace de verificación a tu dirección de correo electrónico. Haz clic en el enlace de verificación para verificar tu dirección de correo electrónico.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Si, calificar el monedero Blockchain</string>
     <string name="rate_no">No, gracias</string>
     <string name="rate_later">Recordarme más tarde</string>
-    <string name="hint_reveals_password_error">No se puede establecer la contraseña principal de la cartera como tu sugerencia de contraseña.</string>
     <string name="why_has_my_address_changed">¿Por qué ha cambiado mi dirección?</string>
     <string name="learn_more">Saber más</string>
 
@@ -410,7 +407,7 @@
     <string name="accept_higher_fee">Aceptar la comisión más alta</string>
     <string name="large_tx_high_fee_warning">"Esta transacción requiere una comisión más alta para el consumo 'polvo', debido al bajo monto del cambio a devolver."</string>
 
-    <string name="transactions">Transacciones</string>
+    <string name="overview">Transacciones</string>
     <string name="invalid_password_too_short">Por favor, ingrese más de 3 caracteres</string>
     <string name="change_pin_new_matches_current">No puede usar su PIN actual como PIN nuevo</string>
     <string name="account_locked_title">Cuenta bloqueada</string>

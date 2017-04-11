@@ -22,16 +22,16 @@ public class ApiInterceptor implements Interceptor {
         long startTime = System.nanoTime();
 
         String requestLog = String.format(
-                "Sending request %s with headers %s%n%s",
+                "Sending request of type %s to %s with headers %s",
+                request.method(),
                 request.url(),
-                chain.connection(),
                 request.headers());
 
         if (request.method().compareToIgnoreCase("post") == 0) {
             requestLog = "\n" + requestLog + "\n" + requestBodyToString(request.body());
         }
 
-        Log.d(TAG, "Request:" + "\n" + requestLog);
+        Log.v(TAG, "Request:" + "\n" + requestLog);
 
         Response response = chain.proceed(request);
         long endTime = System.nanoTime();
@@ -45,9 +45,9 @@ public class ApiInterceptor implements Interceptor {
 
         String bodyString = response.body().string();
         if (response.code() == 200) {
-            Log.d(TAG, "Response:" + "\n" + responseLog + "\n" + bodyString);
+            Log.v(TAG, "Response: " + response.code() + "\n" + responseLog + "\n" + bodyString);
         } else {
-            Log.e(TAG, "Response:" + "\n" + responseLog + "\n" + bodyString);
+            Log.e(TAG, "Response: " + response.code() + "\n" + responseLog + "\n" + bodyString);
         }
 
         return response.newBuilder()

@@ -3,11 +3,11 @@ package piuk.blockchain.android.ui.auth;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.annotation.UiThread;
 import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 
-import info.blockchain.api.WalletPayload;
-import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
 
 import javax.inject.Inject;
 
@@ -21,14 +21,19 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
 
+@SuppressWarnings("WeakerAccess")
 public class PasswordRequiredViewModel extends BaseViewModel {
 
-    @Inject protected AppUtil mAppUtil;
-    @Inject protected PrefsUtil mPrefsUtil;
-    @Inject protected AuthDataManager mAuthDataManager;
-    @Inject protected AccessState mAccessState;
-    private DataListener mDataListener;
-    @VisibleForTesting boolean mWaitingForAuth = false;
+    @VisibleForTesting static final String KEY_AUTH_REQUIRED = "Authorization Required";
+    private static final String TAG = PasswordRequiredViewModel.class.getSimpleName();
+
+    @Inject protected AppUtil appUtil;
+    @Inject protected PrefsUtil prefsUtil;
+    @Inject protected AuthDataManager authDataManager;
+    @Inject protected AccessState accessState;
+    private DataListener dataListener;
+    private String sessionId;
+    @VisibleForTesting boolean waitingForAuth = false;
 
     public interface DataListener {
 
@@ -52,9 +57,9 @@ public class PasswordRequiredViewModel extends BaseViewModel {
 
     }
 
-    public PasswordRequiredViewModel(DataListener listener) {
+    PasswordRequiredViewModel(DataListener listener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
-        mDataListener = listener;
+        dataListener = listener;
     }
 
     @Override
@@ -62,20 +67,20 @@ public class PasswordRequiredViewModel extends BaseViewModel {
         // No-op
     }
 
-    public void onContinueClicked() {
-        if (mDataListener.getPassword().length() > 1) {
-            verifyPassword(new CharSequenceX(mDataListener.getPassword()));
+    void onContinueClicked() {
+        if (dataListener.getPassword().length() > 1) {
+            verifyPassword(dataListener.getPassword());
         } else {
-            mDataListener.showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
-            mDataListener.restartPage();
+            dataListener.showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
+            dataListener.restartPage();
         }
     }
 
-    public void onForgetWalletClicked() {
-        mDataListener.showForgetWalletWarning(new DialogButtonCallback() {
+    void onForgetWalletClicked() {
+        dataListener.showForgetWalletWarning(new DialogButtonCallback() {
             @Override
             public void onPositiveClicked() {
-                mAppUtil.clearCredentialsAndRestart();
+                appUtil.clearCredentialsAndRestart();
             }
 
             @Override
@@ -85,107 +90,101 @@ public class PasswordRequiredViewModel extends BaseViewModel {
         });
     }
 
-    private void verifyPassword(CharSequenceX password) {
-        mDataListener.showProgressDialog(R.string.validating_password, null, false);
+    private void verifyPassword(String password) {
+        dataListener.showProgressDialog(R.string.validating_password, null, false);
 
-        String guid = mPrefsUtil.getValue(PrefsUtil.KEY_GUID, "");
-        mWaitingForAuth = true;
+        String guid = prefsUtil.getValue(PrefsUtil.KEY_GUID, "");
+        waitingForAuth = true;
 
         compositeDisposable.add(
-                mAuthDataManager.getSessionId(guid)
-                        .flatMap(sessionId -> mAuthDataManager.getEncryptedPayload(guid, sessionId))
+                authDataManager.getSessionId(guid)
+                        .doOnNext(s -> sessionId = s)
+                        .flatMap(sessionId -> authDataManager.getEncryptedPayload(guid, sessionId))
                         .subscribe(response -> {
-                            if (response.equals(WalletPayload.KEY_AUTH_REQUIRED)) {
+                            if (response.errorBody() != null
+                                    && response.errorBody().string().contains(KEY_AUTH_REQUIRED)) {
+
                                 showCheckEmailDialog();
+
                                 compositeDisposable.add(
-                                        mAuthDataManager.startPollingAuthStatus(guid).subscribe(payloadResponse -> {
-                                            mWaitingForAuth = false;
+                                        authDataManager.startPollingAuthStatus(guid, sessionId)
+                                                .subscribe(payloadResponse -> {
+                                                    waitingForAuth = false;
 
-                                            if (payloadResponse == null || payloadResponse.equals(WalletPayload.KEY_AUTH_REQUIRED)) {
-                                                showErrorToastAndRestartApp(R.string.auth_failed);
-                                                return;
+                                                    if (payloadResponse == null || payloadResponse.contains(KEY_AUTH_REQUIRED)) {
+                                                        showErrorToastAndRestartApp(R.string.auth_failed);
+                                                        return;
 
-                                            }
-                                            attemptDecryptPayload(password, guid, payloadResponse);
+                                                    }
+                                                    attemptDecryptPayload(password, payloadResponse);
 
-                                        }, throwable -> {
-                                            mWaitingForAuth = false;
-                                            showErrorToastAndRestartApp(R.string.auth_failed);
-                                        }));
+                                                }, throwable -> {
+                                                    waitingForAuth = false;
+                                                    showErrorToastAndRestartApp(R.string.auth_failed);
+                                                }));
                             } else {
-                                mWaitingForAuth = false;
-                                attemptDecryptPayload(password, guid, response);
+                                waitingForAuth = false;
+                                attemptDecryptPayload(password, response.message());
                             }
                         }, throwable -> {
-                            throwable.printStackTrace();
+                            Log.e(TAG, "verifyPassword: ", throwable);
                             showErrorToastAndRestartApp(R.string.auth_failed);
                         }));
     }
 
-    private void attemptDecryptPayload(CharSequenceX password, String guid, String payload) {
-        mAuthDataManager.attemptDecryptPayload(password, guid, payload, new AuthDataManager.DecryptPayloadListener() {
-            @Override
-            public void onSuccess() {
-                mDataListener.goToPinPage();
-            }
-
-            @Override
-            public void onPairFail() {
-                showErrorToast(R.string.pairing_failed);
-            }
-
-            @Override
-            public void onAuthFail() {
-                showErrorToast(R.string.auth_failed);
-            }
-
-            @Override
-            public void onFatalError() {
-                showErrorToastAndRestartApp(R.string.auth_failed);
-            }
-        });
+    private void attemptDecryptPayload(String password, String payload) {
+        compositeDisposable.add(
+                authDataManager.initializeFromPayload(payload, password)
+                        .subscribe(() -> dataListener.goToPinPage(),
+                                throwable -> {
+                                    if (throwable instanceof HDWalletException) {
+                                        showErrorToast(R.string.pairing_failed);
+                                    } else if (throwable instanceof DecryptionException) {
+                                        showErrorToast(R.string.auth_failed);
+                                    } else {
+                                        showErrorToastAndRestartApp(R.string.auth_failed);
+                                    }
+                                }));
     }
 
     private void showCheckEmailDialog() {
-        mDataListener.showProgressDialog(R.string.check_email_to_auth_login, "120", true);
+        dataListener.showProgressDialog(R.string.check_email_to_auth_login, "120", true);
 
-        compositeDisposable.add(mAuthDataManager.createCheckEmailTimer()
-                .takeUntil(integer -> !mWaitingForAuth)
+        compositeDisposable.add(authDataManager.createCheckEmailTimer()
+                .takeUntil(integer -> !waitingForAuth)
                 .subscribe(integer -> {
                     if (integer <= 0) {
                         // Only called if timer has run out
                         showErrorToastAndRestartApp(R.string.pairing_failed);
                     } else {
-                        mDataListener.updateWaitingForAuthDialog(integer);
+                        dataListener.updateWaitingForAuthDialog(integer);
                     }
                 }, throwable -> {
                     showErrorToast(R.string.auth_failed);
-                    mWaitingForAuth = false;
+                    waitingForAuth = false;
                 }));
     }
 
-    public void onProgressCancelled() {
-        mWaitingForAuth = false;
+    void onProgressCancelled() {
+        waitingForAuth = false;
         destroy();
     }
 
-    @UiThread
     private void showErrorToast(@StringRes int message) {
-        mDataListener.dismissProgressDialog();
-        mDataListener.resetPasswordField();
-        mDataListener.showToast(message, ToastCustom.TYPE_ERROR);
+        dataListener.dismissProgressDialog();
+        dataListener.resetPasswordField();
+        dataListener.showToast(message, ToastCustom.TYPE_ERROR);
     }
 
-    @UiThread
     private void showErrorToastAndRestartApp(@StringRes int message) {
-        mDataListener.resetPasswordField();
-        mDataListener.dismissProgressDialog();
-        mDataListener.showToast(message, ToastCustom.TYPE_ERROR);
-        mAppUtil.clearCredentialsAndRestart();
+        dataListener.resetPasswordField();
+        dataListener.dismissProgressDialog();
+        dataListener.showToast(message, ToastCustom.TYPE_ERROR);
+        appUtil.clearCredentialsAndRestart();
     }
 
     @NonNull
-    public AppUtil getAppUtil() {
-        return mAppUtil;
+    AppUtil getAppUtil() {
+        return appUtil;
     }
 }

@@ -1,10 +1,8 @@
 package piuk.blockchain.android.ui.backup;
 
-import android.app.Fragment;
-import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +12,7 @@ import info.blockchain.wallet.payload.PayloadManager;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentBackupStartBinding;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
-import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.util.annotations.Thunk;
-
-import static android.app.Activity.RESULT_OK;
-import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
-import static piuk.blockchain.android.ui.auth.PinEntryFragment.REQUEST_CODE_VALIDATE_PIN;
 
 public class BackupWalletStartingFragment extends Fragment {
 
@@ -36,7 +29,7 @@ public class BackupWalletStartingFragment extends Fragment {
             mPayloadManager = PayloadManager.getInstance();
 
             // Wallet is double encrypted
-            if (mPayloadManager.getPayload().isDoubleEncrypted()) {
+            if (mPayloadManager.getPayload().isDoubleEncryption()) {
                 new SecondPasswordHandler(getActivity()).validate(new SecondPasswordHandler.ResultListener() {
                     @Override
                     public void onNoSecondPassword() {
@@ -54,10 +47,7 @@ public class BackupWalletStartingFragment extends Fragment {
                 });
 
             } else {
-                Intent intent = new Intent(getActivity(), PinEntryActivity.class);
-                intent.putExtra(KEY_VALIDATING_PIN_FOR_RESULT, true);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                startActivityForResult(intent, REQUEST_CODE_VALIDATE_PIN);
+                loadFragment(new BackupWalletWordListFragment());
             }
         });
 
@@ -66,18 +56,10 @@ public class BackupWalletStartingFragment extends Fragment {
 
     @Thunk
     void loadFragment(Fragment fragment) {
-        getFragmentManager().beginTransaction()
-                .setTransition(FragmentTransaction.TRANSIT_NONE)
+        getActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_frame, fragment)
                 .addToBackStack(null)
                 .commit();
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_VALIDATE_PIN && resultCode == RESULT_OK) {
-            loadFragment(new BackupWalletWordListFragment());
-        }
-    }
 }

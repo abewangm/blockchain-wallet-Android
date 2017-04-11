@@ -103,7 +103,7 @@
 
     <string name="support">Destek</string>
     <string name="rate_us">Bize puan verin</string>
-    <string name="about">Blockchain Cüzdanı %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Blockchain Cüzdanı %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Ücretsiz Tacir yatırımı</string>
     <string name="password_or_wipe">Şifrenizi kullanarak giriş yapın veya bu cüzdanı unutun</string>
     <string name="use_password">Şifre kullan</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Cüzdan şifresi çözülüyor...</string>
     <string name="password_unchanged">Şifre değiştirilmedi</string>
     <string name="password_changed">Şifre değiştirildi</string>
-    <string name="verify_email2">Doğrulanmış e-posta adresiniz, şüpheli veya sıradışı etkinlikler belirlendiği zaman oturum açma kodları göndermek, cüzdan oturum açma kimliğinizi size hatırlatmak ve para aldığınız zaman size bitcoin ödeme uyarıları göndermek için kullanılır.  E-posta adresinizi pazarlama amaçları için kullanmayacağız.</string>
+    <string name="verify_email2">Doğrulanmış e-posta adresiniz, şüpheli veya sıradışı etkinlikler belirlendiği zaman oturum açma kodları göndermek, cüzdan oturum açma kimliğinizi size hatırlatmak ve para aldığınız zaman size bitcoin ödeme uyarıları göndermek için kullanılır.</string>
     <string name="disable_root_warning">Kök dizin cihaz uyarısını devre dışı bırak</string>
 
     <string name="show_balance">Bakiyeyi Göster</string>
@@ -366,8 +366,6 @@
     <string name="two_fa">2-aşamalı Doğrulama</string>
     <string name="tor_requests">Tor Taleplerini Engelle</string>
     <string name="tor_summary">Tor anonimleştirme ağına ait olduğu bilinen IP adreslerinin cüzdanınıza erişimini engellemek ister misiniz? Tor ağı, Blochchain kullanıcı cüzdanlarına erişmek için korsanlar tarafından sıkça kullanılır.</string>
-    <string name="password_hint">Şifre İpucu</string>
-    <string name="password_hint_summary">Blockchain Cüzdanınız şifrenizi sunucularımıza asla sağlamaz. Bu da şifrenizin ne olduğunu bilmediğimiz ve unuttuğunuzda bunu yeniden ayarlamak için sıfırlayamadığımız anlamına gelir. Şifrenizi unutmanız durumunda doğrulanmış e-posta adresinize gönderebileceğimiz aklınızda kalacak bir şifre ipucu oluşturun.</string>
     <string name="change_password">Şifre Değiştir</string>
     <string name="change_password_summary">Şifreniz sunucularımızla asla paylaşılmaz, bu sebeple şifrenizi unuttuğunuz zaman sıfırlamanıza yardımcı olamıyoruz.  Şifrenin kaybolması durumunda cüzdanınıza erişimi sıfırlamak için kurtarma ifadenizi not ettiğinizden emin olun.</string>
     <string name="verify_email_notice">E-posta adresinize bir doğrulama bağlantısı gönderdik. E-posta adresinizi doğrulamak için lütfen gönderilen doğrulama bağlantısına tıklayın.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Evet, Blockchain Cüzdanına puan ver</string>
     <string name="rate_no">Hayır, teşekkürler</string>
     <string name="rate_later">Daha sonra hatırlat</string>
-    <string name="hint_reveals_password_error">Ana cüzdan şifrenizi şifre ipucunuz olarak ayarlayamazsınız.</string>
     <string name="why_has_my_address_changed">Adresim neden değişti?</string>
     <string name="learn_more">Daha Fazla Öğren</string>
 
@@ -410,7 +407,7 @@
     <string name="accept_higher_fee">Daha yüksek ücreti kabul et</string>
     <string name="large_tx_high_fee_warning">"Bu işlem, küçük miktarda para üstü iadesi sebebiyle toz tüketimi için daha yüksek bir ücret gerektirir."</string>
 
-    <string name="transactions">İşlemler</string>
+    <string name="overview">İşlemler</string>
     <string name="invalid_password_too_short">Lütfen 3 karakterden fazla girmeyin</string>
     <string name="change_pin_new_matches_current">Mevcut PIN kodunuzu yeni PIN kodunuz olarak giremezsiniz</string>
     <string name="account_locked_title">Hesap kilitlendi</string>

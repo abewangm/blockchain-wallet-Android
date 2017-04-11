@@ -27,10 +27,10 @@ class AccountAdapter extends RecyclerView.Adapter {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == TYPE_CREATE_NEW_WALLET_BUTTON || viewType == TYPE_IMPORT_ADDRESS_BUTTON) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row_header, parent, false);
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_accounts_row_header, parent, false);
             return new HeaderViewHolder(v);
         } else if (viewType == TYPE_ACCOUNT) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_accounts_row, parent, false);
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_accounts_row, parent, false);
             return new AccountViewHolder(v);
         } else {
             throw new IllegalArgumentException("Unknown ViewType " + viewType);
@@ -120,7 +120,6 @@ class AccountAdapter extends RecyclerView.Adapter {
         TextView address;
         TextView amount;
         TextView tag;
-        TextView description;
 
         AccountViewHolder(View view) {
             super(view);
@@ -128,7 +127,6 @@ class AccountAdapter extends RecyclerView.Adapter {
             address = (TextView) view.findViewById(R.id.my_account_row_address);
             amount = (TextView) view.findViewById(R.id.my_account_row_amount);
             tag = (TextView) view.findViewById(R.id.my_account_row_tag);
-            description = (TextView) view.findViewById(R.id.description);
         }
     }
 
@@ -138,7 +136,7 @@ class AccountAdapter extends RecyclerView.Adapter {
 
         HeaderViewHolder(View itemView) {
             super(itemView);
-            title = (TextView) itemView.findViewById(R.id.account_row_header);
+            title = (TextView) itemView.findViewById(R.id.header_name);
         }
     }
 

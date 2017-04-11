@@ -103,7 +103,7 @@
 
     <string name="support">Support</string>
     <string name="rate_us">Bewerten Sie uns</string>
-    <string name="about">Blockchain-Wallet %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Blockchain-Wallet %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Kostenlose Merchant-App</string>
     <string name="password_or_wipe">Anmeldung mithilfe des persönlichen Passworts oder diese Wallet vergessen</string>
     <string name="use_password">Passwort verwenden</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Wallet wird entschlüsselt ...</string>
     <string name="password_unchanged">Passwort wurde nicht geändert</string>
     <string name="password_changed">Passwort wurde geändert</string>
-    <string name="verify_email2">Ihre verifizierte E-Mail-Adresse wird bei Feststellung verdächtiger oder ungewöhnlicher Aktivitäten zur Übersendung von Anmeldecodes, aber auch zur Erinnerung an Ihre persönliche Wallet-Anmelde-ID und zum Versand von Bitcoin-Zahlungsbenachrichtigungen bei Eintreffen von Guthaben verwendet. Wir werden Ihre E-Mail-Adresse nicht zu Marketingzwecken benutzen.</string>
+    <string name="verify_email2">Ihre verifizierte E-Mail-Adresse wird bei Feststellung verdächtiger oder ungewöhnlicher Aktivitäten zur Übersendung von Anmeldecodes, aber auch zur Erinnerung an Ihre persönliche Wallet-Anmelde-ID und zum Versand von Bitcoin-Zahlungsbenachrichtigungen bei Eintreffen von Guthaben verwendet.</string>
     <string name="disable_root_warning">Warnmeldung des gerooteten Geräts deaktivieren</string>
 
     <string name="show_balance">Wallet-Stand anzeigen</string>
@@ -366,8 +366,6 @@
     <string name="two_fa">2-Schritt-Verifizierung</string>
     <string name="tor_requests">Tor-Anfragen sperren</string>
     <string name="tor_summary">Möchten Sie verhindern, dass bekannterweise dem Anonymisierungsnetzwerk Tor zugehörige IP-Adressen Zugang zu Ihrer Wallet erhalten? Hackers versuchen häufig mithilfe des Tor-Netzwerkes, Zugriff auf Wallets von Blockchain-Benutzern zu bekommen.</string>
-    <string name="password_hint">Passworthinweis</string>
-    <string name="password_hint_summary">Ihre Blockchain-Wallet teilt unseren Servern niemals Ihr Passwort mit. Deshalb haben wir auch keine Kenntnisse darüber und können Ihr Passwort - sollten Sie es vergessen - nicht zurücksetzen. Erstellen Sie einen einprägsamen Passworthinweis, den wir Ihnen an Ihre verifizierte E-Mail-Adresse zusenden können, falls Sie sich nicht mehr an Ihr Passwort erinnern.</string>
     <string name="change_password">Passwort ändern</string>
     <string name="change_password_summary">Ihr Passwort wird unseren Servern niemals mitgeteilt, weshalb wir Ihnen bei der Rücksetzung Ihres Passwortes - sollten Sie dieses vergessen - nicht behilflich sein können. Denken Sie daran, Ihr Wiederherstellungspasswort, das Ihnen im Falle eines Passwortverlustes einen erneuten Zugriff auf Ihre Wallet ermöglicht, aufzuschreiben.</string>
     <string name="verify_email_notice">Wir haben an Ihre E-Mail-Adresse einen Verifizierungslink gesandt. Zur Verifizierung Ihrer E-Mail-Adresse klicken Sie bitte auf den entsprechenden Link.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Ja, Blockchain Wallet bewerten</string>
     <string name="rate_no">Nein, danke</string>
     <string name="rate_later">Nochmal später daran erinnern</string>
-    <string name="hint_reveals_password_error">Sie können Ihr Wallet-Hauptpasswort nicht als Passworthinweis einsetzen.</string>
     <string name="why_has_my_address_changed">Warum hat sich meine Adresse geändert?</string>
     <string name="learn_more">Mehr dazu</string>
 
@@ -410,7 +407,7 @@
     <string name="accept_higher_fee">Höhere Gebühr akzeptieren</string>
     <string name="large_tx_high_fee_warning">„Da der zurückzugebene Wechselbetrag klein ist, erfordert diese Transaktion eine höhere Gebühr für Kleinstsummenkonsum.“</string>
 
-    <string name="transactions">Transaktionen</string>
+    <string name="overview">Transaktionen</string>
     <string name="invalid_password_too_short">Bitte geben Sie mehr als 3 Buchstaben ein</string>
     <string name="change_pin_new_matches_current">Ihre derzeitige PIN kann nicht als neue PIN verwendet werden</string>
     <string name="account_locked_title">Konto gesperrt</string>

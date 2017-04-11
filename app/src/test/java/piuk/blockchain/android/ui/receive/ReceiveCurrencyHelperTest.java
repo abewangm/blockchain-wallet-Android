@@ -76,6 +76,7 @@ public class ReceiveCurrencyHelperTest {
     public void getLastPrice() throws Exception {
         // Arrange
         when(mExchangeRateFactory.getLastPrice(anyString())).thenReturn(1000D);
+        when(mPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)).thenReturn("GBP");
         // Act
         double value = mSubject.getLastPrice();
         // Assert
@@ -195,7 +196,7 @@ public class ReceiveCurrencyHelperTest {
         // Act
         Double value = mSubject.getDoubleAmount("13.37");
         // Assert
-        assertEquals(Double.valueOf(13.37), value);
+        assertEquals(13.37, value);
     }
 
     @Test
@@ -205,7 +206,7 @@ public class ReceiveCurrencyHelperTest {
         // Act
         Double value = mSubject.getDoubleAmount("leet");
         // Assert
-        assertEquals(Double.valueOf(0), value);
+        assertEquals(0d, value);
     }
 
     @Test
@@ -218,6 +219,7 @@ public class ReceiveCurrencyHelperTest {
         assertTrue(value);
     }
 
+    @SuppressWarnings("SyntheticAccessorCall")
     private class MockApplicationModule extends ApplicationModule {
         MockApplicationModule(Application application) {
             super(application);

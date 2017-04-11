@@ -4,14 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
+import android.support.v7.app.AlertDialog.Builder;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,14 +21,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.PasswordUtil;
 
 import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
-import piuk.blockchain.android.data.payload.PayloadBridge;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.databinding.ActivityUpgradeWalletBinding;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
@@ -98,12 +94,10 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
             return;
         }
 
-        if (PasswordUtil.getInstance().ddpw(payloadManager.getTempPassword()) || PasswordUtil.getInstance().getStrength(payloadManager.getTempPassword().toString()) < 50) {
+        if (PasswordUtil.ddpw(payloadManager.getTempPassword()) || PasswordUtil.getStrength(payloadManager.getTempPassword()) < 50) {
+            final LinearLayout pwLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.modal_change_password, null);
 
-            LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-            final LinearLayout pwLayout = (LinearLayout) inflater.inflate(R.layout.modal_change_password, null);
-
-            new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+            new Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
                     .setMessage(R.string.weak_password)
                     .setCancelable(false)
@@ -121,14 +115,17 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
                                 showToast(R.string.password_mismatch_error, ToastCustom.TYPE_ERROR);
                             } else {
 
-                                final CharSequenceX currentPassword = payloadManager.getTempPassword();
-                                payloadManager.setTempPassword(new CharSequenceX(password2));
+                                final String currentPassword = payloadManager.getTempPassword();
+                                payloadManager.setTempPassword(password2);
 
                                 AccessState.getInstance().createPin(payloadManager.getTempPassword(), AccessState.getInstance().getPIN())
                                         .subscribe(success -> {
                                             if (success) {
-                                                PayloadBridge.getInstance().remoteSaveThread(null);
-                                                showToast(R.string.password_changed, ToastCustom.TYPE_OK);
+
+                                                AccessState.getInstance().syncPayloadToServer().subscribe(aBoolean -> {
+                                                    showToast(R.string.password_changed, ToastCustom.TYPE_OK);
+                                                }, Throwable::printStackTrace);
+
                                             } else {
                                                 throw Exceptions.propagate(new Throwable("Create PIN failed"));
                                             }
@@ -151,18 +148,18 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
         new SecondPasswordHandler(UpgradeWalletActivity.this).validate(new SecondPasswordHandler.ResultListener() {
             @Override
             public void onNoSecondPassword() {
-                doUpgrade(new CharSequenceX(""));
+                doUpgrade(null);
             }
 
             @Override
             public void onSecondPasswordValidated(String validateSecondPassword) {
-                doUpgrade(new CharSequenceX(validateSecondPassword));
+                doUpgrade(validateSecondPassword);
             }
         });
     }
 
     @Thunk
-    void doUpgrade(final CharSequenceX secondPassword) {
+    void doUpgrade(final String secondPassword) {
 
         onUpgradeStart();
 
@@ -170,45 +167,31 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
 
             @Override
             protected Void doInBackground(Void[] params) {
-                try {
-                    if (ConnectivityStatus.hasConnectivity(UpgradeWalletActivity.this)) {
-                        appUtil.setNewlyCreated(true);
+                if (ConnectivityStatus.hasConnectivity(UpgradeWalletActivity.this)) {
+                    appUtil.setNewlyCreated(true);
 
-                        payloadManager.upgradeV2PayloadToV3(
-                                secondPassword,
-                                appUtil.isNewlyCreated(),
-                                getResources().getString(R.string.default_wallet_name),
-                                new PayloadManager.UpgradePayloadListener() {
-                                    @Override
-                                    public void onDoubleEncryptionPasswordError() {
-                                        showToast(R.string.double_encryption_password_error, ToastCustom.TYPE_ERROR);
-                                        upgradeClicked(null);
-                                    }
+                    try {
+                        boolean success = payloadManager.upgradeV2PayloadToV3(secondPassword, getResources().getString(R.string.default_wallet_name));
 
-                                    @Override
-                                    public void onUpgradeSuccess() {
-                                        if (new OSUtil(UpgradeWalletActivity.this).isServiceRunning(WebSocketService.class)) {
-                                            stopService(new Intent(UpgradeWalletActivity.this,
-                                                    WebSocketService.class));
-                                        }
-                                        startService(new Intent(UpgradeWalletActivity.this,
-                                                WebSocketService.class));
+                        if (success) {
+                            if (new OSUtil(UpgradeWalletActivity.this).isServiceRunning(WebSocketService.class)) {
+                                stopService(new Intent(UpgradeWalletActivity.this,
+                                        WebSocketService.class));
+                            }
+                            startService(new Intent(UpgradeWalletActivity.this,
+                                    WebSocketService.class));
 
-                                        payloadManager.getPayload().getHdWallet().getAccounts().get(0).setLabel(getResources().getString(R.string.default_wallet_name));
-                                        onUpgradeCompleted();
-                                    }
+                            payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(0).setLabel(getResources().getString(R.string.default_wallet_name));
+                            onUpgradeCompleted();
+                        } else {
+                            onUpgradeFailed();
+                        }
 
-                                    @Override
-                                    public void onUpgradeFail() {
-                                        onUpgradeFailed();
-                                    }
-                                });
+                    } catch (Exception e) {
+                        onUpgradeFailed();
+                        e.printStackTrace();
                     }
-
-                } catch (Exception e) {
-                    Log.e(TAG, "doInBackground: ", e);
                 }
-
                 return null;
             }
         }.execute();
@@ -262,34 +245,30 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
 
     @Thunk
     void setSelectedPage(int position) {
-
-        setBackGround(binding.pageBox0, R.drawable.rounded_view_dark_blue);
-        setBackGround(binding.pageBox1, R.drawable.rounded_view_dark_blue);
-        setBackGround(binding.pageBox2, R.drawable.rounded_view_dark_blue);
-
         switch (position) {
             case 0:
                 binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_1));
-                setBackGround(binding.pageBox0, R.drawable.rounded_view_upgrade_wallet_blue);
+                setBackGround(binding.pageBox0, R.drawable.rounded_view_accent_blue);
+                setBackGround(binding.pageBox1, R.drawable.rounded_view_dark_blue);
+                setBackGround(binding.pageBox2, R.drawable.rounded_view_dark_blue);
                 break;
             case 1:
                 binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_2));
-                setBackGround(binding.pageBox1, R.drawable.rounded_view_upgrade_wallet_blue);
+                setBackGround(binding.pageBox0, R.drawable.rounded_view_dark_blue);
+                setBackGround(binding.pageBox1, R.drawable.rounded_view_accent_blue);
+                setBackGround(binding.pageBox2, R.drawable.rounded_view_dark_blue);
                 break;
             case 2:
                 binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_3));
-                setBackGround(binding.pageBox2, R.drawable.rounded_view_upgrade_wallet_blue);
+                setBackGround(binding.pageBox0, R.drawable.rounded_view_dark_blue);
+                setBackGround(binding.pageBox1, R.drawable.rounded_view_dark_blue);
+                setBackGround(binding.pageBox2, R.drawable.rounded_view_accent_blue);
                 break;
         }
     }
 
     private void setBackGround(View view, int res) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            //noinspection deprecation
-            view.setBackgroundDrawable(ContextCompat.getDrawable(this, res));
-        } else {
-            view.setBackground(ContextCompat.getDrawable(this, res));
-        }
+        view.setBackground(ContextCompat.getDrawable(this, res));
     }
 
     private static class CustomPagerAdapter extends PagerAdapter {

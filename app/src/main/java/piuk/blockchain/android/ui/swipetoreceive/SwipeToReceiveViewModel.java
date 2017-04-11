@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import javax.inject.Inject;
 
 import io.reactivex.exceptions.Exceptions;
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
+import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 
@@ -16,7 +16,7 @@ public class SwipeToReceiveViewModel extends BaseViewModel {
     private static final int DIMENSION_QR_CODE = 600;
 
     private DataListener dataListener;
-    @Inject ReceiveDataManager dataManager;
+    @Inject QrCodeDataManager dataManager;
     @Inject SwipeToReceiveHelper swipeToReceiveHelper;
 
     interface DataListener {

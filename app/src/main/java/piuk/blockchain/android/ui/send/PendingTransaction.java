@@ -1,7 +1,7 @@
 package piuk.blockchain.android.ui.send;
 
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
 import java.math.BigInteger;
 
@@ -17,22 +17,9 @@ public class PendingTransaction {
     public BigInteger bigIntFee;
     public BigInteger bigIntAmount;
     public int addressToReceiveIndex;
+    public boolean isCustomFee;
 
     public boolean isHD() {
         return (sendingObject.accountObject instanceof Account);
-    }
-
-    @Override
-    public String toString() {
-        return "PendingTransaction{" +
-                "unspentOutputBundle=" + unspentOutputBundle +
-                ", sendingObject=" + sendingObject +
-                ", receivingObject=" + receivingObject +
-                ", note='" + note + '\'' +
-                ", receivingAddress='" + receivingAddress + '\'' +
-                ", bigIntFee=" + bigIntFee +
-                ", bigIntAmount=" + bigIntAmount +
-                ", addressToReceiveIndex=" + addressToReceiveIndex +
-                '}';
     }
 }

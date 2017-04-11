@@ -7,8 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
-import info.blockchain.wallet.util.CharSequenceX;
-
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
@@ -45,7 +43,7 @@ public class FingerprintDialogViewModel extends BaseViewModel implements Fingerp
 
         void onFatalError();
 
-        void onAuthenticated(@Nullable CharSequenceX data);
+        void onAuthenticated(@Nullable String data);
 
         void onRecoverableError();
 
@@ -105,8 +103,8 @@ public class FingerprintDialogViewModel extends BaseViewModel implements Fingerp
     }
 
     @Override
-    public void onAuthenticated(@Nullable CharSequenceX data) {
-        dataListener.setIcon(R.drawable.ic_fingerprint_success);
+    public void onAuthenticated(@Nullable String data) {
+        dataListener.setIcon(R.drawable.vector_fingerprint_success);
         dataListener.setStatusTextColor(R.color.primary_blue_accent);
         dataListener.setStatusText(R.string.fingerprint_success);
         dataListener.onAuthenticated(data);
@@ -146,7 +144,7 @@ public class FingerprintDialogViewModel extends BaseViewModel implements Fingerp
     }
 
     private void setFailureState(@StringRes Integer status, @StringRes Integer description) {
-        dataListener.setIcon(R.drawable.ic_fingerprint_error);
+        dataListener.setIcon(R.drawable.vector_fingerprint_error);
         dataListener.setStatusTextColor(R.color.product_red_medium);
         if (status != null) dataListener.setStatusText(status);
         if (description != null) dataListener.setDescriptionText(description);

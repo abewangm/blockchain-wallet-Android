@@ -88,7 +88,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:tint="@color/primary_navy_dark"
                 android:visibility="gone"
-                app:srcCompat="@drawable/ic_fingerprint" />
+                app:srcCompat="@drawable/vector_fingerprint" />
 
         </LinearLayout>
 

@@ -4,8 +4,6 @@
     <string name="backup_wallet">Backup funds</string>
     <string name="upgrade_wallet">Upgrade</string>
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="current_price_millibits">1 mBTC = %1$s</string>
-    <string name="current_price_bits">1 bit = %1$s</string>
 
     <string name="app_name">Blockchain</string>
     <string name="action_settings">Settings</string>
@@ -16,7 +14,7 @@
 
     <string name="send_bitcoin">Send</string>
     <string name="receive_bitcoin">Receive</string>
-    <string name="transactions">Transactions</string>
+    <string name="overview">Overview</string>
 
     <string name="cancel">Cancel</string>
     <string name="yes">Yes</string>
@@ -231,7 +229,7 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="check_email_to_auth_login">Please check your email to approve this login attempt.</string>
     <string name="transaction_fee">Transaction Fee</string>
-    <string name="your_transactions">Your Transactions</string>
+    <string name="your_transactions">No Transactions</string>
     <string name="transaction_occur_when">Transactions occur when you receive and send bitcoin.</string>
     <string name="click">Click</string>
     <string name="to_start_sending_and_receiving_btc">to start sending and receiving bitcoin.</string>
@@ -270,7 +268,7 @@
     <string name="password_unchanged">Password unchanged</string>
     <string name="password_changed">Password changed</string>
     <string name="password_changed_explanation">Your password has been changed, please re-pair your wallet</string>
-    <string name="verify_email2">Your verified email address is used to send login codes when suspicious or unusual activity is detected, to remind you of your wallet login ID, and to send bitcoin payment alerts when you receive funds. We will not use your email address for marketing purposes.</string>
+    <string name="verify_email2">Your verified email address is used to send login codes when suspicious or unusual activity is detected, to remind you of your wallet login ID, and to send bitcoin payment alerts when you receive funds.</string>
     <string name="disable_root_warning">Disable rooted device warning</string>
 
     <string name="show_balance">Show Balance</string>
@@ -421,7 +419,9 @@
     <string name="two_fa">2-step Verification</string>
     <string name="tor_requests">Block Tor Requests</string>
     <string name="tor_summary">Would you like to block IP addresses that are known to be part of the Tor anonymizing network from accessing your wallet? The Tor network is frequently used by hackers attempting to access Blockchain users wallets.</string>
-    <string name="password_hint">Password Hint</string>
+    <string name="enable_screenshots">Enable Screenshots</string>
+    <string name="enable_screenshots_warning">You\'re about to enable screenshots for the Blockchain app. Some screens within the application can display sensitive data. Other applications will be able to access these screenshots.</string>
+
     <string name="password_hint_summary">Your Blockchain Wallet never communicates your password to our servers. This means we have no idea what your password is and we cannot reset it if you forget it. Create a memorable password hint that we can send to your verified email address in case you forget your password.</string>
     <string name="change_password">Change Password</string>
     <string name="change_password_summary">Your password is never shared with our servers, which means we cannot help reset your password if you forget it. Make sure you write down your recovery phrase which can restore access to your wallet in the event of a lost password.</string>
@@ -439,7 +439,6 @@
     <string name="rate_yes">Yes, rate Blockchain Wallet</string>
     <string name="rate_no">No, thanks</string>
     <string name="rate_later">Remind me later</string>
-    <string name="hint_reveals_password_error">You may not set your main wallet password as your password hint.</string>
     <string name="why_has_my_address_changed">Why has my address changed?</string>
     <string name="information">Information</string>
     <string name="learn_more">Learn More</string>
@@ -495,6 +494,7 @@
     <string name="transaction_detail_double_spend">May be at risk for a double spend.</string>
     <string name="transaction_detail_verify">Verify on Blockchain.info</string>
     <string name="transaction_detail_share_chooser">Share transaction details</string>
+    <string name="transaction_detail_contact_note">Note</string>
 
     <!-- SECURITY CENTRE -->
     <string name="security_centre_email_title">Check your email</string>
@@ -549,8 +549,110 @@
     <string name="shortcut_receive_qr_short">Show Receive QR</string>
     <string name="shortcut_receive_qr_long">View QR code for receive address</string>
     <string name="shortcut_receive_qr_error">Sorry, there was an error generating the QR code</string>
-    <string name="shortcut_settings_enable">Launcher Shortcuts</string>
     <string name="shortcut_settings_summary">Enable this option to reveal a receive address when you long-press on the app icon in the launcher, making receiving bitcoin even faster.</string>
+
+    <!-- CONTACTS -->
+    <string name="contacts_title">Contacts</string>
+    <string name="contacts_loading_failed">Loading contacts failed, please try again</string>
+    <string name="contacts_pairing_method_title">Add Contact</string>
+    <string name="contacts_choose_pairing_method">Choose the paring method you wish to use to add a trusted contact:</string>
+    <string name="contacts_send_link">Send link</string>
+    <string name="contacts_use_nfc">Use NFC</string>
+    <string name="contacts_no_contacts_found">No contacts found</string>
+    <string name="contacts_delete_contact_success">Contact deleted</string>
+    <string name="contacts_delete_contact_failed">Deleting contact failed, please try again</string>
+    <string name="contacts_not_found_error">Contact not found</string>
+    <string name="contacts_add_contact_failed">Adding contact failed, please try again</string>
+    <string name="contacts_add_contact_success">Contact added successfully</string>
+    <string name="contacts_rename_invalid_name">Name invalid</string>
+    <string name="contacts_rename_failed">Renaming contact failed, please try again</string>
+    <string name="contacts_rename_success">Contact renamed successfully</string>
+    <string name="contacts_error_getting_messages">Error getting messages</string>
+    <string name="contacts_error_sending_payment_request">There was an error sending your payment request, please try again</string>
+    <string name="contacts_success_sending_payment_request">Payment request sent</string>
+    <string name="contacts_add_contact_title">Add contact</string>
+    <string name="contacts_name_cannot_be_empty">Invalid name</string>
+    <string name="contacts_name_field_hint">Name</string>
+    <string name="contacts_add_button">Add</string>
+    <string name="contacts_share_invitation">Share invitation</string>
+    <string name="contacts_add_are_you_sure">Are you sure you wish to add %1$s as a trusted contact?</string>
+    <string name="shortcut_settings_enable">Launcher Shortcuts</string>
+    <string name="contacts_invite_someone">Invite someone</string>
+    <string name="contacts_being_invited">Accept invite</string>
+    <string name="contacts_who_are_you_inviting_header">Who are you inviting to connect?</string>
+    <string name="contacts_how_are_you_known_header">What name does %1$s know you by?</string>
+    <string name="contacts_scan_instructions">%1$s should scan this QR code with their Blockchain Wallet mobile app.</string>
+    <string name="contacts_sharing_method_header">How would you like to share this invite?</string>
+    <string name="contacts_field_error_empty">Cannot be empty</string>
+    <string name="contacts_share_qr">Via QR code (in-person)</string>
+    <string name="contacts_share_link">Using a link</string>
+    <string name="contacts_scan_qr">Scan a QR code</string>
+    <string name="contacts_sent_link">Someone sent me a link</string>
+    <string name="contacts_accept_invite_title">Accept Invite</string>
+    <string name="contacts_sent_link_explanation">If someone sent you a link, simply tap on the link to accept.</string>
+    <string name="contacts_detail_title">I want to:</string>
+    <string name="contacts_detail_transactions">Transactions with %1$s:</string>
+    <string name="contacts_detail_transactions_empty">No transactions found</string>
+    <string name="contacts_rename">Rename contact</string>
+    <string name="contacts_delete">Delete contact</string>
+    <string name="contacts_send_bitcoin">Ask to send %1$s bitcoin</string>
+    <string name="contacts_request_bitcoin">Request bitcoin from %1$s</string>
+    <string name="contacts_invalid_qr">Invalid QR code</string>
+    <string name="contacts_request_sent">Contact request sent</string>
+    <string name="contacts_request_just_added">Just added</string>
+    <string name="contacts_request_trusted">Trusted</string>
+    <string name="contacts_delete_message">Are you sure you want to delete this contact? You will not lose any bitcoin by deleting this contact.</string>
+    <string name="contacts_payment_request_title">Payment request</string>
+    <string name="contacts_payment_request_send_note">Why would you like to send %1$s bitcoin? This is optional and will be shared with %1$s.</string>
+    <string name="contacts_payment_request_receive_note">Why would you like %1$s to send you bitcoin? This is optional and will be shared with %1$s.</string>
+    <string name="contacts_payment_request_send_hint">Tapas lunch</string>
+    <string name="contacts_payment_request_receive_hint">For drinks Friday</string>
+    <string name="contacts_payment_request_note_hint">Note</string>
+    <string name="contacts_payment_request_send_amount">How much do you want to send to %1$s?</string>
+    <string name="contacts_payment_request_receive_amount">How much do you want %1$s to send you? \n\nThis is just a suggestion: the actual amount may differ.</string>
+    <string name="contacts_payment_request_amount_hint">Amount</string>
+    <string name="contacts_payment_success_waiting_title">Waiting for %1$s to accept</string>
+    <string name="contacts_payment_success_request_sent_title">Request has been sent</string>
+    <string name="contacts_payment_success_waiting_message">Your contact has been notified that you would like to send them Bitcoin. When they accept, we will notify you and you can complete the transaction.</string>
+    <string name="contact_send_request_button">Send request</string>
+    <string name="contacts_transaction_not_found_error">Transaction not found</string>
+    <string name="contacts_address_sent_success">Address sent successfully</string>
+    <string name="contacts_address_sent_failed">Sending address failed</string>
+    <string name="contacts_choose_account_message">Choose where you wish to receive your funds.</string>
+    <string name="contacts_send_address_message">This will send an address to your contact. Proceed?</string>
+    <string name="contacts_waiting_for_address_message">Your contact has been informed that you wish to send them bitcoin and that you require an address from them. We will notify you when they have sent an address!</string>
+    <string name="contacts_waiting_for_payment_message">Your contact has been informed that you wish to receive bitcoin from them and has been sent an address. We will notify you when they have sent you bitcoin!</string>
+    <string name="contacts_digesting_messages_failed">Checking messages failed, please try again</string>
+    <string name="contacts_broadcasting_payment">We\'re just informing your contact that you\'ve sent them some bitcoin, please wait.</string>
+    <string name="contacts_payment_sent_success">Payment sent! We\'ve notified your contact to let them know that you\'ve completed the transaction.</string>
+    <string name="contacts_payment_sent_failed_message">There was an error notifying your contact that you have sent them a payment. Please check your connection and try again.</string>
+    <string name="contacts_register_nodes_failure">We couldn\'t connect you to the contacts service. Please retry to enable full functionality.</string>
+    <string name="contacts_too_much_sent">Looks like you sent more bitcoin than was requested. You can request some back from your contact if you wish. We have not marked the payment as complete.</string>
+    <string name="contacts_too_little_sent">Looks like you sent less bitcoin than was requested. Your contact will still receive the bitcoin you sent, but we have not marked the payment as complete.</string>
+    <string name="contacts_second_password_prompt">To use this service, we require you to enter your second password. You should only need to enter this once to use the Contacts functionality.</string>
+    <string name="contacts_pending_transaction">Pending Transactions</string>
+    <string name="contacts_transaction_history">Transaction History</string>
+    <string name="contacts_request_money_receive">Send request to contact</string>
+    <string name="contacts_no_confirmed_contacts_found">No confirmed contacts found!</string>
+    <string name="contacts_decline_pending_transaction">Are you sure you want to decline this pending transaction?</string>
+    <string name="contacts_cancel_pending_transaction">Are you sure you want to cancel this pending transaction?</string>
+    <string name="contacts_pending_transaction_delete_success">Pending transaction successfully deleted</string>
+    <string name="contacts_pending_transaction_delete_failure">Pending transaction deletion failed</string>
+    <string name="contacts_pending_transaction_decline_success">Pending transaction successfully declined</string>
+    <string name="contacts_pending_transaction_decline_failure">Pending transaction declination failed</string>
+    <string name="contacts_pending_transaction_cancel_success">Pending transaction successfully cancelled</string>
+    <string name="contacts_pending_transaction_cancel_failure">Pending transaction cancellation failed</string>
+    <!-- CONTACTS PENDING TRANSACTION STRINGS -->
+    <string name="contacts_sending_to_contact_waiting">Sending %1$s to %2$s\nWaiting for %2$s to accept</string>
+    <string name="contacts_payment_requested_ready_to_send">%1$s requested by %2$s\nReady to send</string>
+    <string name="contacts_requesting_from_contact_waiting_for_payment">Requested %1$s from %2$s\nWaiting for payment</string>
+    <string name="contacts_receiving_from_contact_waiting_to_accept">Receiving %1$s from %2$s\nWaiting for you to accept</string>
+    <string name="contacts_receiving_declined">Payment declined</string>
+    <string name="contacts_receiving_cancelled">Payment cancelled</string>
+    <string name="contacts_send_complete">Sent %1$s to %2$s</string>
+    <string name="contacts_receive_complete">Received %1$s from %2$s</string>
+    <string name="contacts_received">Received from %1$s</string>
+    <string name="contacts_sent">Sent to %1$s</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>
@@ -560,5 +662,29 @@
     <!-- SURVEY PROMPT -->
     <string name="survey_message">Would you like to fill out a short survey to help improve your wallet experience?\n\nWe value your feedback!</string>
     <string name="survey_positive_button">Take survey</string>
+
+    <!-- ONBOARDING -->
+    <string name="onboarding_fingerprint_title">Fingerprint Login</string>
+    <string name="onboarding_fingerprint_summary">Use fingerprint login instead of your PIN to authenticate and access your wallet.</string>
+    <string name="onboarding_fingerprint_enable">Enable fingerprint</string>
+    <string name="onboarding_complete_later">I\'ll do this later</string>
+    <string name="onboarding_check_inbox_title">Check Your Inbox</string>
+    <string name="onboarding_check_inbox_summary">Look for an email from Blockchain and click the verification link to complete your wallet setup.</string>
+    <string name="onboarding_verify_email">Verify email</string>
+    <string name="onboarding_receive_bitcoin">Receive Bitcoin</string>
+    <string name="onboarding_current_price">Current Price:</string>
+    <string name="onboarding_qr_codes">QR Codes</string>
+    <string name="onboarding_scan_address">Scan Address</string>
+    <string name="onboarding_buy_content">We work with exchange partners all over the world, so you can buy bitcoin directly from your wallet.</string>
+    <string name="onboarding_receive_content">Send your wallet address to a friend to request bitcoin. An address is a string of random letters and numbers that change for each transaction.</string>
+    <string name="onboarding_qr_codes_content">An address can also be shown as a QR code. Scan a friend’s QR code to quickly capture their wallet address.</string>
+
+    <!-- BUY BITCOIN -->
+    <string name="onboarding_buy_bitcoin">Buy Bitcoin</string>
+    <string name="onboarding_get_bitcoin">Get Bitcoin</string>
+    <string name="onboarding_complete_title">That\'s it for now!</string>
+    <string name="onboarding_complete_content">We’ll keep you up-to-date here with recommendations and new features.</string>
+    <string name="onboarding_start_over">Start Over</string>
+    <string name="onboarding_skip_all">Skip All</string>
 
 </resources>

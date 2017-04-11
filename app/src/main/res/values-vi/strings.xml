@@ -103,7 +103,7 @@
 
     <string name="support">Hỗ trợ</string>
     <string name="rate_us">Đánh giá</string>
-    <string name="about">Ví Blockchain %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">Ví Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Ứng dụng cổng thanh toán miễn phí</string>
     <string name="password_or_wipe">Nhập mật khẩu đang sử dụng hoặc quên ví này</string>
     <string name="use_password">Sử dụng mật khẩu</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">Đang giải mã Ví...</string>
     <string name="password_unchanged">Mật khẩu không được thay đổi</string>
     <string name="password_changed">Mật khẩu đã được thay đổi</string>
-    <string name="verify_email2">Địa chỉ email đã xác minh của bạn được sử dụng để gửi các mã đăng nhập khi phát hiện có hành vi đáng ngờ hoặc bất thường, nhắc nhở bạn về ID đăng nhập ví của mình, và để gửi thông báo thanh toán bitcoin khi bạn nhận được tiền. Chúng tôi sẽ không sử dụng địa chỉ email của bạn cho các mục đích tiếp thị.</string>
+    <string name="verify_email2">Địa chỉ email đã xác minh của bạn được sử dụng để gửi các mã đăng nhập khi phát hiện có hành vi đáng ngờ hoặc bất thường, nhắc nhở bạn về ID đăng nhập ví của mình, và để gửi thông báo thanh toán bitcoin khi bạn nhận được tiền.</string>
     <string name="disable_root_warning">Tắt cảnh báo thiết bị đã được root</string>
 
     <string name="show_balance">Hiện số dư</string>
@@ -366,8 +366,6 @@
     <string name="two_fa">Xác minh 2 bước</string>
     <string name="tor_requests">Chặn các yêu cầu từ Tor</string>
     <string name="tor_summary">Bạn có muốn chặn các địa chỉ IP, được biết đến là một phần của mạng ẩn danh Tor, khỏi việc truy cập vào ví của bạn? Mạng Tor được sử dụng thường xuyên bởi các hacker, những kẻ luôn cố gắng truy cập vào ví người dùng Blockchain.</string>
-    <string name="password_hint">Cụm từ gợi ý mật khẩu</string>
-    <string name="password_hint_summary">Ví Blockchain không bao giờ chia sẻ mật khẩu của bạn đến các máy chủ của chúng tôi. Điều này có nghĩa chúng tôi không có ý kiến gì về mật khẩu của bạn và chúng tôi không thể thiết lập lại mật khẩu nếu bạn quên. Tạo một cụm từ gợi ý mật khẩu dễ nhớ để chúng tôi có thể gửi đến địa chỉ email đã xác minh của bạn trong trường hợp bạn quên mật khẩu của mình.</string>
     <string name="change_password">Thay đổi mật khẩu</string>
     <string name="change_password_summary">Mật khẩu của bạn không bao giờ được chia sẻ với các máy chủ của chúng tôi, điều đó có nghĩa chúng tôi không thể hỗ trợ bạn thiết lập lại mật khẩu nếu bạn quên. Hãy chắc chắn bạn ghi lại nhóm từ khôi phục để có thể khôi phục truy cập ví trong trường hợp mất mật khẩu.</string>
     <string name="verify_email_notice">Chúng tôi đã gửi đến địa chỉ email của một bạn liên kết xác minh. Nhấn vào liên kết xác minh để xác minh địa chỉ email của bạn.</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">Có, đánh giá Ví Blockchain</string>
     <string name="rate_no">Không, cảm ơn</string>
     <string name="rate_later">Nhắc lại sau</string>
-    <string name="hint_reveals_password_error">Bạn không thể đặt mật khẩu chính của mình làm cụm từ gợi ý mật khẩu.</string>
     <string name="why_has_my_address_changed">Tại sao địa chỉ của tôi đã thay đổi?</string>
     <string name="learn_more">Tìm hiểu thêm</string>
 
@@ -410,7 +407,7 @@
     <string name="accept_higher_fee">Chấp nhận phí cao hơn</string>
     <string name="large_tx_high_fee_warning">"Giao dịch này yêu cầu phí cao hơn vì thực hiện giao dịch với số tiền quá nhỏ."</string>
 
-    <string name="transactions">Giao dịch</string>
+    <string name="overview">Giao dịch</string>
     <string name="invalid_password_too_short">Vui lòng nhập nhiều hơn 3 ký tự</string>
     <string name="change_pin_new_matches_current">Bạn không thể sử dụng mã PIN hiện tại làm mã PIN mới</string>
     <string name="account_locked_title">Tài khoản bị khóa</string>

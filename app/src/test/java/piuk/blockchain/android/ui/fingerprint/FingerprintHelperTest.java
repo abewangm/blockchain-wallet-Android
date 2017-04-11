@@ -10,19 +10,22 @@ import com.mtramin.rxfingerprint.data.FingerprintDecryptionResult;
 import com.mtramin.rxfingerprint.data.FingerprintEncryptionResult;
 import com.mtramin.rxfingerprint.data.FingerprintResult;
 
-import info.blockchain.wallet.util.CharSequenceX;
-
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
+import io.reactivex.Observable;
+import piuk.blockchain.android.BlockchainTestApplication;
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuth;
 import piuk.blockchain.android.util.PrefsUtil;
-import io.reactivex.Observable;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -30,12 +33,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
+@RunWith(RobolectricTestRunner.class)
 public class FingerprintHelperTest {
 
     private FingerprintHelper subject;
-    @Mock Context applicationContext;
-    @Mock PrefsUtil prefsUtil;
-    @Mock FingerprintAuth fingerprintAuth;
+    @Mock private Context applicationContext;
+    @Mock private PrefsUtil prefsUtil;
+    @Mock private FingerprintAuth fingerprintAuth;
 
     @Before
     public void setUp() throws Exception {
@@ -106,20 +111,27 @@ public class FingerprintHelperTest {
         verify(prefsUtil).setValue(PrefsUtil.KEY_FINGERPRINT_ENABLED, true);
     }
 
-    @Ignore
     @Test
     public void storeEncryptedData() throws Exception {
-        /**
-         * Not currently testable, Base64 not mocked
-         */
+        // Arrange
+
+        // Act
+        boolean result = subject.storeEncryptedData("key", new String("data"));
+        // Assert
+        verify(prefsUtil).setValue("key", "ZGF0YQ==\n");
+        assertTrue(result);
     }
 
-    @Ignore
     @Test
     public void getEncryptedData() throws Exception {
-        /**
-         * Not currently testable, Base64 not mocked
-         */
+        // Arrange
+        when(prefsUtil.getValue("key", "")).thenReturn("ZGF0YQ==\n");
+        // Act
+        String result = subject.getEncryptedData("key");
+        // Assert
+        verify(prefsUtil).getValue("key", "");
+        assert result != null;
+        assertEquals("data", result.toString());
     }
 
     @Test
@@ -214,7 +226,7 @@ public class FingerprintHelperTest {
         // Act
         subject.encryptString("", "", mockAuthCallback);
         // Assert
-        verify(mockAuthCallback).onAuthenticated(any(CharSequenceX.class));
+        verify(mockAuthCallback).onAuthenticated(any(String.class));
     }
 
     @Test
@@ -262,7 +274,7 @@ public class FingerprintHelperTest {
         // Act
         subject.decryptString("", "", mockAuthCallback);
         // Assert
-        verify(mockAuthCallback).onAuthenticated(any(CharSequenceX.class));
+        verify(mockAuthCallback).onAuthenticated(any(String.class));
     }
 
     @Test

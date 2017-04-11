@@ -47,13 +47,13 @@
         <!-- The navigation drawer that comes from the left -->
         <!-- Note that `android:layout_gravity` needs to be set to 'start' -->
         <android.support.design.widget.NavigationView
-            android:id="@+id/nvView"
+            android:id="@+id/navigation_view"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start"
             android:background="@android:color/white"
             app:headerLayout="@layout/navigation_drawer_header"
-            app:insetForeground="@color/primary_navy_medium"
+            app:insetForeground="@color/primary_navy_dark"
             app:menu="@menu/menu_nav_drawer" />
     </android.support.v4.widget.DrawerLayout>
 </layout>

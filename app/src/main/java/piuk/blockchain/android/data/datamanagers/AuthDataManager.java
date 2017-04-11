@@ -1,93 +1,90 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 
-import info.blockchain.api.WalletPayload;
-import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.exceptions.HDWalletException;
-import info.blockchain.wallet.exceptions.InvalidCredentialsException;
-import info.blockchain.wallet.exceptions.PayloadException;
-import info.blockchain.wallet.payload.BlockchainWallet;
-import info.blockchain.wallet.payload.Payload;
-import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import info.blockchain.wallet.api.data.WalletOptions;
+import info.blockchain.wallet.payload.data.Wallet;
 
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
-import io.reactivex.CompletableObserver;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.exceptions.Exceptions;
-import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.services.WalletPayloadService;
-import piuk.blockchain.android.util.AESUtilWrapper;
+import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
+import piuk.blockchain.android.util.annotations.Thunk;
+import retrofit2.Response;
 
 @SuppressWarnings("WeakerAccess")
 public class AuthDataManager {
 
-    private WalletPayloadService walletPayloadService;
-    private PayloadManager payloadManager;
-    private PrefsUtil prefsUtil;
+    @VisibleForTesting static final String AUTHORIZATION_REQUIRED = "Authorization Required";
+
+    private WalletService walletService;
     private AppUtil appUtil;
-    private AESUtilWrapper aesUtilWrapper;
     private AccessState accessState;
     private StringUtils stringUtils;
+    private PayloadDataManager payloadDataManager;
+    private RxPinning rxPinning;
+    @Thunk PrefsUtil prefsUtil;
     @VisibleForTesting protected int timer;
 
-    public AuthDataManager(PayloadManager payloadManager,
+    public AuthDataManager(PayloadDataManager payloadDataManager,
                            PrefsUtil prefsUtil,
-                           WalletPayloadService walletPayloadService,
+                           WalletService walletService,
                            AppUtil appUtil,
-                           AESUtilWrapper aesUtilWrapper,
                            AccessState accessState,
-                           StringUtils stringUtils) {
+                           StringUtils stringUtils,
+                           RxBus rxBus) {
 
-        this.payloadManager = payloadManager;
+        this.payloadDataManager = payloadDataManager;
         this.prefsUtil = prefsUtil;
-        this.walletPayloadService = walletPayloadService;
+        this.walletService = walletService;
         this.appUtil = appUtil;
-        this.aesUtilWrapper = aesUtilWrapper;
         this.accessState = accessState;
         this.stringUtils = stringUtils;
+        rxPinning = new RxPinning(rxBus);
     }
 
-    public Observable<String> getEncryptedPayload(String guid, String sessionId) {
-        return walletPayloadService.getEncryptedPayload(guid, sessionId);
-    }
-
-    public Observable<String> getSessionId(String guid) {
-        return walletPayloadService.getSessionId(guid);
-    }
-
-    public Completable updatePayload(String sharedKey, String guid, CharSequenceX password) {
-        return getUpdatePayloadObservable(sharedKey, guid, password)
-                .compose(RxUtil.applySchedulersToCompletable());
-    }
-
-    public Observable<CharSequenceX> validatePin(String pin) {
-        return accessState.validatePin(pin);
-    }
-
-    public Observable<Boolean> createPin(CharSequenceX password, String pin) {
-        return accessState.createPin(password, pin)
+    public Observable<Response<ResponseBody>> getEncryptedPayload(String guid, String sessionId) {
+        return rxPinning.call(() -> walletService.getEncryptedPayload(guid, sessionId))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    public Observable<Payload> createHdWallet(String password, String walletName) {
-        return Observable.fromCallable(() -> payloadManager.createHDWallet(password, walletName))
-                .compose(RxUtil.applySchedulersToObservable())
+    public Observable<String> getSessionId(String guid) {
+        return rxPinning.call(() -> walletService.getSessionId(guid))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    public Completable updatePayload(String sharedKey, String guid, String password) {
+        return payloadDataManager.initializeAndDecrypt(sharedKey, guid, password);
+    }
+
+    public Observable<String> validatePin(String pin) {
+        return rxPinning.call(() -> accessState.validatePin(pin))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    public Observable<Boolean> createPin(String password, String pin) {
+        return rxPinning.call(() -> accessState.createPin(password, pin))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    public Observable<WalletOptions> getWalletOptions() {
+        return rxPinning.call(() -> walletService.getWalletOptions())
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    public Observable<Wallet> createHdWallet(String password, String walletName, String email) {
+        return payloadDataManager.createHdWallet(password, walletName, email)
                 .doOnNext(payload -> {
                     // Successfully created and saved
                     appUtil.setNewlyCreated(true);
@@ -96,169 +93,54 @@ public class AuthDataManager {
                 });
     }
 
-    public Observable<Payload> restoreHdWallet(String email, String password, String passphrase) {
-        payloadManager.setEmail(email);
-        return Observable.fromCallable(() -> payloadManager.restoreHDWallet(
-                password, passphrase, stringUtils.getString(R.string.default_wallet_name)))
+    public Observable<Wallet> restoreHdWallet(String email, String password, String mnemonic) {
+        return payloadDataManager.restoreHdWallet(
+                mnemonic,
+                stringUtils.getString(R.string.default_wallet_name),
+                email,
+                password)
                 .doOnNext(payload -> {
-                    if (payload == null) {
-                        throw Exceptions.propagate(new Throwable("Save failed"));
-                    } else {
-                        appUtil.setNewlyCreated(true);
-                        prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
-                        appUtil.setSharedKey(payload.getSharedKey());
-                    }
-                })
+                    appUtil.setNewlyCreated(true);
+                    prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
+                    appUtil.setSharedKey(payload.getSharedKey());
+                });
+    }
+
+    public Observable<String> startPollingAuthStatus(String guid, String sessionId) {
+        // Emit tick every 2 seconds
+        return Observable.interval(2, TimeUnit.SECONDS)
+                // For each emission from the timer, try to get the payload
+                .map(tick -> getEncryptedPayload(guid, sessionId).blockingFirst())
+                // If auth not required, emit payload
+                .filter(s -> s.errorBody() == null || !s.errorBody().string().contains(AUTHORIZATION_REQUIRED))
+                // Return message in response
+                .map(responseBodyResponse -> responseBodyResponse.body().string())
+                // If error called, emit Auth Required
+                .onErrorReturn(throwable -> AUTHORIZATION_REQUIRED)
+                // Only emit the first object
+                .firstElement()
+                // As Observable rather than Maybe
+                .toObservable()
+                // Apply correct threading
                 .compose(RxUtil.applySchedulersToObservable());
-    }
-
-    public Observable<String> startPollingAuthStatus(String guid) {
-        // Get session id
-        return getSessionId(guid)
-                // return Observable that emits ticks every two seconds, pass in Session ID
-                .flatMap(sessionId -> Observable.interval(2, TimeUnit.SECONDS)
-                        // For each emission from the timer, try to get the payload
-                        .map(tick -> getEncryptedPayload(guid, sessionId).blockingFirst())
-                        // If auth not required, emit payload
-                        .filter(s -> !s.equals(WalletPayload.KEY_AUTH_REQUIRED))
-                        // If error called, emit Auth Required
-                        .onErrorReturn(throwable -> WalletPayload.KEY_AUTH_REQUIRED)
-                        // Make sure threading is correct
-                        .compose(RxUtil.applySchedulersToObservable())
-                        // Only emit the first object
-                        .firstElement()
-                        // As Observable rather than Maybe
-                        .toObservable());
-    }
-
-    private Completable getUpdatePayloadObservable(String sharedKey, String guid, CharSequenceX password) {
-        return Completable.defer(() -> Completable.create(subscriber -> {
-            try {
-                payloadManager.initiatePayload(
-                        sharedKey,
-                        guid,
-                        password,
-                        () -> {
-                            payloadManager.setTempPassword(password);
-                            if (!subscriber.isDisposed()) {
-                                subscriber.onComplete();
-                            }
-                        });
-            } catch (Exception e) {
-                if (!subscriber.isDisposed()) {
-                    subscriber.onError(e);
-                }
-            }
-        }));
     }
 
     public Observable<Integer> createCheckEmailTimer() {
         timer = 2 * 60;
 
-        return Observable.interval(0, 1, TimeUnit.SECONDS, Schedulers.io())
+        return Observable.interval(0, 1, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(aLong -> timer--)
                 .takeUntil(aLong -> timer < 0);
     }
 
-    /*
-     * TODO - move to jar and make more testable
-     */
-    public void attemptDecryptPayload(CharSequenceX password, String guid, String payload, DecryptPayloadListener listener) {
-        try {
-            JSONObject jsonObject = new JSONObject(payload);
-
-            if (jsonObject.has("payload")) {
-                String encryptedPayload = jsonObject.getString("payload");
-
-                int iterations = BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS_V2;
-                if (jsonObject.has("pbkdf2_iterations")) {
-                    iterations = jsonObject.getInt("pbkdf2_iterations");
-                }
-
-                String decryptedPayload = null;
-                try {
-                    decryptedPayload = aesUtilWrapper.decrypt(encryptedPayload, password, iterations);
-                } catch (Exception e) {
-                    listener.onFatalError();
-                }
-
-                if (decryptedPayload != null) {
-                    attemptUpdatePayload(password, guid, decryptedPayload, listener);
-                } else {
-                    // Decryption failed
-                    listener.onAuthFail();
-                }
-            }
-        } catch (JSONException e) {
-            // Most likely a V1 Wallet, attempt parse
-            try {
-                BlockchainWallet v1Wallet = new BlockchainWallet(payload, password);
-                attemptUpdatePayload(password, guid, v1Wallet.getPayload().getDecryptedPayload(), listener);
-            } catch (DecryptionException | NullPointerException authException) {
-                Log.e(getClass().getSimpleName(), "attemptDecryptPayload: ", authException);
-                listener.onAuthFail();
-            } catch (Exception fatalException) {
-                Log.e(getClass().getSimpleName(), "attemptDecryptPayload: ", fatalException);
-                listener.onFatalError();
-            }
-        }
+    public Completable initializeFromPayload(String payload, String password) {
+        return payloadDataManager.initializeFromPayload(payload, password)
+                .doOnComplete(() -> {
+                    prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.getWallet().getGuid());
+                    appUtil.setSharedKey(payloadDataManager.getWallet().getSharedKey());
+                    prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
+                });
     }
 
-    private void attemptUpdatePayload(CharSequenceX password, String guid, String decryptedPayload, DecryptPayloadListener listener) throws JSONException {
-        JSONObject decryptedJsonObject = new JSONObject(decryptedPayload);
-
-        if (decryptedJsonObject.has("sharedKey")) {
-            prefsUtil.setValue(PrefsUtil.KEY_GUID, guid);
-            payloadManager.setTempPassword(password);
-
-            String sharedKey = decryptedJsonObject.getString("sharedKey");
-            appUtil.setSharedKey(sharedKey);
-
-            updatePayload(sharedKey, guid, password)
-                    .subscribe(new CompletableObserver() {
-                        @Override
-                        public void onSubscribe(Disposable d) {
-                            // No-op
-                        }
-
-                        @Override
-                        public void onComplete() {
-                            prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
-                            listener.onSuccess();
-                        }
-
-                        @Override
-                        public void onError(Throwable throwable) {
-                            if (throwable instanceof InvalidCredentialsException) {
-                                listener.onAuthFail();
-
-                            } else if (throwable instanceof PayloadException) {
-                                // This shouldn't happen - Payload retrieved from server couldn't be parsed
-                                listener.onFatalError();
-
-                            } else if (throwable instanceof HDWalletException) {
-                                // This shouldn't happen. HD fatal error - not safe to continue - don't clear credentials
-                                listener.onFatalError();
-
-                            } else {
-                                listener.onPairFail();
-                            }
-                        }
-                    });
-        } else {
-            listener.onFatalError();
-        }
-    }
-
-    public interface DecryptPayloadListener {
-
-        void onSuccess();
-
-        void onPairFail();
-
-        void onAuthFail();
-
-        void onFatalError();
-    }
 }

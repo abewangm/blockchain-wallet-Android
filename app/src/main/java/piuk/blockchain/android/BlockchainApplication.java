@@ -6,26 +6,27 @@ import com.google.android.gms.security.ProviderInstaller;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 
-import info.blockchain.BlockchainFramework;
-import info.blockchain.FrameworkInterface;
-import info.blockchain.api.PinStore;
-
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.FrameworkInterface;
+import info.blockchain.wallet.api.WalletApi;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import dagger.Lazy;
 import io.reactivex.plugins.RxJavaPlugins;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityManager;
-import piuk.blockchain.android.data.services.PinStoreService;
+import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ApplicationLifeCycle;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -39,15 +40,24 @@ import retrofit2.Retrofit;
 
 public class BlockchainApplication extends Application implements FrameworkInterface {
 
+    public static final String RX_ERROR_TAG = "RxJava Error";
     @Thunk static final String TAG = BlockchainApplication.class.getSimpleName();
-    private static final String RX_ERROR_TAG = "RxJava Error";
 
     @Inject
     @Named("api")
-    protected Retrofit retrofitApi;
+    protected Lazy<Retrofit> retrofitApi;
     @Inject
     @Named("server")
-    protected Retrofit retrofitServer;
+    protected Lazy<Retrofit> retrofitServer;
+    @Inject
+    @Named("sfox")
+    protected Lazy<Retrofit> sfoxApi;
+    @Inject
+    @Named("coinify")
+    protected Lazy<Retrofit> coinify;
+
+    @Inject protected PrefsUtil prefsUtil;
+    @Inject protected RxBus rxBus;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -59,7 +69,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
                         .setFontAttrId(R.attr.fontPath)
                         .build());
 
-        if (BuildConfig.DEBUG && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        if (BuildConfig.DEBUG && !AndroidUtils.is21orHigher()) {
             MultiDex.install(base);
         }
     }
@@ -81,9 +91,10 @@ public class BlockchainApplication extends Application implements FrameworkInter
         AppUtil appUtil = new AppUtil(this);
 
         AccessState.getInstance().initAccessState(this,
-                new PrefsUtil(this),
-                new PinStoreService(new PinStore()),
-                appUtil);
+                prefsUtil,
+                new WalletService(new WalletApi()),
+                appUtil,
+                rxBus);
 
         // Apply PRNG fixes on app start if needed
         appUtil.applyPRNGFixes();
@@ -94,6 +105,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
+        //noinspection AnonymousInnerClassMayBeStatic
         ApplicationLifeCycle.getInstance().addListener(new ApplicationLifeCycle.LifeCycleListener() {
             @Override
             public void onBecameForeground() {
@@ -108,15 +120,40 @@ public class BlockchainApplication extends Application implements FrameworkInter
         });
     }
 
-    // Pass instances to JAR Framework
+    // Pass instances to JAR Framework, evaluate after object graph instantiated fully
     @Override
     public Retrofit getRetrofitApiInstance() {
-        return retrofitApi;
+        return retrofitApi.get();
     }
 
     @Override
     public Retrofit getRetrofitServerInstance() {
-        return retrofitServer;
+        return retrofitServer.get();
+    }
+
+    @Override
+    public Retrofit getRetrofitSFOXInstance() {
+        return sfoxApi.get();
+    }
+
+    @Override
+    public Retrofit getRetrofitCoinifyInstance() {
+        return coinify.get();
+    }
+
+    @Override
+    public String getApiCode() {
+        return "25a6ad13-1633-4dfb-b6ee-9b91cdf0b5c3";
+    }
+
+    @Override
+    public String getDevice() {
+        return "android";
+    }
+
+    @Override
+    public String getAppVersion() {
+        return BuildConfig.VERSION_NAME;
     }
 
     /**
@@ -130,7 +167,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
      * @see <a href="https://developer.android.com/training/articles/security-gms-provider.html">Updating
      * Your Security Provider</a>
      */
-    private void checkSecurityProviderAndPatchIfNeeded() {
+    protected void checkSecurityProviderAndPatchIfNeeded() {
         ProviderInstaller.installIfNeededAsync(this, new ProviderInstaller.ProviderInstallListener() {
             @Override
             public void onProviderInstalled() {

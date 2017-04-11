@@ -103,7 +103,7 @@
 
     <string name="support">サポート</string>
     <string name="rate_us">評価する</string>
-    <string name="about">ブロックチェーンウォレット %1$s\n©%2$s Blockchain.info</string>
+    <string name="about">ブロックチェーンウォレット %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">無料商人アプリ</string>
     <string name="password_or_wipe">パスワードを使ってログインするかこの財布を忘れる</string>
     <string name="use_password">パスワードを使用</string>
@@ -252,7 +252,7 @@
     <string name="decrypting_wallet">財布を復号化中...</string>
     <string name="password_unchanged">パスワードは変更されていません</string>
     <string name="password_changed">パスワードが変更されました</string>
-    <string name="verify_email2">認証されたメールアドレスは疑わしい、もしくは通常と異なったアクティビティが検出された際に、財布ログインIDのリマインダーおよびビットコイン資金の受信通知の送信のために使用されます。マーケティング目的でメールアドレスを使用することはありません。</string>
+    <string name="verify_email2">認証されたメールアドレスは疑わしい、もしくは通常と異なったアクティビティが検出された際に、財布ログインIDのリマインダーおよびビットコイン資金の受信通知の送信のために使用されます。</string>
     <string name="disable_root_warning">ルート化されたデバイスの警告を無効にする</string>
 
     <string name="show_balance">残高を表示</string>
@@ -366,8 +366,6 @@
     <string name="two_fa">2段階認証</string>
     <string name="tor_requests">Torリクエストをブロック</string>
     <string name="tor_summary">Tor匿名ネットワークの一部として認識されているIPアドレスのあなたの財布へのアクセスをブロックしますか？Torネットワークはブロックチェーンユーザーの財布への不正アクセスに頻繁に利用されることが知られています。</string>
-    <string name="password_hint">パスワードヒント</string>
-    <string name="password_hint_summary">ブロックチェーンウォレットはサーバーにパスワードを伝達することはありません。当社ではお客様のパスワードを保管しておらず、忘れた場合でもこちらからリセットを行うことはできません。パスワードを忘れた場合にパスワードのヒントを送信できます。覚えやすいパスワードのヒントを作成してください。</string>
     <string name="change_password">パスワードを変更</string>
     <string name="change_password_summary">あなたのパスワードが当社サーバーに共有されることはありません。よって、パスワードを忘れた場合でも当社がリセットを行うことはできません。パスワードを紛失した場合にアクセスを復元するためのリカバリーフレーズを書き留めておいてください。</string>
     <string name="verify_email_notice">メールアドレスに認証リンクが送信されました。認証リンクをクリックしてメールアドレスを認証してください。</string>
@@ -387,7 +385,6 @@
     <string name="rate_yes">はい、ブロックチェーンウォレットを評価します</string>
     <string name="rate_no">いいえ、結構です</string>
     <string name="rate_later">後で通知する</string>
-    <string name="hint_reveals_password_error">メイン財布のパスワードをパスワードヒントに設定することはできません。</string>
     <string name="why_has_my_address_changed">なぜ私のアドレスが変更したのでしょうか？</string>
     <string name="learn_more">さらに詳しく</string>
 
@@ -410,7 +407,7 @@
     <string name="accept_higher_fee">より高額な費用に同意する</string>
     <string name="large_tx_high_fee_warning">"この取引では少額の釣り銭金額が払い戻されるため、ダスト消費により高額な手数料が必要です。"</string>
 
-    <string name="transactions">取引</string>
+    <string name="overview">取引</string>
     <string name="invalid_password_too_short">3文字以上入力してください</string>
     <string name="change_pin_new_matches_current">新規PINに以前のPINを使うことはできません</string>
     <string name="account_locked_title">アカウントがロックされています</string>

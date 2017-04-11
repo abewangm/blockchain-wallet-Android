@@ -8,45 +8,45 @@ import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
 import info.blockchain.wallet.crypto.AESUtil;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
 
 import org.spongycastle.util.encoders.Hex;
 
-import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 
 import io.reactivex.Observable;
 import io.reactivex.exceptions.Exceptions;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.services.PinStoreService;
+import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.ui.auth.LogoutActivity;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
+// TODO: 21/03/2017 Most of this class can be refactored out
 public class AccessState {
 
     private static final long LOGOUT_TIMEOUT_MILLIS = 1000L * 30L;
     public static final String LOGOUT_ACTION = "info.blockchain.wallet.LOGOUT";
 
     private PrefsUtil prefs;
-    private PinStoreService pinStore;
+    private WalletService walletService;
     private AppUtil appUtil;
-    private String mPin;
+    private RxBus rxBus;
+    private String pin;
     private boolean isLoggedIn = false;
     private PendingIntent logoutPendingIntent;
+    private boolean inSepaCountry = false;
     private static AccessState instance;
-    private static final Subject<AuthEvent> authEventSubject = PublishSubject.create();
 
-
-    public void initAccessState(Context context, PrefsUtil prefs, PinStoreService pinStore, AppUtil appUtil) {
+    public void initAccessState(Context context, PrefsUtil prefs, WalletService walletService, AppUtil appUtil, RxBus rxBus) {
         this.prefs = prefs;
-        this.pinStore = pinStore;
+        this.walletService = walletService;
         this.appUtil = appUtil;
+        this.rxBus = rxBus;
 
         Intent intent = new Intent(context, LogoutActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -60,99 +60,94 @@ public class AccessState {
         return instance;
     }
 
-    public Observable<Boolean> createPin(CharSequenceX password, String passedPin) {
+    // TODO: 31/03/2017 Move all of the web calls out of here
+
+    @Deprecated
+    public Observable<Boolean> createPin(String password, String passedPin) {
         return createPinObservable(password, passedPin)
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    public Observable<CharSequenceX> validatePin(String passedPin) {
-        mPin = passedPin;
+    @Deprecated
+    public Observable<String> validatePin(String passedPin) {
+        pin = passedPin;
 
         String key = prefs.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
         String encryptedPassword = prefs.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
 
-        return pinStore.validateAccess(key, passedPin)
-                .flatMap(jsonObject -> {
-                    if (jsonObject.has("success")) {
-                        try {
-                            String decryptionKey = (String) jsonObject.get("success");
-                            return Observable.just(new CharSequenceX(
-                                    AESUtil.decrypt(encryptedPassword,
-                                            new CharSequenceX(decryptionKey),
-                                            AESUtil.PIN_PBKDF2_ITERATIONS)));
-                        } catch (Exception e) {
-                            throw Exceptions.propagate(new Throwable("Validate access failed"));
-                        }
+        return walletService.validateAccess(key, passedPin)
+                .map(response -> {
+                    if (response.isSuccessful()) {
+                        String decryptionKey = response.body().getSuccess();
+
+                        return AESUtil.decrypt(encryptedPassword,
+                                decryptionKey,
+                                AESUtil.PIN_PBKDF2_ITERATIONS);
                     } else {
-                        throw Exceptions.propagate(new Throwable("Validate access failed"));
+                        //Invalid PIN
+                        throw new InvalidCredentialsException("Validate access failed");
                     }
-                })
-                .compose(RxUtil.applySchedulersToObservable());
+                });
     }
 
-    // TODO: 14/10/2016 This should be moved elsewhere in the
+    @Deprecated
     public Observable<Boolean> syncPayloadToServer() {
-        return Observable.fromCallable(() -> PayloadManager.getInstance().savePayloadToServer())
+        return Observable.fromCallable(() -> PayloadManager.getInstance().save())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    private Observable<Boolean> createPinObservable(CharSequenceX password, String passedPin) {
+    @Deprecated
+    private Observable<Boolean> createPinObservable(String password, String passedPin) {
         if (passedPin == null || passedPin.equals("0000") || passedPin.length() != 4) {
             return Observable.just(false);
         }
 
-        mPin = passedPin;
+        pin = passedPin;
         appUtil.applyPRNGFixes();
 
         return Observable.create(subscriber -> {
-            try {
-                byte[] bytes = new byte[16];
-                SecureRandom random = new SecureRandom();
-                random.nextBytes(bytes);
-                String key = new String(Hex.encode(bytes), "UTF-8");
-                random.nextBytes(bytes);
-                String value = new String(Hex.encode(bytes), "UTF-8");
+            byte[] bytes = new byte[16];
+            SecureRandom random = new SecureRandom();
+            random.nextBytes(bytes);
+            String key = new String(Hex.encode(bytes), "UTF-8");
+            random.nextBytes(bytes);
+            String value = new String(Hex.encode(bytes), "UTF-8");
 
-                pinStore.setAccessKey(key, value, passedPin)
-                        .subscribe(success -> {
-                            String encryptedPassword = null;
-                            try {
-                                encryptedPassword = new AESUtilWrapper().encrypt(
-                                        password.toString(), new CharSequenceX(value), AESUtil.PIN_PBKDF2_ITERATIONS);
+            walletService.setAccessKey(key, value, passedPin)
+                    .subscribe(response -> {
+                        if (response.isSuccessful()) {
+                            String encryptionKey = Hex.toHexString(value.getBytes("UTF-8"));
 
-                                prefs.setValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, encryptedPassword);
-                                prefs.setValue(PrefsUtil.KEY_PIN_IDENTIFIER, key);
+                            String encryptedPassword = new AESUtilWrapper().encrypt(
+                                    password, encryptionKey, AESUtil.PIN_PBKDF2_ITERATIONS);
 
-                                if (!subscriber.isDisposed()) {
-                                    subscriber.onNext(true);
-                                    subscriber.onComplete();
-                                }
+                            prefs.setValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD,
+                                    encryptedPassword);
+                            prefs.setValue(PrefsUtil.KEY_PIN_IDENTIFIER, key);
 
-                            } catch (Exception e) {
-                                throw Exceptions.propagate(e);
-                            }
-
-                        }, throwable -> {
                             if (!subscriber.isDisposed()) {
-                                subscriber.onNext(false);
+                                subscriber.onNext(true);
                                 subscriber.onComplete();
                             }
-                        });
+                        } else {
+                            throw Exceptions.propagate(new Throwable("Validate access failed: " + response.errorBody().string()));
+                        }
 
-            } catch (UnsupportedEncodingException e) {
-                if (!subscriber.isDisposed()) {
-                    subscriber.onError(new Throwable(e));
-                }
-            }
+                    }, throwable -> {
+                        if (!subscriber.isDisposed()) {
+                            subscriber.onNext(false);
+                            subscriber.onComplete();
+                        }
+                    });
         });
     }
 
     public void setPIN(@Nullable String pin) {
-        mPin = pin;
+        this.pin = pin;
     }
 
     public String getPIN() {
-        return mPin;
+        return pin;
     }
 
     /**
@@ -172,11 +167,23 @@ public class AccessState {
     }
 
     public void logout(Context context) {
-        mPin = null;
+        pin = null;
         Intent intent = new Intent(context, LogoutActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.setAction(LOGOUT_ACTION);
         context.startActivity(intent);
+    }
+
+    /**
+     * Returns whether or not a user is accessing their wallet from a SEPA country, ie should be
+     * able to see buy/sell prompts.
+     */
+    public boolean getInSepaCountry() {
+        return inSepaCountry;
+    }
+
+    public void setInSepaCountry(boolean inSepaCountry) {
+        this.inSepaCountry = inSepaCountry;
     }
 
     public boolean isLoggedIn() {
@@ -187,22 +194,14 @@ public class AccessState {
         prefs.logIn();
         isLoggedIn = loggedIn;
         if (isLoggedIn) {
-            authEventSubject.onNext(AuthEvent.Login);
+            rxBus.emitEvent(AuthEvent.class, AuthEvent.LOGIN);
         } else {
-            authEventSubject.onNext(AuthEvent.Logout);
+            rxBus.emitEvent(AuthEvent.class, AuthEvent.LOGOUT);
         }
     }
 
-    /**
-     * Returns a {@link Subject} that publishes login/logout events
-     */
-    public Subject<AuthEvent> getAuthEventSubject() {
-        return authEventSubject;
+    public void unpairWallet() {
+        rxBus.emitEvent(AuthEvent.class, AuthEvent.UNPAIR);
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public enum AuthEvent {
-        Login,
-        Logout
-    }
 }

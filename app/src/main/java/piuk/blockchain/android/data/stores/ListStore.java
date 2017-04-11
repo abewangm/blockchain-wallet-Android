@@ -9,7 +9,7 @@ import piuk.blockchain.android.util.ListUtil;
 
 public abstract class ListStore<T> {
 
-    List<T> data;
+    private List<T> data;
 
     public ListStore() {
         data = new ArrayList<>();
@@ -29,6 +29,10 @@ public abstract class ListStore<T> {
 
     public void insertObjectIntoList(T object) {
         data.add(object);
+    }
+
+    public void removeObjectFromList(T object) {
+        data.remove(object);
     }
 
     public void insertBulk(List<T> objects) {

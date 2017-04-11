@@ -2,20 +2,11 @@ package piuk.blockchain.android.ui.pairing;
 
 import android.support.annotation.StringRes;
 
-import info.blockchain.api.WalletPayload;
-import info.blockchain.wallet.pairing.Pairing;
-import info.blockchain.wallet.pairing.PairingQRComponents;
-import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.CharSequenceX;
-
-import org.spongycastle.util.encoders.Hex;
-
 import javax.inject.Inject;
+import javax.net.ssl.SSLPeerUnverifiedException;
 
-import io.reactivex.Observable;
-import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -25,7 +16,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 public class PairingViewModel extends BaseViewModel {
 
     @Inject protected AppUtil appUtil;
-    @Inject protected PayloadManager payloadManager;
+    @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected PrefsUtil prefsUtil;
     private DataListener dataListener;
 
@@ -52,44 +43,26 @@ public class PairingViewModel extends BaseViewModel {
     }
 
     void pairWithQR(String raw) {
-        dataListener.showProgressDialog(R.string.please_wait);
-
         appUtil.clearCredentials();
 
-        Pairing pairing = new Pairing();
-        WalletPayload access = new WalletPayload();
-
         compositeDisposable.add(
-                handleQrCode(raw, pairing, access)
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(pairingQRComponents -> {
-                            dataListener.dismissProgressDialog();
-                            if (pairingQRComponents.guid != null) {
-                                prefsUtil.setValue(PrefsUtil.KEY_GUID, pairingQRComponents.guid);
-                                prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
-                                dataListener.startPinEntryActivity();
-                            } else {
-                                throw Exceptions.propagate(new Throwable("GUID was null"));
-                            }
+                payloadDataManager.handleQrCode(raw)
+                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.please_wait))
+                        .doOnComplete(() -> appUtil.setSharedKey(payloadDataManager.getWallet().getSharedKey()))
+                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .subscribe(() -> {
+                            prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.getWallet().getGuid());
+                            prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
+                            dataListener.startPinEntryActivity();
                         }, throwable -> {
-                            dataListener.dismissProgressDialog();
-                            dataListener.showToast(R.string.pairing_failed, ToastCustom.TYPE_ERROR);
-                            appUtil.clearCredentialsAndRestart();
+                            if (throwable instanceof SSLPeerUnverifiedException) {
+                                // BaseActivity handles message
+                                appUtil.clearCredentials();
+                            } else {
+                                dataListener.showToast(R.string.pairing_failed, ToastCustom.TYPE_ERROR);
+                                appUtil.clearCredentialsAndRestart();
+                            }
                         }));
     }
 
-    private Observable<PairingQRComponents> handleQrCode(String data, Pairing pairing, WalletPayload access) {
-        return Observable.fromCallable(() -> {
-            PairingQRComponents qrComponents = pairing.getQRComponentsFromRawString(data);
-            String encryptionPassword = access.getPairingEncryptionPassword(qrComponents.guid);
-            String[] sharedKeyAndPassword = pairing.getSharedKeyAndPassword(qrComponents.encryptedPairingCode, encryptionPassword);
-
-            CharSequenceX password = new CharSequenceX(new String(Hex.decode(sharedKeyAndPassword[1]), "UTF-8"));
-
-            payloadManager.setTempPassword(password);
-            appUtil.setSharedKey(sharedKeyAndPassword[0]);
-
-            return qrComponents;
-        });
-    }
 }

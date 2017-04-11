@@ -3,8 +3,8 @@ package piuk.blockchain.android.ui.account;
 import android.content.Context;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
+import android.widget.EditText;
 
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -29,28 +29,27 @@ public class SecondPasswordHandler {
     public interface ResultListener {
         void onNoSecondPassword();
 
-        void onSecondPasswordValidated(String validateSecondPassword);
+        void onSecondPasswordValidated(String validatedSecondPassword);
     }
 
     public void validate(final ResultListener listener) {
-
-        if (!payloadManager.getPayload().isDoubleEncrypted()) {
+        if (!payloadManager.getPayload().isDoubleEncryption()) {
             listener.onNoSecondPassword();
         } else {
 
-            final AppCompatEditText passwordField = new AppCompatEditText(context);
+            final EditText passwordField = new EditText(context);
             passwordField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            passwordField.setHint(R.string.password);
 
             new AlertDialog.Builder(context, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
                     .setMessage(R.string.enter_double_encryption_pw)
-                    .setView(ViewUtils.getAlertDialogEditTextLayout(context, passwordField))
+                    .setView(ViewUtils.getAlertDialogPaddedView(context, passwordField))
                     .setCancelable(false)
                     .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
-
                         String secondPassword = passwordField.getText().toString();
 
-                        if (secondPassword.length() > 0) {
+                        if (!secondPassword.isEmpty()) {
                             showProgressDialog(R.string.validating_password);
                             validateSecondPassword(secondPassword)
                                     .compose(RxUtil.applySchedulersToObservable())
@@ -65,7 +64,9 @@ public class SecondPasswordHandler {
                         } else {
                             showErrorToast();
                         }
-                    }).setNegativeButton(android.R.string.cancel, null).show();
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
         }
     }
 

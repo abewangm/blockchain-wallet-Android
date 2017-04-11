@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.base;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -16,59 +17,58 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
+import javax.inject.Inject;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.connectivity.ConnectionEvent;
+import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ApplicationLifeCycle;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 
 /**
  * A base Activity for all activities which need auth timeouts & screenshot prevention
  */
-
+@SuppressLint("Registered")
 public class BaseAuthActivity extends AppCompatActivity {
 
-    private AlertDialog mAlertDialog;
-    private SSLVerifyUtil mSSLVerifyUtil = new SSLVerifyUtil(this);
     private static CompositeDisposable compositeDisposable;
+    private static Observable<ConnectionEvent> connectionEventObservable;
+    private AlertDialog mAlertDialog;
+    @Inject protected SSLVerifyUtil mSSLVerifyUtil;
+    @Inject protected PrefsUtil mPrefsUtil;
+    @Inject protected RxBus rxBus;
+
+    {
+        Injector.getInstance().getAppComponent().inject(this);
+    }
 
     @CallSuper
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-        if (!BuildConfig.DOGFOOD && !BuildConfig.DEBUG) {
-            disallowScreenshots();
-        }
+        mPrefsUtil = new PrefsUtil(this);
 
         compositeDisposable = new CompositeDisposable();
 
-        // Subscribe to SSL pinning events
+        connectionEventObservable = rxBus.register(ConnectionEvent.class);
         compositeDisposable.add(
-                mSSLVerifyUtil.getSslPinningSubject()
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(sslEvent -> {
-                                    switch (sslEvent) {
-                                        case ServerDown:
-                                            showAlertDialog(getString(R.string.ssl_no_connection), false);
-                                            break;
-                                        case PinningFail:
-                                            showAlertDialog(getString(R.string.ssl_pinning_invalid), true);
-                                            break;
-                                        case NoConnection:
-                                            showAlertDialog(getString(R.string.ssl_no_connection), false);
-                                            break;
-                                        case Success:
-                                            // No-op
-                                        default:
-                                            // No-op
-                                    }
-                                },
-                                Throwable::printStackTrace));
+                connectionEventObservable
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(connectionEvent -> {
+                            if (connectionEvent.equals(ConnectionEvent.PINNING_FAIL)) {
+                                showAlertDialog(getString(R.string.ssl_pinning_invalid), true);
+                            } else {
+                                showAlertDialog(getString(R.string.ssl_no_connection), false);
+                            }
+                        }));
     }
 
     /**
@@ -80,11 +80,25 @@ public class BaseAuthActivity extends AppCompatActivity {
      * @param title   The title for the page, as a StringRes
      */
     public void setupToolbar(Toolbar toolbar, @StringRes int title) {
+        setupToolbar(toolbar, getString(title));
+    }
+
+    /**
+     * Applies the title to the {@link Toolbar} which is then set as the Activity's
+     * SupportActionBar. Also applies the Montserrat-Regular font, as this cannot be done elsewhere
+     * for now.
+     *
+     * @param toolbar The {@link Toolbar} for the current activity
+     * @param title   The title for the page, as a String
+     */
+    public void setupToolbar(Toolbar toolbar, String title) {
         // Fix for bug with formatted ActionBars https://android-review.googlesource.com/#/c/47831/
         if (AndroidUtils.is18orHigher()) {
             toolbar.setTitle(CalligraphyUtils.applyTypefaceSpan(
-                    getString(title),
+                    title,
                     TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        } else {
+            toolbar.setTitle(title);
         }
 
         setSupportActionBar(toolbar);
@@ -104,6 +118,8 @@ public class BaseAuthActivity extends AppCompatActivity {
             actionBar.setTitle(CalligraphyUtils.applyTypefaceSpan(
                     getString(title),
                     TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
+        } else {
+            actionBar.setTitle(title);
         }
     }
 
@@ -113,6 +129,12 @@ public class BaseAuthActivity extends AppCompatActivity {
         super.onResume();
         stopLogoutTimer();
         ApplicationLifeCycle.getInstance().onActivityResumed();
+
+        if (mPrefsUtil.getValue(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false)) {
+            enableScreenshots();
+        } else {
+            disallowScreenshots();
+        }
     }
 
     @CallSuper
@@ -127,6 +149,7 @@ public class BaseAuthActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        rxBus.unregister(ConnectionEvent.class, connectionEventObservable);
         compositeDisposable.clear();
         if (mAlertDialog != null) {
             mAlertDialog.dismiss();
@@ -152,11 +175,12 @@ public class BaseAuthActivity extends AppCompatActivity {
         AccessState.getInstance().stopLogoutTimer(this);
     }
 
-    /**
-     * Override if you want a particular activity to be able to be screenshot.
-     */
-    protected void disallowScreenshots() {
+    private void disallowScreenshots() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+    }
+
+    private void enableScreenshots() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
     }
 
     private void showAlertDialog(final String message, final boolean forceExit) {
@@ -176,9 +200,9 @@ public class BaseAuthActivity extends AppCompatActivity {
         builder.setNegativeButton(R.string.exit, (d, id) -> finish());
 
         mAlertDialog = builder.create();
-
         if (!isFinishing()) {
             mAlertDialog.show();
         }
     }
+
 }

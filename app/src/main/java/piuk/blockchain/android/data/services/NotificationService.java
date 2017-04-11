@@ -1,16 +1,15 @@
 package piuk.blockchain.android.data.services;
 
-import info.blockchain.api.Notifications;
+import info.blockchain.wallet.api.WalletApi;
 
 import io.reactivex.Completable;
-import io.reactivex.schedulers.Schedulers;
 
 public class NotificationService {
 
-    private Notifications notification;
+    private WalletApi walletApi;
 
-    public NotificationService(Notifications notification) {
-        this.notification = notification;
+    public NotificationService(WalletApi walletApi) {
+        this.walletApi = walletApi;
     }
 
     /**
@@ -19,12 +18,10 @@ public class NotificationService {
      * @param token     A Firebase notification token
      * @param guid      The user's GUID
      * @param sharedKey The user's shared key
-     * @return A {@link Completable}, ie an Observable specifically for methods returning void.
+     * @return A {@link Completable}, ie an Observable type object specifically for methods
+     * returning void.
      */
     public Completable sendNotificationToken(String token, String guid, String sharedKey) {
-        return Completable.fromCallable(() -> {
-            notification.updateFirebaseNotificationToken(token, guid, sharedKey);
-            return Void.TYPE;
-        }).subscribeOn(Schedulers.io());
+        return Completable.fromObservable(walletApi.updateFirebaseNotificationToken(token, guid, sharedKey));
     }
 }

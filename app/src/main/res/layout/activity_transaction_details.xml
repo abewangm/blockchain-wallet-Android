@@ -11,7 +11,6 @@
         <include layout="@layout/toolbar_general" />
 
         <!-- LOADING LAYOUT -->
-
         <RelativeLayout
             android:id="@+id/loading_layout"
             android:layout_width="match_parent"
@@ -50,28 +49,18 @@
                     android:visibility="gone"
                     tools:visibility="visible">
 
-                    <LinearLayout
+                    <TextView
+                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:orientation="horizontal">
+                        android:drawableLeft="@drawable/ic_warning_white_24dp"
+                        android:drawablePadding="8dp"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="@string/transaction_detail_double_spend"
+                        android:textColor="@color/white" />
 
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:padding="8dp"
-                            app:srcCompat="@drawable/ic_warning_white_24dp" />
-
-                        <TextView
-                            fontPath="fonts/Montserrat-Regular.ttf"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="@string/transaction_detail_double_spend"
-                            android:textColor="@color/white" />
-
-                    </LinearLayout>
                 </LinearLayout>
 
                 <!-- MAIN DETAILS -->
@@ -159,7 +148,7 @@
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        app:srcCompat="@drawable/ic_mode_edit" />
+                        app:srcCompat="@drawable/vector_mode_edit" />
 
                 </RelativeLayout>
 
@@ -219,6 +208,29 @@
                         android:textColor="@color/black"
                         android:textSize="16sp"
                         tools:text="1XUzFYTvEjWxLkqtL4100MQ7zyzRvq9xXX" />
+
+                    <LinearLayout
+                        android:id="@+id/transaction_note_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <TextView
+                            style="@style/TransactionDetailHeader"
+                            android:layout_marginTop="16dp"
+                            android:text="@string/transaction_detail_contact_note" />
+
+                        <TextView
+                            android:id="@+id/transaction_note"
+                            fontPath="fonts/Montserrat-Regular.ttf"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            tools:text="For the burger" />
+                    </LinearLayout>
                 </LinearLayout>
 
                 <include layout="@layout/divider_grey" />
@@ -281,7 +293,7 @@
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
                     android:text="@string/transaction_detail_verify"
-                    android:theme="@style/ButtonBlueTheme" />
+                    android:theme="@style/ButtonLightBlueTheme" />
 
             </LinearLayout>
         </ScrollView>

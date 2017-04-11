@@ -21,13 +21,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
-import info.blockchain.wallet.payload.PayloadManager;
-
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.databinding.ActivityAccountEditBinding;
-import piuk.blockchain.android.databinding.AlertGenericWarningBinding;
 import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -94,7 +91,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.name)
                 .setMessage(R.string.assign_display_name)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(this, etLabel))
+                .setView(ViewUtils.getAlertDialogPaddedView(this, etLabel))
                 .setCancelable(false)
                 .setPositiveButton(R.string.save_name, (dialog, whichButton) -> {
                     if (!ConnectivityStatus.hasConnectivity(this)) {
@@ -248,31 +245,14 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
     }
 
     private void onShowLargeTransactionWarning(AlertDialog alertDialog) {
-
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        AlertGenericWarningBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
-                R.layout.alert_generic_warning, null, false);
-        dialogBuilder.setView(dialogBinding.getRoot());
-
-        final AlertDialog alertDialogFee = dialogBuilder.create();
-        alertDialogFee.setCanceledOnTouchOutside(false);
-
-        dialogBinding.tvBody.setText(R.string.large_tx_warning);
-
-        dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialogFee.isShowing()) alertDialogFee.cancel();
-        });
-
-        dialogBinding.confirmKeep.setText(getResources().getString(R.string.go_back));
-        dialogBinding.confirmKeep.setOnClickListener(v -> {
-            alertDialogFee.dismiss();
-            alertDialog.dismiss();
-        });
-
-        dialogBinding.confirmChange.setText(getResources().getString(R.string.accept_higher_fee));
-        dialogBinding.confirmChange.setOnClickListener(v -> alertDialogFee.dismiss());
-
-        alertDialogFee.show();
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setCancelable(false)
+                .setTitle(R.string.warning)
+                .setMessage(R.string.large_tx_warning)
+                .setNegativeButton(R.string.go_back, (dialog, which) -> alertDialog.dismiss())
+                .setPositiveButton(R.string.accept_higher_fee, null)
+                .create()
+                .show();
     }
 
     @Override
@@ -300,7 +280,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.bip38_password_entry)
-                .setView(ViewUtils.getAlertDialogEditTextLayout(this, password))
+                .setView(ViewUtils.getAlertDialogPaddedView(this, password))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
                         viewModel.importBIP38Address(data, password.getText().toString()))
@@ -367,6 +347,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         }
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
@@ -424,7 +405,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         if (AndroidUtils.is25orHigher() && viewModel.areLauncherShortcutsEnabled()) {
             LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(
                     this,
-                    PayloadManager.getInstance(),
+                    viewModel.getPayloadDataManager(),
                     getSystemService(ShortcutManager.class));
 
             launcherShortcutHelper.generateReceiveShortcuts();

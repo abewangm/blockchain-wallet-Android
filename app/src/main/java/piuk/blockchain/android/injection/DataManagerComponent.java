@@ -1,15 +1,27 @@
 package piuk.blockchain.android.injection;
 
 import dagger.Subcomponent;
+import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.account.AccountEditViewModel;
 import piuk.blockchain.android.ui.account.AccountViewModel;
 import piuk.blockchain.android.ui.auth.PasswordRequiredViewModel;
 import piuk.blockchain.android.ui.auth.PinEntryViewModel;
+import piuk.blockchain.android.ui.backup.BackupVerifyViewModel;
+import piuk.blockchain.android.ui.backup.BackupWalletViewModel;
 import piuk.blockchain.android.ui.backup.ConfirmFundsTransferViewModel;
 import piuk.blockchain.android.ui.balance.BalanceViewModel;
+import piuk.blockchain.android.ui.chooser.AccountChooserViewModel;
+import piuk.blockchain.android.ui.contacts.detail.ContactDetailViewModel;
+import piuk.blockchain.android.ui.contacts.list.ContactsListViewModel;
+import piuk.blockchain.android.ui.contacts.pairing.ContactPairingMethodViewModel;
+import piuk.blockchain.android.ui.contacts.pairing.ContactsInvitationBuilderViewModel;
+import piuk.blockchain.android.ui.contacts.pairing.ContactsQrViewModel;
+import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialogViewModel;
+import piuk.blockchain.android.ui.contacts.payments.ContactsPaymentRequestViewModel;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialogViewModel;
 import piuk.blockchain.android.ui.home.MainViewModel;
 import piuk.blockchain.android.ui.launcher.LauncherViewModel;
+import piuk.blockchain.android.ui.onboarding.OnboardingViewModel;
 import piuk.blockchain.android.ui.pairing.ManualPairingViewModel;
 import piuk.blockchain.android.ui.pairing.PairingViewModel;
 import piuk.blockchain.android.ui.receive.ReceiveQrViewModel;
@@ -63,5 +75,29 @@ public interface DataManagerComponent {
 
     void inject(ReceiveQrViewModel receiveQrViewModel);
 
+    void inject(ContactsListViewModel contactsListViewModel);
+
+    void inject(ContactPairingMethodViewModel contactPairingMethodViewModel);
+
     void inject(SwipeToReceiveViewModel swipeToReceiveViewModel);
+
+    void inject(ContactsInvitationBuilderViewModel contactsInvitationBuilderViewModel);
+
+    void inject(ContactsQrViewModel contactsQrViewModel);
+
+    void inject(ContactDetailViewModel contactDetailViewModel);
+
+    void inject(ContactsPaymentRequestViewModel contactsPaymentRequestViewModel);
+
+    void inject(AccountChooserViewModel accountChooserViewModel);
+
+    void inject(BackupWalletViewModel backupWalletViewModel);
+
+    void inject(WebSocketService webSocketService);
+
+    void inject(BackupVerifyViewModel backupVerifyViewModel);
+
+    void inject(ContactPaymentDialogViewModel contactPaymentDialogViewModel);
+
+    void inject(OnboardingViewModel onboardingViewModel);
 }

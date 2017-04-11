@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <data>
-
-        <variable
-            name="viewModel"
-            type="piuk.blockchain.android.ui.send.SendViewModel" />
-    </data>
-
     <RelativeLayout
         android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
@@ -45,18 +37,41 @@
                         <TextView
                             fontPath="fonts/Montserrat-Light.ttf"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="center|left"
+                            android:paddingTop="8dp"
                             android:text="@string/from"
                             android:textColor="@color/primary_gray_dark" />
 
-                        <include
-                            android:id="@+id/accounts"
-                            fontPath="fonts/Montserrat-Regular.ttf"
-                            layout="@layout/include_spinner_compat"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:layout_marginTop="8dp" />
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/from"
+                                fontPath="fonts/Montserrat-Regular.ttf"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.9"
+                                android:background="@color/white"
+                                android:paddingBottom="14dp"
+                                android:paddingTop="14dp"
+                                android:textColor="@color/black"
+                                android:textSize="16sp" />
+
+                            <ImageView
+                                android:id="@+id/imageview_dropdown_send"
+                                android:layout_width="58dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="6dp"
+                                android:layout_marginRight="2dp"
+                                android:layout_weight="0.1"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:divider="@null"
+                                android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
+                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -96,19 +111,20 @@
                                 android:hint="@string/to_field_helper"
                                 android:inputType="textNoSuggestions"
                                 android:lineSpacingMultiplier="0.8"
-                                android:text="@{viewModel.sendModel.destinationAddress}"
                                 android:textCursorDrawable="@null"
                                 android:textSize="16sp" />
 
-                            <piuk.blockchain.android.ui.customviews.ReselectSpinner
-                                android:id="@+id/sp_destination"
-                                fontPath="fonts/Montserrat-Regular.ttf"
+                            <ImageView
+                                android:id="@+id/imageview_dropdown_receive"
                                 android:layout_width="58dp"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="6dp"
+                                android:layout_marginRight="2dp"
                                 android:layout_weight="0.1"
-                                android:background="?android:selectableItemBackground"
+                                android:background="?attr/selectableItemBackgroundBorderless"
                                 android:divider="@null"
-                                android:dropDownSelector="?android:selectableItemBackground" />
+                                android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -117,31 +133,31 @@
                         android:id="@+id/amount_row"
                         layout="@layout/include_amount_row" />
 
-                    <TextView
-                        android:id="@+id/max"
-                        fontPath="fonts/Montserrat-Regular.ttf"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal|center_vertical"
-                        android:gravity="center_horizontal|center_vertical"
-                        android:padding="16dp"
-                        android:text="@{viewModel.sendModel.maxAvailable}"
-                        android:textAlignment="gravity"
-                        android:textColor="@{viewModel.sendModel.maxAvailableColor}"
-                        android:visibility="@{viewModel.sendModel.maxAvailableVisibility}" />
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ProgressBar
+                            android:id="@+id/progressBarMaxAvailable"
+                            style="?android:attr/progressBarStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:paddingBottom="16dp"
+                            android:paddingTop="16dp" />
+
+                        <TextView
+                            android:id="@+id/max"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal|center_vertical"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:padding="16dp"
+                            android:textAlignment="gravity" />
+                    </FrameLayout>
 
                     <include layout="@layout/divider_grey" />
-
-                    <ProgressBar
-                        android:id="@+id/progressBarMaxAvailable"
-                        style="?android:attr/progressBarStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:gravity="center_horizontal|center_vertical"
-                        android:paddingBottom="16dp"
-                        android:paddingTop="16dp"
-                        android:visibility="@{viewModel.sendModel.maxAvailableProgressVisibility}" />
 
                 </LinearLayout>
 
@@ -179,14 +195,13 @@
                             android:layout_marginTop="8dp"
                             android:layout_weight="1">
 
-                            <android.support.v7.widget.AppCompatEditText
+                            <android.support.design.widget.TextInputEditText
                                 android:id="@+id/custom_fee"
                                 fontPath="fonts/Montserrat-Regular.ttf"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="number|numberDecimal"
-                                android:maxLines="1"
-                                android:textColor="@{viewModel.sendModel.customFeeColor}" />
+                                android:maxLines="1" />
 
                         </android.support.design.widget.TextInputLayout>
 
@@ -203,13 +218,24 @@
                             fontPath="fonts/Montserrat-Regular.ttf"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:text="@{viewModel.sendModel.estimate}"
-                            android:textColor="@{viewModel.sendModel.estimateColor}" />
+                            android:gravity="center" />
 
                     </LinearLayout>
 
                 </LinearLayout>
+
+                <Button
+                    android:id="@+id/button_send"
+                    style="@style/ButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginTop="16dp"
+                    android:paddingLeft="32dp"
+                    android:paddingRight="32dp"
+                    android:text="@string/CONTINUE"
+                    android:theme="@style/ButtonLightBlueTheme" />
 
                 <TextView
                     android:id="@+id/unconfirmed_funds_warning"
@@ -219,7 +245,6 @@
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
                     android:gravity="center"
-                    android:text="@{viewModel.sendModel.unconfirmedFunds}"
                     android:textColor="@color/product_red_medium" />
 
             </LinearLayout>

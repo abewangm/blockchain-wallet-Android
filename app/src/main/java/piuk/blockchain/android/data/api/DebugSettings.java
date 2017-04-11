@@ -3,22 +3,18 @@ package piuk.blockchain.android.data.api;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.PersistentUrls;
 
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
 
-import javax.inject.Inject;
-
 import piuk.blockchain.android.BuildConfig;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
-import static info.blockchain.api.PersistentUrls.Environment.DEV;
-import static info.blockchain.api.PersistentUrls.Environment.STAGING;
-import static info.blockchain.api.PersistentUrls.Environment.TESTNET;
-import static info.blockchain.api.PersistentUrls.KEY_ENV_PROD;
+import static info.blockchain.wallet.api.PersistentUrls.Environment.DEV;
+import static info.blockchain.wallet.api.PersistentUrls.Environment.STAGING;
+import static info.blockchain.wallet.api.PersistentUrls.Environment.TESTNET;
+import static info.blockchain.wallet.api.PersistentUrls.KEY_ENV_PROD;
 
 @SuppressWarnings("WeakerAccess")
 public class DebugSettings {
@@ -27,15 +23,15 @@ public class DebugSettings {
 
     private static final String TAG = DebugSettings.class.getSimpleName();
 
-    @Inject protected PrefsUtil prefsUtil;
-    @Inject protected AppUtil appUtil;
-    @Inject protected PersistentUrls persistentUrls;
+    private PrefsUtil prefsUtil;
+    private PersistentUrls persistentUrls;
 
-    public DebugSettings() {
-        Injector.getInstance().getAppComponent().inject(this);
+    public DebugSettings(PrefsUtil prefsUtil, PersistentUrls persistentUrls) {
+        this.prefsUtil = prefsUtil;
+        this.persistentUrls = persistentUrls;
 
         // Restore saved environment
-        String storedEnv = prefsUtil.getValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_PROD);
+        String storedEnv = this.prefsUtil.getValue(KEY_CURRENT_ENVIRONMENT, KEY_ENV_PROD);
         if (PersistentUrls.Environment.fromString(storedEnv) != null) {
             setEnvironment(PersistentUrls.Environment.fromString(storedEnv));
         } else {
@@ -53,6 +49,26 @@ public class DebugSettings {
         return persistentUrls.getCurrentEnvironment();
     }
 
+    @NonNull
+    public String getCurrentServerUrl() {
+        return persistentUrls.getCurrentBaseServerUrl();
+    }
+
+    @NonNull
+    public String getCurrentApiUrl() {
+        return persistentUrls.getCurrentBaseApiUrl();
+    }
+
+    @NonNull
+    public String getCurrentSFOXUrl() {
+        return persistentUrls.getCurrentSFOXUrl();
+    }
+
+    @NonNull
+    public String getCurrentCoinifyUrl() {
+        return persistentUrls.getCurrentCoinifyUrl();
+    }
+
     /**
      * Sets the current environment to whatever is passed to it. Clears all user data other than the
      * selected env and restarts the app
@@ -61,7 +77,6 @@ public class DebugSettings {
      */
     public void changeEnvironment(@NonNull PersistentUrls.Environment environment) {
         setEnvironment(environment);
-        appUtil.clearCredentialsAndKeepEnvironment();
     }
 
     private void setEnvironment(PersistentUrls.Environment environment) {

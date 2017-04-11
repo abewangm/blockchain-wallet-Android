@@ -14,7 +14,7 @@ import org.robolectric.annotation.Config;
 
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
+import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -36,8 +36,8 @@ import static org.mockito.Mockito.when;
 public class ReceiveQrViewModelTest {
 
     private ReceiveQrViewModel subject;
-    @Mock ReceiveQrViewModel.DataListener activity;
-    @Mock ReceiveDataManager receiveDataManager;
+    @Mock private ReceiveQrViewModel.DataListener activity;
+    @Mock private QrCodeDataManager qrCodeDataManager;
 
     @Before
     public void setUp() throws Exception {
@@ -63,7 +63,7 @@ public class ReceiveQrViewModelTest {
         intent.putExtra(ReceiveQrActivity.INTENT_EXTRA_LABEL, label);
         when(activity.getPageIntent()).thenReturn(intent);
         Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
-        when(receiveDataManager.generateQrCode(anyString(), anyInt())).thenReturn(Observable.just(bitmap));
+        when(qrCodeDataManager.generateQrCode(anyString(), anyInt())).thenReturn(Observable.just(bitmap));
         // Act
         subject.onViewReady();
         // Assert
@@ -83,7 +83,7 @@ public class ReceiveQrViewModelTest {
         intent.putExtra(ReceiveQrActivity.INTENT_EXTRA_ADDRESS, address);
         intent.putExtra(ReceiveQrActivity.INTENT_EXTRA_LABEL, label);
         when(activity.getPageIntent()).thenReturn(intent);
-        when(receiveDataManager.generateQrCode(anyString(), anyInt())).thenReturn(Observable.error(new Throwable()));
+        when(qrCodeDataManager.generateQrCode(anyString(), anyInt())).thenReturn(Observable.error(new Throwable()));
         // Act
         subject.onViewReady();
         // Assert
@@ -121,8 +121,8 @@ public class ReceiveQrViewModelTest {
 
     private class MockDataManagerModule extends DataManagerModule {
         @Override
-        protected ReceiveDataManager provideReceiveDataManager() {
-            return receiveDataManager;
+        protected QrCodeDataManager provideQrDataManager() {
+            return qrCodeDataManager;
         }
     }
 }

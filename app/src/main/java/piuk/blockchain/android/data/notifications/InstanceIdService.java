@@ -15,8 +15,12 @@ public class InstanceIdService extends FirebaseInstanceIdService {
 
     @Inject protected NotificationTokenManager notificationTokenManager;
 
-    public InstanceIdService() {
+    {
         Injector.getInstance().getAppComponent().inject(this);
+    }
+
+    public InstanceIdService() {
+        Log.d(TAG, "InstanceIdService: constructor instantiated");
     }
 
     @Override
@@ -26,8 +30,7 @@ public class InstanceIdService extends FirebaseInstanceIdService {
         Log.d(TAG, "Refreshed token: " + refreshedToken);
 
         if (refreshedToken != null) {
-            // FIXME: 15/11/2016 This will need re-enabling once metadata is live
-//            notificationTokenManager.storeAndUpdateToken(refreshedToken);
+            notificationTokenManager.storeAndUpdateToken(refreshedToken);
         }
     }
 }

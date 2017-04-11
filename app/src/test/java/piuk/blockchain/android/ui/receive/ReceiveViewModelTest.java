@@ -4,14 +4,12 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.graphics.Bitmap;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.HDWallet;
-import info.blockchain.wallet.payload.LegacyAddress;
-import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.HDWallet;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payload.data.Wallet;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,47 +25,58 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import javax.inject.Named;
+
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
-import piuk.blockchain.android.data.datamanagers.ReceiveDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.account.ItemAccount;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
+import retrofit2.Retrofit;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.TestCase.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.receive.ReceiveViewModel.KEY_WARN_WATCH_ONLY_SPEND;
 
+@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class ReceiveViewModelTest {
 
-    private ReceiveViewModel mSubject;
-    @Mock PayloadManager mPayloadManager;
-    @Mock AppUtil mAppUtil;
-    @Mock PrefsUtil mPrefsUtil;
-    @Mock StringUtils mStringUtils;
-    @Mock ReceiveDataManager mDataManager;
-    @Mock ExchangeRateFactory mExchangeRateFactory;
-    @Mock WalletAccountHelper mWalletAccountHelper;
-    @Mock private ReceiveViewModel.DataListener mActivity;
+    private ReceiveViewModel subject;
+    @Mock private PayloadDataManager payloadDataManager;
+    @Mock private AppUtil appUtil;
+    @Mock private PrefsUtil prefsUtil;
+    @Mock private StringUtils stringUtils;
+    @Mock private QrCodeDataManager qrCodeDataManager;
+    @Mock private ExchangeRateFactory exchangeRateFactory;
+    @Mock private WalletAccountHelper walletAccountHelper;
+    @Mock private SSLVerifyUtil sslVerifyUtil;
+    @Mock private ReceiveViewModel.DataListener activity;
 
     @Before
     public void setUp() throws Exception {
@@ -79,13 +88,13 @@ public class ReceiveViewModelTest {
                 new MockApiModule(),
                 new MockDataManagerModule());
 
-        mSubject = new ReceiveViewModel(mActivity, Locale.UK);
+        subject = new ReceiveViewModel(activity, Locale.UK);
     }
 
     @Test
     public void onViewReady() throws Exception {
         // Arrange
-        Payload mockPayload = mock(Payload.class);
+        Wallet mockPayload = mock(Wallet.class);
         HDWallet mockHdWallet = mock(HDWallet.class);
 
         List<Account> accounts = new ArrayList<>();
@@ -99,38 +108,64 @@ public class ReceiveViewModelTest {
         LegacyAddress legacy0 = new LegacyAddress();
         legacy0.setTag(LegacyAddress.ARCHIVED_ADDRESS);
         LegacyAddress legacy1 = new LegacyAddress();
-        legacy1.setWatchOnly(true);
         LegacyAddress legacy2 = new LegacyAddress();
         legacy2.setLabel(null);
+        legacy2.setPrivateKey("");
         LegacyAddress legacy3 = new LegacyAddress();
         legacy3.setLabel("Label");
+        legacy3.setPrivateKey("");
         legacyAddresses.addAll(Arrays.asList(legacy0, legacy1, legacy2, legacy3));
 
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(mockPayload.isUpgraded()).thenReturn(true);
-        when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
+        when(mockPayload.getHdWallets()).thenReturn(Collections.singletonList(mockHdWallet));
         when(mockHdWallet.getAccounts()).thenReturn(accounts);
         when(mockPayload.getLegacyAddressList()).thenReturn(legacyAddresses);
         // Act
-        mSubject.onViewReady();
+        subject.onViewReady();
         // Assert
-        verify(mActivity).onSpinnerDataChanged();
-        assertEquals(5, mSubject.mAccountMap.size());
-        assertEquals(2, mSubject.mSpinnerIndexMap.size());
+        verify(activity).onAccountDataChanged();
+        assertEquals(5, subject.accountMap.size());
+        assertEquals(2, subject.spinnerIndexMap.size());
+    }
+
+    @Test
+    public void onSendToContactClickedInvalidAmount() throws Exception {
+        // Arrange
+        String errorString = "ERROR_STRING";
+        when(stringUtils.getString(anyInt())).thenReturn(errorString);
+        // Act
+        subject.onSendToContactClicked("0.00");
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).showToast(errorString, ToastCustom.TYPE_ERROR);
+        verifyZeroInteractions(activity);
+    }
+
+    @Test
+    public void onSendToContactClickedValidAmount() throws Exception {
+        // Arrange
+
+        // Act
+        subject.onSendToContactClicked("1.00");
+        // Assert
+        //noinspection WrongConstant
+        verify(activity).startContactSelectionActivity();
+        verifyZeroInteractions(activity);
     }
 
     @Test
     public void getReceiveToList() throws Exception {
         // Arrange
-        when(mWalletAccountHelper.getAccountItems(anyBoolean())).thenReturn(Collections.emptyList());
-        when(mWalletAccountHelper.getAddressBookEntries()).thenReturn(Collections.emptyList());
+        when(walletAccountHelper.getAccountItems(anyBoolean())).thenReturn(Collections.emptyList());
+        when(walletAccountHelper.getAddressBookEntries()).thenReturn(Collections.emptyList());
         // Act
-        List<ItemAccount> values = mSubject.getReceiveToList();
+        List<ItemAccount> values = subject.getReceiveToList();
         // Assert
         assertNotNull(values);
         assertTrue(values.isEmpty());
-        verify(mWalletAccountHelper).getAccountItems(true);
-        verify(mWalletAccountHelper).getAddressBookEntries();
+        verify(walletAccountHelper).getAccountItems(true);
+        verify(walletAccountHelper).getAddressBookEntries();
     }
 
     @Test
@@ -138,7 +173,7 @@ public class ReceiveViewModelTest {
         // Arrange
 
         // Act
-        ReceiveCurrencyHelper value = mSubject.getCurrencyHelper();
+        ReceiveCurrencyHelper value = subject.getCurrencyHelper();
         // Assert
         assertNotNull(value);
     }
@@ -146,30 +181,32 @@ public class ReceiveViewModelTest {
     @Test
     public void generateQrCodeSuccessful() throws Exception {
         // Arrange
-        when(mDataManager.generateQrCode(anyString(), anyInt())).thenReturn(Observable.just(mock(Bitmap.class)));
+        when(qrCodeDataManager.generateQrCode(anyString(), anyInt()))
+                .thenReturn(Observable.just(mock(Bitmap.class)));
         // Act
-        mSubject.generateQrCode("test uri");
+        subject.generateQrCode("test uri");
         // Assert
-        verify(mActivity).showQrLoading();
-        verify(mActivity).showQrCode(any(Bitmap.class));
+        verify(activity).showQrLoading();
+        verify(activity).showQrCode(any(Bitmap.class));
     }
 
     @Test
     public void generateQrCodeFailure() throws Exception {
         // Arrange
-        when(mDataManager.generateQrCode(anyString(), anyInt())).thenReturn(Observable.error(new Throwable()));
+        when(qrCodeDataManager.generateQrCode(anyString(), anyInt()))
+                .thenReturn(Observable.error(new Throwable()));
         // Act
-        mSubject.generateQrCode("test uri");
+        subject.generateQrCode("test uri");
         // Assert
-        verify(mActivity).showQrLoading();
-        verify(mActivity).showQrCode(null);
+        verify(activity).showQrLoading();
+        verify(activity).showQrCode(null);
     }
 
     @SuppressLint("NewApi")
     @Test
     public void getDefaultSpinnerPosition() throws Exception {
         // Arrange
-        Payload mockPayload = mock(Payload.class);
+        Wallet mockPayload = mock(Wallet.class);
         HDWallet mockHdWallet = mock(HDWallet.class);
 
         List<Account> accounts = new ArrayList<>();
@@ -178,39 +215,21 @@ public class ReceiveViewModelTest {
         Account account2 = new Account();
         accounts.addAll(Arrays.asList(account0, account1, account2));
 
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mockPayload.isUpgraded()).thenReturn(true);
-        when(mockHdWallet.getDefaultIndex()).thenReturn(2);
-        when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
-        when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
+        when(payloadDataManager.getDefaultAccount()).thenReturn(account2);
+        when(mockPayload.getHdWallets()).thenReturn(Collections.singletonList(mockHdWallet));
         when(mockHdWallet.getAccounts()).thenReturn(accounts);
-
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
         // Act
-        mSubject.onViewReady(); // Update account list first
-        Integer value = mSubject.getDefaultSpinnerPosition();
+        subject.onViewReady(); // Update account list first
+        Integer value = subject.getDefaultAccountPosition();
         // Assert
         assertEquals(2, Math.toIntExact(value));
-    }
-
-    @SuppressLint("NewApi")
-    @Test
-    public void getDefaultSpinnerPositionNotUpgraded() throws Exception {
-        // Arrange
-        Payload mockPayload = mock(Payload.class);
-        when(mockPayload.isUpgraded()).thenReturn(false);
-
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        // Act
-        Integer value = mSubject.getDefaultSpinnerPosition();
-        // Assert
-        assertEquals(0, Math.toIntExact(value));
     }
 
     @Test
     public void getAccountItemForPosition() throws Exception {
         // Arrange
-        Payload mockPayload = mock(Payload.class);
+        Wallet mockPayload = mock(Wallet.class);
         HDWallet mockHdWallet = mock(HDWallet.class);
 
         List<Account> accounts = new ArrayList<>();
@@ -219,38 +238,22 @@ public class ReceiveViewModelTest {
         Account account2 = new Account();
         accounts.addAll(Arrays.asList(account0, account1, account2));
 
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mockPayload.isUpgraded()).thenReturn(true);
-        when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
-        when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
+        when(mockPayload.getHdWallets()).thenReturn(Collections.singletonList(mockHdWallet));
         when(mockHdWallet.getAccounts()).thenReturn(accounts);
-
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
         // Act
-        mSubject.onViewReady(); // Update account list first
-        Object value = mSubject.getAccountItemForPosition(2);
+        subject.onViewReady(); // Update account list first
+        Object value = subject.getAccountItemForPosition(2);
         // Assert
         assertEquals(account2, value);
     }
 
     @Test
-    public void isUpgraded() throws Exception {
-        // Arrange
-        Payload mockPayload = mock(Payload.class);
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mockPayload.isUpgraded()).thenReturn(true);
-        // Act
-        Boolean value = mSubject.isUpgraded();
-        // Assert
-        assertTrue(value);
-    }
-
-    @Test
     public void warnWatchOnlySpend() throws Exception {
         // Arrange
-        when(mPrefsUtil.getValue(anyString(), anyBoolean())).thenReturn(true);
+        when(prefsUtil.getValue(anyString(), anyBoolean())).thenReturn(true);
         // Act
-        Boolean value = mSubject.warnWatchOnlySpend();
+        Boolean value = subject.warnWatchOnlySpend();
         // Assert
         assertTrue(value);
     }
@@ -260,9 +263,9 @@ public class ReceiveViewModelTest {
         // Arrange
 
         // Act
-        mSubject.setWarnWatchOnlySpend(true);
+        subject.setWarnWatchOnlySpend(true);
         // Assert
-        verify(mPrefsUtil).setValue(KEY_WARN_WATCH_ONLY_SPEND, true);
+        verify(prefsUtil).setValue(KEY_WARN_WATCH_ONLY_SPEND, true);
     }
 
     @Test
@@ -292,54 +295,29 @@ public class ReceiveViewModelTest {
 
     @Test
     public void getV3ReceiveAddress() throws Exception {
-        Payload mockPayload = mock(Payload.class);
-        HDWallet mockHdWallet = mock(HDWallet.class);
-
-        List<Account> accounts = new ArrayList<>();
-        Account account0 = new Account();
-        Account account1 = new Account();
-        Account account2 = new Account();
-        accounts.addAll(Arrays.asList(account0, account1, account2));
-
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mockPayload.isUpgraded()).thenReturn(true);
-        when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
-        when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
-        when(mockHdWallet.getAccounts()).thenReturn(accounts);
-
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mPayloadManager.getNextReceiveAddress(anyInt())).thenReturn("test address");
+        // Arrange
+        Account account = new Account();
+        when(payloadDataManager.getNextReceiveAddress(account))
+                .thenReturn(Observable.just("test_address"));
         // Act
-        mSubject.onViewReady(); // Update account list first
-        String value = mSubject.getV3ReceiveAddress(account2);
+        subject.getV3ReceiveAddress(account);
         // Assert
-        assertEquals("test address", value);
+        verify(payloadDataManager).getNextReceiveAddress(account);
+        verifyNoMoreInteractions(payloadDataManager);
+        verify(activity).updateReceiveAddress("test_address");
+        verifyNoMoreInteractions(activity);
     }
 
     @Test
     public void getV3ReceiveAddressException() throws Exception {
-        Payload mockPayload = mock(Payload.class);
-        HDWallet mockHdWallet = mock(HDWallet.class);
-
-        List<Account> accounts = new ArrayList<>();
-        Account account0 = new Account();
-        Account account1 = new Account();
-        Account account2 = new Account();
-        accounts.addAll(Arrays.asList(account0, account1, account2));
-
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mockPayload.isUpgraded()).thenReturn(true);
-        when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
-        when(mockPayload.getHdWallet()).thenReturn(mockHdWallet);
-        when(mockHdWallet.getAccounts()).thenReturn(accounts);
-
-        when(mPayloadManager.getPayload()).thenReturn(mockPayload);
-        when(mPayloadManager.getNextReceiveAddress(anyInt())).thenThrow(new RuntimeException());
+        Account account = new Account();
+        when(payloadDataManager.getNextReceiveAddress(account))
+                .thenReturn(Observable.error(new Throwable()));
+        when(stringUtils.getString(anyInt())).thenReturn(anyString());
         // Act
-        mSubject.onViewReady(); // Update account list first
-        String value = mSubject.getV3ReceiveAddress(account2);
+        subject.getV3ReceiveAddress(account);
         // Assert
-        assertNull(value);
+        verify(activity).showToast(anyString(), eq(ToastCustom.TYPE_ERROR));
     }
 
     @Test
@@ -353,16 +331,6 @@ public class ReceiveViewModelTest {
 
     }
 
-    @Test
-    public void getAppUtil() throws Exception {
-        // Arrange
-
-        // Act
-        AppUtil util = mSubject.getAppUtil();
-        // Assert
-        Assert.assertEquals(util, mAppUtil);
-    }
-
     private class MockApplicationModule extends ApplicationModule {
 
         MockApplicationModule(Application application) {
@@ -371,43 +339,51 @@ public class ReceiveViewModelTest {
 
         @Override
         protected PrefsUtil providePrefsUtil() {
-            return mPrefsUtil;
+            return prefsUtil;
         }
 
         @Override
         protected AppUtil provideAppUtil() {
-            return mAppUtil;
+            return appUtil;
         }
 
         @Override
         protected StringUtils provideStringUtils() {
-            return mStringUtils;
+            return stringUtils;
         }
 
         @Override
         protected ExchangeRateFactory provideExchangeRateFactory() {
-            return mExchangeRateFactory;
+            return exchangeRateFactory;
         }
     }
 
     private class MockApiModule extends ApiModule {
-
         @Override
-        protected PayloadManager providePayloadManager() {
-            return mPayloadManager;
+        protected SSLVerifyUtil provideSSlVerifyUtil(@Named("server") Retrofit retrofit,
+                                                     RxBus rxBus) {
+            return sslVerifyUtil;
         }
     }
 
     private class MockDataManagerModule extends DataManagerModule {
-
         @Override
-        protected ReceiveDataManager provideReceiveDataManager() {
-            return mDataManager;
+        protected QrCodeDataManager provideQrDataManager() {
+            return qrCodeDataManager;
         }
 
         @Override
-        protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager, PrefsUtil prefsUtil, StringUtils stringUtils, ExchangeRateFactory exchangeRateFactory, MultiAddrFactory multiAddrFactory) {
-            return mWalletAccountHelper;
+        protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager,
+                                                                 PrefsUtil prefsUtil,
+                                                                 StringUtils stringUtils,
+                                                                 ExchangeRateFactory exchangeRateFactory) {
+            return walletAccountHelper;
+        }
+
+        @Override
+        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager,
+                                                               RxBus rxBus) {
+            return payloadDataManager;
         }
     }
 }

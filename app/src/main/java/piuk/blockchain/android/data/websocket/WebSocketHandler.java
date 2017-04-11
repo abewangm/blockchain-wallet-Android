@@ -1,5 +1,6 @@
 package piuk.blockchain.android.data.websocket;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
@@ -10,8 +11,7 @@ import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 
-import info.blockchain.api.PersistentUrls;
-import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.api.PersistentUrls;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,6 +28,7 @@ import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
@@ -49,24 +50,30 @@ class WebSocketHandler {
     private boolean stoppedDeliberately = false;
     private String[] xpubs;
     private String[] addrs;
+    private NotificationManager notificationManager;
     @Thunk String guid;
     @Thunk WebSocket connection;
     @Thunk HashSet<String> subHashSet = new HashSet<>();
     @Thunk HashSet<String> onChangeHashSet = new HashSet<>();
+    @Thunk PersistentUrls persistentUrls;
     @Thunk MonetaryUtil monetaryUtil;
-    @Thunk PayloadManager payloadManager;
+    @Thunk PayloadDataManager payloadDataManager;
     @Thunk Context context;
     @Thunk CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     public WebSocketHandler(Context context,
-                            PayloadManager payloadManager,
+                            PayloadDataManager payloadDataManager,
+                            NotificationManager notificationManager,
+                            PersistentUrls persistentUrls,
                             MonetaryUtil monetaryUtil,
                             String guid,
                             String[] xpubs,
                             String[] addrs) {
 
         this.context = context;
-        this.payloadManager = payloadManager;
+        this.payloadDataManager = payloadDataManager;
+        this.notificationManager = notificationManager;
+        this.persistentUrls = persistentUrls;
         this.monetaryUtil = monetaryUtil;
         this.guid = guid;
         this.xpubs = xpubs;
@@ -121,13 +128,13 @@ class WebSocketHandler {
         send("{\"op\":\"wallet_sub\",\"guid\":\"" + guid + "\"}");
 
         for (String xpub : xpubs) {
-            if (xpub != null && xpub.length() > 0) {
+            if (xpub != null && !xpub.isEmpty()) {
                 send("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpub + "\"}");
             }
         }
 
         for (String addr : addrs) {
-            if (addr != null && addr.length() > 0) {
+            if (addr != null && !addr.isEmpty()) {
                 send("{\"op\":\"addr_sub\", \"addr\":\"" + addr + "\"}");
             }
         }
@@ -169,17 +176,16 @@ class WebSocketHandler {
 
     @Thunk
     void updateBalancesAndTransactions() {
-        updateBalancesAndTxs().subscribe(new IgnorableDefaultObserver<>());
+        payloadDataManager.updateAllBalances()
+                .andThen(payloadDataManager.updateAllTransactions())
+                .doOnComplete(this::sendBroadcast)
+                .subscribe(new IgnorableDefaultObserver<>());
     }
 
-    private Completable updateBalancesAndTxs() {
-        return Completable.fromCallable(() -> {
-            payloadManager.updateBalancesAndTransactions();
-            return Void.TYPE;
-        }).doAfterTerminate(() -> {
-            Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-        }).compose(RxUtil.applySchedulersToCompletable());
+    @Thunk
+    void sendBroadcast() {
+        Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
     private Completable connectToWebSocket() {
@@ -187,7 +193,7 @@ class WebSocketHandler {
             subHashSet.clear();
 
             connection = new WebSocketFactory()
-                    .createSocket(PersistentUrls.getInstance().getCurrentWebsocketUrl())
+                    .createSocket(persistentUrls.getCurrentWebsocketUrl())
                     .addHeader("Origin", "https://blockchain.info")
                     .setPingInterval(PING_INTERVAL)
                     .addListener(new WebSocketAdapter() {
@@ -199,12 +205,17 @@ class WebSocketHandler {
 
                         @Override
                         public void onTextMessage(WebSocket websocket, String message) {
-                            JSONObject jsonObject;
-                            try {
-                                jsonObject = new JSONObject(message);
-                                attemptParseMessage(message, jsonObject);
-                            } catch (JSONException je) {
-                                Log.e(TAG, "onTextMessage: ", je);
+                            if (payloadDataManager.getWallet() != null) {
+                                JSONObject jsonObject;
+                                try {
+                                    jsonObject = new JSONObject(message);
+                                    attemptParseMessage(message, jsonObject);
+                                } catch (JSONException je) {
+                                    Log.e(TAG, "onTextMessage: ", je);
+                                }
+                            } else {
+                                // Ignore content and broadcast anyway so that SwipeToReceive can update
+                                sendBroadcast();
                             }
                         }
 
@@ -217,7 +228,6 @@ class WebSocketHandler {
                     }).connect();
 
             subscribe();
-            // Necessary but meaningless return type for Completable
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }
@@ -246,7 +256,7 @@ class WebSocketHandler {
                             if (prevOutObj.has("xpub")) {
                                 totalValue -= value;
                             } else if (prevOutObj.has("addr")) {
-                                if (payloadManager.getPayload().containsLegacyAddress((String) prevOutObj.get("addr"))) {
+                                if (payloadDataManager.getWallet().containsLegacyAddress((String) prevOutObj.get("addr"))) {
                                     totalValue -= value;
                                 } else if (inAddr == null) {
                                     inAddr = (String) prevOutObj.get("addr");
@@ -267,7 +277,7 @@ class WebSocketHandler {
                         if (outObj.has("xpub")) {
                             totalValue += value;
                         } else if (outObj.has("addr")) {
-                            if (payloadManager.getPayload().containsLegacyAddress((String) outObj.get("addr"))) {
+                            if (payloadDataManager.getWallet().containsLegacyAddress((String) outObj.get("addr"))) {
                                 totalValue += value;
                             }
                         }
@@ -288,7 +298,7 @@ class WebSocketHandler {
                 updateBalancesAndTransactions();
 
             } else if (op.equals("on_change")) {
-                final String localChecksum = payloadManager.getCheckSum();
+                final String localChecksum = payloadDataManager.getPayloadChecksum();
 
                 boolean isSameChecksum = false;
                 if (jsonObject.has("checksum")) {
@@ -298,12 +308,11 @@ class WebSocketHandler {
 
                 if (!onChangeHashSet.contains(message) && !isSameChecksum) {
                     // Remote update to wallet data detected
-                    if (payloadManager.getTempPassword() != null) {
+                    if (payloadDataManager.getTempPassword() != null) {
                         // Download changed payload
                         //noinspection ThrowableResultOfMethodCallIgnored
                         downloadChangedPayload().blockingGet();
                         showToast().subscribeOn(AndroidSchedulers.mainThread());
-                        updateBalancesAndTransactions();
                     }
 
                     onChangeHashSet.add(message);
@@ -325,18 +334,16 @@ class WebSocketHandler {
 
     private Completable downloadChangedPayload() {
         return Completable.fromCallable(() -> {
-            payloadManager.initiatePayload(
-                    payloadManager.getPayload().getSharedKey(),
-                    payloadManager.getPayload().getGuid(),
-                    payloadManager.getTempPassword(), () -> {
-                        // No-op, blocking call
-                    });
+            payloadDataManager.initializeAndDecrypt(
+                    payloadDataManager.getWallet().getSharedKey(),
+                    payloadDataManager.getWallet().getGuid(),
+                    payloadDataManager.getTempPassword()).subscribe(this::updateBalancesAndTransactions);
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     private void triggerNotification(String title, String marquee, String text) {
-        new NotificationsUtil(context).setNotification(
+        new NotificationsUtil(context, notificationManager).setNotification(
                 title,
                 marquee,
                 text,

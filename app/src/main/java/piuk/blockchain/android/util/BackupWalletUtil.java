@@ -12,6 +12,7 @@ import java.util.List;
 
 public class BackupWalletUtil {
 
+    // TODO: 16/03/2017 Inject PayloadManager through constructor and access this class via ViewModels
     public BackupWalletUtil() {
         // Empty Constructor
     }
@@ -24,14 +25,14 @@ public class BackupWalletUtil {
     public List<Pair<Integer, String>> getConfirmSequence(String secondPassword) {
 
         List<Pair<Integer, String>> toBeConfirmed = new ArrayList<>();
-        String[] s = getMnemonic(secondPassword);
+        List<String> s = getMnemonic(secondPassword);
         SecureRandom random = new SecureRandom();
         List<Integer> seen = new ArrayList<>();
 
-        int sel = 0;
+        int sel;
         int i = 0;
         while (i < 3) {
-            sel = random.nextInt(s.length);
+            sel = random.nextInt(s.size());
             if (!seen.contains(sel)) {
                 seen.add(sel);
                 i++;
@@ -41,7 +42,7 @@ public class BackupWalletUtil {
         Collections.sort(seen);
 
         for (int ii = 0; ii < 3; ii++) {
-            toBeConfirmed.add(new Pair<>(seen.get(ii), s[seen.get(ii)]));
+            toBeConfirmed.add(new Pair<>(seen.get(ii), s.get(seen.get(ii))));
         }
 
         return toBeConfirmed;
@@ -52,14 +53,11 @@ public class BackupWalletUtil {
      *
      * @return String[]
      */
-    public String[] getMnemonic(String secondPassword) {
+    public List<String> getMnemonic(String secondPassword) {
 
         try {
-            if(PayloadManager.getInstance().getPayload().isDoubleEncrypted()) {
-                return PayloadManager.getInstance().getMnemonic(secondPassword);
-            } else {
-                return PayloadManager.getInstance().getMnemonic();
-            }
+            PayloadManager.getInstance().getPayload().decryptHDWallet(0, secondPassword);
+            return PayloadManager.getInstance().getPayload().getHdWallets().get(0).getMnemonic();
         } catch (Exception e) {
             Log.e(BackupWalletUtil.class.getSimpleName(), "getMnemonic: ", e);
             return null;

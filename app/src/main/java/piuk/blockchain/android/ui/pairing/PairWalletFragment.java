@@ -14,8 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import info.blockchain.api.PersistentUrls;
-
+import info.blockchain.wallet.api.PersistentUrls;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentPairWalletBinding;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -61,6 +60,7 @@ public class PairWalletFragment extends Fragment implements FragmentCompat.OnReq
         }
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {

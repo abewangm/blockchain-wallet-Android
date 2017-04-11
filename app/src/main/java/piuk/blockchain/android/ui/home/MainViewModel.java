@@ -2,42 +2,47 @@ package piuk.blockchain.android.ui.home;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Looper;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.util.Log;
 
-import info.blockchain.api.Balance;
-import info.blockchain.api.DynamicFee;
-import info.blockchain.api.ExchangeTicker;
-import info.blockchain.api.Settings;
-import info.blockchain.api.Unspent;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.Account;
+import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.api.data.Settings;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.WebUtil;
 
-import org.json.JSONObject;
-
+import java.math.BigInteger;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.List;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.cache.DefaultAccountUnspentCache;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
+import piuk.blockchain.android.data.contacts.ContactsEvent;
+import piuk.blockchain.android.data.contacts.ContactsPredicates;
+import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.SendDataManager;
+import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
+import piuk.blockchain.android.data.notifications.NotificationPayload;
+import piuk.blockchain.android.data.notifications.NotificationTokenManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.services.EventService;
+import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
-import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.EventLogHandler;
 import piuk.blockchain.android.util.ExchangeRateFactory;
-import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.RootUtil;
@@ -46,18 +51,38 @@ import piuk.blockchain.android.util.StringUtils;
 @SuppressWarnings("WeakerAccess")
 public class MainViewModel extends BaseViewModel {
 
-    private Context context;
+    private static final String TAG = MainViewModel.class.getSimpleName();
+
     private DataListener dataListener;
     private OSUtil osUtil;
-    private MonetaryUtil monetaryUtil;
+    private Observable<NotificationPayload> notificationObservable;
     @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
     @Inject protected AccessState accessState;
     @Inject protected PayloadManager payloadManager;
-    @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
+    @Inject protected PayloadDataManager payloadDataManager;
+    @Inject protected ContactsDataManager contactsDataManager;
+    @Inject protected SendDataManager sendDataManager;
+    @Inject protected NotificationTokenManager notificationTokenManager;
+    @Inject protected Context applicationContext;
     @Inject protected StringUtils stringUtils;
+    @Inject protected SettingsDataManager settingsDataManager;
+    @Inject protected OnboardingDataManager onboardingDataManager;
+    @Inject protected DynamicFeeCache dynamicFeeCache;
+    @Inject protected ExchangeRateFactory exchangeRateFactory;
+    @Inject protected RxBus rxBus;
 
     public interface DataListener {
+
+        /**
+         * We can't simply call BuildConfig.CONTACTS_ENABLED in this class as it would make it
+         * impossible to test, as it's reliant on the build.gradle config. Passing it here
+         * allows us to change the response via mocking the DataListener.
+         *
+         * TODO: This should be removed once/if Contacts ships
+         */
+        boolean getIfContactsEnabled();
+
         void onRooted();
 
         void onConnectivityFail();
@@ -68,27 +93,37 @@ public class MainViewModel extends BaseViewModel {
 
         void onScanInput(String strUri);
 
-        void onStartBalanceFragment();
+        void onStartContactsActivity(@Nullable String data);
+
+        void onStartBalanceFragment(boolean paymentToContactMade);
 
         void kickToLauncherPage();
 
-        void showEmailVerificationDialog(String email);
-
         void showAddEmailDialog();
+
+        void showProgressDialog(@StringRes int message);
+
+        void hideProgressDialog();
 
         void clearAllDynamicShortcuts();
 
         void showSurveyPrompt();
 
+        void showContactsRegistrationFailure();
+
+        void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId, long transactionValue);
+
+        void showBroadcastSuccessDialog();
+
         void updateCurrentPrice(String price);
+
+        void setBuyBitcoinVisible(boolean hide);
     }
 
-    public MainViewModel(Context context, DataListener dataListener) {
+    public MainViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
-        this.context = context;
         this.dataListener = dataListener;
-        osUtil = new OSUtil(context);
-        monetaryUtil = new MonetaryUtil(getCurrentBitcoinFormat());
+        osUtil = new OSUtil(applicationContext);
     }
 
     @Override
@@ -97,32 +132,67 @@ public class MainViewModel extends BaseViewModel {
         checkConnectivity();
         checkIfShouldShowEmailVerification();
         startWebSocketService();
-    }
-
-    public void storeSwipeReceiveAddresses() {
-        swipeToReceiveHelper.updateAndStoreAddresses();
-    }
-
-    private void checkIfShouldShowEmailVerification() {
-        if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
-            compositeDisposable.add(
-                    getSettingsApi()
-                            .compose(RxUtil.applySchedulersToObservable())
-                            .subscribe(settings -> {
-                                if (!settings.isEmailVerified()) {
-                                    appUtil.setNewlyCreated(false);
-                                    String email = settings.getEmail();
-                                    if (email != null && !email.isEmpty()) {
-                                        dataListener.showEmailVerificationDialog(email);
-                                    } else {
-                                        dataListener.showAddEmailDialog();
-                                    }
-                                }
-                            }, Throwable::printStackTrace));
+        subscribeToNotifications();
+        if (dataListener.getIfContactsEnabled()) {
+            registerNodeForMetaDataService();
         }
     }
 
-    public void checkIfShouldShowSurvey() {
+    void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
+        compositeDisposable.add(
+                // Get contacts
+                contactsDataManager.getContactList()
+                        // Find contact by MDID
+                        .filter(ContactsPredicates.filterByMdid(mdid))
+                        // Get FacilitatedTransaction from HashMap
+                        .flatMap(contact -> Observable.just(contact.getFacilitatedTransactions().get(facilitatedTxId)))
+                        // Check the payment value was appropriate
+                        .flatMapCompletable(transaction -> {
+                            // Broadcast payment to shared metadata service
+                            return contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
+                                    // Show successfully broadcast
+                                    .doOnComplete(() -> dataListener.showBroadcastSuccessDialog())
+                                    // Show retry dialog if broadcast failed
+                                    .doOnError(throwable -> dataListener.showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
+                        })
+                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
+                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.contacts_broadcasting_payment))
+                        .subscribe(
+                                () -> {
+                                    // No-op
+                                }, throwable -> {
+                                    // Not sure if it's worth notifying people at this point? Dialogs are advisory anyway.
+                                }));
+    }
+
+    void checkForMessages() {
+        compositeDisposable.add(
+                payloadDataManager.loadNodes()
+                        .flatMapCompletable(
+                                success -> {
+                                    if (success) {
+                                        return contactsDataManager.fetchContacts();
+                                    } else {
+                                        return Completable.error(new Throwable("Nodes not loaded"));
+                                    }
+                                })
+                        .andThen(contactsDataManager.getContactList())
+                        .toList()
+                        .flatMapObservable(contacts -> {
+                            if (!contacts.isEmpty()) {
+                                return contactsDataManager.getMessages(true);
+                            } else {
+                                return Observable.just(Collections.emptyList());
+                            }
+                        })
+                        .subscribe(
+                                messages -> {
+                                    // No-op
+                                },
+                                throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
+    }
+
+    void checkIfShouldShowSurvey() {
         if (!prefs.getValue(PrefsUtil.KEY_SURVEY_COMPLETED, false)) {
             int visitsToPageThisSession = prefs.getValue(PrefsUtil.KEY_SURVEY_VISITS, 0);
             // Trigger first time coming back to transaction tab
@@ -145,12 +215,121 @@ public class MainViewModel extends BaseViewModel {
 
     }
 
-    private Observable<Settings> getSettingsApi() {
-        return Observable.fromCallable(() -> new Settings(payloadManager.getPayload().getGuid(), payloadManager.getPayload().getSharedKey()));
+    void unPair() {
+        dataListener.clearAllDynamicShortcuts();
+        payloadManager.wipe();
+        prefs.logOut();
+        accessState.unpairWallet();
+        appUtil.restartApp();
+        accessState.setPIN(null);
     }
 
-    public PayloadManager getPayloadManager() {
+    PayloadManager getPayloadManager() {
         return payloadManager;
+    }
+
+    private void subscribeToNotifications() {
+        notificationObservable = rxBus.register(NotificationPayload.class);
+
+        compositeDisposable.add(
+                notificationObservable
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(
+                                notificationPayload -> checkForMessages(),
+                                Throwable::printStackTrace));
+    }
+
+    private void registerNodeForMetaDataService() {
+        String uri = null;
+        boolean fromNotification = false;
+
+        if (!prefs.getValue(PrefsUtil.KEY_METADATA_URI, "").isEmpty()) {
+            uri = prefs.getValue(PrefsUtil.KEY_METADATA_URI, "");
+            prefs.removeValue(PrefsUtil.KEY_METADATA_URI);
+        }
+
+        if (prefs.getValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION, false)) {
+            prefs.removeValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION);
+            fromNotification = true;
+        }
+
+        final String finalUri = uri;
+        if (finalUri != null || fromNotification) {
+            dataListener.showProgressDialog(R.string.please_wait);
+        }
+
+        final boolean finalFromNotification = fromNotification;
+
+        compositeDisposable.add(
+                payloadDataManager.loadNodes()
+                        .flatMap(loaded -> {
+                            if (loaded) {
+                                return payloadDataManager.getMetadataNodeFactory();
+                            } else {
+                                if (!payloadManager.getPayload().isDoubleEncryption()) {
+                                    return payloadDataManager.generateNodes(null)
+                                            .andThen(payloadDataManager.getMetadataNodeFactory());
+                                } else {
+                                    throw new InvalidCredentialsException("Payload is double encrypted");
+                                }
+                            }
+                        })
+                        .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
+                                metadataNodeFactory.getMetadataNode(),
+                                metadataNodeFactory.getSharedMetadataNode()))
+                        .doOnComplete(() -> rxBus.emitEvent(ContactsEvent.class, ContactsEvent.INIT))
+                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
+                        .subscribe(
+                                () -> registerMdid(finalUri, finalFromNotification),
+                                throwable -> {
+                                    //noinspection StatementWithEmptyBody
+                                    if (throwable instanceof InvalidCredentialsException) {
+                                        // Double encrypted and not previously set up, ignore error
+                                    } else {
+                                        dataListener.showContactsRegistrationFailure();
+                                    }
+                                }));
+
+        notificationTokenManager.resendNotificationToken();
+    }
+
+    // TODO: 30/03/2017 Move this into the registerNodeForMetaDataService function
+    private void registerMdid(@Nullable String uri, boolean fromNotification) {
+        compositeDisposable.add(
+                payloadDataManager.registerMdid()
+                        .flatMapCompletable(responseBody -> contactsDataManager.publishXpub())
+                        .subscribe(() -> {
+                            if (uri != null) {
+                                dataListener.onStartContactsActivity(uri);
+                            } else if (fromNotification) {
+                                dataListener.onStartContactsActivity(null);
+                            } else {
+                                checkForMessages();
+                            }
+                        }, throwable -> dataListener.showContactsRegistrationFailure()));
+    }
+
+    private void checkIfShouldShowEmailVerification() {
+        compositeDisposable.add(
+                getSettingsApi()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(settings -> {
+                            if (!settings.isEmailVerified()) {
+                                appUtil.setNewlyCreated(false);
+                                String email = settings.getEmail();
+                                if (email == null || email.isEmpty()) {
+                                    if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
+                                        dataListener.showAddEmailDialog();
+                                    }
+                                }
+                            }
+                        }, Throwable::printStackTrace));
+    }
+
+    private Observable<Settings> getSettingsApi() {
+        return settingsDataManager.initSettings(
+                payloadManager.getPayload().getGuid(),
+                payloadManager.getPayload().getSharedKey());
     }
 
     private void checkRooted() {
@@ -161,7 +340,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void checkConnectivity() {
-        if (ConnectivityStatus.hasConnectivity(context)) {
+        if (ConnectivityStatus.hasConnectivity(applicationContext)) {
             preLaunchChecks();
         } else {
             dataListener.onConnectivityFail();
@@ -169,44 +348,35 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void preLaunchChecks() {
-        exchangeRateThread();
-
-        if (AccessState.getInstance().isLoggedIn()) {
+        if (accessState.isLoggedIn()) {
+            dataListener.onStartBalanceFragment(false);
             dataListener.onFetchTransactionsStart();
 
-            new Thread(() -> {
-                Looper.prepare();
-                cacheDynamicFee();
-                cacheDefaultAccountUnspentData();
-                logEvents();
-                Looper.loop();
-            }).start();
+            compositeDisposable.add(
+                    Completable.fromCallable(() -> {
+                        cacheDynamicFee();
+                        logEvents();
+                        return Void.TYPE;
+                    }).compose(RxUtil.applySchedulersToCompletable())
+                            .andThen(onboardingDataManager.getIfSepaCountry())
+                            .doAfterTerminate(() -> {
+                                if (dataListener != null) {
+                                    dataListener.onFetchTransactionCompleted();
+                                }
 
-            new Thread(() -> {
-
-                Looper.prepare();
-
-                try {
-                    payloadManager.updateBalancesAndTransactions();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                storeSwipeReceiveAddresses();
-
-                if (dataListener != null) {
-                    dataListener.onFetchTransactionCompleted();
-                    dataListener.onStartBalanceFragment();
-                }
-
-                if (prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").length() > 0) {
-                    String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
-                    prefs.setValue(PrefsUtil.KEY_SCHEME_URL, "");
-                    dataListener.onScanInput(strUri);
-                }
-
-                Looper.loop();
-            }).start();
+                                if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
+                                    String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
+                                    prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
+                                    dataListener.onScanInput(strUri);
+                                }
+                            })
+                            .subscribe(
+                                    isSepaCountry -> {
+                                        if (isSepaCountry && BuildConfig.BUY_BITCOIN_ENABLED) {
+                                            enableBuySell();
+                                        }
+                                    },
+                                    throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
         } else {
             // This should never happen, but handle the scenario anyway by starting the launcher
             // activity, which handles all login/auth/corruption scenarios itself
@@ -215,133 +385,68 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void cacheDynamicFee() {
-        try {
-            DynamicFeeCache.getInstance().setSuggestedFee(new DynamicFee().getDynamicFee());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        compositeDisposable.add(
+                sendDataManager.getSuggestedFee()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(feeList -> dynamicFeeCache.setCachedDynamicFee(feeList),
+                                Throwable::printStackTrace));
     }
 
-    private void cacheDefaultAccountUnspentData() {
-
-        if (payloadManager.getPayload().getHdWallet() != null) {
-
-            int defaultAccountIndex = payloadManager.getPayload().getHdWallet().getDefaultIndex();
-
-            Account defaultAccount = payloadManager.getPayload().getHdWallet().getAccounts().get(defaultAccountIndex);
-            String xpub = defaultAccount.getXpub();
-
-            try {
-                JSONObject unspentResponse = new Unspent().getUnspentOutputs(xpub);
-                DefaultAccountUnspentCache.getInstance().setUnspentApiResponse(xpub, unspentResponse);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    private void enableBuySell() {
+        dataListener.setBuyBitcoinVisible(true);
     }
 
     @Override
     public void destroy() {
         super.destroy();
+        rxBus.unregister(NotificationPayload.class, notificationObservable);
         appUtil.deleteQR();
-        context = null;
-        dataListener = null;
-        DynamicFeeCache.getInstance().destroy();
+        dynamicFeeCache.destroy();
     }
 
-    public void exchangeRateThread() {
-
-        List<String> currencies = Arrays.asList(ExchangeRateFactory.getInstance().getCurrencies());
-        String strCurrentSelectedFiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
-        if (!currencies.contains(strCurrentSelectedFiat)) {
-            prefs.setValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        }
-
-        new Thread(() -> {
-            Looper.prepare();
-
-            String response = null;
-            try {
-                response = new ExchangeTicker().getExchangeRate();
-
-                ExchangeRateFactory.getInstance().setData(response);
-                ExchangeRateFactory.getInstance().updateFxPricesForEnabledCurrencies();
-                dataListener.updateCurrentPrice(getFormattedPriceString());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            Looper.loop();
-
-        }).start();
+    public void updateTicker() {
+        compositeDisposable.add(exchangeRateFactory.updateTicker().subscribe(() ->
+                        dataListener.updateCurrentPrice(getFormattedPriceString()),
+                Throwable::printStackTrace));
     }
 
     private String getFormattedPriceString() {
-        monetaryUtil.updateUnit(getCurrentBitcoinFormat());
         String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
-        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiat);
-        String fiatSymbol = ExchangeRateFactory.getInstance().getSymbol(fiat);
+        double lastPrice = exchangeRateFactory.getLastPrice(fiat);
+        String fiatSymbol = exchangeRateFactory.getSymbol(fiat);
         DecimalFormat format = new DecimalFormat();
         format.setMinimumFractionDigits(2);
-
-        switch (getCurrentBitcoinFormat()) {
-            case MonetaryUtil.MICRO_BTC:
-                return stringUtils.getFormattedString(
-                        R.string.current_price_bits,
-                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
-            case MonetaryUtil.MILLI_BTC:
-                return stringUtils.getFormattedString(
-                        R.string.current_price_millibits,
-                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
-            default:
-                return stringUtils.getFormattedString(
-                        R.string.current_price_btc,
-                        fiatSymbol + format.format(monetaryUtil.getUndenominatedAmount(lastPrice)));
-        }
-    }
-
-    private int getCurrentBitcoinFormat() {
-        return prefs.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
-    }
-
-    public void unpair() {
-        dataListener.clearAllDynamicShortcuts();
-        payloadManager.wipe();
-        MultiAddrFactory.getInstance().wipe();
-        prefs.logOut();
-        appUtil.restartApp();
-        accessState.setPIN(null);
-    }
-
-    public boolean areLauncherShortcutsEnabled() {
-        return prefs.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true);
+        return stringUtils.getFormattedString(
+                R.string.current_price_btc,
+                fiatSymbol + format.format(lastPrice));
     }
 
     private void startWebSocketService() {
-        Intent intent = new Intent(context, WebSocketService.class);
+        Intent intent = new Intent(applicationContext, WebSocketService.class);
 
         if (!osUtil.isServiceRunning(WebSocketService.class)) {
-            context.startService(intent);
+            applicationContext.startService(intent);
         } else {
             // Restarting this here ensures re-subscription after app restart - the service may remain
             // running, but the subscription to the WebSocket won't be restarted unless onCreate called
-            context.stopService(intent);
-            context.startService(intent);
+            applicationContext.stopService(intent);
+            applicationContext.startService(intent);
         }
     }
 
     private void logEvents() {
-
-        EventLogHandler handler = new EventLogHandler(prefs, WebUtil.getInstance());
-        handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncrypted());
-        handler.logBackupEvent(payloadManager.getPayload().getHdWallet().isMnemonicVerified());
+        EventService handler = new EventService(prefs, new WalletService(new WalletApi()));
+        handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncryption());
+        handler.logBackupEvent(payloadManager.getPayload().getHdWallets().get(0).isMnemonicVerified());
 
         try {
-            List<String> activeLegacyAddressStrings = PayloadManager.getInstance().getPayload().getLegacyAddressStringList();
-            long balance = new Balance().getTotalBalance(activeLegacyAddressStrings);
-            handler.logLegacyEvent(balance > 0L);
+            BigInteger importedAddressesBalance = payloadManager.getImportedAddressesBalance();
+            if (importedAddressesBalance != null) {
+                handler.logLegacyEvent(importedAddressesBalance.longValue() > 0L);
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "logEvents: ", e);
         }
     }
+
 }
