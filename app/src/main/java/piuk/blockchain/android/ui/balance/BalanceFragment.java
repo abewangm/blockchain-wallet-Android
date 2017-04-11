@@ -636,6 +636,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     private void initOnboardingPager() {
         if (onboardingPagerAdapter == null) {
             onboardingPagerAdapter = new OnboardingPagerAdapter(getContext());
+            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setAdapter(onboardingPagerAdapter);
+            notifyLayoutLoaded();
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(
                     new ViewPager.OnPageChangeListener() {
                         @Override
@@ -665,12 +667,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                         }
                     });
         } else {
-            onboardingPagerAdapter.notifyPagesChanged(viewModel.getOnboardingPages());
-            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setAdapter(onboardingPagerAdapter);
-            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.post(() ->
-                    binding.noTransactionInclude.progressBar.setVisibility(View.GONE));
-            binding.noTransactionInclude.onboardingViewpagerLayout.indicator.setViewPager(
-                    binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding);
+            notifyLayoutLoaded();
         }
 
         binding.noTransactionInclude.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(v -> {
@@ -694,6 +691,14 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1.0f);
             viewModel.setOnboardingComplete(false);
         });
+    }
+
+    private void notifyLayoutLoaded() {
+        onboardingPagerAdapter.notifyPagesChanged(viewModel.getOnboardingPages());
+        binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.post(() ->
+                binding.noTransactionInclude.progressBar.setVisibility(View.GONE));
+        binding.noTransactionInclude.onboardingViewpagerLayout.indicator.setViewPager(
+                binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding);
     }
 
     @Override

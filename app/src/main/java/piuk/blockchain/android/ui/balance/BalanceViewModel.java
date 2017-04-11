@@ -771,7 +771,7 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     public void getBitcoinClicked() {
-        if (onboardingDataManager.isSepa()) {
+        if (onboardingDataManager.isSepa() && BuildConfig.BUY_BITCOIN_ENABLED) {
             dataListener.startBuyActivity();
         } else {
             dataListener.startReceiveFragment();
