@@ -64,6 +64,11 @@ public class AuthDataManager {
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
+    public Observable<Response<ResponseBody>> submitTwoFactorCode(String sessionId, String guid, String twoFactorCode) {
+        return rxPinning.call(() -> walletService.submitTwoFactorCode(sessionId, guid, twoFactorCode))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
     public Completable updatePayload(String sharedKey, String guid, String password) {
         return payloadDataManager.initializeAndDecrypt(sharedKey, guid, password);
     }

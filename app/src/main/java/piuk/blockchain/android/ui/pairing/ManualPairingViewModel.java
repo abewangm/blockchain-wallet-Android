@@ -6,11 +6,19 @@ import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
+import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
 import javax.inject.Inject;
 
+import okhttp3.MediaType;
+import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.injection.Injector;
@@ -18,6 +26,7 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
+import retrofit2.Response;
 
 @SuppressWarnings("WeakerAccess")
 public class ManualPairingViewModel extends BaseViewModel {
@@ -49,6 +58,7 @@ public class ManualPairingViewModel extends BaseViewModel {
 
         void resetPasswordField();
 
+        void showTwoFactorCodeNeededDialog(JSONObject jsonObject, String sessionId, int authType, String guid, String password);
     }
 
     ManualPairingViewModel(DataListener listener) {
@@ -83,37 +93,68 @@ public class ManualPairingViewModel extends BaseViewModel {
                 authDataManager.getSessionId(guid)
                         .doOnNext(s -> sessionId = s)
                         .flatMap(sessionId -> authDataManager.getEncryptedPayload(guid, sessionId))
-                        .subscribe(response -> {
-                            if (response.errorBody() != null
-                                    && response.errorBody().string().contains(KEY_AUTH_REQUIRED)) {
+                        .subscribe(response -> handleResponse(password, guid, response),
+                                throwable -> {
+                                    Log.e(TAG, "verifyPassword: ", throwable);
+                                    showErrorToastAndRestartApp(R.string.auth_failed);
+                                }));
+    }
 
-                                showCheckEmailDialog();
+    private void handleResponse(String password, String guid, Response<ResponseBody> response) throws IOException, JSONException {
+        if (response.errorBody() != null
+                && response.errorBody().string().contains(KEY_AUTH_REQUIRED)) {
 
-                                compositeDisposable.add(
-                                        authDataManager.startPollingAuthStatus(guid, sessionId)
-                                                .subscribe(payloadResponse -> {
-                                                    waitingForAuth = false;
+            showCheckEmailDialog();
 
-                                                    if (payloadResponse == null || payloadResponse.contains(KEY_AUTH_REQUIRED)) {
-                                                        showErrorToastAndRestartApp(R.string.auth_failed);
-                                                        return;
-
-                                                    }
-                                                    attemptDecryptPayload(password, payloadResponse);
-
-                                                }, throwable -> {
-                                                    Log.e(TAG, "verifyPassword: ", throwable);
-                                                    waitingForAuth = false;
-                                                    showErrorToastAndRestartApp(R.string.auth_failed);
-                                                }));
-                            } else {
+            compositeDisposable.add(
+                    authDataManager.startPollingAuthStatus(guid, sessionId)
+                            .subscribe(payloadResponse -> {
                                 waitingForAuth = false;
-                                attemptDecryptPayload(password, response.body().string());
-                            }
-                        }, throwable -> {
-                            Log.e(TAG, "verifyPassword: ", throwable);
-                            showErrorToastAndRestartApp(R.string.auth_failed);
-                        }));
+
+                                if (payloadResponse == null || payloadResponse.contains(KEY_AUTH_REQUIRED)) {
+                                    showErrorToastAndRestartApp(R.string.auth_failed);
+                                    return;
+
+                                }
+                                attemptDecryptPayload(password, payloadResponse);
+
+                            }, throwable -> {
+                                Log.e(TAG, "verifyPassword: ", throwable);
+                                waitingForAuth = false;
+                                showErrorToastAndRestartApp(R.string.auth_failed);
+                            }));
+        } else {
+            waitingForAuth = false;
+            String responseBody = response.body().string();
+            JSONObject jsonObject = new JSONObject(responseBody);
+            if (jsonObject.has("auth_type") && !jsonObject.has("payload")
+                    && (jsonObject.getInt("auth_type") == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR
+                    || jsonObject.getInt("auth_type") == Settings.AUTH_TYPE_SMS)) {
+
+                dataListener.dismissProgressDialog();
+                dataListener.showTwoFactorCodeNeededDialog(jsonObject, sessionId, jsonObject.getInt("auth_type"), guid, password);
+            } else {
+                attemptDecryptPayload(password, responseBody);
+            }
+        }
+    }
+
+    void submitTwoFactorCode(JSONObject jsonObject, String sessionId, String guid, String password, String code) {
+        if (code == null || code.isEmpty()) {
+            dataListener.showToast(R.string.two_factor_null_error, ToastCustom.TYPE_ERROR);
+        } else {
+            compositeDisposable.add(
+                    authDataManager.submitTwoFactorCode(sessionId, guid, code)
+                            .subscribe(
+                                    response -> {
+                                        jsonObject.put("payload", response.body().string());
+                                        ResponseBody responseBody =
+                                                ResponseBody.create(MediaType.parse("application/json"), jsonObject.toString());
+
+                                        handleResponse(password, guid, Response.success(responseBody));
+                                    },
+                                    throwable -> showErrorToastAndRestartApp(R.string.auth_failed)));
+        }
     }
 
     private void attemptDecryptPayload(String password, String payload) {
