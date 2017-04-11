@@ -5,6 +5,7 @@ import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +39,7 @@ public class LandingActivityTest extends BaseEspressoTest {
         assertTrue(activityRule.getActivity() != null);
     }
 
+    @Ignore
     @Test
     public void launchLoginPage() throws InterruptedException {
         BUTTON_LOGIN.perform(click());
@@ -45,6 +47,7 @@ public class LandingActivityTest extends BaseEspressoTest {
         onView(withText(R.string.pair_your_wallet)).check(matches(isDisplayed()));
     }
 
+    @Ignore
     @Test
     public void launchCreateWalletPage() throws InterruptedException {
         BUTTON_CREATE.perform(click());
@@ -52,6 +55,7 @@ public class LandingActivityTest extends BaseEspressoTest {
         onView(withText(R.string.new_wallet)).check(matches(isDisplayed()));
     }
 
+    @Ignore
     @Test
     public void launchRecoverFundsPage() throws InterruptedException {
         BUTTON_RECOVER.perform(click());
