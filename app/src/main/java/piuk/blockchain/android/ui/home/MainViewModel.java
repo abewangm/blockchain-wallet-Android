@@ -401,7 +401,6 @@ public class MainViewModel extends BaseViewModel {
         super.destroy();
         rxBus.unregister(NotificationPayload.class, notificationObservable);
         appUtil.deleteQR();
-        dynamicFeeCache.destroy();
     }
 
     public void updateTicker() {

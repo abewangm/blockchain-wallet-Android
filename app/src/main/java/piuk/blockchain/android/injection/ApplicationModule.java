@@ -69,6 +69,7 @@ public class ApplicationModule {
     }
 
     @Provides
+    @Singleton
     protected DynamicFeeCache provideDynamicFeeCache() {
         return new DynamicFeeCache();
     }
