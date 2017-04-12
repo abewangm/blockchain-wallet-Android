@@ -75,12 +75,12 @@ public class ManualPairingActivity extends BaseAuthActivity implements ManualPai
     }
 
     @Override
-    public void showTwoFactorCodeNeededDialog(JSONObject jsonObject, String sessionId, int authType, String guid, String password) {
+    public void showTwoFactorCodeNeededDialog(JSONObject responseObject, String sessionId, int authType, String guid, String password) {
         ViewUtils.hideKeyboard(this);
         int message;
         if (authType == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR) {
             message = R.string.two_factor_dialog_message_authenticator;
-        } else if (authType == Settings.NOTIFICATION_TYPE_SMS) {
+        } else if (authType == Settings.AUTH_TYPE_SMS) {
             message = R.string.two_factor_dialog_message_sms;
         } else {
             throw new IllegalArgumentException("Auth Type " + authType + " should not be passed to this function");
@@ -93,9 +93,7 @@ public class ManualPairingActivity extends BaseAuthActivity implements ManualPai
             editText.setKeyListener(
                     DigitsKeyListener.getInstance("1234567890"));
         } else {
-            editText.setInputType(InputType.TYPE_CLASS_TEXT);
-            editText.setKeyListener(
-                    DigitsKeyListener.getInstance("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"));
+            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
         }
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
@@ -103,7 +101,7 @@ public class ManualPairingActivity extends BaseAuthActivity implements ManualPai
                 .setMessage(message)
                 .setView(ViewUtils.getAlertDialogPaddedView(this, editText))
                 .setPositiveButton(android.R.string.ok, (dialog, which) ->
-                        mViewModel.submitTwoFactorCode(jsonObject, sessionId, guid, password, editText.getText().toString()))
+                        mViewModel.submitTwoFactorCode(responseObject, sessionId, guid, password, editText.getText().toString()))
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();

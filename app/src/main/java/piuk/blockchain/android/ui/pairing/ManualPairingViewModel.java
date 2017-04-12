@@ -31,7 +31,7 @@ import retrofit2.Response;
 @SuppressWarnings("WeakerAccess")
 public class ManualPairingViewModel extends BaseViewModel {
 
-    @VisibleForTesting static final String KEY_AUTH_REQUIRED = "Authorization Required";
+    @VisibleForTesting static final String KEY_AUTH_REQUIRED = "authorization_required";
     private static final String TAG = ManualPairingViewModel.class.getSimpleName();
 
     private DataListener dataListener;
@@ -58,7 +58,8 @@ public class ManualPairingViewModel extends BaseViewModel {
 
         void resetPasswordField();
 
-        void showTwoFactorCodeNeededDialog(JSONObject jsonObject, String sessionId, int authType, String guid, String password);
+        void showTwoFactorCodeNeededDialog(JSONObject responseObject, String sessionId, int authType, String guid, String password);
+
     }
 
     ManualPairingViewModel(DataListener listener) {
@@ -84,13 +85,42 @@ public class ManualPairingViewModel extends BaseViewModel {
         }
     }
 
-    private void verifyPassword(String password, String guid) {
-        dataListener.showProgressDialog(R.string.validating_password, null, false);
+    void submitTwoFactorCode(JSONObject responseObject, String sessionId, String guid, String password, String code) {
+        if (code == null || code.isEmpty()) {
+            dataListener.showToast(R.string.two_factor_null_error, ToastCustom.TYPE_ERROR);
+        } else {
+            compositeDisposable.add(
+                    authDataManager.submitTwoFactorCode(sessionId, guid, code)
+                            .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.please_wait, null, false))
+                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                            .subscribe(response -> {
+                                        // This is slightly hacky, but if the user requires 2FA login,
+                                        // the payload comes in two parts. Here we combine them and
+                                        // parse/decrypt normally.
+                                        responseObject.put("payload", response.body().string());
+                                        ResponseBody responseBody = ResponseBody.create(
+                                                MediaType.parse("application/json"),
+                                                responseObject.toString());
 
+                                        Response<ResponseBody> payload;
+                                        if (response.isSuccessful()) {
+                                            payload = Response.success(responseBody);
+                                        } else {
+                                            payload = Response.error(response.code(), responseBody);
+                                        }
+
+                                        handleResponse(password, guid, payload);
+                                    },
+                                    throwable -> showErrorToastAndRestartApp(R.string.auth_failed)));
+        }
+    }
+
+    private void verifyPassword(String password, String guid) {
         waitingForAuth = true;
 
         compositeDisposable.add(
                 authDataManager.getSessionId(guid)
+                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.validating_password, null, false))
                         .doOnNext(s -> sessionId = s)
                         .flatMap(sessionId -> authDataManager.getEncryptedPayload(guid, sessionId))
                         .subscribe(response -> handleResponse(password, guid, response),
@@ -101,9 +131,8 @@ public class ManualPairingViewModel extends BaseViewModel {
     }
 
     private void handleResponse(String password, String guid, Response<ResponseBody> response) throws IOException, JSONException {
-        if (response.errorBody() != null
-                && response.errorBody().string().contains(KEY_AUTH_REQUIRED)) {
-
+        String errorBody = response.errorBody() != null ? response.errorBody().string() : "";
+        if (response.errorBody() != null && errorBody.contains(KEY_AUTH_REQUIRED)) {
             showCheckEmailDialog();
 
             compositeDisposable.add(
@@ -114,46 +143,42 @@ public class ManualPairingViewModel extends BaseViewModel {
                                 if (payloadResponse == null || payloadResponse.contains(KEY_AUTH_REQUIRED)) {
                                     showErrorToastAndRestartApp(R.string.auth_failed);
                                     return;
-
                                 }
-                                attemptDecryptPayload(password, payloadResponse);
 
+                                ResponseBody responseBody = ResponseBody.create(
+                                        MediaType.parse("application/json"),
+                                        payloadResponse);
+                                checkTwoFactor(password, guid, Response.success(responseBody));
                             }, throwable -> {
-                                Log.e(TAG, "verifyPassword: ", throwable);
+                                Log.e(TAG, "handleResponse: ", throwable);
                                 waitingForAuth = false;
                                 showErrorToastAndRestartApp(R.string.auth_failed);
                             }));
         } else {
             waitingForAuth = false;
-            String responseBody = response.body().string();
-            JSONObject jsonObject = new JSONObject(responseBody);
-            if (jsonObject.has("auth_type") && !jsonObject.has("payload")
-                    && (jsonObject.getInt("auth_type") == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR
-                    || jsonObject.getInt("auth_type") == Settings.AUTH_TYPE_SMS)) {
-
-                dataListener.dismissProgressDialog();
-                dataListener.showTwoFactorCodeNeededDialog(jsonObject, sessionId, jsonObject.getInt("auth_type"), guid, password);
-            } else {
-                attemptDecryptPayload(password, responseBody);
-            }
+            checkTwoFactor(password, guid, response);
         }
     }
 
-    void submitTwoFactorCode(JSONObject jsonObject, String sessionId, String guid, String password, String code) {
-        if (code == null || code.isEmpty()) {
-            dataListener.showToast(R.string.two_factor_null_error, ToastCustom.TYPE_ERROR);
-        } else {
-            compositeDisposable.add(
-                    authDataManager.submitTwoFactorCode(sessionId, guid, code)
-                            .subscribe(
-                                    response -> {
-                                        jsonObject.put("payload", response.body().string());
-                                        ResponseBody responseBody =
-                                                ResponseBody.create(MediaType.parse("application/json"), jsonObject.toString());
+    private void checkTwoFactor(String password, String guid, Response<ResponseBody> response) throws
+            IOException, JSONException {
 
-                                        handleResponse(password, guid, Response.success(responseBody));
-                                    },
-                                    throwable -> showErrorToastAndRestartApp(R.string.auth_failed)));
+        String responseBody = response.body().string();
+        JSONObject jsonObject = new JSONObject(responseBody);
+        // Check if the response has a 2FA Auth Type but is also missing the payload,
+        // as it comes in two parts if 2FA enabled.
+        if (jsonObject.has("auth_type") && !jsonObject.has("payload")
+                && (jsonObject.getInt("auth_type") == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR
+                || jsonObject.getInt("auth_type") == Settings.AUTH_TYPE_SMS)) {
+
+            dataListener.dismissProgressDialog();
+            dataListener.showTwoFactorCodeNeededDialog(jsonObject,
+                    sessionId,
+                    jsonObject.getInt("auth_type"),
+                    guid,
+                    password);
+        } else {
+            attemptDecryptPayload(password, responseBody);
         }
     }
 
@@ -173,21 +198,21 @@ public class ManualPairingViewModel extends BaseViewModel {
     }
 
     private void showCheckEmailDialog() {
-        dataListener.showProgressDialog(R.string.check_email_to_auth_login, "120", true);
-
-        compositeDisposable.add(authDataManager.createCheckEmailTimer()
-                .takeUntil(integer -> !waitingForAuth)
-                .subscribe(integer -> {
-                    if (integer <= 0) {
-                        // Only called if timer has run out
-                        showErrorToastAndRestartApp(R.string.pairing_failed);
-                    } else {
-                        dataListener.updateWaitingForAuthDialog(integer);
-                    }
-                }, throwable -> {
-                    showErrorToast(R.string.auth_failed);
-                    waitingForAuth = false;
-                }));
+        compositeDisposable.add(
+                authDataManager.createCheckEmailTimer()
+                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.check_email_to_auth_login, "120", true))
+                        .takeUntil(integer -> !waitingForAuth)
+                        .subscribe(integer -> {
+                            if (integer <= 0) {
+                                // Only called if timer has run out
+                                showErrorToastAndRestartApp(R.string.pairing_failed);
+                            } else {
+                                dataListener.updateWaitingForAuthDialog(integer);
+                            }
+                        }, throwable -> {
+                            showErrorToast(R.string.auth_failed);
+                            waitingForAuth = false;
+                        }));
     }
 
     void onProgressCancelled() {

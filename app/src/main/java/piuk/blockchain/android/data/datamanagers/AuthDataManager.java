@@ -26,7 +26,7 @@ import retrofit2.Response;
 @SuppressWarnings("WeakerAccess")
 public class AuthDataManager {
 
-    @VisibleForTesting static final String AUTHORIZATION_REQUIRED = "Authorization Required";
+    @VisibleForTesting static final String AUTHORIZATION_REQUIRED = "authorization_required";
 
     private WalletService walletService;
     private AppUtil appUtil;

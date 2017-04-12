@@ -689,7 +689,7 @@
 
     <!-- 2FA Pairing -->
     <string name="two_factor_dialog_title">Enter 2FA code</string>
-    <string name="two_factor_dialog_message_authenticator">Please enter a valid 2FA code from Google Authenticator to continue.</string>
+    <string name="two_factor_dialog_message_authenticator">Please enter a valid 2FA code from your authenticator app to continue.</string>
     <string name="two_factor_dialog_message_sms">We have just sent you an SMS containing a 2FA code. Please enter it here to continue.</string>
     <string name="two_factor_dialog_hint">2FA code</string>
     <string name="two_factor_null_error">2FA code cannot be empty</string>

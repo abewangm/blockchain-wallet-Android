@@ -7,7 +7,14 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.view.MotionEvent;
+import android.widget.EditText;
+
+import info.blockchain.wallet.api.data.Settings;
+
+import org.json.JSONObject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityPasswordRequiredBinding;
@@ -16,6 +23,7 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.util.DialogButtonCallback;
+import piuk.blockchain.android.util.ViewUtils;
 
 /**
  * Created by adambennett on 09/08/2016.
@@ -85,6 +93,39 @@ public class PasswordRequiredActivity extends BaseAuthActivity implements Passwo
                 .setMessage(R.string.forget_wallet_warning)
                 .setPositiveButton(R.string.forget_wallet, (dialogInterface, i) -> callback.onPositiveClicked())
                 .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> callback.onNegativeClicked())
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showTwoFactorCodeNeededDialog(JSONObject responseObject, String sessionId, int authType, String password) {
+        ViewUtils.hideKeyboard(this);
+        int message;
+        if (authType == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR) {
+            message = R.string.two_factor_dialog_message_authenticator;
+        } else if (authType == Settings.AUTH_TYPE_SMS) {
+            message = R.string.two_factor_dialog_message_sms;
+        } else {
+            throw new IllegalArgumentException("Auth Type " + authType + " should not be passed to this function");
+        }
+
+        EditText editText = new EditText(this);
+        editText.setHint(R.string.two_factor_dialog_hint);
+        if (authType == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR) {
+            editText.setInputType(InputType.TYPE_NUMBER_VARIATION_NORMAL);
+            editText.setKeyListener(
+                    DigitsKeyListener.getInstance("1234567890"));
+        } else {
+            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        }
+
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.two_factor_dialog_title)
+                .setMessage(message)
+                .setView(ViewUtils.getAlertDialogPaddedView(this, editText))
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        mViewModel.submitTwoFactorCode(responseObject, sessionId, password, editText.getText().toString()))
+                .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
     }
