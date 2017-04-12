@@ -86,6 +86,24 @@ public class AuthDataManagerTest extends RxTest {
     }
 
     @Test
+    public void submitTwoFactorCode() throws Exception {
+        // Arrange
+        String sessionId = "SESSION_ID";
+        String guid = "GUID";
+        String code= "123456";
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
+        when(walletService.submitTwoFactorCode(sessionId, guid, code))
+                .thenReturn(Observable.just(responseBody));
+        // Act
+        TestObserver<ResponseBody> testObserver = subject.submitTwoFactorCode(sessionId, guid, code).test();
+        // Assert
+        verify(walletService).submitTwoFactorCode(sessionId, guid, code);
+        testObserver.assertComplete();
+        testObserver.onNext(responseBody);
+        testObserver.assertNoErrors();
+    }
+
+    @Test
     public void updatePayload() throws Exception {
         // Arrange
         String sharedKey = "SHARED_KEY";
