@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 public class AuthDataManagerTest extends RxTest {
 
     private static final String ERROR_BODY = "{\n" +
-            "\t\"message\": \"Authorization Required\"\n" +
+            "\t\"authorization_required\": \"true\"\n" +
             "}";
 
     @Mock private PayloadDataManager payloadDataManager;

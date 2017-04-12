@@ -64,7 +64,7 @@ public class AuthDataManager {
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    public Observable<Response<ResponseBody>> submitTwoFactorCode(String sessionId, String guid, String twoFactorCode) {
+    public Observable<ResponseBody> submitTwoFactorCode(String sessionId, String guid, String twoFactorCode) {
         return rxPinning.call(() -> walletService.submitTwoFactorCode(sessionId, guid, twoFactorCode))
                 .compose(RxUtil.applySchedulersToObservable());
     }

@@ -41,7 +41,7 @@ public class WalletService {
      * @return An {@link Observable} which may contain an encrypted Payload
      */
     @WebRequest
-    public Observable<Response<ResponseBody>> submitTwoFactorCode(String sessionId, String guid, String twoFactorCode) {
+    public Observable<ResponseBody> submitTwoFactorCode(String sessionId, String guid, String twoFactorCode) {
         return walletApi.submitTwoFactorCode(sessionId, guid, twoFactorCode);
     }
 

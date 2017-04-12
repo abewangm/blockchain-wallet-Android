@@ -97,21 +97,15 @@ public class ManualPairingViewModel extends BaseViewModel {
                                         // This is slightly hacky, but if the user requires 2FA login,
                                         // the payload comes in two parts. Here we combine them and
                                         // parse/decrypt normally.
-                                        responseObject.put("payload", response.body().string());
+                                        responseObject.put("payload", response.string());
                                         ResponseBody responseBody = ResponseBody.create(
                                                 MediaType.parse("application/json"),
                                                 responseObject.toString());
 
-                                        Response<ResponseBody> payload;
-                                        if (response.isSuccessful()) {
-                                            payload = Response.success(responseBody);
-                                        } else {
-                                            payload = Response.error(response.code(), responseBody);
-                                        }
-
+                                        Response<ResponseBody> payload = Response.success(responseBody);
                                         handleResponse(password, guid, payload);
                                     },
-                                    throwable -> showErrorToastAndRestartApp(R.string.auth_failed)));
+                                    throwable -> showErrorToast(R.string.two_factor_incorrect_error)));
         }
     }
 
@@ -132,7 +126,7 @@ public class ManualPairingViewModel extends BaseViewModel {
 
     private void handleResponse(String password, String guid, Response<ResponseBody> response) throws IOException, JSONException {
         String errorBody = response.errorBody() != null ? response.errorBody().string() : "";
-        if (response.errorBody() != null && errorBody.contains(KEY_AUTH_REQUIRED)) {
+        if (errorBody.contains(KEY_AUTH_REQUIRED)) {
             showCheckEmailDialog();
 
             compositeDisposable.add(
