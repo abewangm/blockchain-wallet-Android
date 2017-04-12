@@ -6,20 +6,14 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.neovisionaries.ws.client.WebSocket;
-import com.neovisionaries.ws.client.WebSocketAdapter;
-import com.neovisionaries.ws.client.WebSocketFactory;
-import com.neovisionaries.ws.client.WebSocketFrame;
-
 import info.blockchain.wallet.api.PersistentUrls;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
@@ -27,6 +21,11 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
@@ -40,28 +39,35 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 
 @SuppressWarnings("WeakerAccess")
-class WebSocketHandler {
+class WebSocketHandler extends WebSocketListener {
 
     @Thunk static final String TAG = WebSocketHandler.class.getSimpleName();
 
-    private final static long PING_INTERVAL = 20 * 1000L;
     private final static long RETRY_INTERVAL = 5 * 1000L;
+    /**
+     * Websocket status code as defined by <a href="http://tools.ietf.org/html/rfc6455#section-7.4">Section
+     * 7.4 of RFC 6455</a>
+     */
+    private static final int STATUS_CODE_NORMAL_CLOSURE = 1000;
 
     private boolean stoppedDeliberately = false;
     private String[] xpubs;
     private String[] addrs;
     private NotificationManager notificationManager;
-    @Thunk String guid;
-    @Thunk WebSocket connection;
-    @Thunk HashSet<String> subHashSet = new HashSet<>();
-    @Thunk HashSet<String> onChangeHashSet = new HashSet<>();
-    @Thunk PersistentUrls persistentUrls;
-    @Thunk MonetaryUtil monetaryUtil;
+    private String guid;
+    private HashSet<String> subHashSet = new HashSet<>();
+    private HashSet<String> onChangeHashSet = new HashSet<>();
+    private PersistentUrls persistentUrls;
+    private MonetaryUtil monetaryUtil;
+    private Context context;
+    private OkHttpClient okHttpClient;
+    private WebSocket webSocketConnection;
+    private boolean connected;
     @Thunk PayloadDataManager payloadDataManager;
-    @Thunk Context context;
     @Thunk CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     public WebSocketHandler(Context context,
+                            OkHttpClient okHttpClient,
                             PayloadDataManager payloadDataManager,
                             NotificationManager notificationManager,
                             PersistentUrls persistentUrls,
@@ -71,6 +77,7 @@ class WebSocketHandler {
                             String[] addrs) {
 
         this.context = context;
+        this.okHttpClient = okHttpClient;
         this.payloadDataManager = payloadDataManager;
         this.notificationManager = notificationManager;
         this.persistentUrls = persistentUrls;
@@ -103,7 +110,9 @@ class WebSocketHandler {
 
     private void stop() {
         if (isConnected()) {
-            connection.disconnect();
+            webSocketConnection.close(STATUS_CODE_NORMAL_CLOSURE, "Websocket deliberately stopped");
+            webSocketConnection = null;
+            Log.d(TAG, "stop: ");
         }
     }
 
@@ -112,7 +121,7 @@ class WebSocketHandler {
         if (!subHashSet.contains(message)) {
             try {
                 if (isConnected()) {
-                    connection.sendText(message);
+                    webSocketConnection.send(message);
                     subHashSet.add(message);
                 }
             } catch (Exception e) {
@@ -121,7 +130,8 @@ class WebSocketHandler {
         }
     }
 
-    private void subscribe() {
+    @Thunk
+    void subscribe() {
         if (guid == null) {
             return;
         }
@@ -138,18 +148,24 @@ class WebSocketHandler {
                 send("{\"op\":\"addr_sub\", \"addr\":\"" + addr + "\"}");
             }
         }
+
+        Log.d(TAG, "subscribe: " + Arrays.toString(addrs) + Arrays.toString(xpubs));
     }
 
     public void subscribeToXpub(String xpub) {
         if (xpub != null && !xpub.isEmpty()) {
             send("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpub + "\"}");
         }
+
+        Log.d(TAG, "subscribeToXpub: " + xpub);
     }
 
     public void subscribeToAddress(String address) {
         if (address != null && !address.isEmpty()) {
             send("{\"op\":\"addr_sub\", \"addr\":\"" + address + "\"}");
         }
+
+        Log.d(TAG, "subscribeToAddress: " + address);
     }
 
     @Thunk
@@ -159,8 +175,7 @@ class WebSocketHandler {
                     getReconnectionObservable()
                             .subscribe(
                                     value -> Log.d(TAG, "attemptReconnection: " + value),
-                                    throwable -> Log.e(TAG, "attemptReconnection: ", throwable)
-                            ));
+                                    throwable -> Log.e(TAG, "attemptReconnection: ", throwable)));
         }
     }
 
@@ -171,7 +186,7 @@ class WebSocketHandler {
     }
 
     private boolean isConnected() {
-        return connection != null && connection.isOpen();
+        return webSocketConnection != null && connected;
     }
 
     @Thunk
@@ -188,46 +203,62 @@ class WebSocketHandler {
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
+    private void startWebSocket() {
+        Request request = new Request.Builder()
+                .url(persistentUrls.getCurrentWebsocketUrl())
+                .addHeader("Origin", "https://blockchain.info")
+                .build();
+
+        webSocketConnection = okHttpClient.newWebSocket(request, this);
+    }
+
+    @Override
+    public void onOpen(WebSocket webSocket, Response response) {
+        super.onOpen(webSocket, response);
+        connected = true;
+        compositeDisposable.clear();
+        Log.d(TAG, "onOpen: " + response);
+        subscribe();
+    }
+
+    @Override
+    public void onMessage(WebSocket webSocket, String text) {
+        super.onMessage(webSocket, text);
+        Log.d(TAG, "onMessage: " + text);
+        if (payloadDataManager.getWallet() != null) {
+            JSONObject jsonObject;
+            try {
+                jsonObject = new JSONObject(text);
+                attemptParseMessage(text, jsonObject);
+            } catch (JSONException je) {
+                Log.e(TAG, "onTextMessage: ", je);
+            }
+        } else {
+            // Ignore content and broadcast anyway so that SwipeToReceive can update
+            sendBroadcast();
+        }
+    }
+
+    @Override
+    public void onClosed(WebSocket webSocket, int code, String reason) {
+        super.onClosed(webSocket, code, reason);
+        Log.d(TAG, "onClosed: ");
+        connected = false;
+        attemptReconnection();
+    }
+
+    @Override
+    public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+        super.onFailure(webSocket, t, response);
+        Log.e(TAG, "onFailure: ", t);
+        connected = false;
+        attemptReconnection();
+    }
+
     private Completable connectToWebSocket() {
         return Completable.fromCallable(() -> {
             subHashSet.clear();
-
-            connection = new WebSocketFactory()
-                    .createSocket(persistentUrls.getCurrentWebsocketUrl())
-                    .addHeader("Origin", "https://blockchain.info")
-                    .setPingInterval(PING_INTERVAL)
-                    .addListener(new WebSocketAdapter() {
-                        @Override
-                        public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
-                            super.onConnected(websocket, headers);
-                            compositeDisposable.clear();
-                        }
-
-                        @Override
-                        public void onTextMessage(WebSocket websocket, String message) {
-                            if (payloadDataManager.getWallet() != null) {
-                                JSONObject jsonObject;
-                                try {
-                                    jsonObject = new JSONObject(message);
-                                    attemptParseMessage(message, jsonObject);
-                                } catch (JSONException je) {
-                                    Log.e(TAG, "onTextMessage: ", je);
-                                }
-                            } else {
-                                // Ignore content and broadcast anyway so that SwipeToReceive can update
-                                sendBroadcast();
-                            }
-                        }
-
-                        @Override
-                        public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
-                            super.onDisconnected(websocket, serverCloseFrame, clientCloseFrame, closedByServer);
-                            attemptReconnection();
-                        }
-
-                    }).connect();
-
-            subscribe();
+            startWebSocket();
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }
@@ -352,4 +383,5 @@ class WebSocketHandler {
                 MainActivity.class,
                 1000);
     }
+
 }
