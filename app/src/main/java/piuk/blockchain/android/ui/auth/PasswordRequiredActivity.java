@@ -100,23 +100,19 @@ public class PasswordRequiredActivity extends BaseAuthActivity implements Passwo
     @Override
     public void showTwoFactorCodeNeededDialog(JSONObject responseObject, String sessionId, int authType, String password) {
         ViewUtils.hideKeyboard(this);
-        int message;
-        if (authType == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR) {
-            message = R.string.two_factor_dialog_message_authenticator;
-        } else if (authType == Settings.AUTH_TYPE_SMS) {
-            message = R.string.two_factor_dialog_message_sms;
-        } else {
-            throw new IllegalArgumentException("Auth Type " + authType + " should not be passed to this function");
-        }
 
         EditText editText = new EditText(this);
         editText.setHint(R.string.two_factor_dialog_hint);
+        int message;
         if (authType == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR) {
+            message = R.string.two_factor_dialog_message_authenticator;
             editText.setInputType(InputType.TYPE_NUMBER_VARIATION_NORMAL);
-            editText.setKeyListener(
-                    DigitsKeyListener.getInstance("1234567890"));
-        } else {
+            editText.setKeyListener(DigitsKeyListener.getInstance("1234567890"));
+        } else if (authType == Settings.AUTH_TYPE_SMS) {
+            message = R.string.two_factor_dialog_message_sms;
             editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        } else {
+            throw new IllegalArgumentException("Auth Type " + authType + " should not be passed to this function");
         }
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
