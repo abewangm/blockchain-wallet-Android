@@ -6,10 +6,18 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+
+import info.blockchain.wallet.api.data.Settings;
+
+import org.json.JSONObject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityManualPairingBinding;
@@ -17,6 +25,7 @@ import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.ViewUtils;
 
 public class ManualPairingActivity extends BaseAuthActivity implements ManualPairingViewModel.DataListener {
 
@@ -63,6 +72,35 @@ public class ManualPairingActivity extends BaseAuthActivity implements ManualPai
         if (mProgressDialog != null) {
             mProgressDialog.setMessage(getString(R.string.check_email_to_auth_login) + " " + secondsRemaining);
         }
+    }
+
+    @Override
+    public void showTwoFactorCodeNeededDialog(JSONObject responseObject, String sessionId, int authType, String guid, String password) {
+        ViewUtils.hideKeyboard(this);
+
+        EditText editText = new EditText(this);
+        editText.setHint(R.string.two_factor_dialog_hint);
+        int message;
+        if (authType == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR) {
+            message = R.string.two_factor_dialog_message_authenticator;
+            editText.setInputType(InputType.TYPE_NUMBER_VARIATION_NORMAL);
+            editText.setKeyListener(DigitsKeyListener.getInstance("1234567890"));
+        } else if (authType == Settings.AUTH_TYPE_SMS) {
+            message = R.string.two_factor_dialog_message_sms;
+            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        } else {
+            throw new IllegalArgumentException("Auth Type " + authType + " should not be passed to this function");
+        }
+
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.two_factor_dialog_title)
+                .setMessage(message)
+                .setView(ViewUtils.getAlertDialogPaddedView(this, editText))
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        mViewModel.submitTwoFactorCode(responseObject, sessionId, guid, password, editText.getText().toString()))
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
+                .show();
     }
 
     @Override

@@ -26,7 +26,7 @@ import retrofit2.Response;
 @SuppressWarnings("WeakerAccess")
 public class AuthDataManager {
 
-    @VisibleForTesting static final String AUTHORIZATION_REQUIRED = "Authorization Required";
+    @VisibleForTesting static final String AUTHORIZATION_REQUIRED = "authorization_required";
 
     private WalletService walletService;
     private AppUtil appUtil;
@@ -61,6 +61,11 @@ public class AuthDataManager {
 
     public Observable<String> getSessionId(String guid) {
         return rxPinning.call(() -> walletService.getSessionId(guid))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    public Observable<ResponseBody> submitTwoFactorCode(String sessionId, String guid, String twoFactorCode) {
+        return rxPinning.call(() -> walletService.submitTwoFactorCode(sessionId, guid, twoFactorCode))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 

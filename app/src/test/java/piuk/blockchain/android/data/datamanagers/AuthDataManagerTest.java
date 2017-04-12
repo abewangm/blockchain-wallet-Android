@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 public class AuthDataManagerTest extends RxTest {
 
     private static final String ERROR_BODY = "{\n" +
-            "\t\"message\": \"Authorization Required\"\n" +
+            "\t\"authorization_required\": \"true\"\n" +
             "}";
 
     @Mock private PayloadDataManager payloadDataManager;
@@ -82,6 +82,24 @@ public class AuthDataManagerTest extends RxTest {
         verify(walletService).getSessionId(anyString());
         testObserver.assertComplete();
         testObserver.onNext(sessionId);
+        testObserver.assertNoErrors();
+    }
+
+    @Test
+    public void submitTwoFactorCode() throws Exception {
+        // Arrange
+        String sessionId = "SESSION_ID";
+        String guid = "GUID";
+        String code= "123456";
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
+        when(walletService.submitTwoFactorCode(sessionId, guid, code))
+                .thenReturn(Observable.just(responseBody));
+        // Act
+        TestObserver<ResponseBody> testObserver = subject.submitTwoFactorCode(sessionId, guid, code).test();
+        // Assert
+        verify(walletService).submitTwoFactorCode(sessionId, guid, code);
+        testObserver.assertComplete();
+        testObserver.onNext(responseBody);
         testObserver.assertNoErrors();
     }
 

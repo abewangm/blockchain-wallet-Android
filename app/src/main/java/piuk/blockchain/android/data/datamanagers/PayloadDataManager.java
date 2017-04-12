@@ -183,14 +183,14 @@ public class PayloadDataManager {
      * Returns the next Receive address for a given {@link Account object}
      *
      * @param accountIndex The index of the account for which you want an address to be generated
-     * @param label Label used to reserve address
+     * @param label        Label used to reserve address
      * @return An {@link Observable} wrapping the receive address
      */
     public Observable<String> getNextReceiveAddressAndReserve(int accountIndex, String label) {
         Account account = getWallet().getHdWallets().get(0).getAccounts().get(accountIndex);
         return Observable.fromCallable(() -> payloadManager.getNextReceiveAddressAndReserve(account, label))
-            .subscribeOn(Schedulers.computation())
-            .observeOn(AndroidSchedulers.mainThread());
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     /**
@@ -263,7 +263,7 @@ public class PayloadDataManager {
     ///////////////////////////////////////////////////////////////////////////
 
     public Wallet getWallet() {
-        return payloadManager.getPayload();
+        return payloadManager != null ? payloadManager.getPayload() : null;
     }
 
     public int getDefaultAccountIndex() {
