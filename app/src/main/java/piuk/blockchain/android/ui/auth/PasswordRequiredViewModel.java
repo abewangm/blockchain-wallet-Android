@@ -124,7 +124,7 @@ public class PasswordRequiredViewModel extends BaseViewModel {
                                                 }));
                             } else {
                                 waitingForAuth = false;
-                                attemptDecryptPayload(password, response.message());
+                                attemptDecryptPayload(password, response.body().string());
                             }
                         }, throwable -> {
                             Log.e(TAG, "verifyPassword: ", throwable);
