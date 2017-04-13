@@ -43,7 +43,7 @@ public class ApiModule {
 
     private static final String TAG = ApiModule.class.getSimpleName();
     private static final int API_TIMEOUT = 30;
-    private final static int PING_INTERVAL = 10;
+    private static final int PING_INTERVAL = 10;
 
     /**
      * This should be phased out for {@link PayloadDataManager}
