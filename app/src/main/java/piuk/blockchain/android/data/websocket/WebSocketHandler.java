@@ -12,7 +12,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
 
@@ -137,34 +136,24 @@ class WebSocketHandler extends WebSocketListener {
         send("{\"op\":\"wallet_sub\",\"guid\":\"" + guid + "\"}");
 
         for (String xpub : xpubs) {
-            if (xpub != null && !xpub.isEmpty()) {
-                send("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpub + "\"}");
-            }
+            subscribeToXpub(xpub);
         }
 
         for (String addr : addrs) {
-            if (addr != null && !addr.isEmpty()) {
-                send("{\"op\":\"addr_sub\", \"addr\":\"" + addr + "\"}");
-            }
+            subscribeToAddress(addr);
         }
-
-        Log.d(TAG, "subscribe: " + Arrays.toString(addrs) + Arrays.toString(xpubs));
     }
 
     public void subscribeToXpub(String xpub) {
         if (xpub != null && !xpub.isEmpty()) {
             send("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpub + "\"}");
         }
-
-        Log.d(TAG, "subscribeToXpub: " + xpub);
     }
 
     public void subscribeToAddress(String address) {
         if (address != null && !address.isEmpty()) {
             send("{\"op\":\"addr_sub\", \"addr\":\"" + address + "\"}");
         }
-
-        Log.d(TAG, "subscribeToAddress: " + address);
     }
 
     @Thunk
@@ -216,7 +205,6 @@ class WebSocketHandler extends WebSocketListener {
         super.onOpen(webSocket, response);
         connected = true;
         compositeDisposable.clear();
-        Log.d(TAG, "onOpen: " + response);
         subscribe();
     }
 
