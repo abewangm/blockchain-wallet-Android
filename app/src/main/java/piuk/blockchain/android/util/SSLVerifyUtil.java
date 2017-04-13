@@ -13,8 +13,9 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 
 
 /**
- * <code>openssl s_client -connect api.blockchain.info:443 | openssl x509 -pubkey -noout | openssl
- * rsa -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64</code>
+ * Certificates to be pinned are derived via <code>openssl s_client -connect api.blockchain.info:443
+ * | openssl x509 -pubkey -noout | openssl rsa -pubin -outform der | openssl dgst -sha256 -binary |
+ * openssl enc -base64</code>, which returns a SHA-256 hash in Base64.
  */
 public class SSLVerifyUtil {
 

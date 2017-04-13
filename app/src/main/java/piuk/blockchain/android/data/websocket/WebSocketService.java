@@ -16,6 +16,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import okhttp3.OkHttpClient;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
@@ -33,6 +34,7 @@ public class WebSocketService extends Service {
     @Inject protected NotificationManager notificationManager;
     @Inject protected PersistentUrls persistentUrls;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
+    @Inject protected OkHttpClient okHttpClient;
     @Thunk WebSocketHandler webSocketHandler;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -70,6 +72,7 @@ public class WebSocketService extends Service {
 
         webSocketHandler = new WebSocketHandler(
                 getApplicationContext(),
+                okHttpClient,
                 payloadDataManager,
                 notificationManager,
                 persistentUrls,
