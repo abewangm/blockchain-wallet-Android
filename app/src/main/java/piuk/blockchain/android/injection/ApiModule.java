@@ -43,7 +43,7 @@ public class ApiModule {
 
     private static final String TAG = ApiModule.class.getSimpleName();
     private static final int API_TIMEOUT = 30;
-    private final static long PING_INTERVAL = 20 * 1000L;
+    private final static int PING_INTERVAL = 10;
 
     /**
      * This should be phased out for {@link PayloadDataManager}
@@ -97,7 +97,7 @@ public class ApiModule {
                 .connectTimeout(API_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(API_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(API_TIMEOUT, TimeUnit.SECONDS)
-                .pingInterval(PING_INTERVAL, TimeUnit.MILLISECONDS)
+                .pingInterval(PING_INTERVAL, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(false)
                 .certificatePinner(certificatePinner)
                 .addInterceptor(new ApiInterceptor());

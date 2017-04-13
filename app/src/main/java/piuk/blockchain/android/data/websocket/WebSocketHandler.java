@@ -112,7 +112,6 @@ class WebSocketHandler extends WebSocketListener {
         if (isConnected()) {
             webSocketConnection.close(STATUS_CODE_NORMAL_CLOSURE, "Websocket deliberately stopped");
             webSocketConnection = null;
-            Log.d(TAG, "stop: ");
         }
     }
 
@@ -224,7 +223,6 @@ class WebSocketHandler extends WebSocketListener {
     @Override
     public void onMessage(WebSocket webSocket, String text) {
         super.onMessage(webSocket, text);
-        Log.d(TAG, "onMessage: " + text);
         if (payloadDataManager.getWallet() != null) {
             JSONObject jsonObject;
             try {
@@ -242,7 +240,6 @@ class WebSocketHandler extends WebSocketListener {
     @Override
     public void onClosed(WebSocket webSocket, int code, String reason) {
         super.onClosed(webSocket, code, reason);
-        Log.d(TAG, "onClosed: ");
         connected = false;
         attemptReconnection();
     }
@@ -250,7 +247,6 @@ class WebSocketHandler extends WebSocketListener {
     @Override
     public void onFailure(WebSocket webSocket, Throwable t, Response response) {
         super.onFailure(webSocket, t, response);
-        Log.e(TAG, "onFailure: ", t);
         connected = false;
         attemptReconnection();
     }
