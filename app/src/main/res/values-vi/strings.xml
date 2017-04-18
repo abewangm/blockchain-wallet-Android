@@ -103,7 +103,6 @@
 
     <string name="support">Hỗ trợ</string>
     <string name="rate_us">Đánh giá</string>
-    <string name="about">Ví Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Ứng dụng cổng thanh toán miễn phí</string>
     <string name="password_or_wipe">Nhập mật khẩu đang sử dụng hoặc quên ví này</string>
     <string name="use_password">Sử dụng mật khẩu</string>
@@ -215,22 +214,18 @@
     <string name="confirm_password">Xác nhận mật khẩu</string>
     <string name="check_email_to_auth_login">Vui lòng kiểm tra email của bạn để chấp nhận lần đăng nhập này.</string>
     <string name="transaction_fee">Phí giao dịch</string>
-    <string name="your_transactions">Giao dịch của bạn</string>
     <string name="transaction_occur_when">Các giao dịch xuất hiện khi bạn nhận và gửi bitcoin.</string>
     <string name="click">Nhấn</string>
     <string name="to_start_sending_and_receiving_btc">để bắt đầu gửi và nhận bitcoin.</string>
 
     <string name="watch_only_label">(chỉ-xem)</string>
     <string name="address_book_label">(sổ địa chỉ)</string>
-    <string name="archived_label">(đã lưu trữ)</string>
 
     <string name="transaction_submitted">Giao dịch hoàn thành</string>
     <string name="transaction_failed">Giao dịch thất bại</string>
-    <string name="UPGRADE_YOUR_WALLET">Ok!</string>
     <string name="upgrade_page_1">Đơn giản hóa sao lưu và khôi phục.</string>
     <string name="upgrade_page_2">Tăng cường bảo mật thông qua các địa chỉ xác định thứ bậc.</string>
     <string name="upgrade_page_3">Tùy chỉnh cách bạn tổ chức Bitcoin trong Ví Blockchain của mình.</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Chúng tôi đã thêm một vài tính năng mới cho ví Blockchain:</string>
     <string name="upgrading">Đang nâng cấp...</string>
     <string name="upgrading_started_info">Ví của bạn đang nâng cấp, thời gian phụ thuộc vào kích cỡ và thời gian sử dụng ví của bạn.</string>
     <string name="upgrade_success_heading">Ví của bạn đã được nâng cấp!</string>
@@ -252,7 +247,6 @@
     <string name="decrypting_wallet">Đang giải mã Ví...</string>
     <string name="password_unchanged">Mật khẩu không được thay đổi</string>
     <string name="password_changed">Mật khẩu đã được thay đổi</string>
-    <string name="verify_email2">Địa chỉ email đã xác minh của bạn được sử dụng để gửi các mã đăng nhập khi phát hiện có hành vi đáng ngờ hoặc bất thường, nhắc nhở bạn về ID đăng nhập ví của mình, và để gửi thông báo thanh toán bitcoin khi bạn nhận được tiền.</string>
     <string name="disable_root_warning">Tắt cảnh báo thiết bị đã được root</string>
 
     <string name="show_balance">Hiện số dư</string>
@@ -407,7 +401,6 @@
     <string name="accept_higher_fee">Chấp nhận phí cao hơn</string>
     <string name="large_tx_high_fee_warning">"Giao dịch này yêu cầu phí cao hơn vì thực hiện giao dịch với số tiền quá nhỏ."</string>
 
-    <string name="overview">Giao dịch</string>
     <string name="invalid_password_too_short">Vui lòng nhập nhiều hơn 3 ký tự</string>
     <string name="change_pin_new_matches_current">Bạn không thể sử dụng mã PIN hiện tại làm mã PIN mới</string>
     <string name="account_locked_title">Tài khoản bị khóa</string>
@@ -460,4 +453,74 @@
 
     <string name="survey_message">Bạn có muốn thực hiện một bài khảo sát ngắn để giúp cải thiện trải nghiệm sử dụng ví của mình?\n\nChúng tôi đánh giá cao phản hồi của bạn!</string>
     <string name="survey_positive_button">Thực hiện khảo sát</string>
+
+    <string name="current_price_btc">1 BTC = %1$s</string>
+    <string name="overview">Tổng quan</string>
+    <string name="create_a_wallet">Tạo ví</string>
+    <string name="log_in">Đăng nhập</string>
+    <string name="about">Ví Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
+    <string name="wallets">Ví</string>
+    <string name="your_transactions">Không có giao dịch</string>
+    <string name="archived_label">Đã lưu trữ</string>
+    <string name="UPGRADE_YOUR_WALLET">OK, bắt đầu!</string>
+    <string name="confirm_upgrade_header">Xin chào, chúng tôi đã thêm các tính năng mới sau đây vào ví Blockchain của bạn:</string>
+    <string name="verify_email2">Địa chỉ email đã xác minh của bạn được sử dụng để gửi các mã đăng nhập khi phát hiện có hành vi đáng ngờ hoặc bất thường, nhắc nhở bạn về ID đăng nhập ví của mình, và để gửi thông báo thanh toán bitcoin khi bạn nhận được tiền.</string>
+    <string name="enable_screenshots">Kích hoạt Chụp màn hình</string>
+    <string name="enable_screenshots_warning">Bạn đang kích hoạt tính năng chụp ảnh màn hình cho ứng dụng Blockchain. Một vài hình ảnh trong ứng dụng có thể hiển thị dữ liệu nhạy cảm. Những ứng dụng khác sẽ có thể truy cập các ảnh chụp màn hình này.</string>
+
+    <string name="information">Thông tin</string>
+    <string name="transaction_detail_verify">Xác minh trên Blockchain.info</string>
+    <string name="transaction_detail_share_chooser">Chia sẻ thông tin giao dịch</string>
+    <string name="transaction_detail_contact_note">Lưu ý</string>
+    <string name="security_centre_email_check">Kiểm tra email</string>
+    <string name="contacts_payment_request_send_note">Tại sao bạn muốn gửi bitcoin đến %1$s? Đây là một tùy chọn và sẽ được chia sẻ với %1$s.</string>
+    <string name="contacts_payment_request_receive_note">Tại sao bạn muốn %1$s gửi bitcoin cho bạn? Đây là một tùy chọn và sẽ được chia sẻ với %1$s.</string>
+    <string name="contacts_send_address_message">Thao tác này sẽ gửi một địa chỉ đến liên lạc của bạn. Tiến hành?</string>
+    <string name="contacts_register_nodes_failure">Chúng tôi không thể kết nối bạn đến với dịch vụ danh bạ. Vui lòng thử lại để kích hoạt đầy đủ tính năng.</string>
+    <string name="contacts_too_much_sent">Có vẻ như bạn đã gửi bitcoin nhiều hơn yêu cầu. Bạn có thể yêu cầu gửi lại một ít từ liên lạc của mình nếu muốn. Chúng tôi chưa đánh dấu hoàn tất cho thanh toán của bạn.</string>
+    <string name="contacts_too_little_sent">Có vẻ như bạn đã gửi bitcoin ít hơn yêu cầu. Liên lạc của bạn sẽ vẫn nhận được số bitcoin mà bạn đã gửi, nhưng chúng tôi chưa đánh dấu hoàn tất cho thanh toán của bạn.</string>
+    <string name="contacts_second_password_prompt">Để sử dụng dịch vụ này, chúng tôi yêu cầu bạn nhập mật khẩu cấp hai của mình. Bạn chỉ nên nhập mật khẩu này khi sử dụng chức năng Danh bạ.</string>
+    <string name="contacts_pending_transaction">Giao dịch đang Chờ duyệt</string>
+    <string name="contacts_transaction_history">Lịch sử Giao dịch</string>
+    <string name="contacts_request_money_receive">Gửi yêu cầu liên lạc</string>
+    <string name="contacts_no_confirmed_contacts_found">Không tìm thấy danh bạ đã xác nhận!</string>
+    <string name="contacts_decline_pending_transaction">Bạn có chắc muốn từ chối giao dịch đang chờ duyệt này?</string>
+    <string name="contacts_cancel_pending_transaction">Bạn có chắc muốn hủy giao dịch đang chờ duyệt này?</string>
+    <string name="contacts_pending_transaction_delete_success">Giao dịch đang chờ duyệt đã xóa thành công</string>
+    <string name="contacts_pending_transaction_delete_failure">Giao dịch đang chờ duyệt đã xóa thất bại</string>
+    <string name="contacts_pending_transaction_decline_success">Giao dịch đang chờ duyệt đã từ chối thành công</string>
+    <string name="contacts_pending_transaction_decline_failure">Giao dịch đang chờ duyệt đã từ chối thất bại</string>
+    <string name="contacts_pending_transaction_cancel_success">Giao dịch đang chờ duyệt đã hủy thành công</string>
+    <string name="contacts_pending_transaction_cancel_failure">Giao dịch đang chờ duyệt đã hủy thất bại</string>
+    <string name="contacts_sending_to_contact_waiting">Đang gửi %1$s đến %2$s\nĐang chờ %2$s chấp nhận</string>
+    <string name="contacts_payment_requested_ready_to_send">%1$s được yêu cầu bởi %2$s\nSẵn sàng để gửi</string>
+    <string name="contacts_requesting_from_contact_waiting_for_payment">Đã yêu cầu %1$s từ %2$s\nĐang chờ thanh toán</string>
+    <string name="contacts_receiving_from_contact_waiting_to_accept">Đang nhận %1$s từ %2$s\nĐang chờ bạn chấp nhận</string>
+    <string name="contacts_receiving_declined">Thanh toán bị từ chối</string>
+    <string name="contacts_receiving_cancelled">Thanh toán bị hủy</string>
+    <string name="contacts_send_complete">Đã gửi %1$s đến %2$s</string>
+    <string name="contacts_receive_complete">Đã nhận %1$s từ %2$s</string>
+    <string name="contacts_received">Đã nhận từ %1$s</string>
+    <string name="contacts_sent">Đã gửi đến %1$s</string>
+    <string name="onboarding_fingerprint_title">Đăng nhập bằng Vân tay</string>
+    <string name="onboarding_fingerprint_summary">Sử dụng đăng nhập bằng vân tay thay cho mã PIN của bạn để xác thực và truy cập ví của bạn.</string>
+    <string name="onboarding_fingerprint_enable">Kích hoạt vân tay</string>
+    <string name="onboarding_complete_later">Để sau</string>
+    <string name="onboarding_check_inbox_title">Kiểm tra Hộp thư đến</string>
+    <string name="onboarding_check_inbox_summary">Tìm kiếm email từ Blockchain và nhấn vào liên kết xác minh để hoàn tất quá trình thiết lập ví của bạn.</string>
+    <string name="onboarding_verify_email">Xác minh email</string>
+    <string name="onboarding_receive_bitcoin">Nhận Bitcoin</string>
+    <string name="onboarding_current_price">Giá Hiện tại:</string>
+    <string name="onboarding_qr_codes">Mã QR</string>
+    <string name="onboarding_scan_address">Quét Địa chỉ</string>
+    <string name="onboarding_buy_content">Chúng tôi làm việc với các đối tác giao dịch trên khắp thế giới, do đó bạn có thể mua bitcoin trực tiếp từ ví của mình.</string>
+    <string name="onboarding_receive_content">Gửi địa chỉ ví của bạn cho bạn bè để nhận bitcoin. Địa chỉ là một chuỗi các chữ cái và chữ số ngẫu nhiên thay đổi theo từng giao dịch.</string>
+    <string name="onboarding_qr_codes_content">Địa chỉ cũng có thể được hiển thị dưới dạng mã QR. Quét mã QR của bạn bè để nhanh chóng biết được địa chỉ ví của họ.</string>
+
+    <string name="onboarding_buy_bitcoin">Mua Bitcoin</string>
+    <string name="onboarding_get_bitcoin">Nhận Bitcoin</string>
+    <string name="onboarding_complete_title">Hiện giờ là như vậy!</string>
+    <string name="onboarding_complete_content">Chúng tôi sẽ cập nhật cho bạn tại đây với các đề xuất và tính năng mới.</string>
+    <string name="onboarding_start_over">Bắt đầu lại</string>
+    <string name="onboarding_skip_all">Bỏ qua Tất cả</string>
 </resources>

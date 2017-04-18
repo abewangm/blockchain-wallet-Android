@@ -103,7 +103,6 @@
 
     <string name="support">支持</string>
     <string name="rate_us">给我们打分</string>
-    <string name="about">Blockchain 钱包 %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">免费商家应用程序</string>
     <string name="password_or_wipe">使用密码进入或忘记此钱包</string>
     <string name="use_password">使用密码</string>
@@ -215,22 +214,18 @@
     <string name="confirm_password">确认密码</string>
     <string name="check_email_to_auth_login">请检查您的电子邮件以同意该登录尝试。</string>
     <string name="transaction_fee">交易费</string>
-    <string name="your_transactions">您的交易记录</string>
     <string name="transaction_occur_when">接收和发送比特币时会产生交易。</string>
     <string name="click">单击</string>
     <string name="to_start_sending_and_receiving_btc">开始发送和接收比特币。</string>
 
     <string name="watch_only_label">（只读）</string>
     <string name="address_book_label">(地址簿)</string>
-    <string name="archived_label">（已存档）</string>
 
     <string name="transaction_submitted">交易完成</string>
     <string name="transaction_failed">交易失败</string>
-    <string name="UPGRADE_YOUR_WALLET">好的，开始吧！</string>
     <string name="upgrade_page_1">简化备份和恢复。</string>
     <string name="upgrade_page_2">通过分层确定性地址增强保密性。</string>
     <string name="upgrade_page_3">自定义在 Blockchain 钱包中整理比特币的方式。</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">嘿，我们向您的 Blockchain 钱包添加了这些新功能：</string>
     <string name="upgrading">正在升级...</string>
     <string name="upgrading_started_info">您的钱包正在升级，所需的时间取决于钱包的大小和年龄，请耐心等待。</string>
     <string name="upgrade_success_heading">您的钱包已升级！</string>
@@ -252,7 +247,6 @@
     <string name="decrypting_wallet">正在解密钱包...</string>
     <string name="password_unchanged">密码未更改</string>
     <string name="password_changed">密码已更改</string>
-    <string name="verify_email2">您的已验证邮箱地址被用于在检测到可疑或者不正常活动时发送登录码、提醒您钱包登录ID，以及在您收到资金时发送比特币支付提供。</string>
     <string name="disable_root_warning">禁用已 Root 的设备警告</string>
 
     <string name="show_balance">显示余额</string>
@@ -407,7 +401,6 @@
     <string name="accept_higher_fee">接受更高的费用</string>
     <string name="large_tx_high_fee_warning">“该交易要求更高的费用用于因为返回少量变化而造成的微额量消费”。</string>
 
-    <string name="overview">交易</string>
     <string name="invalid_password_too_short">请输入3个以上的字符</string>
     <string name="change_pin_new_matches_current">您不能使用当前的 PIN 码作为您的新 PIN 码</string>
     <string name="account_locked_title">帐户已被锁定</string>
@@ -460,4 +453,75 @@
 
     <string name="survey_message">您想要填写一份简单的问卷调查以帮助改进您的钱包体验吗？\n\n我们非常重视您的反馈意见！</string>
     <string name="survey_positive_button">接受调查</string>
+
+    <string name="current_price_btc">1 BTC = %1$s</string>
+    <string name="overview">概览</string>
+    <string name="create_a_wallet">创建钱包</string>
+    <string name="log_in">登录</string>
+    <string name="about">Blockchain 钱包 %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
+    <string name="wallets">钱包</string>
+    <string name="your_transactions">无交易</string>
+    <string name="archived_label">已存档</string>
+    <string name="UPGRADE_YOUR_WALLET">好了，我们开始吧！</string>
+    <string name="confirm_upgrade_header">嘿，我们为您的 Blockchain wallet 添加了新功能：</string>
+    <string name="verify_email2">在检测到可疑或不寻常活动时，系统将使用您经过验证的电子邮件地址发送登录代码，为您提醒钱包登录 ID，以及在您接收资金时发送比特币支付提醒。</string>
+    <string name="enable_screenshots">启用截屏</string>
+    <string name="enable_screenshots_warning">您即将为 Blockchain 应用启用截屏功能。应用内的有些屏幕可能会显示敏感信息。其它应用将能够访问这些截图。</string>
+
+    <string name="information">信息</string>
+    <string name="transaction_detail_verify">在 Blockchain.info 上验证</string>
+    <string name="transaction_detail_share_chooser">分享交易信息</string>
+    <string name="transaction_detail_contact_note">注释</string>
+    <string name="security_centre_email_check">检查邮件</string>
+    <string name="contacts_payment_request_send_note">为什么您想要发送 %1$s 比特币？这是选项的，将与 %1$s 分享。</string>
+    <string name="contacts_payment_request_receive_note">为什么您想要 %1$s 向您发送比特币？这是选项的，将与 %1$s 分享。</string>
+    <string name="contacts_send_address_message">这会向您的联系人发送一个地址。继续？</string>
+    <string name="contacts_register_nodes_failure">我们无法将您与联系人服务相连接。请重试以启用完整功能。</string>
+    <string name="contacts_too_much_sent">似乎您发送的比特币多于所要求的。若希望，您可以向您的联系人请求退还一些。我们尚未将付款标记为完成。</string>
+    <string name="contacts_too_little_sent">似乎您发送的比特币少于所要求的。您的联系人仍然会接收您发出的比特币，但是，我们尚未将付款标记为完成。</string>
+    <string name="contacts_second_password_prompt">若要使用该服务，我们需要您输入您的第二个密码。您应只需要输入这个一次便可以使用联系人功能。</string>
+    <string name="contacts_pending_transaction">待定交易</string>
+    <string name="contacts_transaction_history">交易历史</string>
+    <string name="contacts_request_money_receive">向联系人发送请求</string>
+    <string name="contacts_no_confirmed_contacts_found">未找到已确认联系人！</string>
+    <string name="contacts_decline_pending_transaction">您确定要拒绝这项待定交易吗？</string>
+    <string name="contacts_cancel_pending_transaction">您确定要取消这项待定交易吗？</string>
+    <string name="contacts_pending_transaction_delete_success">已成功删除待定交易</string>
+    <string name="contacts_pending_transaction_delete_failure">删除待定交易失败</string>
+    <string name="contacts_pending_transaction_decline_success">成功拒绝了待定交易</string>
+    <string name="contacts_pending_transaction_decline_failure">拒绝待定交易失败</string>
+    <string name="contacts_pending_transaction_cancel_success">已成功取消待定交易</string>
+    <string name="contacts_pending_transaction_cancel_failure">取消待定交易失败</string>
+    <string name="contacts_sending_to_contact_waiting">正在向 %2$s 发送 %1$s\n正在等待%2$s 接受</string>
+    <string name="contacts_payment_requested_ready_to_send">%2$s 请求的 %1$s\n 准备发送</string>
+    <string name="contacts_requesting_from_contact_waiting_for_payment">向 %2$s 请求了 %1$s\n 正在等待付款</string>
+    <string name="contacts_receiving_from_contact_waiting_to_accept">正在从 %2$s 接收 %1$s\n 正在等待您接受</string>
+    <string name="contacts_receiving_declined">付款被拒绝</string>
+    <string name="contacts_receiving_cancelled">付款被取消</string>
+    <string name="contacts_send_complete">已向 %2$s 发送 %1$s</string>
+    <string name="contacts_receive_complete">从 %2$s 接收了 %1$s</string>
+    <string name="contacts_received">从 %1$s 接收了</string>
+    <string name="contacts_sent">已发送给 %1$s</string>
+    <string name="onboarding_fingerprint_title">指纹登录</string>
+    <string name="onboarding_fingerprint_summary">使用指纹登录而不是 PIN 码来验证和访问您的钱包。</string>
+    <string name="onboarding_fingerprint_enable">启用指纹</string>
+    <string name="onboarding_complete_later">以后再说</string>
+    <string name="onboarding_check_inbox_title">检查您的收件箱</string>
+    <string name="onboarding_check_inbox_summary">寻找一封来自 Blockchain 的邮件，而后点击验证链接以完成您的钱包设置。</string>
+    <string name="onboarding_verify_email">验证邮件</string>
+    <string name="onboarding_receive_bitcoin">接收比特币</string>
+    <string name="onboarding_current_price">当前价格：</string>
+    <string name="onboarding_qr_codes">二维码</string>
+    <string name="onboarding_scan_address">扫描地址</string>
+    <string name="onboarding_buy_content">我们与世界各地的兑换合作伙伴合作，您可以从您的钱包直接购买比特币。</string>
+    <string name="onboarding_receive_content">向朋友发送您的钱包地址请求比特币。地址是一串随机字母和数字组成的字符串，每次交易都会变化。</string>
+    <string name="onboarding_qr_codes_content">地址也可以显示为二维码。扫描朋友的二维码快速获取他们的钱包地址。</string>
+
+    <string name="onboarding_buy_bitcoin">购买比特币</string>
+    <string name="onboarding_get_bitcoin">获取比特币</string>
+    <string name="onboarding_complete_title">目前就是这样！</string>
+    <string name="onboarding_complete_content">我们会在这里向您提供最新建议和功能。</string>
+    <string name="onboarding_start_over">重新开始。</string>
+    <string name="onboarding_skip_all">全部跳过。</string>
+
 </resources>

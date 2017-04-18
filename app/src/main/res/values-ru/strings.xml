@@ -103,7 +103,6 @@
 
     <string name="support">Поддержка</string>
     <string name="rate_us">Оцените нас</string>
-    <string name="about">Blockchain Кошелек %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Приложение Free Merchant</string>
     <string name="password_or_wipe">Войдите, используя свой пароль или удалите этот кошелек</string>
     <string name="use_password">Использовать пароль</string>
@@ -215,22 +214,18 @@
     <string name="confirm_password">Подтвердить пароль</string>
     <string name="check_email_to_auth_login">Проверьте свою электронную почту, чтобы одобрить эту попытку входа.</string>
     <string name="transaction_fee">Комиссия транзакции</string>
-    <string name="your_transactions">Ваши транзакции</string>
     <string name="transaction_occur_when">Транзакции осуществляются, когда вы получаете и отправляете bitcoin.</string>
     <string name="click">Нажмите</string>
     <string name="to_start_sending_and_receiving_btc">для начала отправки и получения bitcoin.</string>
 
     <string name="watch_only_label">(только для просмотра)</string>
     <string name="address_book_label">(адресная книга)</string>
-    <string name="archived_label">(архивировано)</string>
 
     <string name="transaction_submitted">Транзакция выполнена</string>
     <string name="transaction_failed">Сбой транзакции</string>
-    <string name="UPGRADE_YOUR_WALLET">Ок, приступим!</string>
     <string name="upgrade_page_1">Упрошенное создание резервной копии и восстановление.</string>
     <string name="upgrade_page_2">Усиленная конфиденциальность достигается путем использования иерархических детерминированных адресов.</string>
     <string name="upgrade_page_3">Настройте структуру хранения биткоинов в кошельке Blockchain</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Заметьте, мы добавили в кошелек Blockchain вот такие новые функции:</string>
     <string name="upgrading">Идет обновление...</string>
     <string name="upgrading_started_info">Ваш кошелек обновляется, будьте терпеливы, это может занять некоторое время в зависимости от размера и продолжительности действия вашего кошелька.</string>
     <string name="upgrade_success_heading">Ваш кошелек был обновлен!</string>
@@ -252,7 +247,6 @@
     <string name="decrypting_wallet">Идет расшифровка кошелька...</string>
     <string name="password_unchanged">Пароль не изменен</string>
     <string name="password_changed">Пароль изменен</string>
-    <string name="verify_email2">Ваш подтвержденный электронный адрес используется для отправки кодов входа в систему, при подозрительной или необычной активности, для напоминания ID для доступа к кошельку и отправления сообщений о поступлении средств на счет.</string>
     <string name="disable_root_warning">Отключить предупреждение корневого устройства</string>
 
     <string name="show_balance">Показать баланс</string>
@@ -407,7 +401,6 @@
     <string name="accept_higher_fee">Принять более высокую комиссию</string>
     <string name="large_tx_high_fee_warning">"Эта транзакция требует более высокой комиссии за поглощение незначительных сумм в связи с малым количеством выдаваемой сдачи."</string>
 
-    <string name="overview">Транзакции</string>
     <string name="invalid_password_too_short">Нужно ввести более 3 символов</string>
     <string name="change_pin_new_matches_current">Нельзя использовать текущий PIN как новый PIN</string>
     <string name="account_locked_title">Аккаунт заблокирован</string>
@@ -460,4 +453,74 @@
 
     <string name="survey_message">Не могли бы вы принять участие в небольшом опросе, чтобы помочь нам улучшить ваш опыт взаимодействия с кошельком?\n\nМы ценим ваше мнение!</string>
     <string name="survey_positive_button">Принять участие в опросе</string>
+
+    <string name="current_price_btc">1 BTC = %1$s</string>
+    <string name="overview">Обзор</string>
+    <string name="create_a_wallet">Создать кошелек</string>
+    <string name="log_in">Вход</string>
+    <string name="about">Кошелек Blockchain %1$s\n©%2$s Blockchain Люксембург S.A.</string>
+    <string name="wallets">Кошельки</string>
+    <string name="your_transactions">Нет транзакций</string>
+    <string name="archived_label">Архивировано</string>
+    <string name="UPGRADE_YOUR_WALLET">OK, поехали!</string>
+    <string name="confirm_upgrade_header">Смотрите, мы добавили эти новые функции вашему кошельку Blockchain:</string>
+    <string name="verify_email2">Ваш подтвержденный электронный адрес используется для отправки кодов входа в систему, при подозрительной или необычной активности, для напоминания ID для доступа к кошельку и отправления сообщений о поступлении средств на счет.</string>
+    <string name="enable_screenshots">Разрешить скриншоты</string>
+    <string name="enable_screenshots_warning">Вы собираетесь разрешить скриншоты в приложении Blockchain. Некоторые снимки экрана в приложении могут отображать конфиденциальную информацию. Другие приложения могут получить доступ к этим скриншотам.</string>
+
+    <string name="information">Информация</string>
+    <string name="transaction_detail_verify">Верифицировать на Blockchain.info</string>
+    <string name="transaction_detail_share_chooser">Поделиться данными сделки</string>
+    <string name="transaction_detail_contact_note">Примечание</string>
+    <string name="security_centre_email_check">Проверьте почту</string>
+    <string name="contacts_payment_request_send_note">Почему вы хотели бы отправить %1$s биткоинов? Это не обязательно и будет продублировано в %1$s.</string>
+    <string name="contacts_payment_request_receive_note">Почему вы хотите, чтобы %1$s прислал(а) вам биткоины? Это не обязательно и будет продублировано в %1$s.</string>
+    <string name="contacts_send_address_message">Это приведет к отправке адреса вашему контакту. Продолжить?</string>
+    <string name="contacts_register_nodes_failure">Нам не удалось подключить вас к сервису контактов. Повторите попытку, чтобы обеспечить полную функциональность.</string>
+    <string name="contacts_too_much_sent">Судя по всему, вы отправили больше биткоинов, чем требовалось. Если хотите, вы можете попросить контакт вернуть вам какую-то сумму.  Мы не отметили платеж как исполненный.</string>
+    <string name="contacts_too_little_sent">Судя по всему, вы отправили меньше биткоинов, чем требовалось. Ваш контакт все равно получит отправленные вами биткоины, но мы не пометили платеж как исполненный.</string>
+    <string name="contacts_second_password_prompt">Мы требуем ввода второго пароля, чтобы пользоваться этой услугой. Для использования функционала Контактов вам нужно будет ввести эти данные только один раз.</string>
+    <string name="contacts_pending_transaction">Ожидающие транзакции</string>
+    <string name="contacts_transaction_history">История транзакций</string>
+    <string name="contacts_request_money_receive">Отправить запрос контакту</string>
+    <string name="contacts_no_confirmed_contacts_found">Подтвержденных контактов не найдено!</string>
+    <string name="contacts_decline_pending_transaction">Вы уверены, что хотите отклонить эту ожидающую транзакцию?</string>
+    <string name="contacts_cancel_pending_transaction">Вы уверены, что хотите отменить эту ожидающую транзакцию?</string>
+    <string name="contacts_pending_transaction_delete_success">Ожидающая транзакция удалена</string>
+    <string name="contacts_pending_transaction_delete_failure">Удалить ожидающую транзакцию не удалось</string>
+    <string name="contacts_pending_transaction_decline_success">Ожидающая транзакция отклонена</string>
+    <string name="contacts_pending_transaction_decline_failure">Отклонить ожидающую транзакцию не удалось</string>
+    <string name="contacts_pending_transaction_cancel_success">Ожидающая транзакция отменена</string>
+    <string name="contacts_pending_transaction_cancel_failure">Отменить ожидающую транзакцию не удалось</string>
+    <string name="contacts_sending_to_contact_waiting">Отправка %1$s получателю %2$s\nожидание приема от %2$s</string>
+    <string name="contacts_payment_requested_ready_to_send">%1$s, запрошенный %2$s\nГотово к отправке</string>
+    <string name="contacts_requesting_from_contact_waiting_for_payment">Запрошенный %1$s от %2$s\nОжидает платежа</string>
+    <string name="contacts_receiving_from_contact_waiting_to_accept">Получение %1$s от %2$s\nОжидает приема от вас</string>
+    <string name="contacts_receiving_declined">Платеж отклонен</string>
+    <string name="contacts_receiving_cancelled">Платеж отменен</string>
+    <string name="contacts_send_complete">Отправлено %1$s получателю %2$s</string>
+    <string name="contacts_receive_complete">Получено %1$s от %2$s</string>
+    <string name="contacts_received">Получено от %1$s</string>
+    <string name="contacts_sent">Отправлено %1$s</string>
+    <string name="onboarding_fingerprint_title">Вход по отпечатку пальца</string>
+    <string name="onboarding_fingerprint_summary">Для аутентификации и доступа к кошельку используйте вход по отпечатку пальца вместо PIN-кода.</string>
+    <string name="onboarding_fingerprint_enable">Включить вход по отпечатку пальца</string>
+    <string name="onboarding_complete_later">В другой раз</string>
+    <string name="onboarding_check_inbox_title"> Проверьте почту</string>
+    <string name="onboarding_check_inbox_summary">Чтобы завершить установку кошелька, найдите письмо от Blockchain и нажмите на ссылку верификации.</string>
+    <string name="onboarding_verify_email">Верифицировать email</string>
+    <string name="onboarding_receive_bitcoin">Получить биткоины</string>
+    <string name="onboarding_current_price">Текущая цена:</string>
+    <string name="onboarding_qr_codes">QR-коды</string>
+    <string name="onboarding_scan_address">Сканировать адрес</string>
+    <string name="onboarding_buy_content">Мы работаем с партнерами по обмену со всего мира, поэтому вы можете покупать биткоины прямо из своего кошелька.</string>
+    <string name="onboarding_receive_content">Чтобы запросить биткоины, отправьте другу адрес своего кошелька.  Адрес - это цепочка произвольных букв и цифр, которые меняются с каждой сделкой.</string>
+    <string name="onboarding_qr_codes_content">Адрес также может быть показан как Q-код. Сканируйте QR-код друга для быстрого считывания адреса его кошелька.</string>
+
+    <string name="onboarding_buy_bitcoin">Купить Bitcoin</string>
+    <string name="onboarding_get_bitcoin">Получить Bitcoin</string>
+    <string name="onboarding_complete_title">Ну и все пока!</string>
+    <string name="onboarding_complete_content">Мы будем держать вас в курсе: расскажем обо всех новых особенностях и поделимся рекомендациями.</string>
+    <string name="onboarding_start_over">Начать заново</string>
+    <string name="onboarding_skip_all">Пропустить все</string>
 </resources>

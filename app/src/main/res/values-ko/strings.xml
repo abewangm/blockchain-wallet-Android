@@ -103,7 +103,6 @@
 
     <string name="support">지원</string>
     <string name="rate_us">우리에 대한 평가</string>
-    <string name="about">블록체인 지갑 %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">무료 상인(Merchant) 앱</string>
     <string name="password_or_wipe">귀하 암호로 들어가거나 이 지갑은 잊어버리세요</string>
     <string name="use_password">암호 사용</string>
@@ -212,22 +211,18 @@
     <string name="confirm_password">암호 확인</string>
     <string name="check_email_to_auth_login">이 로그인 시도를 승인 받으려면 이메일을 확인하세요</string>
     <string name="transaction_fee">거래 수수료</string>
-    <string name="your_transactions">귀하의 거래</string>
     <string name="transaction_occur_when">비트코인을 받거나 보낼 때 거래가 생깁니다.</string>
     <string name="click">클릭</string>
     <string name="to_start_sending_and_receiving_btc">비트코인 보내기와 받기를 시작하려면</string>
 
     <string name="watch_only_label">(볼 수만 있음, watch-only)</string>
     <string name="address_book_label">(주소록)</string>
-    <string name="archived_label">(보관 됨)</string>
 
     <string name="transaction_submitted">거래 완료</string>
     <string name="transaction_failed">거래 실패</string>
-    <string name="UPGRADE_YOUR_WALLET">좋아요, 갑시다!</string>
     <string name="upgrade_page_1">단순화 백업 및 복구</string>
     <string name="upgrade_page_2">계층적 결정론적 주소를 통한 고급 개인 정보 보호</string>
     <string name="upgrade_page_3">귀하 블록체인 지갑 안 비트코인을 정리를 방법 사용자 설정</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">귀하 블록체인 지갑에 새로운 기능을 추가했습니다:</string>
     <string name="upgrading">업그레이드 중...</string>
     <string name="upgrading_started_info">지갑 업그레이드 중입니다. 지갑 크기나 이력에 따라 시간이 좀 걸리니 기다려 주세요.</string>
     <string name="upgrade_success_heading">지갑 업그레이드가 끝났습니다!</string>
@@ -249,7 +244,6 @@
     <string name="decrypting_wallet">지갑 해독 중...</string>
     <string name="password_unchanged">암호 안 바뀜</string>
     <string name="password_changed">암호 바뀜</string>
-    <string name="verify_email2">귀하의 확인된 이메일 주소는 의심스럽거나 비정상적인 활동이 탐지 되어 로그인 코드를 보낼 때, 지갑 로그인 아이디를 다시 알려줄 때, 자금을 받은 후 비트코인 지불을 하라고 알려줄 때 쓰입니다.</string>
     <string name="disable_root_warning">루팅 된 장치 경보 해제</string>
 
     <string name="show_balance">잔액 보여주기</string>
@@ -401,7 +395,6 @@
     <string name="accept_higher_fee">높은 수수료 승인</string>
     <string name="large_tx_high_fee_warning">"이 거래는 작은 거스름 돈 반환으로 인한 아주 작은 금액 (dust amount) 소비를 위해 높은 수수료가 필요합니다."</string>
 
-    <string name="overview">거래</string>
     <string name="invalid_password_too_short">3 자 이상 입력하세요</string>
     <string name="change_pin_new_matches_current">현재 비밀 번호는 새 비밀 번호로 쓸 수 없음</string>
     <string name="account_locked_title">계정 잠김</string>
@@ -453,4 +446,74 @@
 
     <string name="survey_message">지갑 사용 체험 개선을 위한 짧은 설문에 응해 주시겠습니까?\n\n피드백 감사합니다!</string>
     <string name="survey_positive_button">설문 조사 응하기</string>
+
+    <string name="current_price_btc">1 BTC = %1$s</string>
+    <string name="overview">개요</string>
+    <string name="create_a_wallet">지갑 만들기</string>
+    <string name="log_in">로그인</string>
+    <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
+    <string name="wallets">지갑들</string>
+    <string name="your_transactions">거래 없음</string>
+    <string name="archived_label">보관됨</string>
+    <string name="UPGRADE_YOUR_WALLET">좋아요, 갑시다!</string>
+    <string name="confirm_upgrade_header">귀하 Blockchain 지갑에 다음 새 기능들을 추가했습니다:</string>
+    <string name="verify_email2">확인된 사용자 이메일 주소는 의심스러운 또는 비정상 활동이 탐지 되어 로그인 코드를 보낼 때, 지갑 로그인 아이디를 다시 알려줄 때, 비트코인 입금 알림을 보낼 때 사용됩니다.</string>
+    <string name="enable_screenshots">스크린샷 사용 설정</string>
+    <string name="enable_screenshots_warning">귀하는 Blockchain 앱 스크린샷 사용 설정을 하고 있습니다. 앱 내 어떤 화면은 예민한 데이터를 디스플레이 할 수 있습니다. 다른 앱이 이 스크린샷에 접근할 수 있습니다.</string>
+
+    <string name="information">정보</string>
+    <string name="transaction_detail_verify">Blockchain.info에서 확인하기</string>
+    <string name="transaction_detail_share_chooser">거래 상세 내용 공유</string>
+    <string name="transaction_detail_contact_note">설명</string>
+    <string name="security_centre_email_check">이메일 확인</string>
+    <string name="contacts_payment_request_send_note">귀하는 왜 %1$s 비트코인을 보내려고 합니까? 이것은 옵션이며 %1$s와 공유될 것입니다.</string>
+    <string name="contacts_payment_request_receive_note">왜 귀하는 %1$s가 귀하에게 비트코인 보내기를 원합니까? 이것은 옵션이며 %1$s와 공유될 것입니다.</string>
+    <string name="contacts_send_address_message">이렇게 하면 귀하 연락처에 주소가 보내집니다. 계속할까요?</string>
+    <string name="contacts_register_nodes_failure">연락처 서비스에 연결할 수 없었습니다. 모든 기능 사용 설정이 되도록 다시 해 보세요.</string>
+    <string name="contacts_too_much_sent">요청 받은 것보다 더 많은 비트코인을 보낸 것 같습니다. 원하면 귀하 연락처에게 일부 되돌려 달라고 할 수 있습니다. 우리는 지불이 완료된 것으로 표시하지 않았습니다.</string>
+    <string name="contacts_too_little_sent">요청 받은 것보다 적은 비트코인을 보낸 것 같습니다. 귀하 연락처는 귀하가 보낸 비트코인을 그래도 받겠지만 우리는 지불이 완료된 것으로 표시하지 않았습니다.</string>
+    <string name="contacts_second_password_prompt">이 서비스를 쓰려면 귀하의 두 번째 암호를 입력해야 합니다. 연락처 기능 사용을 위한 입력은 한번만 하면 됩니다.</string>
+    <string name="contacts_pending_transaction">보류 거래들</string>
+    <string name="contacts_transaction_history">거래 이력</string>
+    <string name="contacts_request_money_receive">연락처에 요청 보내기</string>
+    <string name="contacts_no_confirmed_contacts_found">확인된 연락처 없음!</string>
+    <string name="contacts_decline_pending_transaction">이 보류 거래 거절을 원하는 게 확실합니까?</string>
+    <string name="contacts_cancel_pending_transaction">이 보류 거래 취소를 원하는 게 확실합니까?</string>
+    <string name="contacts_pending_transaction_delete_success">보류 거래 삭제 성공</string>
+    <string name="contacts_pending_transaction_delete_failure">보류 거래 삭제 실패</string>
+    <string name="contacts_pending_transaction_decline_success">보류 거래 거절 성공</string>
+    <string name="contacts_pending_transaction_decline_failure">보류 거래 거절 실패</string>
+    <string name="contacts_pending_transaction_cancel_success">보류 거래 취소 성공</string>
+    <string name="contacts_pending_transaction_cancel_failure">보류 거래 취소 실패</string>
+    <string name="contacts_sending_to_contact_waiting">%2$s에게 %1$s를 보내는 중\n%2$s 수령 대기 중</string>
+    <string name="contacts_payment_requested_ready_to_send">%2$s가 %1$s를 요청\n보낼 준비 됨</string>
+    <string name="contacts_requesting_from_contact_waiting_for_payment">%2$s로부터 %1$s를 요청함\n지불 대기 중</string>
+    <string name="contacts_receiving_from_contact_waiting_to_accept">%2$s로부터 %1$s를 받는 중\n귀하가 수령하기를 대기 중</string>
+    <string name="contacts_receiving_declined">지불 거절됨</string>
+    <string name="contacts_receiving_cancelled">지불 취소됨</string>
+    <string name="contacts_send_complete">%2$s에게 %1$s를 보냄</string>
+    <string name="contacts_receive_complete">%2$s로부터 %1$s를 받음</string>
+    <string name="contacts_received">%1$s로부터 받음</string>
+    <string name="contacts_sent">%1$s에게 보냄</string>
+    <string name="onboarding_fingerprint_title">지문 로그인</string>
+    <string name="onboarding_fingerprint_summary">인증과 지갑 접근에 비밀번호 대신 지문 로그인을 쓰세요</string>
+    <string name="onboarding_fingerprint_enable">지문 사용 설정</string>
+    <string name="onboarding_complete_later">나중에 할게요</string>
+    <string name="onboarding_check_inbox_title">받은 편지함 확인</string>
+    <string name="onboarding_check_inbox_summary">지갑 설정을 끝내기 위해 Blockchain에서 온 메일을 찾아 확인 링크를 클릭</string>
+    <string name="onboarding_verify_email">이메일 확인</string>
+    <string name="onboarding_receive_bitcoin">비트코인 받기</string>
+    <string name="onboarding_current_price">현 가격:</string>
+    <string name="onboarding_qr_codes">QR 코드</string>
+    <string name="onboarding_scan_address">스캔 주소</string>
+    <string name="onboarding_buy_content">우리는 전 세계 환전 파트너들과 일하고 있으므로 귀하는 직접 지갑에서 비트코인을 살 수 있습니다.</string>
+    <string name="onboarding_receive_content">지갑 주소를 친구에게 보내 비트코인을 요청하세요 주소는 임의 문자와 숫자 조합으로 매 거래마다 바뀝니다.</string>
+    <string name="onboarding_qr_codes_content">주소를 QR code로 표시할 수도 있습니다. 친구 QR code를 스캔 해서 친구 지갑 주소를 빨리 캡쳐 하세요.</string>
+
+    <string name="onboarding_buy_bitcoin">비트코인 사기</string>
+    <string name="onboarding_get_bitcoin">비트코인 받기</string>
+    <string name="onboarding_complete_title">오늘은 여기까지!</string>
+    <string name="onboarding_complete_content">새 기능이나 추천 사항이 있으면 업데이트 해 드리겠습니다.</string>
+    <string name="onboarding_start_over">다시 시작하기</string>
+    <string name="onboarding_skip_all">모두 건너뛰기</string>
 </resources>

@@ -103,7 +103,6 @@
 
     <string name="support">Suporte</string>
     <string name="rate_us">Avalie-nos</string>
-    <string name="about">Carteira Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Merchant App gratuito</string>
     <string name="password_or_wipe">Entre utilizando sua senha ou descarte esta carteira.</string>
     <string name="use_password">Usar senha</string>
@@ -215,22 +214,18 @@
     <string name="confirm_password">Confirmar senha</string>
     <string name="check_email_to_auth_login">Verifique seu e-mail para aprovar esta tentativa de acesso.</string>
     <string name="transaction_fee">Taxa de Transação</string>
-    <string name="your_transactions">Suas transações</string>
     <string name="transaction_occur_when">As transações ocorrem quando você recebe e envia bitcoins.</string>
     <string name="click">Clique</string>
     <string name="to_start_sending_and_receiving_btc">para iniciar o envio e o recebimento de bitcoins.</string>
 
     <string name="watch_only_label">(watch-only)</string>
     <string name="address_book_label">(catálogo de endereços)</string>
-    <string name="archived_label">(arquivado)</string>
 
     <string name="transaction_submitted">Transação concluída</string>
     <string name="transaction_failed">Erro na transação</string>
-    <string name="UPGRADE_YOUR_WALLET">Certo, vamos lá!</string>
     <string name="upgrade_page_1">Backup e recuperação simplificados.</string>
     <string name="upgrade_page_2">Privacidade aprimorada através de endereços determinísticos hierárquicos.</string>
     <string name="upgrade_page_3">Personalize a organização dos bitcoins em sua Carteira Blockchain.</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Olha só, adicionamos estes novos recursos à sua Carteira Blockchain:</string>
     <string name="upgrading">Atualizando...</string>
     <string name="upgrading_started_info">Sua carteira está sendo atualizada, aguarde um momento. Isto pode levar alguns minutos, dependendo do tamanho e tempo de existência de sua carteira.</string>
     <string name="upgrade_success_heading">Sua carteira foi atualizada!</string>
@@ -252,7 +247,6 @@
     <string name="decrypting_wallet">Decodificando Carteira...</string>
     <string name="password_unchanged">Senha não alterada</string>
     <string name="password_changed">Senha alterada</string>
-    <string name="verify_email2">Seu endereço de e-mail verificado recebe códigos de login, quando atividade suspeita ou incomum for detectada. Também é usado para lembrar-lhe de seu ID de Carteira e enviar-lhe alertas de pagamento Bitcoin quando você receber fundos.</string>
     <string name="disable_root_warning">Desativar o aviso de dispositivos com root</string>
 
     <string name="show_balance">Exibir Saldo</string>
@@ -407,7 +401,6 @@
     <string name="accept_higher_fee">Aceitar taxa mais alta</string>
     <string name="large_tx_high_fee_warning">"Esta transação requer uma taxa mais alta para gasto residual devido ao baixo valor de troco a ser devolvido."</string>
 
-    <string name="overview">Transações</string>
     <string name="invalid_password_too_short">Favor inserir mais de 3 caracteres</string>
     <string name="change_pin_new_matches_current">Você não pode usar seu PIN atual como seu novo PIN</string>
     <string name="account_locked_title">Conta bloqueada</string>
@@ -460,4 +453,74 @@
 
     <string name="survey_message">Gostaria de preencher esta pequena pesquisa para ajudar a melhorar a experiência com a sua carteira?\n\nValorizamos a sua opinião!</string>
     <string name="survey_positive_button">Responder à pesquisa</string>
+
+    <string name="current_price_btc">1 BTC = %1$s</string>
+    <string name="overview">Resumo</string>
+    <string name="create_a_wallet">Criar uma carteira</string>
+    <string name="log_in">Entrar</string>
+    <string name="about">Carteira Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
+    <string name="wallets">Carteiras</string>
+    <string name="your_transactions">Nenhuma Transação</string>
+    <string name="archived_label">Arquivado</string>
+    <string name="UPGRADE_YOUR_WALLET">Tudo bem, vamos!</string>
+    <string name="confirm_upgrade_header">Ei, adicionamos esses recursos para sua carteira Blockchain:</string>
+    <string name="verify_email2">Seu endereço de e-mail verificado recebe códigos de login, quando atividade suspeita ou incomum for detectada. Também é usado para lembrar-lhe de seu ID de Carteira e enviar-lhe alertas de pagamento Bitcoin quando você receber fundos.</string>
+    <string name="enable_screenshots">Habilitar capturas de tela</string>
+    <string name="enable_screenshots_warning">Você está para habilitar a captura de tela para o aplicativo Blockchain. Algumas telas dentro do aplicativo podem exibir dados sigilosos. Outros aplicativos poderão acessar essas capturas de tela.</string>
+
+    <string name="information">Informações</string>
+    <string name="transaction_detail_verify">Verificar no Blockchain.info</string>
+    <string name="transaction_detail_share_chooser">Compartilhar detalhes de transação</string>
+    <string name="transaction_detail_contact_note">Nota</string>
+    <string name="security_centre_email_check">Verificar e-mail</string>
+    <string name="contacts_payment_request_send_note">Por qual razão você gostaria de enviar %1$s bitcoin? Isso é opcional e será compartilhado com %1$s.</string>
+    <string name="contacts_payment_request_receive_note">Por qual razão você gostaria que %1$s enviasse bitcoin para você? Isso é opcional e será compartilhado com %1$s.</string>
+    <string name="contacts_send_address_message">Isso enviará um endereço para seu contato. Prosseguir?</string>
+    <string name="contacts_register_nodes_failure">Impossível conectar você com o serviço de contatos. Por favor, tente habilitar novamente as funcionalidades completas.</string>
+    <string name="contacts_too_much_sent">Parece que você enviou mais bitcoin do que foi pedido. Você pode requisitar um pouco de volta por parte de seu contato caso deseje. Não marcamos o pagamento como concluído.</string>
+    <string name="contacts_too_little_sent">Parece que você enviou menos bitcoin do que foi requisitado. Seu contato ainda receberá os bitcoin que você enviou, mas não marcamos o pagamento como concluído.</string>
+    <string name="contacts_second_password_prompt">Para utilizar esse serviço, requeremos que você insira sua segunda senha. Você deve precisar inserir isso apenas uma vez para utilizar a funcionalidade de Contatos.</string>
+    <string name="contacts_pending_transaction">Transações pendentes</string>
+    <string name="contacts_transaction_history">Histórico de transações</string>
+    <string name="contacts_request_money_receive">Enviar pedido para contato</string>
+    <string name="contacts_no_confirmed_contacts_found">Nenhum contato confirmado foi encontrado!</string>
+    <string name="contacts_decline_pending_transaction">Tem certeza de que deseja negar essa transação pendente?</string>
+    <string name="contacts_cancel_pending_transaction">Tem certeza de que deseja cancelar essa transação pendente?</string>
+    <string name="contacts_pending_transaction_delete_success">Transação pendente excluída com sucesso</string>
+    <string name="contacts_pending_transaction_delete_failure">Falha na exclusão de transação pendente</string>
+    <string name="contacts_pending_transaction_decline_success">Transação pendente negada com sucesso</string>
+    <string name="contacts_pending_transaction_decline_failure">Falha na negação de transação pendente</string>
+    <string name="contacts_pending_transaction_cancel_success">Transação pendente cancelada com sucesso</string>
+    <string name="contacts_pending_transaction_cancel_failure">Falha no cancelamento de transação pendente</string>
+    <string name="contacts_sending_to_contact_waiting">Enviando %1$s para %2$s\nAguardando %2$s aceitar</string>
+    <string name="contacts_payment_requested_ready_to_send">%1$s requisitado por %2$s\nPronto para enviar</string>
+    <string name="contacts_requesting_from_contact_waiting_for_payment">Requisitou %1$s de %2$s\nAguardando pagamento</string>
+    <string name="contacts_receiving_from_contact_waiting_to_accept">Recebendo %1$s de %2$s\nAguardando sua aceitação</string>
+    <string name="contacts_receiving_declined">Pagamento negado</string>
+    <string name="contacts_receiving_cancelled">Pagamento cancelado</string>
+    <string name="contacts_send_complete">Enviou %1$s para %2$s</string>
+    <string name="contacts_receive_complete">Recebeu %1$s de %2$s</string>
+    <string name="contacts_received">Recebido de %1$s</string>
+    <string name="contacts_sent">Enviado para %1$s</string>
+    <string name="onboarding_fingerprint_title">Login por biometria</string>
+    <string name="onboarding_fingerprint_summary">Utilize o login por biometria em vez de seu PIN para autenticar e acessar sua carteira.</string>
+    <string name="onboarding_fingerprint_enable">Habilitar biometria</string>
+    <string name="onboarding_complete_later">Farei isso mais tarde</string>
+    <string name="onboarding_check_inbox_title">Verifique sua caixa de entrada</string>
+    <string name="onboarding_check_inbox_summary">Procure por um e-mail da Blockchain e clique no endereço de verificação para concluir a configuração de sua carteira.</string>
+    <string name="onboarding_verify_email">Verificar e-mail</string>
+    <string name="onboarding_receive_bitcoin">Receber Bitcoin</string>
+    <string name="onboarding_current_price">Preço atual:</string>
+    <string name="onboarding_qr_codes">Códigos QR </string>
+    <string name="onboarding_scan_address">Fazer varredura de endereço</string>
+    <string name="onboarding_buy_content">Trabalhamos com parceiros de troca em todo o mundo, então você pode comprar diretamente de sua carteira.</string>
+    <string name="onboarding_receive_content">Envie o endereço de sua carteira para um amigo para requisitar bitcoin. Um endereço é um conjunto de letras e números aleatórios que mudam para cara transação.</string>
+    <string name="onboarding_qr_codes_content">Um endereço também pode ser exibido como um código QR. Faça a varredura do código QR de um amigo para capturar rapidamente o endereço da carteira dele.</string>
+
+    <string name="onboarding_buy_bitcoin">Comprar bitcoins</string>
+    <string name="onboarding_get_bitcoin">Obter Bitcoin</string>
+    <string name="onboarding_complete_title">Isso é tudo!</string>
+    <string name="onboarding_complete_content">Manteremos você atualizado com recomendações e novos recursos.</string>
+    <string name="onboarding_start_over">Iniciar novamente</string>
+    <string name="onboarding_skip_all">Pular todos</string>
 </resources>

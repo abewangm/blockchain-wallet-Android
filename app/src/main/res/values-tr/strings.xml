@@ -103,7 +103,6 @@
 
     <string name="support">Destek</string>
     <string name="rate_us">Bize puan verin</string>
-    <string name="about">Blockchain Cüzdanı %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Ücretsiz Tacir yatırımı</string>
     <string name="password_or_wipe">Şifrenizi kullanarak giriş yapın veya bu cüzdanı unutun</string>
     <string name="use_password">Şifre kullan</string>
@@ -215,22 +214,18 @@
     <string name="confirm_password">Şifreyi Onayla</string>
     <string name="check_email_to_auth_login">Bu oturum açma denemesini onaylamak için lütfen e-postanızı kontrol edin.</string>
     <string name="transaction_fee">İşlem Ücreti</string>
-    <string name="your_transactions">İşlemleriniz</string>
     <string name="transaction_occur_when">İşlemler, bitcoin aldığınızda ve gönderdiğinizde oluşur.</string>
     <string name="click">Tıklayarak</string>
     <string name="to_start_sending_and_receiving_btc">bitcoin göndermeye ve almaya başlayın.</string>
 
     <string name="watch_only_label">(yalnızca izlenebilir)</string>
     <string name="address_book_label">(adres defteri)</string>
-    <string name="archived_label">(arşivlenen)</string>
 
     <string name="transaction_submitted">İşlem tamamlandı</string>
     <string name="transaction_failed">İşlem başarısız</string>
-    <string name="UPGRADE_YOUR_WALLET">Tamam, hadi devam edelim!</string>
     <string name="upgrade_page_1">Basitleştirilmiş yedekleme ve kurtarma</string>
     <string name="upgrade_page_2">Sıra düzenli belirleyici adresler üzerinden geliştirilmiş gizlilik.</string>
     <string name="upgrade_page_3">Blockchain Cüzdanınızdaki Bitcoinlerinizi düzenleme biçiminizi özelleştirin.</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Selam, Blockchain cüzdanınıza bu yeni özellikleri ekledik:</string>
     <string name="upgrading">Yükseltiliyor...</string>
     <string name="upgrading_started_info">Cüzdanınız yükseltiliyor, bu işlem cüzdanınızın büyüklüğüne ve yaşına göre biraz zaman alabilir lütfen sabırlı olun.</string>
     <string name="upgrade_success_heading">Cüzdanınız yükseltildi!</string>
@@ -252,7 +247,6 @@
     <string name="decrypting_wallet">Cüzdan şifresi çözülüyor...</string>
     <string name="password_unchanged">Şifre değiştirilmedi</string>
     <string name="password_changed">Şifre değiştirildi</string>
-    <string name="verify_email2">Doğrulanmış e-posta adresiniz, şüpheli veya sıradışı etkinlikler belirlendiği zaman oturum açma kodları göndermek, cüzdan oturum açma kimliğinizi size hatırlatmak ve para aldığınız zaman size bitcoin ödeme uyarıları göndermek için kullanılır.</string>
     <string name="disable_root_warning">Kök dizin cihaz uyarısını devre dışı bırak</string>
 
     <string name="show_balance">Bakiyeyi Göster</string>
@@ -407,7 +401,6 @@
     <string name="accept_higher_fee">Daha yüksek ücreti kabul et</string>
     <string name="large_tx_high_fee_warning">"Bu işlem, küçük miktarda para üstü iadesi sebebiyle toz tüketimi için daha yüksek bir ücret gerektirir."</string>
 
-    <string name="overview">İşlemler</string>
     <string name="invalid_password_too_short">Lütfen 3 karakterden fazla girmeyin</string>
     <string name="change_pin_new_matches_current">Mevcut PIN kodunuzu yeni PIN kodunuz olarak giremezsiniz</string>
     <string name="account_locked_title">Hesap kilitlendi</string>
@@ -461,4 +454,73 @@
     <string name="survey_message">Cüzdan deneyiminizi geliştirmemize yardımcı olmak için kısa bir anket doldurmak ister misiniz?\n\nGeri bildiriminize değer veriyoruz!</string>
     <string name="survey_positive_button">Ankete katılın</string>
 
+    <string name="current_price_btc">1 BTC = %1$s</string>
+    <string name="overview">Genel bakış</string>
+    <string name="create_a_wallet">Bir cüzdan oluştur</string>
+    <string name="log_in">Oturum Aç</string>
+    <string name="about">Blockchain Cüzdan %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
+    <string name="wallets">Cüzdanlar</string>
+    <string name="your_transactions">İşlem Bulunmuyor</string>
+    <string name="archived_label">Arşivlendi</string>
+    <string name="UPGRADE_YOUR_WALLET">TAMAM, hadi başlayalım!</string>
+    <string name="confirm_upgrade_header">Selam, Blockchain cüzdana bu yeni özellikleri ekledik:</string>
+    <string name="verify_email2">Doğrulanmış e-posta adresiniz, şüpheli veya sıradışı etkinlikler belirlendiği zaman oturum açma kodları göndermek, cüzdan oturum açma kimliğinizi size hatırlatmak ve para aldığınız zaman size bitcoin ödeme uyarıları göndermek için kullanılır.</string>
+    <string name="enable_screenshots">Ekran Görüntülerini Etkinleştir</string>
+    <string name="enable_screenshots_warning">Blockchain uygulaması için ekran görüntülerini etkinleştirmek üzeresiniz. Uygulama içindeki bazı ekranlar hassas veriler görüntüleyebilir. Diğer uygulamalar bu ekran görüntülerine erişim sağlayacak.</string>
+
+    <string name="information">Bilgi</string>
+    <string name="transaction_detail_verify">Blockchain.info üzerinde doğrulayın</string>
+    <string name="transaction_detail_share_chooser">İşlem ayrıntılarını paylaş</string>
+    <string name="transaction_detail_contact_note">Not</string>
+    <string name="security_centre_email_check">E-postayı kontrol edin</string>
+    <string name="contacts_payment_request_send_note">%1$s bitcoin göndermek istediğinizden emin misiniz? Bu, isteğe bağlıdır ve %1$s ile paylaşılacaktır.</string>
+    <string name="contacts_payment_request_receive_note">%1$s size neden bitcoin göndermeli? Bu, isteğe bağlıdır ve %1$s ile paylaşılacaktır.</string>
+    <string name="contacts_send_address_message">Bu, kişinize bir adres gönderecektir. Devam etsin mi?</string>
+    <string name="contacts_register_nodes_failure">Kişiler hizmetine sizi bağlayamadık. Lütfen tam işlevselliği etkinleştirmek için yeniden deneyin.</string>
+    <string name="contacts_too_much_sent">Öyle görünüyor ki talep edilenden daha fazla bitcoin gönderdiniz. İsterseniz kişinizden birazını geri isteyebilirsiniz. Ödemeyi tamamlanmış olarak işaretlemedik.</string>
+    <string name="contacts_too_little_sent">Öyle görünüyor ki talep edilenden daha az bitcoin gönderdiniz. Kişiniz, göndermiş olduğunuz bitcoin tutarını yine de alacak ancak ödemeyi tamamlanmış olarak işaretlemedik.</string>
+    <string name="contacts_second_password_prompt">Bu hizmeti kullanmak için ikinci şifrenizi girmenizi rica ediyoruz. Kişiler işlevini kullanmak için bunu sadece bir kez girmeniz gerekecek.</string>
+    <string name="contacts_pending_transaction">Bekleyen İşlemler</string>
+    <string name="contacts_transaction_history">İşlem Geçmişi</string>
+    <string name="contacts_request_money_receive">Kişiye talebi gönderin</string>
+    <string name="contacts_no_confirmed_contacts_found">Onaylanmış kişi bulunamadı!</string>
+    <string name="contacts_decline_pending_transaction">Bu bekleyen işlemi geri çevirmek istediğinizden emin misiniz?</string>
+    <string name="contacts_cancel_pending_transaction">Bu bekleyen işlemi iptal etmek istediğinizden emin misiniz?</string>
+    <string name="contacts_pending_transaction_delete_success">Bekleyen işlem başarıyla silindi</string>
+    <string name="contacts_pending_transaction_delete_failure">Bekleyen işlem silinemedi</string>
+    <string name="contacts_pending_transaction_decline_success">Bekleyen işlem başarıyla geri çevrildi</string>
+    <string name="contacts_pending_transaction_decline_failure">Bekleyen işlem geri çevrilemedi</string>
+    <string name="contacts_pending_transaction_cancel_success">Bekleyen işlem başarıyla iptal edildi</string>
+    <string name="contacts_pending_transaction_cancel_failure">Bekleyen işlem iptal edilemedi</string>
+    <string name="contacts_sending_to_contact_waiting">%1$s tutar %2$s için gönderiliyor\n%2$s kabul etmesi gerekiyor</string>
+    <string name="contacts_payment_requested_ready_to_send">%1$s tutar %2$s tarafından talep edildi\nGöndermek için hazır</string>
+    <string name="contacts_requesting_from_contact_waiting_for_payment">%1$s tutar %2$s için talep edildi\nÖdeme yapılması gerekiyor</string>
+    <string name="contacts_receiving_from_contact_waiting_to_accept">%1$s tutar %2$s tarafından alınıyor\nKabul etmenizi bekliyor</string>
+    <string name="contacts_receiving_declined">Ödeme geri çevrildi</string>
+    <string name="contacts_receiving_cancelled">Ödeme iptal edildi</string>
+    <string name="contacts_send_complete">%1$s tutar %2$s için gönderildi</string>
+    <string name="contacts_receive_complete">%1$s tutar %2$s tarafından alındı</string>
+    <string name="contacts_received">%1$s tarafından alındı</string>
+    <string name="contacts_sent">%1$s için gönderildi</string>
+    <string name="onboarding_fingerprint_title">Parmak İziyle Giriş</string>
+    <string name="onboarding_fingerprint_summary">Kimlik doğrulamak ve cüzdanınıza erişmek için PIN kodunuzu kullanmak yerine parmak iziyle girişi kullanın</string>
+    <string name="onboarding_fingerprint_enable">Parmak izini etkinleştir</string>
+    <string name="onboarding_complete_later">Bunu daha sonra yapacağım</string>
+    <string name="onboarding_check_inbox_title">Gelen Kutunuzu Kontrol Edin</string>
+    <string name="onboarding_check_inbox_summary">Blockchain tarafından gönderilmiş bir e-posta arayın ve cüzdan kurulumunuzu tamamlamak için doğrulama bağlantısına tıklayın.</string>
+    <string name="onboarding_verify_email">E-postayı doğrula</string>
+    <string name="onboarding_receive_bitcoin">Bitcoin al</string>
+    <string name="onboarding_current_price">Mevcut Fiyat:</string>
+    <string name="onboarding_qr_codes">QR Kodları</string>
+    <string name="onboarding_scan_address">Adresleri Tara</string>
+    <string name="onboarding_buy_content">Doğrudan cüzdanınızdan bitcoin alabilmeniz için dünya çapında dönüştürme ortaklarıyla çalışmaktayız.</string>
+    <string name="onboarding_receive_content">Bitcoin istemek için cüzdan adresinizi bir arkadaşınıza gönderin. Bir adres her işlem için değişen rastgele harf ve numaralardan oluşan bir dizidir.</string>
+    <string name="onboarding_qr_codes_content">Bir adres ayrıca QR kodu olarak da gösterilebilir. Bir arkadaşınızın cüzdan adresini hızlıca almak için arkadaşınızın QR kodunu tarayın.</string>
+
+    <string name="onboarding_buy_bitcoin">Bitcoin Al</string>
+    <string name="onboarding_get_bitcoin">Bitcoin Edin</string>
+    <string name="onboarding_complete_title">Şimdilik bu kadar!</string>
+    <string name="onboarding_complete_content">Öneriler ve yeni özellikler hakkında size güncel bilgiler sunmaya devam edeceğiz.</string>
+    <string name="onboarding_start_over">Yeniden Başla</string>
+    <string name="onboarding_skip_all">Tümünü Atla</string>
 </resources>
