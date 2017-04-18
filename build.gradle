@@ -10,7 +10,7 @@ buildscript {
         retrofitVersion = '2.2.0'
         okHttpVersion = '3.6.0'
         mockitoVersion = '2.7.21'
-        kotlinVersion = '1.1.2-eap-69'
+        kotlinVersion = '1.1.2-eap-73'
     }
     repositories {
         jcenter()
