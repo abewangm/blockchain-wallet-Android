@@ -20,6 +20,7 @@ import org.spongycastle.crypto.InvalidCipherTextException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -308,6 +309,18 @@ public class PayloadDataManager {
 
     public Account getAccount(int accountPosition) {
         return getWallet().getHdWallets().get(0).getAccount(accountPosition);
+    }
+
+    @NonNull
+    public List<Account> getAccounts() {
+        return getWallet() != null
+                ? getWallet().getHdWallets().get(0).getAccounts()
+                : Collections.emptyList();
+    }
+
+    @NonNull
+    public List<LegacyAddress> getLegacyAddresses() {
+        return getWallet() != null ? getWallet().getLegacyAddressList() : Collections.emptyList();
     }
 
     /**

@@ -15,6 +15,8 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
+import org.amshove.kluent.shouldBeInstanceOf
+import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,16 +30,13 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
-import java.util.*
 import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
-import kotlin.test.assertTrue
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
@@ -129,7 +128,7 @@ class ContactDetailViewModelTest {
         verify(mockContactsManager).contactList
         verify(mockContactsManager).fetchContacts()
         verifyNoMoreInteractions(mockContactsManager)
-        subject.contact equals contact2
+        subject.contact shouldEqual contact2
     }
 
     @Test
@@ -209,7 +208,7 @@ class ContactDetailViewModelTest {
         // Act
         val result = subject.getPrefsUtil()
         // Assert
-        result equals mockPrefsUtil
+        result shouldEqual mockPrefsUtil
     }
 
     @Test
@@ -221,7 +220,7 @@ class ContactDetailViewModelTest {
         val result = subject.contactsTransactionMap
         // Assert
         verify(mockContactsManager).contactsTransactionMap
-        assertTrue { result is HashMap }
+        result shouldBeInstanceOf HashMap::class
     }
 
     @Test
@@ -233,7 +232,7 @@ class ContactDetailViewModelTest {
         val result = subject.notesTransactionMap
         // Assert
         verify(mockContactsManager).notesTransactionMap
-        assertTrue { result is HashMap }
+        result shouldBeInstanceOf HashMap::class
     }
 
     @Test
@@ -245,7 +244,7 @@ class ContactDetailViewModelTest {
         val result = subject.monetaryUtil
         // Assert
         verify(mockPrefsUtil).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        assertTrue { result is MonetaryUtil }
+        result shouldBeInstanceOf MonetaryUtil::class
     }
 
     @Test
@@ -256,7 +255,7 @@ class ContactDetailViewModelTest {
         // Act
         val result = subject.getStringUtils()
         // Assert
-        assertTrue { result is StringUtils }
+        result shouldBeInstanceOf StringUtils::class
     }
 
     @Test
@@ -868,9 +867,9 @@ class ContactDetailViewModelTest {
         verify(mockActivity).onTransactionsUpdated(captor.capture())
         verifyZeroInteractions(mockActivity)
         val list = captor.firstValue
-        (list[0] as ContactTransactionModel).contactName equals contactName
-        (list[1] as TransactionSummary).hash equals txHash1
-        (list[2] as TransactionSummary).hash equals txHash0
+        (list[0] as ContactTransactionModel).contactName shouldEqual contactName
+        (list[1] as TransactionSummary).hash shouldEqual txHash1
+        (list[2] as TransactionSummary).hash shouldEqual txHash0
     }
 
     @Test

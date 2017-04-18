@@ -5,6 +5,7 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Observable
+import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,7 +17,6 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.contacts.PaymentRequestType
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
@@ -80,7 +80,7 @@ class AccountChooserViewModelTest {
         val captor = argumentCaptor<List<ItemAccount>>()
         verify(mockActivity).updateUi(captor.capture())
         // Value is 3 as only 2 confirmed contacts plus header
-        captor.firstValue.size equals 3
+        captor.firstValue.size shouldEqual 3
     }
 
     @Test
@@ -120,7 +120,7 @@ class AccountChooserViewModelTest {
         val captor = argumentCaptor<List<ItemAccount>>()
         verify(mockActivity).updateUi(captor.capture())
         // Value includes 2 headers, 3 accounts, 3 legacy addresses
-        captor.firstValue.size equals 8
+        captor.firstValue.size shouldEqual 8
     }
 
     @Test
@@ -152,7 +152,7 @@ class AccountChooserViewModelTest {
         val captor = argumentCaptor<List<ItemAccount>>()
         verify(mockActivity).updateUi(captor.capture())
         // Value includes 3 headers, 3 accounts, 3 legacy addresses, 2 confirmed contacts
-        captor.firstValue.size equals 11
+        captor.firstValue.size shouldEqual 11
     }
 
     @Test
@@ -177,7 +177,7 @@ class AccountChooserViewModelTest {
         val captor = argumentCaptor<List<ItemAccount>>()
         verify(mockActivity).updateUi(captor.capture())
         // Value includes 2 headers, 3 accounts, 3 legacy addresses, 0 Contacts
-        captor.firstValue.size equals 8
+        captor.firstValue.size shouldEqual 8
     }
 
     inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {

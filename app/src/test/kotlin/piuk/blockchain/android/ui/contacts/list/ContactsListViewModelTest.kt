@@ -12,6 +12,7 @@ import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import okhttp3.MediaType
 import okhttp3.ResponseBody
+import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,7 +25,6 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import java.util.*
@@ -157,7 +157,7 @@ class ContactsListViewModelTest {
         verify(mockActivity).showSecondPasswordDialog()
         verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
         verifyNoMoreInteractions(mockActivity)
-        subject.link equals uri
+        subject.link shouldEqual uri
     }
 
     @Test

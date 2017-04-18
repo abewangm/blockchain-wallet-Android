@@ -50,6 +50,7 @@ import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.ui.zxing.Contents;
 import piuk.blockchain.android.ui.zxing.encode.QRCodeEncoder;
 import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.LabelUtil;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
@@ -447,6 +448,11 @@ public class AccountEditViewModel extends BaseViewModel {
             String finalNewLabel = newLabel;
             String revertLabel;
 
+            if (LabelUtil.isExistingLabel(payloadDataManager, newLabel)) {
+                dataListener.showToast(R.string.label_name_match, ToastCustom.TYPE_ERROR);
+                return;
+            }
+
             if (account != null) {
                 revertLabel = account.getLabel();
                 account.setLabel(finalNewLabel);
@@ -455,10 +461,9 @@ public class AccountEditViewModel extends BaseViewModel {
                 legacyAddress.setLabel(finalNewLabel);
             }
 
-            dataListener.showProgressDialog(R.string.please_wait);
-
             compositeDisposable.add(
                     payloadDataManager.syncPayloadWithServer()
+                            .doOnSubscribe(ignored -> dataListener.showProgressDialog(R.string.please_wait))
                             .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                             .subscribe(() -> {
                                 accountModel.setLabel(finalNewLabel);

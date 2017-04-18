@@ -28,6 +28,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.LabelUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -116,9 +117,14 @@ public class AccountViewModel extends BaseViewModel {
      * @param accountLabel A label for the account to be created
      */
     void createNewAccount(String accountLabel) {
-        dataListener.showProgressDialog(R.string.please_wait);
+        if (LabelUtil.isExistingLabel(payloadDataManager, accountLabel)) {
+            dataListener.showToast(R.string.label_name_match, ToastCustom.TYPE_ERROR);
+            return;
+        }
+
         compositeDisposable.add(
                 accountDataManager.createNewAccount(accountLabel, doubleEncryptionPassword)
+                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.please_wait))
                         .subscribe(account -> {
                             dataListener.dismissProgressDialog();
                             dataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);

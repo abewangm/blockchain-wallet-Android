@@ -4,6 +4,7 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.metadata.data.Invitation
 import io.reactivex.Observable
+import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,7 +15,6 @@ import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import kotlin.test.assertNotNull
@@ -49,7 +49,7 @@ class ContactsInvitationBuilderViewModelTest {
         subject.setNameOfSender(name)
         // Assert
         assertNotNull(subject.sender)
-        subject.sender.name equals name
+        subject.sender.name shouldEqual name
     }
 
     @Test
@@ -61,7 +61,7 @@ class ContactsInvitationBuilderViewModelTest {
         subject.setNameOfRecipient(name)
         // Assert
         assertNotNull(subject.recipient)
-        subject.recipient.name equals name
+        subject.recipient.name shouldEqual name
     }
 
     @Test
