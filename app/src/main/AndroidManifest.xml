@@ -69,7 +69,8 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ui.directory.MapActivity" />
-        <activity android:name=".ui.directory.SuggestMerchantActivity" />
+        <!-- TODO: Remove me once a solid decision has been made -->
+        <!--<activity android:name=".ui.directory.SuggestMerchantActivity" />-->
         <activity
             android:name=".ui.account.AccountActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
