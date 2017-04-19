@@ -9,11 +9,11 @@ import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest
 import info.blockchain.wallet.metadata.data.Message
+import org.amshove.kluent.shouldEqual
 import org.bitcoinj.crypto.DeterministicKey
 import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.RxTest
-import piuk.blockchain.android.equals
 import java.util.*
 
 class ContactsServiceTest : RxTest() {
@@ -120,7 +120,7 @@ class ContactsServiceTest : RxTest() {
         verify(mockContacts).contactList
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0].size equals 3
+        testObserver.values()[0].size shouldEqual 3
     }
 
     @Test
@@ -134,7 +134,7 @@ class ContactsServiceTest : RxTest() {
         verify(mockContacts).digestUnreadPaymentRequests()
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values().size equals 3
+        testObserver.values().size shouldEqual 3
     }
 
     @Test
@@ -190,7 +190,7 @@ class ContactsServiceTest : RxTest() {
         verify(mockContacts).createInvitation(mockSender, mockRecipient)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals mockSender
+        testObserver.values()[0] shouldEqual mockSender
     }
 
     @Test
@@ -206,7 +206,7 @@ class ContactsServiceTest : RxTest() {
         verify(mockContacts).acceptInvitationLink(inviteString)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals mockSender
+        testObserver.values()[0] shouldEqual mockSender
     }
 
     @Test
@@ -222,7 +222,7 @@ class ContactsServiceTest : RxTest() {
         verify(mockContacts).readInvitationLink(inviteString)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals mockSender
+        testObserver.values()[0] shouldEqual mockSender
     }
 
     @Test
@@ -237,7 +237,7 @@ class ContactsServiceTest : RxTest() {
         verify(mockContacts).readInvitationSent(mockRecipient)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals true
+        testObserver.values()[0] shouldEqual true
     }
 
     @Test
@@ -339,7 +339,7 @@ class ContactsServiceTest : RxTest() {
         verify(mockContacts).fetchXpub(mdid)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals xpub
+        testObserver.values()[0] shouldEqual xpub
     }
 
     @Test
@@ -367,7 +367,7 @@ class ContactsServiceTest : RxTest() {
         verify(mockContacts).getMessages(onlyNew)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0].size equals 3
+        testObserver.values()[0].size shouldEqual 3
     }
 
     @Test
@@ -383,7 +383,7 @@ class ContactsServiceTest : RxTest() {
         verify(mockContacts).readMessage(messageId)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals mockMessage
+        testObserver.values()[0] shouldEqual mockMessage
     }
 
     @Test

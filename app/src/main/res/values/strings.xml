@@ -287,6 +287,7 @@
     <string name="label">Label</string>
     <string name="edit">Edit</string>
     <string name="label_cant_be_empty">Label can\'t be blank.</string>
+    <string name="label_name_match">Name already in use</string>
     <string name="warning">Warning</string>
 
     <string name="ssl_no_connection">We are unable to connect to the host to establish a secure connection. Please verify your network connection and device before continuing.</string>

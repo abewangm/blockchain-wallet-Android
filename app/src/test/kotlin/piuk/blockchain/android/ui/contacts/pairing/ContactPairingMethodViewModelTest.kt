@@ -4,8 +4,8 @@ import android.app.Activity
 import android.app.Application
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
-import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Observable
+import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,7 +16,6 @@ import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.AppUtil
@@ -83,7 +82,7 @@ class ContactPairingMethodViewModelTest {
         // Act
         val result = subject.isCameraOpen
         // Assert
-        result equals true
+        result shouldEqual true
     }
 
     inner class MockApiModule : ApiModule() {

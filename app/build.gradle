@@ -201,6 +201,7 @@ dependencies {
     // Unit Tests in Kotlin
     testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
+    testCompile 'org.amshove.kluent:kluent:1.19'
     testCompile("com.nhaarman:mockito-kotlin:1.4.0") {
         exclude module: 'kotlin-stdlib'
     }

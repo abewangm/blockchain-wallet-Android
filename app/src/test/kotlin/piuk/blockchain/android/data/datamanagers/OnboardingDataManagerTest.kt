@@ -4,12 +4,12 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.api.data.Settings
 import info.blockchain.wallet.api.data.WalletOptions
 import io.reactivex.Observable
+import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.access.AccessState
-import piuk.blockchain.android.equals
 
 class OnboardingDataManagerTest: RxTest() {
 
@@ -40,7 +40,7 @@ class OnboardingDataManagerTest: RxTest() {
         // Assert
         verify(mockAccessState).inSepaCountry
         verifyNoMoreInteractions(mockAccessState)
-        result equals true
+        result shouldEqual true
     }
 
     @Test
