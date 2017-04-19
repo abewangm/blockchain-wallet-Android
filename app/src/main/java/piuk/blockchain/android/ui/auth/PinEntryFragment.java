@@ -261,6 +261,10 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
         binding.titleBox.setVisibility(visibility);
     }
 
+    public void resetPinEntry() {
+        viewModel.clearPinBoxes();
+    }
+
     public boolean allowExit() {
         return viewModel.allowExit();
     }
