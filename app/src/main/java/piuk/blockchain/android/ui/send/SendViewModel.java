@@ -639,7 +639,6 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void sendClicked(boolean bypassFeeCheck, String address) {
-
         checkClipboardPaste(address);
         if (FormatsUtil.isValidBitcoinAddress(address)) {
             //Receiving address manual or scanned input
@@ -649,11 +648,8 @@ public class SendViewModel extends BaseViewModel {
         }
 
         if (isValidSpend(sendModel.pendingTransaction, false)) {
-
             if (bypassFeeCheck || isFeeAdequate()) {
-
                 LegacyAddress legacyAddress = null;
-
                 if (!sendModel.pendingTransaction.isHD()) {
                     legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
                 }
@@ -665,7 +661,6 @@ public class SendViewModel extends BaseViewModel {
                     }
                 } else if ((legacyAddress != null && legacyAddress.isWatchOnly()) || sendModel.verifiedSecondPassword != null) {
                     confirmPayment();
-
                 } else {
                     dataListener.showSecondPasswordDialog();
                 }
@@ -796,8 +791,7 @@ public class SendViewModel extends BaseViewModel {
      * total
      */
     boolean isLargeTransaction() {
-
-        if(sendModel.pendingTransaction.isCustomFee) {
+        if (sendModel.pendingTransaction.isCustomFee) {
             return false;
         }
 

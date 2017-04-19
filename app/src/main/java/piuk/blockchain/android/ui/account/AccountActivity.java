@@ -26,6 +26,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.EditText;
 
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
@@ -189,7 +190,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     @Thunk
     void promptForAccountLabel() {
-        AppCompatEditText editText = getAddressLabelEditText();
+        EditText editText = getAddressLabelEditText();
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.label)
@@ -217,7 +218,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     @Override
     public void onUpdateAccountsList() {
-
 //        accountsAndImportedList is linked to AccountAdapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
         accountsAndImportedList.clear();
         int correctedPosition = 0;
@@ -381,7 +381,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     @Override
     public void showRenameImportedAddressDialog(LegacyAddress address) {
-        AppCompatEditText editText = getAddressLabelEditText();
+        EditText editText = getAddressLabelEditText();
 
         new AlertDialog.Builder(AccountActivity.this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
@@ -489,8 +489,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     }
 
     @NonNull
-    private AppCompatEditText getAddressLabelEditText() {
-        AppCompatEditText editText = new AppCompatEditText(this);
+    private EditText getAddressLabelEditText() {
+        EditText editText = new EditText(this);
         editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(ADDRESS_LABEL_MAX_LENGTH)});
         return editText;

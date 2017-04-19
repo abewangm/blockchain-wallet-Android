@@ -148,7 +148,7 @@ public class AccountViewModel extends BaseViewModel {
     void updateLegacyAddress(LegacyAddress address) {
         dataListener.showProgressDialog(R.string.saving_address);
         compositeDisposable.add(
-                payloadDataManager.syncPayloadWithServer()
+                accountDataManager.updateLegacyAddress(address)
                         .subscribe(() -> {
                             dataListener.dismissProgressDialog();
                             dataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
@@ -238,7 +238,6 @@ public class AccountViewModel extends BaseViewModel {
     }
 
     private void importWatchOnlyAddress(String address) {
-
         address = correctAddressFormatting(address);
 
         if (!FormatsUtil.isValidBitcoinAddress(address)) {

@@ -239,13 +239,14 @@ public class AccountViewModelTest {
     @Test
     public void updateLegacyAddressSuccessful() throws Exception {
         // Arrange
-        when(payloadDataManager.syncPayloadWithServer())
+        LegacyAddress legacyAddress = new LegacyAddress();
+        when(accountDataManager.updateLegacyAddress(legacyAddress))
                 .thenReturn(Completable.complete());
         // Act
-        subject.updateLegacyAddress(new LegacyAddress());
+        subject.updateLegacyAddress(legacyAddress);
         // Assert
-        verify(payloadDataManager).syncPayloadWithServer();
-        verifyNoMoreInteractions(payloadDataManager);
+        verify(accountDataManager).updateLegacyAddress(legacyAddress);
+        verifyNoMoreInteractions(accountDataManager);
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
@@ -258,13 +259,14 @@ public class AccountViewModelTest {
     @Test
     public void updateLegacyAddressFailed() throws Exception {
         // Arrange
-        when(payloadDataManager.syncPayloadWithServer())
+        LegacyAddress legacyAddress = new LegacyAddress();
+        when(accountDataManager.updateLegacyAddress(legacyAddress))
                 .thenReturn(Completable.error(new Throwable()));
         // Act
-        subject.updateLegacyAddress(new LegacyAddress());
+        subject.updateLegacyAddress(legacyAddress);
         // Assert
-        verify(payloadDataManager).syncPayloadWithServer();
-        verifyNoMoreInteractions(payloadDataManager);
+        verify(accountDataManager).updateLegacyAddress(legacyAddress);
+        verifyNoMoreInteractions(accountDataManager);
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
