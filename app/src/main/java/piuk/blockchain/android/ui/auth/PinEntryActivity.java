@@ -33,11 +33,13 @@ public class PinEntryActivity extends BaseAuthActivity implements
 
     // Fragments
     private PinEntryFragment pinEntryFragment;
+    private AppUtil appUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        appUtil = new AppUtil(this);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_pin_entry);
         pinEntryFragment = PinEntryFragment.newInstance(!shouldHideSwipeToReceive());
@@ -127,8 +129,7 @@ public class PinEntryActivity extends BaseAuthActivity implements
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         // Test for screen overlays before user enters PIN
-        // consume event
-        return new AppUtil(this).detectObscuredWindow(this, event) || super.dispatchTouchEvent(event);
+        return appUtil.detectObscuredWindow(this, event) || super.dispatchTouchEvent(event);
     }
 
     @Override

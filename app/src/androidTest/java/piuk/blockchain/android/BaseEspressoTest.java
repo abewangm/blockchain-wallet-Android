@@ -11,6 +11,8 @@ import org.junit.Before;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
+import static piuk.blockchain.android.util.PrefsUtil.KEY_OVERLAY_TRUSTED;
+
 @SuppressWarnings("WeakerAccess")
 public class BaseEspressoTest {
 
@@ -49,7 +51,7 @@ public class BaseEspressoTest {
      * @param ignore Set to true to ignore all touch events
      */
     protected void ignoreTapJacking(boolean ignore) {
-        prefsUtil.setValue("OVERLAY_TRUSTED", ignore);
+        prefsUtil.setValue(KEY_OVERLAY_TRUSTED, ignore);
     }
 
     /**
