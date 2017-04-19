@@ -553,20 +553,22 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void showSurveyPrompt() {
-        if (!isFinishing()) {
-            new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                    .setTitle(R.string.app_name)
-                    .setMessage(R.string.survey_message)
-                    .setPositiveButton(R.string.survey_positive_button, (dialog, which) -> {
-                        String url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV";
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(Uri.parse(url));
-                        startActivity(intent);
-                    })
-                    .setNegativeButton(R.string.polite_no, null)
-                    .create()
-                    .show();
-        }
+        binding.getRoot().postDelayed(() -> {
+            if (!isFinishing()) {
+                new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                        .setTitle(R.string.app_name)
+                        .setMessage(R.string.survey_message)
+                        .setPositiveButton(R.string.survey_positive_button, (dialog, which) -> {
+                            String url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV";
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setData(Uri.parse(url));
+                            startActivity(intent);
+                        })
+                        .setNegativeButton(R.string.polite_no, null)
+                        .create()
+                        .show();
+            }
+        }, 1000);
     }
 
     @Override
