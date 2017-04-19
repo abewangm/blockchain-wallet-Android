@@ -401,6 +401,7 @@
     <string name="google_authenticator">Google Authenticator</string>
     <string name="yubikey">Yubikey</string>
     <string name="disable_2fa_first">Please disable 2-step Verification via SMS in the security settings first.</string>
+    <string name="disable_online_only">Please login to your wallet in the web browser to disable 2FA.</string>
     <string name="settings_field_cant_be_empty">Field can\'t be empty.</string>
     <string name="settings_error_updating">Error updating settings, please try again</string>
 
