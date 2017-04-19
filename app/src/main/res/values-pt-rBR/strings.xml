@@ -220,7 +220,7 @@
     <string name="click">Clique</string>
     <string name="to_start_sending_and_receiving_btc">para iniciar o envio e o recebimento de bitcoins.</string>
 
-    <string name="watch_only_label">(watch-only)</string>
+    <string name="watch_only_label">(watch only)</string>
     <string name="address_book_label">(catálogo de endereços)</string>
     <string name="archived_label">(arquivado)</string>
 
@@ -242,7 +242,7 @@
     <string name="upgrade_fail_info">Houve um erro ao atualizar sua carteira. Por favor, tente novamente mais tarde.</string>
     <string name="not_sane_error">A instalação da Carteira Blockchain está incompleta. Por favor, pareie a sua carteira novamente ou crie uma nova.</string>
 
-    <string name="watchonly_address_receive_warning">Você está prestes a receber bitcoins num endereço watch-only. Você só poderá usar estes fundos se tiver acesso à chave privada. Deseja continuar?</string>
+    <string name="watchonly_address_receive_warning">Você está prestes a receber bitcoins num endereço watch only. Você só poderá usar estes fundos se tiver acesso à chave privada. Deseja continuar?</string>
 
     <string name="camera_unavailable">A câmera está sendo usada por outro aplicativo. Por favor, feche o outro aplicativo e tente novamente.</string>
 
@@ -302,13 +302,13 @@
     <string name="privx_required">Chave Privada Requerida</string>
     <string name="watch_only_spend_instructionss">Esta ação requer a chave privada do endereço Bitcoin %1$s. Por favor, escaneie o código QR.</string>
     <string name="invalid_private_key">Chave privada inválida</string>
-    <string name="watch_only_import_warning">Você está prestes a importar um endereço watch-only, um endereço (ou script de chave pública) armazenado na carteira sem a chave privada correspondente. Isto significa que os fundos podem ser utilizados SOMENTE se você tiver a chave privada armazenada em algum lugar. Se você não tiver a chave privada armazenada, NÃO instrua ninguém a enviar bitcoins para o endereço watch-only.\n\nEstas opções são recomendadas apenas para usuários avançados. Deseja continuar? </string>
+    <string name="watch_only_import_warning">Você está prestes a importar um endereço watch only, um endereço (ou script de chave pública) armazenado na carteira sem a chave privada correspondente. Isto significa que os fundos podem ser utilizados SOMENTE se você tiver a chave privada armazenada em algum lugar. Se você não tiver a chave privada armazenada, NÃO instrua ninguém a enviar bitcoins para o endereço watch only.\n\nEstas opções são recomendadas apenas para usuários avançados. Deseja continuar? </string>
     <string name="scan_private_key">Escanear chave privada</string>
     <string name="private_key_successfully_imported">Chave privada importada com êxito.</string>
-    <string name="private_key_not_matching_address">OBSERVAÇÃO: A chave privada escaneada não corresponde ao seu endereço watch-only. Para utilizar os fundos deste endereço, escaneie a chave privada correta.</string>
-    <string name="watch_only">Watch-Only</string>
+    <string name="private_key_not_matching_address">OBSERVAÇÃO: A chave privada escaneada não corresponde ao seu endereço watch only. Para utilizar os fundos deste endereço, escaneie a chave privada correta.</string>
+    <string name="watch_only">Watch Only</string>
     <string name="extended_public_key_description">Se você é um estabelecimento, mostre seu xPub e use o Blockchain Merchant App para receber fundos de forma privada e segura. \n\nMantenha seu xPub privado.         Quem tiver acesso ao seu xPub poderá visualizar todos os seus fundos e transações. </string>
-    <string name="watch_only_description">Este endereço é watch-only. Para utilizar os fundos desta carteira, escaneie sua chave privada. </string>
+    <string name="watch_only_description">Este endereço é watch only. Para utilizar os fundos desta carteira, escaneie sua chave privada. </string>
     <string name="success">Sucesso</string>
     <string name="default_label">Padrão</string>
     <string name="try_again">Tente Novamente</string>
