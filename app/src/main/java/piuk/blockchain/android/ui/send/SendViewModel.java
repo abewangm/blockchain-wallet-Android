@@ -602,7 +602,7 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Updates text displaying what block tx will be included in
      */
-    private String updateEstimateConfirmationTime(BigInteger amountToSend, long fee, UnspentOutputs coins)
+    private void updateEstimateConfirmationTime(BigInteger amountToSend, long fee, UnspentOutputs coins)
             throws UnsupportedEncodingException {
         sendModel.absoluteSuggestedFeeEstimates = getEstimatedBlocks(amountToSend, sendModel.dynamicFeeList.getEstimate(), coins);
 
@@ -625,8 +625,6 @@ public class SendViewModel extends BaseViewModel {
         dataListener.setEstimate(estimateText);
         dataListener.setEstimateColor(estimateText.equals(unlikelyToConfirmMessage)
                 ? R.color.product_red_medium : R.color.primary_blue_accent);
-
-        return estimateText;
     }
 
     private void setupTransaction(String customFeeText,
