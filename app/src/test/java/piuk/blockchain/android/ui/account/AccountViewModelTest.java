@@ -426,13 +426,13 @@ public class AccountViewModelTest {
     public void confirmImportWatchOnlySuccess() throws Exception {
         // Arrange
         String address = "17UovdU9ZvepPe75igTQwxqNME1HbnvMB7";
-        when(accountDataManager.updateLegacyAddress(any(LegacyAddress.class)))
+        when(accountDataManager.addLegacyAddress(any(LegacyAddress.class)))
                 .thenReturn(Completable.complete());
         // Act
         subject.confirmImportWatchOnly(address);
         // Assert
         //noinspection WrongConstant
-        verify(accountDataManager).updateLegacyAddress(any(LegacyAddress.class));
+        verify(accountDataManager).addLegacyAddress(any(LegacyAddress.class));
         verifyNoMoreInteractions(accountDataManager);
         verify(activity).showRenameImportedAddressDialog(any(LegacyAddress.class));
         verifyNoMoreInteractions(activity);
@@ -442,12 +442,12 @@ public class AccountViewModelTest {
     public void confirmImportWatchOnlyFailure() throws Exception {
         // Arrange
         String address = "17UovdU9ZvepPe75igTQwxqNME1HbnvMB7";
-        when(accountDataManager.updateLegacyAddress(any(LegacyAddress.class)))
+        when(accountDataManager.addLegacyAddress(any(LegacyAddress.class)))
                 .thenReturn(Completable.error(new Throwable()));
         // Act
         subject.confirmImportWatchOnly(address);
         // Assert
-        verify(accountDataManager).updateLegacyAddress(any(LegacyAddress.class));
+        verify(accountDataManager).addLegacyAddress(any(LegacyAddress.class));
         verifyNoMoreInteractions(accountDataManager);
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
         verifyNoMoreInteractions(activity);

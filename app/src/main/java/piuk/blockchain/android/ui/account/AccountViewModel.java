@@ -231,7 +231,7 @@ public class AccountViewModel extends BaseViewModel {
         legacyAddress.setCreatedDeviceVersion(BuildConfig.VERSION_NAME);
 
         compositeDisposable.add(
-                accountDataManager.updateLegacyAddress(legacyAddress)
+                accountDataManager.addLegacyAddress(legacyAddress)
                         .subscribe(
                                 () -> dataListener.showRenameImportedAddressDialog(legacyAddress),
                                 throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));

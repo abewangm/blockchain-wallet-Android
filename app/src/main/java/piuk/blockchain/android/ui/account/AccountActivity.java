@@ -97,7 +97,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
         setupToolbar(binding.toolbarContainer.toolbarGeneral, R.string.addresses);
 
-        binding.accountsList.setLayoutManager(new LinearLayoutManager(this));
+        binding.accountsList.setLayoutManager(new AccountLayoutManager());
         binding.accountsList.setHasFixedSize(true);
         accountsAndImportedList = new ArrayList<>();
 
@@ -401,7 +401,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 .setNegativeButton(R.string.polite_no, (dialog, whichButton) -> {
                     address.setLabel(address.getAddress());
                     remoteSaveNewAddress(address);
-
                 }).show();
     }
 
@@ -520,5 +519,17 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         super.onDestroy();
         dismissProgressDialog();
         viewModel.destroy();
+    }
+
+    private class AccountLayoutManager extends LinearLayoutManager {
+
+        AccountLayoutManager() {
+            super(AccountActivity.this);
+        }
+
+        @Override
+        public boolean supportsPredictiveItemAnimations() {
+            return false;
+        }
     }
 }
