@@ -8,9 +8,8 @@ apply from: '../quality/releasechecks.gradle'
 android {
     compileSdkVersion 25
     buildToolsVersion '25.0.2'
-    dexOptions {
-        javaMaxHeapSize "3g"
-    }
+    dexOptions.javaMaxHeapSize "3g"
+
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 25
@@ -65,15 +64,11 @@ android {
         }
     }
     productFlavors {
-        prod {
-            // For release and testing on <API21 devices
-            minSdkVersion 16
-        }
-        dev {
-            // For everyday work, setting minSdkVersion to 21 bypasses MultiDex, resulting in
-            // much faster builds
-            minSdkVersion 21
-        }
+        // For release and testing on <API21 devices
+        prod.minSdkVersion 16
+        // For everyday work, setting minSdkVersion to 21 bypasses MultiDex, resulting in
+        // much faster builds
+        dev.minSdkVersion 21
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -84,15 +79,15 @@ android {
         checkReleaseBuilds true
         abortOnError false
         fatal 'StopShip'
+        htmlReport true
     }
     packagingOptions {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
     }
-    dataBinding {
-        enabled = true
-    }
+    dataBinding.enabled true
+
     // Always show the result of every unit test, even if it passes.
     testOptions.unitTests.all {
         testLogging {
