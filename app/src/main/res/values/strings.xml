@@ -138,7 +138,6 @@
 
     <string name="confirm_details">Confirm Payment</string>
     <string name="fee">Fee</string>
-    <string name="dialog_cancel">CANCEL</string>
     <string name="exit_confirm">Press back button again to exit</string>
 
     <string name="label_address">Your address has been imported successfully. Optionally assign a friendly display name to this address.</string>

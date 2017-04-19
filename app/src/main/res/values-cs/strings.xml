@@ -117,7 +117,6 @@
 
     <string name="confirm_details">Potvrdit platbu</string>
     <string name="fee">Poplatek</string>
-    <string name="dialog_cancel">STORNO</string>
     <string name="exit_confirm">Opětovným stisknutím tlačítka Zpět odejdete</string>
 
     <string name="label_address">Vaše adresa byla úspěšně importována. Této adrese můžete případně přiřadit zapamatovatelný zobrazovaný název.</string>
@@ -148,7 +147,7 @@
     <string name="postal">PSČ</string>
     <string name="telephone">Telefon</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Vyberte kategorii...</string>
+    <string name="merchant_cat_hint">Vyberte kategorii…</string>
     <string name="merchant_cat1">Kavárna</string>
     <string name="merchant_cat2">Bary / Nápoje</string>
     <string name="merchant_cat3">Jídlo a stravování</string>
@@ -231,7 +230,7 @@
     <string name="upgrade_page_2">Lepší soukromí díky hierarchickým deterministickým adresám</string>
     <string name="upgrade_page_3">Upravte si způsob seřazení bitcoinů ve své peněžence Blockchain.</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Vaše peněženka Blockchain byla rozšířena o tyto nové funkce:</string>
-    <string name="upgrading">Upgradování...</string>
+    <string name="upgrading">Upgradování…</string>
     <string name="upgrading_started_info">Vaše peněženka se upgraduje. Mějte prosím trpělivost, protože to může chvíli trvat, a to podle velikosti a stáří Vaší peněženky.</string>
     <string name="upgrade_success_heading">Vaše peněženka byla upgradována!</string>
     <string name="upgrade_success_info">Nyní používáte nejbezpečnější a nejprivátnější peněženku Blockchain. Nyní můžete pokračovat do své peněženky.</string>
@@ -246,10 +245,10 @@
 
     <string name="camera_unavailable">Fotoaparát nyní používá jiná aplikace. Tuto jinou aplikaci prosím ukončete a zkuste to znovu.</string>
 
-    <string name="validating_password">Ověřování hesla...</string>
-    <string name="validating_pin">Ověřování PINu...</string>
-    <string name="creating_pin">Vytváření PINu...</string>
-    <string name="decrypting_wallet">Dešifrování peněženky...</string>
+    <string name="validating_password">Ověřování hesla…</string>
+    <string name="validating_pin">Ověřování PINu…</string>
+    <string name="creating_pin">Vytváření PINu…</string>
+    <string name="decrypting_wallet">Dešifrování peněženky…</string>
     <string name="password_unchanged">Heslo nezměněno</string>
     <string name="password_changed">Heslo změněno</string>
     <string name="verify_email2">Vaše ověřená e-mailová adresa se používá pro odesílání přihlašovacích kódů, pokud je zaznamenána podezřelá nebo neobvyklá aktivita, abychom Vám připomněli Vaše přihlašovací ID peněženky, a zasílání upozornění na bitcoinovou platbu v případě připsání prostředků.</string>
@@ -265,7 +264,7 @@
     <string name="device_rooted">Vaše zařízení je zřejmě rootované. Mějte prosím na paměti, že ukládání prostředků na rootovaném zařízení není bezpečné a navíc může narušit stabilitu. Pokud budete nadále používat naši bitcoinovou peněženku na tomto zařízení, doporučujeme Vám, abyste pro svůj účet Blockchain použili dvojité šifrování.</string>
     <string name="address_already_in_wallet">Vaše peněženka již obsahuje tuto adresu.</string>
     <string name="cannot_create_address">Novou adresu nelze nyní vytvořit. Zkuste to prosím znovu.</string>
-    <string name="saving_address">Ukládání adresy...</string>
+    <string name="saving_address">Ukládání adresy…</string>
 
     <string name="cannot_launch_app">Peněženku Blockchain nelze na tomto zařízení spustit.</string>
     <string name="label">Označení</string>

@@ -117,7 +117,6 @@
 
     <string name="confirm_details">Potwierdź płatność</string>
     <string name="fee">Oplata</string>
-    <string name="dialog_cancel">ANULUJ</string>
     <string name="exit_confirm">Wciśnij przycisk "Wstecz" ponownie, aby wyjść</string>
 
     <string name="label_address">Udało się poprawnie zaimportować Twój adres. Opcjonalnie możesz przypisać temu adresowi przyjazną nazwę do wyświetlania.</string>
@@ -148,7 +147,7 @@
     <string name="postal">Kod pocztowy</string>
     <string name="telephone">Telefon</string>
     <string name="web">Sieć</string>
-    <string name="merchant_cat_hint">Wybierz kategorię...</string>
+    <string name="merchant_cat_hint">Wybierz kategorię…</string>
     <string name="merchant_cat1">Kawiarnie</string>
     <string name="merchant_cat2">Bary/Drinki</string>
     <string name="merchant_cat3">Jedzenie i restauracje</string>
@@ -231,7 +230,7 @@
     <string name="upgrade_page_2">Zwiększona prywatność za pomocą hierarchicznych deterministycznych adresów.</string>
     <string name="upgrade_page_3">Spersonalizuj sposób organizacji bitcoinów swoim Portfelu Blockchain</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Hej, dodaliśmy te nowe opcje do Twojego portfela Blockchain:</string>
-    <string name="upgrading">Ulepszanie...</string>
+    <string name="upgrading">Ulepszanie…</string>
     <string name="upgrading_started_info">Twój portfel jest właśnie ulepszany, prosimy o cierpliwość, gdyż może to chwilę potrwać, w zależności od rozmiaru i wieku Twojego portfela.</string>
     <string name="upgrade_success_heading">Twój portfel został ulepszony!</string>
     <string name="upgrade_success_info">W tej chwili korzystasz z najbezpieczniejszego Portfela Blockchain o największej prywatności. Możesz teraz przejść do swojego portfela.</string>
@@ -246,10 +245,10 @@
 
     <string name="camera_unavailable">Aparat jest w tej chwili używany przez inną aplikację. Zamknij tę aplikację i spróbuj ponownie.</string>
 
-    <string name="validating_password">Zatwierdzanie hasła...</string>
-    <string name="validating_pin">Zatwierdzanie PINu...</string>
-    <string name="creating_pin">Tworzenie PINu...</string>
-    <string name="decrypting_wallet">Odszyfrowywanie Portfela...</string>
+    <string name="validating_password">Zatwierdzanie hasła…</string>
+    <string name="validating_pin">Zatwierdzanie PINu…</string>
+    <string name="creating_pin">Tworzenie PINu…</string>
+    <string name="decrypting_wallet">Odszyfrowywanie Portfela…</string>
     <string name="password_unchanged">Hasło nie zostało zmienione</string>
     <string name="password_changed">Hasło zostało zmienione</string>
     <string name="verify_email2">Twój potwierdzony adres e-mail używany jest do przesyłania kodów do logowania, gdy wykryte zostanie podejrzane lub niecodzienne działanie na Twoim koncie, do przypominania Ci Twoich danych do logowania do portfela, a także wysyłania powiadomień, gdy otrzymasz płatność bitcoinami.</string>
@@ -265,7 +264,7 @@
     <string name="device_rooted">Twoje urządzenie wygląda na zrootowane. Proszę pamiętać, że przechowywanie środków na zrootowanym urządzeniu nie jest bezpieczne, a ponadto może sprawiać problemy ze stabilnością. Jeśli kontynuujesz korzystanie z naszego portfela bitcoin na tym urządzeniu, zalecamy korzystanie z podwójnego szyfrowania na Twoim koncie Blockchain.</string>
     <string name="address_already_in_wallet">Twój portfel już zawiera ten adres.</string>
     <string name="cannot_create_address">W tej chwili nie można stworzyć nowego adresu. Proszę spróbować ponownie.</string>
-    <string name="saving_address">Zapisywanie adresu...</string>
+    <string name="saving_address">Zapisywanie adresu…</string>
 
     <string name="cannot_launch_app">Portfel Blockchain nie może zostać uruchomiony na tym urządzeniu.</string>
     <string name="label">Etykieta</string>
@@ -413,7 +412,7 @@
     <string name="account_locked_title">Konto zablokowane</string>
     <string name="account_locked_message">Twoje konto zostało tymczasowo zablokowane w ramach środków ostrożności. Przeczytaj wiadomość e-mail, aby uzyskać więcej informacji i spróbuj ponownie później.</string>
     <string name="licenses">Licencje</string>
-    <string name="email_chooser">Wyślij e-mail...</string>
+    <string name="email_chooser">Wyślij e-mail…</string>
     <string name="password_changed_explanation">Twoje hasło zostało zmienione, sparuj ponownie swój portfel</string>
     <string name="sms">SMS</string>
     <string name="google_authenticator">Google Authenticator</string>

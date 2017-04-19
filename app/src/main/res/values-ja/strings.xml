@@ -117,7 +117,6 @@
 
     <string name="confirm_details">支払いを確認</string>
     <string name="fee">手数料</string>
-    <string name="dialog_cancel">キャンセル</string>
     <string name="exit_confirm">再度戻るボタンを押して終了してください</string>
 
     <string name="label_address">アドレスのインポートに成功しました。任意でこのアドレスに親しみやすい表示名を割り当てる。</string>
@@ -148,7 +147,7 @@
     <string name="postal">郵便番号</string>
     <string name="telephone">電話番号</string>
     <string name="web">ウェブ</string>
-    <string name="merchant_cat_hint">カテゴリを選択...</string>
+    <string name="merchant_cat_hint">カテゴリを選択…</string>
     <string name="merchant_cat1">カフェ</string>
     <string name="merchant_cat2">バー／酒場</string>
     <string name="merchant_cat3">フードやレストラン</string>
@@ -231,7 +230,7 @@
     <string name="upgrade_page_2">階層的で決定論的なアドレスを介して強化されたプライバシー。</string>
     <string name="upgrade_page_3">ブロックチェーンウォレットでビットコインを管理する方法をカスタマイズ。</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">こんにちは、ブロックチェーンウォレットに次の新規機能が追加されました：</string>
-    <string name="upgrading">アップグレード中...</string>
+    <string name="upgrading">アップグレード中…</string>
     <string name="upgrading_started_info">財布をアップグレードしています。財布のサイズや年数によって時間がかかることがあります。お待ちください。</string>
     <string name="upgrade_success_heading">財布がアップグレードしました！</string>
     <string name="upgrade_success_info">現在最も安全でプライベートなブロックチェーンウォレットを起動しています。財布へ続行できるようになりました。</string>
@@ -246,10 +245,10 @@
 
     <string name="camera_unavailable">このカメラは現在別のアプリケーションで開かれています。別のアプリケーションを閉じて再試行してください。</string>
 
-    <string name="validating_password">パスワードを検証中...</string>
-    <string name="validating_pin">PINを検証中...</string>
-    <string name="creating_pin">PINを作成中...</string>
-    <string name="decrypting_wallet">財布を復号化中...</string>
+    <string name="validating_password">パスワードを検証中…</string>
+    <string name="validating_pin">PINを検証中…</string>
+    <string name="creating_pin">PINを作成中…</string>
+    <string name="decrypting_wallet">財布を復号化中…</string>
     <string name="password_unchanged">パスワードは変更されていません</string>
     <string name="password_changed">パスワードが変更されました</string>
     <string name="verify_email2">認証されたメールアドレスは疑わしい、もしくは通常と異なったアクティビティが検出された際に、財布ログインIDのリマインダーおよびビットコイン資金の受信通知の送信のために使用されます。</string>
@@ -265,7 +264,7 @@
     <string name="device_rooted">デバイスはルート化されているようです。ルート化されたデバイスへの資金保管は安全ではなく、安定性の問題が発生する場合もあることに注意してください。このデバイスでビットコイン財布の使用を継続する場合は、ブロックチェーンアカウントに二重暗号化を使用することを推奨します。</string>
     <string name="address_already_in_wallet">財布にはすでにこのアドレスが含まれています。</string>
     <string name="cannot_create_address">新規アドレスは現在作成できません。再試行してください。</string>
-    <string name="saving_address">アドレスを保存中...</string>
+    <string name="saving_address">アドレスを保存中…</string>
 
     <string name="cannot_launch_app">ブロックチェーンウォレットはこのデバイスで起動できません。</string>
     <string name="label">ラベル</string>
