@@ -31,8 +31,18 @@ public class MonetaryUtil {
         fiatFormat.setMinimumFractionDigits(2);
 
         btcFormat = (DecimalFormat) NumberFormat.getInstance(Locale.getDefault());
-        btcFormat.setMaximumFractionDigits(8);
         btcFormat.setMinimumFractionDigits(1);
+        switch (unit) {
+            case MonetaryUtil.MICRO_BTC:
+                btcFormat.setMaximumFractionDigits(2);
+                break;
+            case MonetaryUtil.MILLI_BTC:
+                btcFormat.setMaximumFractionDigits(5);
+                break;
+            default:
+                btcFormat.setMaximumFractionDigits(8);
+                break;
+        }
     }
 
     public void updateUnit(int unit) {
