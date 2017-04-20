@@ -8,9 +8,9 @@ import info.blockchain.wallet.util.PasswordUtil;
 
 import javax.inject.Inject;
 
-import io.reactivex.Completable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -25,6 +25,7 @@ public class UpgradeWalletViewModel extends BaseViewModel {
     @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
     @Inject protected AccessState accessState;
+    @Inject protected AuthDataManager authDataManager;
     @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected StringUtils stringUtils;
 
@@ -41,6 +42,10 @@ public class UpgradeWalletViewModel extends BaseViewModel {
         void onUpgradeFailed();
 
         void onBackButtonPressed();
+
+        void showProgressDialog(@StringRes int message);
+
+        void dimissProgressDialog();
     }
 
     UpgradeWalletViewModel(DataListener dataListener) {
@@ -78,15 +83,11 @@ public class UpgradeWalletViewModel extends BaseViewModel {
                 payloadDataManager.setTempPassword(secondPassword);
 
                 compositeDisposable.add(
-                        accessState.createPin(currentPassword, accessState.getPIN())
-                                .flatMapCompletable(aBoolean -> {
-                                    if (aBoolean) {
-                                        return payloadDataManager.syncPayloadWithServer();
-                                    } else {
-                                        return Completable.error(new Throwable("Create PIN failed"));
-                                    }
-                                })
-                                .doOnError(throwable -> payloadDataManager.setTempPassword(currentPassword))
+                        authDataManager.createPin(currentPassword, accessState.getPIN())
+                                .andThen(payloadDataManager.syncPayloadWithServer())
+                                .doOnError(ignored -> payloadDataManager.setTempPassword(currentPassword))
+                                .doOnSubscribe(ignored -> dataListener.showProgressDialog(R.string.please_wait))
+                                .doAfterTerminate(() -> dataListener.dimissProgressDialog())
                                 .subscribe(
                                         () -> dataListener.showToast(R.string.password_changed, ToastCustom.TYPE_OK),
                                         throwable -> {
@@ -102,11 +103,9 @@ public class UpgradeWalletViewModel extends BaseViewModel {
                 payloadDataManager.upgradeV2toV3(
                         secondPassword,
                         stringUtils.getString(R.string.default_wallet_name))
-                        .doOnSubscribe(disposable -> {
-                            dataListener.onUpgradeStarted();
-                            appUtil.setNewlyCreated(true);
-                        })
-                        .doOnError(throwable -> appUtil.setNewlyCreated(false))
+                        .doOnSubscribe(ignored -> dataListener.onUpgradeStarted())
+                        .doOnError(ignored -> appUtil.setNewlyCreated(false))
+                        .doOnComplete(() -> appUtil.setNewlyCreated(true))
                         .subscribe(
                                 () -> dataListener.onUpgradeCompleted(),
                                 throwable -> dataListener.onUpgradeFailed()

@@ -22,6 +22,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityUpgradeWalletBinding;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -30,6 +31,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity implements
         ViewPager.OnPageChangeListener {
 
     private ActivityUpgradeWalletBinding binding;
+    private MaterialProgressDialog progressDialog;
     @Thunk UpgradeWalletViewModel viewModel;
 
     @Override
@@ -46,6 +48,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity implements
             textView.setTextColor(ContextCompat.getColor(this, R.color.primary_navy_medium));
             return textView;
         });
+
         binding.upgradePageHeader.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
         binding.upgradePageHeader.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_out));
         binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_1));
@@ -54,12 +57,13 @@ public class UpgradeWalletActivity extends BaseAuthActivity implements
         binding.pager.setAdapter(adapter);
         binding.pager.addOnPageChangeListener(this);
 
-        binding.btnUpgradeComplete.setOnClickListener(v -> upgradeClicked());
+        binding.upgradeBtn.setOnClickListener(v -> upgradeClicked());
     }
 
     @Override
     public void showChangePasswordDialog() {
-        final LinearLayout pwLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.modal_change_password, null);
+        final LinearLayout pwLayout =
+                (LinearLayout) getLayoutInflater().inflate(R.layout.modal_change_password, null);
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
@@ -120,13 +124,35 @@ public class UpgradeWalletActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-        // No-op
+    public void showProgressDialog(@StringRes int message) {
+        progressDialog = new MaterialProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(message);
+        progressDialog.show();
+    }
+
+    @Override
+    public void dimissProgressDialog() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        viewModel.destroy();
     }
 
     @Override
     public void onPageSelected(int position) {
         setSelectedPage(position);
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        // No-op
     }
 
     @Override
@@ -177,9 +203,9 @@ public class UpgradeWalletActivity extends BaseAuthActivity implements
 
     private static class CustomPagerAdapter extends PagerAdapter {
 
-        Context context;
-        LayoutInflater inflater;
-        int[] resources = {
+        private Context context;
+        private LayoutInflater inflater;
+        private int[] resources = {
                 R.drawable.upgrade_backup,
                 R.drawable.upgrade_hd,
                 R.drawable.upgrade_balance

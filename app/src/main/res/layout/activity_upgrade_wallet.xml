@@ -124,7 +124,6 @@
                 android:layout_height="60dp"
                 android:layout_gravity="center_horizontal"
                 android:gravity="center"
-                android:onClick="upgradeClicked"
                 android:text="@string/UPGRADE_YOUR_WALLET"
                 android:theme="@style/ButtonLightBlueTheme" />
 

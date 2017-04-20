@@ -1,6 +1,9 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import info.blockchain.wallet.api.data.Status;
 import info.blockchain.wallet.api.data.WalletOptions;
+import info.blockchain.wallet.crypto.AESUtil;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import org.junit.Before;
@@ -20,18 +23,21 @@ import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.services.WalletService;
+import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 import retrofit2.Response;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 
@@ -47,6 +53,7 @@ public class AuthDataManagerTest extends RxTest {
     @Mock private AppUtil appUtil;
     @Mock private AccessState accessState;
     @Mock private StringUtils stringUtils;
+    @Mock private AESUtilWrapper aesUtilWrapper;
     @Mock private RxBus rxBus;
     @InjectMocks private AuthDataManager subject;
 
@@ -119,30 +126,138 @@ public class AuthDataManagerTest extends RxTest {
     }
 
     @Test
-    public void validatePin() throws Exception {
+    public void validatePinSuccessful() throws Exception {
         // Arrange
-        String decryptedPassword = "1234567890";
-        when(accessState.validatePin(anyString())).thenReturn(Observable.just(decryptedPassword));
+        String pin = "1234";
+        String key = "SHARED_KEY";
+        String encryptedPassword = "ENCRYPTED_PASSWORD";
+        String decryptionKey = "DECRYPTION_KEY";
+        String plaintextPassword = "PLAINTEXT_PASSWORD";
+        Status status = new Status();
+        status.setSuccess(decryptionKey);
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn(key);
+        when(prefsUtil.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, ""))
+                .thenReturn(encryptedPassword);
+        when(walletService.validateAccess(key, pin))
+                .thenReturn(Observable.just(Response.success(status)));
+        when(aesUtilWrapper.decrypt(encryptedPassword, decryptionKey, AESUtil.PIN_PBKDF2_ITERATIONS))
+                .thenReturn(plaintextPassword);
         // Act
-        TestObserver<String> observer = subject.validatePin(anyString()).test();
+        TestObserver<String> observer = subject.validatePin(pin).test();
         // Assert
-        verify(accessState).validatePin(anyString());
+        verify(accessState).setPIN(pin);
+        verifyNoMoreInteractions(accessState);
+        verify(prefsUtil).getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
+        verify(prefsUtil).getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
+        verifyNoMoreInteractions(prefsUtil);
+        verify(walletService).validateAccess(key, pin);
+        verifyNoMoreInteractions(walletService);
+        verify(aesUtilWrapper).decrypt(encryptedPassword, decryptionKey, AESUtil.PIN_PBKDF2_ITERATIONS);
+        verifyNoMoreInteractions(aesUtilWrapper);
         observer.assertComplete();
-        observer.onNext(decryptedPassword);
+        observer.assertValue(plaintextPassword);
         observer.assertNoErrors();
     }
 
     @Test
-    public void createPin() throws Exception {
+    public void validatePinFailure() throws Exception {
         // Arrange
-        when(accessState.createPin(any(String.class), anyString())).thenReturn(Observable.just(true));
+        String pin = "1234";
+        String key = "SHARED_KEY";
+        String encryptedPassword = "ENCRYPTED_PASSWORD";
+        String decryptionKey = "DECRYPTION_KEY";
+        Status status = new Status();
+        status.setSuccess(decryptionKey);
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn(key);
+        when(prefsUtil.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, ""))
+                .thenReturn(encryptedPassword);
+        when(walletService.validateAccess(key, pin))
+                .thenReturn(Observable.just(Response.error(
+                        500,
+                        ResponseBody.create(MediaType.parse("application/json"), "{}"))));
         // Act
-        TestObserver<Boolean> observer = subject.createPin("", "").test();
+        TestObserver<String> observer = subject.validatePin(pin).test();
         // Assert
-        verify(accessState).createPin(any(String.class), anyString());
+        verify(accessState).setPIN(pin);
+        verifyNoMoreInteractions(accessState);
+        verify(prefsUtil).getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
+        verify(prefsUtil).getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
+        verifyNoMoreInteractions(prefsUtil);
+        verify(walletService).validateAccess(key, pin);
+        verifyNoMoreInteractions(walletService);
+        verifyZeroInteractions(aesUtilWrapper);
+        observer.assertNotComplete();
+        observer.assertNoValues();
+        observer.assertError(InvalidCredentialsException.class);
+    }
+
+    @Test
+    public void createPinInvalid() throws Exception {
+        // Arrange
+        String password = "PASSWORD";
+        String pin = "123";
+        // Act
+        TestObserver<Void> observer = subject.createPin(password, pin).test();
+        // Assert
+        verifyZeroInteractions(accessState);
+        verifyZeroInteractions(prefsUtil);
+        verifyZeroInteractions(walletService);
+        verifyZeroInteractions(aesUtilWrapper);
+        observer.assertNotComplete();
+        observer.assertError(Throwable.class);
+    }
+
+    @Test
+    public void createPinSuccessful() throws Exception {
+        // Arrange
+        String password = "PASSWORD";
+        String pin = "1234";
+        String encryptedPassword = "ENCRYPTED_PASSWORD";
+        Status status = new Status();
+        when(walletService.setAccessKey(anyString(), anyString(), eq(pin)))
+                .thenReturn(Observable.just(Response.success(status)));
+        when(aesUtilWrapper.encrypt(eq(password), anyString(), eq(AESUtil.PIN_PBKDF2_ITERATIONS)))
+                .thenReturn(encryptedPassword);
+        // Act
+        TestObserver<Void> observer = subject.createPin(password, pin).test();
+        // Assert
+        verify(accessState).setPIN(pin);
+        verifyNoMoreInteractions(accessState);
+        verify(appUtil).applyPRNGFixes();
+        verifyNoMoreInteractions(appUtil);
+        verify(walletService).setAccessKey(anyString(), anyString(), eq(pin));
+        verifyNoMoreInteractions(walletService);
+        verify(aesUtilWrapper).encrypt(eq(password), anyString(), eq(AESUtil.PIN_PBKDF2_ITERATIONS));
+        verifyNoMoreInteractions(aesUtilWrapper);
+        verify(prefsUtil).setValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, encryptedPassword);
+        verify(prefsUtil).setValue(eq(PrefsUtil.KEY_PIN_IDENTIFIER), anyString());
+        verifyNoMoreInteractions(prefsUtil);
         observer.assertComplete();
-        observer.assertValue(true);
         observer.assertNoErrors();
+    }
+
+    @Test
+    public void createPinError() throws Exception {
+        // Arrange
+        String password = "PASSWORD";
+        String pin = "1234";
+        when(walletService.setAccessKey(anyString(), anyString(), eq(pin)))
+                .thenReturn(Observable.just(Response.error(
+                        500,
+                        ResponseBody.create(MediaType.parse("application/json"), "{}"))));
+        // Act
+        TestObserver<Void> observer = subject.createPin(password, pin).test();
+        // Assert
+        verify(accessState).setPIN(pin);
+        verifyNoMoreInteractions(accessState);
+        verify(appUtil).applyPRNGFixes();
+        verifyNoMoreInteractions(appUtil);
+        verify(walletService).setAccessKey(anyString(), anyString(), eq(pin));
+        verifyNoMoreInteractions(walletService);
+        verifyZeroInteractions(aesUtilWrapper);
+        verifyZeroInteractions(prefsUtil);
+        observer.assertNotComplete();
+        observer.assertError(Throwable.class);
     }
 
     @Test

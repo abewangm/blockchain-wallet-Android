@@ -36,6 +36,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
+import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
@@ -617,7 +618,7 @@ public class SettingsViewModelTest {
         String oldPassword = "OLD_PASSWORD";
         String pin = "PIN";
         when(accessState.getPIN()).thenReturn(pin);
-        when(authDataManager.createPin(newPassword, pin)).thenReturn(Observable.just(true));
+        when(authDataManager.createPin(newPassword, pin)).thenReturn(Completable.complete());
         when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.complete());
         // Act
         subject.updatePassword(newPassword, oldPassword);
@@ -639,34 +640,16 @@ public class SettingsViewModelTest {
         String oldPassword = "OLD_PASSWORD";
         String pin = "PIN";
         when(accessState.getPIN()).thenReturn(pin);
-        when(authDataManager.createPin(newPassword, pin)).thenReturn(Observable.just(false));
+        when(authDataManager.createPin(newPassword, pin))
+                .thenReturn(Completable.error(new Throwable()));
+        when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.complete());
         // Act
         subject.updatePassword(newPassword, oldPassword);
         // Assert
         //noinspection ResultOfMethodCallIgnored
         verify(accessState).getPIN();
         verify(authDataManager).createPin(newPassword, pin);
-        verify(payloadManager).setTempPassword(newPassword);
-        verify(activity).showProgressDialog(anyInt());
-        verify(activity).hideProgressDialog();
-        //noinspection WrongConstant
-        verify(activity, times(2)).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
-    }
-
-    @Test
-    public void updatePasswordError() throws Exception {
-        // Arrange
-        String newPassword = "NEW_PASSWORD";
-        String oldPassword = "OLD_PASSWORD";
-        String pin = "PIN";
-        when(accessState.getPIN()).thenReturn(pin);
-        when(authDataManager.createPin(newPassword, pin)).thenReturn(Observable.error(new Throwable()));
-        // Act
-        subject.updatePassword(newPassword, oldPassword);
-        // Assert
-        //noinspection ResultOfMethodCallIgnored
-        verify(accessState).getPIN();
-        verify(authDataManager).createPin(newPassword, pin);
+        verify(payloadDataManager).syncPayloadWithServer();
         verify(payloadManager).setTempPassword(newPassword);
         verify(payloadManager).setTempPassword(oldPassword);
         verify(activity).showProgressDialog(anyInt());
@@ -697,6 +680,7 @@ public class SettingsViewModelTest {
                                                          AppUtil appUtil,
                                                          AccessState accessState,
                                                          StringUtils stringUtils,
+                                                         AESUtilWrapper aesUtilWrapper,
                                                          RxBus rxBus) {
             return authDataManager;
         }

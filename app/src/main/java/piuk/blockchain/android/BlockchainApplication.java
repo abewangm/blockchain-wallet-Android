@@ -13,7 +13,6 @@ import android.util.Log;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
-import info.blockchain.wallet.api.WalletApi;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
@@ -25,7 +24,6 @@ import io.reactivex.plugins.RxJavaPlugins;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
@@ -91,11 +89,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
         AppUtil appUtil = new AppUtil(this);
 
-        AccessState.getInstance().initAccessState(this,
-                prefsUtil,
-                new WalletService(new WalletApi()),
-                appUtil,
-                rxBus);
+        AccessState.getInstance().initAccessState(this, prefsUtil, rxBus);
 
         // Apply PRNG fixes on app start if needed
         appUtil.applyPRNGFixes();
