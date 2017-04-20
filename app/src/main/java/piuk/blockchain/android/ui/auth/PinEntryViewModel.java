@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.UiThread;
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -218,6 +217,9 @@ public class PinEntryViewModel extends BaseViewModel {
             if (mUserEnteredPin.equals("0000")) {
                 showErrorToast(R.string.zero_pin);
                 clearPinViewAndReset();
+                if (isCreatingNewPin()) {
+                    mDataListener.setTitleString(R.string.create_pin);
+                }
                 return;
             }
 

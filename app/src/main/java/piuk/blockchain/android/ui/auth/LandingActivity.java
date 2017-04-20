@@ -29,7 +29,7 @@ public class LandingActivity extends BaseAuthActivity {
     public static final String KEY_STARTING_FRAGMENT = "starting_fragment";
     public static final String KEY_INTENT_RECOVERING_FUNDS = "recovering_funds";
 
-    private ActivityLandingBinding binding;
+    private AppUtil appUtil;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CREATE_FRAGMENT, LOGIN_FRAGMENT})
@@ -42,7 +42,9 @@ public class LandingActivity extends BaseAuthActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_landing);
+        final ActivityLandingBinding binding =
+                DataBindingUtil.setContentView(this, R.layout.activity_landing);
+        appUtil = new AppUtil(this);
 
         PrefsUtil prefsUtil = new PrefsUtil(this);
         DebugSettings debugSettings = new DebugSettings(prefsUtil, PersistentUrls.getInstance());
@@ -112,7 +114,6 @@ public class LandingActivity extends BaseAuthActivity {
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         // Test for screen overlays before user creates a new wallet or enters confidential information
-        // consume event
-        return new AppUtil(this).detectObscuredWindow(this, event) || super.dispatchTouchEvent(event);
+        return appUtil.detectObscuredWindow(this, event) || super.dispatchTouchEvent(event);
     }
 }

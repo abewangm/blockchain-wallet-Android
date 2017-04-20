@@ -61,29 +61,12 @@ public class AccountDataManagerTest extends RxTest {
         // Arrange
         ECKey mockECKey = mock(ECKey.class);
         LegacyAddress mockLegacyAddress = mock(LegacyAddress.class);
-        when(payloadService.setPrivateKey(eq(mockECKey), isNull()))
+        when(payloadService.setKeyForLegacyAddress(eq(mockECKey), isNull()))
                 .thenReturn(Observable.just(mockLegacyAddress));
         // Act
-        TestObserver<LegacyAddress> observer = subject.setPrivateKey(mockECKey, null).test();
+        TestObserver<LegacyAddress> observer = subject.setKeyForLegacyAddress(mockECKey, null).test();
         // Assert
-        verify(payloadService).setPrivateKey(eq(mockECKey), isNull());
-        observer.assertNoErrors();
-        observer.assertComplete();
-        assertEquals(mockLegacyAddress, observer.values().get(0));
-    }
-
-    @Test
-    public void setPrivateKey() throws Exception {
-        // Arrange
-        ECKey mockECKey = mock(ECKey.class);
-        LegacyAddress mockLegacyAddress = mock(LegacyAddress.class);
-        String password = "PASSWORD";
-        when(payloadService.setPrivateKey(mockECKey, password))
-                .thenReturn(Observable.just(mockLegacyAddress));
-        // Act
-        TestObserver<LegacyAddress> observer = subject.setPrivateKey(mockECKey, password).test();
-        // Assert
-        verify(payloadService).setPrivateKey(mockECKey, password);
+        verify(payloadService).setKeyForLegacyAddress(eq(mockECKey), isNull());
         observer.assertNoErrors();
         observer.assertComplete();
         assertEquals(mockLegacyAddress, observer.values().get(0));
@@ -104,6 +87,19 @@ public class AccountDataManagerTest extends RxTest {
         observer.assertNoErrors();
         observer.assertComplete();
         assertEquals(mockLegacyAddress, observer.values().get(0));
+    }
+
+    @Test
+    public void addLegacyAddress() throws Exception {
+        // Arrange
+        LegacyAddress mockLegacyAddress = mock(LegacyAddress.class);
+        when(payloadService.addLegacyAddress(mockLegacyAddress)).thenReturn(Completable.complete());
+        // Act
+        TestObserver<Void> observer = subject.addLegacyAddress(mockLegacyAddress).test();
+        // Assert
+        verify(payloadService).addLegacyAddress(mockLegacyAddress);
+        observer.assertNoErrors();
+        observer.assertComplete();
     }
 
     @Test

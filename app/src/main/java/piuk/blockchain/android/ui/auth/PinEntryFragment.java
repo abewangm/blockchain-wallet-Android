@@ -10,13 +10,13 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import piuk.blockchain.android.R;
@@ -50,7 +50,6 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     private MaterialProgressDialog materialProgressDialog;
     private FragmentPinEntryBinding binding;
     private FingerprintDialog fingerprintDialog;
-    private ViewGroup keyboardLayout;
     private OnPinEntryFragmentInteractionListener listener;
     private boolean isPaused = false;
     @Thunk PinEntryViewModel viewModel;
@@ -75,8 +74,6 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_pin_entry, container, false);
 
         viewModel = new PinEntryViewModel(this);
-
-        keyboardLayout = (ViewGroup) binding.getRoot().findViewById(R.id.keyboard);
 
         // Set title state
         if (viewModel.isCreatingNewPin()) {
@@ -165,18 +162,18 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
 
     @Override
     public void showKeyboard() {
-        if (keyboardLayout.getVisibility() == View.INVISIBLE) {
+        if (binding.keyboard.getVisibility() == View.INVISIBLE) {
             Animation bottomUp = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_up);
-            keyboardLayout.startAnimation(bottomUp);
-            keyboardLayout.setVisibility(View.VISIBLE);
+            binding.keyboard.startAnimation(bottomUp);
+            binding.keyboard.setVisibility(View.VISIBLE);
         }
     }
 
     private void hideKeyboard() {
-        if (keyboardLayout.getVisibility() == View.VISIBLE) {
+        if (binding.keyboard.getVisibility() == View.VISIBLE) {
             Animation bottomUp = AnimationUtils.loadAnimation(getContext(), R.anim.top_down);
-            keyboardLayout.startAnimation(bottomUp);
-            keyboardLayout.setVisibility(View.INVISIBLE);
+            binding.keyboard.startAnimation(bottomUp);
+            binding.keyboard.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -261,6 +258,10 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
         binding.titleBox.setVisibility(visibility);
     }
 
+    public void resetPinEntry() {
+        viewModel.clearPinBoxes();
+    }
+
     public boolean allowExit() {
         return viewModel.allowExit();
     }
@@ -295,8 +296,9 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
 
     @Override
     public void showValidationDialog() {
-        final AppCompatEditText password = new AppCompatEditText(getContext());
+        final EditText password = new EditText(getContext());
         password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        password.setHint(R.string.password);
 
         new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
@@ -307,12 +309,11 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
                     final String pw = password.getText().toString();
 
-                    if (pw.length() > 0) {
+                    if (!pw.isEmpty()) {
                         viewModel.validatePassword(pw);
                     } else {
                         viewModel.incrementFailureCountAndRestart();
                     }
-
                 }).show();
     }
 

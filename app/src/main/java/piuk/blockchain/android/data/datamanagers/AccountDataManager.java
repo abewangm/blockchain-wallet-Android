@@ -4,6 +4,7 @@ import android.support.annotation.Nullable;
 
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payload.data.Wallet;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import org.bitcoinj.core.ECKey;
@@ -47,28 +48,27 @@ public class AccountDataManager {
      * @param secondPassword An optional double encryption password
      * @return An {@link Observable<Boolean>} representing a successful save
      */
-    public Observable<LegacyAddress> setPrivateKey(ECKey key, @Nullable String secondPassword) {
-        return rxPinning.call(() -> payloadService.setPrivateKey(key, secondPassword))
-                .compose(RxUtil.applySchedulersToObservable());
-    }
-
-    /**
-     * Sets a private key for a {@link LegacyAddress}
-     *
-     * @param key            The {@link ECKey} for the address
-     * @param secondPassword An optional double encryption password
-     */
     public Observable<LegacyAddress> setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword) {
         return rxPinning.call(() -> payloadService.setKeyForLegacyAddress(key, secondPassword))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
-     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link
-     * info.blockchain.wallet.payload.data.Wallet}
+     * Allows you to add a {@link LegacyAddress} to the {@link Wallet}
+     *
+     * @param legacyAddress The new address
+     * @return A {@link Completable} object representing a successful save
+     */
+    public Completable addLegacyAddress(LegacyAddress legacyAddress) {
+        return rxPinning.call(() -> payloadService.addLegacyAddress(legacyAddress))
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link Wallet}
      *
      * @param legacyAddress The updated address
-     * @return {@link Observable<Boolean>} representing a successful save
+     * @return A {@link Completable} object representing a successful save
      */
     public Completable updateLegacyAddress(LegacyAddress legacyAddress) {
         return rxPinning.call(() -> payloadService.updateLegacyAddress(legacyAddress))
