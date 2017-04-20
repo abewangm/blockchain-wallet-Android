@@ -1,15 +1,13 @@
 package piuk.blockchain.android.ui.upgrade;
 
 import android.content.Context;
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog.Builder;
+import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,275 +18,181 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.PasswordUtil;
-
-import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
-import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.databinding.ActivityUpgradeWalletBinding;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.OSUtil;
-import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-public class UpgradeWalletActivity extends BaseAuthActivity {
-
-    private static final String TAG = "UpgradeWalletActivity";
-
-    @Thunk PrefsUtil prefs;
-    @Thunk AppUtil appUtil;
-    @Thunk PayloadManager payloadManager;
+public class UpgradeWalletActivity extends BaseAuthActivity implements
+        UpgradeWalletViewModel.DataListener,
+        ViewPager.OnPageChangeListener {
 
     private ActivityUpgradeWalletBinding binding;
+    @Thunk UpgradeWalletViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_upgrade_wallet);
-
-        payloadManager = PayloadManager.getInstance();
-        prefs = new PrefsUtil(this);
-        appUtil = new AppUtil(this);
+        viewModel = new UpgradeWalletViewModel(this);
 
         binding.upgradePageHeader.setFactory(() -> {
-            TextView myText = new TextView(this);
-            myText.setGravity(Gravity.CENTER);
-            myText.setTextSize(14);
-            myText.setTextColor(ContextCompat.getColor(this, R.color.primary_navy_medium));
-            return myText;
+            TextView textView = new TextView(this);
+            textView.setGravity(Gravity.CENTER);
+            textView.setTextSize(14);
+            textView.setTextColor(ContextCompat.getColor(this, R.color.primary_navy_medium));
+            return textView;
         });
         binding.upgradePageHeader.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
         binding.upgradePageHeader.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_out));
         binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_1));
 
-        CustomPagerAdapter mCustomPagerAdapter = new CustomPagerAdapter(this);
-        binding.pager.setAdapter(mCustomPagerAdapter);
-        binding.pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        CustomPagerAdapter adapter = new CustomPagerAdapter(this);
+        binding.pager.setAdapter(adapter);
+        binding.pager.addOnPageChangeListener(this);
 
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                setSelectedPage(position);
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
-
-        if (payloadManager.getTempPassword() == null) {
-            // Force re-login
-            appUtil.clearCredentialsAndRestart();
-            showToast(R.string.upgrade_fail_info, ToastCustom.TYPE_ERROR);
-            return;
-        }
-
-        if (PasswordUtil.ddpw(payloadManager.getTempPassword()) || PasswordUtil.getStrength(payloadManager.getTempPassword()) < 50) {
-            final LinearLayout pwLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.modal_change_password, null);
-
-            new Builder(this, R.style.AlertDialogStyle)
-                    .setTitle(R.string.app_name)
-                    .setMessage(R.string.weak_password)
-                    .setCancelable(false)
-                    .setView(pwLayout)
-                    .setPositiveButton(R.string.yes, (dialog, whichButton) -> {
-
-                        String password1 = ((EditText) pwLayout.findViewById(R.id.pw1)).getText().toString();
-                        String password2 = ((EditText) pwLayout.findViewById(R.id.pw2)).getText().toString();
-
-                        if (password1.length() < 4 || password1.length() > 255 || password2.length() < 4 || password2.length() > 255) {
-                            showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
-                        } else {
-
-                            if (!password2.equals(password1)) {
-                                showToast(R.string.password_mismatch_error, ToastCustom.TYPE_ERROR);
-                            } else {
-
-                                final String currentPassword = payloadManager.getTempPassword();
-                                payloadManager.setTempPassword(password2);
-
-                                AccessState.getInstance().createPin(payloadManager.getTempPassword(), AccessState.getInstance().getPIN())
-                                        .subscribe(success -> {
-                                            if (success) {
-
-                                                AccessState.getInstance().syncPayloadToServer().subscribe(aBoolean -> {
-                                                    showToast(R.string.password_changed, ToastCustom.TYPE_OK);
-                                                }, Throwable::printStackTrace);
-
-                                            } else {
-                                                throw Exceptions.propagate(new Throwable("Create PIN failed"));
-                                            }
-                                        }, throwable -> {
-                                            payloadManager.setTempPassword(currentPassword);
-                                            showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-                                            showToast(R.string.password_unchanged, ToastCustom.TYPE_ERROR);
-                                        });
-                            }
-                        }
-                    })
-                    .setNegativeButton(R.string.no, (dialog, whichButton) -> showToast(R.string.password_unchanged, ToastCustom.TYPE_GENERAL))
-                    .show();
-
-        }
+        binding.btnUpgradeComplete.setOnClickListener(v -> upgradeClicked());
     }
 
-    public void upgradeClicked(View view) {
+    @Override
+    public void showChangePasswordDialog() {
+        final LinearLayout pwLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.modal_change_password, null);
 
-        new SecondPasswordHandler(UpgradeWalletActivity.this).validate(new SecondPasswordHandler.ResultListener() {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.weak_password)
+                .setCancelable(false)
+                .setView(pwLayout)
+                .setPositiveButton(R.string.yes, (dialog, whichButton) -> {
+                    String password1 = ((EditText) pwLayout.findViewById(R.id.pw1)).getText().toString();
+                    String password2 = ((EditText) pwLayout.findViewById(R.id.pw2)).getText().toString();
+                    viewModel.submitPasswords(password1, password2);
+                })
+                .setNegativeButton(R.string.no, (dialog, whichButton) ->
+                        showToast(R.string.password_unchanged, ToastCustom.TYPE_GENERAL))
+                .show();
+    }
+
+    @Override
+    public void showToast(@StringRes int message, @ToastCustom.ToastType String type) {
+        ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, type);
+    }
+
+    @Override
+    public void onUpgradeStarted() {
+        binding.upgradePageTitle.setText(getString(R.string.upgrading));
+        binding.upgradePageHeader.setText(getString(R.string.upgrading_started_info));
+        binding.progressBar.setVisibility(View.VISIBLE);
+        binding.pager.setVisibility(View.GONE);
+        binding.upgradeActionContainer.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onUpgradeCompleted() {
+        binding.upgradePageTitle.setText(getString(R.string.upgrade_success_heading));
+        binding.upgradePageHeader.setText(getString(R.string.upgrade_success_info));
+        binding.progressBar.setVisibility(View.GONE);
+        binding.btnUpgradeComplete.setVisibility(View.VISIBLE);
+        binding.btnUpgradeComplete.setOnClickListener(v -> viewModel.onContinueClicked());
+    }
+
+    @Override
+    public void onUpgradeFailed() {
+        binding.upgradePageTitle.setText(getString(R.string.upgrade_fail_heading));
+        binding.upgradePageHeader.setText(getString(R.string.upgrade_fail_info));
+        binding.progressBar.setVisibility(View.GONE);
+        binding.btnUpgradeComplete.setVisibility(View.VISIBLE);
+        binding.btnUpgradeComplete.setText(getString(R.string.CLOSE));
+        binding.btnUpgradeComplete.setOnClickListener(v -> onBackPressed());
+    }
+
+    @Override
+    public void onBackButtonPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    public void onBackPressed() {
+        viewModel.onBackButtonPressed(this);
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        // No-op
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        setSelectedPage(position);
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+        // No-op
+    }
+
+    private void upgradeClicked() {
+        new SecondPasswordHandler(this).validate(new SecondPasswordHandler.ResultListener() {
             @Override
             public void onNoSecondPassword() {
-                doUpgrade(null);
+                viewModel.onUpgradeRequested(null);
             }
 
             @Override
-            public void onSecondPasswordValidated(String validateSecondPassword) {
-                doUpgrade(validateSecondPassword);
+            public void onSecondPasswordValidated(String validatedSecondPassword) {
+                viewModel.onUpgradeRequested(validatedSecondPassword);
             }
         });
     }
 
-    @Thunk
-    void doUpgrade(final String secondPassword) {
-
-        onUpgradeStart();
-
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void[] params) {
-                if (ConnectivityStatus.hasConnectivity(UpgradeWalletActivity.this)) {
-                    appUtil.setNewlyCreated(true);
-
-                    try {
-                        boolean success = payloadManager.upgradeV2PayloadToV3(secondPassword, getResources().getString(R.string.default_wallet_name));
-
-                        if (success) {
-                            if (new OSUtil(UpgradeWalletActivity.this).isServiceRunning(WebSocketService.class)) {
-                                stopService(new Intent(UpgradeWalletActivity.this,
-                                        WebSocketService.class));
-                            }
-                            startService(new Intent(UpgradeWalletActivity.this,
-                                    WebSocketService.class));
-
-                            payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(0).setLabel(getResources().getString(R.string.default_wallet_name));
-                            onUpgradeCompleted();
-                        } else {
-                            onUpgradeFailed();
-                        }
-
-                    } catch (Exception e) {
-                        onUpgradeFailed();
-                        e.printStackTrace();
-                    }
-                }
-                return null;
-            }
-        }.execute();
-    }
-
-    private void onUpgradeStart() {
-        runOnUiThread(() -> {
-            binding.upgradePageTitle.setText(getString(R.string.upgrading));
-            binding.upgradePageHeader.setText(getString(R.string.upgrading_started_info));
-            binding.progressBar.setVisibility(View.VISIBLE);
-            binding.pager.setVisibility(View.GONE);
-            binding.upgradeActionContainer.setVisibility(View.GONE);
-        });
-    }
-
-    @Thunk
-    void showToast(@StringRes int message, @ToastCustom.ToastType String type) {
-        runOnUiThread(() -> ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, type));
-    }
-
-    @Thunk
-    void onUpgradeCompleted() {
-
-        runOnUiThread(() -> {
-            binding.upgradePageTitle.setText(getString(R.string.upgrade_success_heading));
-            binding.upgradePageHeader.setText(getString(R.string.upgrade_success_info));
-            binding.progressBar.setVisibility(View.GONE);
-            binding.btnUpgradeComplete.setVisibility(View.VISIBLE);
-            binding.btnUpgradeComplete.setOnClickListener(v -> {
-                prefs.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
-                AccessState.getInstance().setIsLoggedIn(true);
-                appUtil.restartAppWithVerifiedPin();
-            });
-        });
-    }
-
-    @Thunk
-    void onUpgradeFailed() {
-
-        appUtil.setNewlyCreated(false);
-
-        runOnUiThread(() -> {
-            binding.upgradePageTitle.setText(getString(R.string.upgrade_fail_heading));
-            binding.upgradePageHeader.setText(getString(R.string.upgrade_fail_info));
-            binding.progressBar.setVisibility(View.GONE);
-            binding.btnUpgradeComplete.setVisibility(View.VISIBLE);
-            binding.btnUpgradeComplete.setText(getString(R.string.CLOSE));
-            binding.btnUpgradeComplete.setOnClickListener(v -> onBackPressed());
-        });
-    }
-
-    @Thunk
-    void setSelectedPage(int position) {
+    private void setSelectedPage(int position) {
         switch (position) {
             case 0:
                 binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_1));
-                setBackGround(binding.pageBox0, R.drawable.rounded_view_accent_blue);
-                setBackGround(binding.pageBox1, R.drawable.rounded_view_dark_blue);
-                setBackGround(binding.pageBox2, R.drawable.rounded_view_dark_blue);
+                setBackground(binding.pageBox0, R.drawable.rounded_view_accent_blue);
+                setBackground(binding.pageBox1, R.drawable.rounded_view_dark_blue);
+                setBackground(binding.pageBox2, R.drawable.rounded_view_dark_blue);
                 break;
             case 1:
                 binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_2));
-                setBackGround(binding.pageBox0, R.drawable.rounded_view_dark_blue);
-                setBackGround(binding.pageBox1, R.drawable.rounded_view_accent_blue);
-                setBackGround(binding.pageBox2, R.drawable.rounded_view_dark_blue);
+                setBackground(binding.pageBox0, R.drawable.rounded_view_dark_blue);
+                setBackground(binding.pageBox1, R.drawable.rounded_view_accent_blue);
+                setBackground(binding.pageBox2, R.drawable.rounded_view_dark_blue);
                 break;
             case 2:
                 binding.upgradePageHeader.setText(getResources().getString(R.string.upgrade_page_3));
-                setBackGround(binding.pageBox0, R.drawable.rounded_view_dark_blue);
-                setBackGround(binding.pageBox1, R.drawable.rounded_view_dark_blue);
-                setBackGround(binding.pageBox2, R.drawable.rounded_view_accent_blue);
+                setBackground(binding.pageBox0, R.drawable.rounded_view_dark_blue);
+                setBackground(binding.pageBox1, R.drawable.rounded_view_dark_blue);
+                setBackground(binding.pageBox2, R.drawable.rounded_view_accent_blue);
                 break;
         }
     }
 
-    private void setBackGround(View view, int res) {
+    private void setBackground(View view, int res) {
         view.setBackground(ContextCompat.getDrawable(this, res));
     }
 
     private static class CustomPagerAdapter extends PagerAdapter {
 
-        Context mContext;
-        LayoutInflater mLayoutInflater;
-        int[] mResources = {
+        Context context;
+        LayoutInflater inflater;
+        int[] resources = {
                 R.drawable.upgrade_backup,
                 R.drawable.upgrade_hd,
                 R.drawable.upgrade_balance
         };
 
         CustomPagerAdapter(Context context) {
-            mContext = context;
-            mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            this.context = context;
+            inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
         public int getCount() {
-            return mResources.length;
+            return resources.length;
         }
 
         @Override
@@ -298,10 +202,10 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            View itemView = mLayoutInflater.inflate(R.layout.activity_upgrade_wallet_pager_item, container, false);
+            View itemView = inflater.inflate(R.layout.activity_upgrade_wallet_pager_item, container, false);
 
             ImageView imageView = (ImageView) itemView.findViewById(R.id.imageView);
-            imageView.setImageResource(mResources[position]);
+            imageView.setImageResource(resources[position]);
 
             container.addView(itemView);
 
@@ -312,12 +216,6 @@ public class UpgradeWalletActivity extends BaseAuthActivity {
         public void destroyItem(ViewGroup container, int position, Object object) {
             container.removeView((LinearLayout) object);
         }
-
     }
 
-    @Override
-    public void onBackPressed() {
-        new AccessState().logout(this);
-        super.onBackPressed();
-    }
 }
