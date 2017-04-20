@@ -117,7 +117,6 @@
 
     <string name="confirm_details">Xác nhận thanh toán</string>
     <string name="fee">Phí</string>
-    <string name="dialog_cancel">HỦY</string>
     <string name="exit_confirm">Nhấn trở lại một lần nữa để thoát</string>
 
     <string name="label_address">Địa chỉ của bạn đã được nhập thành công. Tùy chọn chỉ định một tên hiển thị dễ nhìn cho địa chỉ này.</string>
@@ -148,7 +147,7 @@
     <string name="postal">Mã bưu chính</string>
     <string name="telephone">Điện thoại</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Chọn một hạng mục...</string>
+    <string name="merchant_cat_hint">Chọn một hạng mục…</string>
     <string name="merchant_cat1">Cà phê</string>
     <string name="merchant_cat2">Quán Bar/Đồ uống</string>
     <string name="merchant_cat3">Thức ăn và đồ uống</string>
@@ -231,7 +230,7 @@
     <string name="upgrade_page_2">Tăng cường bảo mật thông qua các địa chỉ xác định thứ bậc.</string>
     <string name="upgrade_page_3">Tùy chỉnh cách bạn tổ chức Bitcoin trong Ví Blockchain của mình.</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Chúng tôi đã thêm một vài tính năng mới cho ví Blockchain:</string>
-    <string name="upgrading">Đang nâng cấp...</string>
+    <string name="upgrading">Đang nâng cấp…</string>
     <string name="upgrading_started_info">Ví của bạn đang nâng cấp, thời gian phụ thuộc vào kích cỡ và thời gian sử dụng ví của bạn.</string>
     <string name="upgrade_success_heading">Ví của bạn đã được nâng cấp!</string>
     <string name="upgrade_success_info">Bạn đang sử dụng Ví Blockchain an toàn và bảo mật nhất. Bạn có thể tiếp tục sử dụng ví của mình.</string>
@@ -246,10 +245,10 @@
 
     <string name="camera_unavailable">Camere hiện đang được bật cho ứng dụng khác. Vui lòng đóng ứng dụng khác và thử lại.</string>
 
-    <string name="validating_password">Đang xác nhận mật khẩu...</string>
-    <string name="validating_pin">Đang xác nhận mã PIN...</string>
-    <string name="creating_pin">Đang tạo mã PIN...</string>
-    <string name="decrypting_wallet">Đang giải mã Ví...</string>
+    <string name="validating_password">Đang xác nhận mật khẩu…</string>
+    <string name="validating_pin">Đang xác nhận mã PIN…</string>
+    <string name="creating_pin">Đang tạo mã PIN…</string>
+    <string name="decrypting_wallet">Đang giải mã Ví…</string>
     <string name="password_unchanged">Mật khẩu không được thay đổi</string>
     <string name="password_changed">Mật khẩu đã được thay đổi</string>
     <string name="verify_email2">Địa chỉ email đã xác minh của bạn được sử dụng để gửi các mã đăng nhập khi phát hiện có hành vi đáng ngờ hoặc bất thường, nhắc nhở bạn về ID đăng nhập ví của mình, và để gửi thông báo thanh toán bitcoin khi bạn nhận được tiền.</string>
@@ -265,7 +264,7 @@
     <string name="device_rooted">Thiết bị của bạn đã được root. Lưu ý, không an toàn khi lưu trữ các khoản tiền trên một thiết bị đã được root, hơn nữa, có thể gây ra sự không ổn định. Nếu bạn tiếp tục sử dụng ví Bitcoin của mình trên thiết bị này, chúng tôi khuyên bạn nên sử dụng mã hóa kép cho tài khoản Blockchain.</string>
     <string name="address_already_in_wallet">Ví của bạn đã chứa địa chỉ này.</string>
     <string name="cannot_create_address">Không thể tạo địa chỉ mới vào thời điểm này. Vui lòng thử lại.</string>
-    <string name="saving_address">Đang lưu địa chỉ...</string>
+    <string name="saving_address">Đang lưu địa chỉ…</string>
 
     <string name="cannot_launch_app">Ví Blockchain không thể sử dụng trên thiết bị này.</string>
     <string name="label">Nhãn</string>

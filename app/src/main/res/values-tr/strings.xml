@@ -117,7 +117,6 @@
 
     <string name="confirm_details">Ödemeyi Onayla</string>
     <string name="fee">Ücret</string>
-    <string name="dialog_cancel">İPTAL</string>
     <string name="exit_confirm">Çıkış için geri düğmesine basın</string>
 
     <string name="label_address">Adresiniz başarıyla alındı. Seçeneğe göre bu adres için uygun bir görüntü ismi belirleyin.</string>
@@ -148,7 +147,7 @@
     <string name="postal">Posta kodu</string>
     <string name="telephone">Telefon</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Bir kategori seç...</string>
+    <string name="merchant_cat_hint">Bir kategori seç…</string>
     <string name="merchant_cat1">Kafe</string>
     <string name="merchant_cat2">Barlar/İçki</string>
     <string name="merchant_cat3">Yemek ve Yiyecek</string>
@@ -231,7 +230,7 @@
     <string name="upgrade_page_2">Sıra düzenli belirleyici adresler üzerinden geliştirilmiş gizlilik.</string>
     <string name="upgrade_page_3">Blockchain Cüzdanınızdaki Bitcoinlerinizi düzenleme biçiminizi özelleştirin.</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Selam, Blockchain cüzdanınıza bu yeni özellikleri ekledik:</string>
-    <string name="upgrading">Yükseltiliyor...</string>
+    <string name="upgrading">Yükseltiliyor…</string>
     <string name="upgrading_started_info">Cüzdanınız yükseltiliyor, bu işlem cüzdanınızın büyüklüğüne ve yaşına göre biraz zaman alabilir lütfen sabırlı olun.</string>
     <string name="upgrade_success_heading">Cüzdanınız yükseltildi!</string>
     <string name="upgrade_success_info">Şimdi en güvenli ve özel Blockchain Cüzdanını kullanıyorsunuz. Cüzdanınıza şimdi devam edebilirsiniz.</string>
@@ -246,10 +245,10 @@
 
     <string name="camera_unavailable">Kamera şu an başka bir uygulama tarafından açılmış. Lütfen diğer uygulamayı kapatın ve tekrar deneyin.</string>
 
-    <string name="validating_password">Şifre Doğrulanıyor...</string>
-    <string name="validating_pin">PIN Doğrulanıyor...</string>
-    <string name="creating_pin">PIN Oluşturuluyor...</string>
-    <string name="decrypting_wallet">Cüzdan şifresi çözülüyor...</string>
+    <string name="validating_password">Şifre Doğrulanıyor…</string>
+    <string name="validating_pin">PIN Doğrulanıyor…</string>
+    <string name="creating_pin">PIN Oluşturuluyor…</string>
+    <string name="decrypting_wallet">Cüzdan şifresi çözülüyor…</string>
     <string name="password_unchanged">Şifre değiştirilmedi</string>
     <string name="password_changed">Şifre değiştirildi</string>
     <string name="verify_email2">Doğrulanmış e-posta adresiniz, şüpheli veya sıradışı etkinlikler belirlendiği zaman oturum açma kodları göndermek, cüzdan oturum açma kimliğinizi size hatırlatmak ve para aldığınız zaman size bitcoin ödeme uyarıları göndermek için kullanılır.</string>
@@ -265,7 +264,7 @@
     <string name="device_rooted">Cihazınızın kök dizinli olduğu görünmektedir. Kök dizinli bir cihazda para depolamanın güvenli olmadığını ve ayrıca bunun denge sorunları yarabileceğini dikkate alın. Bu cihaz üzerinde Bitcoin cüzdanımızı kullanmaya devam ederseniz, Blockchain hesabınızı iki aşamalı şifreleme ile kullanmanızı tavsiye ederiz. </string>
     <string name="address_already_in_wallet">Bu adres cüzdanınızda zaten var.</string>
     <string name="cannot_create_address">Şu an yeni bir adres oluşturulamıyor. Lütfen tekrar deneyin.</string>
-    <string name="saving_address">Adres kaydediliyor...</string>
+    <string name="saving_address">Adres kaydediliyor…</string>
 
     <string name="cannot_launch_app">Blockchain Cüzdanı bu cihazda çalışmıyor.</string>
     <string name="label">Etiket</string>
@@ -413,7 +412,7 @@
     <string name="account_locked_title">Hesap kilitlendi</string>
     <string name="account_locked_message">Hesabınız ihtiyati olarak geçici şekilde kilitlenmiştir Lütfen daha fazla bilgi için e-postanızı kontrol edin ve daha sonra tekrar deneyin.</string>
     <string name="licenses">Lisanslar</string>
-    <string name="email_chooser">E-posta gönder...</string>
+    <string name="email_chooser">E-posta gönder…</string>
     <string name="password_changed_explanation">Şifreniz değiştirildi, lütfen cüzdanınızı onarın</string>
     <string name="sms">SMS</string>
     <string name="google_authenticator">Google Kimlik Denetleyici</string>

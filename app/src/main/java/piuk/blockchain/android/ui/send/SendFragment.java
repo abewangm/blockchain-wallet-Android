@@ -625,8 +625,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         playAudio();
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.modal_transaction_success, null);
+        View dialogView = View.inflate(getActivity(), R.layout.modal_transaction_success, null);
         transactionSuccessDialog = dialogBuilder.setView(dialogView)
                 .setPositiveButton(getString(R.string.done), null)
                 .create();

@@ -117,7 +117,6 @@
 
     <string name="confirm_details">Подтвердить оплату</string>
     <string name="fee">Комиссия</string>
-    <string name="dialog_cancel">ОТМЕНА</string>
     <string name="exit_confirm">Для выхода еще раз нажмите кнопку «Назад»</string>
 
     <string name="label_address">Ваш адрес успешно импортирован. При необходимости присвойте понятное отображаемое имя этому адресу.</string>
@@ -148,7 +147,7 @@
     <string name="postal">Почтовый индекс</string>
     <string name="telephone">Телефон</string>
     <string name="web">Веб</string>
-    <string name="merchant_cat_hint">Выберите категорию...</string>
+    <string name="merchant_cat_hint">Выберите категорию…</string>
     <string name="merchant_cat1">Кафе</string>
     <string name="merchant_cat2">Бары/напитки</string>
     <string name="merchant_cat3">Продукты и рестораны</string>
@@ -231,7 +230,7 @@
     <string name="upgrade_page_2">Усиленная конфиденциальность достигается путем использования иерархических детерминированных адресов.</string>
     <string name="upgrade_page_3">Настройте структуру хранения биткоинов в кошельке Blockchain</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Заметьте, мы добавили в кошелек Blockchain вот такие новые функции:</string>
-    <string name="upgrading">Идет обновление...</string>
+    <string name="upgrading">Идет обновление…</string>
     <string name="upgrading_started_info">Ваш кошелек обновляется, будьте терпеливы, это может занять некоторое время в зависимости от размера и продолжительности действия вашего кошелька.</string>
     <string name="upgrade_success_heading">Ваш кошелек был обновлен!</string>
     <string name="upgrade_success_info">Теперь у вас есть наиболее безопасный и конфиденциальный кошелек Blockchain. Теперь вы можете перейти к кошельку.</string>
@@ -246,10 +245,10 @@
 
     <string name="camera_unavailable">Сейчас камера открыта другим приложением. Закройте другое приложение и повторите попытку.</string>
 
-    <string name="validating_password">Идет проверка пароля...</string>
-    <string name="validating_pin">Идет проверка PIN-кода...</string>
-    <string name="creating_pin">Идет создание PIN-кода...</string>
-    <string name="decrypting_wallet">Идет расшифровка кошелька...</string>
+    <string name="validating_password">Идет проверка пароля…</string>
+    <string name="validating_pin">Идет проверка PIN-кода…</string>
+    <string name="creating_pin">Идет создание PIN-кода…</string>
+    <string name="decrypting_wallet">Идет расшифровка кошелька…</string>
     <string name="password_unchanged">Пароль не изменен</string>
     <string name="password_changed">Пароль изменен</string>
     <string name="verify_email2">Ваш подтвержденный электронный адрес используется для отправки кодов входа в систему, при подозрительной или необычной активности, для напоминания ID для доступа к кошельку и отправления сообщений о поступлении средств на счет.</string>
@@ -265,7 +264,7 @@
     <string name="device_rooted">Возможно, ваше устройство корневое. Имейте в виду, что хранение средств на корневом устройстве является небезопасным и, кроме того, может вызвать проблемы со стабильностью. Если вы продолжаете использовать наш Bitcoin кошелек на этом устройстве, мы рекомендуем использовать двойное шифрование вашей учетной записи Blockchain.</string>
     <string name="address_already_in_wallet">Ваш кошелек уже содержит этот адрес.</string>
     <string name="cannot_create_address">В данный момент невозможно создать новый адрес. Попробуйте еще раз.</string>
-    <string name="saving_address">Идет сохранение адреса...</string>
+    <string name="saving_address">Идет сохранение адреса…</string>
 
     <string name="cannot_launch_app">На этом устройстве невозможно запустить кошелек Blockchain.</string>
     <string name="label">Ярлык</string>

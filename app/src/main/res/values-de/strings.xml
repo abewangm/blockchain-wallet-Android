@@ -117,7 +117,6 @@
 
     <string name="confirm_details">Zahlung bestätigen</string>
     <string name="fee">Gebühr</string>
-    <string name="dialog_cancel">ABBRECHEN</string>
     <string name="exit_confirm">Zum Beenden nochmals auf den \'Zurück\'-Button drücken</string>
 
     <string name="label_address">Ihre Adresse wurde erfolgreich importiert. Auf Wunsch kann dieser Adresse ein ansprechender Anzeigename hinzugefügt werden.</string>
@@ -148,7 +147,7 @@
     <string name="postal">Postleitzahl</string>
     <string name="telephone">Telefon</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Kategorie auswählen ...</string>
+    <string name="merchant_cat_hint">Kategorie auswählen …</string>
     <string name="merchant_cat1">Café</string>
     <string name="merchant_cat2">Bars/Getränke</string>
     <string name="merchant_cat3">Essen und Speisen</string>
@@ -231,7 +230,7 @@
     <string name="upgrade_page_2">Verbesserter Datenschutz durch hierarchische deterministische Adressen.</string>
     <string name="upgrade_page_3">Individualisieren Sie die Art und Weise, wie Sie die Bitcoins in Ihrer Blockchain-Wallet organisieren.</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Hallo, wir haben Ihre Blockchain-Wallet um diese neuen Funktionen erweitert:</string>
-    <string name="upgrading">Aufrüstung erfolgt ...</string>
+    <string name="upgrading">Aufrüstung erfolgt …</string>
     <string name="upgrading_started_info">Ihre Wallet wird derzeit aufgerüstet. Bitte haben Sie Geduld. Dies kann je nach Größe und Alter Ihrer Wallet etwas dauern.</string>
     <string name="upgrade_success_heading">Ihre Wallet wurde aufgerüstet!</string>
     <string name="upgrade_success_info">Sie verfügen jetzt über die sicherste und vertraulichste Blockchain-Wallet. Sie können nun zu Ihrer Wallet gehen.</string>
@@ -246,10 +245,10 @@
 
     <string name="camera_unavailable">Die Kamera wird derzeit durch eine andere Anwendung genutzt. Bitte schließen Sie die entsprechende Anwendung und versuchen Sie es erneut.</string>
 
-    <string name="validating_password">Passwort wird überprüft ...</string>
-    <string name="validating_pin">PIN wird überprüft ...</string>
-    <string name="creating_pin">PIN wird erstellt ...</string>
-    <string name="decrypting_wallet">Wallet wird entschlüsselt ...</string>
+    <string name="validating_password">Passwort wird überprüft …</string>
+    <string name="validating_pin">PIN wird überprüft …</string>
+    <string name="creating_pin">PIN wird erstellt …</string>
+    <string name="decrypting_wallet">Wallet wird entschlüsselt …</string>
     <string name="password_unchanged">Passwort wurde nicht geändert</string>
     <string name="password_changed">Passwort wurde geändert</string>
     <string name="verify_email2">Ihre verifizierte E-Mail-Adresse wird bei Feststellung verdächtiger oder ungewöhnlicher Aktivitäten zur Übersendung von Anmeldecodes, aber auch zur Erinnerung an Ihre persönliche Wallet-Anmelde-ID und zum Versand von Bitcoin-Zahlungsbenachrichtigungen bei Eintreffen von Guthaben verwendet.</string>
@@ -265,7 +264,7 @@
     <string name="device_rooted">Ihr Gerät scheint gerootet zu sein. Wir weisen Sie darauf hin, dass eine Guthabenspeicherung auf gerooteten Geräten nicht sicher ist und auch zu Stabilitätsproblemen führen kann. Falls Sie auf diesem Gerät weiterhin unsere Bitcoin-Wallet verwenden, raten wir Ihnen, Ihr Blockchain-Konto doppelt zu verschlüsseln.</string>
     <string name="address_already_in_wallet">Diese Adresse ist bereits in Ihrer Wallet vorhanden.</string>
     <string name="cannot_create_address">Derzeit kann keine neue Adresse erstellt werden. Bitte erneut versuchen.</string>
-    <string name="saving_address">Adresse wird gespeichert ...</string>
+    <string name="saving_address">Adresse wird gespeichert …</string>
 
     <string name="cannot_launch_app">Blockchain Wallet funktioniert nicht auf diesem Gerät.</string>
     <string name="label">Beschreibung</string>

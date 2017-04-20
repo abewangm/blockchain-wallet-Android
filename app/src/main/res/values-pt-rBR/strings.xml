@@ -117,7 +117,6 @@
 
     <string name="confirm_details">Confirmar Pagamento</string>
     <string name="fee">Taxa</string>
-    <string name="dialog_cancel">CANCELAR</string>
     <string name="exit_confirm">Pressione novamente o botão voltar para sair.</string>
 
     <string name="label_address">Seu endereço foi importado com sucesso. Adicione um nome a este endereço se desejar.</string>
@@ -148,7 +147,7 @@
     <string name="postal">CEP</string>
     <string name="telephone">Telefone</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Escolher categoria...</string>
+    <string name="merchant_cat_hint">Escolher categoria…</string>
     <string name="merchant_cat1">Cafés</string>
     <string name="merchant_cat2">Bares/Bebidas</string>
     <string name="merchant_cat3">Lanchonetes/Restaurantes</string>
@@ -231,7 +230,7 @@
     <string name="upgrade_page_2">Privacidade aprimorada através de endereços determinísticos hierárquicos.</string>
     <string name="upgrade_page_3">Personalize a organização dos bitcoins em sua Carteira Blockchain.</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Olha só, adicionamos estes novos recursos à sua Carteira Blockchain:</string>
-    <string name="upgrading">Atualizando...</string>
+    <string name="upgrading">Atualizando…</string>
     <string name="upgrading_started_info">Sua carteira está sendo atualizada, aguarde um momento. Isto pode levar alguns minutos, dependendo do tamanho e tempo de existência de sua carteira.</string>
     <string name="upgrade_success_heading">Sua carteira foi atualizada!</string>
     <string name="upgrade_success_info">Agora, você está usando a Carteira Blockchain mais segura e privativa. Você pode acessar sua carteira agora.</string>
@@ -246,10 +245,10 @@
 
     <string name="camera_unavailable">A câmera está sendo usada por outro aplicativo. Por favor, feche o outro aplicativo e tente novamente.</string>
 
-    <string name="validating_password">Validando senha...</string>
-    <string name="validating_pin">Validando PIN...</string>
-    <string name="creating_pin">Criando PIN...</string>
-    <string name="decrypting_wallet">Decodificando Carteira...</string>
+    <string name="validating_password">Validando senha…</string>
+    <string name="validating_pin">Validando PIN…</string>
+    <string name="creating_pin">Criando PIN…</string>
+    <string name="decrypting_wallet">Decodificando Carteira…</string>
     <string name="password_unchanged">Senha não alterada</string>
     <string name="password_changed">Senha alterada</string>
     <string name="verify_email2">Seu endereço de e-mail verificado recebe códigos de login, quando atividade suspeita ou incomum for detectada. Também é usado para lembrar-lhe de seu ID de Carteira e enviar-lhe alertas de pagamento Bitcoin quando você receber fundos.</string>
@@ -265,7 +264,7 @@
     <string name="device_rooted">O dispositivo parece ter sido rooteado. Esteja ciente de que armazenar fundos em um dispositivo rooteado é arriscado e, além disso, pode causar problemas de estabilidade. Se for continuar a usar nossa carteira Bitcoin neste dispositivo, recomendamos o uso de criptografia dupla em sua conta da Blockchain.</string>
     <string name="address_already_in_wallet">Sua carteira já contém este endereço.</string>
     <string name="cannot_create_address">Não é possível criar um endereço novo neste momento. Tente novamente.</string>
-    <string name="saving_address">Salvando endereço...</string>
+    <string name="saving_address">Salvando endereço…</string>
 
     <string name="cannot_launch_app">Não é possível executar a Carteira Blockchain neste dispositivo.</string>
     <string name="label">Etiqueta</string>

@@ -53,10 +53,10 @@ public class AboutDialog extends AppCompatDialogFragment {
         });
 
         licenses.setOnClickListener(v -> {
-            View layout = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_licenses, null);
+            View layout = View.inflate(getActivity(), R.layout.dialog_licenses, null);
             WebView webView = (WebView) layout.findViewById(R.id.webview);
             webView.loadUrl(("file:///android_asset/licenses.html"));
-                    new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+            new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setView(layout)
                     .setPositiveButton(android.R.string.ok, null)
                     .show();

@@ -117,7 +117,6 @@
 
     <string name="confirm_details">지불 확인</string>
     <string name="fee">수수료</string>
-    <string name="dialog_cancel">취소</string>
     <string name="exit_confirm">나가려면 뒤로 단추를 다시 누르세요</string>
 
     <string name="label_address">귀하 주소 가져오기 성공 선택으로 이 주소에 친근한 디스플레이를 배정하세요</string>
@@ -148,7 +147,7 @@
     <string name="postal">우편 번호</string>
     <string name="telephone">전화</string>
     <string name="web">웹</string>
-    <string name="merchant_cat_hint">범주 선택...</string>
+    <string name="merchant_cat_hint">범주 선택…</string>
     <string name="merchant_cat1">카페</string>
     <string name="merchant_cat2">바/마시기</string>
     <string name="merchant_cat3">식품과 식사하기</string>
@@ -228,7 +227,7 @@
     <string name="upgrade_page_2">계층적 결정론적 주소를 통한 고급 개인 정보 보호</string>
     <string name="upgrade_page_3">귀하 블록체인 지갑 안 비트코인을 정리를 방법 사용자 설정</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">귀하 블록체인 지갑에 새로운 기능을 추가했습니다:</string>
-    <string name="upgrading">업그레이드 중...</string>
+    <string name="upgrading">업그레이드 중…</string>
     <string name="upgrading_started_info">지갑 업그레이드 중입니다. 지갑 크기나 이력에 따라 시간이 좀 걸리니 기다려 주세요.</string>
     <string name="upgrade_success_heading">지갑 업그레이드가 끝났습니다!</string>
     <string name="upgrade_success_info">귀하는 이제 가장 안전하고 개인적인 블록체인 Wallet을 운영하게 되었습니다. 이제 지갑을 계속해도 됩니다</string>
@@ -243,10 +242,10 @@
 
     <string name="camera_unavailable">다른 애플리케이션이 카메라를 사용하고 있습니다. 다른 애플리케이션을 닫고 다시 해 보세요.</string>
 
-    <string name="validating_password">암호 확인 중...</string>
-    <string name="validating_pin">비밀 번호 확인 중...</string>
-    <string name="creating_pin">비밀 번호 만드는 중...</string>
-    <string name="decrypting_wallet">지갑 해독 중...</string>
+    <string name="validating_password">암호 확인 중…</string>
+    <string name="validating_pin">비밀 번호 확인 중…</string>
+    <string name="creating_pin">비밀 번호 만드는 중…</string>
+    <string name="decrypting_wallet">지갑 해독 중…</string>
     <string name="password_unchanged">암호 안 바뀜</string>
     <string name="password_changed">암호 바뀜</string>
     <string name="verify_email2">귀하의 확인된 이메일 주소는 의심스럽거나 비정상적인 활동이 탐지 되어 로그인 코드를 보낼 때, 지갑 로그인 아이디를 다시 알려줄 때, 자금을 받은 후 비트코인 지불을 하라고 알려줄 때 쓰입니다.</string>
@@ -262,7 +261,7 @@
     <string name="device_rooted">귀하 장치가 루팅 된 것 같습니다. 루팅 된 장치에 자금을 가지고 있는 것은 위험하며 안정성 문제도 일어날 수 있습니다. 비트코인 지갑을 계속 이 장치에서 쓰려면 귀하 블록체인 계정에서 이중 암호화를 쓰도록 하십시오.</string>
     <string name="address_already_in_wallet">귀하 지갑은 이미 이 주소를 가지고 있습니다.</string>
     <string name="cannot_create_address">이 번에는 새 주소를 만들 수 없었습니다. 다시 해 보세요.</string>
-    <string name="saving_address">주소 저장 중...</string>
+    <string name="saving_address">주소 저장 중…</string>
 
     <string name="cannot_launch_app">이 장치에서는 블록체인 지갑을 쓸 수 없습니다.</string>
     <string name="label">라벨</string>
@@ -407,7 +406,7 @@
     <string name="account_locked_title">계정 잠김</string>
     <string name="account_locked_message">귀하 계정을 사전 주의 조치로 일시 잠구었습니다. 이메일로 보낸 추가 정보를 보고 나중에 다시 해 보세요.</string>
     <string name="licenses">라이선스</string>
-    <string name="email_chooser">이메일 보내기...</string>
+    <string name="email_chooser">이메일 보내기…</string>
     <string name="password_changed_explanation">암호가 바뀌었으니 지갑 페어링을 다시 하세요</string>
     <string name="sms">문자</string>
     <string name="google_authenticator">구글 인증 도구</string>

@@ -117,7 +117,6 @@
 
     <string name="confirm_details">Confirmar pago</string>
     <string name="fee">Comisión</string>
-    <string name="dialog_cancel">CANCELAR</string>
     <string name="exit_confirm">Pulsa nuevamente el botón atrás para salir</string>
 
     <string name="label_address">Tu dirección ha sido importada con éxito. Puedes asignar un nombre de usuario a esta dirección.</string>
@@ -148,7 +147,7 @@
     <string name="postal">Código postal</string>
     <string name="telephone">Teléfono</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Elige una categoría...</string>
+    <string name="merchant_cat_hint">Elige una categoría…</string>
     <string name="merchant_cat1">Café</string>
     <string name="merchant_cat2">Bares/Bebidas</string>
     <string name="merchant_cat3">Comida y cenas</string>
@@ -231,7 +230,7 @@
     <string name="upgrade_page_2">Privacidad mejorada a través de direcciones de jerarquía determinista.</string>
     <string name="upgrade_page_3">Personaliza la forma en la que organizas tu Bitcoin en tu monedero Blockchain.</string>
     <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Hemos agregado estas nuevas características a tu monedero Blockchain:</string>
-    <string name="upgrading">Actualizando...</string>
+    <string name="upgrading">Actualizando…</string>
     <string name="upgrading_started_info">Tu monedero se está actualizando, te pedimos paciencia ya que esto puede tomar algo de tiempo dependiendo del tamaño y la antigüedad de tu monedero.</string>
     <string name="upgrade_success_heading">¡Tu monedero ha sido actualizado!</string>
     <string name="upgrade_success_info">Ahora tienes el monedero Blockchain más seguro y privado. Ahora puedes continuar a tu monedero.</string>
@@ -246,10 +245,10 @@
 
     <string name="camera_unavailable">La cámara está siendo utilizada por otra aplicación. Cierra la aplicación y vuelve a intentarlo.</string>
 
-    <string name="validating_password">Validando la contraseña...</string>
-    <string name="validating_pin">Validando PIN...</string>
-    <string name="creating_pin">Creando PIN...</string>
-    <string name="decrypting_wallet">Descifrando el monedero...</string>
+    <string name="validating_password">Validando la contraseña…</string>
+    <string name="validating_pin">Validando PIN…</string>
+    <string name="creating_pin">Creando PIN…</string>
+    <string name="decrypting_wallet">Descifrando el monedero…</string>
     <string name="password_unchanged">Contraseña sin cambios</string>
     <string name="password_changed">Contraseñada cambiada</string>
     <string name="verify_email2">Tu dirección de correo electrónico verificada se utiliza para enviar códigos de inicio de sesión cuando se detecta actividad sospechosa o inusual, para recordarte tu ID de inicio de sesión de monedero y para enviar avisos de pago de Bitcoin cuando recibas los fondos.</string>
@@ -265,7 +264,7 @@
     <string name="device_rooted">Parece que este dispositivo ha sido rooteado. Ten en cuenta que guardar fondos en un dispositivo rooteado es riesgoso, además, puede causar problemas de estabilidad. Si continúas utilizando nuestro monedero Bitcoin en este dispositivo te recomendamos que utilices un encriptado doble en tu cuenta de Blockchain.</string>
     <string name="address_already_in_wallet">Tu monedero ya contiene esta dirección.</string>
     <string name="cannot_create_address">No se puede crear una nueva dirección en este momento. Por favor, reinténtalo más tarde.</string>
-    <string name="saving_address">Guardando dirección...</string>
+    <string name="saving_address">Guardando dirección…</string>
 
     <string name="cannot_launch_app">El monedero Blockchain no se puede ejecutar en este dispositivo.</string>
     <string name="label">Etiqueta</string>
@@ -413,7 +412,7 @@
     <string name="account_locked_title">Cuenta bloqueada</string>
     <string name="account_locked_message">Su cuenta se bloqueó temporalmente como medida de precaución. Por favor, verifique su correo electrónico para obtener más información e intente de nuevo más tarde.</string>
     <string name="licenses">Licencias</string>
-    <string name="email_chooser">Enviar correo electrónico...</string>
+    <string name="email_chooser">Enviar correo electrónico…</string>
     <string name="password_changed_explanation">Su cuenta se cambió, por favor vuelva a emparejar su billetera</string>
     <string name="sms">Mensaje de texto</string>
     <string name="google_authenticator">Verificador de Google</string>

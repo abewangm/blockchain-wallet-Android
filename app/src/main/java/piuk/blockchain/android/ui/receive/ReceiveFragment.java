@@ -465,7 +465,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
             ShareReceiveIntentAdapter adapter = new ShareReceiveIntentAdapter(list);
             adapter.setItemClickedListener(() -> bottomSheetDialog.dismiss());
 
-            View sheetView = getActivity().getLayoutInflater().inflate(R.layout.bottom_sheet_receive, null);
+            View sheetView = View.inflate(getActivity(), R.layout.bottom_sheet_receive, null);
             RecyclerView recyclerView = (RecyclerView) sheetView.findViewById(R.id.recycler_view);
             recyclerView.setAdapter(adapter);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
