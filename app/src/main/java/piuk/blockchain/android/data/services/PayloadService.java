@@ -83,7 +83,7 @@ public class PayloadService {
 
     /**
      * Fetches the user's wallet payload, and then initializes and decrypts a payload using the
-     * user's  password.
+     * user's password.
      *
      * @param sharedKey The shared key as a String
      * @param guid      The user's GUID

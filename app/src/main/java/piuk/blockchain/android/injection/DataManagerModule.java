@@ -33,6 +33,7 @@ import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.ui.transactions.TransactionHelper;
+import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -49,6 +50,7 @@ public class DataManagerModule {
                                                      AppUtil appUtil,
                                                      AccessState accessState,
                                                      StringUtils stringUtils,
+                                                     AESUtilWrapper aesUtilWrapper,
                                                      RxBus rxBus) {
         return new AuthDataManager(
                 payloadDataManager,
@@ -57,6 +59,7 @@ public class DataManagerModule {
                 appUtil,
                 accessState,
                 stringUtils,
+                aesUtilWrapper,
                 rxBus);
     }
 

@@ -49,6 +49,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
+import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -458,7 +459,7 @@ public class PinEntryViewModelTest {
         subject.mUserEnteredConfirmationPin = "1337";
         when(payloadManager.getTempPassword()).thenReturn("temp password");
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-        when(authDataManager.createPin(anyString(), anyString())).thenReturn(just(true));
+        when(authDataManager.createPin(anyString(), anyString())).thenReturn(Completable.complete());
         when(authDataManager.validatePin(anyString())).thenReturn(just("password"));
         // Act
         subject.onPadClicked("7");
@@ -476,7 +477,8 @@ public class PinEntryViewModelTest {
         subject.mUserEnteredConfirmationPin = "1337";
         when(payloadManager.getTempPassword()).thenReturn("temp password");
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-        when(authDataManager.createPin(anyString(), anyString())).thenReturn(just(false));
+        when(authDataManager.createPin(anyString(), anyString()))
+                .thenReturn(Completable.error(new Throwable()));
         // Act
         subject.onPadClicked("7");
         // Assert
@@ -493,7 +495,7 @@ public class PinEntryViewModelTest {
         // Arrange
         subject.mUserEnteredPin = "133";
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-        when(authDataManager.createPin(anyString(), anyString())).thenReturn(just(true));
+        when(authDataManager.createPin(anyString(), anyString())).thenReturn(Completable.complete());
         // Act
         subject.onPadClicked("7");
         // Assert
@@ -507,7 +509,7 @@ public class PinEntryViewModelTest {
         subject.mUserEnteredPin = "133";
         subject.mUserEnteredConfirmationPin = "1234";
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-        when(authDataManager.createPin(anyString(), anyString())).thenReturn(just(true));
+        when(authDataManager.createPin(anyString(), anyString())).thenReturn(Completable.complete());
         // Act
         subject.onPadClicked("7");
         // Assert
@@ -937,6 +939,7 @@ public class PinEntryViewModelTest {
                                                          AppUtil appUtil,
                                                          AccessState accessState,
                                                          StringUtils stringUtils,
+                                                         AESUtilWrapper aesUtilWrapper,
                                                          RxBus rxBus) {
             return authDataManager;
         }

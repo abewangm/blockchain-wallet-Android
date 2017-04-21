@@ -26,7 +26,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.exceptions.Exceptions;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
@@ -343,7 +342,7 @@ public class PinEntryViewModel extends BaseViewModel {
                                 mAppUtil.clearCredentialsAndRestart();
 
                             } else if (throwable instanceof AccountLockedException) {
-                                    mDataListener.showAccountLockedDialog();
+                                mDataListener.showAccountLockedDialog();
 
                             } else {
                                 mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
@@ -401,16 +400,12 @@ public class PinEntryViewModel extends BaseViewModel {
 
         compositeDisposable.add(
                 mAuthDataManager.createPin(mPayloadManager.getTempPassword(), pin)
-                        .subscribe(createSuccessful -> {
+                        .subscribe(() -> {
                             mDataListener.dismissProgressDialog();
-                            if (createSuccessful) {
-                                mFingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
-                                mFingerprintHelper.setFingerprintUnlockEnabled(false);
-                                mPrefsUtil.setValue(PrefsUtil.KEY_PIN_FAILS, 0);
-                                updatePayload(mPayloadManager.getTempPassword());
-                            } else {
-                                throw Exceptions.propagate(new Throwable("Pin create failed"));
-                            }
+                            mFingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
+                            mFingerprintHelper.setFingerprintUnlockEnabled(false);
+                            mPrefsUtil.setValue(PrefsUtil.KEY_PIN_FAILS, 0);
+                            updatePayload(mPayloadManager.getTempPassword());
                         }, throwable -> {
                             showErrorToast(R.string.create_pin_failed);
                             mPrefsUtil.clear();

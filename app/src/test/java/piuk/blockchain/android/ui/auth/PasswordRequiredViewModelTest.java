@@ -32,6 +32,7 @@ import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -621,6 +622,7 @@ public class PasswordRequiredViewModelTest extends RxTest {
                                                          AppUtil appUtil,
                                                          AccessState accessState,
                                                          StringUtils stringUtils,
+                                                         AESUtilWrapper aesUtilWrapper,
                                                          RxBus rxBus) {
             return authDataManager;
         }
