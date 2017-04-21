@@ -58,6 +58,8 @@ public class UpgradeWalletActivity extends BaseAuthActivity implements
         binding.pager.addOnPageChangeListener(this);
 
         binding.upgradeBtn.setOnClickListener(v -> upgradeClicked());
+
+        viewModel.onViewReady();
     }
 
     @Override
