@@ -113,10 +113,22 @@ public class BaseAuthActivity extends AppCompatActivity {
      * @param title     The title for the page, as a StringRes
      */
     public void setupToolbar(ActionBar actionBar, @StringRes int title) {
+        setupToolbar(actionBar, getString(title));
+    }
+
+    /**
+     * Applies the title to the Activity's {@link ActionBar}. This method is the fragment equivalent
+     * of {@link #setupToolbar(Toolbar, int)} Also applies the Montserrat-Regular font, as this
+     * cannot be done elsewhere for now.
+     *
+     * @param actionBar The {@link ActionBar} for the current activity
+     * @param title     The title for the page, as a String
+     */
+    public void setupToolbar(ActionBar actionBar, String title) {
         // Fix for bug with formatted ActionBars https://android-review.googlesource.com/#/c/47831/
         if (AndroidUtils.is18orHigher()) {
             actionBar.setTitle(CalligraphyUtils.applyTypefaceSpan(
-                    getString(title),
+                    title,
                     TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
         } else {
             actionBar.setTitle(title);
