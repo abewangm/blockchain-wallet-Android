@@ -21,25 +21,22 @@ import android.widget.TextView;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityUpgradeWalletBinding;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.util.annotations.Thunk;
 
-public class UpgradeWalletActivity extends BaseAuthActivity implements
-        UpgradeWalletViewModel.DataListener,
+public class UpgradeWalletActivity extends BaseMvpActivity<UpgradeWalletView, UpgradeWalletPresenter>
+        implements UpgradeWalletView,
         ViewPager.OnPageChangeListener {
 
     private ActivityUpgradeWalletBinding binding;
     private MaterialProgressDialog progressDialog;
-    @Thunk UpgradeWalletViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_upgrade_wallet);
-        viewModel = new UpgradeWalletViewModel(this);
 
         binding.upgradePageHeader.setFactory(() -> {
             TextView textView = new TextView(this);
@@ -59,7 +56,17 @@ public class UpgradeWalletActivity extends BaseAuthActivity implements
 
         binding.upgradeBtn.setOnClickListener(v -> upgradeClicked());
 
-        viewModel.onViewReady();
+        onViewReady();
+    }
+
+    @Override
+    protected UpgradeWalletPresenter createPresenter() {
+        return new UpgradeWalletPresenter();
+    }
+
+    @Override
+    protected UpgradeWalletView getView() {
+        return this;
     }
 
     @Override
@@ -75,7 +82,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity implements
                 .setPositiveButton(R.string.yes, (dialog, whichButton) -> {
                     String password1 = ((EditText) pwLayout.findViewById(R.id.pw1)).getText().toString();
                     String password2 = ((EditText) pwLayout.findViewById(R.id.pw2)).getText().toString();
-                    viewModel.submitPasswords(password1, password2);
+                    getPresenter().submitPasswords(password1, password2);
                 })
                 .setNegativeButton(R.string.no, (dialog, whichButton) ->
                         showToast(R.string.password_unchanged, ToastCustom.TYPE_GENERAL))
@@ -102,7 +109,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity implements
         binding.upgradePageHeader.setText(getString(R.string.upgrade_success_info));
         binding.progressBar.setVisibility(View.GONE);
         binding.btnUpgradeComplete.setVisibility(View.VISIBLE);
-        binding.btnUpgradeComplete.setOnClickListener(v -> viewModel.onContinueClicked());
+        binding.btnUpgradeComplete.setOnClickListener(v -> getPresenter().onContinueClicked());
     }
 
     @Override
@@ -122,7 +129,7 @@ public class UpgradeWalletActivity extends BaseAuthActivity implements
 
     @Override
     public void onBackPressed() {
-        viewModel.onBackButtonPressed(this);
+        getPresenter().onBackButtonPressed(this);
     }
 
     @Override
@@ -134,17 +141,11 @@ public class UpgradeWalletActivity extends BaseAuthActivity implements
     }
 
     @Override
-    public void dimissProgressDialog() {
+    public void dismissProgressDialog() {
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
             progressDialog = null;
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        viewModel.destroy();
     }
 
     @Override
@@ -166,12 +167,12 @@ public class UpgradeWalletActivity extends BaseAuthActivity implements
         new SecondPasswordHandler(this).validate(new SecondPasswordHandler.ResultListener() {
             @Override
             public void onNoSecondPassword() {
-                viewModel.onUpgradeRequested(null);
+                getPresenter().onUpgradeRequested(null);
             }
 
             @Override
             public void onSecondPasswordValidated(String validatedSecondPassword) {
-                viewModel.onUpgradeRequested(validatedSecondPassword);
+                getPresenter().onUpgradeRequested(validatedSecondPassword);
             }
         });
     }
