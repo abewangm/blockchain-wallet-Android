@@ -116,7 +116,6 @@
 
     <string name="confirm_details">Betaling bevestigen</string>
     <string name="fee">Tarief</string>
-    <string name="dialog_cancel">ANNULEREN</string>
     <string name="exit_confirm">Druk op de terug-knop om af te sluiten</string>
 
     <string name="label_address">Uw adres is met succes geïmporteerd. Optioneel kunt u een vriendelijke schermnaam toewijzen aan dit adres.</string>
@@ -147,7 +146,7 @@
     <string name="postal">Postcode</string>
     <string name="telephone">Telefoonnummer</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Kies een categorie...</string>
+    <string name="merchant_cat_hint">Kies een categorie…</string>
     <string name="merchant_cat1">Café</string>
     <string name="merchant_cat2">Bars/drinken</string>
     <string name="merchant_cat3">Eten en restaurants</string>
@@ -239,10 +238,10 @@
 
     <string name="camera_unavailable">De camera is momenteel geopend door een andere applicatie. Sluit de andere applicatie en probeer het opnieuw.</string>
 
-    <string name="validating_password">Wachtwoord aan het valideren...</string>
-    <string name="validating_pin">Pincode aan het valideren...</string>
-    <string name="creating_pin">Pincode aan het aanmaken...</string>
-    <string name="decrypting_wallet">Portemonnee aan het decoderen...</string>
+    <string name="validating_password">Wachtwoord aan het valideren…</string>
+    <string name="validating_pin">Pincode aan het valideren…</string>
+    <string name="creating_pin">Pincode aan het aanmaken…</string>
+    <string name="decrypting_wallet">Portemonnee aan het decoderen…</string>
     <string name="password_unchanged">Wachtwoord niet gewijzigd</string>
     <string name="password_changed">Wachtwoord gewijzigd</string>
     <string name="disable_root_warning">Geroot waarschuwingssysteem uitschakelen</string>
@@ -257,7 +256,7 @@
     <string name="device_rooted">Uw apparaat lijkt te zijn geroot. Weet dat het bewaren van tegoeden op een geroot apparaat onveilig is en bovendien stabiliteitsproblemen kan veroorzaken. Als u doorgaat met het gebruik van onze Bitcoin portemonnee op dit apparaat, raden wij u aan een dubbele codering te gebruiken bij uw Blockchain-account.</string>
     <string name="address_already_in_wallet">Uw portemonnee bevat dit adres al.</string>
     <string name="cannot_create_address">Er kan op dit moment geen nieuw adres worden aangemaakt. Probeer het opnieuw.</string>
-    <string name="saving_address">Adres aan het opslaan...</string>
+    <string name="saving_address">Adres aan het opslaan…</string>
 
     <string name="cannot_launch_app">Blockchain Portemonnee kan niet worden uitgevoerd op dit apparaat.</string>
     <string name="label">Label</string>

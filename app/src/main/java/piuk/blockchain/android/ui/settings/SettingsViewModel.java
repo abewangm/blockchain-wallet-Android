@@ -10,7 +10,6 @@ import info.blockchain.wallet.settings.SettingsManager;
 
 import javax.inject.Inject;
 
-import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
@@ -538,13 +537,7 @@ public class SettingsViewModel extends BaseViewModel {
 
         compositeDisposable.add(
                 authDataManager.createPin(password, accessState.getPIN())
-                        .flatMapCompletable(success -> {
-                            if (success) {
-                                return payloadDataManager.syncPayloadWithServer();
-                            } else {
-                                return Completable.error(new Throwable());
-                            }
-                        })
+                        .andThen(payloadDataManager.syncPayloadWithServer())
                         .doAfterTerminate(() -> dataListener.hideProgressDialog())
                         .subscribe(
                                 () -> dataListener.showToast(R.string.password_changed, ToastCustom.TYPE_OK),

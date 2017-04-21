@@ -2,16 +2,17 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
+        android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/main_layout"
         android:fitsSystemWindows="true"
         android:orientation="vertical">
 
         <include layout="@layout/toolbar_general" />
 
-        <FrameLayout
-            android:id="@+id/content_frame"
+        <fragment
+            android:id="@+id/fragment_settings"
+            class="piuk.blockchain.android.ui.settings.SettingsFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>

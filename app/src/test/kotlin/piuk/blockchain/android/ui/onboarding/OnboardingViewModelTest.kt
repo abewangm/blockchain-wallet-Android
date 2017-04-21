@@ -7,6 +7,7 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.api.data.Settings
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Observable
+import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,7 +21,6 @@ import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper
 import piuk.blockchain.android.ui.onboarding.OnboardingActivity.EXTRAS_EMAIL_ONLY
@@ -143,7 +143,7 @@ class OnboardingViewModelTest {
         verifyNoMoreInteractions(mockAccessState)
         verify(mockActivity).showFingerprintDialog(captor.capture())
         verifyNoMoreInteractions(mockActivity)
-        captor.firstValue equals pin
+        captor.firstValue shouldEqual pin
     }
 
     @Test(expected = IllegalStateException::class)
@@ -229,7 +229,7 @@ class OnboardingViewModelTest {
         // Act
         val result = subject.getEmail()
         // Assert
-        result equals email
+        result shouldEqual email
     }
 
     inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {

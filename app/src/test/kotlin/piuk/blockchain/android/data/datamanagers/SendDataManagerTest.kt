@@ -8,6 +8,7 @@ import info.blockchain.api.data.UnspentOutputs
 import info.blockchain.wallet.api.data.FeeList
 import info.blockchain.wallet.payment.SpendableUnspentOutputs
 import io.reactivex.Observable
+import org.amshove.kluent.shouldEqual
 import org.apache.commons.lang3.tuple.Pair
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.params.MainNetParams
@@ -16,7 +17,6 @@ import org.junit.Test
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.services.PaymentService
-import piuk.blockchain.android.equals
 import java.math.BigInteger
 
 class SendDataManagerTest : RxTest() {
@@ -60,7 +60,7 @@ class SendDataManagerTest : RxTest() {
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals txHash
+        testObserver.values()[0] shouldEqual txHash
         verify(mockPaymentService).submitPayment(mockOutputBundle,
                 mockKeys,
                 toAddress,
@@ -100,7 +100,7 @@ class SendDataManagerTest : RxTest() {
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals mockFeeList
+        testObserver.values()[0] shouldEqual mockFeeList
         verify(mockPaymentService).suggestedFee
         verifyNoMoreInteractions(mockPaymentService)
     }
@@ -118,7 +118,7 @@ class SendDataManagerTest : RxTest() {
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals mockUnspentOutputs
+        testObserver.values()[0] shouldEqual mockUnspentOutputs
         verify(mockPaymentService).getUnspentOutputs(address)
         verifyNoMoreInteractions(mockPaymentService)
     }
@@ -136,7 +136,7 @@ class SendDataManagerTest : RxTest() {
         // Act
         val result = subject.getSpendableCoins(mockUnspent, mockPayment, mockFee)
         // Assert
-        result equals mockOutputs
+        result shouldEqual mockOutputs
         verify(mockPaymentService).getSpendableCoins(mockUnspent, mockPayment, mockFee)
         verifyNoMoreInteractions(mockPaymentService)
     }
@@ -153,7 +153,7 @@ class SendDataManagerTest : RxTest() {
         // Act
         val result = subject.getSweepableCoins(mockUnspent, mockFee)
         // Assert
-        result equals mockSweepableCoins
+        result shouldEqual mockSweepableCoins
         verify(mockPaymentService).getSweepableCoins(mockUnspent, mockFee)
         verifyNoMoreInteractions(mockPaymentService)
     }
@@ -169,7 +169,7 @@ class SendDataManagerTest : RxTest() {
         // Act
         val result = subject.isAdequateFee(inputs, outputs, mockFee)
         // Assert
-        result equals false
+        result shouldEqual false
         verify(mockPaymentService).isAdequateFee(inputs, outputs, mockFee)
         verifyNoMoreInteractions(mockPaymentService)
     }
@@ -185,7 +185,7 @@ class SendDataManagerTest : RxTest() {
         // Act
         val result = subject.estimateSize(inputs, outputs)
         // Assert
-        result equals estimatedSize
+        result shouldEqual estimatedSize
         verify(mockPaymentService).estimateSize(inputs, outputs)
         verifyNoMoreInteractions(mockPaymentService)
     }
@@ -203,7 +203,7 @@ class SendDataManagerTest : RxTest() {
         // Act
         val result = subject.estimatedFee(inputs, outputs, mockFeePerKb)
         // Assert
-        result equals mockAbsoluteFee
+        result shouldEqual mockAbsoluteFee
         verify(mockPaymentService).estimateFee(inputs, outputs, mockFeePerKb)
         verifyNoMoreInteractions(mockPaymentService)
     }

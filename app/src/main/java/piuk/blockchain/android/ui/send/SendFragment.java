@@ -20,7 +20,6 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -75,7 +74,6 @@ import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
-import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 import static android.databinding.DataBindingUtil.inflate;
@@ -105,6 +103,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private OnSendFragmentInteractionListener listener;
     private CustomKeypad customKeypad;
     private MaterialProgressDialog progressDialog;
+    private AlertDialog confirmationDialog;
+    private AlertDialog largeTxWarning;
 
     private int selectedAccountPosition = -1;
     private long backPressed;
@@ -625,8 +625,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         playAudio();
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.modal_transaction_success, null);
+        View dialogView = View.inflate(getActivity(), R.layout.modal_transaction_success, null);
         transactionSuccessDialog = dialogBuilder.setView(dialogView)
                 .setPositiveButton(getString(R.string.done), null)
                 .create();
@@ -669,14 +668,19 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     private void onShowLargeTransactionWarning(AlertDialog alertDialog) {
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+        if (largeTxWarning != null && largeTxWarning.isShowing()) {
+            largeTxWarning.dismiss();
+        }
+
+        largeTxWarning = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setCancelable(false)
                 .setTitle(R.string.warning)
                 .setMessage(R.string.large_tx_warning)
                 .setNegativeButton(R.string.go_back, (dialog, which) -> alertDialog.dismiss())
                 .setPositiveButton(R.string.accept_higher_fee, null)
-                .create()
-                .show();
+                .create();
+
+        largeTxWarning.show();
     }
 
     @Override
@@ -837,13 +841,18 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     @Override
     public void onShowPaymentDetails(PaymentConfirmationDetails details) {
+        // Clear dialog incase of accidental double tap
+        if (confirmationDialog != null && confirmationDialog.isShowing()) {
+            confirmationDialog.dismiss();
+        }
+
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
         FragmentSendConfirmBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
                 R.layout.fragment_send_confirm, null, false);
         dialogBuilder.setView(dialogBinding.getRoot());
 
-        final AlertDialog alertDialog = dialogBuilder.create();
-        alertDialog.setCanceledOnTouchOutside(false);
+        confirmationDialog = dialogBuilder.create();
+        confirmationDialog.setCanceledOnTouchOutside(false);
 
         dialogBinding.confirmFromLabel.setText(details.fromLabel);
         dialogBinding.confirmToLabel.setText(details.toLabel);
@@ -885,8 +894,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         }
 
         dialogBinding.tvCustomizeFee.setOnClickListener(v -> {
-            if (alertDialog.isShowing()) {
-                alertDialog.cancel();
+            if (confirmationDialog.isShowing()) {
+                confirmationDialog.cancel();
             }
 
             getActivity().runOnUiThread(() -> {
@@ -904,15 +913,15 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         });
 
         dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialog.isShowing()) {
-                alertDialog.cancel();
+            if (confirmationDialog.isShowing()) {
+                confirmationDialog.cancel();
             }
         });
 
         dialogBinding.confirmSend.setOnClickListener(v -> {
             if (ConnectivityStatus.hasConnectivity(getActivity())) {
                 dialogBinding.confirmSend.setClickable(false);
-                viewModel.submitPayment(alertDialog);
+                viewModel.submitPayment(confirmationDialog);
             } else {
                 showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
                 // Queue tx here
@@ -920,16 +929,16 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         });
 
         if (getActivity() != null && !getActivity().isFinishing()) {
-            alertDialog.show();
+            confirmationDialog.show();
         }
 
         // To prevent the dialog from appearing too large on Android N
-        if (alertDialog.getWindow() != null) {
-            alertDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        if (confirmationDialog.getWindow() != null) {
+            confirmationDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
         }
 
         if (viewModel.isLargeTransaction()) {
-            onShowLargeTransactionWarning(alertDialog);
+            onShowLargeTransactionWarning(confirmationDialog);
         }
     }
 

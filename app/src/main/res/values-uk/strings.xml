@@ -116,7 +116,6 @@
 
     <string name="confirm_details">Підтвердити платіж</string>
     <string name="fee">Комісія</string>
-    <string name="dialog_cancel">ВІДМІНИТИ</string>
     <string name="exit_confirm">Натисніть кнопку назад, щоб вийти</string>
 
     <string name="label_address">Вашу адресу успішно імпортовано. За бажанням назвіть відображення цієї адреси.</string>
@@ -147,7 +146,7 @@
     <string name="postal">Поштовий індекс</string>
     <string name="telephone">Телефон</string>
     <string name="web">Веб</string>
-    <string name="merchant_cat_hint">Вибрати категорію...</string>
+    <string name="merchant_cat_hint">Вибрати категорію…</string>
     <string name="merchant_cat1">Кафе</string>
     <string name="merchant_cat2">Бари/Випивка</string>
     <string name="merchant_cat3">Їжа та харчування</string>
@@ -239,10 +238,10 @@
 
     <string name="camera_unavailable">Камера використовується іншою програмою. Будь ласка, закрийте програму і спробуйте ще раз.</string>
 
-    <string name="validating_password">Підтвердження пароля...</string>
-    <string name="validating_pin">Підтвердження PIN...</string>
-    <string name="creating_pin">Створення PIN...</string>
-    <string name="decrypting_wallet">Дешифрування гаманця...</string>
+    <string name="validating_password">Підтвердження пароля…</string>
+    <string name="validating_pin">Підтвердження PIN…</string>
+    <string name="creating_pin">Створення PIN…</string>
+    <string name="decrypting_wallet">Дешифрування гаманця…</string>
     <string name="password_unchanged">Пароль не змінено</string>
     <string name="password_changed">Пароль змінено</string>
     <string name="disable_root_warning">Вимкніть попередження рутованого пристрою</string>
@@ -257,7 +256,7 @@
     <string name="device_rooted">Здається ваш пристрій рутовано. Майте на увазі: збереження коштів на рутованих пристроях є небезпечним, можуть виникнути проблеми із стабільністю. Якщо ви продовжите використовувати Bitcoin-гаманець на цьому пристрої, рекомендуємо вам користуватись подвійним шифруванням свого облікового запису Blockchain.</string>
     <string name="address_already_in_wallet">У вашому гаманцю ця адреса вже присутня.</string>
     <string name="cannot_create_address">Зараз неможливо створити нову адресу. Будь ласка, спробуйте ще раз.</string>
-    <string name="saving_address">Збереження адреси...</string>
+    <string name="saving_address">Збереження адреси…</string>
 
     <string name="cannot_launch_app">Гаманець Blockchain не може працювати на цьому пристрої.</string>
     <string name="label">Мітка</string>

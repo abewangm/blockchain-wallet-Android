@@ -116,7 +116,6 @@
 
     <string name="confirm_details">Potvrdit platbu</string>
     <string name="fee">Poplatek</string>
-    <string name="dialog_cancel">STORNO</string>
     <string name="exit_confirm">Opětovným stisknutím tlačítka Zpět odejdete</string>
 
     <string name="label_address">Vaše adresa byla úspěšně importována. Této adrese můžete případně přiřadit zapamatovatelný zobrazovaný název.</string>
@@ -147,7 +146,7 @@
     <string name="postal">PSČ</string>
     <string name="telephone">Telefon</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Vyberte kategorii...</string>
+    <string name="merchant_cat_hint">Vyberte kategorii…</string>
     <string name="merchant_cat1">Kavárna</string>
     <string name="merchant_cat2">Bary / Nápoje</string>
     <string name="merchant_cat3">Jídlo a stravování</string>
@@ -239,10 +238,10 @@
 
     <string name="camera_unavailable">Fotoaparát nyní používá jiná aplikace. Tuto jinou aplikaci prosím ukončete a zkuste to znovu.</string>
 
-    <string name="validating_password">Ověřování hesla...</string>
-    <string name="validating_pin">Ověřování PINu...</string>
-    <string name="creating_pin">Vytváření PINu...</string>
-    <string name="decrypting_wallet">Dešifrování peněženky...</string>
+    <string name="validating_password">Ověřování hesla…</string>
+    <string name="validating_pin">Ověřování PINu…</string>
+    <string name="creating_pin">Vytváření PINu…</string>
+    <string name="decrypting_wallet">Dešifrování peněženky…</string>
     <string name="password_unchanged">Heslo nezměněno</string>
     <string name="password_changed">Heslo změněno</string>
     <string name="disable_root_warning">Deaktivovat varování před rootovaným zařízením</string>
@@ -257,7 +256,7 @@
     <string name="device_rooted">Vaše zařízení je zřejmě rootované. Mějte prosím na paměti, že ukládání prostředků na rootovaném zařízení není bezpečné a navíc může narušit stabilitu. Pokud budete nadále používat naši bitcoinovou peněženku na tomto zařízení, doporučujeme Vám, abyste pro svůj účet Blockchain použili dvojité šifrování.</string>
     <string name="address_already_in_wallet">Vaše peněženka již obsahuje tuto adresu.</string>
     <string name="cannot_create_address">Novou adresu nelze nyní vytvořit. Zkuste to prosím znovu.</string>
-    <string name="saving_address">Ukládání adresy...</string>
+    <string name="saving_address">Ukládání adresy…</string>
 
     <string name="cannot_launch_app">Peněženku Blockchain nelze na tomto zařízení spustit.</string>
     <string name="label">Označení</string>

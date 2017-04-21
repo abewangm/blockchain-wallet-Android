@@ -116,7 +116,6 @@
 
     <string name="confirm_details">Confirmar Pagamento</string>
     <string name="fee">Taxa</string>
-    <string name="dialog_cancel">CANCELAR</string>
     <string name="exit_confirm">Pressione novamente o botão voltar para sair.</string>
 
     <string name="label_address">Seu endereço foi importado com sucesso. Adicione um nome a este endereço se desejar.</string>
@@ -147,7 +146,7 @@
     <string name="postal">CEP</string>
     <string name="telephone">Telefone</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Escolher categoria...</string>
+    <string name="merchant_cat_hint">Escolher categoria…</string>
     <string name="merchant_cat1">Cafés</string>
     <string name="merchant_cat2">Bares/Bebidas</string>
     <string name="merchant_cat3">Lanchonetes/Restaurantes</string>
@@ -216,7 +215,7 @@
     <string name="click">Clique</string>
     <string name="to_start_sending_and_receiving_btc">para iniciar o envio e o recebimento de bitcoins.</string>
 
-    <string name="watch_only_label">(watch-only)</string>
+    <string name="watch_only_label">(watch only)</string>
     <string name="address_book_label">(catálogo de endereços)</string>
 
     <string name="transaction_submitted">Transação concluída</string>
@@ -235,14 +234,14 @@
     <string name="upgrade_fail_info">Houve um erro ao atualizar sua carteira. Por favor, tente novamente mais tarde.</string>
     <string name="not_sane_error">A instalação da Carteira Blockchain está incompleta. Por favor, pareie a sua carteira novamente ou crie uma nova.</string>
 
-    <string name="watchonly_address_receive_warning">Você está prestes a receber bitcoins num endereço watch-only. Você só poderá usar estes fundos se tiver acesso à chave privada. Deseja continuar?</string>
+    <string name="watchonly_address_receive_warning">Você está prestes a receber bitcoins num endereço watch only. Você só poderá usar estes fundos se tiver acesso à chave privada. Deseja continuar?</string>
 
     <string name="camera_unavailable">A câmera está sendo usada por outro aplicativo. Por favor, feche o outro aplicativo e tente novamente.</string>
 
-    <string name="validating_password">Validando senha...</string>
-    <string name="validating_pin">Validando PIN...</string>
-    <string name="creating_pin">Criando PIN...</string>
-    <string name="decrypting_wallet">Decodificando Carteira...</string>
+    <string name="validating_password">Validando senha…</string>
+    <string name="validating_pin">Validando PIN…</string>
+    <string name="creating_pin">Criando PIN…</string>
+    <string name="decrypting_wallet">Decodificando Carteira…</string>
     <string name="password_unchanged">Senha não alterada</string>
     <string name="password_changed">Senha alterada</string>
     <string name="disable_root_warning">Desativar o aviso de dispositivos com root</string>
@@ -257,7 +256,7 @@
     <string name="device_rooted">O dispositivo parece ter sido rooteado. Esteja ciente de que armazenar fundos em um dispositivo rooteado é arriscado e, além disso, pode causar problemas de estabilidade. Se for continuar a usar nossa carteira Bitcoin neste dispositivo, recomendamos o uso de criptografia dupla em sua conta da Blockchain.</string>
     <string name="address_already_in_wallet">Sua carteira já contém este endereço.</string>
     <string name="cannot_create_address">Não é possível criar um endereço novo neste momento. Tente novamente.</string>
-    <string name="saving_address">Salvando endereço...</string>
+    <string name="saving_address">Salvando endereço…</string>
 
     <string name="cannot_launch_app">Não é possível executar a Carteira Blockchain neste dispositivo.</string>
     <string name="label">Etiqueta</string>
@@ -294,13 +293,13 @@
     <string name="privx_required">Chave Privada Requerida</string>
     <string name="watch_only_spend_instructionss">Esta ação requer a chave privada do endereço Bitcoin %1$s. Por favor, escaneie o código QR.</string>
     <string name="invalid_private_key">Chave privada inválida</string>
-    <string name="watch_only_import_warning">Você está prestes a importar um endereço watch-only, um endereço (ou script de chave pública) armazenado na carteira sem a chave privada correspondente. Isto significa que os fundos podem ser utilizados SOMENTE se você tiver a chave privada armazenada em algum lugar. Se você não tiver a chave privada armazenada, NÃO instrua ninguém a enviar bitcoins para o endereço watch-only.\n\nEstas opções são recomendadas apenas para usuários avançados. Deseja continuar? </string>
+    <string name="watch_only_import_warning">Você está prestes a importar um endereço watch only, um endereço (ou script de chave pública) armazenado na carteira sem a chave privada correspondente. Isto significa que os fundos podem ser utilizados SOMENTE se você tiver a chave privada armazenada em algum lugar. Se você não tiver a chave privada armazenada, NÃO instrua ninguém a enviar bitcoins para o endereço watch only.\n\nEstas opções são recomendadas apenas para usuários avançados. Deseja continuar? </string>
     <string name="scan_private_key">Escanear chave privada</string>
     <string name="private_key_successfully_imported">Chave privada importada com êxito.</string>
-    <string name="private_key_not_matching_address">OBSERVAÇÃO: A chave privada escaneada não corresponde ao seu endereço watch-only. Para utilizar os fundos deste endereço, escaneie a chave privada correta.</string>
-    <string name="watch_only">Watch-Only</string>
+    <string name="private_key_not_matching_address">OBSERVAÇÃO: A chave privada escaneada não corresponde ao seu endereço watch only. Para utilizar os fundos deste endereço, escaneie a chave privada correta.</string>
+    <string name="watch_only">Watch Only</string>
     <string name="extended_public_key_description">Se você é um estabelecimento, mostre seu xPub e use o Blockchain Merchant App para receber fundos de forma privada e segura. \n\nMantenha seu xPub privado.         Quem tiver acesso ao seu xPub poderá visualizar todos os seus fundos e transações. </string>
-    <string name="watch_only_description">Este endereço é watch-only. Para utilizar os fundos desta carteira, escaneie sua chave privada. </string>
+    <string name="watch_only_description">Este endereço é watch only. Para utilizar os fundos desta carteira, escaneie sua chave privada. </string>
     <string name="success">Sucesso</string>
     <string name="default_label">Padrão</string>
     <string name="try_again">Tente Novamente</string>

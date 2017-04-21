@@ -116,7 +116,6 @@
 
     <string name="confirm_details">确认付款</string>
     <string name="fee">费用</string>
-    <string name="dialog_cancel">取消</string>
     <string name="exit_confirm">再次按返回按钮退出</string>
 
     <string name="label_address">您的地址已成功导入。也可为该地址分配一个易记显示名称。</string>
@@ -147,7 +146,7 @@
     <string name="postal">邮政编码</string>
     <string name="telephone">电话</string>
     <string name="web">网页</string>
-    <string name="merchant_cat_hint">选择类别...</string>
+    <string name="merchant_cat_hint">选择类别…</string>
     <string name="merchant_cat1">咖啡店</string>
     <string name="merchant_cat2">酒吧/饮料吧</string>
     <string name="merchant_cat3">饮食</string>
@@ -239,10 +238,10 @@
 
     <string name="camera_unavailable">摄像头目前由其他应用程序打开。请关闭其他应用程序并重试。</string>
 
-    <string name="validating_password">正在验证密码...</string>
-    <string name="validating_pin">正在验证芯片密码...</string>
-    <string name="creating_pin">正在创建芯片密码...</string>
-    <string name="decrypting_wallet">正在解密钱包...</string>
+    <string name="validating_password">正在验证密码…</string>
+    <string name="validating_pin">正在验证芯片密码…</string>
+    <string name="creating_pin">正在创建芯片密码…</string>
+    <string name="decrypting_wallet">正在解密钱包…</string>
     <string name="password_unchanged">密码未更改</string>
     <string name="password_changed">密码已更改</string>
     <string name="disable_root_warning">禁用已 Root 的设备警告</string>
@@ -257,7 +256,7 @@
     <string name="device_rooted">您的设备似乎已被 Root。请注意，在已 Root 的设备上存放资金不仅不安全，并且还会导致稳定性问题。如果您继续在此设备上使用我们的比特币钱包，建议您对您的 Blockchain 账户使用双重加密。</string>
     <string name="address_already_in_wallet">您的钱包已包含此地址。</string>
     <string name="cannot_create_address">目前无法创建新地址。请重试。</string>
-    <string name="saving_address">正在保存地址...</string>
+    <string name="saving_address">正在保存地址…</string>
 
     <string name="cannot_launch_app">Blockchain 钱包无法在此设备上运行。</string>
     <string name="label">标签</string>

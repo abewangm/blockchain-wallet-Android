@@ -116,7 +116,6 @@
 
     <string name="confirm_details">Conferma il Pagamento</string>
     <string name="fee">Costo</string>
-    <string name="dialog_cancel">ANNULLA</string>
     <string name="exit_confirm">Premi di nuovo il pulsante indietro per uscire</string>
 
     <string name="label_address">Il tuo indirizzo è stato importato con successo. A volte assegniamo un nome semplice su schermo per questo indirizzo.</string>
@@ -147,7 +146,7 @@
     <string name="postal">Codice postale</string>
     <string name="telephone">Telefono</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Scegli una categoria...</string>
+    <string name="merchant_cat_hint">Scegli una categoria…</string>
     <string name="merchant_cat1">Caffé</string>
     <string name="merchant_cat2">Bar/Locali dove bere</string>
     <string name="merchant_cat3">Mangiare e Cenare</string>
@@ -239,10 +238,10 @@
 
     <string name="camera_unavailable">La fotocamera è attualmente aperta da un\'altra applicazione. Chiudi le altre applicazioni e riprova.</string>
 
-    <string name="validating_password">In fase di convalida della Password...</string>
-    <string name="validating_pin">In fase di convalida del PIN...</string>
-    <string name="creating_pin">In fase di creazione del PIN...</string>
-    <string name="decrypting_wallet">In fase di decifrazione del Portafoglio...</string>
+    <string name="validating_password">In fase di convalida della Password…</string>
+    <string name="validating_pin">In fase di convalida del PIN…</string>
+    <string name="creating_pin">In fase di creazione del PIN…</string>
+    <string name="decrypting_wallet">In fase di decifrazione del Portafoglio…</string>
     <string name="password_unchanged">Password non cambiata</string>
     <string name="password_changed">Password cambiata</string>
     <string name="disable_root_warning">Disattiva l\'avviso di dispositivo rooted</string>
@@ -257,7 +256,7 @@
     <string name="device_rooted">Il tuo dispositivo appare rooted. Sappi che la memorizzazione di fondi su un dispositivo rooted è pericolosa e, in aggiunta, può causare problema di stabilità. Se continui ad usare il nostro portafoglio Bitcoin su questo dispositivo ti raccomandiamo di usare la doppia cifratura sul tuo conto Blockchain.</string>
     <string name="address_already_in_wallet">Il tuo portafoglio contiene già questo indirizzo.</string>
     <string name="cannot_create_address">Un nuovo indirizzo non può essere creato in questo momento. Per favore, riprova.</string>
-    <string name="saving_address">In fase di salvataggio dell\'indirizzo...</string>
+    <string name="saving_address">In fase di salvataggio dell\'indirizzo…</string>
 
     <string name="cannot_launch_app">Il portafoglio Blockchain non può girare su questo dispositivo.</string>
     <string name="label">Etichetta</string>

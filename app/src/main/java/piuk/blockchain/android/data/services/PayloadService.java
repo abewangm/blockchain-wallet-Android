@@ -83,7 +83,7 @@ public class PayloadService {
 
     /**
      * Fetches the user's wallet payload, and then initializes and decrypts a payload using the
-     * user's  password.
+     * user's password.
      *
      * @param sharedKey The shared key as a String
      * @param guid      The user's GUID
@@ -209,32 +209,34 @@ public class PayloadService {
      * @return An {@link Observable<Boolean>} representing a successful save
      */
     @WebRequest
-    public Observable<LegacyAddress> setPrivateKey(ECKey key, @Nullable String secondPassword) {
-        return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword));
-    }
-
-    /**
-     * Sets a private key for a {@link LegacyAddress}
-     *
-     * @param key            The {@link ECKey} for the address
-     * @param secondPassword An optional double encryption password
-     */
-    @WebRequest
     public Observable<LegacyAddress> setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword) {
         return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword));
     }
 
     /**
-     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link
-     * info.blockchain.wallet.payload.data.Wallet}
+     * Allows you to add a {@link LegacyAddress} to the {@link Wallet}
+     *
+     * @param legacyAddress The new address
+     * @return A {@link Completable} object representing a successful save
+     */
+    @WebRequest
+    public Completable addLegacyAddress(LegacyAddress legacyAddress) {
+        return Completable.fromCallable(() -> {
+            payloadManager.addLegacyAddress(legacyAddress);
+            return Void.TYPE;
+        });
+    }
+
+    /**
+     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link Wallet}
      *
      * @param legacyAddress The updated address
-     * @return {@link Observable<Boolean>} representing a successful save
+     * @return A {@link Completable} object representing a successful save
      */
     @WebRequest
     public Completable updateLegacyAddress(LegacyAddress legacyAddress) {
         return Completable.fromCallable(() -> {
-            payloadManager.addLegacyAddress(legacyAddress);
+            payloadManager.updateLegacyAddress(legacyAddress);
             return Void.TYPE;
         });
     }

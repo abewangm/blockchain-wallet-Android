@@ -116,7 +116,6 @@
 
     <string name="confirm_details">Confirmer le paiement</string>
     <string name="fee">Frais</string>
-    <string name="dialog_cancel">ANNULER</string>
     <string name="exit_confirm">Appuyez sur le bouton retour pour quitter</string>
 
     <string name="label_address">Votre adresse a été importée avec succès. Facultatif : donnez un nom sympa et lisible à cette adresse</string>
@@ -147,7 +146,7 @@
     <string name="postal">Code postal</string>
     <string name="telephone">Téléphone</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Choisir une catégorie...</string>
+    <string name="merchant_cat_hint">Choisir une catégorie…</string>
     <string name="merchant_cat1">Café</string>
     <string name="merchant_cat2">Bars/Boissons</string>
     <string name="merchant_cat3">Alimentation et Restaurants</string>
@@ -239,10 +238,10 @@
 
     <string name="camera_unavailable">L\’appareil photo est actuellement ouvert par une autre application. Veuillez fermer l\'autre application et réessayer.</string>
 
-    <string name="validating_password">Validation du mot de passe en cours...</string>
-    <string name="validating_pin">Validation du code PIN en cours...</string>
-    <string name="creating_pin">Création du code PIN en cours...</string>
-    <string name="decrypting_wallet">Décryptage du portefeuille en cours...</string>
+    <string name="validating_password">Validation du mot de passe en cours…</string>
+    <string name="validating_pin">Validation du code PIN en cours…</string>
+    <string name="creating_pin">Création du code PIN en cours…</string>
+    <string name="decrypting_wallet">Décryptage du portefeuille en cours…</string>
     <string name="password_unchanged">Mot de passe inchangé</string>
     <string name="password_changed">Mot de passe modifié</string>
     <string name="disable_root_warning">Désactiver l\’avertissement d\'appareil en mode root</string>
@@ -257,7 +256,7 @@
     <string name="device_rooted">Il semble que votre appareil soit en mode root. Stocker des fonds sur un appareil en mode root n\'est pas sûr et peut entraîner des problèmes de stabilité. Si vous continuez à utiliser notre portefeuille Bitcoin sur cet appareil, nous vous recommandons d\’utiliser le double cryptage sur votre compte Blockchain.</string>
     <string name="address_already_in_wallet">Votre portefeuille contient déjà cette adresse.</string>
     <string name="cannot_create_address">Impossible de créer une nouvelle adresse à l\'heure actuelle. Veuillez réessayer.</string>
-    <string name="saving_address">Enregistrement de l\’adresse en cours...</string>
+    <string name="saving_address">Enregistrement de l\’adresse en cours…</string>
 
     <string name="cannot_launch_app">Impossible de charger le portefeuille Blockchain sur cet appareil.</string>
     <string name="label">Libellé</string>

@@ -116,7 +116,6 @@
 
     <string name="confirm_details">Подтвердить оплату</string>
     <string name="fee">Комиссия</string>
-    <string name="dialog_cancel">ОТМЕНА</string>
     <string name="exit_confirm">Для выхода еще раз нажмите кнопку «Назад»</string>
 
     <string name="label_address">Ваш адрес успешно импортирован. При необходимости присвойте понятное отображаемое имя этому адресу.</string>
@@ -147,7 +146,7 @@
     <string name="postal">Почтовый индекс</string>
     <string name="telephone">Телефон</string>
     <string name="web">Веб</string>
-    <string name="merchant_cat_hint">Выберите категорию...</string>
+    <string name="merchant_cat_hint">Выберите категорию…</string>
     <string name="merchant_cat1">Кафе</string>
     <string name="merchant_cat2">Бары/напитки</string>
     <string name="merchant_cat3">Продукты и рестораны</string>
@@ -239,10 +238,10 @@
 
     <string name="camera_unavailable">Сейчас камера открыта другим приложением. Закройте другое приложение и повторите попытку.</string>
 
-    <string name="validating_password">Идет проверка пароля...</string>
-    <string name="validating_pin">Идет проверка PIN-кода...</string>
-    <string name="creating_pin">Идет создание PIN-кода...</string>
-    <string name="decrypting_wallet">Идет расшифровка кошелька...</string>
+    <string name="validating_password">Идет проверка пароля…</string>
+    <string name="validating_pin">Идет проверка PIN-кода…</string>
+    <string name="creating_pin">Идет создание PIN-кода…</string>
+    <string name="decrypting_wallet">Идет расшифровка кошелька…</string>
     <string name="password_unchanged">Пароль не изменен</string>
     <string name="password_changed">Пароль изменен</string>
     <string name="disable_root_warning">Отключить предупреждение корневого устройства</string>
@@ -257,7 +256,7 @@
     <string name="device_rooted">Возможно, ваше устройство корневое. Имейте в виду, что хранение средств на корневом устройстве является небезопасным и, кроме того, может вызвать проблемы со стабильностью. Если вы продолжаете использовать наш Bitcoin кошелек на этом устройстве, мы рекомендуем использовать двойное шифрование вашей учетной записи Blockchain.</string>
     <string name="address_already_in_wallet">Ваш кошелек уже содержит этот адрес.</string>
     <string name="cannot_create_address">В данный момент невозможно создать новый адрес. Попробуйте еще раз.</string>
-    <string name="saving_address">Идет сохранение адреса...</string>
+    <string name="saving_address">Идет сохранение адреса…</string>
 
     <string name="cannot_launch_app">На этом устройстве невозможно запустить кошелек Blockchain.</string>
     <string name="label">Ярлык</string>

@@ -21,6 +21,8 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 
+import static piuk.blockchain.android.util.PersistentPrefs.KEY_OVERLAY_TRUSTED;
+
 public class AppUtil {
 
     private static final String REGEX_UUID = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
@@ -146,24 +148,24 @@ public class AppUtil {
 
     public boolean detectObscuredWindow(Context context, MotionEvent event) {
         //Detect if touch events are being obscured by hidden overlays - These could be used for tapjacking
-        if ((!prefs.getValue("OVERLAY_TRUSTED", false)) && (event.getFlags() & MotionEvent.FLAG_WINDOW_IS_OBSCURED) != 0) {
+        if ((!prefs.getValue(KEY_OVERLAY_TRUSTED, false))
+                && (event.getFlags() & MotionEvent.FLAG_WINDOW_IS_OBSCURED) != 0) {
 
             //Prevent multiple popups
-            if (alertDialog != null)
+            if (alertDialog != null) {
                 alertDialog.dismiss();
+            }
 
             alertDialog = new AlertDialog.Builder(context, R.style.AlertDialogStyle)
                     .setTitle(R.string.screen_overlay_warning)
                     .setMessage(R.string.screen_overlay_note)
                     .setCancelable(false)
-                    .setPositiveButton(R.string.dialog_continue, (dialog, whichButton) -> {
-                        prefs.setValue("OVERLAY_TRUSTED", true);
-                        dialog.dismiss();
-                    }).setNegativeButton(R.string.exit, (dialog, whichButton) -> {
-                        dialog.dismiss();
-                        ((Activity) context).finish();
-                    }).show();
-            return true;//consume event
+                    .setPositiveButton(R.string.dialog_continue, (dialog, whichButton) ->
+                            prefs.setValue(KEY_OVERLAY_TRUSTED, true))
+                    .setNegativeButton(R.string.exit, (dialog, whichButton) ->
+                            ((Activity) context).finish())
+                    .show();
+            return true;
         } else {
             return false;
         }

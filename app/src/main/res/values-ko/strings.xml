@@ -116,7 +116,6 @@
 
     <string name="confirm_details">지불 확인</string>
     <string name="fee">수수료</string>
-    <string name="dialog_cancel">취소</string>
     <string name="exit_confirm">나가려면 뒤로 단추를 다시 누르세요</string>
 
     <string name="label_address">귀하 주소 가져오기 성공 선택으로 이 주소에 친근한 디스플레이를 배정하세요</string>
@@ -147,7 +146,7 @@
     <string name="postal">우편 번호</string>
     <string name="telephone">전화</string>
     <string name="web">웹</string>
-    <string name="merchant_cat_hint">범주 선택...</string>
+    <string name="merchant_cat_hint">범주 선택…</string>
     <string name="merchant_cat1">카페</string>
     <string name="merchant_cat2">바/마시기</string>
     <string name="merchant_cat3">식품과 식사하기</string>
@@ -215,7 +214,7 @@
     <string name="click">클릭</string>
     <string name="to_start_sending_and_receiving_btc">비트코인 보내기와 받기를 시작하려면</string>
 
-    <string name="watch_only_label">(볼 수만 있음, watch-only)</string>
+    <string name="watch_only_label">(볼 수만 있음, watch only)</string>
     <string name="address_book_label">(주소록)</string>
 
     <string name="transaction_submitted">거래 완료</string>
@@ -238,10 +237,10 @@
 
     <string name="camera_unavailable">다른 애플리케이션이 카메라를 사용하고 있습니다. 다른 애플리케이션을 닫고 다시 해 보세요.</string>
 
-    <string name="validating_password">암호 확인 중...</string>
-    <string name="validating_pin">비밀 번호 확인 중...</string>
-    <string name="creating_pin">비밀 번호 만드는 중...</string>
-    <string name="decrypting_wallet">지갑 해독 중...</string>
+    <string name="validating_password">암호 확인 중…</string>
+    <string name="validating_pin">비밀 번호 확인 중…</string>
+    <string name="creating_pin">비밀 번호 만드는 중…</string>
+    <string name="decrypting_wallet">지갑 해독 중…</string>
     <string name="password_unchanged">암호 안 바뀜</string>
     <string name="password_changed">암호 바뀜</string>
     <string name="disable_root_warning">루팅 된 장치 경보 해제</string>
@@ -256,7 +255,7 @@
     <string name="device_rooted">귀하 장치가 루팅 된 것 같습니다. 루팅 된 장치에 자금을 가지고 있는 것은 위험하며 안정성 문제도 일어날 수 있습니다. 비트코인 지갑을 계속 이 장치에서 쓰려면 귀하 블록체인 계정에서 이중 암호화를 쓰도록 하십시오.</string>
     <string name="address_already_in_wallet">귀하 지갑은 이미 이 주소를 가지고 있습니다.</string>
     <string name="cannot_create_address">이 번에는 새 주소를 만들 수 없었습니다. 다시 해 보세요.</string>
-    <string name="saving_address">주소 저장 중...</string>
+    <string name="saving_address">주소 저장 중…</string>
 
     <string name="cannot_launch_app">이 장치에서는 블록체인 지갑을 쓸 수 없습니다.</string>
     <string name="label">라벨</string>
@@ -293,13 +292,13 @@
     <string name="privx_required">개인 열쇠가 필요함</string>
     <string name="watch_only_spend_instructionss">이 행동은 비트코인 주소 %1$s에 대한 개인 열쇠가 필요합니다. QR 코드를 스캔 하세요.</string>
     <string name="invalid_private_key">유효하지 않은 개인 열쇠</string>
-    <string name="watch_only_import_warning">귀하는 해당 개인 열쇠 없이 지갑에 주소 (또는 공개 열쇠 스크립트)가 저장되어 있는 보기만 할 수 있는 (watch-only) 주소를 가져오게 됩니다. 즉 다른 곳에 개인 열쇠가 저장되어 있어야 자금을 쓸 수 있습니다. 저장된 개인 열쇠가 없으면 다른 사람에게 보기만 할 수 있는 (watch-only) 주소로 비트코인을 보내라고 하지 마십시오. 이 옵션은 고급 사용자만 쓰는 것이 좋습니다. 계속합니까? </string>
+    <string name="watch_only_import_warning">귀하는 해당 개인 열쇠 없이 지갑에 주소 (또는 공개 열쇠 스크립트)가 저장되어 있는 보기만 할 수 있는 (watch only) 주소를 가져오게 됩니다. 즉 다른 곳에 개인 열쇠가 저장되어 있어야 자금을 쓸 수 있습니다. 저장된 개인 열쇠가 없으면 다른 사람에게 보기만 할 수 있는 (watch only) 주소로 비트코인을 보내라고 하지 마십시오. 이 옵션은 고급 사용자만 쓰는 것이 좋습니다. 계속합니까? </string>
     <string name="scan_private_key">개인 열쇠 스캔</string>
     <string name="private_key_successfully_imported">개인 열쇠 가져오기 성공</string>
-    <string name="private_key_not_matching_address">설명: 스캔 된 개인 열쇠가 귀하의 보기만 할 수 있는 (watch-only) 주소와 일치하지 않습니다. 이 주소에서 자금을 쓰려면 올바른 개인 열쇠를 스캔 하세요.</string>
+    <string name="private_key_not_matching_address">설명: 스캔 된 개인 열쇠가 귀하의 보기만 할 수 있는 (watch only) 주소와 일치하지 않습니다. 이 주소에서 자금을 쓰려면 올바른 개인 열쇠를 스캔 하세요.</string>
     <string name="watch_only">보기만 함</string>
     <string name="extended_public_key_description">귀하가 상인이면 귀하 xPub을 보여준 후 블록체인 상인 앱을 써서 자금을 안전하고 개인적으로 받으십시오. xPub은 본인만 가지고 있으세요.         귀하 xPub을 아는 사람은 귀하의 자금과 거래를 모두 볼 수 있습니다. </string>
-    <string name="watch_only_description">이 주소는 보기만 할 수 있는 (watch-only) 주소입니다. 이 지갑에서 자금을 쓰려면 올바른 개인 열쇠를 스캔 하세요. </string>
+    <string name="watch_only_description">이 주소는 보기만 할 수 있는 (watch only) 주소입니다. 이 지갑에서 자금을 쓰려면 올바른 개인 열쇠를 스캔 하세요. </string>
     <string name="success">성공</string>
     <string name="default_label">디폴트</string>
     <string name="try_again">다시 해 보세요</string>
@@ -400,7 +399,7 @@
     <string name="account_locked_title">계정 잠김</string>
     <string name="account_locked_message">귀하 계정을 사전 주의 조치로 일시 잠구었습니다. 이메일로 보낸 추가 정보를 보고 나중에 다시 해 보세요.</string>
     <string name="licenses">라이선스</string>
-    <string name="email_chooser">이메일 보내기...</string>
+    <string name="email_chooser">이메일 보내기…</string>
     <string name="password_changed_explanation">암호가 바뀌었으니 지갑 페어링을 다시 하세요</string>
     <string name="sms">문자</string>
     <string name="google_authenticator">구글 인증 도구</string>

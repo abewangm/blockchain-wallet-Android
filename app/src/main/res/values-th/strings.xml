@@ -116,7 +116,6 @@
 
     <string name="confirm_details">ยืนยันการชำระเงิน</string>
     <string name="fee">ค่าธรรมเนียม</string>
-    <string name="dialog_cancel">ยกเลิก</string>
     <string name="exit_confirm">กดปุ่ม กลับ อีกครั้งเพื่อออก</string>
 
     <string name="label_address">นำเข้าที่อยู่ของคุณสำเร็จแล้ว สามารถเลือกที่จะมอบชื่อในการแสดงผลที่เข้าใจง่ายให้กับที่อยู่นี้ได้</string>
@@ -147,7 +146,7 @@
     <string name="postal">รหัสไปรษณีย์</string>
     <string name="telephone">โทรศัพท์</string>
     <string name="web">เว็บ</string>
-    <string name="merchant_cat_hint">เลือกหมวดหมู่...</string>
+    <string name="merchant_cat_hint">เลือกหมวดหมู่…</string>
     <string name="merchant_cat1">คาเฟ่</string>
     <string name="merchant_cat2">บาร์/เครื่องดื่ม</string>
     <string name="merchant_cat3">อาหาร</string>
@@ -239,10 +238,10 @@
 
     <string name="camera_unavailable">แอปพลิเคชันอื่นกำลังเปิดใช้กล้องอยู่ โปรดปิดแอปพลิเคชันอื่นและลองอีกครั้ง</string>
 
-    <string name="validating_password">กำลังยืนยันรหัสผ่าน...</string>
-    <string name="validating_pin">กำลังยืนยัน PIN...</string>
-    <string name="creating_pin">กำลังสร้าง PIN...</string>
-    <string name="decrypting_wallet">กำลังถอดรหัสกระเป๋าเงิน...</string>
+    <string name="validating_password">กำลังยืนยันรหัสผ่าน…</string>
+    <string name="validating_pin">กำลังยืนยัน PIN…</string>
+    <string name="creating_pin">กำลังสร้าง PIN…</string>
+    <string name="decrypting_wallet">กำลังถอดรหัสกระเป๋าเงิน…</string>
     <string name="password_unchanged">ไม่ได้เปลี่ยนรหัสผ่าน</string>
     <string name="password_changed">เปลี่ยนรหัสผ่านแล้ว</string>
     <string name="disable_root_warning">ปิดคำเตือนอุปกรณ์ที่ถูกรูท</string>
@@ -257,7 +256,7 @@
     <string name="device_rooted">ดูเหมือนว่าอุปกรณ์ของคุณจะถูกรูท โปรดทราบว่าการเก็บเงินไว้ในอุปกรณ์ที่ถูกรูทนั้นไม่ปลอดภัย และนอกจากนั้นแล้วมันอาจก่อให้เกิดปัญหาด้านความเสถียรได้ หากคุณใช้งานกระเป๋าเงิน Bitcoin ของเราบนอุปกรณ์นี้ต่อไป เราแนะนำให้คุณใช้การเข้ารหัสสองครั้งในบัญชี Blockchain ของคุณ</string>
     <string name="address_already_in_wallet">กระเป๋าเงินของคุณมีที่อยู่นี้อยู่แล้ว</string>
     <string name="cannot_create_address">ไม่สามารถสร้างที่อยู่ใหม่ได้ในตอนนี้ โปรดลองอีกครั้ง</string>
-    <string name="saving_address">กำลังบันทึกที่อยู่...</string>
+    <string name="saving_address">กำลังบันทึกที่อยู่…</string>
 
     <string name="cannot_launch_app">ไม่สามารถใช้งานกระเป๋าเงิน Blockchain ได้บนอุปกรณ์นี้</string>
     <string name="label">ทำเครื่องหมาย</string>
@@ -402,7 +401,7 @@
     <string name="account_locked_title">บัญชีถูกล็อก</string>
     <string name="account_locked_message">บัญชีของคุณถูกล็อกชั่วคราวเพื่อเป็นการเตือน โปรดตรวจสอบอีเมลของคุณเพื่อรับข้อมูลเพิ่มเติมและลองอีกครั้งในภายหลัง</string>
     <string name="licenses">ใบอนุญาต</string>
-    <string name="email_chooser">ส่งอีเมล...</string>
+    <string name="email_chooser">ส่งอีเมล…</string>
     <string name="password_changed_explanation">มีการเปลี่ยนรหัสผ่านของคุณ โปรดจับคู่กระเป๋าเงินของคุณอีกครั้ง</string>
     <string name="sms">SMS</string>
     <string name="google_authenticator">Google Authenticator</string>

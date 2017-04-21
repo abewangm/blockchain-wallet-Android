@@ -2,12 +2,17 @@ package piuk.blockchain.android.data.rxjava
 
 import com.nhaarman.mockito_kotlin.mock
 import io.reactivex.Observable
+import org.amshove.kluent.shouldEqual
+import org.amshove.kluent.shouldHaveKey
+import org.amshove.kluent.shouldNotHaveKey
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import piuk.blockchain.android.*
+import piuk.blockchain.android.BlockchainTestApplication
+import piuk.blockchain.android.BuildConfig
+import piuk.blockchain.android.RxTest
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
@@ -31,9 +36,9 @@ class RxBusTest : RxTest() {
         // Act
         subject.register(type)
         // Assert
-        subject.subjectsMap shouldContainKey type
-        subject.subjectsMap.size equals 1
-        subject.subjectsMap[type]!!.size equals 1
+        subject.subjectsMap shouldHaveKey type
+        subject.subjectsMap.size shouldEqual 1
+        subject.subjectsMap[type]!!.size shouldEqual 1
     }
 
     @Test
@@ -46,9 +51,9 @@ class RxBusTest : RxTest() {
         subject.register(type)
         subject.register(type)
         // Assert
-        subject.subjectsMap shouldContainKey type
-        subject.subjectsMap.size equals 1
-        subject.subjectsMap[type]!!.size equals 3
+        subject.subjectsMap shouldHaveKey type
+        subject.subjectsMap.size shouldEqual 1
+        subject.subjectsMap[type]!!.size shouldEqual 3
     }
 
     @Test
@@ -63,13 +68,13 @@ class RxBusTest : RxTest() {
         subject.register(type1)
         subject.register(type2)
         // Assert
-        subject.subjectsMap shouldContainKey type0
-        subject.subjectsMap shouldContainKey type1
-        subject.subjectsMap shouldContainKey type2
-        subject.subjectsMap.size equals 3
-        subject.subjectsMap[type0]!!.size equals 1
-        subject.subjectsMap[type1]!!.size equals 1
-        subject.subjectsMap[type2]!!.size equals 1
+        subject.subjectsMap shouldHaveKey type0
+        subject.subjectsMap shouldHaveKey type1
+        subject.subjectsMap shouldHaveKey type2
+        subject.subjectsMap.size shouldEqual 3
+        subject.subjectsMap[type0]!!.size shouldEqual 1
+        subject.subjectsMap[type1]!!.size shouldEqual 1
+        subject.subjectsMap[type2]!!.size shouldEqual 1
     }
 
     @Test
@@ -81,8 +86,8 @@ class RxBusTest : RxTest() {
         val observable = subject.register(type)
         subject.unregister(type, observable)
         // Assert
-        subject.subjectsMap shouldNotContainKey type
-        subject.subjectsMap.size equals 0
+        subject.subjectsMap shouldNotHaveKey type
+        subject.subjectsMap.size shouldEqual 0
     }
 
     @Test
@@ -95,10 +100,10 @@ class RxBusTest : RxTest() {
         val observableToBeUnregistered = subject.register(type)
         subject.unregister(type, observableToBeUnregistered)
         // Assert
-        subject.subjectsMap shouldContainKey type
-        subject.subjectsMap.size equals 1
-        subject.subjectsMap[type]!!.size equals 1
-        subject.subjectsMap[type]!![0] equals observableToBeLeftRegistered
+        subject.subjectsMap shouldHaveKey type
+        subject.subjectsMap.size shouldEqual 1
+        subject.subjectsMap[type]!!.size shouldEqual 1
+        subject.subjectsMap[type]!![0] shouldEqual observableToBeLeftRegistered
     }
 
     @Test
@@ -110,8 +115,8 @@ class RxBusTest : RxTest() {
         val observable: Observable<String> = mock()
         subject.unregister(type, observable)
         // Assert
-        subject.subjectsMap shouldNotContainKey type
-        subject.subjectsMap.size equals 0
+        subject.subjectsMap shouldNotHaveKey type
+        subject.subjectsMap.size shouldEqual 0
     }
 
     @Test
@@ -125,8 +130,8 @@ class RxBusTest : RxTest() {
         subject.emitEvent(type, value)
         // Assert
         testObserver.assertNoErrors()
-        testObserver.values().size equals 1
-        testObserver.values()[0] equals value
+        testObserver.values().size shouldEqual 1
+        testObserver.values()[0] shouldEqual value
     }
 
     @Test

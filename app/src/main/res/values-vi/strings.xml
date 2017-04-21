@@ -116,7 +116,6 @@
 
     <string name="confirm_details">Xác nhận thanh toán</string>
     <string name="fee">Phí</string>
-    <string name="dialog_cancel">HỦY</string>
     <string name="exit_confirm">Nhấn trở lại một lần nữa để thoát</string>
 
     <string name="label_address">Địa chỉ của bạn đã được nhập thành công. Tùy chọn chỉ định một tên hiển thị dễ nhìn cho địa chỉ này.</string>
@@ -147,7 +146,7 @@
     <string name="postal">Mã bưu chính</string>
     <string name="telephone">Điện thoại</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Chọn một hạng mục...</string>
+    <string name="merchant_cat_hint">Chọn một hạng mục…</string>
     <string name="merchant_cat1">Cà phê</string>
     <string name="merchant_cat2">Quán Bar/Đồ uống</string>
     <string name="merchant_cat3">Thức ăn và đồ uống</string>
@@ -239,10 +238,10 @@
 
     <string name="camera_unavailable">Camere hiện đang được bật cho ứng dụng khác. Vui lòng đóng ứng dụng khác và thử lại.</string>
 
-    <string name="validating_password">Đang xác nhận mật khẩu...</string>
-    <string name="validating_pin">Đang xác nhận mã PIN...</string>
-    <string name="creating_pin">Đang tạo mã PIN...</string>
-    <string name="decrypting_wallet">Đang giải mã Ví...</string>
+    <string name="validating_password">Đang xác nhận mật khẩu…</string>
+    <string name="validating_pin">Đang xác nhận mã PIN…</string>
+    <string name="creating_pin">Đang tạo mã PIN…</string>
+    <string name="decrypting_wallet">Đang giải mã Ví…</string>
     <string name="password_unchanged">Mật khẩu không được thay đổi</string>
     <string name="password_changed">Mật khẩu đã được thay đổi</string>
     <string name="disable_root_warning">Tắt cảnh báo thiết bị đã được root</string>
@@ -257,7 +256,7 @@
     <string name="device_rooted">Thiết bị của bạn đã được root. Lưu ý, không an toàn khi lưu trữ các khoản tiền trên một thiết bị đã được root, hơn nữa, có thể gây ra sự không ổn định. Nếu bạn tiếp tục sử dụng ví Bitcoin của mình trên thiết bị này, chúng tôi khuyên bạn nên sử dụng mã hóa kép cho tài khoản Blockchain.</string>
     <string name="address_already_in_wallet">Ví của bạn đã chứa địa chỉ này.</string>
     <string name="cannot_create_address">Không thể tạo địa chỉ mới vào thời điểm này. Vui lòng thử lại.</string>
-    <string name="saving_address">Đang lưu địa chỉ...</string>
+    <string name="saving_address">Đang lưu địa chỉ…</string>
 
     <string name="cannot_launch_app">Ví Blockchain không thể sử dụng trên thiết bị này.</string>
     <string name="label">Nhãn</string>

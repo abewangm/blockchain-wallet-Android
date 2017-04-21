@@ -116,7 +116,6 @@
 
     <string name="confirm_details">Konfirmasi Pembayaran</string>
     <string name="fee">Biaya</string>
-    <string name="dialog_cancel">BATAL</string>
     <string name="exit_confirm">Tekan lagi tombol kembali untuk keluar</string>
 
     <string name="label_address">Alamat Anda berhasil diimpor. Beri nama tampilan yang ramah untuk alamat ini secara opsional.</string>
@@ -147,7 +146,7 @@
     <string name="postal">Kode pos</string>
     <string name="telephone">Telepon</string>
     <string name="web">Situs</string>
-    <string name="merchant_cat_hint">Pilih kategori...</string>
+    <string name="merchant_cat_hint">Pilih kategori…</string>
     <string name="merchant_cat1">Kafe</string>
     <string name="merchant_cat2">Bar/Tempat minum-minum</string>
     <string name="merchant_cat3">Makanan dan Santapan</string>
@@ -224,6 +223,7 @@
     <string name="upgrade_page_1">Pncadangan dan pemulihan disederhanakan.</string>
     <string name="upgrade_page_2">Privasi yang ditingkatkan melalui alamat deterministik hirarkis.</string>
     <string name="upgrade_page_3">Sesuaikan cara Anda mengatur Bitcoin Anda dalam dompet Blockchain Anda.</string>
+
     <string name="upgrading">Memutakhirkan...</string>
     <string name="upgrading_started_info">Dompet Anda sedang dimutakhirkan, harap bersabar, hal ini akan memakan waktu cukup lama tergantung dari ukuran dan umur dari dompet Anda.</string>
     <string name="upgrade_success_heading">Dompet Anda sudah ditingkatkan versinya!</string>
@@ -239,10 +239,10 @@
 
     <string name="camera_unavailable">Kamera saat ini sedang digunakan oleh aplikasi lain. Mohon tutup aplikasi lain tersebut lalu coba lagi.</string>
 
-    <string name="validating_password">Memvalidasi Kata Sandi...</string>
-    <string name="validating_pin">Memvalidasi PIN...</string>
-    <string name="creating_pin">Membuat PIN...</string>
-    <string name="decrypting_wallet">Mendekripsi Dompet...</string>
+    <string name="validating_password">Memvalidasi Kata Sandi…</string>
+    <string name="validating_pin">Memvalidasi PIN…</string>
+    <string name="creating_pin">Membuat PIN…</string>
+    <string name="decrypting_wallet">Mendekripsi Dompet…</string>
     <string name="password_unchanged">Kata sandi tidak diubah</string>
     <string name="password_changed">Kata sandi diubah</string>
     <string name="disable_root_warning">Menonaktifkan peringatan perangkat yang di root</string>
@@ -257,7 +257,7 @@
     <string name="device_rooted">Perangkat Anda tampaknya telah di root. Perhatikan bahwa menyimpan dana di perangkat yang di-root tidak aman dan, selain itu, bisa menyebabkan masalah ketidakstabilan. Jika Anda terus menggunakan dompet Bitcoin kami pada perangkat ini, kami menyarankan agar Anda menggunakan enkripsi ganda pada akun Blockchain Anda.</string>
     <string name="address_already_in_wallet">Dompet Anda sudah memiliki alamat ini.</string>
     <string name="cannot_create_address">Alamat baru tidak bisa dibuat saat ini. Silakan coba lagi.</string>
-    <string name="saving_address">Menyimpan alamat...</string>
+    <string name="saving_address">Menyimpan alamat…</string>
 
     <string name="cannot_launch_app">Dompet Blockchain tidak dapat dijalankan pada perangkat ini.</string>
     <string name="label">Label</string>
@@ -401,7 +401,7 @@
     <string name="account_locked_title">Akun terkunci</string>
     <string name="account_locked_message">Akun Anda telah dikunci sementara sebagai pencegahan. Silahkan cek surel Anda untuk informasi lebih lanjut dan coba lagi nanti.</string>
     <string name="licenses">Surat izin</string>
-    <string name="email_chooser">Kirim surel...</string>
+    <string name="email_chooser">Kirim surel…</string>
     <string name="password_changed_explanation">Kata sandi Anda telah diubah, silakan memasangkan kembali dompet Anda</string>
     <string name="sms">SMS</string>
     <string name="google_authenticator">Google Authenticator</string>

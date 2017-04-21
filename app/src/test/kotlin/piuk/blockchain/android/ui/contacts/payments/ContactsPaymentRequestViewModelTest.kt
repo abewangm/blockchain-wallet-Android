@@ -6,9 +6,9 @@ import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest
 import info.blockchain.wallet.payload.PayloadManager
-import info.blockchain.wallet.payload.data.Account
 import io.reactivex.Completable
 import io.reactivex.Observable
+import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,7 +21,6 @@ import piuk.blockchain.android.data.contacts.PaymentRequestType
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -113,7 +112,7 @@ class ContactsPaymentRequestViewModelTest {
         verify(mockActivity).fragmentBundle
         verify(mockActivity).contactLoaded(contactName, paymentRequestType)
         verifyNoMoreInteractions(mockActivity)
-        subject.recipient equals contact1
+        subject.recipient shouldEqual contact1
     }
 
     @Test

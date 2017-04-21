@@ -138,7 +138,6 @@
 
     <string name="confirm_details">Confirm Payment</string>
     <string name="fee">Fee</string>
-    <string name="dialog_cancel">CANCEL</string>
     <string name="exit_confirm">Press back button again to exit</string>
 
     <string name="label_address">Your address has been imported successfully. Optionally assign a friendly display name to this address.</string>
@@ -234,7 +233,7 @@
     <string name="click">Click</string>
     <string name="to_start_sending_and_receiving_btc">to start sending and receiving bitcoin.</string>
 
-    <string name="watch_only_label">(watch-only)</string>
+    <string name="watch_only_label">(watch only)</string>
     <string name="address_book_label">(address book)</string>
     <string name="archived_label">Archived</string>
 
@@ -257,7 +256,7 @@
     <string name="upgrade_fail_info">There was an error upgrading your wallet. Please try again later.</string>
     <string name="not_sane_error">Your Blockchain Wallet installation is incomplete. Please re-pair your wallet or create a new one.</string>
 
-    <string name="watchonly_address_receive_warning">You are about to receive bitcoin to a watch-only address. You can only spend these funds if you have access to the private key. Continue?</string>
+    <string name="watchonly_address_receive_warning">You are about to receive bitcoin to a watch only address. You can only spend these funds if you have access to the private key. Continue?</string>
 
     <string name="camera_unavailable">The camera is currently opened by another application. Please close other application and try again.</string>
 
@@ -287,6 +286,7 @@
     <string name="label">Label</string>
     <string name="edit">Edit</string>
     <string name="label_cant_be_empty">Label can\'t be blank.</string>
+    <string name="label_name_match">Name already in use</string>
     <string name="warning">Warning</string>
 
     <string name="ssl_no_connection">We are unable to connect to the host to establish a secure connection. Please verify your network connection and device before continuing.</string>
@@ -323,21 +323,21 @@
     <string name="privx_required">Private Key Needed</string>
     <string name="watch_only_spend_instructionss">This action requires the private key for the Bitcoin address %1$s. Please scan the QR code.</string>
     <string name="invalid_private_key">Invalid private key</string>
-    <string name="watch_only_import_warning">You are about to import a watch-only address, an address (or public key script)
+    <string name="watch_only_import_warning">You are about to import a watch only address, an address (or public key script)
         stored in the wallet without the corresponding private key. This
         means that the funds can be spent ONLY if you have the private key stored elsewhere. If you do
-        not have the private key stored, do NOT instruct anyone to send you bitcoin to the watch-only
+        not have the private key stored, do NOT instruct anyone to send you bitcoin to the watch only
         address.\n\nThese options are recommended for advanced users only. Continue?
     </string>
     <string name="scan_private_key">Scan private key</string>
     <string name="private_key_successfully_imported">Private key successfully imported.</string>
-    <string name="private_key_not_matching_address">NOTE: The scanned private key does not correspond to your watch-only address. To spend your funds from this address, please scan the correct private key.</string>
+    <string name="private_key_not_matching_address">NOTE: The scanned private key does not correspond to your watch only address. To spend your funds from this address, please scan the correct private key.</string>
     <string name="watch_only">Watch Only</string>
     <string name="extended_public_key_description">If you are a merchant, show your xPub and use the
         Blockchain Merchant app to receive funds safely and privately.\n\nKeep your xPub private.
         Someone with access to your xPub will be able to see all your funds and transactions.
     </string>
-    <string name="watch_only_description">This is a watch-only address. To spend your funds from
+    <string name="watch_only_description">This is a watch only address. To spend your funds from
         this wallet, please scan your private key.
     </string>
     <string name="success">Success</string>
@@ -401,6 +401,7 @@
     <string name="google_authenticator">Google Authenticator</string>
     <string name="yubikey">Yubikey</string>
     <string name="disable_2fa_first">Please disable 2-step Verification via SMS in the security settings first.</string>
+    <string name="disable_online_only">Please login to your wallet in the web browser to disable 2FA.</string>
     <string name="settings_field_cant_be_empty">Field can\'t be empty.</string>
     <string name="settings_error_updating">Error updating settings, please try again</string>
 
@@ -424,7 +425,7 @@
 
     <string name="password_hint_summary">Your Blockchain Wallet never communicates your password to our servers. This means we have no idea what your password is and we cannot reset it if you forget it. Create a memorable password hint that we can send to your verified email address in case you forget your password.</string>
     <string name="change_password">Change Password</string>
-    <string name="change_password_summary">Your password is never shared with our servers, which means we cannot help reset your password if you forget it. Make sure you write down your recovery phrase which can restore access to your wallet in the event of a lost password.</string>
+    <string name="change_password_summary">Your password is never shared with our servers, which means we cannot help reset your password if you forget it. Make sure you backup your funds from the side menu which can restore access to your wallet in the event of a lost password.</string>
     <string name="verify_email_notice">We have sent your email address a verification link. Click the verification link to verify your email address.</string>
     <string name="email_notifications">Email Notifications</string>
     <string name="email_notifications_summary">Get notified when you receive bitcoin.</string>
@@ -475,7 +476,7 @@
     <string name="password_reveal_warning">Be careful! Revealing this text allows your password to be copied to the clipboard, which can then be read by all applications on your device. Also be aware of people standing behind you!</string>
 
     <string name="sms_notifications">SMS Notifications</string>
-    <string name="sms_notifications_summary">Enable notifications to receive an SMS whenever you receive bitcoins. Only labeled addresses and imported addresses are eligible to trigger notifications.</string>
+    <string name="sms_notifications_summary">Enable notifications to receive an SMS whenever you receive bitcoin.</string>
 
     <!-- TRANSACTION DETAILS -->
     <string name="transaction_detail_title">Transaction</string>

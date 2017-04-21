@@ -28,6 +28,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.LabelUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -116,9 +117,14 @@ public class AccountViewModel extends BaseViewModel {
      * @param accountLabel A label for the account to be created
      */
     void createNewAccount(String accountLabel) {
-        dataListener.showProgressDialog(R.string.please_wait);
+        if (LabelUtil.isExistingLabel(payloadDataManager, accountLabel)) {
+            dataListener.showToast(R.string.label_name_match, ToastCustom.TYPE_ERROR);
+            return;
+        }
+
         compositeDisposable.add(
                 accountDataManager.createNewAccount(accountLabel, doubleEncryptionPassword)
+                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.please_wait))
                         .subscribe(account -> {
                             dataListener.dismissProgressDialog();
                             dataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
@@ -148,7 +154,7 @@ public class AccountViewModel extends BaseViewModel {
     void updateLegacyAddress(LegacyAddress address) {
         dataListener.showProgressDialog(R.string.saving_address);
         compositeDisposable.add(
-                payloadDataManager.syncPayloadWithServer()
+                accountDataManager.updateLegacyAddress(address)
                         .subscribe(() -> {
                             dataListener.dismissProgressDialog();
                             dataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
@@ -231,14 +237,13 @@ public class AccountViewModel extends BaseViewModel {
         legacyAddress.setCreatedDeviceVersion(BuildConfig.VERSION_NAME);
 
         compositeDisposable.add(
-                accountDataManager.updateLegacyAddress(legacyAddress)
+                accountDataManager.addLegacyAddress(legacyAddress)
                         .subscribe(
                                 () -> dataListener.showRenameImportedAddressDialog(legacyAddress),
                                 throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
     private void importWatchOnlyAddress(String address) {
-
         address = correctAddressFormatting(address);
 
         if (!FormatsUtil.isValidBitcoinAddress(address)) {

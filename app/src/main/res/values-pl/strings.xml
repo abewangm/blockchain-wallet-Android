@@ -116,7 +116,6 @@
 
     <string name="confirm_details">Potwierdź płatność</string>
     <string name="fee">Oplata</string>
-    <string name="dialog_cancel">ANULUJ</string>
     <string name="exit_confirm">Wciśnij przycisk "Wstecz" ponownie, aby wyjść</string>
 
     <string name="label_address">Udało się poprawnie zaimportować Twój adres. Opcjonalnie możesz przypisać temu adresowi przyjazną nazwę do wyświetlania.</string>
@@ -147,7 +146,7 @@
     <string name="postal">Kod pocztowy</string>
     <string name="telephone">Telefon</string>
     <string name="web">Sieć</string>
-    <string name="merchant_cat_hint">Wybierz kategorię...</string>
+    <string name="merchant_cat_hint">Wybierz kategorię…</string>
     <string name="merchant_cat1">Kawiarnie</string>
     <string name="merchant_cat2">Bary/Drinki</string>
     <string name="merchant_cat3">Jedzenie i restauracje</string>
@@ -239,10 +238,10 @@
 
     <string name="camera_unavailable">Aparat jest w tej chwili używany przez inną aplikację. Zamknij tę aplikację i spróbuj ponownie.</string>
 
-    <string name="validating_password">Zatwierdzanie hasła...</string>
-    <string name="validating_pin">Zatwierdzanie PINu...</string>
-    <string name="creating_pin">Tworzenie PINu...</string>
-    <string name="decrypting_wallet">Odszyfrowywanie Portfela...</string>
+    <string name="validating_password">Zatwierdzanie hasła…</string>
+    <string name="validating_pin">Zatwierdzanie PINu…</string>
+    <string name="creating_pin">Tworzenie PINu…</string>
+    <string name="decrypting_wallet">Odszyfrowywanie Portfela…</string>
     <string name="password_unchanged">Hasło nie zostało zmienione</string>
     <string name="password_changed">Hasło zostało zmienione</string>
     <string name="disable_root_warning">Wyłącz ostrzeżenie o zrootowanym urządzeniu</string>
@@ -257,7 +256,7 @@
     <string name="device_rooted">Twoje urządzenie wygląda na zrootowane. Proszę pamiętać, że przechowywanie środków na zrootowanym urządzeniu nie jest bezpieczne, a ponadto może sprawiać problemy ze stabilnością. Jeśli kontynuujesz korzystanie z naszego portfela bitcoin na tym urządzeniu, zalecamy korzystanie z podwójnego szyfrowania na Twoim koncie Blockchain.</string>
     <string name="address_already_in_wallet">Twój portfel już zawiera ten adres.</string>
     <string name="cannot_create_address">W tej chwili nie można stworzyć nowego adresu. Proszę spróbować ponownie.</string>
-    <string name="saving_address">Zapisywanie adresu...</string>
+    <string name="saving_address">Zapisywanie adresu…</string>
 
     <string name="cannot_launch_app">Portfel Blockchain nie może zostać uruchomiony na tym urządzeniu.</string>
     <string name="label">Etykieta</string>
@@ -401,7 +400,7 @@
     <string name="account_locked_title">Konto zablokowane</string>
     <string name="account_locked_message">Twoje konto zostało tymczasowo zablokowane w ramach środków ostrożności. Przeczytaj wiadomość e-mail, aby uzyskać więcej informacji i spróbuj ponownie później.</string>
     <string name="licenses">Licencje</string>
-    <string name="email_chooser">Wyślij e-mail...</string>
+    <string name="email_chooser">Wyślij e-mail…</string>
     <string name="password_changed_explanation">Twoje hasło zostało zmienione, sparuj ponownie swój portfel</string>
     <string name="sms">SMS</string>
     <string name="google_authenticator">Google Authenticator</string>
