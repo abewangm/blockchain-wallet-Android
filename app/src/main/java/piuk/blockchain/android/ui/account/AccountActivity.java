@@ -26,7 +26,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.EditText;
 
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
@@ -190,7 +189,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     @Thunk
     void promptForAccountLabel() {
-        EditText editText = getAddressLabelEditText();
+        AppCompatEditText editText = getAddressLabelEditText();
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.label)
@@ -381,7 +380,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     @Override
     public void showRenameImportedAddressDialog(LegacyAddress address) {
-        EditText editText = getAddressLabelEditText();
+        AppCompatEditText editText = getAddressLabelEditText();
 
         new AlertDialog.Builder(AccountActivity.this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
@@ -488,10 +487,11 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     }
 
     @NonNull
-    private EditText getAddressLabelEditText() {
-        EditText editText = new EditText(this);
+    private AppCompatEditText getAddressLabelEditText() {
+        AppCompatEditText editText = new AppCompatEditText(this);
         editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(ADDRESS_LABEL_MAX_LENGTH)});
+        editText.setHint(R.string.name);
         return editText;
     }
 

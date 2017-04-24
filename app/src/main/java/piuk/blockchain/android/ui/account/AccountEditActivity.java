@@ -86,6 +86,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         final AppCompatEditText etLabel = new AppCompatEditText(this);
         etLabel.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         etLabel.setFilters(new InputFilter[]{new InputFilter.LengthFilter(ADDRESS_LABEL_MAX_LENGTH)});
+        etLabel.setHint(R.string.name);
         if (label != null && label.length() <= ADDRESS_LABEL_MAX_LENGTH) {
             etLabel.setText(label);
             etLabel.setSelection(label.length());

@@ -7,13 +7,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 
 import info.blockchain.wallet.api.data.Settings;
 
@@ -78,7 +78,7 @@ public class ManualPairingActivity extends BaseAuthActivity implements ManualPai
     public void showTwoFactorCodeNeededDialog(JSONObject responseObject, String sessionId, int authType, String guid, String password) {
         ViewUtils.hideKeyboard(this);
 
-        EditText editText = new EditText(this);
+        AppCompatEditText editText = new AppCompatEditText(this);
         editText.setHint(R.string.two_factor_dialog_hint);
         int message;
         if (authType == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR) {

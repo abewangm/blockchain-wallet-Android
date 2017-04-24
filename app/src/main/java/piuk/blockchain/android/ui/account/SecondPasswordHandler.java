@@ -3,8 +3,8 @@ package piuk.blockchain.android.ui.account;
 import android.content.Context;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
-import android.widget.EditText;
 
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -38,7 +38,7 @@ public class SecondPasswordHandler {
             listener.onNoSecondPassword();
         } else {
 
-            final EditText passwordField = new EditText(context);
+            final AppCompatEditText passwordField = new AppCompatEditText(context);
             passwordField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
             passwordField.setHint(R.string.password);
 
