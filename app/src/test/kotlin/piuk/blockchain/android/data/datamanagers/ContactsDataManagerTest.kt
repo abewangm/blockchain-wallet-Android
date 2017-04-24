@@ -11,6 +11,7 @@ import info.blockchain.wallet.contacts.data.RequestForPaymentRequest
 import info.blockchain.wallet.metadata.data.Message
 import io.reactivex.Completable
 import io.reactivex.Observable
+import org.amshove.kluent.shouldEqual
 import org.bitcoinj.crypto.DeterministicKey
 import org.junit.Before
 import org.junit.Test
@@ -19,9 +20,7 @@ import piuk.blockchain.android.data.contacts.ContactTransactionModel
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.services.ContactsService
 import piuk.blockchain.android.data.stores.PendingTransactionListStore
-import piuk.blockchain.android.equals
 import java.util.*
-import kotlin.test.assertNull
 
 class ContactsDataManagerTest : RxTest() {
 
@@ -77,8 +76,9 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockContactsService).contactList
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        subject.contactsTransactionMap.size equals 1
-        subject.contactsTransactionMap[facilitatedTransaction1.txHash] as String equals contact2.name
+        subject.contactsTransactionMap.size shouldEqual 1
+        subject.contactsTransactionMap[facilitatedTransaction1.txHash]
+                as String shouldEqual contact2.name
     }
 
     @Test
@@ -122,7 +122,7 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockContactsService).contactList
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0].size equals 3
+        testObserver.values()[0].size shouldEqual 3
     }
 
     @Test
@@ -140,7 +140,7 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockContactsService).contactsWithUnreadPaymentRequests
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0].size equals 3
+        testObserver.values()[0].size shouldEqual 3
     }
 
     @Test
@@ -201,7 +201,7 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockContactsService).createInvitation(sender, recipient)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals sender
+        testObserver.values()[0] shouldEqual sender
     }
 
     @Test
@@ -218,7 +218,7 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockContactsService).acceptInvitation(invitationUrl)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals sender
+        testObserver.values()[0] shouldEqual sender
     }
 
     @Test
@@ -235,7 +235,7 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockContactsService).readInvitationLink(invitationUrl)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals sender
+        testObserver.values()[0] shouldEqual sender
     }
 
     @Test
@@ -251,7 +251,7 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockContactsService).readInvitationSent(recipient)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals true
+        testObserver.values()[0] shouldEqual true
     }
 
     @Test
@@ -365,7 +365,7 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockContactsService).fetchXpub(mdid)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals xpub
+        testObserver.values()[0] shouldEqual xpub
     }
 
     @Test
@@ -397,7 +397,7 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockContactsService).getMessages(onlyNew)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0].size equals 3
+        testObserver.values()[0].size shouldEqual 3
     }
 
     @Test
@@ -413,7 +413,7 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockContactsService).readMessage(messageId)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals message
+        testObserver.values()[0] shouldEqual message
     }
 
     @Test
@@ -460,10 +460,10 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockPendingTransactionListStore).insertTransaction(any<ContactTransactionModel>())
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0].size equals 1
+        testObserver.values()[0].size shouldEqual 1
         val contactTransactionModel = testObserver.values()[0][0]
-        contactTransactionModel.contactName equals contact1.name
-        contactTransactionModel.facilitatedTransaction equals facilitatedTransaction1
+        contactTransactionModel.contactName shouldEqual contact1.name
+        contactTransactionModel.facilitatedTransaction shouldEqual facilitatedTransaction1
     }
 
     @Test
@@ -498,10 +498,10 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockPendingTransactionListStore).insertTransaction(any<ContactTransactionModel>())
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0].size equals 1
+        testObserver.values()[0].size shouldEqual 1
         val contactTransactionModel = testObserver.values()[0][0]
-        contactTransactionModel.contactName equals contact1.name
-        contactTransactionModel.facilitatedTransaction equals facilitatedTransaction1
+        contactTransactionModel.contactName shouldEqual contact1.name
+        contactTransactionModel.facilitatedTransaction shouldEqual facilitatedTransaction1
     }
 
     @Test
@@ -518,7 +518,7 @@ class ContactsDataManagerTest : RxTest() {
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0].size equals 3
+        testObserver.values()[0].size shouldEqual 3
     }
 
     @Test
@@ -544,7 +544,7 @@ class ContactsDataManagerTest : RxTest() {
         verify(mockContactsService).contactList
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.values()[0] equals contact0
+        testObserver.values()[0] shouldEqual contact0
     }
 
     @Test
@@ -595,7 +595,7 @@ class ContactsDataManagerTest : RxTest() {
         // Act
         val result = subject.getContactsTransactionMap()
         // Assert
-        result equals subject.contactsTransactionMap
+        result shouldEqual subject.contactsTransactionMap
     }
 
     @Test
@@ -606,7 +606,7 @@ class ContactsDataManagerTest : RxTest() {
         // Act
         val result = subject.getNotesTransactionMap()
         // Assert
-        result equals subject.notesTransactionMap
+        result shouldEqual subject.notesTransactionMap
     }
 
     @Test
@@ -619,8 +619,8 @@ class ContactsDataManagerTest : RxTest() {
         // Assert
         verify(mockPendingTransactionListStore).clearList()
         verify(mockContactsService).destroy()
-        subject.notesTransactionMap.size equals 0
-        subject.contactsTransactionMap.size equals 0
+        subject.notesTransactionMap.size shouldEqual 0
+        subject.contactsTransactionMap.size shouldEqual 0
     }
 
 }

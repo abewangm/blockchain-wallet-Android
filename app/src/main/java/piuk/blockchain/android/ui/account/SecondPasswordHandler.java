@@ -27,6 +27,7 @@ public class SecondPasswordHandler {
     }
 
     public interface ResultListener {
+
         void onNoSecondPassword();
 
         void onSecondPasswordValidated(String validatedSecondPassword);

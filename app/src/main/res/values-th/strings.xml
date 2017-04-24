@@ -103,7 +103,6 @@
 
     <string name="support">สนับสนุน</string>
     <string name="rate_us">ให้คะแนนเรา</string>
-    <string name="about">กระเป๋าเงิน Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">แอปร้านค้าฟรี</string>
     <string name="password_or_wipe">กรอกโดยใช้รหัสผ่านของคุณ หรือลืมกระเป๋าเงินนี้</string>
     <string name="use_password">ใช้รหัสผ่าน</string>
@@ -117,7 +116,6 @@
 
     <string name="confirm_details">ยืนยันการชำระเงิน</string>
     <string name="fee">ค่าธรรมเนียม</string>
-    <string name="dialog_cancel">ยกเลิก</string>
     <string name="exit_confirm">กดปุ่ม กลับ อีกครั้งเพื่อออก</string>
 
     <string name="label_address">นำเข้าที่อยู่ของคุณสำเร็จแล้ว สามารถเลือกที่จะมอบชื่อในการแสดงผลที่เข้าใจง่ายให้กับที่อยู่นี้ได้</string>
@@ -148,7 +146,7 @@
     <string name="postal">รหัสไปรษณีย์</string>
     <string name="telephone">โทรศัพท์</string>
     <string name="web">เว็บ</string>
-    <string name="merchant_cat_hint">เลือกหมวดหมู่...</string>
+    <string name="merchant_cat_hint">เลือกหมวดหมู่…</string>
     <string name="merchant_cat1">คาเฟ่</string>
     <string name="merchant_cat2">บาร์/เครื่องดื่ม</string>
     <string name="merchant_cat3">อาหาร</string>
@@ -183,9 +181,7 @@
     <string name="address_lookup_fail">ไม่สามารถรับที่อยู่ได้ โปรดกรอกที่อยู่ด้วยตนเอง</string>
 
     <string name="backup_write_down_words">เป็นสิ่งสำคัญที่ต้องตรวจสอบให้แน่ใจว่าคุณได้เขียนคำของคุณลงไปอย่างแม่นยำตามที่แสดงอยู่ที่นี่และในลำดับเดียวกันนี้</string>
-    <string name="backup_next_word">คำถัดไป</string>
     <string name="backup_verify_heading">กรอกคำต่อไปนี้จากวลีเพื่อการกู้คืนของคุณเพื่อดำเนินกระบวนการสำรองข้อมูลให้เสร็จสิ้น</string>
-    <string name="backup_word">คำ</string>
     <string name="backup_of">จาก</string>
     <string name="backup_confirmed">ยืนยันการสำรองข้อมูลแล้ว</string>
     <string name="backup_word_mismatch">คำไม่ตรงกัน</string>
@@ -215,22 +211,18 @@
     <string name="confirm_password">ยืนยันรหัสผ่าน</string>
     <string name="check_email_to_auth_login">โปรดตรวจสอบอีเมลของคุณเพื่ออนุมัติความพยายามในการล็อกอินครั้งนี้</string>
     <string name="transaction_fee">ค่าธรรมเนียมธุรกรรม</string>
-    <string name="your_transactions">ธุรกรรมของคุณ</string>
     <string name="transaction_occur_when">ธุรกรรมจะเกิดขึ้นเมื่อคุณได้รับหรือส่ง bitcoin</string>
     <string name="click">คลิก</string>
     <string name="to_start_sending_and_receiving_btc">เพื่อเริ่มส่งและรับ bitcoin</string>
 
     <string name="watch_only_label">(ชมอย่างเดียว)</string>
     <string name="address_book_label">(สมุดที่อยู่)</string>
-    <string name="archived_label">(เก็บเข้าคลังแล้ว)</string>
 
     <string name="transaction_submitted">ธุรกรรมเสร็จสิ้น</string>
     <string name="transaction_failed">ธุรกรรมล้มเหลว</string>
-    <string name="UPGRADE_YOUR_WALLET">ตกลง ไปกันเลย!</string>
     <string name="upgrade_page_1">ทำให้การสำรองข้อมูลและการกู้คืนง่ายดาย</string>
     <string name="upgrade_page_2">ความเป็นส่วนตัวที่เพิ่มขึ้นผ่านทางที่อยู่ที่ระบุได้โดยเป็นลำดับชั้น</string>
     <string name="upgrade_page_3">ตั้งค่าวิธีการที่คุณจัดการ Bitcoin ของคุณในกระเป๋าเงิน Blockchain ของคุณ</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">หวัดดี เราได้เพิ่มฟีเจอร์ใหม่เหล่านี้ไปยังกระเป๋าเงิน Blockchain ของคุณ</string>
     <string name="upgrading">กำลังอัปเกรด...</string>
     <string name="upgrading_started_info">กระเป๋าเงินของคุณกำลังอัปเกรด โปรดอดทนรอ มันจะใช้เวลาสักครู่โดยขึ้นอยู่กับขนาดและอายุของกระเป๋าเงินของคุณ</string>
     <string name="upgrade_success_heading">กระเป๋าเงินของคุณได้รับการอัปเกรดแล้ว!</string>
@@ -246,13 +238,12 @@
 
     <string name="camera_unavailable">แอปพลิเคชันอื่นกำลังเปิดใช้กล้องอยู่ โปรดปิดแอปพลิเคชันอื่นและลองอีกครั้ง</string>
 
-    <string name="validating_password">กำลังยืนยันรหัสผ่าน...</string>
-    <string name="validating_pin">กำลังยืนยัน PIN...</string>
-    <string name="creating_pin">กำลังสร้าง PIN...</string>
-    <string name="decrypting_wallet">กำลังถอดรหัสกระเป๋าเงิน...</string>
+    <string name="validating_password">กำลังยืนยันรหัสผ่าน…</string>
+    <string name="validating_pin">กำลังยืนยัน PIN…</string>
+    <string name="creating_pin">กำลังสร้าง PIN…</string>
+    <string name="decrypting_wallet">กำลังถอดรหัสกระเป๋าเงิน…</string>
     <string name="password_unchanged">ไม่ได้เปลี่ยนรหัสผ่าน</string>
     <string name="password_changed">เปลี่ยนรหัสผ่านแล้ว</string>
-    <string name="verify_email2">ที่อยู่อีเมลซึ่งได้รับการยืนยันของคุณจะใช้เพื่อส่งรหัสล็อกอินเมื่อตรวจพบกิจกรรมที่ผิดปกติ เพื่อเตือนคุณถึง ID ล็อกอินกระเป๋าเงินของคุณ และเพื่อส่งการแจ้งเตือนการชำระเงิน bitcoin เมื่อคุณได้รับเงิน</string>
     <string name="disable_root_warning">ปิดคำเตือนอุปกรณ์ที่ถูกรูท</string>
 
     <string name="show_balance">แสดงยอดคงเหลือ</string>
@@ -265,7 +256,7 @@
     <string name="device_rooted">ดูเหมือนว่าอุปกรณ์ของคุณจะถูกรูท โปรดทราบว่าการเก็บเงินไว้ในอุปกรณ์ที่ถูกรูทนั้นไม่ปลอดภัย และนอกจากนั้นแล้วมันอาจก่อให้เกิดปัญหาด้านความเสถียรได้ หากคุณใช้งานกระเป๋าเงิน Bitcoin ของเราบนอุปกรณ์นี้ต่อไป เราแนะนำให้คุณใช้การเข้ารหัสสองครั้งในบัญชี Blockchain ของคุณ</string>
     <string name="address_already_in_wallet">กระเป๋าเงินของคุณมีที่อยู่นี้อยู่แล้ว</string>
     <string name="cannot_create_address">ไม่สามารถสร้างที่อยู่ใหม่ได้ในตอนนี้ โปรดลองอีกครั้ง</string>
-    <string name="saving_address">กำลังบันทึกที่อยู่...</string>
+    <string name="saving_address">กำลังบันทึกที่อยู่…</string>
 
     <string name="cannot_launch_app">ไม่สามารถใช้งานกระเป๋าเงิน Blockchain ได้บนอุปกรณ์นี้</string>
     <string name="label">ทำเครื่องหมาย</string>
@@ -377,9 +368,6 @@
     <string name="preferences">การตั้งค่า</string>
     <string name="two_fa_summary">ปกป้องกระเป๋าเงินของคุณจากการเข้าถึงที่ไม่ได้รับอนุญาตโดยการเปิดใช้งานการยืนยัน 2 ขั้นตอน คุณสามารถเลือกใช้หมายเลขโทรศัพท์มือถือของคุณเพื่อทำให้กระเป๋าเงินของคุณปลอดภัย รหัสผ่านนี้จะได้รับการร้องขอเมื่อคุณพยายามที่จะเข้าถึงกระเป๋าเงินของคุณผ่านทางเว็บเบราว์เซอร์\n\nเพื่อใช้วิธีการพิสูจน์ตัวตนอื่น โปรดล็อกอินไปยังกระเป๋าเงินเว็บของเรา</string>
 
-    <string name="backup_previous_word">คำก่อนหน้า</string>
-    <string name="backup_done">เสร็จแล้ว</string>
-    <string name="backup_lost_mnemonic">ทำวลีเพื่อการกู้คืน 12 คำสูญหาย?</string>
     <string name="rate_title">ให้คะแนนกระเป๋าเงิน Blockchain </string>
     <string name="rate_message">สนุกกับการใช้งานกระเป๋าเงิน Blockchain? โปรดใช้เวลาสักเล็กน้อยในการรีวิวเราใน Google Play และบอกให้ผู้อื่นรู้จักเรา</string>
     <string name="rate_yes">ใช่แล้ว ให้คะแนนกระเป๋าเงิน Blockchain</string>
@@ -408,13 +396,12 @@
     <string name="large_tx_high_fee_warning">"ธุรกรรมนี้ต้องการค่าธรรมเนียมที่สูงขึ้นสำหรับการใช้ดัส เนื่องจากจะมีการคืนเงินทอนเล็กน้อย"</string>
 
 
-    <string name="overview">ธุรกรรม</string>
     <string name="invalid_password_too_short">โปรดกรอกมากกว่า 3 ตัวอักษร</string>
     <string name="change_pin_new_matches_current">คุณไม่สามารถใช้ PIN ปัจจุบันของคุณเป็น PIN ใหม่ได้</string>
     <string name="account_locked_title">บัญชีถูกล็อก</string>
     <string name="account_locked_message">บัญชีของคุณถูกล็อกชั่วคราวเพื่อเป็นการเตือน โปรดตรวจสอบอีเมลของคุณเพื่อรับข้อมูลเพิ่มเติมและลองอีกครั้งในภายหลัง</string>
     <string name="licenses">ใบอนุญาต</string>
-    <string name="email_chooser">ส่งอีเมล...</string>
+    <string name="email_chooser">ส่งอีเมล…</string>
     <string name="password_changed_explanation">มีการเปลี่ยนรหัสผ่านของคุณ โปรดจับคู่กระเป๋าเงินของคุณอีกครั้ง</string>
     <string name="sms">SMS</string>
     <string name="google_authenticator">Google Authenticator</string>
@@ -461,4 +448,205 @@
 
     <string name="survey_message">คุณต้องการกรอกแบบสำรวจสั้น ๆ เพื่อช่วยปรับปรุงประสบการณ์การใช้กระเป๋าเงินของเราหรือไม่?\n\nเราเห็นคุณค่าของคำแนะนำติชมของคุณ!</string>
     <string name="survey_positive_button">ทำแบบสำรวจ</string>
+
+    <string name="current_price_btc">1 BTC = %1$s</string>
+    <string name="overview">ภาพรวม</string>
+    <string name="create_a_wallet">สร้างกระเป๋าเงิน</string>
+    <string name="log_in">ล็อกอิน</string>
+    <string name="about">กระเป๋าเงิน Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
+    <string name="wallets">กระเป๋าเงิน</string>
+    <string name="your_transactions">ไม่มีธุรกรรม</string>
+    <string name="archived_label">เก็บเอกสารแล้ว</string>
+    <string name="UPGRADE_YOUR_WALLET">โอเค เริ่มได้!</string>
+    <string name="confirm_upgrade_header">เฮ้ เราได้เพิ่มฟีเจอร์ใหม่เหล่านี้ไปยังกระเป๋าเงิน Blockchain ของคุณ:</string>
+    <string name="verify_email2">จะมีการใช้ที่อยู่อีเมลของคุณที่ได้รับการยืนยันเพื่อการส่งรหัสล็อกอินเมื่อตรวจพบกิจกรรมที่น่าสงสัยหรือผิดปกติ หรือเพื่อแจ้งเตือนคุณเกี่ยวกับ ID ล็อกอินกระเป๋าเงินของคุณ และเพื่อส่งการแจ้งเตือนการชำระเงิน bitcoin เมื่อคุณได้รับเงิน</string>
+    <string name="enable_screenshots">เปิดใช้งานภาพถ่ายหน้าจอ</string>
+    <string name="enable_screenshots_warning">คุณกำลังจะเปิดใช้งานภาพถ่ายหน้าจอสำหรับแอป Blockchain บางหน้าจอภายในแอปสามารถแสดงข้อมูลที่ละเอียดอ่อน แอปอื่น ๆ จะสามารถเข้าถึงภาพถ่ายหน้าจอเหล่านี้ได้</string>
+
+    <string name="information">ข้อมูล</string>
+    <string name="transaction_detail_verify">ยืนยันบน Blockchain.info</string>
+    <string name="transaction_detail_share_chooser">แชร์รายละเอียดธุรกรรม</string>
+    <string name="transaction_detail_contact_note">หมายเหตุ</string>
+    <string name="security_centre_email_check">ตรวจสอบอีเมล</string>
+    <string name="contacts_payment_request_send_note">ทำไมคุณถึงต้องการส่ง %1$s bitcoin? สิ่งนี้เป็นสิ่งที่ไม่จำเป็นและจะได้รับการแบ่งปันกับ %1$s</string>
+    <string name="contacts_payment_request_receive_note">ทำไมคุณถึงต้องการให้ %1$s ส่ง bitcoin ให้คุณ? สิ่งนี้เป็นสิ่งที่ไม่จำเป็นและจะได้รับการแบ่งปันกับ %1$s</string>
+    <string name="contacts_send_address_message">มันจะส่งที่อยู่ไปยังผู้ติดต่อของคุณ ดำเนินการต่อ?</string>
+    <string name="contacts_register_nodes_failure">เราไม่สามารถเชื่อมต่อคุณไปยังบริการผู้ติดต่อได้ โปรดลองอีกครั้งเพื่อเปิดการใช้งานแบบเต็ม</string>
+    <string name="contacts_too_much_sent">ดูเหมือนว่าคุณส่ง bitcoin มากกว่าที่ได้รับการร้องขอ คุณสามารถร้องขอบางส่วนกลับมาจากผู้ติดต่อของคุณได้หากคุณต้องการ เราได้ทำเครื่องหมายว่าการชำระเงินนี้เสร็จสิ้น</string>
+    <string name="contacts_too_little_sent">ดูเหมือนว่าคุณส่ง bitcoin น้อยกว่าที่ได้รับการร้องขอ ผู้ติดต่อของคุณจะยังคงได้รับ bitcoin ที่คุณส่ง แต่เราจะไม่ทำเครื่องหมายว่าการชำระเงินนี้เสร็จสิ้น</string>
+    <string name="contacts_second_password_prompt">เพื่อใช้บริการนี้ เราต้องการให้คุณกรอกรหัสผ่านที่สองของคุณ คุณควรจำเป็นต้องกรอกสิ่งนี้เพียงครั้งเดียวเพื่อใช้การใช้งานผู้ติดต่อ</string>
+    <string name="contacts_pending_transaction">ธุรกรรมที่รอดำเนินการ</string>
+    <string name="contacts_transaction_history">ประวัติธุรกรรม</string>
+    <string name="contacts_request_money_receive">ส่งคำร้องไปยังผู้ติดต่อ</string>
+    <string name="contacts_no_confirmed_contacts_found">ไม่พบผู้ติดต่อที่ได้รับการยืนยัน!</string>
+    <string name="contacts_decline_pending_transaction">คุณแน่ใจหรือไม่ว่าคุณต้องการปฏิเสธธุรกรรมที่รอดำเนินการนี้?</string>
+    <string name="contacts_cancel_pending_transaction">คุณแน่ใจหรือไม่ว่าคุณต้องการยกเลิกธุรกรรมที่รอดำเนินการนี้?</string>
+    <string name="contacts_pending_transaction_delete_success">ลบธุรกรรมที่รอดำเนินการเรียบร้อยแล้ว</string>
+    <string name="contacts_pending_transaction_delete_failure">การลบธุรกรรมที่รอดำเนินการล้มเหลว</string>
+    <string name="contacts_pending_transaction_decline_success">ปฏิเสธธุรกรรมที่รอดำเนินการเรียบร้อยแล้ว</string>
+    <string name="contacts_pending_transaction_decline_failure">การปฏิเสธธุรกรรมที่รอดำเนินการล้มเหลว</string>
+    <string name="contacts_pending_transaction_cancel_success">ยกเลิกธุรกรรมที่รอดำเนินการเรียบร้อยแล้ว</string>
+    <string name="contacts_pending_transaction_cancel_failure">การยกเลิกธุรกรรมที่รอดำเนินการล้มเหลว</string>
+    <string name="contacts_sending_to_contact_waiting">กำลังส่ง %1$s ไปยัง %2$s\nกำลังรอให้ %2$s รับ</string>
+    <string name="contacts_payment_requested_ready_to_send">%1$s ถูกร้องขอโดย %2$s\nพร้อมส่ง</string>
+    <string name="contacts_requesting_from_contact_waiting_for_payment">ร้องขอ %1$s จาก %2$s\nกำลังรอการชำระเงิน</string>
+    <string name="contacts_receiving_from_contact_waiting_to_accept">กำลังรับ %1$s จาก %2$s\nกำลังรอให้คุณรับ</string>
+    <string name="contacts_receiving_declined">การชำระเงินถูกปฏิเสธ</string>
+    <string name="contacts_receiving_cancelled">การชำระเงินถูกยกเลิก</string>
+    <string name="contacts_send_complete">ส่ง %1$s ไปยัง %2$s</string>
+    <string name="contacts_receive_complete">รับ %1$s จาก %2$s</string>
+    <string name="contacts_received">ได้รับจาก %1$s</string>
+    <string name="contacts_sent">ส่งไปยัง %1$s</string>
+    <string name="onboarding_fingerprint_title">การล็อกอินด้วยลายนิ้วมือ</string>
+    <string name="onboarding_fingerprint_summary">ใช้การล็อกอินด้วยลายนิ้วมือแทนการใช้งาน PIN ของคุณเพื่อพิสูจน์ตัวตนและเข้าถึงกระเป๋าเงินของคุณ</string>
+    <string name="onboarding_fingerprint_enable">เปิดใช้งานลายนิ้วมือ</string>
+    <string name="onboarding_complete_later">ฉันจะทำมันในภายหลัง</string>
+    <string name="onboarding_check_inbox_title">ตรวจสอบกล่องข้อความของคุณ</string>
+    <string name="onboarding_check_inbox_summary">มองหาอีเมลจาก Blockchain และคลิกลิงก์ยืนยันเพื่อทำการตั้งค่ากระเป๋าเงินของคุณให้เสร็จสิ้น</string>
+    <string name="onboarding_verify_email">ยืนยันอีเมล</string>
+    <string name="onboarding_receive_bitcoin">รับ Bitcoin</string>
+    <string name="onboarding_current_price">ราคาปัจจุบัน:</string>
+    <string name="onboarding_qr_codes">รหัส QR</string>
+    <string name="onboarding_scan_address">สแกนที่อยู่</string>
+    <string name="onboarding_buy_content">เราทำงานกับพันธมิตรการแลกเปลี่ยนทั่วทั้งโลก ดังนั้นคุณสามารถซื้อ bitcoin โดยตรงจากกระเป๋าเงินของคุณ</string>
+    <string name="onboarding_receive_content">ส่งที่อยู่กระเป๋าเงินให้เพื่อนเพื่อร้องขอ bitcoin ที่อยู่่คือสตริงของตัวอักษรและหมายเลขแบบสุ่มซึ่งเปลี่ยนแปลงสำหรับแต่ละธุรกรรม</string>
+    <string name="onboarding_qr_codes_content">สามารถแสดงที่อยู่ในรูปแบบรหัส QR ค้นหารหัส QR ของเพื่อนเพื่อรับที่อยู่กระเป๋าเงินของพวกเขา</string>
+
+    <string name="onboarding_buy_bitcoin">ซื้อ Bitcoin</string>
+    <string name="onboarding_get_bitcoin">รับ Bitcoin</string>
+    <string name="onboarding_complete_title">และนี่คือทั้งหมดสำหรับตอนนี้!</string>
+    <string name="onboarding_complete_content">เราจะอัปเดตคุณด้วยคำแนะนำและฟีเจอร์ใหม่ในที่นี้</string>
+    <string name="onboarding_start_over">เริ่มใหม่</string>
+    <string name="onboarding_skip_all">ข้ามทั้งหมด</string>
+
+    <string name="backup_again">สำรองข้อมูลอีกครั้ง</string>
+    <string name="backup_button_start">เริ่มสำรองข้อมูล</string>
+    <string name="backup_complete_message">คุณสามารถใช้วลีเพื่อการกู้คืนเพื่อกู้คืนเงินทุนของคุณได้หากคุณทำรหัสผ่านของคุณหาย ผู้ใดก็ตามที่สามารถเข้าถึงวลีเพื่อการกู้คืนของคุณจะสามารถเข้าถึง bitcoin ของคุณได้ ดังนั้นโปรดอย่าลืมที่จะเก็บมันไว้ทางออฟไลน์ในสถานที่ที่มั่งคงและปลอดภัย</string>
+    <string name="backup_done">เสร็จแล้ว</string>
+    <string name="backup_explanation">เพื่อความปลอดภัยของคุณ Blockchain จะไม่เก็บรหัสผ่านใด ๆ ในไฟล์  วลีเพื่อการกู้คืน 12 คำต่อไปนี้จะมอบการเข้าถึงให้กับคุณไปยังเงินทุนในกรณีที่คุณทำรหัสผ่านสูญหาย  โปรดมั่นใจว่าคุณได้เขียนมันไว้ในกระดาษและเก็บมันไว้ในสถานที่ที่มั่นคงและปลอดภัย </string>
+    <string name="backup_header">วลีเพื่อการกู้คืน</string>
+    <string name="backup_header_complete">การสำรองข้อมูลเสร็จสิ้น</string>
+    <string name="backup_last">การสำรองข้อมูลครั้งล่าสุด: %1$s</string>
+    <string name="backup_lost_mnemonic">ทำวลีเพื่อการกู้คืน 12 คำสูญหาย?</string>
+    <string name="backup_next_word">คำถัดไป</string>
+    <string name="backup_previous_word">คำก่อนหน้า</string>
+    <string name="backup_word">คำ</string>
+    <string name="change_password_new_matches_current">คุณไม่สามารถใช้รหัสผ่านปัจจุบันของคุณเป็นรหัสผ่านใหม่ของคุณได้</string>
+    <string name="contact_send_request_button">ส่งคำร้องขอ</string>
+    <string name="contacts_accept_invite_title">รับคำเชิญ</string>
+    <string name="contacts_add_are_you_sure">คุณแน่ใจหรือไม่ว่าคุณต้องการเพิ่ม %1$s เป็นผู้ติดต่อที่ไว้วางใจ?</string>
+    <string name="contacts_add_button">เพิ่ม</string>
+    <string name="contacts_add_contact_failed">การเพิ่มผู้ติดต่อล้มเหลว โปรดลองอีกครั้ง</string>
+    <string name="contacts_add_contact_success">เพิ่มผู้ติดต่อสำเร็จแล้ว</string>
+    <string name="contacts_add_contact_title">เพิ่มผู้ติดต่อ</string>
+    <string name="contacts_address_sent_failed">การส่งที่อยู่ล้มเหลว</string>
+    <string name="contacts_address_sent_success">ส่งที่อยู่สำเร็จแล้ว</string>
+    <string name="contacts_being_invited">รับคำเชิญ</string>
+    <string name="contacts_broadcasting_payment">เราเพิ่งแจ้งให้ผู้ติดต่อของคุณทราบว่าคุณได้ส่ง bitcoin ไปเล็กน้อย โปรดรอ</string>
+    <string name="contacts_choose_account_message">เลือกว่าคุณต้องการรับเงินของคุณไปยังที่ใด</string>
+    <string name="contacts_choose_pairing_method">เลือกวิธีการจับคู่ที่คุณต้องการใช้เพื่อเพิ่มผู้ติดต่อที่ไว้วางใจ:</string>
+    <string name="contacts_delete">ลบผู้ติดต่อ</string>
+    <string name="contacts_delete_contact_success">ลบผู้ติดต่อแล้ว</string>
+    <string name="contacts_delete_contact_failed">การลบผู้ติดต่อล้มเหลว โปรดลองอีกครั้ง</string>
+    <string name="contacts_delete_message">คุณแน่ใจว่าต้องการลบผู้ติดต่อคนนี้?  คุณจะไม่สูญเสีย bitcoin ใด ๆ ในการลบผู้ติดต่อคนนี้</string>
+    <string name="contacts_detail_title">ฉันต้องการ:</string>
+    <string name="contacts_detail_transactions">ธุรกรรมกับ %1$s:</string>
+    <string name="contacts_detail_transactions_empty">ไม่พบธุรกรรม</string>
+    <string name="contacts_digesting_messages_failed">การตรวจสอบข้อความล้มเหลว โปรดลองอีกครั้ง</string>
+    <string name="contacts_error_getting_messages">ข้อผิดพลาดในการรับข้อความ</string>
+    <string name="contacts_error_sending_payment_request">มีข้อผิดพลาดในการส่งคำร้องขอการชำระเงินของคุณ โปรดลองอีกครั้ง</string>
+    <string name="contacts_field_error_empty">ห้ามเว้นว่าง</string>
+    <string name="contacts_how_are_you_known_header">%1$s รู้จักคุณในชื่อใด?</string>
+    <string name="contacts_invalid_qr">รหัส QR ไม่ถูกต้อง</string>
+    <string name="contacts_invite_someone">เชิญบางคน</string>
+    <string name="contacts_loading_failed">การโหลดผู้ติดต่อล้มเหลว โปรดลองอีกครั้ง</string>
+    <string name="contacts_name_cannot_be_empty">ชื่อไม่ถูกต้อง</string>
+    <string name="contacts_name_field_hint">ชื่อ</string>
+    <string name="two_factor_dialog_title">กรอกรหัส 2FA</string>
+    <string name="two_factor_dialog_message_authenticator">โปรดกรอกรหัส 2FA ที่ถูกต้องจากแอปพิสูจน์ตัวตนของคุณเพื่อดำเนินการต่อ</string>
+    <string name="two_factor_dialog_message_sms">เราเพิ่งส่ง SMS ที่ประกอบไปด้วยรหัส 2FA ให้กับคุณ โปรดกรอกมันที่นี่เพื่อดำเนินการต่อ</string>
+    <string name="two_factor_dialog_hint">รหัส 2FA</string>
+    <string name="two_factor_null_error">ห้ามเว้นว่างรหัส 2FA</string>
+    <string name="two_factor_incorrect_error">รหัส 2FA ไม่ถูกต้อง</string>
+    <string name="contacts_payment_sent_success">ส่งการชำระเงินแล้ว! เราได้แจ้งให้ผู้ติดต่อของคุณทราบว่าคุณได้ดำเนินธุรกรรมเสร็จสิ้นแล้ว</string>
+    <string name="contacts_payment_sent_failed_message">มีข้อผิดพลาดในการแจ้งให้ผู้ติดต่อของคุณทราบว่าคุณได้ส่งการชำระเงินให้กับพวกเขา  โปรดตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง</string>
+    <string name="contacts_waiting_for_address_message">ผู้ติดต่อของคุณได้รับการแจ้งให้ทราบว่าคุรต้องการส่ง bitcoin ให้กับพวกเขา และคุณร้องขอที่อยู่จากพวกเขา  เราจะแจ้งให้คุณทราบเมื่อพวกเขาส่งที่อยู่มาแล้ว!</string>
+    <string name="contacts_waiting_for_payment_message">ผู้ติดต่อของคุณได้รับการแจ้งให้ทราบว่าคุณต้องการรับ bitcoin จากพวกเขา และได้รับการส่งที่อยู่แล้ว  เราจะแจ้งให้คุณทราบเมื่อพวกเขาส่ง bitcoin มาใหุ้คุณ!</string>
+    <string name="contacts_transaction_not_found_error">ไม่พบธุรกรรม</string>
+    <string name="contacts_payment_request_send_hint">อาหารเที่ยงทาปาส</string>
+    <string name="contacts_payment_request_receive_hint">สำหรับเครื่องดื่มเท่านั้น</string>
+    <string name="contacts_payment_request_note_hint">หมายเหตุ</string>
+    <string name="contacts_payment_request_send_amount">คุณต้องการส่งเงินให้ %1$s เท่าใด?</string>
+    <string name="contacts_payment_request_receive_amount">คุณต้องการให้ %1$s ส่งเงินให้คุณเท่าใด? \n\nนี่เป็นเพียงข้อเสนอแนะ: จำนวนที่แท้จริงอาจแตกต่างกันไป</string>
+    <string name="contacts_payment_request_amount_hint">จำนวน</string>
+    <string name="contacts_payment_success_waiting_title">กำลังรอให้ %1$s ตอบรับ</string>
+    <string name="contacts_payment_success_request_sent_title">ส่งคำร้องขอแล้ว</string>
+    <string name="contacts_payment_success_waiting_message">ผู้ติดต่อของคุณได้รับการแจ้งว่าคุณต้องการส่ง Bitcoin ให้กับพวกเขา เมื่อพวกเขายอมรับ เราจะแจ้งให้คุณทราบและคุณจะสามารถดำเนินธุรกรรมให้เสร็จสิ้นได้</string>
+    <string name="contacts_payment_request_title">คำร้องขอการชำระเงิน</string>
+    <string name="contacts_request_sent">ส่งคำร้องขอผู้ติดต่อแล้ว</string>
+    <string name="contacts_request_just_added">เพิ่งเพิ่ม</string>
+    <string name="contacts_request_trusted">เชื่อใจได้</string>
+    <string name="contacts_send_bitcoin">ร้องขอในการส่ง bitcoin ให้กับ %1$s</string>
+    <string name="contacts_request_bitcoin">ร้องขอ bitcoin จาก %1$s</string>
+    <string name="contacts_rename">ตั้งชื่อให้กับผู้ติดต่อใหม่</string>
+    <string name="contacts_sent_link_explanation">หากมีคนส่งลิงก์ให้กับคุณ เพียงแค่แตะบนลิงก์เพื่อยอมรับ</string>
+    <string name="contacts_share_qr">ผ่านทางรหัส QR (ตัวต่อตัว)</string>
+    <string name="contacts_share_link">ใช้ลิงก์</string>
+    <string name="contacts_scan_qr">สแกนรหัส QR</string>
+    <string name="contacts_sent_link">มีคนส่งลิงก์มาให้ฉัน</string>
+    <string name="contacts_scan_instructions">%1$S ควรสแกนรหัส QR นี้ด้วยแอปมือถือ Blockchain Wallet ของเขา</string>
+    <string name="contacts_sharing_method_header">คุณต้องการแชร์คำเชิญนี้อย่างไร?</string>
+    <string name="contacts_who_are_you_inviting_header">คุณกำลังเชิญใครเพื่อทำการเชื่อมต่อ?</string>
+    <string name="contacts_share_invitation">แชร์คำเชิญ</string>
+    <string name="contacts_success_sending_payment_request">ส่งคำร้องขอการชำระเงินแล้ว</string>
+    <string name="contacts_rename_invalid_name">ชื่อไม่ถูกต้อง</string>
+    <string name="contacts_rename_failed">การตั้งชื่อผู้ติดต่อใหม่ล้มเหลว โปรดลองอีกครั้ง</string>
+    <string name="contacts_rename_success">ตั้งชื่อผู้ติดต่อใหม่สำเร็จแล้ว</string>
+    <string name="contacts_not_found_error">ไม่พบผู้ติดต่อ</string>
+    <string name="contacts_send_link">ส่งลิงก์</string>
+    <string name="contacts_use_nfc">ใช้ NFC</string>
+    <string name="contacts_no_contacts_found">ไม่พบผู้ติดต่อ</string>
+    <string name="contacts_pairing_method_title">เพิ่มผู้ติดต่อ</string>
+    <string name="contacts_title">ผู้ติดต่อ</string>
+    <string name="security_centre_backup_message">เพื่อความปลอดภัยของคุณ เราจะไม่เก็บรหัสผ่านใด ๆ ในไฟล์  สำรองข้อมูลกระเป๋าเงินของคุณเพื่อยืนยันว่า bitcoin จะปลอดภัยในกรณีที่คุณทำรหัสผ่านของคุณหาย </string>
+    <string name="security_centre_backup_positive_button">สำรอง</string>
+    <string name="security_centre_email_message">เราส่งอีเมลไปยัง %1$s แล้ว มองหาอีเมลจาก Blockchain และคลิกลิงก์ยืนยันเพื่อทำการตั้งค่ากระเป๋าเงินของคุณให้เสร็จสิ้น</string>
+    <string name="security_centre_email_title">ตรวจสอบอีเมลของคุณ</string>
+    <string name="transaction_detail_fee">"ค่าธรรมเนียมธุรกรรม: %1$s"</string>
+    <string name="transaction_detail_value_at_time_received">มูลค่าเมื่อได้รับ:\u0020</string>
+    <string name="transaction_detail_value_at_time_transferred">มูลค่าเมื่อโอน:\u0020</string>
+    <string name="transaction_detail_value_at_time_sent">มูลค่าเมื่อส่ง:\u0020</string>
+    <string name="transaction_detail_value">มูลค่า:\u0020</string>
+    <string name="transaction_detail_date">วันที่</string>
+    <string name="transaction_detail_status">สถานะ</string>
+    <string name="transaction_detail_title">ธุรกรรม</string>
+    <string name="sms_notifications">การแจ้งเตือน SMS</string>
+    <string name="forget_wallet">ลืมกระเป๋าเงิน</string>
+    <string name="forget_wallet_warning">มันจะลบข้อมูลกระเป๋าเงินทั้งหมดบนอุปกรณ์นี้ โปรดยืนยันว่าคุณได้จัดเก็บข้อมูลกระเป๋าเงินของคุณไว้ที่อื่น ไม่เช่นนั้นจะไม่สามารถเข้าถึง bitcoin ใด ๆ ในกระเป๋าเงินนี้ได้!!</string>
+    <string name="transfer_archive">ยืนยันคลังเก็บข้อมูลแล้ว</string>
+    <string name="transfer_confirm">ยืนยันการโอน</string>
+    <string name="transfer_all">โอนทั้งหมด</string>
+    <string name="transfer_amount">จำนวนการโอน</string>
+    <string name="transfer_archive_message">เก็บที่อยู่ที่นำเข้าหลังจากการโอน</string>
+    <string name="creating_wallet">กำลังสร้างกระเป๋าเงิน</string>
+    <string name="recover_funds">กู้คืนเงินทุน</string>
+    <string name="recover_funds_warning_message">คุณควรจับคู่หรือล็อกอินอยู่เสมอหากคุณสามารถเข้าถึง ID กระเป๋าเงินหรือรหัสผ่านของคุณได้ การกู้คืนเงินจะสร้าง ID กระเป๋าเงินใหม่ คุณต้องการดำเนินการต่อหรือไม่?</string>
+    <string name="recover_funds_instructions">กรอกคำเพื่อการกู้คืน 12 คำพร้อมช่องว่างเพื่อกู้คืนเงิน &amp; ธุรกรรมของคุณ</string>
+    <string name="done">เสร็จ</string>
+    <string name="transfer_confirmed">ยืนยันการโอน</string>
+    <string name="transaction_details_unknown">ไม่ทราบ</string>
+    <string name="transaction_detail_pending">รอดำเนินการ (%1$s/%2$s การยืนยัน)</string>
+    <string name="transaction_detail_description_hint">มันมีไว้เพื่ออะไร?</string>
+    <string name="transaction_detail_confirmed">ยืนยันแล้ว</string>
+    <string name="to_field_helper_no_dropdown">กรอกที่อยู่ Bitcoin</string>
+    <string name="sms_notifications_summary">เปิดการแจ้งเตือนเพื่อรับ SMS เมื่อใดก็ตามที่คุณได้รับ bitcoin มีเฉพาะที่อยู่ที่มีการทำเครื่องหมายและได้รับการนำเข้าเท่านั้นที่สามารถทำให้เกิดการแจ้งเตือนนได้</string>
+    <string name="share_instructions">แตะเพื่อคัดลอกที่อยู่นี้ แชร์มันกับผู้ส่งผ่านอีเมลหรือข้อความ</string>
+    <string name="security_centre_two_fa_message">ป้องกันการเข้าถึงกระเป๋าเงินของคุณโดยไม่ได้รับอนุญาต  เปิดใช้งานการยืนยัน 2 ขั้นตอนเพื่อเพิ่มความปลอดภัยให้กับกระเป๋าเงินของคุณ</string>
+    <string name="security_centre_backup_title">สำรองข้อมูลเงินทุนของคุณ</string>
+    <string name="restore_failed">การกู้คืนกระเป๋าเงินล้มเหลว โปรดลองอีกครั้ง</string>
+    <string name="recovery_passphrase">วลีรหัสผ่านเพื่อการกู้คืน</string>
+    <string name="password_reveal_warning">โปรดระวัง! การเปิดเผยข้อความนี้จะอนุญาตให้สามารถคัดลอกรหัสผ่านของคุณไปยังคลิปบอร์ดได้ ซึ่งหลังจากนั้นแอปพลิเคชันทั้งหมดบนอุปกรณ์ของคุณจะสามารถอ่านมันได้ และระวังคนที่ยืนอยู่ข้างหลังคุณด้วย!</string>
+    <string name="password_hint_summary">กระเป๋าเงิน Blockchain ของคุณจะไม่สื่อสารรหัสผ่านของคุณไปยังเซิร์ฟเวอร์ของเรา มันหมายความว่าเราไม่ทราบว่ารหัสผ่านของคุณคืออะไรและเราไม่สามารถรีเซ็ตมันได้หากคุณลืมมัน โปรดสร้างคำใบ้รหัสผ่านที่จดจำได้ง่าย เพื่อที่เราจะสามารถส่งไปยังที่อยู่อีเมลที่ได้รับการยืนยันของคุณได้ในกรณีที่คุณลืมรหัสผ่านของคุณ</string>
+    <string name="invalid_recovery_phrase">วลีเพื่อการกู้คืนไม่ถูกต้อง โปรดลองอีกครั้ง</string>
+
 </resources>

@@ -32,14 +32,17 @@ dependencies:
     - '/usr/local/android-sdk-linux/platforms/android-25'
     - '/usr/local/android-sdk-linux/build-tools/25.0.2'
     - '/usr/local/android-sdk-linux/extras/android/m2repository'
+    - '/usr/local/android-sdk-linux/extras/google/m2repository'
 
 test:
   pre:
     # Decode Firebase API key
     - echo $FIREBASE_API_JSON | base64 --decode > app/google-services.json
   override:
-    - ./gradlew assembleDevDebug testDevDebugUnitTest testDevDebugUnitTestCoverage coveralls --no-daemon -Dpre-dex=false -Porg.gradle.parallel=false -Pcom.android.build.threadPoolSize=1 --stacktrace
+    - ./gradlew assembleDevDebug testDevDebugUnitTest testDevDebugUnitTestCoverage lintProdRelease coveralls --no-daemon -Dpre-dex=false -Porg.gradle.parallel=false -Pcom.android.build.threadPoolSize=1 --stacktrace
   post:
     # Move unit test XML to correct directory
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - mkdir -p $CIRCLE_TEST_REPORTS/lint/
     - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+    - find . -type f -regex ".*/build/reports/lint-results-prodRelease.html" -exec cp {} $CIRCLE_TEST_REPORTS/lint/ \;

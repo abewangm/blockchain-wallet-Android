@@ -78,30 +78,35 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_suggest_merchant);
+        /**
+         * TODO: Remove me once a decision has been made
+         */
+        throw new IllegalArgumentException("This activity isn't intended to be launched");
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        setupToolbar(toolbar, R.string.suggest_merchant);
-
-        edName = (EditText) findViewById(R.id.merchant_name);
-        edDescription = (EditText) findViewById(R.id.description);
-        edStreetAddress = (EditText) findViewById(R.id.street_address);
-        edCity = (EditText) findViewById(R.id.city);
-        edPostal = (EditText) findViewById(R.id.zip);
-        edTelephone = (EditText) findViewById(R.id.telephone);
-        edWeb = (EditText) findViewById(R.id.web);
-
-        mapContainer = (LinearLayout) findViewById(R.id.map_container);
-        mapView = (FrameLayout) findViewById(R.id.map_layout);
-        confirmLayout = (LinearLayout) findViewById(R.id.confirm_layout);
-
-        progress = (ProgressBar) findViewById(R.id.progressBar);
-        progress.setVisibility(View.GONE);
-
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationListener = new MyLocationListener();
-
-        ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+//        setContentView(R.layout.activity_suggest_merchant);
+//
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+//        setupToolbar(toolbar, R.string.suggest_merchant);
+//
+//        edName = (EditText) findViewById(R.id.merchant_name);
+//        edDescription = (EditText) findViewById(R.id.description);
+//        edStreetAddress = (EditText) findViewById(R.id.street_address);
+//        edCity = (EditText) findViewById(R.id.city);
+//        edPostal = (EditText) findViewById(R.id.zip);
+//        edTelephone = (EditText) findViewById(R.id.telephone);
+//        edWeb = (EditText) findViewById(R.id.web);
+//
+//        mapContainer = (LinearLayout) findViewById(R.id.map_container);
+//        mapView = (FrameLayout) findViewById(R.id.map_layout);
+//        confirmLayout = (LinearLayout) findViewById(R.id.confirm_layout);
+//
+//        progress = (ProgressBar) findViewById(R.id.progressBar);
+//        progress.setVisibility(View.GONE);
+//
+//        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+//        locationListener = new MyLocationListener();
+//
+//        ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
     }
 
     @Override
@@ -168,7 +173,10 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
 
                     String res = null;
                     try {
-                        res = WebUtil.getInstance().postURLJson(SUGGEST_MERCHANT_URL, args.toString());
+                        /**
+                         * TODO: Remove me once a decision has been made
+                         */
+//                        res = WebUtil.getInstance().postURLJson(SUGGEST_MERCHANT_URL, args.toString());
                     } catch (Exception e) {
                         onShowToast(e.getMessage(), ToastCustom.TYPE_ERROR);
                     }

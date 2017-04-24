@@ -12,6 +12,7 @@ import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.Wallet
 import info.blockchain.wallet.payment.SpendableUnspentOutputs
 import io.reactivex.Observable
+import org.amshove.kluent.shouldEqual
 import org.apache.commons.lang3.tuple.Pair
 import org.bitcoinj.core.ECKey
 import org.junit.Before
@@ -28,7 +29,6 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.SendDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.equals
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog.ARGUMENT_CONTACT_ID
@@ -170,8 +170,8 @@ class ContactPaymentDialogViewModelTest {
         // Assert
         verify(mockActivity).fragmentBundle
         verify(mockActivity).setContactName(contactName)
-        subject.pendingTransaction.receivingAddress equals "1LTMmoCoAh5S3SJqCkdCEw9TDfagAyxkRU"
-        subject.pendingTransaction.bigIntAmount equals BigInteger.valueOf(12345678L)
+        subject.pendingTransaction.receivingAddress shouldEqual "1LTMmoCoAh5S3SJqCkdCEw9TDfagAyxkRU"
+        subject.pendingTransaction.bigIntAmount shouldEqual BigInteger.valueOf(12345678L)
     }
 
     @Test
@@ -186,7 +186,7 @@ class ContactPaymentDialogViewModelTest {
         // Assert
         verify(mockWalletAccountHelper).getHdAccounts(true)
         verifyNoMoreInteractions(mockWalletAccountHelper)
-        result equals list
+        result shouldEqual list
     }
 
     @Test
@@ -204,7 +204,7 @@ class ContactPaymentDialogViewModelTest {
         verify(mockPayloadDataManager).defaultAccountIndex
         verify(mockPayloadDataManager).getPositionOfAccountInActiveList(defaultIndex)
         verifyNoMoreInteractions(mockPayloadDataManager)
-        result equals positionToReturn
+        result shouldEqual positionToReturn
     }
 
     @Test

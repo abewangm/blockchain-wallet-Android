@@ -113,6 +113,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private boolean paymentToContactMade = false;
     private Typeface typeface;
     private WebView buyWebView;
+    private BalanceFragment balanceFragment;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -143,7 +144,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
         appUtil = new AppUtil(this);
         viewModel = new MainViewModel(this);
-        viewModel.onViewReady();
+        balanceFragment = BalanceFragment.newInstance(false);
 
         binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -173,6 +174,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
         ViewUtils.setElevation(toolbar, 0F);
+
+        // Notify ViewModel that page is setup
+        viewModel.onViewReady();
 
         // Create items
         AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.white);
@@ -365,7 +369,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         startSendFragment(strResult, scanRoute);
     }
 
-    private Intent putWebViewState(Intent intent) {
+    @Thunk
+    Intent putWebViewState(Intent intent) {
         Bundle state = new Bundle();
         buyWebView.saveState(state);
         return intent.putExtra(WEB_VIEW_STATE_KEY, state);
@@ -553,20 +558,22 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void showSurveyPrompt() {
-        if (!isFinishing()) {
-            new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                    .setTitle(R.string.app_name)
-                    .setMessage(R.string.survey_message)
-                    .setPositiveButton(R.string.survey_positive_button, (dialog, which) -> {
-                        String url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV";
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(Uri.parse(url));
-                        startActivity(intent);
-                    })
-                    .setNegativeButton(R.string.polite_no, null)
-                    .create()
-                    .show();
-        }
+        binding.getRoot().postDelayed(() -> {
+            if (!isFinishing()) {
+                new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                        .setTitle(R.string.app_name)
+                        .setMessage(R.string.survey_message)
+                        .setPositiveButton(R.string.survey_positive_button, (dialog, which) -> {
+                            String url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV";
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setData(Uri.parse(url));
+                            startActivity(intent);
+                        })
+                        .setNegativeButton(R.string.polite_no, null)
+                        .create()
+                        .show();
+            }
+        }, 1000);
     }
 
     @Override
@@ -671,8 +678,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void onStartBalanceFragment(boolean paymentToContactMade) {
-        BalanceFragment fragment = BalanceFragment.newInstance(paymentToContactMade);
-        replaceFragmentWithAnimation(fragment);
+        if (paymentToContactMade) {
+            balanceFragment = BalanceFragment.newInstance(true);
+        }
+        replaceFragmentWithAnimation(balanceFragment);
+        toolbar.setTitle("");
         viewModel.checkIfShouldShowSurvey();
     }
 
@@ -782,12 +792,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     private void startSendFragment(@Nullable String scanData, String scanRoute) {
         SendFragment sendFragment = SendFragment.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
-        replaceFragmentWithAnimation(sendFragment);
+        addFragmentToBackStack(sendFragment);
     }
 
     private void startReceiveFragment() {
         ReceiveFragment receiveFragment = ReceiveFragment.newInstance(getSelectedAccountFromFragments());
-        replaceFragmentWithAnimation(receiveFragment);
+        addFragmentToBackStack(receiveFragment);
     }
 
     private int getSelectedAccountFromFragments() {
@@ -807,6 +817,14 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
                 .replace(R.id.content_frame, fragment)
+                .commitAllowingStateLoss();
+    }
+
+    private void addFragmentToBackStack(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .addToBackStack(fragment.getClass().getName())
+                .add(R.id.content_frame, fragment)
                 .commitAllowingStateLoss();
     }
 

@@ -20,6 +20,7 @@ import org.spongycastle.crypto.InvalidCipherTextException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -144,6 +145,19 @@ public class PayloadDataManager {
     }
 
     /**
+     * Returns a {@link Completable} which saves the current payload to the server whilst also
+     * forcing the sync of the user's public keys. This method generates 20 addresses per {@link
+     * Account}, so it should be used only when strictly necessary (for instance, after enabling
+     * notifications).
+     *
+     * @return A {@link Completable} object
+     */
+    public Completable syncPayloadAndPublicKeys() {
+        return rxPinning.call(() -> payloadService.syncPayloadAndPublicKeys())
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
      * Returns {@link Completable} which updates transactions in the PayloadManager.
      * Completable returns no value, and is used to call functions that return void but have side
      * effects.
@@ -183,14 +197,14 @@ public class PayloadDataManager {
      * Returns the next Receive address for a given {@link Account object}
      *
      * @param accountIndex The index of the account for which you want an address to be generated
-     * @param label Label used to reserve address
+     * @param label        Label used to reserve address
      * @return An {@link Observable} wrapping the receive address
      */
     public Observable<String> getNextReceiveAddressAndReserve(int accountIndex, String label) {
         Account account = getWallet().getHdWallets().get(0).getAccounts().get(accountIndex);
         return Observable.fromCallable(() -> payloadManager.getNextReceiveAddressAndReserve(account, label))
-            .subscribeOn(Schedulers.computation())
-            .observeOn(AndroidSchedulers.mainThread());
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     /**
@@ -263,7 +277,7 @@ public class PayloadDataManager {
     ///////////////////////////////////////////////////////////////////////////
 
     public Wallet getWallet() {
-        return payloadManager.getPayload();
+        return payloadManager != null ? payloadManager.getPayload() : null;
     }
 
     public int getDefaultAccountIndex() {
@@ -298,6 +312,10 @@ public class PayloadDataManager {
         return payloadManager.getTempPassword();
     }
 
+    public void setTempPassword(String password) {
+        payloadManager.setTempPassword(password);
+    }
+
     public BigInteger getImportedAddressesBalance() {
         return payloadManager.getImportedAddressesBalance();
     }
@@ -308,6 +326,18 @@ public class PayloadDataManager {
 
     public Account getAccount(int accountPosition) {
         return getWallet().getHdWallets().get(0).getAccount(accountPosition);
+    }
+
+    @NonNull
+    public List<Account> getAccounts() {
+        return getWallet() != null
+                ? getWallet().getHdWallets().get(0).getAccounts()
+                : Collections.emptyList();
+    }
+
+    @NonNull
+    public List<LegacyAddress> getLegacyAddresses() {
+        return getWallet() != null ? getWallet().getLegacyAddressList() : Collections.emptyList();
     }
 
     /**
@@ -398,6 +428,23 @@ public class PayloadDataManager {
      */
     public boolean isOwnHDAddress(String address) {
         return payloadManager.isOwnHDAddress(address);
+    }
+
+    /**
+     * Upgrades a Wallet from V2 to V3 and saves it with the server. If saving is unsuccessful or
+     * some other part fails, this will propagate an Exception.
+     *
+     * @param secondPassword     An optional second password if the user has one
+     * @param defaultAccountName A required name for the default account
+     * @return A {@link Completable} object
+     */
+    public Completable upgradeV2toV3(@Nullable String secondPassword, String defaultAccountName) {
+        return rxPinning.call(() -> Completable.fromCallable(() -> {
+            if (!payloadManager.upgradeV2PayloadToV3(secondPassword, defaultAccountName)) {
+                return Completable.error(new Throwable("Upgrade wallet failed"));
+            }
+            return Void.TYPE;
+        })).compose(RxUtil.applySchedulersToCompletable());
     }
 
     ///////////////////////////////////////////////////////////////////////////

@@ -83,7 +83,7 @@ public class PayloadService {
 
     /**
      * Fetches the user's wallet payload, and then initializes and decrypts a payload using the
-     * user's  password.
+     * user's password.
      *
      * @param sharedKey The shared key as a String
      * @param guid      The user's GUID
@@ -113,7 +113,7 @@ public class PayloadService {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // TRANSACTION METHODS
+    // SYNC METHODS
     ///////////////////////////////////////////////////////////////////////////
 
     /**
@@ -128,6 +128,26 @@ public class PayloadService {
             return Void.TYPE;
         });
     }
+
+    /**
+     * Returns a {@link Completable} which saves the current payload to the server whilst also
+     * forcing the sync of the user's public keys. This method generates 20 addresses per {@link
+     * Account}, so it should be used only when strictly necessary (for instance, after enabling
+     * notifications).
+     *
+     * @return A {@link Completable} object
+     */
+    @WebRequest
+    public Completable syncPayloadAndPublicKeys() {
+        return Completable.fromCallable(() -> {
+            if (!payloadManager.saveAndSyncPubKeys()) throw new ApiException("Sync failed");
+            return Void.TYPE;
+        });
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // TRANSACTION METHODS
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * Returns {@link Completable} which updates transactions in the PayloadManager.
@@ -202,22 +222,11 @@ public class PayloadService {
 
     /**
      * Sets a private key for an associated {@link LegacyAddress} which is already in the {@link
-     * info.blockchain.wallet.payload.data.Wallet} as a watch only address
+     * Wallet} as a watch only address
      *
      * @param key            An {@link ECKey}
      * @param secondPassword An optional double encryption password
      * @return An {@link Observable<Boolean>} representing a successful save
-     */
-    @WebRequest
-    public Observable<LegacyAddress> setPrivateKey(ECKey key, @Nullable String secondPassword) {
-        return Observable.fromCallable(() -> payloadManager.setKeyForLegacyAddress(key, secondPassword));
-    }
-
-    /**
-     * Sets a private key for a {@link LegacyAddress}
-     *
-     * @param key            The {@link ECKey} for the address
-     * @param secondPassword An optional double encryption password
      */
     @WebRequest
     public Observable<LegacyAddress> setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword) {
@@ -225,22 +234,35 @@ public class PayloadService {
     }
 
     /**
-     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link
-     * info.blockchain.wallet.payload.data.Wallet}
+     * Allows you to add a {@link LegacyAddress} to the {@link Wallet}
      *
-     * @param legacyAddress The updated address
-     * @return {@link Observable<Boolean>} representing a successful save
+     * @param legacyAddress The new address
+     * @return A {@link Completable} object representing a successful save
      */
     @WebRequest
-    public Completable updateLegacyAddress(LegacyAddress legacyAddress) {
+    public Completable addLegacyAddress(LegacyAddress legacyAddress) {
         return Completable.fromCallable(() -> {
             payloadManager.addLegacyAddress(legacyAddress);
             return Void.TYPE;
         });
     }
 
+    /**
+     * Allows you to propagate changes to a {@link LegacyAddress} through the {@link Wallet}
+     *
+     * @param legacyAddress The updated address
+     * @return A {@link Completable} object representing a successful save
+     */
+    @WebRequest
+    public Completable updateLegacyAddress(LegacyAddress legacyAddress) {
+        return Completable.fromCallable(() -> {
+            payloadManager.updateLegacyAddress(legacyAddress);
+            return Void.TYPE;
+        });
+    }
+
     ///////////////////////////////////////////////////////////////////////////
-    // CONTACTS/METADATA METHODS
+    // CONTACTS/METADATA/IWCS/CRYPTO-MATRIX METHODS
     ///////////////////////////////////////////////////////////////////////////
 
     /**

@@ -19,15 +19,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,6 +31,7 @@ import android.widget.TextView;
 
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Merchant;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +40,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.util.annotations.Thunk;
 
 public class MapActivity extends BaseAuthActivity implements LocationListener, OnMapReadyCallback {
 
@@ -52,10 +50,10 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
     public static List<Merchant> merchantList = null;
     private static float Z00M_LEVEL_DEFAULT = 13.0f;
     private static float Z00M_LEVEL_CLOSE = 18.0f;
-    private GoogleMap map = null;
+    @Thunk GoogleMap map = null;
     private LocationManager locationManager = null;
     private Location currLocation = null;
-    private float saveZ00mLevel = Z00M_LEVEL_DEFAULT;
+    @Thunk float saveZ00mLevel = Z00M_LEVEL_DEFAULT;
     private boolean changeZoom = false;
     private final int color_category_selected = 0xffFFFFFF;
     private final int color_category_unselected = 0xffF1F1F1;
@@ -90,7 +88,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
     private boolean spendSelected = true;
     private boolean atmSelected = true;
     private HashMap<String, Merchant> markerValues = null;
-    private LinearLayout infoLayout = null;
+    @Thunk LinearLayout infoLayout = null;
     private WalletApi walletApi;
     private CompositeDisposable compositeDisposable;
 
@@ -347,23 +345,25 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
     public void onProviderDisabled(String provider) {
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_merchant, menu);
-        return true;
-    }
+    /**
+     * TODO: Remove me once a decision has been made on the future of Merchant Activity
+     */
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        getMenuInflater().inflate(R.menu.menu_merchant, menu);
+//        return true;
+//    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.action_merchant_suggest:
-                doSuggest();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//            case R.id.action_merchant_suggest:
+//                doSuggest();
+//                return true;
+//            default:
+//                return super.onOptionsItemSelected(item);
+//        }
+//    }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {

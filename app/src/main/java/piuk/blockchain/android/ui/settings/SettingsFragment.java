@@ -830,7 +830,17 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     private void showDialogTwoFA() {
-        if (!viewModel.isSmsVerified()) {
+        if (viewModel.getAuthType() == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR
+                || viewModel.getAuthType() == Settings.AUTH_TYPE_YUBI_KEY) {
+            twoStepVerificationPref.setChecked(true);
+            new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                    .setTitle(R.string.warning)
+                    .setMessage(R.string.disable_online_only)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .create()
+                    .show();
+
+        } else if (!viewModel.isSmsVerified()) {
             twoStepVerificationPref.setChecked(false);
             showDialogMobile();
         } else {

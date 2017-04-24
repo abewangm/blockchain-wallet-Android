@@ -5,6 +5,7 @@ import android.app.Application;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +31,8 @@ import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -42,6 +45,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -53,6 +59,14 @@ import static piuk.blockchain.android.ui.auth.PasswordRequiredViewModel.KEY_AUTH
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class PasswordRequiredViewModelTest extends RxTest {
+
+    private static final String KEY_AUTH_REQUIRED_JSON = "{\n" +
+            "  \"authorization_required\": true\n" +
+            "}";
+
+    private static final String TWO_FA_RESPONSE = "{\n" +
+            "  \"auth_type\": 5\n" +
+            "}";
 
     private PasswordRequiredViewModel subject;
     @Mock private PasswordRequiredActivity activity;
@@ -100,7 +114,7 @@ public class PasswordRequiredViewModelTest extends RxTest {
         when(activity.getPassword()).thenReturn("1234567890");
 
         when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
         Response response = Response.success(responseBody);
         when(authDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -108,12 +122,37 @@ public class PasswordRequiredViewModelTest extends RxTest {
                 .thenReturn(Observable.just("1234567890"));
         when(authDataManager.initializeFromPayload(anyString(), anyString()))
                 .thenReturn(Completable.complete());
-
         // Act
         subject.onContinueClicked();
         // Assert
-        // noinspection WrongConstant
         verify(activity).goToPinPage();
+    }
+
+    /**
+     * Password is correct but 2FA is enabled, should trigger {@link PasswordRequiredActivity#showTwoFactorCodeNeededDialog(JSONObject,
+     * String, int, String)}
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void onContinueClickedCorrectPasswordTwoFa() throws Exception {
+        // Arrange
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
+        when(activity.getPassword()).thenReturn("1234567890");
+
+        when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), TWO_FA_RESPONSE);
+        Response response = Response.success(responseBody);
+        when(authDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.just(response));
+        when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
+        when(authDataManager.initializeFromPayload(anyString(), anyString()))
+                .thenReturn(Completable.complete());
+        // Act
+        subject.onContinueClicked();
+        // Assert
+        verify(activity).dismissProgressDialog();
+        verify(activity).showTwoFactorCodeNeededDialog(any(), anyString(), anyInt(), anyString());
     }
 
     /**
@@ -139,7 +178,6 @@ public class PasswordRequiredViewModelTest extends RxTest {
         verify(activity).dismissProgressDialog();
     }
 
-
     /**
      * AuthDataManager returns failure when polling auth status, should trigger {@link
      * PasswordRequiredActivity#showToast(int, String)}
@@ -152,13 +190,12 @@ public class PasswordRequiredViewModelTest extends RxTest {
         when(activity.getPassword()).thenReturn("1234567890");
 
         when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
         Response response = Response.success(responseBody);
         when(authDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
         when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
                 .thenReturn(Observable.error(new Throwable()));
-
         // Act
         subject.onContinueClicked();
         // Assert
@@ -181,7 +218,7 @@ public class PasswordRequiredViewModelTest extends RxTest {
         when(activity.getPassword()).thenReturn("1234567890");
 
         when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
         Response response = Response.success(responseBody);
         when(authDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -189,7 +226,6 @@ public class PasswordRequiredViewModelTest extends RxTest {
                 .thenReturn(Observable.just("1234567890"));
         when(authDataManager.initializeFromPayload(anyString(), anyString()))
                 .thenReturn(Completable.error(new DecryptionException()));
-
         // Act
         subject.onContinueClicked();
         // Assert
@@ -211,7 +247,7 @@ public class PasswordRequiredViewModelTest extends RxTest {
         when(activity.getPassword()).thenReturn("1234567890");
 
         when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
         Response response = Response.success(responseBody);
         when(authDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -219,7 +255,6 @@ public class PasswordRequiredViewModelTest extends RxTest {
                 .thenReturn(Observable.just("1234567890"));
         when(authDataManager.initializeFromPayload(anyString(), anyString()))
                 .thenReturn(Completable.error(new HDWalletException()));
-
         // Act
         subject.onContinueClicked();
         // Assert
@@ -240,7 +275,7 @@ public class PasswordRequiredViewModelTest extends RxTest {
         when(activity.getPassword()).thenReturn("1234567890");
 
         when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
         Response response = Response.success(responseBody);
         when(authDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -248,7 +283,6 @@ public class PasswordRequiredViewModelTest extends RxTest {
                 .thenReturn(Observable.just("1234567890"));
         when(authDataManager.initializeFromPayload(anyString(), anyString()))
                 .thenReturn(Completable.error(new RuntimeException()));
-
         // Act
         subject.onContinueClicked();
         // Assert
@@ -317,7 +351,7 @@ public class PasswordRequiredViewModelTest extends RxTest {
         when(activity.getPassword()).thenReturn("1234567890");
 
         when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED_JSON);
         Response response = Response.error(500, responseBody);
         when(authDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -345,12 +379,12 @@ public class PasswordRequiredViewModelTest extends RxTest {
         when(activity.getPassword()).thenReturn("1234567890");
 
         when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED_JSON);
         Response response = Response.error(500, responseBody);
         when(authDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
         when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
-                .thenReturn(Observable.just("1234567890"));
+                .thenReturn(Observable.just("{}"));
         when(authDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
         when(authDataManager.initializeFromPayload(anyString(), anyString()))
                 .thenReturn(Completable.complete());
@@ -371,12 +405,12 @@ public class PasswordRequiredViewModelTest extends RxTest {
         when(activity.getPassword()).thenReturn("1234567890");
 
         when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED_JSON);
         Response response = Response.error(500, responseBody);
         when(authDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
         when(authDataManager.startPollingAuthStatus(anyString(), anyString()))
-                .thenReturn(Observable.just("1234567890"));
+                .thenReturn(Observable.just("{}"));
         when(authDataManager.createCheckEmailTimer())
                 .thenReturn(Observable.error(new Throwable()));
         when(authDataManager.initializeFromPayload(anyString(), anyString()))
@@ -401,7 +435,7 @@ public class PasswordRequiredViewModelTest extends RxTest {
         when(activity.getPassword()).thenReturn("1234567890");
 
         when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED_JSON);
         Response response = Response.error(500, responseBody);
         when(authDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -428,7 +462,7 @@ public class PasswordRequiredViewModelTest extends RxTest {
         when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn("1234567890");
         when(activity.getPassword()).thenReturn("1234567890");
         when(authDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED_JSON);
         Response response = Response.error(500, responseBody);
         when(authDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -442,6 +476,64 @@ public class PasswordRequiredViewModelTest extends RxTest {
         verify(activity, times(2)).showToast(anyInt(), anyString());
         verify(activity, times(2)).resetPasswordField();
         verify(appUtil, times(2)).clearCredentialsAndRestart();
+    }
+
+    @Test
+    public void submitTwoFactorCodeNull() throws Exception {
+        // Arrange
+        JSONObject responseObject = new JSONObject();
+        String sessionId = "SESSION_ID";
+        String password = "PASSWORD";
+        // Act
+        subject.submitTwoFactorCode(responseObject, sessionId, password, null);
+        // Assert
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+    }
+
+    @Test
+    public void submitTwoFactorCodeFailed() throws Exception {
+        // Arrange
+        JSONObject responseObject = new JSONObject();
+        String sessionId = "SESSION_ID";
+        String guid = "GUID";
+        String password = "PASSWORD";
+        String code = "123456";
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn(guid);
+        when(authDataManager.submitTwoFactorCode(sessionId, guid, code))
+                .thenReturn(Observable.error(new Throwable()));
+        // Act
+        subject.submitTwoFactorCode(responseObject, sessionId, password, code);
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull(), eq(false));
+        // TODO: 12/04/2017 There's a bug in Mockito here were it asserts that this was called twice.
+        // Check this with Mockito 2.8.0 when it makes it onto bintray
+        verify(activity, atLeastOnce()).dismissProgressDialog();
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verify(authDataManager).submitTwoFactorCode(sessionId, guid, code);
+    }
+
+    @Test
+    public void submitTwoFactorCodeSuccess() throws Exception {
+        // Arrange
+        JSONObject responseObject = new JSONObject();
+        String sessionId = "SESSION_ID";
+        String guid = "GUID";
+        String password = "PASSWORD";
+        String code = "123456";
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn(guid);
+        when(authDataManager.submitTwoFactorCode(sessionId, guid, code))
+                .thenReturn(Observable.just(ResponseBody.create(MediaType.parse("application/json"), TWO_FA_RESPONSE)));
+        when(authDataManager.initializeFromPayload(anyString(), eq(password))).thenReturn(Completable.complete());
+        // Act
+        subject.submitTwoFactorCode(responseObject, sessionId, password, code);
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull(), eq(false));
+        // TODO: 12/04/2017 There's a bug in Mockito here were it asserts that this was called twice.
+        // Check this with Mockito 2.8.0 when it makes it onto bintray
+        verify(activity, atLeastOnce()).dismissProgressDialog();
+        verify(activity).goToPinPage();
+        verify(authDataManager).submitTwoFactorCode(sessionId, guid, code);
+        verify(authDataManager).initializeFromPayload(anyString(), eq(password));
     }
 
     @Test
@@ -530,6 +622,7 @@ public class PasswordRequiredViewModelTest extends RxTest {
                                                          AppUtil appUtil,
                                                          AccessState accessState,
                                                          StringUtils stringUtils,
+                                                         AESUtilWrapper aesUtilWrapper,
                                                          RxBus rxBus) {
             return authDataManager;
         }

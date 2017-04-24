@@ -5,6 +5,7 @@ import android.app.Application;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,8 @@ import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
@@ -37,8 +40,12 @@ import retrofit2.Response;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +56,14 @@ import static piuk.blockchain.android.ui.pairing.ManualPairingViewModel.KEY_AUTH
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class ManualPairingViewModelTest {
+
+    private static final String KEY_AUTH_REQUIRED_JSON = "{\n" +
+            "  \"authorization_required\": true\n" +
+            "}";
+
+    private static final String TWO_FA_RESPONSE = "{\n" +
+            "  \"auth_type\": 5\n" +
+            "}";
 
     private ManualPairingViewModel mSubject;
 
@@ -110,7 +125,7 @@ public class ManualPairingViewModelTest {
         when(mActivity.getPassword()).thenReturn("1234567890");
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
         Response response = Response.success(responseBody);
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -118,12 +133,37 @@ public class ManualPairingViewModelTest {
                 .thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.initializeFromPayload(anyString(), anyString()))
                 .thenReturn(Completable.complete());
-
         // Act
         mSubject.onContinueClicked();
         // Assert
-        // noinspection WrongConstant
         verify(mActivity).goToPinPage();
+    }
+
+    /**
+     * Password is correct but 2FA is enabled, should trigger {@link ManualPairingActivity#showTwoFactorCodeNeededDialog(JSONObject,
+     * String, int, String, String)}
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void onContinueClickedCorrectPasswordTwoFa() throws Exception {
+        // Arrange
+        when(mActivity.getGuid()).thenReturn("1234567890");
+        when(mActivity.getPassword()).thenReturn("1234567890");
+
+        when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), TWO_FA_RESPONSE);
+        Response response = Response.success(responseBody);
+        when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
+                .thenReturn(Observable.just(response));
+        when(mAuthDataManager.startPollingAuthStatus(anyString(), anyString()))
+                .thenReturn(Observable.just("1234567890"));
+        when(mAuthDataManager.initializeFromPayload(anyString(), anyString()))
+                .thenReturn(Completable.complete());
+        // Act
+        mSubject.onContinueClicked();
+        // Assert
+        verify(mActivity).dismissProgressDialog();
+        verify(mActivity).showTwoFactorCodeNeededDialog(any(), anyString(), anyInt(), anyString(), anyString());
     }
 
     /**
@@ -149,7 +189,6 @@ public class ManualPairingViewModelTest {
         verify(mActivity).dismissProgressDialog();
     }
 
-
     /**
      * AuthDataManager returns failure when polling auth status, should trigger {@link
      * ManualPairingActivity#showToast(int, String)}
@@ -162,13 +201,12 @@ public class ManualPairingViewModelTest {
         when(mActivity.getPassword()).thenReturn("1234567890");
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
         Response response = Response.success(responseBody);
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
         when(mAuthDataManager.startPollingAuthStatus(anyString(), anyString()))
                 .thenReturn(Observable.error(new Throwable()));
-
         // Act
         mSubject.onContinueClicked();
         // Assert
@@ -191,7 +229,7 @@ public class ManualPairingViewModelTest {
         when(mActivity.getPassword()).thenReturn("1234567890");
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
         Response response = Response.success(responseBody);
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -199,7 +237,6 @@ public class ManualPairingViewModelTest {
                 .thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.initializeFromPayload(anyString(), anyString()))
                 .thenReturn(Completable.error(new DecryptionException()));
-
         // Act
         mSubject.onContinueClicked();
         // Assert
@@ -221,7 +258,7 @@ public class ManualPairingViewModelTest {
         when(mActivity.getPassword()).thenReturn("1234567890");
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
         Response response = Response.success(responseBody);
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -229,7 +266,6 @@ public class ManualPairingViewModelTest {
                 .thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.initializeFromPayload(anyString(), anyString()))
                 .thenReturn(Completable.error(new HDWalletException()));
-
         // Act
         mSubject.onContinueClicked();
         // Assert
@@ -250,7 +286,7 @@ public class ManualPairingViewModelTest {
         when(mActivity.getPassword()).thenReturn("1234567890");
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "");
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
         Response response = Response.success(responseBody);
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -258,7 +294,6 @@ public class ManualPairingViewModelTest {
                 .thenReturn(Observable.just("1234567890"));
         when(mAuthDataManager.initializeFromPayload(anyString(), anyString()))
                 .thenReturn(Completable.error(new RuntimeException()));
-
         // Act
         mSubject.onContinueClicked();
         // Assert
@@ -327,7 +362,7 @@ public class ManualPairingViewModelTest {
         when(mActivity.getPassword()).thenReturn("1234567890");
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED_JSON);
         Response response = Response.error(500, responseBody);
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -355,12 +390,12 @@ public class ManualPairingViewModelTest {
         when(mActivity.getPassword()).thenReturn("1234567890");
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED_JSON);
         Response response = Response.error(500, responseBody);
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
         when(mAuthDataManager.startPollingAuthStatus(anyString(), anyString()))
-                .thenReturn(Observable.just("1234567890"));
+                .thenReturn(Observable.just("{}"));
         when(mAuthDataManager.createCheckEmailTimer()).thenReturn(Observable.just(1));
         when(mAuthDataManager.initializeFromPayload(anyString(), anyString()))
                 .thenReturn(Completable.complete());
@@ -381,12 +416,12 @@ public class ManualPairingViewModelTest {
         when(mActivity.getPassword()).thenReturn("1234567890");
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED_JSON);
         Response response = Response.error(500, responseBody);
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
         when(mAuthDataManager.startPollingAuthStatus(anyString(), anyString()))
-                .thenReturn(Observable.just("1234567890"));
+                .thenReturn(Observable.just("{}"));
         when(mAuthDataManager.createCheckEmailTimer())
                 .thenReturn(Observable.error(new Throwable()));
         when(mAuthDataManager.initializeFromPayload(anyString(), anyString()))
@@ -411,7 +446,7 @@ public class ManualPairingViewModelTest {
         when(mActivity.getPassword()).thenReturn("1234567890");
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED_JSON);
         Response response = Response.error(500, responseBody);
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -439,7 +474,7 @@ public class ManualPairingViewModelTest {
         when(mActivity.getPassword()).thenReturn("1234567890");
 
         when(mAuthDataManager.getSessionId(anyString())).thenReturn(Observable.just("1234567890"));
-        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED);
+        ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), KEY_AUTH_REQUIRED_JSON);
         Response response = Response.error(500, responseBody);
         when(mAuthDataManager.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(response));
@@ -453,6 +488,63 @@ public class ManualPairingViewModelTest {
         verify(mActivity, times(2)).showToast(anyInt(), anyString());
         verify(mActivity, times(2)).resetPasswordField();
         verify(mAppUtil, times(2)).clearCredentialsAndRestart();
+    }
+
+    @Test
+    public void submitTwoFactorCodeNull() throws Exception {
+        // Arrange
+        JSONObject responseObject = new JSONObject();
+        String sessionId = "SESSION_ID";
+        String guid = "GUID";
+        String password = "PASSWORD";
+        // Act
+        mSubject.submitTwoFactorCode(responseObject, sessionId, guid, password, null);
+        // Assert
+        verify(mActivity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+    }
+
+    @Test
+    public void submitTwoFactorCodeFailed() throws Exception {
+        // Arrange
+        JSONObject responseObject = new JSONObject();
+        String sessionId = "SESSION_ID";
+        String guid = "GUID";
+        String password = "PASSWORD";
+        String code = "123456";
+        when(mAuthDataManager.submitTwoFactorCode(sessionId, guid, code))
+                .thenReturn(Observable.error(new Throwable()));
+        // Act
+        mSubject.submitTwoFactorCode(responseObject, sessionId, guid, password, code);
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), isNull(), eq(false));
+        // TODO: 12/04/2017 There's a bug in Mockito here were it asserts that this was called twice.
+        // Check this with Mockito 2.8.0 when it makes it onto bintray
+        verify(mActivity, atLeastOnce()).dismissProgressDialog();
+        verify(mActivity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verify(mAuthDataManager).submitTwoFactorCode(sessionId, guid, code);
+    }
+
+    @Test
+    public void submitTwoFactorCodeSuccess() throws Exception {
+        // Arrange
+        JSONObject responseObject = new JSONObject();
+        String sessionId = "SESSION_ID";
+        String guid = "GUID";
+        String password = "PASSWORD";
+        String code = "123456";
+        when(mAuthDataManager.submitTwoFactorCode(sessionId, guid, code))
+                .thenReturn(Observable.just(ResponseBody.create(MediaType.parse("application/json"), TWO_FA_RESPONSE)));
+        when(mAuthDataManager.initializeFromPayload(anyString(), eq(password))).thenReturn(Completable.complete());
+        // Act
+        mSubject.submitTwoFactorCode(responseObject, sessionId, guid, password, code);
+        // Assert
+        verify(mActivity).showProgressDialog(anyInt(), isNull(), eq(false));
+        // TODO: 12/04/2017 There's a bug in Mockito here were it asserts that this was called twice.
+        // Check this with Mockito 2.8.0 when it makes it onto bintray
+        verify(mActivity, atLeastOnce()).dismissProgressDialog();
+        verify(mActivity).goToPinPage();
+        verify(mAuthDataManager).submitTwoFactorCode(sessionId, guid, code);
+        verify(mAuthDataManager).initializeFromPayload(anyString(), eq(password));
     }
 
     @Test
@@ -506,6 +598,7 @@ public class ManualPairingViewModelTest {
                                                          AppUtil appUtil,
                                                          AccessState accessState,
                                                          StringUtils stringUtils,
+                                                         AESUtilWrapper aesUtilWrapper,
                                                          RxBus rxBus) {
             return mAuthDataManager;
         }

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -22,7 +23,9 @@ import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveFragment;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
-public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragment.OnPinEntryFragmentInteractionListener {
+public class PinEntryActivity extends BaseAuthActivity implements
+        PinEntryFragment.OnPinEntryFragmentInteractionListener,
+        ViewPager.OnPageChangeListener {
 
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
     private ActivityPinEntryBinding binding;
@@ -30,11 +33,13 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragme
 
     // Fragments
     private PinEntryFragment pinEntryFragment;
+    private AppUtil appUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        appUtil = new AppUtil(this);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_pin_entry);
         pinEntryFragment = PinEntryFragment.newInstance(!shouldHideSwipeToReceive());
@@ -58,6 +63,7 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragme
         }
 
         binding.viewpager.setAdapter(fragmentPagerAdapter);
+        binding.viewpager.addOnPageChangeListener(this);
 
         PrefsUtil prefsUtil = new PrefsUtil(this);
         DebugSettings debugSettings = new DebugSettings(prefsUtil, PersistentUrls.getInstance());
@@ -123,8 +129,22 @@ public class PinEntryActivity extends BaseAuthActivity implements PinEntryFragme
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         // Test for screen overlays before user enters PIN
-        // consume event
-        return new AppUtil(this).detectObscuredWindow(this, event) || super.dispatchTouchEvent(event);
+        return appUtil.detectObscuredWindow(this, event) || super.dispatchTouchEvent(event);
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        // No-op
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        pinEntryFragment.resetPinEntry();
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+        // No-op
     }
 
     private static class SwipeToReceiveFragmentPagerAdapter extends FragmentPagerAdapter {

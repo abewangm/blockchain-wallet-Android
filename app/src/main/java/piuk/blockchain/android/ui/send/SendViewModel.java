@@ -602,7 +602,7 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Updates text displaying what block tx will be included in
      */
-    private String updateEstimateConfirmationTime(BigInteger amountToSend, long fee, UnspentOutputs coins)
+    private void updateEstimateConfirmationTime(BigInteger amountToSend, long fee, UnspentOutputs coins)
             throws UnsupportedEncodingException {
         sendModel.absoluteSuggestedFeeEstimates = getEstimatedBlocks(amountToSend, sendModel.dynamicFeeList.getEstimate(), coins);
 
@@ -625,8 +625,6 @@ public class SendViewModel extends BaseViewModel {
         dataListener.setEstimate(estimateText);
         dataListener.setEstimateColor(estimateText.equals(unlikelyToConfirmMessage)
                 ? R.color.product_red_medium : R.color.primary_blue_accent);
-
-        return estimateText;
     }
 
     private void setupTransaction(String customFeeText,
@@ -641,7 +639,6 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void sendClicked(boolean bypassFeeCheck, String address) {
-
         checkClipboardPaste(address);
         if (FormatsUtil.isValidBitcoinAddress(address)) {
             //Receiving address manual or scanned input
@@ -651,11 +648,8 @@ public class SendViewModel extends BaseViewModel {
         }
 
         if (isValidSpend(sendModel.pendingTransaction, false)) {
-
             if (bypassFeeCheck || isFeeAdequate()) {
-
                 LegacyAddress legacyAddress = null;
-
                 if (!sendModel.pendingTransaction.isHD()) {
                     legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
                 }
@@ -667,7 +661,6 @@ public class SendViewModel extends BaseViewModel {
                     }
                 } else if ((legacyAddress != null && legacyAddress.isWatchOnly()) || sendModel.verifiedSecondPassword != null) {
                     confirmPayment();
-
                 } else {
                     dataListener.showSecondPasswordDialog();
                 }
@@ -798,8 +791,7 @@ public class SendViewModel extends BaseViewModel {
      * total
      */
     boolean isLargeTransaction() {
-
-        if(sendModel.pendingTransaction.isCustomFee) {
+        if (sendModel.pendingTransaction.isCustomFee) {
             return false;
         }
 

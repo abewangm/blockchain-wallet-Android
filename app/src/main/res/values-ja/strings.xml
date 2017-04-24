@@ -103,7 +103,6 @@
 
     <string name="support">サポート</string>
     <string name="rate_us">評価する</string>
-    <string name="about">ブロックチェーンウォレット %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">無料商人アプリ</string>
     <string name="password_or_wipe">パスワードを使ってログインするかこの財布を忘れる</string>
     <string name="use_password">パスワードを使用</string>
@@ -117,7 +116,6 @@
 
     <string name="confirm_details">支払いを確認</string>
     <string name="fee">手数料</string>
-    <string name="dialog_cancel">キャンセル</string>
     <string name="exit_confirm">再度戻るボタンを押して終了してください</string>
 
     <string name="label_address">アドレスのインポートに成功しました。任意でこのアドレスに親しみやすい表示名を割り当てる。</string>
@@ -148,7 +146,7 @@
     <string name="postal">郵便番号</string>
     <string name="telephone">電話番号</string>
     <string name="web">ウェブ</string>
-    <string name="merchant_cat_hint">カテゴリを選択...</string>
+    <string name="merchant_cat_hint">カテゴリを選択…</string>
     <string name="merchant_cat1">カフェ</string>
     <string name="merchant_cat2">バー／酒場</string>
     <string name="merchant_cat3">フードやレストラン</string>
@@ -183,9 +181,7 @@
     <string name="address_lookup_fail">アドレスの取得ができませんでした。手動でアドレスを入力してください。</string>
 
     <string name="backup_write_down_words">画面の通り、語句が表示されている順番で書き留めることが重要です。</string>
-    <string name="backup_next_word">次の語句</string>
     <string name="backup_verify_heading">バックアッププロセスを完了するため、次の語句をリカバリーフレーズから入力してバックアッププロセスを完了してください。</string>
-    <string name="backup_word">語句</string>
     <string name="backup_of">の</string>
     <string name="backup_confirmed">バックアップが確認されました</string>
     <string name="backup_word_mismatch">語句が一致しません</string>
@@ -215,22 +211,18 @@
     <string name="confirm_password">パスワードの確認</string>
     <string name="check_email_to_auth_login">メールを確認してこのログイン試行を許可してください。</string>
     <string name="transaction_fee">取引手数料</string>
-    <string name="your_transactions">あなたの取引</string>
     <string name="transaction_occur_when">ビットコインを送受信する際に取引が発生します。</string>
     <string name="click">クリック</string>
     <string name="to_start_sending_and_receiving_btc">してビットコインの送受信を開始。</string>
 
     <string name="watch_only_label">(閲覧のみ)</string>
     <string name="address_book_label">(アドレスブック)</string>
-    <string name="archived_label">(アーカイブ済み)</string>
 
     <string name="transaction_submitted">取引完了</string>
     <string name="transaction_failed">取引が失敗しました</string>
-    <string name="UPGRADE_YOUR_WALLET">さあ、始めましょう！</string>
     <string name="upgrade_page_1">簡単になったバックアップとリカバリー。</string>
     <string name="upgrade_page_2">階層的で決定論的なアドレスを介して強化されたプライバシー。</string>
     <string name="upgrade_page_3">ブロックチェーンウォレットでビットコインを管理する方法をカスタマイズ。</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">こんにちは、ブロックチェーンウォレットに次の新規機能が追加されました：</string>
     <string name="upgrading">アップグレード中...</string>
     <string name="upgrading_started_info">財布をアップグレードしています。財布のサイズや年数によって時間がかかることがあります。お待ちください。</string>
     <string name="upgrade_success_heading">財布がアップグレードしました！</string>
@@ -246,13 +238,12 @@
 
     <string name="camera_unavailable">このカメラは現在別のアプリケーションで開かれています。別のアプリケーションを閉じて再試行してください。</string>
 
-    <string name="validating_password">パスワードを検証中...</string>
-    <string name="validating_pin">PINを検証中...</string>
-    <string name="creating_pin">PINを作成中...</string>
-    <string name="decrypting_wallet">財布を復号化中...</string>
+    <string name="validating_password">パスワードを検証中…</string>
+    <string name="validating_pin">PINを検証中…</string>
+    <string name="creating_pin">PINを作成中…</string>
+    <string name="decrypting_wallet">財布を復号化中…</string>
     <string name="password_unchanged">パスワードは変更されていません</string>
     <string name="password_changed">パスワードが変更されました</string>
-    <string name="verify_email2">認証されたメールアドレスは疑わしい、もしくは通常と異なったアクティビティが検出された際に、財布ログインIDのリマインダーおよびビットコイン資金の受信通知の送信のために使用されます。</string>
     <string name="disable_root_warning">ルート化されたデバイスの警告を無効にする</string>
 
     <string name="show_balance">残高を表示</string>
@@ -265,7 +256,7 @@
     <string name="device_rooted">デバイスはルート化されているようです。ルート化されたデバイスへの資金保管は安全ではなく、安定性の問題が発生する場合もあることに注意してください。このデバイスでビットコイン財布の使用を継続する場合は、ブロックチェーンアカウントに二重暗号化を使用することを推奨します。</string>
     <string name="address_already_in_wallet">財布にはすでにこのアドレスが含まれています。</string>
     <string name="cannot_create_address">新規アドレスは現在作成できません。再試行してください。</string>
-    <string name="saving_address">アドレスを保存中...</string>
+    <string name="saving_address">アドレスを保存中…</string>
 
     <string name="cannot_launch_app">ブロックチェーンウォレットはこのデバイスで起動できません。</string>
     <string name="label">ラベル</string>
@@ -377,9 +368,6 @@
     <string name="preferences">環境設定</string>
     <string name="two_fa_summary">2段階認証を有効にして財布を不正アクセスから保護しましょう。財布を保護するために携帯電話番号を使用することができます。このコードはウェブブラウザで財布にアクセスしようとする際に要求されます。\n\n別の認証方法を使用するには当社のウェブ財布にログインしてください。</string>
 
-    <string name="backup_previous_word">前の語句</string>
-    <string name="backup_done">完了</string>
-    <string name="backup_lost_mnemonic">12語句のリカバリーフレーズをなくしましたか？</string>
     <string name="rate_title">ブロックチェーンウォレットを評価</string>
     <string name="rate_message">ブロックチェーンウォレットをお楽しみいただいていますか？ブロックチェーンウォレットをもっと知ってもらうためにGoogle Playでのレビューをお願いします。</string>
     <string name="rate_yes">はい、ブロックチェーンウォレットを評価します</string>
@@ -407,7 +395,6 @@
     <string name="accept_higher_fee">より高額な費用に同意する</string>
     <string name="large_tx_high_fee_warning">"この取引では少額の釣り銭金額が払い戻されるため、ダスト消費により高額な手数料が必要です。"</string>
 
-    <string name="overview">取引</string>
     <string name="invalid_password_too_short">3文字以上入力してください</string>
     <string name="change_pin_new_matches_current">新規PINに以前のPINを使うことはできません</string>
     <string name="account_locked_title">アカウントがロックされています</string>
@@ -460,4 +447,205 @@
 
     <string name="survey_message">ウォレットの使用法を改善するための簡単なアンケートへのご回答をお願いします。\n\n皆様のご意見は大変重要です！</string>
     <string name="survey_positive_button">アンケートを受ける</string>
+
+    <string name="current_price_btc">1 BTC = %1$s</string>
+    <string name="overview">概要</string>
+    <string name="create_a_wallet">ウォレットを作成</string>
+    <string name="log_in">ログイン</string>
+    <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
+    <string name="wallets">ウォレット</string>
+    <string name="your_transactions">取引なし</string>
+    <string name="archived_label">アーカイブ済み</string>
+    <string name="UPGRADE_YOUR_WALLET">さあ、開始しましょう！</string>
+    <string name="confirm_upgrade_header">Blockchainウォレットに次の機能が追加されました:</string>
+    <string name="verify_email2">認証されたメールアドレスは、不審もしくは通常と異なるアクティビティが検出された際、ウォレットログインIDのリマインダーとして、そして資金を受信した際にビットコイン決済通知の送信のためのログインコード送信に使用されます。</string>
+    <string name="enable_screenshots">スクリーンショットを有効にする</string>
+    <string name="enable_screenshots_warning">Blockchainアプリのスクリーンショットを有効にしようとしています。アプリケーション内のいくつかの画面には機密データが含まれる可能性があります。その他のアプリケーションがこれらのスクリーンショットにアクセスできます。</string>
+
+    <string name="information">情報</string>
+    <string name="transaction_detail_verify">Blockchain.infoで認証</string>
+    <string name="transaction_detail_share_chooser">取引情報をシェア</string>
+    <string name="transaction_detail_contact_note">メモ</string>
+    <string name="security_centre_email_check">メールを確認</string>
+    <string name="contacts_payment_request_send_note">%1$sビットコインを送信する理由は何ですか？これは任意であり、%1$sと共有されます。</string>
+    <string name="contacts_payment_request_receive_note">%1$sにビットコインを送信させたい理由は何ですか？これは任意であり、%1$sと共有されます。</string>
+    <string name="contacts_send_address_message">これをすることであなたの連絡先にアドレスが送信されます。続行しますか？</string>
+    <string name="contacts_register_nodes_failure">連絡先サービスに接続できませんでした。完全な機能を有効にするには再試行してください。</string>
+    <string name="contacts_too_much_sent">リクエストされている以上のビットコインを送信したようです。ご希望の場合は連絡先の相手に返金をリクエストできます。決済が完了とマークされていません。</string>
+    <string name="contacts_too_little_sent">リクエストされている額よりも少ないビットコインを送信したようです。連絡先の相手はビットコインを受け取りますが、決済が完了とマークされません。</string>
+    <string name="contacts_second_password_prompt">このサービスを使用するには2番目のパスワードが必要です。連絡先機能を使用するため、これは一回のみ入力が必要です。</string>
+    <string name="contacts_pending_transaction">保留中の取引</string>
+    <string name="contacts_transaction_history">取引履歴</string>
+    <string name="contacts_request_money_receive">リクエストを連絡先に送信</string>
+    <string name="contacts_no_confirmed_contacts_found">確認済みの連絡先は見つかりませんでした！</string>
+    <string name="contacts_decline_pending_transaction">本当にこの保留中の取引を拒否しますか？</string>
+    <string name="contacts_cancel_pending_transaction">本当にこの保留中の取引をキャンセルしますか？</string>
+    <string name="contacts_pending_transaction_delete_success">保留中の取引の削除が完了しました</string>
+    <string name="contacts_pending_transaction_delete_failure">保留中の取引の削除に失敗しました</string>
+    <string name="contacts_pending_transaction_decline_success">保留中の取引の拒否が完了しました</string>
+    <string name="contacts_pending_transaction_decline_failure">保留中の取引の拒否に失敗しました</string>
+    <string name="contacts_pending_transaction_cancel_success">保留中の取引のキャンセルが完了しました</string>
+    <string name="contacts_pending_transaction_cancel_failure">保留中の取引の拒否に失敗しました</string>
+    <string name="contacts_sending_to_contact_waiting">%1$sを%2$sへ送信しています\n%2$sの同意を待機しています</string>
+    <string name="contacts_payment_requested_ready_to_send">%1$sが%2$sよりリクエストされました\n送信の準備が完了しました</string>
+    <string name="contacts_requesting_from_contact_waiting_for_payment">%2$sより%1$sがリクエストされています\n決済を待機しています</string>
+    <string name="contacts_receiving_from_contact_waiting_to_accept">%2$sより%1$sを受け取っています\n同意を待機しています</string>
+    <string name="contacts_receiving_declined">決済が拒否されました</string>
+    <string name="contacts_receiving_cancelled">決済がキャンセルされました</string>
+    <string name="contacts_send_complete">%1$sを%2$sに送信しました</string>
+    <string name="contacts_receive_complete">%1$sを%2$sより受け取りました</string>
+    <string name="contacts_received">%1$sよち受け取りました</string>
+    <string name="contacts_sent">%1$sに送信しました</string>
+    <string name="onboarding_fingerprint_title">指紋ログイン</string>
+    <string name="onboarding_fingerprint_summary">PINの代わりに指紋ログインで認証してウォレットにアクセス。</string>
+    <string name="onboarding_fingerprint_enable">指紋を有効にする</string>
+    <string name="onboarding_complete_later">後で行う</string>
+    <string name="onboarding_check_inbox_title">受信箱を確認してください</string>
+    <string name="onboarding_check_inbox_summary">Blockchainからのメールを確認して認証リンクをクリックし、ウォレットのセットアップを完了してください。</string>
+    <string name="onboarding_verify_email">メール認証</string>
+    <string name="onboarding_receive_bitcoin">ビットコインを受信</string>
+    <string name="onboarding_current_price">現在の価格:</string>
+    <string name="onboarding_qr_codes">QRコード</string>
+    <string name="onboarding_scan_address">アドレスをスキャン</string>
+    <string name="onboarding_buy_content">当社は世界中の両替業者と提携しており、ウォレットから直接ビットコインを購入いただけます。</string>
+    <string name="onboarding_receive_content">ビットコインをリクエストするにはウォレットアドレスを友達に送信してください。アドレスは各取引によって変更される無作為の英数字の羅列です。</string>
+    <string name="onboarding_qr_codes_content">アドレスはQRコードとしても表示できます。友達のQRコードをスキャンすると瞬時にウォレットアドレスが取得できます。</string>
+
+    <string name="onboarding_buy_bitcoin">ビットコインを買う</string>
+    <string name="onboarding_get_bitcoin">ビットコインを手に入れる</string>
+    <string name="onboarding_complete_title">これ以上行うことは今のところありません！</string>
+    <string name="onboarding_complete_content">おすすめや新機能についてはここからお知らせします。</string>
+    <string name="onboarding_start_over">最初からやり直す</string>
+    <string name="onboarding_skip_all">すべてスキップ</string>
+
+    <string name="backup_again">再度バックアップする</string>
+    <string name="backup_button_start">バックアップを開始する</string>
+    <string name="backup_complete_message">リカバリーフレーズを使用するとパスワードを紛失した場合も資金を復元できます。リカバリーフレーズを知っている人は誰でもビットコインにアクセスできるため、安全な場所に厳重に保管してください。</string>
+    <string name="backup_done">完了</string>
+    <string name="backup_explanation">安全のため、Blockchainはパスワードを保管しておりません。次の12のリカバリーフレーズを使用するとパスワードを紛失した場合も資金にアクセスできます。メモ帳などに書き残し、安全な場所に厳重に保管してください。 </string>
+    <string name="backup_header">リカバリーフレーズ</string>
+    <string name="backup_header_complete">バックアップ完了</string>
+    <string name="backup_last">最後のバックアップ: %1$s</string>
+    <string name="backup_lost_mnemonic">12語句のリカバリーフレーズをなくしましたか？</string>
+    <string name="backup_next_word">次の語句</string>
+    <string name="backup_previous_word">前の語句</string>
+    <string name="backup_word">語句</string>
+    <string name="change_password_new_matches_current">現在のパスワードを新規パスワードに設定することはできません</string>
+    <string name="contact_send_request_button">リクエストを送信する</string>
+    <string name="contacts_accept_invite_title">招待を承諾する</string>
+    <string name="contacts_add_are_you_sure">本当に%1$sを信頼できる連絡先に追加しますか？</string>
+    <string name="contacts_add_button">追加</string>
+    <string name="contacts_add_contact_failed">連絡先の追加に失敗しました。再試行してください。</string>
+    <string name="contacts_add_contact_success">連絡先の追加が完了しました</string>
+    <string name="contacts_add_contact_title">連絡先を追加</string>
+    <string name="contacts_address_sent_failed">アドレスの送信に失敗しました</string>
+    <string name="contacts_address_sent_success">アドレスの送信が完了しました</string>
+    <string name="contacts_being_invited">招待を承認</string>
+    <string name="contacts_broadcasting_payment">連絡先の相手にビットコインの送信について通知しています。お待ちください。</string>
+    <string name="contacts_choose_account_message">資金を受け取りたい場所を指定してください。</string>
+    <string name="contacts_choose_pairing_method">信頼できる連絡先の追加に使用するするペアリング方法を選択してください:</string>
+    <string name="contacts_delete">連絡先を削除する</string>
+    <string name="contacts_delete_contact_success">連絡先が削除されました</string>
+    <string name="contacts_delete_contact_failed">連絡先の削除に失敗しました。再試行してください</string>
+    <string name="contacts_delete_message">本当にこの連絡先を削除しますか？この連絡先を削除してもビットコインは失われません。</string>
+    <string name="contacts_detail_title">次を行う:</string>
+    <string name="contacts_detail_transactions">%1$sとの取引:</string>
+    <string name="contacts_detail_transactions_empty">取引が見つかりませんでした</string>
+    <string name="contacts_digesting_messages_failed">メッセージの確認に失敗しました。再試行してください</string>
+    <string name="contacts_error_getting_messages">メッセージの取得エラー</string>
+    <string name="contacts_error_sending_payment_request">決済リクエストの送信にエラーが発生しました。再試行してください</string>
+    <string name="contacts_field_error_empty">入力は必須です</string>
+    <string name="contacts_how_are_you_known_header">%1$sが知っているあなたの名前は何ですか？</string>
+    <string name="contacts_invalid_qr">無効なQRコード</string>
+    <string name="contacts_invite_someone">ユーザーを招待する</string>
+    <string name="contacts_loading_failed">連絡先の読み込みに失敗しました。再試行してください</string>
+    <string name="contacts_name_cannot_be_empty">無効な名前</string>
+    <string name="contacts_name_field_hint">名称</string>
+    <string name="two_factor_dialog_title">2FAコードを入力する</string>
+    <string name="two_factor_dialog_message_authenticator">認証アプリから有効な2FAコードを入力して続行してください。</string>
+    <string name="two_factor_dialog_message_sms">2FAコードが記載されたSMSが送信されました。ここに入力して続行してください。</string>
+    <string name="two_factor_dialog_hint">2FAコード</string>
+    <string name="two_factor_null_error">2FAコードの入力は必須です</string>
+    <string name="two_factor_incorrect_error">2FAコードが間違っています</string>
+    <string name="contacts_payment_sent_success">決済が送信されました！連絡先の相手に取引の完了が通知されました。</string>
+    <string name="contacts_payment_sent_failed_message">連絡先の相手への取引の完了の通知が失敗しました。接続を確認して再試行してください。</string>
+    <string name="contacts_waiting_for_address_message">ビットコインの送信について、さらに取引の完了にはアドレスが必要なことが連絡先の相手に通知されました。相手がアドレスを送信するとあなたに通知されます！</string>
+    <string name="contacts_waiting_for_payment_message">連絡先の相手にあなたがビットコインの受信を希望していること、アドレスを送信したことが通知されました。相手がビットコインを送信するとあなたに通知されます！</string>
+    <string name="contacts_transaction_not_found_error">取引が見つかりませんでした</string>
+    <string name="contacts_payment_request_send_hint">タパスランチ</string>
+    <string name="contacts_payment_request_receive_hint">金曜の飲み会</string>
+    <string name="contacts_payment_request_note_hint">メモ</string>
+    <string name="contacts_payment_request_send_amount">%1$sに送信したい金額はいくらですか？</string>
+    <string name="contacts_payment_request_receive_amount">%1$sに送信してほしい金額はいくらですか？ \n\nこれは一例です: 実際の金額は異なる場合があります。</string>
+    <string name="contacts_payment_request_amount_hint">金額</string>
+    <string name="contacts_payment_success_waiting_title">%1$sの同意を待機しています</string>
+    <string name="contacts_payment_success_request_sent_title">リクエストが送信されました</string>
+    <string name="contacts_payment_success_waiting_message">あなたがビットコインを送信したいということが相手に通知されました。相手が同意するとあなたに通知され、取引が完了できます。</string>
+    <string name="contacts_payment_request_title">決済リクエスト</string>
+    <string name="contacts_request_sent">連絡先リクエストが送信されました</string>
+    <string name="contacts_request_just_added">たった今追加されました</string>
+    <string name="contacts_request_trusted">信頼されている</string>
+    <string name="contacts_send_bitcoin">%1$sにビットコインの送信を依頼する</string>
+    <string name="contacts_request_bitcoin">%1$sにビットコインをリクエストする</string>
+    <string name="contacts_rename">連絡先の名前を変更する</string>
+    <string name="contacts_sent_link_explanation">ユーザーからリンクを受け取った場合は、クリックすると承認できます。</string>
+    <string name="contacts_share_qr">QRコードを使用(対面)</string>
+    <string name="contacts_share_link">リンクを使用</string>
+    <string name="contacts_scan_qr">QRコードをスキャン</string>
+    <string name="contacts_sent_link">ユーザーからリンクを受け取りました</string>
+    <string name="contacts_scan_instructions">Blockchain Walletモバイルアプリで%1$sはQRコードをスキャンする必要があります。</string>
+    <string name="contacts_sharing_method_header">この招待をどのように共有しますか？</string>
+    <string name="contacts_who_are_you_inviting_header">誰を接続に招待しますか？</string>
+    <string name="contacts_share_invitation">招待を共有</string>
+    <string name="contacts_success_sending_payment_request">決済リクエストが送信されました</string>
+    <string name="contacts_rename_invalid_name">名前が無効です</string>
+    <string name="contacts_rename_failed">連絡先の名前の変更に失敗しました。再試行してください</string>
+    <string name="contacts_rename_success">連絡先の名前の変更に成功しました</string>
+    <string name="contacts_not_found_error">連絡先が見つかりませんでした</string>
+    <string name="contacts_send_link">リンクを送信</string>
+    <string name="contacts_use_nfc">NFCを使用</string>
+    <string name="contacts_no_contacts_found">連絡先が見つかりませんでした</string>
+    <string name="contacts_pairing_method_title">連絡先を追加</string>
+    <string name="contacts_title">連絡先</string>
+    <string name="security_centre_backup_message">安全のため当社はパスワードを保管しておりません。パスワード紛失に備えウォレットをバックアップしてビットコインの安全性を確保しましょう。 </string>
+    <string name="security_centre_backup_positive_button">バックアップ</string>
+    <string name="security_centre_email_message">%1$sにメールが送信されました。Blockchainからのメールを確認して認証リンクをクリックし、ウォレットのセットアップを完了してください。</string>
+    <string name="security_centre_email_title">メールを確認してください</string>
+    <string name="transaction_detail_fee">"取引手数料: %1$s"</string>
+    <string name="transaction_detail_value_at_time_received">受信時の値:\u0020</string>
+    <string name="transaction_detail_value_at_time_transferred">送金時の値:\u0020</string>
+    <string name="transaction_detail_value_at_time_sent">送信時の値:\u0020</string>
+    <string name="transaction_detail_value">値:\u0020</string>
+    <string name="transaction_detail_date">日付</string>
+    <string name="transaction_detail_status">ステータス</string>
+    <string name="transaction_detail_title">取引</string>
+    <string name="sms_notifications">SMS通知</string>
+    <string name="forget_wallet">財布を忘れる</string>
+    <string name="forget_wallet_warning">このはこのデバイスの全ウォレットデータを削除します。ウォレット情報が別の場所に保管されているのを確認してください。そうでない場合このウォレットのビットコインにアクセスできなくなります！！</string>
+    <string name="transfer_archive">アーカイブされました</string>
+    <string name="transfer_confirm">送金を確認する</string>
+    <string name="transfer_all">すべて送金する</string>
+    <string name="transfer_amount">送金額</string>
+    <string name="transfer_archive_message">送金後にインポートしたアドレスをアーカイブする</string>
+    <string name="creating_wallet">ウォレットを作成</string>
+    <string name="recover_funds">資金を復元</string>
+    <string name="recover_funds_warning_message">ウォレットIDおよびパスワードにアクセスがある場合、ペアリングもしくはログインを常に行ってください。資金を復元すると新規ウォレットIDが作成されます。続行しますか？</string>
+    <string name="recover_funds_instructions">資金や取引を復元するには、12のリカバリー単語を空白を含めて入力してください</string>
+    <string name="done">完了</string>
+    <string name="transfer_confirmed">送金が完了しました</string>
+    <string name="transaction_details_unknown">不明</string>
+    <string name="transaction_detail_pending">保留中(%1$s/%2$sの確認)</string>
+    <string name="transaction_detail_description_hint">これは何ですか？</string>
+    <string name="transaction_detail_confirmed">確認済み</string>
+    <string name="to_field_helper_no_dropdown">ビットコインアドレスを入力してください</string>
+    <string name="sms_notifications_summary">通知を有効にするとビットコインを受信する度にSMSが送信されます。ラベル付けされたアドレスやインポートされたアドレスのみ通知のトリガーに有効です。</string>
+    <string name="share_instructions">タップしてこのアドレスをコピー。メールもしくはテキストで送信者と共有</string>
+    <string name="security_centre_two_fa_message">ウォレットへの不正アクセスを防ぎます。2段階認証を有効にしてウォレットの安全性を向上させます。</string>
+    <string name="security_centre_backup_title">資金をバックアップする</string>
+    <string name="restore_failed">ウォレットの復元に失敗しました。再試行してください</string>
+    <string name="recovery_passphrase">リカバリーパスフレーズ</string>
+    <string name="password_reveal_warning">ご注意ください！このテキストを表示してクリップボードへのコピーを許可すると、デバイス上のすべてのアプリで読み取りが可能となります。背後にいる人にも注意してください！</string>
+    <string name="password_hint_summary">ブロックチェーンウォレットは決してパスワードをサーバーに送信することはありません。当社ではお客様のパスワードを保管しておらず、忘れた場合でもこちらからリセットを行うことはできません。覚えやすいパスワードのヒントを作成すると、パスワードを忘れた際に当社から認証済みのメールアドレスに送信されます。</string>
+    <string name="invalid_recovery_phrase">無効なリカバリーフレーズです。再試行してください</string>
+
 </resources>

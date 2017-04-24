@@ -103,7 +103,6 @@
 
     <string name="support">Ayuda</string>
     <string name="rate_us">Califícanos</string>
-    <string name="about">Monedero Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="merchant_download">Aplicación gratuita para comerciante</string>
     <string name="password_or_wipe">Entrar introduciendo tu contraseña u olvidar este monedero</string>
     <string name="use_password">Usar contraseña</string>
@@ -117,7 +116,6 @@
 
     <string name="confirm_details">Confirmar pago</string>
     <string name="fee">Comisión</string>
-    <string name="dialog_cancel">CANCELAR</string>
     <string name="exit_confirm">Pulsa nuevamente el botón atrás para salir</string>
 
     <string name="label_address">Tu dirección ha sido importada con éxito. Puedes asignar un nombre de usuario a esta dirección.</string>
@@ -148,7 +146,7 @@
     <string name="postal">Código postal</string>
     <string name="telephone">Teléfono</string>
     <string name="web">Web</string>
-    <string name="merchant_cat_hint">Elige una categoría...</string>
+    <string name="merchant_cat_hint">Elige una categoría…</string>
     <string name="merchant_cat1">Café</string>
     <string name="merchant_cat2">Bares/Bebidas</string>
     <string name="merchant_cat3">Comida y cenas</string>
@@ -183,9 +181,7 @@
     <string name="address_lookup_fail">No se ha podido recuperar la dirección. Introduce la dirección manualmente.</string>
 
     <string name="backup_write_down_words">Es importante asegurarte de que escribas las palabras exactamente como aparecen aquí y en el mismo orden.</string>
-    <string name="backup_next_word">PALABRA SIGUIENTE </string>
     <string name="backup_verify_heading">Escribe las siguientes palabras de tu frase de recuperación para completar el proceso de respaldo.</string>
-    <string name="backup_word">Palabra</string>
     <string name="backup_of">de</string>
     <string name="backup_confirmed">Respaldo confirmado</string>
     <string name="backup_word_mismatch">La palabra no coincide</string>
@@ -215,22 +211,18 @@
     <string name="confirm_password">Confirmar contraseña</string>
     <string name="check_email_to_auth_login">Revisa tu correo electrónico para aprobar este intento de inicio de sesión.</string>
     <string name="transaction_fee">Comisión de transacción</string>
-    <string name="your_transactions">Tus transacciones</string>
     <string name="transaction_occur_when">Las transacciones se producen al recibir y enviar bitcoin.</string>
     <string name="click">Haz clic</string>
     <string name="to_start_sending_and_receiving_btc">para comenzar a enviar y recibir bitcoin.</string>
 
     <string name="watch_only_label">(sólo ver)</string>
     <string name="address_book_label">(libreta de direcciones)</string>
-    <string name="archived_label">(archivado)</string>
 
     <string name="transaction_submitted">Transacción completa</string>
     <string name="transaction_failed">Falló la transacción</string>
-    <string name="UPGRADE_YOUR_WALLET">¡Ok, vamos!</string>
     <string name="upgrade_page_1">Respaldo y recuperación simplificados.</string>
     <string name="upgrade_page_2">Privacidad mejorada a través de direcciones de jerarquía determinista.</string>
     <string name="upgrade_page_3">Personaliza la forma en la que organizas tu Bitcoin en tu monedero Blockchain.</string>
-    <!--<string name="confirm_upgrade_info">The upgrade takes just a second and your Bitcoin and history will be safe. Here is what’s better:\n\n✓ Completely updated design and user experience\n✓ Robust security center\n✓ Enhanced Privacy\n✓ Simplified backup and recovery\n✓ Customized fund management\n\nOne advanced transaction type (Shared Coin) is not supported in the new version at this time.</string>--><string name="confirm_upgrade_header">Hemos agregado estas nuevas características a tu monedero Blockchain:</string>
     <string name="upgrading">Actualizando...</string>
     <string name="upgrading_started_info">Tu monedero se está actualizando, te pedimos paciencia ya que esto puede tomar algo de tiempo dependiendo del tamaño y la antigüedad de tu monedero.</string>
     <string name="upgrade_success_heading">¡Tu monedero ha sido actualizado!</string>
@@ -246,13 +238,12 @@
 
     <string name="camera_unavailable">La cámara está siendo utilizada por otra aplicación. Cierra la aplicación y vuelve a intentarlo.</string>
 
-    <string name="validating_password">Validando la contraseña...</string>
-    <string name="validating_pin">Validando PIN...</string>
-    <string name="creating_pin">Creando PIN...</string>
-    <string name="decrypting_wallet">Descifrando el monedero...</string>
+    <string name="validating_password">Validando la contraseña…</string>
+    <string name="validating_pin">Validando PIN…</string>
+    <string name="creating_pin">Creando PIN…</string>
+    <string name="decrypting_wallet">Descifrando el monedero…</string>
     <string name="password_unchanged">Contraseña sin cambios</string>
     <string name="password_changed">Contraseñada cambiada</string>
-    <string name="verify_email2">Tu dirección de correo electrónico verificada se utiliza para enviar códigos de inicio de sesión cuando se detecta actividad sospechosa o inusual, para recordarte tu ID de inicio de sesión de monedero y para enviar avisos de pago de Bitcoin cuando recibas los fondos.</string>
     <string name="disable_root_warning">Desactivar la advertencia de dispositivo con sistema operativo modificado</string>
 
     <string name="show_balance">Mostrar saldo</string>
@@ -265,7 +256,7 @@
     <string name="device_rooted">Parece que este dispositivo ha sido rooteado. Ten en cuenta que guardar fondos en un dispositivo rooteado es riesgoso, además, puede causar problemas de estabilidad. Si continúas utilizando nuestro monedero Bitcoin en este dispositivo te recomendamos que utilices un encriptado doble en tu cuenta de Blockchain.</string>
     <string name="address_already_in_wallet">Tu monedero ya contiene esta dirección.</string>
     <string name="cannot_create_address">No se puede crear una nueva dirección en este momento. Por favor, reinténtalo más tarde.</string>
-    <string name="saving_address">Guardando dirección...</string>
+    <string name="saving_address">Guardando dirección…</string>
 
     <string name="cannot_launch_app">El monedero Blockchain no se puede ejecutar en este dispositivo.</string>
     <string name="label">Etiqueta</string>
@@ -377,9 +368,6 @@
     <string name="preferences">Preferencias</string>
     <string name="two_fa_summary">Protege tu monedero de accesos no autorizados habilitando la verificación de 2 pasos. Puedes elegir utilizar tu número de celular para asegurar tu monedero. Se te pedirá este código cuando intentes acceder a tu monedero con el navegador web.\n\nPara poder usar otros métodos de autentificación en lugar de éste, inicia sesión en nuestro monedero web.</string>
 
-    <string name="backup_previous_word">PALABRA ANTERIOR</string>
-    <string name="backup_done">Completado</string>
-    <string name="backup_lost_mnemonic">¿Perdiste tu frase de recuperación de 12 palabras?</string>
     <string name="rate_title">Califica al monedero Blockchain</string>
     <string name="rate_message">¿Estás disfrutando de tu monedero Blockchain? Por favor tómate un momento para dejar una reseña en Google Play para que así otros la conozcan.</string>
     <string name="rate_yes">Si, calificar el monedero Blockchain</string>
@@ -407,13 +395,12 @@
     <string name="accept_higher_fee">Aceptar la comisión más alta</string>
     <string name="large_tx_high_fee_warning">"Esta transacción requiere una comisión más alta para el consumo 'polvo', debido al bajo monto del cambio a devolver."</string>
 
-    <string name="overview">Transacciones</string>
     <string name="invalid_password_too_short">Por favor, ingrese más de 3 caracteres</string>
     <string name="change_pin_new_matches_current">No puede usar su PIN actual como PIN nuevo</string>
     <string name="account_locked_title">Cuenta bloqueada</string>
     <string name="account_locked_message">Su cuenta se bloqueó temporalmente como medida de precaución. Por favor, verifique su correo electrónico para obtener más información e intente de nuevo más tarde.</string>
     <string name="licenses">Licencias</string>
-    <string name="email_chooser">Enviar correo electrónico...</string>
+    <string name="email_chooser">Enviar correo electrónico…</string>
     <string name="password_changed_explanation">Su cuenta se cambió, por favor vuelva a emparejar su billetera</string>
     <string name="sms">Mensaje de texto</string>
     <string name="google_authenticator">Verificador de Google</string>
@@ -460,4 +447,205 @@
 
     <string name="survey_message">¿Le gustaría completar una corta encuesta para ayudarnos a mejorar su experiencia con la billetera?\n\n¡Valoramos sus comentarios!</string>
     <string name="survey_positive_button">Realizar encuesta</string>
+
+    <string name="current_price_btc">1 BTC = %1$s</string>
+    <string name="overview">Información general</string>
+    <string name="create_a_wallet">Crear una billetera</string>
+    <string name="log_in">Iniciar sesión</string>
+    <string name="about">Billetera de Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
+    <string name="wallets">Billeteras</string>
+    <string name="your_transactions">Sin transacciones</string>
+    <string name="archived_label">Archivado</string>
+    <string name="UPGRADE_YOUR_WALLET">Bien, ¡vamos!</string>
+    <string name="confirm_upgrade_header">Hemos añadido estas nuevas características a su billetera de Blockchain:</string>
+    <string name="verify_email2">Su dirección de correo electrónico verificada se utiliza para enviar códigos de inicio de sesión cuando se detecta actividad sospechosa o inusual, para recordarle su ID de inicio de sesión en su billetera y para enviar avisos de pago de bitcoins cuando reciba fondos.</string>
+    <string name="enable_screenshots">Habilitar capturas de pantalla</string>
+    <string name="enable_screenshots_warning">Está a punto de habilitar capturas de pantalla para la aplicación Blockchain. Algunas secciones dentro de la aplicación podrían mostrar información delicada. Otras aplicaciones podrían acceder a estas capturas de pantalla.</string>
+
+    <string name="information">Información</string>
+    <string name="transaction_detail_verify">Verifique en Blockchain.info</string>
+    <string name="transaction_detail_share_chooser">Compartir información de transacción</string>
+    <string name="transaction_detail_contact_note">Nota</string>
+    <string name="security_centre_email_check">Revise su correo electrónico</string>
+    <string name="contacts_payment_request_send_note">¿Por qué desea enviar %1$s bitcoins? Esto es opcional y se compartirá con %1$s.</string>
+    <string name="contacts_payment_request_receive_note">¿Por qué desea que %1$s le envíe bitcoins? Esto es opcional y se compartirá con %1$s.</string>
+    <string name="contacts_send_address_message">Esto enviará una dirección a su contacto. ¿Continuar?</string>
+    <string name="contacts_register_nodes_failure">No pudimos conectarlo con el servicio de contactos. Por favor, inténtelo de nuevo para habilitar la funcionalidad completa.</string>
+    <string name="contacts_too_much_sent">Parece que ha enviado más bitcoins de lo solicitado. Puede pedirle a su contacto que le devuelva algunas, si lo desea. No hemos marcado este pago como completado.</string>
+    <string name="contacts_too_little_sent">Parece que ha enviado menos bitcoins de lo solicitado. Su contacto sí recibirá las bitcoins que envió, pero no hemos marcado el pago como completado.</string>
+    <string name="contacts_second_password_prompt">Para usar este servicio, le pedimos introducir su segunda contraseña. Solo tendrá que introducir esto una sola vez para usar la funcionalidad de contactos.</string>
+    <string name="contacts_pending_transaction">Transacciones pendientes</string>
+    <string name="contacts_transaction_history">Historial de transacciones</string>
+    <string name="contacts_request_money_receive">Enviar solicitud a contacto</string>
+    <string name="contacts_no_confirmed_contacts_found">¡No se encontraron contactos confirmados!</string>
+    <string name="contacts_decline_pending_transaction">¿En verdad desea rechazar esta transacción pendiente?</string>
+    <string name="contacts_cancel_pending_transaction">¿En verdad desea cancelar esta transacción pendiente?</string>
+    <string name="contacts_pending_transaction_delete_success">La transacción pendiente se eliminó de forma exitosa.</string>
+    <string name="contacts_pending_transaction_delete_failure">No fue posible eliminar la transacción pendiente.</string>
+    <string name="contacts_pending_transaction_decline_success">La transacción pendiente se rechazó de forma exitosa.</string>
+    <string name="contacts_pending_transaction_decline_failure">No fue posible rechazar la transacción pendiente.</string>
+    <string name="contacts_pending_transaction_cancel_success">La transacción pendiente se canceló de forma exitosa.</string>
+    <string name="contacts_pending_transaction_cancel_failure">No fue posible cancelar la transacción pendiente.</string>
+    <string name="contacts_sending_to_contact_waiting">Enviando %1$s a %2$s\nEsperando que %2$s acepte</string>
+    <string name="contacts_payment_requested_ready_to_send">%1$s solicitado por %2$s\nListo para enviar</string>
+    <string name="contacts_requesting_from_contact_waiting_for_payment">Solicitó %1$s de %2$s\nEsperando el pago</string>
+    <string name="contacts_receiving_from_contact_waiting_to_accept">Recibiendo %1$s de %2$s\nEsperando que usted acepte</string>
+    <string name="contacts_receiving_declined">Pago rechazado</string>
+    <string name="contacts_receiving_cancelled">Pago cancelado</string>
+    <string name="contacts_send_complete">Ha enviado %1$s a %2$s</string>
+    <string name="contacts_receive_complete">Ha recibido %1$s de %2$s</string>
+    <string name="contacts_received">Recibido de %1$s</string>
+    <string name="contacts_sent">Enviado a %1$s</string>
+    <string name="onboarding_fingerprint_title">Inicio de sesión con huella digital</string>
+    <string name="onboarding_fingerprint_summary">Use el inicio de sesión con su huella digital en vez de con su PIN, para autenticarse y acceder a su billetera.</string>
+    <string name="onboarding_fingerprint_enable">Habilitar huella digital</string>
+    <string name="onboarding_complete_later">Lo haré después</string>
+    <string name="onboarding_check_inbox_title">Revise su bandeja de entrada</string>
+    <string name="onboarding_check_inbox_summary">Busque un correo electrónico de Blockchain y haga clic en el enlace de verificación, para finalizar la configuración de su billetera.</string>
+    <string name="onboarding_verify_email">Verifique su correo electrónico</string>
+    <string name="onboarding_receive_bitcoin">Recibir bitcoins</string>
+    <string name="onboarding_current_price">Precio actual:</string>
+    <string name="onboarding_qr_codes">Códigos QR</string>
+    <string name="onboarding_scan_address">Escanear dirección</string>
+    <string name="onboarding_buy_content">Trabajamos con socios de intercambio de todo el mundo, así que puede comprar bitcoins directo desde su billetera.</string>
+    <string name="onboarding_receive_content">Envíele a un amigo la dirección de su billetera para pedirle bitcoins. Una dirección es un conjunto de letras y números aleatorios, que cambian en cada transacción.</string>
+    <string name="onboarding_qr_codes_content">Una dirección también puede mostrarse como un código QR. Escanee el código QR de un amigo para capturar de forma rápida la dirección de su billetera.</string>
+
+    <string name="onboarding_buy_bitcoin">Comprar bitcoins</string>
+    <string name="onboarding_get_bitcoin">Obtener bitcoins</string>
+    <string name="onboarding_complete_title">¡Eso es todo por ahora!</string>
+    <string name="onboarding_complete_content">Aquí tendremos información actualizada de nuevas recomendaciones y características.</string>
+    <string name="onboarding_start_over">Iniciar de nuevo</string>
+    <string name="onboarding_skip_all">Omitir todo</string>
+
+    <string name="backup_again">Nueva copia de seguridad</string>
+    <string name="backup_button_start">Comenzar copia de seguridad</string>
+    <string name="backup_complete_message">Puedes utilizar la frase de recuperación para restaurar tus fondos si pierdes la contraseña. Recuerda anotar tu frase de recuperación en un lugar seguro y confidencial ya que cualquiera que la conozca podrá acceder a tu bitcoin.</string>
+    <string name="backup_done">Completado</string>
+    <string name="backup_explanation">Blockchain no guarda ninguna contraseña para garantizar tu seguridad. La siguiente frase de recuperación de 12 palabras te permitirá acceder a tus fondos en caso de que pierdas la contraseña. Asegúrate de anotarla en un papel y guardarla en un lugar seguro. </string>
+    <string name="backup_header">Frase de recuperación</string>
+    <string name="backup_header_complete">Copia de seguridad finalizada</string>
+    <string name="backup_last">Última copia de seguridad: %1$s</string>
+    <string name="backup_lost_mnemonic">¿Perdiste tu frase de recuperación de 12 palabras?</string>
+    <string name="backup_next_word">PALABRA SIGUIENTE</string>
+    <string name="backup_previous_word">PALABRA ANTERIOR</string>
+    <string name="backup_word">Palabra</string>
+    <string name="change_password_new_matches_current">La contraseña nueva no puede ser tu contraseña actual</string>
+    <string name="contact_send_request_button">Enviar solicitud</string>
+    <string name="contacts_accept_invite_title">Aceptar invitación</string>
+    <string name="contacts_add_are_you_sure">¿Estás seguro de que deseas añadir a %1$s como contacto de confianza?</string>
+    <string name="contacts_add_button">Añadir</string>
+    <string name="contacts_add_contact_failed">No se pudo añadir el contacto. Inténtalo de nuevo.</string>
+    <string name="contacts_add_contact_success">El contacto se añadió correctamente</string>
+    <string name="contacts_add_contact_title">Añadir contacto</string>
+    <string name="contacts_address_sent_failed">No se pudo enviar la dirección</string>
+    <string name="contacts_address_sent_success">La dirección se envió correctamente</string>
+    <string name="contacts_being_invited">Aceptar invitación</string>
+    <string name="contacts_broadcasting_payment">Aguarda un momento. Le estamos informando a tu contacto que le has enviado unos bitcoins.</string>
+    <string name="contacts_choose_account_message">Elige dónde deseas recibir tus fondos.</string>
+    <string name="contacts_choose_pairing_method">Elige el método de emparejamiento que deseas utilizar para añadir un contacto de confianza:</string>
+    <string name="contacts_delete">Eliminar contacto</string>
+    <string name="contacts_delete_contact_success">Contacto eliminado</string>
+    <string name="contacts_delete_contact_failed">No se pudo eliminar el contacto. Inténtalo de nuevo.</string>
+    <string name="contacts_delete_message">¿Estás seguro de que quieres eliminar este contacto? No perderás ningún bitcoin si eliminas este contacto.</string>
+    <string name="contacts_detail_title">Quiero:</string>
+    <string name="contacts_detail_transactions">Operaciones con %1$s:</string>
+    <string name="contacts_detail_transactions_empty">No hay ninguna operación</string>
+    <string name="contacts_digesting_messages_failed">No se pudo revisar los mensajes. Inténtalo de nuevo.</string>
+    <string name="contacts_error_getting_messages">Error al obtener mensajes</string>
+    <string name="contacts_error_sending_payment_request">Se produjo un error al enviar tu solicitud de pago. Inténtalo de nuevo.</string>
+    <string name="contacts_field_error_empty">No puede estar vacío</string>
+    <string name="contacts_how_are_you_known_header">¿Con qué nombre te conoce %1$s?</string>
+    <string name="contacts_invalid_qr">Código QR incorrecto</string>
+    <string name="contacts_invite_someone">Invita a alguien</string>
+    <string name="contacts_loading_failed">No se pudo cargar los contactos. Inténtalo de nuevo.</string>
+    <string name="contacts_name_cannot_be_empty">Nombre inválido</string>
+    <string name="contacts_name_field_hint">Nombre</string>
+    <string name="two_factor_dialog_title">Ingresar código 2FA</string>
+    <string name="two_factor_dialog_message_authenticator">Ingresa un código 2FA válido desde tu aplicación autenticadora para continuar.</string>
+    <string name="two_factor_dialog_message_sms">Acabamos de enviarte un SMS con un código 2FA. Ingrésalo aquí para continuar.</string>
+    <string name="two_factor_dialog_hint">Código 2FA</string>
+    <string name="two_factor_null_error">El código 2FA no puede estar vacío</string>
+    <string name="two_factor_incorrect_error">Código 2FA incorrecto</string>
+    <string name="contacts_payment_sent_success">¡Pago enviado! Hemos informado a tu contacto que has completado la operación.</string>
+    <string name="contacts_payment_sent_failed_message">Se produjo un error al informar a tu contacto que le enviaste un pago. Revisa tu conexión y vuelve a intentarlo.</string>
+    <string name="contacts_waiting_for_address_message">Le informamos a tu contacto que deseas enviarle bitcoin y que necesitas su dirección. ¡Te avisaremos cuando haya enviado una dirección!</string>
+    <string name="contacts_waiting_for_payment_message">Le informamos a tu contacto que deseas recibir bitcoin y le enviamos una dirección. ¡Te avisaremos cuando te haya enviado bitcoin!</string>
+    <string name="contacts_transaction_not_found_error">No se encontró la operación</string>
+    <string name="contacts_payment_request_send_hint">Tapas</string>
+    <string name="contacts_payment_request_receive_hint">Viernes de tragos</string>
+    <string name="contacts_payment_request_note_hint">Nota</string>
+    <string name="contacts_payment_request_send_amount">¿Cuánto quieres enviar a %1$s?</string>
+    <string name="contacts_payment_request_receive_amount">¿Cuánto quieres que te envíe %1$s? \n\nEs solo una sugerencia. El monto final puede ser diferente.</string>
+    <string name="contacts_payment_request_amount_hint">Monto</string>
+    <string name="contacts_payment_success_waiting_title">Esperando que %1$s acepte</string>
+    <string name="contacts_payment_success_request_sent_title">Se envió la solicitud</string>
+    <string name="contacts_payment_success_waiting_message">Le informamos a tu contacto que te gustaría enviarle Bitcoin. Cuando lo acepte, te avisaremos y podrás completar la operación.</string>
+    <string name="contacts_payment_request_title">Solicitud de pago</string>
+    <string name="contacts_request_sent">Solicitud de contacto enviada</string>
+    <string name="contacts_request_just_added">Recién añadido</string>
+    <string name="contacts_request_trusted">De confianza</string>
+    <string name="contacts_send_bitcoin">Preguntar para enviar bitcoin a %1$s</string>
+    <string name="contacts_request_bitcoin">Solicitar bitcoin a %1$s</string>
+    <string name="contacts_rename">Cambiar nombre de contacto</string>
+    <string name="contacts_sent_link_explanation">Si alguien te ha enviado un enlace, simplemente tócalo para aceptarlo.</string>
+    <string name="contacts_share_qr">Mediante un código QR (en persona)</string>
+    <string name="contacts_share_link">Usar un enlace</string>
+    <string name="contacts_scan_qr">Escanear un código QR</string>
+    <string name="contacts_sent_link">Alguien me envió un enlace</string>
+    <string name="contacts_scan_instructions">%1$s debería escanear este código QR con su aplicación móvil Blockchain Wallet.</string>
+    <string name="contacts_sharing_method_header">¿Cómo quisieras compartir esta invitación?</string>
+    <string name="contacts_who_are_you_inviting_header">¿A quién invitas a conectarse?</string>
+    <string name="contacts_share_invitation">Compartir invitación</string>
+    <string name="contacts_success_sending_payment_request">Solicitud de pago enviada</string>
+    <string name="contacts_rename_invalid_name">Nombre inválido</string>
+    <string name="contacts_rename_failed">No se pudo cambiar el nombre del contacto. Inténtalo de nuevo.</string>
+    <string name="contacts_rename_success">Se cambió el nombre del contacto correctamente.</string>
+    <string name="contacts_not_found_error">No se pudo encontrar el contacto.</string>
+    <string name="contacts_send_link">Enviar enlace</string>
+    <string name="contacts_use_nfc">Usar NFC</string>
+    <string name="contacts_no_contacts_found">No se encontró ningún contacto</string>
+    <string name="contacts_pairing_method_title">Añadir contacto</string>
+    <string name="contacts_title">Contactos</string>
+    <string name="security_centre_backup_message">No guardamos ninguna contraseña para garantizar tu seguridad. Haz una copia de seguridad de tu cartera para asegurar que tus bitcoins estén a salvo en caso de perder la contraseña. </string>
+    <string name="security_centre_backup_positive_button">Copia de seguridad</string>
+    <string name="security_centre_email_message">Enviamos un correo electrónico a %1$s. Busca un correo electrónico de Blockchain y haz clic en el enlace de verificación para finalizar la configuración de tu billetera.</string>
+    <string name="security_centre_email_title">Revisa tu correo electrónico</string>
+    <string name="transaction_detail_fee">"Tarifa de la operación: %1$s"</string>
+    <string name="transaction_detail_value_at_time_received">Valor cuando se recibe:\u0020</string>
+    <string name="transaction_detail_value_at_time_transferred">Valor cuando se transfiere:\u0020</string>
+    <string name="transaction_detail_value_at_time_sent">Valor cuando se envía:\u0020</string>
+    <string name="transaction_detail_value">Valor:\u0020</string>
+    <string name="transaction_detail_date">Fecha</string>
+    <string name="transaction_detail_status">Estado</string>
+    <string name="transaction_detail_title">Operación</string>
+    <string name="sms_notifications">Notificaciones de mensajes de texto</string>
+    <string name="forget_wallet">Olvidar monedero</string>
+    <string name="forget_wallet_warning">Esto borrará todos los datos del monedero en este dispositivo. Confirma que has guardado en otro lugar la información de tu monedero. Si no lo has hecho, ¡los Bitcoin que tenga este monedero quedarán inaccesibles!</string>
+    <string name="transfer_archive">Archivo confirmado</string>
+    <string name="transfer_confirm">Confirmar transferencia</string>
+    <string name="transfer_all">Transferir todo</string>
+    <string name="transfer_amount">Transferir monto</string>
+    <string name="transfer_archive_message">Archivar direcciones importadas después de la transferencia</string>
+    <string name="creating_wallet">Creando billetera</string>
+    <string name="recover_funds">Recuperar fondos</string>
+    <string name="recover_funds_warning_message">Siempre deberías emparejar o iniciar sesión si tienes acceso a la ID y contraseña de tu billetera. La recuperación de tus fondos creará una nueva ID de monedero. ¿Deseas continuar?</string>
+    <string name="recover_funds_instructions">Ingresa las 12 palabras de recuperación con espacios para recuperar tus fondos y operaciones</string>
+    <string name="done">Completado</string>
+    <string name="transfer_confirmed">Transferencia confirmada</string>
+    <string name="transaction_details_unknown">Desconocido</string>
+    <string name="transaction_detail_pending">Pendiente (%1$s/%2$s confirmaciones)</string>
+    <string name="transaction_detail_description_hint">¿Para qué es esto?</string>
+    <string name="transaction_detail_confirmed">Confirmada</string>
+    <string name="to_field_helper_no_dropdown">Ingresar dirección de Bitcoin</string>
+    <string name="sms_notifications_summary">Habilita las notificaciones para recibir un SMS cada vez que recibas bitcoins. Solo las direcciones con etiqueta y las direcciones importadas pueden activar notificaciones.</string>
+    <string name="share_instructions">Pulsa para copiar esta dirección. Compártela con el remitente por correo electrónico o mensaje de texto.</string>
+    <string name="security_centre_two_fa_message">Evita el acceso no autorizado a tu cartera. Habilita la verificación en dos pasos para aumentar la seguridad de la cartera.</string>
+    <string name="security_centre_backup_title">Haz una copia de seguridad de tus fondos</string>
+    <string name="restore_failed">No se pudo restaurar la cartera. Inténtalo de nuevo.</string>
+    <string name="recovery_passphrase">Tu frase de recuperación</string>
+    <string name="password_reveal_warning">¡Ten cuidado! Al revelar este texto se copia tu contraseña en el portapapeles y luego todas las aplicaciones de tu dispositivo pueden leerla. ¡También ten cuidado de las personas que están detrás de ti!</string>
+    <string name="password_hint_summary">Tu billetera Blockchain nunca comunica tu contraseña a nuestros servidores. Esto significa que no tenemos idea de cuál pueda ser tu contraseña y no podemos restablecerla si la olvidas. Crea una sugerencia de contraseña fácil de recordar que podamos enviar a tu dirección de correo electrónico en caso de que olvides la contraseña.</string>
+    <string name="invalid_recovery_phrase">Frase de recuperación inválida. Inténtalo de nuevo.</string>
+
 </resources>

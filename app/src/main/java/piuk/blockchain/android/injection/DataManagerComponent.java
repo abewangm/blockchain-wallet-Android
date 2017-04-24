@@ -31,6 +31,7 @@ import piuk.blockchain.android.ui.send.SendViewModel;
 import piuk.blockchain.android.ui.settings.SettingsViewModel;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveViewModel;
 import piuk.blockchain.android.ui.transactions.TransactionDetailViewModel;
+import piuk.blockchain.android.ui.upgrade.UpgradeWalletViewModel;
 
 /**
  * Subcomponents have access to all upstream objects in the graph but can have their own scope -
@@ -100,4 +101,6 @@ public interface DataManagerComponent {
     void inject(ContactPaymentDialogViewModel contactPaymentDialogViewModel);
 
     void inject(OnboardingViewModel onboardingViewModel);
+
+    void inject(UpgradeWalletViewModel upgradeWalletViewModel);
 }

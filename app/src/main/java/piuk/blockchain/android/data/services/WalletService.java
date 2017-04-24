@@ -32,6 +32,20 @@ public class WalletService {
     }
 
     /**
+     * Posts a user's 2FA code to the server. Will return an encrypted copy of the Payload if
+     * successful.
+     *
+     * @param sessionId     The current session ID
+     * @param guid          The user's GUID
+     * @param twoFactorCode The user's generated (or received) 2FA code
+     * @return An {@link Observable} which may contain an encrypted Payload
+     */
+    @WebRequest
+    public Observable<ResponseBody> submitTwoFactorCode(String sessionId, String guid, String twoFactorCode) {
+        return walletApi.submitTwoFactorCode(sessionId, guid, twoFactorCode);
+    }
+
+    /**
      * Gets a session ID from the server
      *
      * @param guid A user's GUID

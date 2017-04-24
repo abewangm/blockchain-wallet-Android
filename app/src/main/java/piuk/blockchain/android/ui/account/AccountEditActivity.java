@@ -2,6 +2,9 @@ package piuk.blockchain.android.ui.account;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
@@ -312,13 +315,13 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
                 .setMessage(R.string.xpub_sharing_warning)
                 .setCancelable(false)
                 .setPositiveButton(R.string.dialog_continue, (dialog, whichButton) ->
-                        viewModel.showAddressDetails()).setNegativeButton(R.string.dialog_cancel, null)
+                        viewModel.showAddressDetails()).setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
 
     @Override
     public void showAddressDetails(String heading, String note, String copy, Bitmap bitmap, String qrString) {
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_view_qr, null);
+        View view = View.inflate(this, R.layout.dialog_view_qr, null);
         ImageView imageView = (ImageView) view.findViewById(R.id.imageview_qr);
         imageView.setImageBitmap(bitmap);
 
@@ -328,10 +331,11 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
                 .setView(view)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(copy, (dialog, which) -> {
-                    android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(android.content.Context.CLIPBOARD_SERVICE);
-                    android.content.ClipData clip = null;
-                    clip = android.content.ClipData.newPlainText("Send address", qrString);
-                    ToastCustom.makeText(this, getString(R.string.copied_to_clipboard), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip;
+                    clip = ClipData.newPlainText("Send address", qrString);
+                    ToastCustom.makeText(this,
+                            getString(R.string.copied_to_clipboard), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
                     clipboard.setPrimaryClip(clip);
                 })
                 .create()
@@ -364,7 +368,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
     @Override
     public void showTransactionSuccess() {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        View dialogView = getLayoutInflater().inflate(R.layout.modal_transaction_success, null);
+        View dialogView = View.inflate(this, R.layout.modal_transaction_success, null);
         dialogBuilder.setView(dialogView)
                 .setPositiveButton(getString(R.string.done), (dialog, which) -> dialog.dismiss())
                 .setOnDismissListener(dialogInterface -> finish())

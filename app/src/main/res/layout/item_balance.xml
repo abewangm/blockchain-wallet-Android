@@ -60,7 +60,7 @@
                     android:layout_marginTop="4dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="Sent"
+                    android:text="@string/SENT"
                     android:textAllCaps="true"
                     android:textColor="@color/primary_gray"
                     android:textSize="16sp" />
