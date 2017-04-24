@@ -497,9 +497,19 @@ public class SettingsViewModel extends BaseViewModel {
                                 return settingsDataManager.disableNotification(type, settings.getNotificationsType());
                             }
                         })
+                        .doOnNext(settings -> this.settings = settings)
+                        .flatMapCompletable(ignored -> {
+                            if (enable) {
+                                return payloadDataManager.syncPayloadAndPublicKeys();
+                            } else {
+                                return payloadDataManager.syncPayloadWithServer();
+                            }
+                        })
                         .doAfterTerminate(this::updateUi)
                         .subscribe(
-                                settings -> this.settings = settings,
+                                () -> {
+                                    // No-op
+                                },
                                 throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 

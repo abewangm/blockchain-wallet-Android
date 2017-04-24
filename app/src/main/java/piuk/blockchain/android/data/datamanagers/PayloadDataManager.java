@@ -145,6 +145,19 @@ public class PayloadDataManager {
     }
 
     /**
+     * Returns a {@link Completable} which saves the current payload to the server whilst also
+     * forcing the sync of the user's public keys. This method generates 20 addresses per {@link
+     * Account}, so it should be used only when strictly necessary (for instance, after enabling
+     * notifications).
+     *
+     * @return A {@link Completable} object
+     */
+    public Completable syncPayloadAndPublicKeys() {
+        return rxPinning.call(() -> payloadService.syncPayloadAndPublicKeys())
+                .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
      * Returns {@link Completable} which updates transactions in the PayloadManager.
      * Completable returns no value, and is used to call functions that return void but have side
      * effects.

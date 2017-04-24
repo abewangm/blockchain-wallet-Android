@@ -515,6 +515,7 @@ public class SettingsViewModelTest {
         subject.updateNotification(notificationType, true);
         // Assert
         verify(settingsDataManager).enableNotification(SettingsManager.NOTIFICATION_TYPE_EMAIL, notifications);
+        verify(payloadDataManager).syncPayloadAndPublicKeys();
         verify(activity).setSmsNotificationPref(anyBoolean());
         verify(activity).setEmailNotificationPref(anyBoolean());
     }
@@ -536,6 +537,7 @@ public class SettingsViewModelTest {
         subject.updateNotification(notificationType, false);
         // Assert
         verify(settingsDataManager).disableNotification(SettingsManager.NOTIFICATION_TYPE_EMAIL, notifications);
+        verify(payloadDataManager).syncPayloadWithServer();
         verify(activity).setSmsNotificationPref(anyBoolean());
         verify(activity).setEmailNotificationPref(anyBoolean());
     }

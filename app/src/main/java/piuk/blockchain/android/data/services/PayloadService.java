@@ -113,7 +113,7 @@ public class PayloadService {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // TRANSACTION METHODS
+    // SYNC METHODS
     ///////////////////////////////////////////////////////////////////////////
 
     /**
@@ -128,6 +128,26 @@ public class PayloadService {
             return Void.TYPE;
         });
     }
+
+    /**
+     * Returns a {@link Completable} which saves the current payload to the server whilst also
+     * forcing the sync of the user's public keys. This method generates 20 addresses per {@link
+     * Account}, so it should be used only when strictly necessary (for instance, after enabling
+     * notifications).
+     *
+     * @return A {@link Completable} object
+     */
+    @WebRequest
+    public Completable syncPayloadAndPublicKeys() {
+        return Completable.fromCallable(() -> {
+            if (!payloadManager.saveAndSyncPubKeys()) throw new ApiException("Sync failed");
+            return Void.TYPE;
+        });
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // TRANSACTION METHODS
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * Returns {@link Completable} which updates transactions in the PayloadManager.
@@ -202,7 +222,7 @@ public class PayloadService {
 
     /**
      * Sets a private key for an associated {@link LegacyAddress} which is already in the {@link
-     * info.blockchain.wallet.payload.data.Wallet} as a watch only address
+     * Wallet} as a watch only address
      *
      * @param key            An {@link ECKey}
      * @param secondPassword An optional double encryption password
@@ -242,7 +262,7 @@ public class PayloadService {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // CONTACTS/METADATA METHODS
+    // CONTACTS/METADATA/IWCS/CRYPTO-MATRIX METHODS
     ///////////////////////////////////////////////////////////////////////////
 
     /**
