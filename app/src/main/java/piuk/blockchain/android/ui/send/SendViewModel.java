@@ -519,7 +519,7 @@ public class SendViewModel extends BaseViewModel {
             dataListener.setMaxAvailable(stringUtils.getString(R.string.max_available) + " " + btcAmountFormatted + " " + sendModel.btcUnit);
         }
 
-        if (balanceAfterFee <= 0) {
+        if (balanceAfterFee <= Payment.DUST.longValue()) {
             dataListener.setMaxAvailable(stringUtils.getString(R.string.insufficient_funds));
             dataListener.setMaxAvailableColor(R.color.product_red_medium);
         } else {
