@@ -1010,6 +1010,8 @@ public class SendViewModel extends BaseViewModel {
         // After sending btc we create a "placeholder" tx until websocket handler refreshes list
         HashMap<String, BigInteger> inputs = new HashMap<>();
         inputs.put(pendingTransaction.sendingObject.label, pendingTransaction.bigIntAmount);
+        HashMap<String, BigInteger> outputs = new HashMap<>();
+        outputs.put(pendingTransaction.receivingObject.label, pendingTransaction.bigIntAmount);
 
         TransactionSummary tx = new TransactionSummary();
         tx.setDirection(Direction.SENT);
@@ -1018,6 +1020,7 @@ public class SendViewModel extends BaseViewModel {
         tx.setHash(hash);
         tx.setFee(pendingTransaction.bigIntFee);
         tx.setInputsMap(inputs);
+        tx.setOutputsMap(outputs);
         tx.setPending(true);
 
         transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);

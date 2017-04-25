@@ -52,6 +52,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
+import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -73,18 +74,19 @@ public class BalanceViewModel extends BaseViewModel {
     private List<ItemAccount> activeAccountAndAddressList;
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
     private List<Object> displayList;
-    @Inject PrefsUtil prefsUtil;
-    @Inject PayloadManager payloadManager;
-    @Inject StringUtils stringUtils;
-    @Inject TransactionListDataManager transactionListDataManager;
-    @Inject ContactsDataManager contactsDataManager;
-    @Inject PayloadDataManager payloadDataManager;
-    @Inject SettingsDataManager settingsDataManager;
-    @Inject SwipeToReceiveHelper swipeToReceiveHelper;
-    @Inject RxBus rxBus;
-    @Inject OnboardingDataManager onboardingDataManager;
+    @Inject protected PrefsUtil prefsUtil;
+    @Inject protected PayloadManager payloadManager;
+    @Inject protected StringUtils stringUtils;
+    @Inject protected TransactionListDataManager transactionListDataManager;
+    @Inject protected ContactsDataManager contactsDataManager;
+    @Inject protected PayloadDataManager payloadDataManager;
+    @Inject protected SettingsDataManager settingsDataManager;
+    @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
+    @Inject protected RxBus rxBus;
+    @Inject protected OnboardingDataManager onboardingDataManager;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
     @Inject protected PrefsUtil prefs;
+    @Inject protected AppUtil appUtil;
 
     public interface DataListener {
 
@@ -142,6 +144,8 @@ public class BalanceViewModel extends BaseViewModel {
         void startBuyActivity();
 
         void startReceiveFragment();
+
+        void onExchangeRateUpdated();
     }
 
     public BalanceViewModel(DataListener dataListener) {
@@ -204,6 +208,12 @@ public class BalanceViewModel extends BaseViewModel {
                                 }, Throwable::printStackTrace));
             }
         }
+
+        compositeDisposable.add(
+                exchangeRateFactory.updateTicker()
+                        .subscribe(
+                                () -> dataListener.onExchangeRateUpdated(),
+                                Throwable::printStackTrace));
 
         contactsEventObservable = rxBus.register(ContactsEvent.class);
         contactsEventObservable.subscribe(contactsEvent -> refreshFacilitatedTransactions());
@@ -352,6 +362,10 @@ public class BalanceViewModel extends BaseViewModel {
         return contactsDataManager.getNotesTransactionMap();
     }
 
+    double getLastPrice(String fiat) {
+        return exchangeRateFactory.getLastPrice(fiat);
+    }
+
     void onTransactionListRefreshed() {
         compositeDisposable.add(
                 payloadDataManager.updateAllTransactions()
@@ -389,17 +403,21 @@ public class BalanceViewModel extends BaseViewModel {
                             }
                         }));
 
-        if (fetchTransactions) {
-            //Update transactions
-            compositeDisposable.add(
-                    transactionListDataManager.fetchTransactions(object, 50, 0)
-                            .doAfterTerminate(() -> {
-                                if (dataListener != null) dataListener.setShowRefreshing(false);
-                            })
-                            .subscribe(
-                                    this::insertTransactionsAndDisplay,
-                                    throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
-        }
+        compositeDisposable.add(
+                Observable.just(fetchTransactions)
+                        .flatMap(fetch -> {
+                            if (fetch) {
+                                return transactionListDataManager.fetchTransactions(finalObject, 50, 0);
+                            } else {
+                                return Observable.just(transactionListDataManager.getTransactionList());
+                            }
+                        })
+                        .doAfterTerminate(() -> {
+                            if (dataListener != null) dataListener.setShowRefreshing(false);
+                        })
+                        .subscribe(
+                                this::insertTransactionsAndDisplay,
+                                throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
     }
 
     @SuppressWarnings("Java8CollectionRemoveIf")

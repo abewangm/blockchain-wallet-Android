@@ -160,7 +160,6 @@ dependencies {
     // Dagger2
     compile "com.google.dagger:dagger:$daggerVersion"
     annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
-    annotationProcessor 'com.google.guava:guava:20.0'
     // Fingerprint authentication
     compile 'com.mtramin:rxfingerprint:2.0.3'
     // Custom fonts

@@ -171,6 +171,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     public void onResume() {
         super.onResume();
         setupToolbar();
+        closeKeypad();
         IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
         viewModel.updateUI();

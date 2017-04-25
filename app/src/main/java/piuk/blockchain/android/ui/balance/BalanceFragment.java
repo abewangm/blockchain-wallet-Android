@@ -41,13 +41,14 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.home.SecurityPromptDialog;
 import piuk.blockchain.android.ui.home.TransactionSelectedListener;
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerAdapter;
+import piuk.blockchain.android.ui.receive.ReceiveFragment;
+import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.settings.SettingsFragment;
 import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.DateUtil;
-import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.ListUtil;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -129,6 +130,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel.onViewReady();
+        viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, true);
     }
 
     private void setAccountSpinner() {
@@ -157,12 +159,16 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         viewModel.updateAccountList();
         viewModel.getFacilitatedTransactions();
-        viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, true);
+        viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, false);
 
         binding.rvTransactions.clearOnScrollListeners();
 
+        updateAdapters();
+    }
+
+    private void updateAdapters() {
         String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiat);
+        double lastPrice = viewModel.getLastPrice(fiat);
 
         if (transactionAdapter != null) {
             transactionAdapter.notifyAdapterDataSetChanged(lastPrice);
@@ -171,6 +177,17 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         if (accountsAdapter != null) {
             accountsAdapter.notifyFiatUnitsChanged(fiat, lastPrice);
         }
+    }
+
+    public void checkCachedTransactions() {
+        if (accountSpinner != null) {
+            viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, false);
+        }
+    }
+
+    @Override
+    public void onExchangeRateUpdated() {
+        updateAdapters();
     }
 
     @Override
@@ -270,8 +287,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     /**
      * Position is offset to account for first item being "All Wallets". If returned result is -1,
-     * {@link piuk.blockchain.android.ui.send.SendFragment} and {@link
-     * piuk.blockchain.android.ui.receive.ReceiveFragment} can safely ignore and choose the defaults
+     * {@link SendFragment} and {@link ReceiveFragment} can safely ignore and choose the defaults
      * instead.
      */
     public int getSelectedAccountPosition() {
@@ -320,7 +336,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 isBTC,
                 new MonetaryUtil(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
                 fiat,
-                ExchangeRateFactory.getInstance().getLastPrice(fiat));
+                viewModel.getLastPrice(fiat));
 
         accountsAdapter.setDropDownViewResource(R.layout.item_balance_account_dropdown);
         accountSpinner.setAdapter(accountsAdapter);
@@ -342,7 +358,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         }));
 
         String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
+        double lastPrice = viewModel.getLastPrice(fiatString);
 
         transactionAdapter = new BalanceListAdapter(
                 viewModel.getContactsTransactionMap(),
@@ -478,10 +494,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     private void handleTransactionsVisibility() {
         if (!viewModel.getTransactionList().isEmpty()) {
-            binding.swipeContainer.setVisibility(View.VISIBLE);
+            binding.rvTransactions.setVisibility(View.VISIBLE);
             binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.GONE);
         } else {
-            binding.swipeContainer.setVisibility(View.GONE);
+            binding.rvTransactions.setVisibility(View.GONE);
             binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.VISIBLE);
 
             if (!viewModel.isOnboardingComplete()) {
@@ -663,7 +679,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                         @Override
                         public void onPageSelected(int position) {
                             // No-op
-                        }   
+                        }
 
                         @Override
                         public void onPageScrollStateChanged(int state) {
