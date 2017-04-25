@@ -714,6 +714,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         // Setup buy WebView
         // TODO: 17/03/2017 Check if there's a better way to improve loading time of this webview
         buyWebView = new WebView(this);
+        buyWebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         buyWebView.getSettings().setJavaScriptEnabled(true);
         buyWebView.loadUrl("http://localhost:8080/wallet/#/intermediate");
     }

@@ -4,6 +4,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.webkit.CookieManager;
 import android.webkit.WebView;
 
 import info.blockchain.wallet.api.trade.coinify.CoinifyApi;
@@ -52,6 +53,7 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
         coinifyApi = new CoinifyApi();
 
         WebView webView = binding.webview;
+        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         frontendJavascriptManager = new FrontendJavascriptManager(this, webView);
         payloadManager = PayloadManager.getInstance();
 
