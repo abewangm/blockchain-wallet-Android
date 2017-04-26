@@ -36,8 +36,8 @@ public class FrontendJavascriptManager {
         executeScript(script);
     }
 
-    public void activateMobileBuyFromJson(String walletJson, String externalJson, String magicHash, String password) {
-        String script = FrontendJavascriptManager.createActivateFromJsonScript(walletJson, externalJson, magicHash, password);
+    public void activateMobileBuyFromJson(String walletJson, String externalJson, String magicHash, String password, Boolean firstLogin) {
+        String script = FrontendJavascriptManager.createActivateFromJsonScript(walletJson, externalJson, magicHash, password, firstLogin);
         executeScript(script);
     }
 
@@ -60,13 +60,14 @@ public class FrontendJavascriptManager {
         );
     }
 
-    public static String createActivateFromJsonScript(String walletJson, String externalJson, String magicHash, String password) {
+    public static String createActivateFromJsonScript(String walletJson, String externalJson, String magicHash, String password, Boolean firstLogin) {
         return String.format(
-                "activateMobileBuyFromJson('%s','%s','%s','%s')",
+                "activateMobileBuyFromJson('%s','%s','%s','%s', %b)",
                 StringEscapeUtils.escapeEcmaScript(walletJson),
                 StringEscapeUtils.escapeEcmaScript(externalJson),
                 StringEscapeUtils.escapeEcmaScript(magicHash),
-                StringEscapeUtils.escapeEcmaScript(password)
+                StringEscapeUtils.escapeEcmaScript(password),
+                firstLogin
         );
     }
 }

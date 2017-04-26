@@ -133,7 +133,8 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
                         payloadManager.getPayload().toJson(),
                         metadata == null ? "" : metadata,
                         magicHash == null ? "" : Hex.toHexString(magicHash),
-                        payloadManager.getTempPassword()
+                        payloadManager.getTempPassword(),
+                        false // should be true if the wallet was just created
                 );
             } catch (Exception e) {
                 Log.d(TAG, "activateIfReady error: " + e.getMessage());
