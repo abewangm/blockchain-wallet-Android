@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.buy;
 import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.webkit.CookieManager;
@@ -17,12 +18,16 @@ import info.blockchain.wallet.util.MetadataUtil;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.util.encoders.Hex;
 
+import java.util.Locale;
+
 import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.databinding.ActivityBuyBinding;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.home.MainActivity;
+import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 
 public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<String> {
 
@@ -172,5 +177,23 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
                                     //do stuff
                                 },
                                 Throwable::printStackTrace));
+    }
+
+    private void showTradeComplete(long date, String receiveAddress, String txHash) {
+        String tradeDetailsMessage = getString(R.string.trade_complete_details);
+        // TODO: format date
+        String alertMessage = String.format(Locale.getDefault(), tradeDetailsMessage, "{date}");
+
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(getString(R.string.trade_complete))
+                .setMessage(alertMessage)
+                .setCancelable(false)
+                .setPositiveButton(R.string.ok_cap, (dialog, whichButton) -> {
+                })
+                .setNegativeButton(R.string.view_details, (dialog, whichButton) -> {
+                    Bundle bundle = new Bundle();
+                    bundle.putString(BalanceFragment.KEY_TRANSACTION_HASH, txHash);
+                    TransactionDetailActivity.start(this, bundle);
+                }).show();
     }
 }

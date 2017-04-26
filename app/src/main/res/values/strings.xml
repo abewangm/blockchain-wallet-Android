@@ -687,6 +687,9 @@
     <string name="onboarding_complete_content">We’ll keep you up-to-date here with recommendations and new features.</string>
     <string name="onboarding_start_over">Start Over</string>
     <string name="onboarding_skip_all">Skip All</string>
+    <string name="trade_complete">Trade Complete</string>
+    <string name="trade_complete_details">The trade you created on %1$s has been completed!</string>
+    <string name="view_details">View details</string>
 
     <!-- 2FA Pairing -->
     <string name="two_factor_dialog_title">Enter 2FA code</string>
