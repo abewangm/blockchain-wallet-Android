@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.buy;
 
 import android.databinding.DataBindingUtil;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -53,7 +54,9 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
         coinifyApi = new CoinifyApi();
 
         WebView webView = binding.webview;
-        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+        }
         frontendJavascriptManager = new FrontendJavascriptManager(this, webView);
         payloadManager = PayloadManager.getInstance();
 
