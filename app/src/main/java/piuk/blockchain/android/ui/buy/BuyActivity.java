@@ -20,14 +20,18 @@ import org.spongycastle.util.encoders.Hex;
 
 import java.util.Locale;
 
+import javax.inject.Inject;
+
 import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.databinding.ActivityBuyBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
+import piuk.blockchain.android.util.AppUtil;
 
 public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<String> {
 
@@ -45,11 +49,13 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
     private CoinifyApi coinifyApi;
     private CompositeDisposable compositeDisposable;
     private ActivityBuyBinding binding;
+    private BuyViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_buy);
+        viewModel = new BuyViewModel();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.onboarding_buy_bitcoin);
@@ -70,6 +76,7 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
         webView.restoreState(getIntent().getParcelableExtra(MainActivity.WEB_VIEW_STATE_KEY));
 
         loadBuyMetadata();
+        viewModel.onViewReady();
     }
 
     @Override
@@ -139,7 +146,7 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
                         metadata == null ? "" : metadata,
                         magicHash == null ? "" : Hex.toHexString(magicHash),
                         payloadManager.getTempPassword(),
-                        false // should be true if the wallet was just created
+                        viewModel.isNewlyCreated()
                 );
             } catch (Exception e) {
                 Log.d(TAG, "activateIfReady error: " + e.getMessage());
