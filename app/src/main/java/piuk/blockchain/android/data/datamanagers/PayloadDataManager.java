@@ -421,6 +421,19 @@ public class PayloadDataManager {
     }
 
     /**
+     * Returns an xPub from a given {@link Account} index. This call is not index-safe, ie will
+     * throw an {@link IndexOutOfBoundsException} if you choose an index which is greater than the
+     * size of the Accounts list.
+     *
+     * @param index The index of the Account
+     * @return An xPub as a String
+     */
+    @NonNull
+    public String getXpubFromIndex(int index) {
+        return payloadManager.getXpubFromAccountIndex(index);
+    }
+
+    /**
      * Returns true if the supplied address belongs to the user's wallet.
      *
      * @param address The address you want to query as a String

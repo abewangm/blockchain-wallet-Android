@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'kotlin-android'
 apply from: 'environment.gradle'
 apply from: '../quality/jacoco.gradle'
@@ -160,13 +159,10 @@ dependencies {
     // Dagger2
     compile "com.google.dagger:dagger:$daggerVersion"
     annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
-    annotationProcessor 'com.google.guava:guava:20.0'
     // Fingerprint authentication
-    compile 'com.mtramin:rxfingerprint:2.0.3'
+    compile 'com.mtramin:rxfingerprint:2.1.0'
     // Custom fonts
     compile 'uk.co.chrisjenx:calligraphy:2.2.0'
-    // GSON
-    compile 'com.google.code.gson:gson:2.8.0'
     // Logging
     prodCompile 'org.slf4j:slf4j-nop:1.7.20'
     devCompile 'org.slf4j:slf4j-simple:1.7.20'
@@ -206,26 +202,14 @@ buildscript {
     repositories {
         jcenter()
     }
-
-    dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:3.4.0'
-    }
 }
 
-// Required for RetroLambda && CountryPicker
+// Required for CountryPicker
 repositories {
     jcenter()
     maven {
         url "https://jitpack.io"
     }
-    // TODO: Remove this once the client is published
-//    maven {
-//        url nexusUrl + '/repository/maven-public/'
-//        credentials(PasswordCredentials) {
-//            username nexusUsername
-//            password nexusPassword
-//        }
-//    }
 }
 
 // This must remain at the bottom of this file until Google work out a better way to do this

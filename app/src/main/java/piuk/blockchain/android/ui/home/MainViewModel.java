@@ -358,6 +358,7 @@ public class MainViewModel extends BaseViewModel {
                         logEvents();
                         return Void.TYPE;
                     }).compose(RxUtil.applySchedulersToCompletable())
+                            .andThen(exchangeRateFactory.updateTicker())
                             .andThen(onboardingDataManager.getIfSepaCountry())
                             .doAfterTerminate(() -> {
                                 if (dataListener != null) {
@@ -404,9 +405,11 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public void updateTicker() {
-        compositeDisposable.add(exchangeRateFactory.updateTicker().subscribe(() ->
-                        dataListener.updateCurrentPrice(getFormattedPriceString()),
-                Throwable::printStackTrace));
+        compositeDisposable.add(
+                exchangeRateFactory.updateTicker()
+                        .subscribe(
+                                () -> dataListener.updateCurrentPrice(getFormattedPriceString()),
+                                Throwable::printStackTrace));
     }
 
     private String getFormattedPriceString() {

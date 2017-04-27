@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.chooser;
 
-import com.google.gson.Gson;
-
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -9,6 +7,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -86,11 +87,15 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
     public void updateUi(List<ItemAccount> items) {
         AccountChooserAdapter adapter = new AccountChooserAdapter(items, object -> {
             if (object != null) {
-                Intent intent = new Intent();
-                intent.putExtra(EXTRA_SELECTED_ITEM, new Gson().toJson(object));
-                intent.putExtra(EXTRA_SELECTED_OBJECT_TYPE, object.getClass().getName());
-                setResult(RESULT_OK, intent);
-                finish();
+                try {
+                    Intent intent = new Intent();
+                    intent.putExtra(EXTRA_SELECTED_ITEM, new ObjectMapper().writeValueAsString(object));
+                    intent.putExtra(EXTRA_SELECTED_OBJECT_TYPE, object.getClass().getName());
+                    setResult(RESULT_OK, intent);
+                    finish();
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
         binding.recyclerview.setAdapter(adapter);

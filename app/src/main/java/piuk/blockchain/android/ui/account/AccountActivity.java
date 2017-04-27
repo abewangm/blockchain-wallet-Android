@@ -28,7 +28,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
@@ -79,7 +78,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     private PrefsUtil prefsUtil;
     private MonetaryUtil monetaryUtil;
     @Thunk MaterialProgressDialog progress;
-    @Thunk PayloadManager payloadManager;
     @Thunk AccountViewModel viewModel;
     @Thunk ActivityAccountsBinding binding;
 
@@ -88,7 +86,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         super.onCreate(savedInstanceState);
 
         prefsUtil = new PrefsUtil(this);
-        payloadManager = PayloadManager.getInstance();
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_accounts);
@@ -107,8 +104,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     @Thunk
     void onRowClick(int position) {
         Intent intent = new Intent(this, AccountEditActivity.class);
-        if (position >= payloadManager.getPayload().getHdWallets().get(0).getAccounts().size()) {
-            intent.putExtra("address_index", position - payloadManager.getPayload().getHdWallets().get(0).getAccounts().size());
+        if (position >= viewModel.getAccounts().size()) {
+            intent.putExtra("address_index", position - viewModel.getAccounts().size());
         } else {
             intent.putExtra("account_index", position);
         }
@@ -221,7 +218,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 //        accountsAndImportedList is linked to AccountAdapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
         accountsAndImportedList.clear();
         int correctedPosition = 0;
-        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
+        List<Account> accounts = viewModel.getAccounts();
         List<Account> accountClone = new ArrayList<>(accounts.size());
         accountClone.addAll(accounts);
 
@@ -232,8 +229,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         // Create New Wallet button at top position
         accountsAndImportedList.add(new AccountItem(AccountItem.TYPE_CREATE_NEW_WALLET_BUTTON));
 
-        int defaultIndex = payloadManager.getPayload().getHdWallets().get(0).getDefaultAccountIdx();
-        Account defaultAccount = payloadManager.getPayload().getHdWallets().get(0).getAccounts().get(defaultIndex);
+        int defaultIndex = viewModel.getDefaultAccountIndex();
+        Account defaultAccount = viewModel.getAccounts().get(defaultIndex);
 
         for (int i = 0; i < accountClone.size(); i++) {
             String label = accountClone.get(i).getLabel();
@@ -258,7 +255,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         // Import Address button at first position after wallets
         accountsAndImportedList.add(new AccountItem(AccountItem.TYPE_IMPORT_ADDRESS_BUTTON));
 
-        legacy = payloadManager.getPayload().getLegacyAddressList();
+        legacy = viewModel.getLegacyAddressList();
         for (int j = 0; j < legacy.size(); j++) {
 
             String label = legacy.get(j).getLabel();
@@ -308,8 +305,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     }
 
     private String getAccountBalance(int index) {
-        String address = payloadManager.getXpubFromAccountIndex(index);
-        BigInteger addressBalance = payloadManager.getAddressBalance(address);
+        String address = viewModel.getXpubFromIndex(index);
+        BigInteger addressBalance = viewModel.getBalanceFromAddress(address);
         // Archived addresses/xPubs aren't parsed, so balance will be null
         Long amount = addressBalance != null ? addressBalance.longValue() : 0L;
 
@@ -320,7 +317,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     private String getAddressBalance(int index) {
         String address = legacy.get(index).getAddress();
-        Long amount = payloadManager.getAddressBalance(address).longValue();
+        Long amount = viewModel.getBalanceFromAddress(address).longValue();
         String unit = (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
 
         return monetaryUtil.getDisplayAmount(amount) + " " + unit;

@@ -683,6 +683,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         }
         replaceFragmentWithAnimation(balanceFragment);
         toolbar.setTitle("");
+        balanceFragment.checkCachedTransactions();
         viewModel.checkIfShouldShowSurvey();
     }
 

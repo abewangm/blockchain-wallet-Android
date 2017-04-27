@@ -5,8 +5,8 @@ import info.blockchain.api.data.TickerItem;
 import info.blockchain.api.exchangerates.ExchangeRates;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.exceptions.ApiException;
 
-import io.reactivex.Completable;
 import org.apache.commons.lang3.EnumUtils;
 
 import java.text.NumberFormat;
@@ -14,6 +14,7 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
@@ -24,12 +25,9 @@ import retrofit2.Response;
  */
 public class ExchangeRateFactory {
 
-    private String TAG = getClass().getName();
-
-    private ExchangeRates api;
-
     //Regularly updated ticker data
     private Ticker tickerData;
+    private ExchangeRates api;
 
     @Inject protected PrefsUtil prefsUtil;
 
@@ -56,96 +54,67 @@ public class ExchangeRateFactory {
     }
 
     public Completable updateTicker() {
-
         return Completable.fromCallable(() -> {
-                Response<Ticker> call = api.getTicker().execute();
-
-                if (call.isSuccessful()) {
-                    tickerData = call.body();
-                    return Void.TYPE;
-                } else {
-                    throw new Exception(call.errorBody().string());
-                }
+            Response<Ticker> call = api.getTicker().execute();
+            if (call.isSuccessful()) {
+                tickerData = call.body();
+                return Void.TYPE;
+            } else {
+                throw new ApiException(call.errorBody().string());
+            }
         }).compose(RxUtil.applySchedulersToCompletable());
     }
 
     private TickerItem getTickerItem(Currency currency) {
-
-        TickerItem item;
-
         switch (currency) {
             case AUD:
-                item = tickerData.getAUD();
-                break;
+                return tickerData.getAUD();
             case BRL:
-                item = tickerData.getBRL();
-                break;
+                return tickerData.getBRL();
             case CAD:
-                item = tickerData.getCAD();
-                break;
+                return tickerData.getCAD();
             case CHF:
-                item = tickerData.getCHF();
-                break;
+                return tickerData.getCHF();
             case CLP:
-                item = tickerData.getCLP();
-                break;
+                return tickerData.getCLP();
             case CNY:
-                item = tickerData.getCNY();
-                break;
+                return tickerData.getCNY();
             case DKK:
-                item = tickerData.getDKK();
-                break;
+                return tickerData.getDKK();
             case EUR:
-                item = tickerData.getEUR();
-                break;
+                return tickerData.getEUR();
             case GBP:
-                item = tickerData.getGBP();
-                break;
+                return tickerData.getGBP();
             case HKD:
-                item = tickerData.getHKD();
-                break;
+                return tickerData.getHKD();
             case ISK:
-                item = tickerData.getISK();
-                break;
+                return tickerData.getISK();
             case JPY:
-                item = tickerData.getJPY();
-                break;
+                return tickerData.getJPY();
             case KRW:
-                item = tickerData.getKRW();
-                break;
+                return tickerData.getKRW();
             case NZD:
-                item = tickerData.getNZD();
-                break;
+                return tickerData.getNZD();
             case PLN:
-                item = tickerData.getPLN();
-                break;
+                return tickerData.getPLN();
             case RUB:
-                item = tickerData.getRUB();
-                break;
+                return tickerData.getRUB();
             case SEK:
-                item = tickerData.getSEK();
-                break;
+                return tickerData.getSEK();
             case SGD:
-                item = tickerData.getSGD();
-                break;
+                return tickerData.getSGD();
             case THB:
-                item = tickerData.getTHB();
-                break;
+                return tickerData.getTHB();
             case TWD:
-                item = tickerData.getTWD();
-                break;
+                return tickerData.getTWD();
             case USD:
-                item = tickerData.getUSD();
-                break;
+                return tickerData.getUSD();
             default:
-                item = tickerData.getUSD();
+                return tickerData.getUSD();
         }
-
-        return item;
     }
 
     public double getLastPrice(String currencyName) {
-
         if (currencyName.isEmpty()) {
             currencyName = Currency.USD.name();
         }
@@ -158,7 +127,6 @@ public class ExchangeRateFactory {
             lastPrice = lastKnown;
         } else {
             TickerItem tickerItem = getTickerItem(currency);
-
             lastPrice = tickerItem.getLast();
 
             if (lastPrice > 0.0) {
@@ -172,7 +140,6 @@ public class ExchangeRateFactory {
     }
 
     public String getSymbol(String currencyName) {
-
         if (currencyName.isEmpty()) {
             currencyName = Currency.USD.name();
         }

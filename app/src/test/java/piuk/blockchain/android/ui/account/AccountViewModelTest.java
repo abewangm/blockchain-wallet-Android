@@ -23,7 +23,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.math.BigInteger;
 import java.util.Collections;
+import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -451,6 +453,67 @@ public class AccountViewModelTest {
         verifyNoMoreInteractions(accountDataManager);
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
         verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void getAccounts() throws Exception {
+        // Arrange
+        List<Account> list = Collections.emptyList();
+        when(payloadDataManager.getAccounts()).thenReturn(list);
+        // Act
+        List<Account> result = subject.getAccounts();
+        // Assert
+        verify(payloadDataManager).getAccounts();
+        assertEquals(list, result);
+    }
+
+    @Test
+    public void getLegacyAddressList() throws Exception {
+        // Arrange
+        List<LegacyAddress> list = Collections.emptyList();
+        when(payloadDataManager.getLegacyAddresses()).thenReturn(list);
+        // Act
+        List<LegacyAddress> result = subject.getLegacyAddressList();
+        // Assert
+        verify(payloadDataManager).getLegacyAddresses();
+        assertEquals(list, result);
+    }
+
+    @Test
+    public void getDefaultAccountIndex() throws Exception {
+        // Arrange
+        when(payloadDataManager.getDefaultAccountIndex()).thenReturn(-1);
+        // Act
+        int result = subject.getDefaultAccountIndex();
+        // Assert
+        verify(payloadDataManager).getDefaultAccountIndex();
+        assertEquals(-1, result);
+    }
+
+    @Test
+    public void getXpubFromIndex() throws Exception {
+        // Arrange
+        int index = 1337;
+        String xPub = "X_PUB";
+        when(payloadDataManager.getXpubFromIndex(index)).thenReturn(xPub);
+        // Act
+        String result = subject.getXpubFromIndex(index);
+        // Assert
+        verify(payloadDataManager).getXpubFromIndex(index);
+        assertEquals(xPub, result);
+    }
+
+    @Test
+    public void getBalanceFromAddress() throws Exception {
+        // Arrange
+        String address = "ADDRESS";
+        BigInteger balance = BigInteger.TEN;
+        when(payloadDataManager.getAddressBalance(address)).thenReturn(balance);
+        // Act
+        BigInteger result = subject.getBalanceFromAddress(address);
+        // Assert
+        verify(payloadDataManager).getAddressBalance(address);
+        assertEquals(balance, result);
     }
 
     @SuppressLint("VisibleForTests")
