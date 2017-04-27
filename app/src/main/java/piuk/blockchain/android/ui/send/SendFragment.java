@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.send;
 
-import com.google.gson.Gson;
-
 import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -40,12 +38,15 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -227,7 +228,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         }
     }
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings({"ConstantConditions", "unchecked"})
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK && requestCode == SCAN_URI
@@ -247,7 +248,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
             try {
                 Class type = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE));
-                Object object = new Gson().fromJson(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
+                Object object = new ObjectMapper().readValue(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
 
                 if (object instanceof Contact) {
                     viewModel.setContact(((Contact) object));
@@ -271,7 +272,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     binding.destination.setText(StringUtils.abbreviate(label, 32));
                 }
 
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException | IOException e) {
                 throw new RuntimeException(e);
             }
             // Set Sending account
@@ -281,7 +282,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
             try {
                 Class type = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE));
-                Object object = new Gson().fromJson(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
+                Object object = new ObjectMapper().readValue(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
 
                 ItemAccount chosenItem = null;
                 if (object instanceof Account) {
@@ -311,7 +312,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                         binding.amountRow.amountBtc.getText().toString(),
                         binding.customFee.getText().toString(), null);
 
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException | IOException e) {
                 throw new RuntimeException(e);
             }
         }

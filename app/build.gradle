@@ -163,8 +163,6 @@ dependencies {
     compile 'com.mtramin:rxfingerprint:2.1.0'
     // Custom fonts
     compile 'uk.co.chrisjenx:calligraphy:2.2.0'
-    // GSON
-    compile 'com.google.code.gson:gson:2.8.0'
     // Logging
     prodCompile 'org.slf4j:slf4j-nop:1.7.20'
     devCompile 'org.slf4j:slf4j-simple:1.7.20'

@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.receive;
 
-import com.google.gson.Gson;
-
 import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -38,6 +36,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.payload.data.Account;
@@ -48,6 +48,7 @@ import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.uri.BitcoinURI;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -429,7 +430,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
             try {
                 Class type = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE));
-                Object object = new Gson().fromJson(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
+                Object object = new ObjectMapper().readValue(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
 
                 if (viewModel.warnWatchOnlySpend()) {
                     promptWatchOnlySpendWarning(object);
@@ -437,7 +438,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
                 selectAccount(viewModel.getObjectPosition(object));
 
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException | IOException e) {
                 Log.e(TAG, "onActivityResult: ", e);
                 selectAccount(viewModel.getDefaultAccountPosition());
             }
@@ -446,15 +447,21 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_CONTACT
                 && data != null) {
 
-            Contact contact = new Gson().fromJson(data.getStringExtra(EXTRA_SELECTED_ITEM), Contact.class);
+            try {
+                Contact contact = new ObjectMapper().readValue(
+                        data.getStringExtra(EXTRA_SELECTED_ITEM),
+                        Contact.class);
 
-            if (listener != null) {
-                listener.onTransactionNotesRequested(
-                        contact.getId(),
-                        viewModel.getCorrectedAccountIndex(selectedAccountPosition),
-                        PaymentRequestType.REQUEST,
-                        viewModel.getCurrencyHelper().getLongAmount(
-                                binding.amountContainer.amountBtc.getText().toString()));
+                if (listener != null) {
+                    listener.onTransactionNotesRequested(
+                            contact.getId(),
+                            viewModel.getCorrectedAccountIndex(selectedAccountPosition),
+                            PaymentRequestType.REQUEST,
+                            viewModel.getCurrencyHelper().getLongAmount(
+                                    binding.amountContainer.amountBtc.getText().toString()));
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }
