@@ -8,6 +8,7 @@ import info.blockchain.wallet.payload.PayloadManager;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Named;
@@ -16,6 +17,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import okhttp3.CertificatePinner;
+import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.ApiInterceptor;
@@ -94,6 +96,7 @@ public class ApiModule {
                 .build();
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                .connectionSpecs(Collections.singletonList(ConnectionSpec.MODERN_TLS))
                 .connectTimeout(API_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(API_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(API_TIMEOUT, TimeUnit.SECONDS)
