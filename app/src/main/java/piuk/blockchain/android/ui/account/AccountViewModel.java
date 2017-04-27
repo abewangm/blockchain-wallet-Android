@@ -9,12 +9,16 @@ import android.util.Log;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
+import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
+
+import java.math.BigInteger;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -241,6 +245,31 @@ public class AccountViewModel extends BaseViewModel {
                         .subscribe(
                                 () -> dataListener.showRenameImportedAddressDialog(legacyAddress),
                                 throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // HELPER METHODS
+    ///////////////////////////////////////////////////////////////////////////
+
+    List<Account> getAccounts() {
+        return payloadDataManager.getAccounts();
+    }
+
+    List<LegacyAddress> getLegacyAddressList() {
+        return payloadDataManager.getLegacyAddresses();
+    }
+
+    int getDefaultAccountIndex() {
+        return payloadDataManager.getDefaultAccountIndex();
+    }
+
+    String getXpubFromIndex(int index) {
+        return payloadDataManager.getXpubFromIndex(index);
+    }
+
+    /* This will also return the final balance from an XPub */
+    BigInteger getBalanceFromAddress(String address) {
+        return payloadDataManager.getAddressBalance(address);
     }
 
     private void importWatchOnlyAddress(String address) {
