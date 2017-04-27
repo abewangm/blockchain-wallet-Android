@@ -7,7 +7,14 @@ apply from: '../quality/releasechecks.gradle'
 android {
     compileSdkVersion 25
     buildToolsVersion '25.0.2'
-    dexOptions.javaMaxHeapSize "3g"
+    dexOptions {
+        if (System.getenv()["CIRCLECI"] as boolean) {
+            javaMaxHeapSize "2g"
+            preDexLibraries false
+        } else {
+            javaMaxHeapSize "3g"
+        }
+    }
 
     defaultConfig {
         applicationId "piuk.blockchain.android"
