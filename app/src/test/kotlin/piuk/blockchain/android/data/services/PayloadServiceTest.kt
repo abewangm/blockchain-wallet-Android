@@ -113,6 +113,39 @@ class PayloadServiceTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
+    fun `upgradeV2toV3 successful`() {
+        // Arrange
+        val secondPassword = "SECOND_PASSWORD"
+        val defaultAccountName = "DEFAULT_ACCOUNT_NAME"
+        whenever(mockPayloadManager.upgradeV2PayloadToV3(secondPassword, defaultAccountName))
+                .thenReturn(true)
+        // Act
+        val testObserver = subject.upgradeV2toV3(secondPassword, defaultAccountName).test()
+        // Assert
+        verify(mockPayloadManager).upgradeV2PayloadToV3(secondPassword, defaultAccountName)
+        verifyNoMoreInteractions(mockPayloadManager)
+        testObserver.assertComplete()
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `upgradeV2toV3 failed`() {
+        // Arrange
+        val secondPassword = "SECOND_PASSWORD"
+        val defaultAccountName = "DEFAULT_ACCOUNT_NAME"
+        whenever(mockPayloadManager.upgradeV2PayloadToV3(secondPassword, defaultAccountName))
+                .thenReturn(false)
+        // Act
+        val testObserver = subject.upgradeV2toV3(secondPassword, defaultAccountName).test()
+        // Assert
+        verify(mockPayloadManager).upgradeV2PayloadToV3(secondPassword, defaultAccountName)
+        verifyNoMoreInteractions(mockPayloadManager)
+        testObserver.assertNotComplete()
+        testObserver.assertError(Throwable::class.java)
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun `syncPayloadWithServer successful`() {
         // Arrange
         whenever(mockPayloadManager.save()).thenReturn(true)

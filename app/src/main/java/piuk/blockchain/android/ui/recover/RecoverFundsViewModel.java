@@ -3,8 +3,6 @@ package piuk.blockchain.android.ui.recover;
 import android.content.Intent;
 import android.support.annotation.StringRes;
 
-import info.blockchain.wallet.payload.PayloadManager;
-
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
@@ -19,10 +17,9 @@ import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_PA
 
 public class RecoverFundsViewModel extends BaseViewModel {
 
-    private DataListener mDataListener;
-    @Inject protected AuthDataManager mAuthDataManager;
-    @Inject protected PayloadManager mPayloadManager;
-    @Inject protected AppUtil mAppUtil;
+    private DataListener dataListener;
+    @Inject AuthDataManager authDataManager;
+    @Inject AppUtil appUtil;
 
     public interface DataListener {
 
@@ -42,7 +39,7 @@ public class RecoverFundsViewModel extends BaseViewModel {
 
     RecoverFundsViewModel(DataListener listener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
-        mDataListener = listener;
+        dataListener = listener;
     }
 
     @Override
@@ -51,46 +48,45 @@ public class RecoverFundsViewModel extends BaseViewModel {
     }
 
     void onContinueClicked() {
-        String recoveryPhrase = mDataListener.getRecoveryPhrase();
+        String recoveryPhrase = dataListener.getRecoveryPhrase();
         if (recoveryPhrase == null || recoveryPhrase.isEmpty()) {
-            mDataListener.showToast(R.string.invalid_recovery_phrase, ToastCustom.TYPE_ERROR);
+            dataListener.showToast(R.string.invalid_recovery_phrase, ToastCustom.TYPE_ERROR);
             return;
         }
 
         String trimmed = recoveryPhrase.trim();
         int words = trimmed.isEmpty() ? 0 : trimmed.split("\\s+").length;
         if (words != 12) {
-            mDataListener.showToast(R.string.invalid_recovery_phrase, ToastCustom.TYPE_ERROR);
+            dataListener.showToast(R.string.invalid_recovery_phrase, ToastCustom.TYPE_ERROR);
             return;
         }
 
-        String password = mDataListener.getPageIntent().getStringExtra(KEY_INTENT_PASSWORD);
+        String password = dataListener.getPageIntent().getStringExtra(KEY_INTENT_PASSWORD);
 
         if (password == null || password.isEmpty()) {
-            mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-            mAppUtil.clearCredentialsAndRestart();
+            dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+            appUtil.clearCredentialsAndRestart();
             return;
         }
 
-        String email = mDataListener.getPageIntent().getStringExtra(KEY_INTENT_EMAIL);
+        String email = dataListener.getPageIntent().getStringExtra(KEY_INTENT_EMAIL);
 
         if (email == null || email.isEmpty()) {
-            mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-            mAppUtil.clearCredentialsAndRestart();
+            dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+            appUtil.clearCredentialsAndRestart();
             return;
         }
 
-        mDataListener.showProgressDialog(R.string.creating_wallet);
-
-        mAuthDataManager.restoreHdWallet(email, password, recoveryPhrase)
-                .doAfterTerminate(() -> mDataListener.dismissProgressDialog())
+        authDataManager.restoreHdWallet(email, password, recoveryPhrase)
+                .doOnSubscribe(ignored -> dataListener.showProgressDialog(R.string.creating_wallet))
+                .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                 .subscribe(
-                        payload -> mDataListener.goToPinEntryPage(),
-                        throwable -> mDataListener.showToast(R.string.restore_failed, ToastCustom.TYPE_ERROR));
+                        payload -> dataListener.goToPinEntryPage(),
+                        throwable -> dataListener.showToast(R.string.restore_failed, ToastCustom.TYPE_ERROR));
     }
 
     public AppUtil getAppUtil() {
-        return mAppUtil;
+        return appUtil;
     }
 
 }
