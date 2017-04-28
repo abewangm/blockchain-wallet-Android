@@ -22,6 +22,7 @@ import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
+import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.services.PayloadService;
@@ -165,5 +166,11 @@ public class DataManagerModule {
                 authDataManager,
                 payloadDataManager,
                 accessState);
+    }
+
+    @Provides
+    @ViewModelScope
+    protected BuyDataManager provideBuyDataManager(OnboardingDataManager onboardingDataManager) {
+        return new BuyDataManager(onboardingDataManager);
     }
 }

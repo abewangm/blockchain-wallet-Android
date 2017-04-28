@@ -27,6 +27,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
+import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
@@ -68,6 +69,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected StringUtils stringUtils;
     @Inject protected SettingsDataManager settingsDataManager;
     @Inject protected OnboardingDataManager onboardingDataManager;
+    @Inject protected BuyDataManager buyDataManager;
     @Inject protected DynamicFeeCache dynamicFeeCache;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
     @Inject protected RxBus rxBus;
@@ -358,7 +360,7 @@ public class MainViewModel extends BaseViewModel {
                         return Void.TYPE;
                     }).compose(RxUtil.applySchedulersToCompletable())
                             .andThen(exchangeRateFactory.updateTicker())
-                            .andThen(onboardingDataManager.getIfSepaCountry())
+                            .andThen(buyDataManager.getCanBuy())
                             .doAfterTerminate(() -> {
                                 if (dataListener != null) {
                                     dataListener.onFetchTransactionCompleted();
@@ -371,8 +373,8 @@ public class MainViewModel extends BaseViewModel {
                                 }
                             })
                             .subscribe(
-                                    isSepaCountry -> {
-                                        if (isSepaCountry && BuildConfig.BUY_BITCOIN_ENABLED) {
+                                    canBuy -> {
+                                        if (canBuy && BuildConfig.BUY_BITCOIN_ENABLED) {
                                             enableBuySell();
                                         }
                                     },
