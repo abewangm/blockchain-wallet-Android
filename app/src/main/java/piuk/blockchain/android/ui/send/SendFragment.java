@@ -23,6 +23,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -655,7 +656,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     @Override
     public void onShowBIP38PassphrasePrompt(String scanData) {
-        final EditText password = new EditText(getActivity());
+        final AppCompatEditText password = new AppCompatEditText(getActivity());
         password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         password.setHint(R.string.password);
 

@@ -10,13 +10,13 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.EditText;
 import android.widget.ImageView;
 
 import piuk.blockchain.android.R;
@@ -296,7 +296,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
 
     @Override
     public void showValidationDialog() {
-        final EditText password = new EditText(getContext());
+        final AppCompatEditText password = new AppCompatEditText(getContext());
         password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         password.setHint(R.string.password);
 

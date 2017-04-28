@@ -6,11 +6,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
 import android.view.MotionEvent;
-import android.widget.EditText;
 
 import info.blockchain.wallet.api.data.Settings;
 
@@ -101,7 +101,7 @@ public class PasswordRequiredActivity extends BaseAuthActivity implements Passwo
     public void showTwoFactorCodeNeededDialog(JSONObject responseObject, String sessionId, int authType, String password) {
         ViewUtils.hideKeyboard(this);
 
-        EditText editText = new EditText(this);
+        AppCompatEditText editText = new AppCompatEditText(this);
         editText.setHint(R.string.two_factor_dialog_hint);
         int message;
         if (authType == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR) {
