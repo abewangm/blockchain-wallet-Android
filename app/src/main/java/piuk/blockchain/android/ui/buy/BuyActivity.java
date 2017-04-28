@@ -33,11 +33,10 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.util.AppUtil;
 
-public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<String> {
+public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataListener, FrontendJavascript<String> {
 
     public static final String TAG = BuyActivity.class.getSimpleName();
     private static final String JS_INTERFACE_NAME = "android";
-    private static final int METADATA_TYPE_EXTERNAL = 3;
     private FrontendJavascriptManager frontendJavascriptManager;
     private PayloadManager payloadManager;
 
@@ -55,7 +54,7 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_buy);
-        viewModel = new BuyViewModel();
+        viewModel = new BuyViewModel(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.onboarding_buy_bitcoin);
@@ -75,7 +74,6 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
         webView.getSettings().setJavaScriptEnabled(true);
         webView.restoreState(getIntent().getParcelableExtra(MainActivity.WEB_VIEW_STATE_KEY));
 
-        loadBuyMetadata();
         viewModel.onViewReady();
     }
 
@@ -87,38 +85,17 @@ public class BuyActivity extends BaseAuthActivity implements FrontendJavascript<
         webView.removeJavascriptInterface(JS_INTERFACE_NAME);
 
         if (didBuyBitcoin) {
-            // Should reload buy metadata, watch for new trade
+            viewModel.reloadExchangeDate();
         }
 
         compositeDisposable.clear();
-    }
-
-    private Metadata getBuyMetadata() throws Exception {
-        DeterministicKey masterKey = payloadManager.getPayload().getHdWallets().get(0)
-                .getMasterKey();
-        DeterministicKey metadataHDNode = MetadataUtil.deriveMetadataNode(masterKey);
-        return new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXTERNAL).build();
-    }
-
-    private void loadBuyMetadata() {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Metadata buyMetadata = getBuyMetadata();
-                    onMetadataLoaded(buyMetadata);
-                } catch (Exception e) {
-                    Log.d(TAG, "loadBuyMetadata error: " + e.getMessage());
-                }
-            }
-        }.start();
     }
 
     public void onReceiveValue(String value) {
         Log.d(TAG, "Received JS value: " + value);
     }
 
-    private void onMetadataLoaded(Metadata buyMetadata) {
+    public void setExchangeData(Metadata buyMetadata) {
         Log.d(TAG, "onMetadataLoaded: done");
         this.buyMetadata = buyMetadata;
         activateIfReady();
