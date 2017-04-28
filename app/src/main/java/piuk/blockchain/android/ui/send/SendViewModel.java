@@ -44,7 +44,6 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
-import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
@@ -92,20 +91,19 @@ public class SendViewModel extends BaseViewModel {
 
     private Disposable unspentApiDisposable;
 
-    @Inject PrefsUtil prefsUtil;
-    @Inject WalletAccountHelper walletAccountHelper;
-    @Inject ExchangeRateFactory exchangeRateFactory;
-    @Inject SSLVerifyUtil sslVerifyUtil;
-    @Inject PrivateKeyFactory privateKeyFactory;
-    @Inject PayloadManager payloadManager;
-    @Inject StringUtils stringUtils;
-    @Inject ContactsDataManager contactsDataManager;
-    @Inject SendDataManager sendDataManager;
-    @Inject PayloadDataManager payloadDataManager;
-    @Inject AccountDataManager accountDataManager;
-    @Inject DynamicFeeCache dynamicFeeCache;
-    @Inject TransactionListDataManager transactionListDataManager;
-    @Inject PersistentUrls persistentUrls;
+    @Inject protected PrefsUtil prefsUtil;
+    @Inject protected WalletAccountHelper walletAccountHelper;
+    @Inject protected ExchangeRateFactory exchangeRateFactory;
+    @Inject protected SSLVerifyUtil sslVerifyUtil;
+    @Inject protected PrivateKeyFactory privateKeyFactory;
+    @Inject protected PayloadManager payloadManager;
+    @Inject protected StringUtils stringUtils;
+    @Inject protected ContactsDataManager contactsDataManager;
+    @Inject protected SendDataManager sendDataManager;
+    @Inject protected PayloadDataManager payloadDataManager;
+    @Inject protected DynamicFeeCache dynamicFeeCache;
+    @Inject protected TransactionListDataManager transactionListDataManager;
+    @Inject protected PersistentUrls persistentUrls;
 
     SendViewModel(SendContract.DataListener dataListener, Locale locale) {
         Injector.getInstance().getDataManagerComponent().inject(this);
@@ -1057,7 +1055,6 @@ public class SendViewModel extends BaseViewModel {
             if (sendModel.pendingTransaction.isHD()) {
                 Account account = (Account) sendModel.pendingTransaction.sendingObject.accountObject;
                 payloadManager.subtractAmountFromAddressBalance(account.getXpub(), totalSent);
-
             } else {
                 LegacyAddress address = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
                 payloadManager.subtractAmountFromAddressBalance(address.getAddress(), totalSent);
