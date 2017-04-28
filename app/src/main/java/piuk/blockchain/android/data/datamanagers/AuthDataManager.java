@@ -257,6 +257,7 @@ public class AuthDataManager {
         return walletService.validateAccess(key, passedPin)
                 .map(response -> {
                     if (response.isSuccessful()) {
+                        appUtil.setNewlyCreated(false);
                         String decryptionKey = response.body().getSuccess();
 
                         return aesUtilWrapper.decrypt(encryptedPassword,

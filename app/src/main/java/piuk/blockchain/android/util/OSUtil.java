@@ -26,7 +26,6 @@ public class OSUtil {
     }
 
     public boolean hasPackage(String p) {
-
         PackageManager pm = context.getPackageManager();
         try {
             pm.getPackageInfo(p, 0);

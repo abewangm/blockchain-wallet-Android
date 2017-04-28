@@ -106,7 +106,6 @@ public class LauncherViewModel extends BaseViewModel {
             // App has been PIN validated
             accessState.setIsLoggedIn(true);
             if (appUtil.isNewlyCreated()) {
-                appUtil.setNewlyCreated(false);
                 dataListener.onStartOnboarding(false);
             } else {
                 compositeDisposable.add(
