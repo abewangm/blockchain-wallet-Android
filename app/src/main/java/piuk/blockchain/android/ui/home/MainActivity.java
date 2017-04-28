@@ -706,7 +706,14 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void setBuyBitcoinVisible(boolean visible) {
+    public void setBuySellEnabled(boolean enabled) {
+        if (enabled) {
+            setupBuyWebView();
+        }
+        setBuyBitcoinVisible(enabled);
+    }
+
+    private void setBuyBitcoinVisible(boolean visible) {
         Menu menu = binding.navigationView.getMenu();
         menu.findItem(R.id.nav_buy).setVisible(visible);
     }

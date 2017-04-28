@@ -119,7 +119,7 @@ public class MainViewModel extends BaseViewModel {
 
         void updateCurrentPrice(String price);
 
-        void setBuyBitcoinVisible(boolean hide);
+        void setBuySellEnabled(boolean enabled);
     }
 
     public MainViewModel(DataListener dataListener) {
@@ -374,9 +374,8 @@ public class MainViewModel extends BaseViewModel {
                             })
                             .subscribe(
                                     canBuy -> {
-                                        if (canBuy && BuildConfig.BUY_BITCOIN_ENABLED) {
-                                            enableBuySell();
-                                        }
+                                        Log.d(TAG, "preLaunchChecks: canBuy " + canBuy);
+                                        dataListener.setBuySellEnabled(canBuy && BuildConfig.BUY_BITCOIN_ENABLED);
                                     },
                                     throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
         } else {
@@ -392,10 +391,6 @@ public class MainViewModel extends BaseViewModel {
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(feeList -> dynamicFeeCache.setCachedDynamicFee(feeList),
                                 Throwable::printStackTrace));
-    }
-
-    private void enableBuySell() {
-        dataListener.setBuyBitcoinVisible(true);
     }
 
     @Override
