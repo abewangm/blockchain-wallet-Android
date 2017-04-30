@@ -69,7 +69,7 @@ public class PaymentService {
                 }
             } else {
                 if (!observableOnSubscribe.isDisposed()) {
-                    observableOnSubscribe.onError(new Throwable(exe.code() + ": " + exe.errorBody()));
+                    observableOnSubscribe.onError(new Throwable(exe.code() + ": " + exe.errorBody().string()));
                 }
             }
         });

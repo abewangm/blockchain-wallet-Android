@@ -18,6 +18,7 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.exceptions.Exceptions;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
@@ -112,6 +113,24 @@ public class PayloadService {
         });
     }
 
+    /**
+     * Upgrades a Wallet from V2 to V3 and saves it with the server. If saving is unsuccessful or
+     * some other part fails, this will propagate an Exception.
+     *
+     * @param secondPassword     An optional second password if the user has one
+     * @param defaultAccountName A required name for the default account
+     * @return A {@link Completable} object
+     */
+    @WebRequest
+    public Completable upgradeV2toV3(@Nullable String secondPassword, String defaultAccountName) {
+        return Completable.fromCallable(() -> {
+            if (!payloadManager.upgradeV2PayloadToV3(secondPassword, defaultAccountName)) {
+                throw Exceptions.propagate(new Throwable("Upgrade wallet failed"));
+            }
+            return Void.TYPE;
+        });
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // SYNC METHODS
     ///////////////////////////////////////////////////////////////////////////
@@ -181,17 +200,6 @@ public class PayloadService {
     }
 
     /**
-     * Returns a {@link LinkedHashMap} of {@link Balance} objects keyed to their addresses.
-     *
-     * @param addresses A List of addresses as Strings
-     * @return A {@link LinkedHashMap}
-     */
-    @WebRequest
-    public Observable<LinkedHashMap<String, Balance>> getBalanceOfAddresses(List<String> addresses) {
-        return Observable.fromCallable(() -> payloadManager.getBalanceOfAddresses(addresses));
-    }
-
-    /**
      * Update notes for a specific transaction hash and then sync the payload to the server
      *
      * @param transactionHash The hash of the transaction to be updated
@@ -207,6 +215,17 @@ public class PayloadService {
     ///////////////////////////////////////////////////////////////////////////
     // ACCOUNTS AND ADDRESS METHODS
     ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Returns a {@link LinkedHashMap} of {@link Balance} objects keyed to their addresses.
+     *
+     * @param addresses A List of addresses as Strings
+     * @return A {@link LinkedHashMap}
+     */
+    @WebRequest
+    public Observable<LinkedHashMap<String, Balance>> getBalanceOfAddresses(List<String> addresses) {
+        return Observable.fromCallable(() -> payloadManager.getBalanceOfAddresses(addresses));
+    }
 
     /**
      * Derives new {@link Account} from the master seed

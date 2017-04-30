@@ -34,13 +34,12 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.NotificationsUtil;
-import piuk.blockchain.android.util.annotations.Thunk;
 
 
 @SuppressWarnings("WeakerAccess")
 class WebSocketHandler extends WebSocketListener {
 
-    @Thunk static final String TAG = WebSocketHandler.class.getSimpleName();
+    private static final String TAG = WebSocketHandler.class.getSimpleName();
 
     private final static long RETRY_INTERVAL = 5 * 1000L;
     /**
@@ -62,8 +61,8 @@ class WebSocketHandler extends WebSocketListener {
     private OkHttpClient okHttpClient;
     private WebSocket webSocketConnection;
     private boolean connected;
-    @Thunk PayloadDataManager payloadDataManager;
-    @Thunk CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private PayloadDataManager payloadDataManager;
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     public WebSocketHandler(Context context,
                             OkHttpClient okHttpClient,
@@ -84,6 +83,18 @@ class WebSocketHandler extends WebSocketListener {
         this.guid = guid;
         this.xpubs = xpubs;
         this.addrs = addrs;
+    }
+
+    public void subscribeToXpub(String xpub) {
+        if (xpub != null && !xpub.isEmpty()) {
+            send("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpub + "\"}");
+        }
+    }
+
+    public void subscribeToAddress(String address) {
+        if (address != null && !address.isEmpty()) {
+            send("{\"op\":\"addr_sub\", \"addr\":\"" + address + "\"}");
+        }
     }
 
     /**
@@ -111,6 +122,7 @@ class WebSocketHandler extends WebSocketListener {
         if (isConnected()) {
             webSocketConnection.close(STATUS_CODE_NORMAL_CLOSURE, "Websocket deliberately stopped");
             webSocketConnection = null;
+            Log.d(TAG, "stop: ");
         }
     }
 
@@ -128,8 +140,7 @@ class WebSocketHandler extends WebSocketListener {
         }
     }
 
-    @Thunk
-    void subscribe() {
+    private void subscribe() {
         if (guid == null) {
             return;
         }
@@ -144,20 +155,7 @@ class WebSocketHandler extends WebSocketListener {
         }
     }
 
-    public void subscribeToXpub(String xpub) {
-        if (xpub != null && !xpub.isEmpty()) {
-            send("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpub + "\"}");
-        }
-    }
-
-    public void subscribeToAddress(String address) {
-        if (address != null && !address.isEmpty()) {
-            send("{\"op\":\"addr_sub\", \"addr\":\"" + address + "\"}");
-        }
-    }
-
-    @Thunk
-    void attemptReconnection() {
+    private void attemptReconnection() {
         if (compositeDisposable.size() == 0 && !stoppedDeliberately) {
             compositeDisposable.add(
                     getReconnectionObservable()
@@ -177,16 +175,14 @@ class WebSocketHandler extends WebSocketListener {
         return webSocketConnection != null && connected;
     }
 
-    @Thunk
-    void updateBalancesAndTransactions() {
+    private void updateBalancesAndTransactions() {
         payloadDataManager.updateAllBalances()
                 .andThen(payloadDataManager.updateAllTransactions())
                 .doOnComplete(this::sendBroadcast)
                 .subscribe(new IgnorableDefaultObserver<>());
     }
 
-    @Thunk
-    void sendBroadcast() {
+    private void sendBroadcast() {
         Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
@@ -247,8 +243,7 @@ class WebSocketHandler extends WebSocketListener {
         }).compose(RxUtil.applySchedulersToCompletable());
     }
 
-    @Thunk
-    void attemptParseMessage(String message, JSONObject jsonObject) {
+    private void attemptParseMessage(String message, JSONObject jsonObject) {
         try {
             String op = (String) jsonObject.get("op");
             if (op.equals("utx") && jsonObject.has("x")) {

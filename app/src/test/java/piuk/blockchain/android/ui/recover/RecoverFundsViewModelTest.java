@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.recover;
 import android.app.Application;
 import android.content.Intent;
 
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import org.junit.Before;
@@ -52,7 +51,6 @@ public class RecoverFundsViewModelTest {
 
     @Mock private RecoverFundsActivity mActivity;
     @Mock private AuthDataManager mAuthDataManager;
-    @Mock private PayloadManager mPayloadManager;
     @Mock private AppUtil mAppUtil;
 
     @Before
@@ -62,7 +60,7 @@ public class RecoverFundsViewModelTest {
         InjectorTestUtils.initApplicationComponent(
                 Injector.getInstance(),
                 new MockApplicationModule(RuntimeEnvironment.application),
-                new MockApiModule(),
+                new ApiModule(),
                 new MockDataManagerModule());
 
         mSubject = new RecoverFundsViewModel(mActivity);
@@ -222,15 +220,6 @@ public class RecoverFundsViewModelTest {
         @Override
         protected AppUtil provideAppUtil() {
             return mAppUtil;
-        }
-    }
-
-    @SuppressWarnings({"SyntheticAccessorCall", "PrivateMemberAccessBetweenOuterAndInnerClass"})
-    private class MockApiModule extends ApiModule {
-
-        @Override
-        protected PayloadManager providePayloadManager() {
-            return mPayloadManager;
         }
     }
 

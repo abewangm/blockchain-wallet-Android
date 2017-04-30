@@ -315,7 +315,6 @@ public class MainViewModel extends BaseViewModel {
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(settings -> {
                             if (!settings.isEmailVerified()) {
-                                appUtil.setNewlyCreated(false);
                                 String email = settings.getEmail();
                                 if (email == null || email.isEmpty()) {
                                     if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
@@ -358,6 +357,7 @@ public class MainViewModel extends BaseViewModel {
                         logEvents();
                         return Void.TYPE;
                     }).compose(RxUtil.applySchedulersToCompletable())
+                            .andThen(exchangeRateFactory.updateTicker())
                             .andThen(onboardingDataManager.getIfSepaCountry())
                             .doAfterTerminate(() -> {
                                 if (dataListener != null) {
@@ -404,9 +404,11 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public void updateTicker() {
-        compositeDisposable.add(exchangeRateFactory.updateTicker().subscribe(() ->
-                        dataListener.updateCurrentPrice(getFormattedPriceString()),
-                Throwable::printStackTrace));
+        compositeDisposable.add(
+                exchangeRateFactory.updateTicker()
+                        .subscribe(
+                                () -> dataListener.updateCurrentPrice(getFormattedPriceString()),
+                                Throwable::printStackTrace));
     }
 
     private String getFormattedPriceString() {

@@ -154,6 +154,8 @@ public class AuthDataManagerTest extends RxTest {
         verifyNoMoreInteractions(walletService);
         verify(aesUtilWrapper).decrypt(encryptedPassword, decryptionKey, AESUtil.PIN_PBKDF2_ITERATIONS);
         verifyNoMoreInteractions(aesUtilWrapper);
+        verify(appUtil).setNewlyCreated(false);
+        verifyZeroInteractions(appUtil);
         observer.assertComplete();
         observer.assertValue(plaintextPassword);
         observer.assertNoErrors();
