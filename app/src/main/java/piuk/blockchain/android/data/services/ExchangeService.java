@@ -38,14 +38,11 @@ public class ExchangeService {
     }
 
     public Observable<Metadata> getExchangeData() {
-        return this.metadataSubject;
-    }
-
-    public void loadExchangeData() {
         if (!didStartLoad) {
             reloadExchangeData();
             didStartLoad = true;
         }
+        return this.metadataSubject;
     }
 
     public void reloadExchangeData() {

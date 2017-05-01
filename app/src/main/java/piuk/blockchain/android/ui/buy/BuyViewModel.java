@@ -26,7 +26,6 @@ public class BuyViewModel extends BaseViewModel {
     BuyViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
-        buyDataManager.loadExchangeData();
     }
 
     public Boolean isNewlyCreated() {

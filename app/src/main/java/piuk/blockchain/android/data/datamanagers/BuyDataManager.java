@@ -45,10 +45,6 @@ public class BuyDataManager {
         });
     }
 
-    public void loadExchangeData() {
-        this.exchangeService.loadExchangeData();
-    }
-
     public void reloadExchangeData() {
         this.exchangeService.reloadExchangeData();
     }
