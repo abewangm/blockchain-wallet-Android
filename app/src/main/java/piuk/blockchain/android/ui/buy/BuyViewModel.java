@@ -1,5 +1,7 @@
 package piuk.blockchain.android.ui.buy;
 
+import android.util.Log;
+
 import info.blockchain.wallet.metadata.Metadata;
 
 import javax.inject.Inject;
@@ -14,6 +16,7 @@ import piuk.blockchain.android.util.AppUtil;
  */
 
 public class BuyViewModel extends BaseViewModel {
+    private static final String TAG = BuyViewModel.class.getSimpleName();
     private DataListener dataListener;
 
     @Inject protected AppUtil appUtil;
@@ -43,7 +46,7 @@ public class BuyViewModel extends BaseViewModel {
                         .getExchangeData()
                         .subscribe(metadata -> {
                             dataListener.setExchangeData(metadata);
-                        })
+                        }, Throwable::printStackTrace)
         );
     }
 }

@@ -27,6 +27,10 @@ public class BuyDataManager {
         return this.exchangeService.getExchangeData();
     }
 
+    public Observable<String> getPendingTradeAddresses() {
+        return exchangeService.getPendingTradeAddresses();
+    }
+
     public Observable<Boolean> getCanBuy() {
         return Observable.combineLatest(
                 this.onboardingDataManager.getIfSepaCountry(),

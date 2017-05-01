@@ -2,14 +2,25 @@ package piuk.blockchain.android.data.services;
 
 import android.util.Log;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import io.reactivex.Observable;
 import io.reactivex.subjects.ReplaySubject;
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.exchange.ExchangeData;
+import piuk.blockchain.android.data.exchange.TradeData;
+import piuk.blockchain.android.injection.Injector;
 
 /**
  * Created by justin on 5/1/17.
@@ -25,9 +36,12 @@ public class ExchangeService {
     private ReplaySubject<Metadata> metadataSubject;
     private boolean didStartLoad;
 
+    @Inject PayloadDataManager payloadDataManager;
+
     private ExchangeService() {
         this.payloadManager = PayloadManager.getInstance();
         this.metadataSubject = ReplaySubject.create(1);
+        Injector.getInstance().getDataManagerComponent().inject(this);
     }
 
     public static ExchangeService getInstance() {
@@ -43,6 +57,44 @@ public class ExchangeService {
             didStartLoad = true;
         }
         return this.metadataSubject;
+    }
+
+    public Observable<String> getPendingTradeAddresses() {
+        Log.d(TAG, "getPendingTradeAddresses: called");
+        return this.getExchangeData()
+                .flatMap(metadata ->
+                        Observable.fromCallable(metadata::getMetadata)
+                )
+                .filter(metadata ->
+                        metadata != null
+                )
+                .flatMapIterable(exchangeData -> {
+                    ObjectMapper mapper = new ObjectMapper();
+                    ExchangeData data = mapper.readValue(exchangeData, ExchangeData.class);
+
+                    List<TradeData> trades = new ArrayList<TradeData>();
+                    if (data.getCoinify() != null) {
+                        trades.addAll(data.getCoinify().getTrades());
+                    } else if (data.getSfox() != null) {
+                        trades.addAll(data.getSfox().getTrades());
+                    }
+
+                    return trades;
+                })
+                .filter(tradeData ->
+                        !tradeData.isConfirmed()
+                )
+                .map(tradeData ->
+                        payloadDataManager.getReceiveAddressAtPosition(
+                                payloadDataManager.getAccount(tradeData.getAccountIndex()),
+                                tradeData.getReceiveIndex()
+                        )
+                )
+                .map(address -> {
+                    Log.d(TAG, "getPendingTradeAddresses: found address: " + address);
+                    return address;
+                })
+                .distinct();
     }
 
     public void reloadExchangeData() {
