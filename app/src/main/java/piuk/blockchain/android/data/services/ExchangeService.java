@@ -4,13 +4,12 @@ import android.util.Log;
 
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payload.data.HDWallet;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
 import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.ReplaySubject;
 
 /**
  * Created by justin on 5/1/17.
@@ -23,12 +22,12 @@ public class ExchangeService {
     public static final String TAG = ExchangeService.class.getSimpleName();
 
     private PayloadManager payloadManager;
-    private PublishSubject<Metadata> metadataSubject;
+    private ReplaySubject<Metadata> metadataSubject;
     private boolean didStartLoad;
 
     private ExchangeService() {
         this.payloadManager = PayloadManager.getInstance();
-        this.metadataSubject = PublishSubject.create();
+        this.metadataSubject = ReplaySubject.create(1);
     }
 
     public static ExchangeService getInstance() {
