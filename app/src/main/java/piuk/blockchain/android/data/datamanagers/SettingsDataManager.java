@@ -1,5 +1,7 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import android.util.Log;
+
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.settings.SettingsManager;
 
