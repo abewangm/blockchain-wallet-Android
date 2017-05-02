@@ -501,6 +501,24 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         binding.from.setOnClickListener(v -> startFromFragment());
         binding.imageviewDropdownSend.setOnClickListener(v -> startFromFragment());
+
+        binding.destination.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // No-op
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // No-op
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // TODO: 02/05/2017 This is a little hacky, but will be fixed properly when re-writing for fees toggle
+                viewModel.sendModel.pendingTransaction.receivingAddress = s.toString();
+            }
+        });
     }
 
     private void startFromFragment() {
