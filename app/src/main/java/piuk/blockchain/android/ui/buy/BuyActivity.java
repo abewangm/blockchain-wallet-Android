@@ -168,8 +168,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
                 .setTitle(getString(R.string.trade_complete))
                 .setMessage(alertMessage)
                 .setCancelable(false)
-                .setPositiveButton(R.string.ok_cap, (dialog, whichButton) -> {
-                })
+                .setPositiveButton(R.string.ok_cap, null)
                 .setNegativeButton(R.string.view_details, (dialog, whichButton) -> {
                     Bundle bundle = new Bundle();
                     bundle.putString(BalanceFragment.KEY_TRANSACTION_HASH, txHash);
