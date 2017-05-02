@@ -65,9 +65,6 @@ public class ExchangeService {
                 .flatMap(metadata ->
                         Observable.fromCallable(metadata::getMetadata)
                 )
-                .filter(metadata ->
-                        metadata != null
-                )
                 .flatMapIterable(exchangeData -> {
                     ObjectMapper mapper = new ObjectMapper();
                     ExchangeData data = mapper.readValue(exchangeData, ExchangeData.class);
