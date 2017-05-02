@@ -20,6 +20,7 @@ import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.exchange.ExchangeData;
 import piuk.blockchain.android.data.exchange.TradeData;
+import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 
 /**
@@ -95,26 +96,18 @@ public class ExchangeService {
     }
 
     public void reloadExchangeData() {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Metadata exchangeData = getMetadata();
-                    metadataSubject.onNext(exchangeData);
-                } catch (Exception e) {
-                    Log.d(TAG, "reloadExchangeMetadata error: " + e.getMessage());
-                }
-
-            }
-        }.start();
+        Observable<Metadata> exchangeDataStream = getMetadata();
+        exchangeDataStream.subscribeWith(metadataSubject);
     }
 
-    private Metadata getMetadata() throws Exception {
-        DeterministicKey masterKey = this.payloadManager
-                .getPayload()
-                .getHdWallets().get(0)
-                .getMasterKey();
-        DeterministicKey metadataHDNode = MetadataUtil.deriveMetadataNode(masterKey);
-        return new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXCHANGE).build();
+    private Observable<Metadata> getMetadata() {
+        return Observable.fromCallable(() -> {
+            DeterministicKey masterKey = this.payloadManager
+                    .getPayload()
+                    .getHdWallets().get(0)
+                    .getMasterKey();
+            DeterministicKey metadataHDNode = MetadataUtil.deriveMetadataNode(masterKey);
+            return new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXCHANGE).build();
+        }).compose(RxUtil.applySchedulersToObservable());
     }
 }
