@@ -244,7 +244,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
             // Set Receiving account
         } else if (resultCode == Activity.RESULT_OK
-                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE
+                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND
                 && data != null) {
 
             try {
@@ -512,7 +512,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private void setupReceiveToView() {
         binding.imageviewDropdownReceive.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
-                        AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE,
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND,
                         PaymentRequestType.SEND));
     }
 
