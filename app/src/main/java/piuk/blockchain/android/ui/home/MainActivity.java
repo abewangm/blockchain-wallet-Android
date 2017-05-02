@@ -12,7 +12,6 @@ import android.databinding.DataBindingUtil;
 import android.graphics.Typeface;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
@@ -722,7 +721,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         // Setup buy WebView
         // TODO: 17/03/2017 Check if there's a better way to improve loading time of this webview
         buyWebView = new WebView(this);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (AndroidUtils.is21orHigher()) {
             buyWebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         }
         buyWebView.getSettings().setJavaScriptEnabled(true);

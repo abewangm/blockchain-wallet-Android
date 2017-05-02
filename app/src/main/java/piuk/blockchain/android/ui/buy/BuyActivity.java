@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.buy;
 
 import android.databinding.DataBindingUtil;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
@@ -13,9 +12,7 @@ import info.blockchain.wallet.api.trade.coinify.CoinifyApi;
 import info.blockchain.wallet.api.trade.sfox.SFOXApi;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.MetadataUtil;
 
-import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.util.encoders.Hex;
 
 import java.util.Locale;
@@ -26,12 +23,11 @@ import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.databinding.ActivityBuyBinding;
-import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
-import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.AndroidUtils;
 
 public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataListener, FrontendJavascript<String> {
 
@@ -64,7 +60,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         coinifyApi = new CoinifyApi();
 
         WebView webView = binding.webview;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (AndroidUtils.is21orHigher()) {
             CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         }
         frontendJavascriptManager = new FrontendJavascriptManager(this, webView);
