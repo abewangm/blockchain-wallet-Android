@@ -6,8 +6,10 @@ import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import piuk.blockchain.android.ui.base.BasePresenter;
 
 /**
  * Created by adambennett on 12/08/2016.
@@ -57,5 +59,30 @@ public final class RxUtil {
         return (item) -> predicate.apply(item)
                 ? ifTrue.apply(item)
                 : ifFalse.apply(item);
+    }
+
+    /**
+     * Adds the subscription to the upstream {@link Observable} to the {@link CompositeDisposable}
+     * supplied by a class extending {@link BasePresenter}. This allows the subscription to be
+     * cancelled automatically by the Presenter on Android lifecycle events.
+     *
+     * @param presenter A class extending {@link BasePresenter}
+     * @param <T>       The upstream {@link Observable}
+     */
+    public static <T> ObservableTransformer<T, T> addObservableToCompositeDisposable(BasePresenter presenter) {
+        return upstream -> upstream.doOnSubscribe(disposable ->
+                presenter.getCompositeDisposable().add(disposable));
+    }
+
+    /**
+     * Adds the subscription to the upstream {@link io.reactivex.Completable} to the {@link
+     * CompositeDisposable} supplied by a class extending {@link BasePresenter}. This allows the
+     * subscription to be cancelled automatically by the Presenter on Android lifecycle events.
+     *
+     * @param presenter A class extending {@link BasePresenter}
+     */
+    public static CompletableTransformer addCompletableToCompositeDisposable(BasePresenter presenter) {
+        return upstream -> upstream.doOnSubscribe(disposable ->
+                presenter.getCompositeDisposable().add(disposable));
     }
 }

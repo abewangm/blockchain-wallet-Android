@@ -27,10 +27,10 @@ import piuk.blockchain.android.util.StringUtils
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
-class UpgradeWalletViewModelTest {
+class UpgradeWalletPresenterTest {
 
-    private lateinit var subject: UpgradeWalletViewModel
-    private val mockActivity: UpgradeWalletViewModel.DataListener = mock()
+    private lateinit var subject: UpgradeWalletPresenter
+    private val mockActivity: UpgradeWalletView = mock()
     private val mockPrefs: PrefsUtil = mock()
     private val mockAppUtil: AppUtil = mock()
     private val mockAccessState: AccessState = mock()
@@ -47,7 +47,8 @@ class UpgradeWalletViewModelTest {
                 ApiModule(),
                 MockDataManagerModule())
 
-        subject = UpgradeWalletViewModel(mockActivity)
+        subject = UpgradeWalletPresenter()
+        subject.initView(mockActivity)
     }
 
     @Test
@@ -131,7 +132,7 @@ class UpgradeWalletViewModelTest {
         verify(mockAuthDataManager).createPin(currentPassword, pin)
         verifyNoMoreInteractions(mockAuthDataManager)
         verify(mockActivity).showProgressDialog(any())
-        verify(mockActivity).dimissProgressDialog()
+        verify(mockActivity).dismissProgressDialog()
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_OK))
         verifyNoMoreInteractions(mockActivity)
     }
@@ -162,7 +163,7 @@ class UpgradeWalletViewModelTest {
         verifyNoMoreInteractions(mockAuthDataManager)
         verify(mockActivity, times(2)).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         verify(mockActivity).showProgressDialog(any())
-        verify(mockActivity).dimissProgressDialog()
+        verify(mockActivity).dismissProgressDialog()
         verifyNoMoreInteractions(mockActivity)
     }
 
