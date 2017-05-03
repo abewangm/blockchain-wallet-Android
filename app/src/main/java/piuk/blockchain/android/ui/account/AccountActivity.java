@@ -344,8 +344,10 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
             String strResult = data.getStringExtra(CaptureActivity.SCAN_RESULT);
             viewModel.onAddressScanned(strResult);
+            setResult(resultCode);
         } else if (resultCode == Activity.RESULT_OK && requestCode == EDIT_ACTIVITY_REQUEST_CODE) {
             onUpdateAccountsList();
+            setResult(resultCode);
         }
     }
 

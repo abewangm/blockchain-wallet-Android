@@ -27,6 +27,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -99,6 +100,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     public static final String WEB_VIEW_STATE_KEY = "web_view_state";
     public static final int SCAN_URI = 2007;
+
+    public static final int ACCOUNT_EDIT = 2008;
 
     @Thunk boolean drawerIsOpen = false;
 
@@ -309,7 +312,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_BACKUP) {
             resetNavigationDrawer();
-        } else {
+        } else if (resultCode == RESULT_OK && requestCode == ACCOUNT_EDIT) {
+            if (getCurrentFragment() instanceof BalanceFragment) {
+                ((BalanceFragment) getCurrentFragment()).updateAccountList();
+                ((BalanceFragment) getCurrentFragment()).updateBalanceAndTransactionList(true);
+            }
+        }  else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -378,7 +386,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 startActivityForResult(new Intent(MainActivity.this, BackupWalletActivity.class), REQUEST_BACKUP);
                 break;
             case R.id.nav_addresses:
-                startActivity(new Intent(MainActivity.this, AccountActivity.class));
+                startActivityForResult(new Intent(MainActivity.this, AccountActivity.class), ACCOUNT_EDIT);
                 break;
             case R.id.nav_buy:
                 startActivity(putWebViewState(new Intent(MainActivity.this, BuyActivity.class)));
