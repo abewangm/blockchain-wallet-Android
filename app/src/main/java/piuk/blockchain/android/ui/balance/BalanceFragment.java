@@ -20,7 +20,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -110,7 +109,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d("vos", "onReceive b: ");
         setHasOptionsMenu(true);
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_balance, container, false);
         viewModel = new BalanceViewModel(this);
