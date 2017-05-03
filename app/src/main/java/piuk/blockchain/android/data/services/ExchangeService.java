@@ -4,6 +4,10 @@ import android.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import info.blockchain.wallet.api.trade.coinify.CoinifyApi;
+import info.blockchain.wallet.api.trade.coinify.data.CoinifyTrade;
+import info.blockchain.wallet.api.trade.sfox.SFOXApi;
+import info.blockchain.wallet.api.trade.sfox.data.SFOXTransaction;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.MetadataUtil;
@@ -37,6 +41,8 @@ public class ExchangeService {
 
     private PayloadManager payloadManager;
     private ReplaySubject<Metadata> metadataSubject;
+    private CoinifyApi coinifyApi;
+    private SFOXApi sfoxApi;
     private boolean didStartLoad;
 
     @Inject PayloadDataManager payloadDataManager;
@@ -45,6 +51,8 @@ public class ExchangeService {
     private ExchangeService() {
         this.payloadManager = PayloadManager.getInstance();
         this.metadataSubject = ReplaySubject.create(1);
+        this.coinifyApi = new CoinifyApi();
+        this.sfoxApi = new SFOXApi();
         Injector.getInstance().getDataManagerComponent().inject(this);
     }
 
@@ -64,14 +72,16 @@ public class ExchangeService {
     }
 
     public Observable<String> watchPendingTrades() {
-        Observable<String> payments = rxBus.register(WebSocketReceiveEvent.class)
-                .map(event -> event.getAddress());
+        Observable<WebSocketReceiveEvent> receiveEvents = rxBus.register(WebSocketReceiveEvent.class);
 
         return getPendingTradeAddresses()
-                .flatMap(address -> {
-                    Log.d(TAG, "watchPendingTrades: watching receive address: " + address);
-                    return payments.filter(paymentAddress -> paymentAddress.equals(address));
-                });
+                .doOnNext(address ->
+                    Log.d(TAG, "watchPendingTrades: watching receive address: " + address)
+                )
+                .flatMap(address -> receiveEvents
+                        .filter(event -> event.getAddress().equals(address))
+                        .map(event -> event.getHash())
+                );
     }
 
     public Observable<String> getPendingTradeAddresses() {
@@ -120,5 +130,15 @@ public class ExchangeService {
             DeterministicKey metadataHDNode = MetadataUtil.deriveMetadataNode(masterKey);
             return new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXCHANGE).build();
         }).compose(RxUtil.applySchedulersToObservable());
+    }
+
+    private Observable<List<CoinifyTrade>> getCoinifyTrades(String accessToken) {
+        return coinifyApi.getTrades(accessToken)
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    public Observable<List<SFOXTransaction>> getSfoxTransactions(String accountToken) {
+        return sfoxApi.getTransactions(accountToken)
+                .compose(RxUtil.applySchedulersToObservable());
     }
 }

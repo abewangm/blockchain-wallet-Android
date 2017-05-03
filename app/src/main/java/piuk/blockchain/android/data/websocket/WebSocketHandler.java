@@ -288,9 +288,11 @@ class WebSocketHandler extends WebSocketListener {
                         if (outObj.has("value")) {
                             value = outObj.getLong("value");
                         }
-                        if (outObj.has("addr")) {
-                            WebSocketReceiveEvent event = new WebSocketReceiveEvent((String) outObj.get("addr"));
-                            rxBus.emitEvent(WebSocketReceiveEvent.class, event);
+                        if (outObj.has("addr") && objX.has("hash")) {
+                            rxBus.emitEvent(WebSocketReceiveEvent.class, new WebSocketReceiveEvent(
+                                    (String) outObj.get("addr"),
+                                    (String) objX.get("hash")
+                            ));
                         }
                         if (outObj.has("xpub")) {
                             totalValue += value;

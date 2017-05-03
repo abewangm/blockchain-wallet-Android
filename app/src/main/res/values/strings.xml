@@ -688,7 +688,7 @@
     <string name="onboarding_start_over">Start Over</string>
     <string name="onboarding_skip_all">Skip All</string>
     <string name="trade_complete">Trade Complete</string>
-    <string name="trade_complete_details">The trade you created on %1$s has been completed!</string>
+    <string name="trade_complete_details">Your Buy Bitcoin trade has been completed!</string>
     <string name="view_details">View details</string>
 
     <!-- 2FA Pairing -->

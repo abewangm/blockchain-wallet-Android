@@ -121,7 +121,7 @@ public class MainViewModel extends BaseViewModel {
 
         void setBuySellEnabled(boolean enabled);
 
-        void onTradeCompleted();
+        void onTradeCompleted(String txHash);
     }
 
     public MainViewModel(DataListener dataListener) {
@@ -379,7 +379,7 @@ public class MainViewModel extends BaseViewModel {
                                         Log.d(TAG, "preLaunchChecks: canBuy " + canBuy);
                                         dataListener.setBuySellEnabled(canBuy && BuildConfig.BUY_BITCOIN_ENABLED);
                                         buyDataManager.watchPendingTrades()
-                                                .subscribe(address -> dataListener.onTradeCompleted());
+                                                .subscribe(dataListener::onTradeCompleted);
                                     },
                                     throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
         } else {

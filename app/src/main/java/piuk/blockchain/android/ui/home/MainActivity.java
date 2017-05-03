@@ -716,14 +716,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void onTradeCompleted() {
-        onTradeCompleted(new Date().getTime(), "");
-    }
-
-    public void onTradeCompleted(long date, String txHash) {
+    public void onTradeCompleted(String txHash) {
         String tradeDetailsMessage = getString(R.string.trade_complete_details);
-        // TODO: format date
-        String alertMessage = String.format(Locale.getDefault(), tradeDetailsMessage, "{date}");
+        String alertMessage = String.format(Locale.getDefault(), tradeDetailsMessage);
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(getString(R.string.trade_complete))

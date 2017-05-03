@@ -129,26 +129,4 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         onBackPressed();
         return true;
     }
-
-    public void fetchTransaction(String accountToken) {
-        compositeDisposable.add(
-                sfoxApi.getTransactions(accountToken)
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(
-                                transactionList -> {
-                                    //do stuff
-                                },
-                                Throwable::printStackTrace));
-    }
-
-    public void fetchTrades(String accessToken) {
-        compositeDisposable.add(
-                coinifyApi.getTrades(accessToken)
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(
-                                tradesList -> {
-                                    //do stuff
-                                },
-                                Throwable::printStackTrace));
-    }
 }
