@@ -41,6 +41,8 @@ import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Locale;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
@@ -64,6 +66,7 @@ import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
+import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AndroidUtils;
@@ -710,6 +713,28 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             setupBuyWebView();
         }
         setBuyBitcoinVisible(enabled);
+    }
+
+    @Override
+    public void onTradeCompleted() {
+        onTradeCompleted(new Date().getTime(), "");
+    }
+
+    public void onTradeCompleted(long date, String txHash) {
+        String tradeDetailsMessage = getString(R.string.trade_complete_details);
+        // TODO: format date
+        String alertMessage = String.format(Locale.getDefault(), tradeDetailsMessage, "{date}");
+
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(getString(R.string.trade_complete))
+                .setMessage(alertMessage)
+                .setCancelable(false)
+                .setPositiveButton(R.string.ok_cap, null)
+                .setNegativeButton(R.string.view_details, (dialog, whichButton) -> {
+                    Bundle bundle = new Bundle();
+                    bundle.putString(BalanceFragment.KEY_TRANSACTION_HASH, txHash);
+                    TransactionDetailActivity.start(this, bundle);
+                }).show();
     }
 
     private void setBuyBitcoinVisible(boolean visible) {

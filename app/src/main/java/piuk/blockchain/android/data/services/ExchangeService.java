@@ -63,20 +63,14 @@ public class ExchangeService {
         return this.metadataSubject;
     }
 
-    public void watchPendingTrades() {
+    public Observable<String> watchPendingTrades() {
         Observable<String> payments = rxBus.register(WebSocketReceiveEvent.class)
                 .map(event -> event.getAddress());
 
-        getPendingTradeAddresses()
-                .doOnError(Throwable::printStackTrace)
-                .forEach(address -> {
+        return getPendingTradeAddresses()
+                .flatMap(address -> {
                     Log.d(TAG, "watchPendingTrades: watching receive address: " + address);
-                    payments.subscribe(paymentAddress -> {
-                        if (paymentAddress.equals(address)) {
-                            // show completed
-                            Log.d(TAG, "watchPendingTrades: should show completed");
-                        }
-                    }, Throwable::printStackTrace);
+                    return payments.filter(paymentAddress -> paymentAddress.equals(address));
                 });
     }
 

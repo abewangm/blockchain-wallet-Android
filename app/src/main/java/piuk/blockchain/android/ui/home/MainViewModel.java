@@ -120,6 +120,8 @@ public class MainViewModel extends BaseViewModel {
         void updateCurrentPrice(String price);
 
         void setBuySellEnabled(boolean enabled);
+
+        void onTradeCompleted();
     }
 
     public MainViewModel(DataListener dataListener) {
@@ -376,7 +378,8 @@ public class MainViewModel extends BaseViewModel {
                                     canBuy -> {
                                         Log.d(TAG, "preLaunchChecks: canBuy " + canBuy);
                                         dataListener.setBuySellEnabled(canBuy && BuildConfig.BUY_BITCOIN_ENABLED);
-                                        buyDataManager.watchPendingTrades();
+                                        buyDataManager.watchPendingTrades()
+                                                .subscribe(address -> dataListener.onTradeCompleted());
                                     },
                                     throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
         } else {
