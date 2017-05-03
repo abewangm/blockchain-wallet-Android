@@ -20,6 +20,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -97,9 +98,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(ACTION_INTENT) && getActivity() != null) {
-                viewModel.updateAccountList();
-                viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, true);
-                viewModel.refreshFacilitatedTransactions();
+                updateAccountList();
+                updateBalanceAndTransactionList(true);
+                refreshFacilitatedTransactions();
                 // Check backup status on receiving funds
                 viewModel.onViewReady();
                 binding.rvTransactions.scrollToPosition(0);
@@ -109,6 +110,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d("vos", "onReceive b: ");
         setHasOptionsMenu(true);
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_balance, container, false);
         viewModel = new BalanceViewModel(this);
@@ -130,7 +132,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel.onViewReady();
-        viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, true);
+        updateBalanceAndTransactionList(true);
     }
 
     private void setAccountSpinner() {
@@ -157,9 +159,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(receiver, filter);
 
-        viewModel.updateAccountList();
+        updateAccountList();
         viewModel.getFacilitatedTransactions();
-        viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, false);
+        updateBalanceAndTransactionList(false);
 
         binding.rvTransactions.clearOnScrollListeners();
 
@@ -181,7 +183,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     public void checkCachedTransactions() {
         if (accountSpinner != null) {
-            viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, false);
+            updateBalanceAndTransactionList(false);
         }
     }
 
@@ -304,6 +306,14 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         viewModel.refreshFacilitatedTransactions();
     }
 
+    public void updateAccountList() {
+        viewModel.updateAccountList();
+    }
+
+    public void updateBalanceAndTransactionList(boolean fetchTransactions) {
+        viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, fetchTransactions);
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private void setupViews() {
         setShowRefreshing(true);
@@ -313,11 +323,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             if (balanceDisplayState == SHOW_BTC) {
                 balanceDisplayState = SHOW_FIAT;
                 isBTC = false;
-                viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, false);
+                updateBalanceAndTransactionList(false);
             } else {
                 balanceDisplayState = SHOW_BTC;
                 isBTC = true;
-                viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, false);
+                updateBalanceAndTransactionList(false);
             }
 
             transactionAdapter.onViewFormatUpdated(isBTC);
@@ -326,7 +336,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         });
 
         accountSpinner = binding.accountsSpinner;
-        viewModel.updateAccountList();
+        updateAccountList();
 
         String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         accountsAdapter = new BalanceHeaderAdapter(
@@ -347,7 +357,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                 //Refresh balance header and tx list
-                viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBTC, true);
+                updateBalanceAndTransactionList(true);
                 binding.rvTransactions.scrollToPosition(0);
             }
 
@@ -380,7 +390,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 isBTC = isBtc;
                 viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
                 transactionAdapter.onViewFormatUpdated(isBtc);
-                viewModel.updateBalanceAndTransactionList(accountSpinner.getSelectedItemPosition(), isBtc, false);
+                updateBalanceAndTransactionList(false);
             }
 
             @Override
