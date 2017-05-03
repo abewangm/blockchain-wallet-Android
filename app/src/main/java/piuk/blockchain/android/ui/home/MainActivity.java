@@ -122,7 +122,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(ACTION_SEND) && getActivity() != null) {
-                startScanActivity();
+                requestScan();
             } else if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
                 binding.bottomNavigation.setCurrentItem(2);
             } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
@@ -267,11 +267,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 binding.drawerLayout.openDrawer(GravityCompat.START);
                 return true;
             case R.id.action_qr_main:
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), this);
-                } else {
-                    startScanActivity();
-                }
+                requestScan();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -484,6 +480,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 Intent intent = new Intent(MainActivity.this, piuk.blockchain.android.ui.directory.MapActivity.class);
                 startActivityForResult(intent, MERCHANT_ACTIVITY);
             }
+        }
+    }
+
+    @Thunk
+    void requestScan() {
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), MainActivity.this);
+        } else {
+            startScanActivity();
         }
     }
 

@@ -73,7 +73,6 @@
     <string name="pair_wallet_step_1">Zaloguj się do swojego Portfela Blockchain na swoim komputerze lub Macu pod adresem %1$s</string>
     <string name="pair_wallet_step_2">Jeśli korzystasz ze starego portfela, kliknij przycisk Ustawienia Konta i wybierz zakładkę Urządzenia. Jeśli korzystasz z nowej wersji beta Portfela, przejdź do Ustawień / Informacji o Portfelu.</string>
     <string name="pair_wallet_step_3">Kliknij "Pokaż kod parowania", by zobaczyć kwadratowy, czarno-biały kod QR. Zeskanuj kod swoim aparatem.</string>
-    <string name="disable_two_factor">Musisz wyłączyć Uwierzytelnianie Dwustopniowe przed próbą ręcznego parowania swojego urządzenia</string>
     <string name="wallet_id">Identyfikator portfela</string>
     <string name="default_wallet_name">Mój portfel bitcoin</string>
 
