@@ -27,8 +27,8 @@ public class BuyDataManager {
         return this.exchangeService.getExchangeData();
     }
 
-    public Observable<String> getPendingTradeAddresses() {
-        return exchangeService.getPendingTradeAddresses();
+    public void watchPendingTrades() {
+        exchangeService.watchPendingTrades();
     }
 
     public Observable<Boolean> getCanBuy() {

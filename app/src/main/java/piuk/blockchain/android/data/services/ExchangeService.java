@@ -20,7 +20,9 @@ import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.exchange.ExchangeData;
 import piuk.blockchain.android.data.exchange.TradeData;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.websocket.WebSocketReceiveEvent;
 import piuk.blockchain.android.injection.Injector;
 
 /**
@@ -38,6 +40,7 @@ public class ExchangeService {
     private boolean didStartLoad;
 
     @Inject PayloadDataManager payloadDataManager;
+    @Inject RxBus rxBus;
 
     private ExchangeService() {
         this.payloadManager = PayloadManager.getInstance();
@@ -60,11 +63,28 @@ public class ExchangeService {
         return this.metadataSubject;
     }
 
+    public void watchPendingTrades() {
+        Observable<String> payments = rxBus.register(WebSocketReceiveEvent.class)
+                .map(event -> event.getAddress());
+
+        getPendingTradeAddresses()
+                .doOnError(Throwable::printStackTrace)
+                .forEach(address -> {
+                    Log.d(TAG, "watchPendingTrades: watching receive address: " + address);
+                    payments.subscribe(paymentAddress -> {
+                        if (paymentAddress.equals(address)) {
+                            // show completed
+                            Log.d(TAG, "watchPendingTrades: should show completed");
+                        }
+                    }, Throwable::printStackTrace);
+                });
+    }
+
     public Observable<String> getPendingTradeAddresses() {
-        Log.d(TAG, "getPendingTradeAddresses: called");
         return this.getExchangeData()
-                .flatMap(metadata ->
-                        Observable.fromCallable(metadata::getMetadata)
+                .flatMap(metadata -> Observable
+                        .fromCallable(metadata::getMetadata)
+                        .compose(RxUtil.applySchedulersToObservable())
                 )
                 .flatMapIterable(exchangeData -> {
                     ObjectMapper mapper = new ObjectMapper();
@@ -83,15 +103,12 @@ public class ExchangeService {
                         !tradeData.isConfirmed()
                 )
                 .map(tradeData ->
+                        // TODO: This gets the wrong receive address since "position" is relative to current receive index, not absolute. Must fix.
                         payloadDataManager.getReceiveAddressAtPosition(
                                 payloadDataManager.getAccount(tradeData.getAccountIndex()),
                                 tradeData.getReceiveIndex()
                         )
                 )
-                .map(address -> {
-                    Log.d(TAG, "getPendingTradeAddresses: found address: " + address);
-                    return address;
-                })
                 .distinct();
     }
 
