@@ -379,6 +379,7 @@ public class MainViewModel extends BaseViewModel {
                                         Log.d(TAG, "preLaunchChecks: canBuy " + canBuy);
                                         dataListener.setBuySellEnabled(canBuy && BuildConfig.BUY_BITCOIN_ENABLED);
                                         buyDataManager.watchPendingTrades()
+                                                .compose(RxUtil.applySchedulersToObservable())
                                                 .subscribe(dataListener::onTradeCompleted);
                                     },
                                     throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
