@@ -1009,7 +1009,12 @@ public class SendViewModel extends BaseViewModel {
         HashMap<String, BigInteger> inputs = new HashMap<>();
         inputs.put(pendingTransaction.sendingObject.label, pendingTransaction.bigIntAmount);
         HashMap<String, BigInteger> outputs = new HashMap<>();
-        outputs.put(pendingTransaction.receivingObject.label, pendingTransaction.bigIntAmount);
+
+        String outLabel = pendingTransaction.receivingAddress;
+        if(pendingTransaction.receivingObject != null && pendingTransaction.receivingObject.label != null) {
+            outLabel = pendingTransaction.receivingObject.label;
+        }
+        outputs.put(outLabel, pendingTransaction.bigIntAmount);
 
         TransactionSummary tx = new TransactionSummary();
         tx.setDirection(Direction.SENT);

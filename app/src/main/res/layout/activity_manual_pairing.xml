@@ -54,15 +54,6 @@
                         android:maxLines="1" />
 
                 </piuk.blockchain.android.ui.customviews.AnimatedPasswordInputLayout>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="32dp"
-                    android:text="@string/disable_two_factor"
-                    android:textColor="@color/primary_gray_medium" />
-
             </LinearLayout>
 
         </ScrollView>

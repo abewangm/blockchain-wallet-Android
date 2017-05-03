@@ -120,6 +120,8 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
         if (getArguments() != null) {
             selectedAccountPosition = getArguments().getInt(ARG_SELECTED_ACCOUNT_POSITION);
         }
@@ -144,8 +146,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
         selectAccount(selectedAccountPosition != -1
                 ? selectedAccountPosition : viewModel.getDefaultAccountPosition());
-
-        setHasOptionsMenu(true);
 
         binding.scrollView.post(() -> binding.scrollView.scrollTo(0, 0));
 
@@ -587,15 +587,9 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if (menu != null) menu.clear();
         inflater.inflate(R.menu.menu_receive, menu);
         super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        MenuItem menuItem = menu.findItem(R.id.action_qr_main);
-        menuItem.setVisible(false);
     }
 
     @Override
