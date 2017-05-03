@@ -73,7 +73,6 @@
     <string name="pair_wallet_step_1">%1$sからPCもしくはMac経由でブロックチェーンウォレットにログインしてください。</string>
     <string name="pair_wallet_step_2">旧財布を使用している場合はアカウント設定ボタンをクリックしてデバイスタブを選択してください。新規ベータ財布を使用している場合、設定／財布情報にアクセスしてください。</string>
     <string name="pair_wallet_step_3">ペアリングコードを表示をクリックしてQRコードを表示してください。これは四角い白黒のバーコードです。カメラでコードをスキャンしてください。</string>
-    <string name="disable_two_factor">財布を手動でペアリングする前に2段階認証を無効にする必要があります</string>
     <string name="wallet_id">財布ID</string>
     <string name="default_wallet_name">私のビットコイン財布</string>
 

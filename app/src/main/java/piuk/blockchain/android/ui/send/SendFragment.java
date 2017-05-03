@@ -146,11 +146,17 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
         if (getArguments() != null) {
             selectedAccountPosition = getArguments().getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION);
         }
+    }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_send, container, false);
         viewModel = new SendViewModel(this, Locale.getDefault());
 
@@ -158,7 +164,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         setCustomKeypad();
         setupViews();
-        setHasOptionsMenu(true);
         viewModel.onViewReady();
 
         return binding.getRoot();
@@ -200,18 +205,9 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if (menu != null) menu.clear();
         inflater.inflate(R.menu.menu_send, menu);
         super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        // Main activity QR button
-        final MenuItem menuItem = menu.findItem(R.id.action_qr_main);
-        if (menuItem != null) {
-            menuItem.setVisible(false);
-        }
     }
 
     @Override
@@ -501,6 +497,24 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         binding.from.setOnClickListener(v -> startFromFragment());
         binding.imageviewDropdownSend.setOnClickListener(v -> startFromFragment());
+
+        binding.destination.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // No-op
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // No-op
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // TODO: 02/05/2017 This is a little hacky, but will be fixed properly when re-writing for fees toggle
+                viewModel.sendModel.pendingTransaction.receivingAddress = s.toString();
+            }
+        });
     }
 
     private void startFromFragment() {
