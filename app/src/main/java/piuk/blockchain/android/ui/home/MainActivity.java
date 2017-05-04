@@ -27,7 +27,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -100,7 +99,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     public static final String WEB_VIEW_STATE_KEY = "web_view_state";
     public static final int SCAN_URI = 2007;
-
     public static final int ACCOUNT_EDIT = 2008;
 
     @Thunk boolean drawerIsOpen = false;
@@ -317,7 +315,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 ((BalanceFragment) getCurrentFragment()).updateAccountList();
                 ((BalanceFragment) getCurrentFragment()).updateBalanceAndTransactionList(true);
             }
-        }  else {
+        } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -776,12 +774,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @Override
     public void onSendFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
-    }
-
-    // Ensure bottom nav button selected after scanning for result
-    @Override
-    public void onSendFragmentStart() {
-        binding.bottomNavigation.setCurrentItem(0);
     }
 
     @Override
