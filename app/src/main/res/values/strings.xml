@@ -695,4 +695,7 @@
     <string name="two_factor_null_error">2FA code cannot be empty</string>
     <string name="two_factor_incorrect_error">2FA code incorrect</string>
 
+    <!-- CONFIRM PAYMENT -->
+    <string name="confirm_payment_change_fee">Change fee</string>
+
 </resources>

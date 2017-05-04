@@ -448,11 +448,16 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         binding.buttonSend.setOnClickListener(v -> {
             customKeypad.setNumpadVisibility(View.GONE);
-            if (ConnectivityStatus.hasConnectivity(getActivity())) {
-                requestSendPayment(false);
-            } else {
-                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
-            }
+//            if (ConnectivityStatus.hasConnectivity(getActivity())) {
+//                requestSendPayment(false);
+//            } else {
+//                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+//            }
+
+            // STOPSHIP: 04/05/2017
+            ConfirmPaymentDialog.newInstance()
+                    .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
+
         });
     }
 

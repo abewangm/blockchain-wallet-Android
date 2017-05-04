@@ -305,4 +305,23 @@
         <item name="fontPath">fonts/Montserrat-SemiBold.ttf</item>
     </style>
 
+    <style name="ConfirmPaymentTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textColor">@color/primary_gray_dark</item>
+        <item name="android:textSize">14sp</item>
+        <item name="fontPath">fonts/Montserrat-Light.ttf</item>
+    </style>
+
+    <style name="ConfirmPaymentField">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_gravity">right</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">14sp</item>
+        <item name="fontPath">fonts/Montserrat-Regular.ttf</item>
+    </style>
+
 </resources>
