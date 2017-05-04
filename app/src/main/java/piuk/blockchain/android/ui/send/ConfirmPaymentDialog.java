@@ -4,7 +4,6 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,8 +13,10 @@ import android.view.WindowManager;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.DialogConfirmTransactionBinding;
+import piuk.blockchain.android.ui.base.BaseDialogFragment;
 
-public class ConfirmPaymentDialog extends AppCompatDialogFragment {
+public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView, ConfirmPaymentPresenter>
+        implements ConfirmPaymentView {
 
     private DialogConfirmTransactionBinding binding;
 
@@ -58,7 +59,20 @@ public class ConfirmPaymentDialog extends AppCompatDialogFragment {
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> dismiss());
 
+        // TODO: 04/05/2017
+
+        onViewReady();
     }
 
+
+    @Override
+    protected ConfirmPaymentPresenter createPresenter() {
+        return new ConfirmPaymentPresenter();
+    }
+
+    @Override
+    protected ConfirmPaymentView getMvpView() {
+        return this;
+    }
 
 }
