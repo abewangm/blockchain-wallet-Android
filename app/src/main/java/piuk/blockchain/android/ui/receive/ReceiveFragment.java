@@ -194,12 +194,12 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
         binding.destination.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
-                        AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE,
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
                         PaymentRequestType.REQUEST));
 
         binding.imageviewDropdownReceive.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
-                        AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE,
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
                         PaymentRequestType.REQUEST));
 
         if (BuildConfig.CONTACTS_ENABLED) {
@@ -425,7 +425,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Set receiving account
         if (resultCode == Activity.RESULT_OK
-                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_RECEIVE
+                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE
                 && data != null) {
 
             try {

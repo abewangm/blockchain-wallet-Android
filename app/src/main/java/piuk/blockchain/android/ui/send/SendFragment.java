@@ -94,8 +94,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     public static final String ARGUMENT_FCTX_ID = "fctx_id";
     public static final String ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE = "address_input_route";
 
-    private static final int SCAN_URI = 2007;
-    private static final int SCAN_PRIVX = 2008;
+    private static final int SCAN_URI = 2010;
+    private static final int SCAN_PRIVX = 2011;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
     @Thunk FragmentSendBinding binding;
@@ -182,10 +182,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
         viewModel.updateUI();
-
-        if (listener != null) {
-            listener.onSendFragmentStart();
-        }
     }
 
     @Override
@@ -240,7 +236,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
             // Set Receiving account
         } else if (resultCode == Activity.RESULT_OK
-                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND
+                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND
                 && data != null) {
 
             try {
@@ -274,7 +270,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
             }
             // Set Sending account
         } else if (resultCode == Activity.RESULT_OK
-                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND
+                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND
                 && data != null) {
 
             try {
@@ -519,14 +515,14 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     private void startFromFragment() {
         AccountChooserActivity.startForResult(this,
-                AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND,
+                AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
                 PaymentRequestType.REQUEST);
     }
 
     private void setupReceiveToView() {
         binding.imageviewDropdownReceive.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
-                        AccountChooserActivity.REQUEST_CODE_CHOOSE_ACCOUNT_SEND,
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
                         PaymentRequestType.SEND));
     }
 
@@ -1091,8 +1087,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     public interface OnSendFragmentInteractionListener {
 
         void onSendFragmentClose();
-
-        void onSendFragmentStart();
 
         void onTransactionNotesRequested(String contactId, @Nullable Integer accountPosition, PaymentRequestType paymentRequestType, long satoshis);
     }
