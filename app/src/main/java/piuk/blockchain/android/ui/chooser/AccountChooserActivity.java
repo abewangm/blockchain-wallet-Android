@@ -51,6 +51,7 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
             int requestCode = getIntent().getIntExtra(EXTRA_REQUEST_CODE, -1);
             binding.toolbar.toolbarGeneral.setTitle(
                     requestCode == REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE
+                            || requestCode == REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND
                             || requestCode == REQUEST_CODE_CHOOSE_CONTACT ? R.string.to : R.string.from);
 
             setSupportActionBar(binding.toolbar.toolbarGeneral);

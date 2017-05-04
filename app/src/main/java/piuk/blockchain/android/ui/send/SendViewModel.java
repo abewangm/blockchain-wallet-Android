@@ -309,9 +309,9 @@ public class SendViewModel extends BaseViewModel {
         }
 
         if (!btcAddress.equals("")) {
-            dataListener.setDestinationAddress(btcAddress);
             sendModel.pendingTransaction.receivingObject = null;
             sendModel.pendingTransaction.receivingAddress = btcAddress;
+            dataListener.setDestinationAddress(btcAddress);
         }
         if (btcAmount != null && !btcAmount.equals("")) {
             if (dataListener != null) {
