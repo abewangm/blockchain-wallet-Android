@@ -24,6 +24,7 @@ import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 @SuppressWarnings("WeakerAccess")
@@ -44,7 +45,7 @@ public class ContactsListViewModel extends BaseViewModel {
 
         void onContactsLoaded(@NonNull List<ContactsListItem> contacts);
 
-        void setUiState(@ContactsListActivity.UiState int uiState);
+        void setUiState(@UiState.UiStateDef int uiState);
 
         void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
@@ -76,7 +77,7 @@ public class ContactsListViewModel extends BaseViewModel {
     }
 
     void initContactsService(@Nullable String secondPassword) {
-        dataListener.setUiState(ContactsListActivity.LOADING);
+        dataListener.setUiState(UiState.LOADING);
         compositeDisposable.add(
                 payloadDataManager.generateNodes(secondPassword)
                         .andThen(payloadDataManager.getMetadataNodeFactory())
@@ -85,7 +86,7 @@ public class ContactsListViewModel extends BaseViewModel {
                                 metadataNodeFactory.getSharedMetadataNode()))
                         .subscribe(this::registerMdid,
                                 throwable -> {
-                                    dataListener.setUiState(ContactsListActivity.FAILURE);
+                                    dataListener.setUiState(UiState.FAILURE);
                                     if (throwable instanceof DecryptionException) {
                                         dataListener.showToast(R.string.password_mismatch_error, ToastCustom.TYPE_ERROR);
                                     } else {
@@ -102,31 +103,31 @@ public class ContactsListViewModel extends BaseViewModel {
                         .subscribe(
                                 () -> attemptPageSetup(false),
                                 throwable -> {
-                                    dataListener.setUiState(ContactsListActivity.FAILURE);
+                                    dataListener.setUiState(UiState.FAILURE);
                                     dataListener.showToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
                                 }));
     }
 
     @VisibleForTesting
     void refreshContacts() {
-        dataListener.setUiState(ContactsListActivity.LOADING);
+        dataListener.setUiState(UiState.LOADING);
         compositeDisposable.add(
                 contactsDataManager.fetchContacts()
                         .andThen(contactsDataManager.getContactList())
                         .toList()
                         .subscribe(
                                 this::handleContactListUpdate,
-                                throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
+                                throwable -> dataListener.setUiState(UiState.FAILURE)));
     }
 
     private void loadContacts() {
-        dataListener.setUiState(ContactsListActivity.LOADING);
+        dataListener.setUiState(UiState.LOADING);
         compositeDisposable.add(
                 contactsDataManager.getContactList()
                         .toList()
                         .subscribe(
                                 this::handleContactListUpdate,
-                                throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
+                                throwable -> dataListener.setUiState(UiState.FAILURE)));
     }
 
     // TODO: 19/01/2017 This is pretty gross and I'm certain it can be Rx-ified in the future
@@ -158,17 +159,17 @@ public class ContactsListViewModel extends BaseViewModel {
 
                         }, throwable -> {
                             dataListener.onContactsLoaded(new ArrayList<>());
-                            dataListener.setUiState(ContactsListActivity.FAILURE);
+                            dataListener.setUiState(UiState.FAILURE);
                         }));
     }
 
     private void updateUI(List<ContactsListItem> list) {
         if (!list.isEmpty()) {
-            dataListener.setUiState(ContactsListActivity.CONTENT);
+            dataListener.setUiState(UiState.CONTENT);
             dataListener.onContactsLoaded(list);
         } else {
             dataListener.onContactsLoaded(new ArrayList<>());
-            dataListener.setUiState(ContactsListActivity.EMPTY);
+            dataListener.setUiState(UiState.EMPTY);
         }
     }
 
@@ -225,7 +226,7 @@ public class ContactsListViewModel extends BaseViewModel {
 
     private void attemptPageSetup(boolean firstAttempt) {
         if (firstAttempt) {
-            dataListener.setUiState(ContactsListActivity.LOADING);
+            dataListener.setUiState(UiState.LOADING);
             compositeDisposable.add(
                     payloadDataManager.loadNodes()
                             .subscribe(
@@ -240,14 +241,14 @@ public class ContactsListViewModel extends BaseViewModel {
                                             // Not set up, most likely has a second password enabled
                                             if (payloadDataManager.isDoubleEncrypted()) {
                                                 dataListener.showSecondPasswordDialog();
-                                                dataListener.setUiState(ContactsListActivity.FAILURE);
+                                                dataListener.setUiState(UiState.FAILURE);
                                             } else {
                                                 initContactsService(null);
                                             }
                                         }
-                                    }, throwable -> dataListener.setUiState(ContactsListActivity.FAILURE)));
+                                    }, throwable -> dataListener.setUiState(UiState.FAILURE)));
         } else {
-            dataListener.setUiState(ContactsListActivity.FAILURE);
+            dataListener.setUiState(UiState.FAILURE);
         }
     }
 

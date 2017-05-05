@@ -11,19 +11,24 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.DialogConfirmTransactionBinding;
+import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.BaseDialogFragment;
+import piuk.blockchain.android.ui.base.UiState;
 
 public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView, ConfirmPaymentPresenter>
         implements ConfirmPaymentView {
 
+    private static final String ARGUMENT_PAYMENT_DETAILS = "argument_payment_details";
+
     private DialogConfirmTransactionBinding binding;
 
-    public static ConfirmPaymentDialog newInstance() {
-
+    public static ConfirmPaymentDialog newInstance(PaymentConfirmationDetails details) {
         Bundle args = new Bundle();
-
+        args.putParcelable(ARGUMENT_PAYMENT_DETAILS, details);
         ConfirmPaymentDialog fragment = new ConfirmPaymentDialog();
         fragment.setArguments(args);
         fragment.setStyle(DialogFragment.STYLE_NO_FRAME, R.style.FullscreenDialog);
@@ -59,11 +64,73 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> dismiss());
 
-        // TODO: 04/05/2017
+        binding.buttonChangeFee.setOnClickListener(v -> getPresenter().onChangeFeeClicked());
+        binding.buttonSend.setOnClickListener(v -> getPresenter().onSendClicked());
 
         onViewReady();
     }
 
+    @Override
+    public void setFromLabel(String fromLabel) {
+        binding.textviewFromAddress.setText(fromLabel);
+    }
+
+    @Override
+    public void setToLabel(String toLabel) {
+        binding.textviewToAddress.setText(toLabel);
+    }
+
+    @Override
+    public void setAmount(String amount) {
+        binding.textviewAmount.setText(amount);
+    }
+
+    @Override
+    public void setFee(String fee) {
+        binding.textviewFees.setText(fee);
+    }
+
+    @Override
+    public void setTotalBtc(String totalBtc) {
+        binding.textviewTotalBtc.setText(totalBtc);
+    }
+
+    @Override
+    public void setTotalFiat(String totalFiat) {
+        binding.textviewTotalFiat.setText(totalFiat);
+    }
+
+    @Override
+    public void setSendButtonEnabled(boolean enabled) {
+        binding.buttonSend.setEnabled(enabled);
+    }
+
+    @Override
+    public void closeDialog() {
+        dismiss();
+    }
+
+    @Override
+    public PaymentConfirmationDetails getPaymentDetails() {
+        return getArguments().getParcelable(ARGUMENT_PAYMENT_DETAILS);
+    }
+
+    @Override
+    public void setUiState(int uiState) {
+        switch (uiState) {
+            case UiState.LOADING:
+                binding.loadingLayout.setVisibility(View.VISIBLE);
+                binding.mainLayout.setVisibility(View.GONE);
+                break;
+            case UiState.CONTENT:
+                binding.loadingLayout.setVisibility(View.GONE);
+                binding.mainLayout.setVisibility(View.VISIBLE);
+                break;
+            case UiState.EMPTY:
+            case UiState.FAILURE:
+                throw new NotImplementedException("State " + uiState + " hasn't been implemented yet");
+        }
+    }
 
     @Override
     protected ConfirmPaymentPresenter createPresenter() {

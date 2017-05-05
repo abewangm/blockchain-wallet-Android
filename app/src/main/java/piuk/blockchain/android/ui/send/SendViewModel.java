@@ -45,6 +45,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
@@ -91,19 +92,20 @@ public class SendViewModel extends BaseViewModel {
 
     private Disposable unspentApiDisposable;
 
-    @Inject protected PrefsUtil prefsUtil;
-    @Inject protected WalletAccountHelper walletAccountHelper;
-    @Inject protected ExchangeRateFactory exchangeRateFactory;
-    @Inject protected SSLVerifyUtil sslVerifyUtil;
-    @Inject protected PrivateKeyFactory privateKeyFactory;
-    @Inject protected PayloadManager payloadManager;
-    @Inject protected StringUtils stringUtils;
-    @Inject protected ContactsDataManager contactsDataManager;
-    @Inject protected SendDataManager sendDataManager;
-    @Inject protected PayloadDataManager payloadDataManager;
-    @Inject protected DynamicFeeCache dynamicFeeCache;
-    @Inject protected TransactionListDataManager transactionListDataManager;
-    @Inject protected PersistentUrls persistentUrls;
+    @Inject PrefsUtil prefsUtil;
+    @Inject WalletAccountHelper walletAccountHelper;
+    @Inject ExchangeRateFactory exchangeRateFactory;
+    @Inject SSLVerifyUtil sslVerifyUtil;
+    @Inject PrivateKeyFactory privateKeyFactory;
+    @Inject PayloadManager payloadManager;
+    @Inject StringUtils stringUtils;
+    @Inject ContactsDataManager contactsDataManager;
+    @Inject SendDataManager sendDataManager;
+    @Inject PayloadDataManager payloadDataManager;
+    @Inject DynamicFeeCache dynamicFeeCache;
+    @Inject TransactionListDataManager transactionListDataManager;
+    @Inject PersistentUrls persistentUrls;
+    @Inject FeeDataManager feeDataManager;
 
     SendViewModel(SendContract.DataListener dataListener, Locale locale) {
         Injector.getInstance().getDataManagerComponent().inject(this);
@@ -325,19 +327,18 @@ public class SendViewModel extends BaseViewModel {
     }
 
     /**
-     * Get cached dynamic fee from Bci dynamic fee API
+     * Get cached dynamic fee from new Fee options endpoint
      */
     private void getSuggestedFee() {
-        sendModel.dynamicFeeList = dynamicFeeCache.getCachedDynamicFee();
+        sendModel.feeOptions = dynamicFeeCache.getFeeOptions();
 
         // Refresh fee cache
         compositeDisposable.add(
-                sendDataManager.getSuggestedFee()
-                        .doAfterTerminate(() -> sendModel.dynamicFeeList = dynamicFeeCache.getCachedDynamicFee())
-                        .subscribe(suggestedFee -> dynamicFeeCache.setCachedDynamicFee(suggestedFee)
-                                , throwable -> {
-                                    // No-op
-                                }));
+                feeDataManager.getFeeOptions()
+                        .doOnTerminate(() -> sendModel.feeOptions = dynamicFeeCache.getFeeOptions())
+                        .subscribe(
+                                feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions),
+                                Throwable::printStackTrace));
     }
 
     /**
@@ -773,6 +774,7 @@ public class SendViewModel extends BaseViewModel {
         details.fiatTotal = (monetaryUtil.getFiatFormat(sendModel.fiatUnit)
                 .format(sendModel.exchangeRate * (totalFiat.doubleValue() / 1e8)));
 
+        details.fiatSymbol = exchangeRateFactory.getSymbol(sendModel.fiatUnit);
         details.isSurge = isSurge();
         details.isLargeTransaction = isLargeTransaction();
         details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.getConsumedAmount().compareTo(BigInteger.ZERO) == 1;
@@ -1011,7 +1013,7 @@ public class SendViewModel extends BaseViewModel {
         HashMap<String, BigInteger> outputs = new HashMap<>();
 
         String outLabel = pendingTransaction.receivingAddress;
-        if(pendingTransaction.receivingObject != null && pendingTransaction.receivingObject.label != null) {
+        if (pendingTransaction.receivingObject != null && pendingTransaction.receivingObject.label != null) {
             outLabel = pendingTransaction.receivingObject.label;
         }
         outputs.put(outLabel, pendingTransaction.bigIntAmount);

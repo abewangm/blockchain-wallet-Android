@@ -28,6 +28,7 @@ import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
@@ -71,6 +72,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected DynamicFeeCache dynamicFeeCache;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
     @Inject protected RxBus rxBus;
+    @Inject protected FeeDataManager feeDataManager;
 
     public interface DataListener {
 
@@ -387,8 +389,13 @@ public class MainViewModel extends BaseViewModel {
     private void cacheDynamicFee() {
         compositeDisposable.add(
                 sendDataManager.getSuggestedFee()
+                        .doOnNext(feeList -> dynamicFeeCache.setCachedDynamicFee(feeList))
+                        .flatMap(ignored -> feeDataManager.getFeeOptions())
+                        .doOnNext(feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions))
                         .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(feeList -> dynamicFeeCache.setCachedDynamicFee(feeList),
+                        .subscribe(ignored -> {
+                                    // No-op
+                                },
                                 Throwable::printStackTrace));
     }
 

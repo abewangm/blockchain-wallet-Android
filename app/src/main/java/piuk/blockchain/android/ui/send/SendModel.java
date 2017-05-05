@@ -2,6 +2,8 @@ package piuk.blockchain.android.ui.send;
 
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.api.data.FeeList;
+import info.blockchain.wallet.api.data.FeeOptions;
+
 import java.math.BigInteger;
 import java.util.HashMap;
 
@@ -28,7 +30,12 @@ public class SendModel {
     String fiatUnit;
     double exchangeRate;
 
+    @Deprecated
     FeeList dynamicFeeList;//Fee per kb list
+    /**
+     * Priority and Regular fees, defined as Satoshis per byte
+     */
+    FeeOptions feeOptions;
 
     PendingTransaction pendingTransaction;
     BigInteger maxAvailable;

@@ -60,7 +60,6 @@ import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentSendBinding;
-import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
@@ -448,16 +447,11 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         binding.buttonSend.setOnClickListener(v -> {
             customKeypad.setNumpadVisibility(View.GONE);
-//            if (ConnectivityStatus.hasConnectivity(getActivity())) {
-//                requestSendPayment(false);
-//            } else {
-//                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
-//            }
-
-            // STOPSHIP: 04/05/2017
-            ConfirmPaymentDialog.newInstance()
-                    .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
-
+            if (ConnectivityStatus.hasConnectivity(getActivity())) {
+                requestSendPayment(false);
+            } else {
+                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+            }
         });
     }
 
@@ -859,105 +853,109 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     @Override
     public void onShowPaymentDetails(PaymentConfirmationDetails details) {
+
+        ConfirmPaymentDialog.newInstance(details)
+                .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
+
         // Clear dialog incase of accidental double tap
-        if (confirmationDialog != null && confirmationDialog.isShowing()) {
-            confirmationDialog.dismiss();
-        }
-
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-        FragmentSendConfirmBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
-                R.layout.fragment_send_confirm, null, false);
-        dialogBuilder.setView(dialogBinding.getRoot());
-
-        confirmationDialog = dialogBuilder.create();
-        confirmationDialog.setCanceledOnTouchOutside(false);
-
-        dialogBinding.confirmFromLabel.setText(details.fromLabel);
-        dialogBinding.confirmToLabel.setText(details.toLabel);
-        dialogBinding.confirmAmountBtcUnit.setText(details.btcUnit);
-        dialogBinding.confirmAmountFiatUnit.setText(details.fiatUnit);
-        dialogBinding.confirmAmountBtc.setText(details.btcAmount);
-        dialogBinding.confirmAmountFiat.setText(details.fiatAmount);
-        dialogBinding.confirmFeeBtc.setText(details.btcFee);
-        dialogBinding.confirmFeeFiat.setText(details.fiatFee);
-        dialogBinding.confirmTotalBtc.setText(details.btcTotal);
-        dialogBinding.confirmTotalFiat.setText(details.fiatTotal);
-
-        String feeMessage = "";
-        if (details.isSurge) {
-            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
-            feeMessage += getString(R.string.transaction_surge);
-
-        }
-
-        if (details.hasConsumedAmounts) {
-            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
-            if (details.hasConsumedAmounts) {
-                if (details.isSurge) feeMessage += "\n\n";
-                feeMessage += getString(R.string.large_tx_high_fee_warning);
-            }
-
-        }
-
-        final String finalFeeMessage = feeMessage;
-        dialogBinding.ivFeeInfo.setOnClickListener(view -> new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.transaction_fee)
-                .setMessage(finalFeeMessage)
-                .setPositiveButton(android.R.string.ok, null).show());
-
-        if (details.isSurge) {
-            dialogBinding.confirmFeeBtc.setTextColor(ContextCompat.getColor(getContext(), R.color.product_red_medium));
-            dialogBinding.confirmFeeFiat.setTextColor(ContextCompat.getColor(getContext(), R.color.product_red_medium));
-            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
-        }
-
-        dialogBinding.tvCustomizeFee.setOnClickListener(v -> {
-            if (confirmationDialog.isShowing()) {
-                confirmationDialog.cancel();
-            }
-
-            getActivity().runOnUiThread(() -> {
-                binding.customFeeContainer.setVisibility(View.VISIBLE);
-
-                binding.customFee.setText(details.btcFee);
-                binding.customFee.setHint(details.btcSuggestedFee);
-                binding.customFee.requestFocus();
-                binding.customFee.setSelection(binding.customFee.getText().length());
-                customKeypad.setNumpadVisibility(View.GONE);
-            });
-
-            alertCustomSpend(details.btcSuggestedFee, details.btcUnit);
-
-        });
-
-        dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (confirmationDialog.isShowing()) {
-                confirmationDialog.cancel();
-            }
-        });
-
-        dialogBinding.confirmSend.setOnClickListener(v -> {
-            if (ConnectivityStatus.hasConnectivity(getActivity())) {
-                dialogBinding.confirmSend.setClickable(false);
-                viewModel.submitPayment(confirmationDialog);
-            } else {
-                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
-                // Queue tx here
-            }
-        });
-
-        if (getActivity() != null && !getActivity().isFinishing()) {
-            confirmationDialog.show();
-        }
-
-        // To prevent the dialog from appearing too large on Android N
-        if (confirmationDialog.getWindow() != null) {
-            confirmationDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-        }
-
-        if (viewModel.isLargeTransaction()) {
-            onShowLargeTransactionWarning(confirmationDialog);
-        }
+//        if (confirmationDialog != null && confirmationDialog.isShowing()) {
+//            confirmationDialog.dismiss();
+//        }
+//
+//        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+//        FragmentSendConfirmBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
+//                R.layout.fragment_send_confirm, null, false);
+//        dialogBuilder.setView(dialogBinding.getRoot());
+//
+//        confirmationDialog = dialogBuilder.create();
+//        confirmationDialog.setCanceledOnTouchOutside(false);
+//
+//        dialogBinding.confirmFromLabel.setText(details.fromLabel);
+//        dialogBinding.confirmToLabel.setText(details.toLabel);
+//        dialogBinding.confirmAmountBtcUnit.setText(details.btcUnit);
+//        dialogBinding.confirmAmountFiatUnit.setText(details.fiatUnit);
+//        dialogBinding.confirmAmountBtc.setText(details.btcAmount);
+//        dialogBinding.confirmAmountFiat.setText(details.fiatAmount);
+//        dialogBinding.confirmFeeBtc.setText(details.btcFee);
+//        dialogBinding.confirmFeeFiat.setText(details.fiatFee);
+//        dialogBinding.confirmTotalBtc.setText(details.btcTotal);
+//        dialogBinding.confirmTotalFiat.setText(details.fiatTotal);
+//
+//        String feeMessage = "";
+//        if (details.isSurge) {
+//            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
+//            feeMessage += getString(R.string.transaction_surge);
+//
+//        }
+//
+//        if (details.hasConsumedAmounts) {
+//            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
+//            if (details.hasConsumedAmounts) {
+//                if (details.isSurge) feeMessage += "\n\n";
+//                feeMessage += getString(R.string.large_tx_high_fee_warning);
+//            }
+//
+//        }
+//
+//        final String finalFeeMessage = feeMessage;
+//        dialogBinding.ivFeeInfo.setOnClickListener(view -> new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+//                .setTitle(R.string.transaction_fee)
+//                .setMessage(finalFeeMessage)
+//                .setPositiveButton(android.R.string.ok, null).show());
+//
+//        if (details.isSurge) {
+//            dialogBinding.confirmFeeBtc.setTextColor(ContextCompat.getColor(getContext(), R.color.product_red_medium));
+//            dialogBinding.confirmFeeFiat.setTextColor(ContextCompat.getColor(getContext(), R.color.product_red_medium));
+//            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
+//        }
+//
+//        dialogBinding.tvCustomizeFee.setOnClickListener(v -> {
+//            if (confirmationDialog.isShowing()) {
+//                confirmationDialog.cancel();
+//            }
+//
+//            getActivity().runOnUiThread(() -> {
+//                binding.customFeeContainer.setVisibility(View.VISIBLE);
+//
+//                binding.customFee.setText(details.btcFee);
+//                binding.customFee.setHint(details.btcSuggestedFee);
+//                binding.customFee.requestFocus();
+//                binding.customFee.setSelection(binding.customFee.getText().length());
+//                customKeypad.setNumpadVisibility(View.GONE);
+//            });
+//
+//            alertCustomSpend(details.btcSuggestedFee, details.btcUnit);
+//
+//        });
+//
+//        dialogBinding.confirmCancel.setOnClickListener(v -> {
+//            if (confirmationDialog.isShowing()) {
+//                confirmationDialog.cancel();
+//            }
+//        });
+//
+//        dialogBinding.confirmSend.setOnClickListener(v -> {
+//            if (ConnectivityStatus.hasConnectivity(getActivity())) {
+//                dialogBinding.confirmSend.setClickable(false);
+//                viewModel.submitPayment(confirmationDialog);
+//            } else {
+//                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+//                // Queue tx here
+//            }
+//        });
+//
+//        if (getActivity() != null && !getActivity().isFinishing()) {
+//            confirmationDialog.show();
+//        }
+//
+//        // To prevent the dialog from appearing too large on Android N
+//        if (confirmationDialog.getWindow() != null) {
+//            confirmationDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+//        }
+//
+//        if (viewModel.isLargeTransaction()) {
+//            onShowLargeTransactionWarning(confirmationDialog);
+//        }
     }
 
     @Override
