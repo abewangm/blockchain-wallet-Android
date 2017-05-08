@@ -301,7 +301,9 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 viewModel.setSendingAddress(chosenItem);
 
                 viewModel.calculateTransactionAmounts(chosenItem,
-                        binding.amountRow.amountBtc.getText().toString(), getFeePriority(), null);// TODO: 05/05/2017 Pass in fee priority
+                        binding.amountRow.amountBtc.getText().toString(),
+                        getFeePriority(),
+                        null);
 
             } catch (ClassNotFoundException | IOException e) {
                 throw new RuntimeException(e);
@@ -431,7 +433,11 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
             }
         });
 
-        binding.switchPriority.setOnCheckedChangeListener((buttonView, isChecked) -> setupSendFromView());
+        binding.switchPriority.setOnCheckedChangeListener((buttonView, isChecked) ->
+                viewModel.calculateTransactionAmounts(viewModel.getSendingItemAccount(),
+                        binding.amountRow.amountBtc.getText().toString(),
+                        getFeePriority(),
+                        null));
     }
 
     private void requestSendPayment() {
@@ -446,6 +452,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         binding.destination.setOnTouchListener((v, event) -> {
             binding.destination.setText("");
             viewModel.setReceivingAddress(null);
+            v.performClick();
             return false;
         });
         binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
@@ -458,9 +465,9 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private void setupSendFromView() {
         ItemAccount itemAccount;
         if (selectedAccountPosition != -1) {
-            itemAccount = viewModel.getAddressList(false, getFeePriority()).get(selectedAccountPosition);
+            itemAccount = viewModel.getAddressList(getFeePriority()).get(selectedAccountPosition);
         } else {
-            itemAccount = viewModel.getAddressList(false, getFeePriority()).get(viewModel.getDefaultAccount());
+            itemAccount = viewModel.getAddressList(getFeePriority()).get(viewModel.getDefaultAccount());
         }
 
         viewModel.setSendingAddress(itemAccount);
@@ -805,13 +812,13 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     @Override
     public void onShowPaymentDetails(PaymentConfirmationDetails details) {
-        if (viewModel.isLargeTransaction()) {
-            onShowLargeTransactionWarning();
-        }
-
         confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details);
         confirmPaymentDialog
                 .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
+
+        if (viewModel.isLargeTransaction()) {
+            binding.getRoot().postDelayed(this::onShowLargeTransactionWarning, 500);
+        }
     }
 
     @Override
@@ -828,14 +835,14 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         dialogBinding.confirmCancel.setOnClickListener(v -> {
             binding.destination.setText("");
             if (dialogBinding.confirmDontAskAgain.isChecked())
-                viewModel.setWatchOnlySpendWarning(false);
+                viewModel.disableWatchOnlySpendWarning();
             alertDialog.dismiss();
         });
 
         dialogBinding.confirmContinue.setOnClickListener(v -> {
             binding.destination.setText(address);
             if (dialogBinding.confirmDontAskAgain.isChecked())
-                viewModel.setWatchOnlySpendWarning(false);
+                viewModel.disableWatchOnlySpendWarning();
             alertDialog.dismiss();
         });
 

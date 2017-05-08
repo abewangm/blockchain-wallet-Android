@@ -218,10 +218,9 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Returns a list of accounts, legacy addresses and optionally Address Book entries
      *
-     * @param includeAddressBookEntries Whether or not to include a user's Address book
      * @return List of account details (balance, label, tag, account/address/address_book object)
      */
-    List<ItemAccount> getAddressList(boolean includeAddressBookEntries, int feePriority) {
+    List<ItemAccount> getAddressList(int feePriority) {
         ArrayList<ItemAccount> result = new ArrayList<>();
         result.addAll(walletAccountHelper.getAccountItems(sendModel.isBTC));
 
@@ -229,11 +228,6 @@ public class SendViewModel extends BaseViewModel {
             //Only a single account/address available in wallet
             if (dataListener != null) dataListener.hideSendingAddressField();
             calculateTransactionAmounts(result.get(0), null, feePriority, null);
-        }
-
-        //Address Book (only included in receiving)
-        if (includeAddressBookEntries) {
-            result.addAll(walletAccountHelper.getAddressBookEntries());
         }
 
         if (result.size() == 1) {
@@ -681,6 +675,10 @@ public class SendViewModel extends BaseViewModel {
         sendModel.pendingTransaction.sendingObject = selectedItem;
     }
 
+    ItemAccount getSendingAddress() {
+       return sendModel.pendingTransaction.sendingObject;
+    }
+
     ItemAccount getSendingItemAccount() {
         return sendModel.pendingTransaction.sendingObject;
     }
@@ -948,8 +946,8 @@ public class SendViewModel extends BaseViewModel {
         if (dataListener != null) dataListener.showToast(message, type);
     }
 
-    void setWatchOnlySpendWarning(boolean enabled) {
-        prefsUtil.setValue("WARN_WATCH_ONLY_SPEND", enabled);
+    void disableWatchOnlySpendWarning() {
+        prefsUtil.setValue("WARN_WATCH_ONLY_SPEND", false);
     }
 
     BigInteger getFeePerKbFromPriority(@FeePriority.FeePriorityDef int feePriorityTemp) {
