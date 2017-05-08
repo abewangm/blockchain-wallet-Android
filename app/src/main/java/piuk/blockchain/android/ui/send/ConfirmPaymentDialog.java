@@ -4,31 +4,42 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.lang3.NotImplementedException;
+
+import java.io.IOException;
+import java.util.List;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.DialogConfirmTransactionBinding;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.BaseDialogFragment;
 import piuk.blockchain.android.ui.base.UiState;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView, ConfirmPaymentPresenter>
         implements ConfirmPaymentView {
 
     private static final String ARGUMENT_PAYMENT_DETAILS = "argument_payment_details";
+    private static final String ARGUMENT_PENDING_TRANSACTION = "argument_pending_transaction";
 
     private DialogConfirmTransactionBinding binding;
 
-    public static ConfirmPaymentDialog newInstance(PaymentConfirmationDetails details) {
+    public static ConfirmPaymentDialog newInstance(PaymentConfirmationDetails details,
+                                                   String sendModel) {
         Bundle args = new Bundle();
         args.putParcelable(ARGUMENT_PAYMENT_DETAILS, details);
+        args.putString(ARGUMENT_PENDING_TRANSACTION, sendModel);
         ConfirmPaymentDialog fragment = new ConfirmPaymentDialog();
         fragment.setArguments(args);
         fragment.setStyle(DialogFragment.STYLE_NO_FRAME, R.style.FullscreenDialog);
@@ -111,8 +122,42 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
     }
 
     @Override
+    public void showFeeChangeDialog(List<String> feeOptions) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                getActivity(), R.layout.item_environment_list, feeOptions);
+
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setSingleChoiceItems(adapter, 0, (dialogInterface, i) -> {
+                    switch (i) {
+                        case 1:
+                            // Priority
+                            ToastCustom.makeText(getActivity(), "Priority", ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
+                            break;
+                        default:
+                            // Default
+                            ToastCustom.makeText(getActivity(), "Regular", ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
+                            break;
+                    }
+                })
+                .setPositiveButton(android.R.string.ok, null)
+                .create()
+                .show();
+    }
+
+    @Override
     public PaymentConfirmationDetails getPaymentDetails() {
         return getArguments().getParcelable(ARGUMENT_PAYMENT_DETAILS);
+    }
+
+    @Override
+    public SendModel getSendModel() {
+        try {
+            String arguments = getArguments().getString(ARGUMENT_PENDING_TRANSACTION);
+            return new ObjectMapper().readValue(arguments, SendModel.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -33,13 +33,13 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.wallet.contacts.data.Contact;
@@ -799,10 +799,15 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public void onShowPaymentDetails(PaymentConfirmationDetails details) {
-
-//        ConfirmPaymentDialog.newInstance(details)
-//                .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
+    public void onShowPaymentDetails(PaymentConfirmationDetails details, SendModel sendModel) {
+//        try {
+//            String model = new ObjectMapper().writer().writeValueAsString(sendModel);
+//
+//            ConfirmPaymentDialog.newInstance(details, model)
+//                    .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
 
         // Clear dialog incase of accidental double tap
         if (confirmationDialog != null && confirmationDialog.isShowing()) {

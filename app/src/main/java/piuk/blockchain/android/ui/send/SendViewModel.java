@@ -328,6 +328,7 @@ public class SendViewModel extends BaseViewModel {
      */
     private void getSuggestedFee() {
         sendModel.feeOptions = dynamicFeeCache.getFeeOptions();
+        sendModel.dynamicFeeList = dynamicFeeCache.getCachedDynamicFee();
 
         // Refresh fee cache
         compositeDisposable.add(
@@ -599,7 +600,7 @@ public class SendViewModel extends BaseViewModel {
         details.isLargeTransaction = isLargeTransaction();
         details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.getConsumedAmount().compareTo(BigInteger.ZERO) == 1;
 
-        if (dataListener != null) dataListener.onShowPaymentDetails(details);
+        if (dataListener != null) dataListener.onShowPaymentDetails(details, sendModel);
     }
 
     /**

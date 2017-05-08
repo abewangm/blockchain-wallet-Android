@@ -1,13 +1,16 @@
 package piuk.blockchain.android.ui.send;
 
+import java.util.List;
+
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.ui.base.View;
 
 interface ConfirmPaymentView extends View {
 
-    // No-op
     PaymentConfirmationDetails getPaymentDetails();
+
+    SendModel getSendModel();
 
     void setUiState(@UiState.UiStateDef int uiState);
 
@@ -26,5 +29,7 @@ interface ConfirmPaymentView extends View {
     void closeDialog();
 
     void setSendButtonEnabled(boolean enabled);
+
+    void showFeeChangeDialog(List<String> feeOptions);
 
 }
