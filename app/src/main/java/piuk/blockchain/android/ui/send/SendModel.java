@@ -30,12 +30,12 @@ public class SendModel {
     String fiatUnit;
     double exchangeRate;
 
-    @Deprecated
-    FeeList dynamicFeeList;//Fee per kb list
     /**
      * Priority and Regular fees, defined as Satoshis per byte
      */
     FeeOptions feeOptions;
+    public static final int FEE_OPTION_REGULAR = 0;
+    public static final int FEE_OPTION_PRIORITY = 1;
 
     PendingTransaction pendingTransaction;
     BigInteger maxAvailable;
@@ -44,7 +44,6 @@ public class SendModel {
      * repeatedly
      */
     HashMap<String, UnspentOutputs> unspentApiResponses;
-    public BigInteger[] absoluteSuggestedFeeEstimates;
 
     /**
      * Fee for 2nd block inclusion

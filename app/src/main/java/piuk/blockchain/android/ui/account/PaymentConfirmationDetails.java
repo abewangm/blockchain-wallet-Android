@@ -17,7 +17,6 @@ public class PaymentConfirmationDetails implements Parcelable {
     public String fiatTotal;
     public String btcSuggestedFee;
     public String fiatSymbol;
-    public boolean isSurge;
     public boolean isLargeTransaction;
     public boolean hasConsumedAmounts;
 
@@ -38,7 +37,6 @@ public class PaymentConfirmationDetails implements Parcelable {
         fiatTotal = in.readString();
         btcSuggestedFee = in.readString();
         fiatSymbol = in.readString();
-        isSurge = in.readByte() != 0x00;
         isLargeTransaction = in.readByte() != 0x00;
         hasConsumedAmounts = in.readByte() != 0x00;
     }
@@ -74,7 +72,6 @@ public class PaymentConfirmationDetails implements Parcelable {
         dest.writeString(fiatTotal);
         dest.writeString(btcSuggestedFee);
         dest.writeString(fiatSymbol);
-        dest.writeByte((byte) (isSurge ? 0x01 : 0x00));
         dest.writeByte((byte) (isLargeTransaction ? 0x01 : 0x00));
         dest.writeByte((byte) (hasConsumedAmounts ? 0x01 : 0x00));
     }
@@ -94,7 +91,6 @@ public class PaymentConfirmationDetails implements Parcelable {
                 ", fiatTotal='" + fiatTotal + '\'' +
                 ", btcSuggestedFee='" + btcSuggestedFee + '\'' +
                 ", fiatSymbol='" + fiatSymbol + '\'' +
-                ", isSurge=" + isSurge +
                 ", isLargeTransaction=" + isLargeTransaction +
                 ", hasConsumedAmounts=" + hasConsumedAmounts +
                 '}';

@@ -200,20 +200,10 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         dialogBinding.confirmTotalFiat.setText(details.fiatTotal);
 
         String feeMessage = "";
-        if (details.isSurge) {
-            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
-            feeMessage += getString(R.string.transaction_surge);
-
-        }
 
         if (details.hasConsumedAmounts) {
             dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
-
-            if (details.hasConsumedAmounts) {
-                if (details.isSurge) feeMessage += "\n\n";
-                feeMessage += getString(R.string.large_tx_high_fee_warning);
-            }
-
+            feeMessage = getString(R.string.large_tx_high_fee_warning);
         }
 
         final String finalFeeMessage = feeMessage;
@@ -221,12 +211,6 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
                 .setTitle(R.string.transaction_fee)
                 .setMessage(finalFeeMessage)
                 .setPositiveButton(android.R.string.ok, null).show());
-
-        if (details.isSurge) {
-            dialogBinding.confirmFeeBtc.setTextColor(ContextCompat.getColor(this, R.color.product_red_medium));
-            dialogBinding.confirmFeeFiat.setTextColor(ContextCompat.getColor(this, R.color.product_red_medium));
-            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
-        }
 
         dialogBinding.tvCustomizeFee.setVisibility(View.GONE);
 

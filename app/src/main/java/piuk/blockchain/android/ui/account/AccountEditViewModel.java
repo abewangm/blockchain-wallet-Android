@@ -374,7 +374,6 @@ public class AccountEditViewModel extends BaseViewModel {
         details.fiatTotal = monetaryUtil.getFiatFormat(fiatUnit)
                 .format(exchangeRate * totalFiat.doubleValue() / 1e8);
 
-        details.isSurge = false;
         details.isLargeTransaction = isLargeTransaction(pendingTransaction);
         details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.getConsumedAmount().compareTo(BigInteger.ZERO) == 1;
 
