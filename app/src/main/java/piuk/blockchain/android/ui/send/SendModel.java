@@ -1,12 +1,12 @@
 package piuk.blockchain.android.ui.send;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.FeeOptions;
 
 import java.math.BigInteger;
 import java.util.HashMap;
 
+@SuppressWarnings("WeakerAccess")
 public class SendModel {
 
     // Vars used for warning user of large tx
@@ -34,8 +34,6 @@ public class SendModel {
      * Priority and Regular fees, defined as Satoshis per byte
      */
     FeeOptions feeOptions;
-    public static final int FEE_OPTION_REGULAR = 0;
-    public static final int FEE_OPTION_PRIORITY = 1;
 
     PendingTransaction pendingTransaction;
     BigInteger maxAvailable;
@@ -46,7 +44,7 @@ public class SendModel {
     HashMap<String, UnspentOutputs> unspentApiResponses;
 
     /**
-     * Fee for 2nd block inclusion
+     * Current total fee amount
      */
     BigInteger absoluteSuggestedFee;
 

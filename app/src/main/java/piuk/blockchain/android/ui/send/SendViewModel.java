@@ -162,7 +162,7 @@ public class SendViewModel extends BaseViewModel {
         dataListener.updateFiatUnit(sendModel.fiatUnit);
     }
 
-    void onSendClicked(String amount, String address, int feePriority) {
+    void onSendClicked(String amount, String address, @FeePriority.FeePriorityDef int feePriority) {
         // Contact selected but no FacilitationTransaction to respond to
         if (fctxId == null && contactMdid != null) {
             setupTransaction(amount, feePriority, () -> {
@@ -328,7 +328,6 @@ public class SendViewModel extends BaseViewModel {
      */
     private void getSuggestedFee() {
         sendModel.feeOptions = dynamicFeeCache.getFeeOptions();
-        sendModel.dynamicFeeList = dynamicFeeCache.getCachedDynamicFee();
 
         // Refresh fee cache
         compositeDisposable.add(
@@ -342,15 +341,22 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Wrapper for calculateTransactionAmounts
      */
-    void spendAllClicked(ItemAccount sendAddressItem, int feePriority) {
+    void spendAllClicked(ItemAccount sendAddressItem, @FeePriority.FeePriorityDef int feePriority) {
         calculateTransactionAmounts(true, sendAddressItem, null, feePriority, null);
     }
 
     /**
      * Wrapper for calculateTransactionAmounts
      */
-    void calculateTransactionAmounts(ItemAccount sendAddressItem, String amountToSendText, int feePriority, TransactionDataListener listener) {
-        calculateTransactionAmounts(false, sendAddressItem, amountToSendText, feePriority, listener);
+    void calculateTransactionAmounts(ItemAccount sendAddressItem,
+                                     String amountToSendText,
+                                     @FeePriority.FeePriorityDef int feePriority,
+                                     TransactionDataListener listener) {
+        calculateTransactionAmounts(false,
+                sendAddressItem,
+                amountToSendText,
+                feePriority,
+                listener);
     }
 
     /**
@@ -361,7 +367,7 @@ public class SendViewModel extends BaseViewModel {
     private void calculateTransactionAmounts(boolean spendAll,
                                              ItemAccount sendAddressItem,
                                              String amountToSendText,
-                                             int feePriority,
+                                             @FeePriority.FeePriorityDef int feePriority,
                                              TransactionDataListener listener) {
 
         //Convert selected fee priority to feePerKb
@@ -432,7 +438,6 @@ public class SendViewModel extends BaseViewModel {
                 amountToSend,
                 feePerKb);
 
-        sendModel.pendingTransaction.isCustomFee = false;
         sendModel.pendingTransaction.bigIntAmount = amountToSend;
         sendModel.pendingTransaction.unspentOutputBundle = unspentOutputBundle;
         sendModel.pendingTransaction.bigIntFee = sendModel.pendingTransaction.unspentOutputBundle.getAbsoluteFee();
@@ -513,7 +518,8 @@ public class SendViewModel extends BaseViewModel {
         return displayAmount;
     }
 
-    private void setupTransaction(String amount, int feePriority,
+    private void setupTransaction(String amount,
+                                  @FeePriority.FeePriorityDef int feePriority,
                                   TransactionDataListener transactionDataListener) {
         ItemAccount selectedItem = getSendingItemAccount();
         setSendingAddress(selectedItem);
@@ -600,7 +606,7 @@ public class SendViewModel extends BaseViewModel {
         details.isLargeTransaction = isLargeTransaction();
         details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.getConsumedAmount().compareTo(BigInteger.ZERO) == 1;
 
-        if (dataListener != null) dataListener.onShowPaymentDetails(details, sendModel);
+        if (dataListener != null) dataListener.onShowPaymentDetails(details);
     }
 
     /**
@@ -608,10 +614,6 @@ public class SendViewModel extends BaseViewModel {
      * total
      */
     boolean isLargeTransaction() {
-        if (sendModel.pendingTransaction.isCustomFee) {
-            return false;
-        }
-
         int txSize = sendDataManager.estimateSize(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = sendModel.absoluteSuggestedFee.doubleValue() / sendModel.pendingTransaction.bigIntAmount.doubleValue() * 100.0;
 
@@ -955,16 +957,10 @@ public class SendViewModel extends BaseViewModel {
         prefsUtil.setValue("WARN_WATCH_ONLY_SPEND", enabled);
     }
 
-    BigInteger getFeePerKbFromPriority(int feePriorityTemp) {
-
-        switch (feePriorityTemp) {
-            case SendModel.FEE_OPTION_REGULAR:
-                return BigInteger.valueOf(sendModel.feeOptions.getRegularFee() * 1000);
-            case SendModel.FEE_OPTION_PRIORITY:
-                return BigInteger.valueOf(sendModel.feeOptions.getPriorityFee() * 1000);
-            default:
-                return BigInteger.valueOf(sendModel.feeOptions.getRegularFee() * 1000);
-        }
+    BigInteger getFeePerKbFromPriority(@FeePriority.FeePriorityDef int feePriorityTemp) {
+        return feePriorityTemp == FeePriority.FEE_OPTION_PRIORITY
+                ? BigInteger.valueOf(sendModel.feeOptions.getPriorityFee() * 1000)
+                : BigInteger.valueOf(sendModel.feeOptions.getRegularFee() * 1000);
     }
 
     interface TransactionDataListener {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <RelativeLayout
         android:id="@+id/main_layout"
@@ -168,25 +169,18 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:visibility="gone">
+                    android:padding="16dp"
+                    android:visibility="gone"
+                    tools:visibility="visible">
 
-                    <LinearLayout
+                    <android.support.v7.widget.SwitchCompat
+                        android:id="@+id/switch_priority"
+                        fontPath="fonts/Montserrat-Light.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            fontPath="fonts/Montserrat-Light.ttf"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center_vertical"
-                            android:text="some fee dropdown here"
-                            android:textColor="@color/primary_gray_dark" />
-
-                    </LinearLayout>
+                        android:checked="false"
+                        android:text="@string/confirm_payment_fee_toggle_title"
+                        android:textColor="@color/primary_gray_dark" />
 
                 </LinearLayout>
 

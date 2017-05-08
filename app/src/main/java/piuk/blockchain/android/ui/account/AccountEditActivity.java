@@ -179,7 +179,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
 
     @Override
     public void showPaymentDetails(PaymentConfirmationDetails details, PendingTransaction pendingTransaction) {
-
+        // STOPSHIP: 08/05/2017 This needs to be updated
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         FragmentSendConfirmBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
                 R.layout.fragment_send_confirm, null, false);

@@ -19,7 +19,6 @@ public class PendingTransaction {
     public BigInteger bigIntFee;
     public BigInteger bigIntAmount;
     public int addressToReceiveIndex;
-    public boolean isCustomFee;
 
     @JsonIgnore
     public boolean isHD() {

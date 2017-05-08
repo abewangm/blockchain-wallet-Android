@@ -38,7 +38,7 @@ interface SendContract {
 
         void updateFiatTextField(String text);
 
-        void onShowPaymentDetails(PaymentConfirmationDetails confirmationDetails, SendModel sendModel);
+        void onShowPaymentDetails(PaymentConfirmationDetails confirmationDetails);
 
         void onShowReceiveToWatchOnlyWarning(String address);
 

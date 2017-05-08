@@ -39,7 +39,6 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.wallet.contacts.data.Contact;
@@ -61,7 +60,6 @@ import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentSendBinding;
-import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
@@ -106,8 +104,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private OnSendFragmentInteractionListener listener;
     private CustomKeypad customKeypad;
     private MaterialProgressDialog progressDialog;
-    private AlertDialog confirmationDialog;
     private AlertDialog largeTxWarning;
+    private ConfirmPaymentDialog confirmPaymentDialog;
 
     private int selectedAccountPosition = -1;
     private long backPressed;
@@ -303,7 +301,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 viewModel.setSendingAddress(chosenItem);
 
                 viewModel.calculateTransactionAmounts(chosenItem,
-                        binding.amountRow.amountBtc.getText().toString(), 0, null);// TODO: 05/05/2017 Pass in fee priority
+                        binding.amountRow.amountBtc.getText().toString(), getFeePriority(), null);// TODO: 05/05/2017 Pass in fee priority
 
             } catch (ClassNotFoundException | IOException e) {
                 throw new RuntimeException(e);
@@ -422,7 +420,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         setupFiatTextField();
 
         binding.max.setOnClickListener(view ->
-                viewModel.spendAllClicked(viewModel.getSendingItemAccount(), SendModel.FEE_OPTION_REGULAR));// TODO: 05/05/2017 Pass in fee priority
+                viewModel.spendAllClicked(viewModel.getSendingItemAccount(), getFeePriority()));
 
         binding.buttonSend.setOnClickListener(v -> {
             customKeypad.setNumpadVisibility(View.GONE);
@@ -432,12 +430,14 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
             }
         });
+
+        binding.switchPriority.setOnCheckedChangeListener((buttonView, isChecked) -> setupSendFromView());
     }
 
     private void requestSendPayment() {
         viewModel.onSendClicked(binding.amountRow.amountBtc.getText().toString(),
                 binding.destination.getText().toString(),
-                SendModel.FEE_OPTION_REGULAR);// TODO: 05/05/2017 Pass in fee priority
+                getFeePriority());
     }
 
     private void setupDestinationView() {
@@ -458,20 +458,26 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private void setupSendFromView() {
         ItemAccount itemAccount;
         if (selectedAccountPosition != -1) {
-            itemAccount = viewModel.getAddressList(false, SendModel.FEE_OPTION_REGULAR).get(selectedAccountPosition);// TODO: 05/05/2017 Pass in fee priority
+            itemAccount = viewModel.getAddressList(false, getFeePriority()).get(selectedAccountPosition);
         } else {
-            itemAccount = viewModel.getAddressList(false, SendModel.FEE_OPTION_REGULAR).get(viewModel.getDefaultAccount());// TODO: 05/05/2017 Pass in fee priority
+            itemAccount = viewModel.getAddressList(false, getFeePriority()).get(viewModel.getDefaultAccount());
         }
 
         viewModel.setSendingAddress(itemAccount);
         viewModel.calculateTransactionAmounts(itemAccount,
                 binding.amountRow.amountBtc.getText().toString(),
-                SendModel.FEE_OPTION_REGULAR,// TODO: 05/05/2017 Pass in fee priority
-                 null);
+                getFeePriority(),
+                null);
         binding.from.setText(itemAccount.label);
 
         binding.from.setOnClickListener(v -> startFromFragment());
         binding.imageviewDropdownSend.setOnClickListener(v -> startFromFragment());
+    }
+
+    private int getFeePriority() {
+        return binding.switchPriority.isChecked()
+                ? FeePriority.FEE_OPTION_PRIORITY
+                : FeePriority.FEE_OPTION_REGULAR;
     }
 
     private void startFromFragment() {
@@ -799,94 +805,45 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Override
-    public void onShowPaymentDetails(PaymentConfirmationDetails details, SendModel sendModel) {
-//        try {
-//            String model = new ObjectMapper().writer().writeValueAsString(sendModel);
-//
-//            ConfirmPaymentDialog.newInstance(details, model)
-//                    .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
+    public void onShowPaymentDetails(PaymentConfirmationDetails details) {
+//        if (viewModel.isLargeTransaction()) {
+//            onShowLargeTransactionWarning(confirmationDialog);
 //        }
 
-        // Clear dialog incase of accidental double tap
-        if (confirmationDialog != null && confirmationDialog.isShowing()) {
-            confirmationDialog.dismiss();
-        }
-
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-        FragmentSendConfirmBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
-                R.layout.fragment_send_confirm, null, false);
-        dialogBuilder.setView(dialogBinding.getRoot());
-
-        confirmationDialog = dialogBuilder.create();
-        confirmationDialog.setCanceledOnTouchOutside(false);
-
-        dialogBinding.confirmFromLabel.setText(details.fromLabel);
-        dialogBinding.confirmToLabel.setText(details.toLabel);
-        dialogBinding.confirmAmountBtcUnit.setText(details.btcUnit);
-        dialogBinding.confirmAmountFiatUnit.setText(details.fiatUnit);
-        dialogBinding.confirmAmountBtc.setText(details.btcAmount);
-        dialogBinding.confirmAmountFiat.setText(details.fiatAmount);
-        dialogBinding.confirmFeeBtc.setText(details.btcFee);
-        dialogBinding.confirmFeeFiat.setText(details.fiatFee);
-        dialogBinding.confirmTotalBtc.setText(details.btcTotal);
-        dialogBinding.confirmTotalFiat.setText(details.fiatTotal);
+        confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details);
+        confirmPaymentDialog
+                .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
 
         String feeMessage = "";
 
         if (details.hasConsumedAmounts) {
-            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
+//            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
             feeMessage = getString(R.string.large_tx_high_fee_warning);
         }
 
-        final String finalFeeMessage = feeMessage;
-        dialogBinding.ivFeeInfo.setOnClickListener(view -> new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.transaction_fee)
-                .setMessage(finalFeeMessage)
-                .setPositiveButton(android.R.string.ok, null).show());
+//        final String finalFeeMessage = feeMessage;
+//        dialogBinding.ivFeeInfo.setOnClickListener(view -> new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+//                .setTitle(R.string.transaction_fee)
+//                .setMessage(finalFeeMessage)
+//                .setPositiveButton(android.R.string.ok, null).show());
 
-        dialogBinding.tvCustomizeFee.setOnClickListener(v -> {
-            if (confirmationDialog.isShowing()) {
-                confirmationDialog.cancel();
-            }
-
-            getActivity().runOnUiThread(() -> {
-                binding.customFeeContainer.setVisibility(View.VISIBLE);
-            });
-
-            alertCustomSpend(details.btcSuggestedFee, details.btcUnit);
-
-        });
-
-        dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (confirmationDialog.isShowing()) {
-                confirmationDialog.cancel();
-            }
-        });
-
-        dialogBinding.confirmSend.setOnClickListener(v -> {
-            if (ConnectivityStatus.hasConnectivity(getActivity())) {
-                dialogBinding.confirmSend.setClickable(false);
-                viewModel.submitPayment(confirmationDialog);
-            } else {
-                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
-                // Queue tx here
-            }
-        });
-
-        if (getActivity() != null && !getActivity().isFinishing()) {
-            confirmationDialog.show();
+//        dialogBinding.confirmSend.setOnClickListener(v -> {
+        if (ConnectivityStatus.hasConnectivity(getActivity())) {
+//                dialogBinding.confirmSend.setClickable(false);
+//                viewModel.submitPayment(confirmationDialog);
+        } else {
+            showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+            // Queue tx here
         }
+
+//        if (getActivity() != null && !getActivity().isFinishing()) {
+//            confirmationDialog.show();
+//        }
 
         // To prevent the dialog from appearing too large on Android N
-        if (confirmationDialog.getWindow() != null) {
-            confirmationDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-        }
-
-        if (viewModel.isLargeTransaction()) {
-            onShowLargeTransactionWarning(confirmationDialog);
-        }
+//        if (confirmationDialog.getWindow() != null) {
+//            confirmationDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+//        }
     }
 
     @Override
@@ -926,7 +883,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.transaction_fee)
                 .setMessage(message)
-                .setPositiveButton(android.R.string.ok, null).show();
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 
     private void playAudio() {
@@ -972,6 +930,18 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     @Override
     public void finishPage() {
         if (listener != null) listener.onSendFragmentClose();
+    }
+
+    public void onChangeFeeClicked(String feeInBtc, String btcUnit) {
+        confirmPaymentDialog.dismiss();
+
+        binding.customFeeContainer.setVisibility(View.VISIBLE);
+
+        alertCustomSpend(feeInBtc, btcUnit);
+    }
+
+    public void onSendClicked() {
+        // TODO: 08/05/2017
     }
 
     @Override

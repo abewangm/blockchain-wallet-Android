@@ -697,5 +697,6 @@
 
     <!-- CONFIRM PAYMENT -->
     <string name="confirm_payment_change_fee">Change fee</string>
+    <string name="confirm_payment_fee_toggle_title">Priority Fee</string>
 
 </resources>
