@@ -391,7 +391,7 @@
 
     <string name="api_fail">Impossibile connettersi al server. Riprova più tardi.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Questa è una transazione in bitcoin troppo grande. Il tuo portafoglio deve consolidare tanti piccoli pagamenti che hai ricevuto in passato. Ciò richiede un costo relativamente elevato, per avere una conferma rapida. Se ti sta bene che la transazione richieda più tempo per la conferma, puoi ridurre la commissione manualmente cliccando su "personalizza”. </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Questa è una transazione in bitcoin troppo grande. Il tuo portafoglio deve consolidare tanti piccoli pagamenti che hai ricevuto in passato. Ciò richiede un costo relativamente elevato, per avere una conferma rapida. </string>
     <string name="go_back">Torna indietro</string>
     <string name="accept_higher_fee">Accetta commissioni più alte</string>
     <string name="large_tx_high_fee_warning">"Questa operazione richiede una commissione più elevata per il consumo di dust a causa della piccola quantità di resto da restituire."</string>

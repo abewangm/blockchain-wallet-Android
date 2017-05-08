@@ -389,7 +389,7 @@
 
     <string name="api_fail">Nie udało się połączyć z serwerem. Spróbuj ponownie później.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Ta transakcja bitcoin jest za duża. Twój portfel musi skonsolidować wiele mniejszych płatności, otrzymanych przez Ciebie w przeszłości. Wymaga to stosunkowo wysokiej opłaty w celu szybkiego potwierdzenia. Jeśli transakcja może poczekać dłużej na potwierdzenie, możesz ręcznie obniżyć opłatę, klikając "spersonalizuj" </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Ta transakcja bitcoin jest za duża. Twój portfel musi skonsolidować wiele mniejszych płatności, otrzymanych przez Ciebie w przeszłości. Wymaga to stosunkowo wysokiej opłaty w celu szybkiego potwierdzenia.</string>
     <string name="go_back">Wróć</string>
     <string name="accept_higher_fee">Zaakceptuj wyższą opłatę</string>
     <string name="large_tx_high_fee_warning">"Ta transakcja wymaga wyższej opłaty dla konsumpcji "kurzu" z powodu małej kwoty reszty."</string>

@@ -632,7 +632,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 .setNegativeButton(android.R.string.cancel, null).show();
     }
 
-    private void onShowLargeTransactionWarning(AlertDialog alertDialog) {
+    private void onShowLargeTransactionWarning() {
         if (largeTxWarning != null && largeTxWarning.isShowing()) {
             largeTxWarning.dismiss();
         }
@@ -641,8 +641,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 .setCancelable(false)
                 .setTitle(R.string.warning)
                 .setMessage(R.string.large_tx_warning)
-                .setNegativeButton(R.string.go_back, (dialog, which) -> alertDialog.dismiss())
-                .setPositiveButton(R.string.accept_higher_fee, null)
+                .setPositiveButton(android.R.string.ok, null)
                 .create();
 
         largeTxWarning.show();
@@ -806,44 +805,13 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     @Override
     public void onShowPaymentDetails(PaymentConfirmationDetails details) {
-//        if (viewModel.isLargeTransaction()) {
-//            onShowLargeTransactionWarning(confirmationDialog);
-//        }
+        if (viewModel.isLargeTransaction()) {
+            onShowLargeTransactionWarning();
+        }
 
         confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details);
         confirmPaymentDialog
                 .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
-
-        String feeMessage = "";
-
-        if (details.hasConsumedAmounts) {
-//            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
-            feeMessage = getString(R.string.large_tx_high_fee_warning);
-        }
-
-//        final String finalFeeMessage = feeMessage;
-//        dialogBinding.ivFeeInfo.setOnClickListener(view -> new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-//                .setTitle(R.string.transaction_fee)
-//                .setMessage(finalFeeMessage)
-//                .setPositiveButton(android.R.string.ok, null).show());
-
-//        dialogBinding.confirmSend.setOnClickListener(v -> {
-        if (ConnectivityStatus.hasConnectivity(getActivity())) {
-//                dialogBinding.confirmSend.setClickable(false);
-//                viewModel.submitPayment(confirmationDialog);
-        } else {
-            showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
-            // Queue tx here
-        }
-
-//        if (getActivity() != null && !getActivity().isFinishing()) {
-//            confirmationDialog.show();
-//        }
-
-        // To prevent the dialog from appearing too large on Android N
-//        if (confirmationDialog.getWindow() != null) {
-//            confirmationDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-//        }
     }
 
     @Override
@@ -933,15 +901,22 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     public void onChangeFeeClicked(String feeInBtc, String btcUnit) {
-        confirmPaymentDialog.dismiss();
-
         binding.customFeeContainer.setVisibility(View.VISIBLE);
-
+        confirmPaymentDialog.dismiss();
         alertCustomSpend(feeInBtc, btcUnit);
     }
 
     public void onSendClicked() {
-        // TODO: 08/05/2017
+        if (ConnectivityStatus.hasConnectivity(getActivity())) {
+            viewModel.submitPayment();
+        } else {
+            showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+        }
+    }
+
+    @Override
+    public void dismissConfirmationDialog() {
+        confirmPaymentDialog.dismiss();
     }
 
     @Override

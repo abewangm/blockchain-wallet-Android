@@ -70,6 +70,8 @@ interface SendContract {
 
         void navigateToAddNote(String contactId, PaymentRequestType paymentRequestType, long satoshis);
 
+        void dismissConfirmationDialog();
+
     }
 
 }

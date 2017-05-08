@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.send;
 
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import info.blockchain.api.data.UnspentOutputs;
@@ -751,7 +750,7 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Executes transaction
      */
-    void submitPayment(AlertDialog alertDialog) {
+    void submitPayment() {
         String changeAddress;
         List<ECKey> keys = new ArrayList<>();
         Account account;
@@ -796,11 +795,7 @@ public class SendViewModel extends BaseViewModel {
                         .subscribe(
                                 hash -> {
                                     clearUnspentResponseCache();
-
-                                    if (alertDialog != null && alertDialog.isShowing()) {
-                                        alertDialog.dismiss();
-                                    }
-
+                                    dataListener.dismissConfirmationDialog();
                                     handleSuccessfulPayment(hash);
                                 }, throwable -> showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)));
     }

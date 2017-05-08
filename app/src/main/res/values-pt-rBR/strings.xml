@@ -389,7 +389,7 @@
 
     <string name="api_fail">Não é possível conectar-se ao servidor. Por favor, tente novamente mais tarde.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Esta transação bitcoin é grande demais. Sua carteira precisa consolidar muitos pagamentos menores já recebidos. Isto requer uma taxa relativamente alta para ser confirmado relativamente rápido. Se não tem problema que a transação demore um pouco mais para ser confirmada, você pode reduzir a taxa manualmente, clicando em “personalizar”. </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Esta transação bitcoin é grande demais. Sua carteira precisa consolidar muitos pagamentos menores já recebidos. Isto requer uma taxa relativamente alta para ser confirmado relativamente rápido.</string>
     <string name="go_back">Voltar</string>
     <string name="accept_higher_fee">Aceitar taxa mais alta</string>
     <string name="large_tx_high_fee_warning">"Esta transação requer uma taxa mais alta para gasto residual devido ao baixo valor de troco a ser devolvido."</string>

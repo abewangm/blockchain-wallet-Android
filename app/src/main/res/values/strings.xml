@@ -466,8 +466,7 @@
     <!-- FEE WARNING -->
     <string name="large_tx_warning">This is an oversized bitcoin transaction. Your wallet needs to
         consolidate many smaller payments you\'ve received in the past. This requires a relatively
-        high fee in order to be confirmed quickly. If it’s fine for the transaction to take longer
-        to confirm, you could reduce the fee manually by clicking “customize”.
+        high fee in order to be confirmed quickly.
     </string>
     <string name="go_back">Go back</string>
     <string name="accept_higher_fee">Accept higher fee</string>
