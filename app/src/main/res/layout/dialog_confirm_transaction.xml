@@ -16,7 +16,7 @@
             android:background="?attr/colorPrimary"
             android:elevation="5dp"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            android:title="@string/confirm_details"
+            app:title="@string/confirm_details"
             app:contentInsetLeft="72dp"
             app:contentInsetStart="72dp"
             app:navigationIcon="@drawable/ic_clear_white_24dp"
