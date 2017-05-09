@@ -319,13 +319,16 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Get cached dynamic fee from new Fee options endpoint
      */
-    // TODO: 09/05/2017 If this fails, null pointers can be thrown elsewhere
     private void getSuggestedFee() {
         sendModel.feeOptions = dynamicFeeCache.getFeeOptions();
 
         // Refresh fee cache
         compositeDisposable.add(
                 feeDataManager.getFeeOptions()
+                        .doOnError(ignored -> {
+                            dataListener.showToast(R.string.confirm_payment_fee_sync_error, ToastCustom.TYPE_ERROR);
+                            dataListener.finishPage();
+                        })
                         .doOnTerminate(() -> sendModel.feeOptions = dynamicFeeCache.getFeeOptions())
                         .subscribe(
                                 feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions),
@@ -676,10 +679,6 @@ public class SendViewModel extends BaseViewModel {
         sendModel.pendingTransaction.sendingObject = selectedItem;
     }
 
-    ItemAccount getSendingAddress() {
-       return sendModel.pendingTransaction.sendingObject;
-    }
-
     ItemAccount getSendingItemAccount() {
         return sendModel.pendingTransaction.sendingObject;
     }
@@ -737,7 +736,7 @@ public class SendViewModel extends BaseViewModel {
         }
 
         // Test that amount does not exceed btc limit
-        if (bAmount.compareTo(BigInteger.valueOf(2100000000000000L)) == 1) {
+        if (bAmount.compareTo(BigInteger.valueOf(2_100_000_000_000_000L)) == 1) {
             if (dataListener != null) dataListener.updateBtcAmount("0");
             return false;
         }
@@ -952,6 +951,11 @@ public class SendViewModel extends BaseViewModel {
     }
 
     BigInteger getFeePerKbFromPriority(@FeePriority.FeePriorityDef int feePriorityTemp) {
+        if (sendModel.feeOptions == null) {
+            // This is a stopgap in case of failure to prevent crashes.
+            return BigInteger.ZERO;
+        }
+
         return feePriorityTemp == FeePriority.FEE_OPTION_PRIORITY
                 ? BigInteger.valueOf(sendModel.feeOptions.getPriorityFee() * 1000)
                 : BigInteger.valueOf(sendModel.feeOptions.getRegularFee() * 1000);

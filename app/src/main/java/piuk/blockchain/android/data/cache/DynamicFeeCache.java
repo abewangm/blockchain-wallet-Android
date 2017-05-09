@@ -1,5 +1,7 @@
 package piuk.blockchain.android.data.cache;
 
+import android.support.annotation.Nullable;
+
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.FeeOptions;
 
@@ -17,6 +19,7 @@ public class DynamicFeeCache {
         return feeList;
     }
 
+    @Nullable
     public FeeOptions getFeeOptions() {
         return feeOptions;
     }
