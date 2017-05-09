@@ -11,7 +11,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.ECKey;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +48,8 @@ public class TransferFundsDataManager {
     public Observable<Triple<List<PendingTransaction>, Long, Long>> getTransferableFundTransactionList(int addressToReceiveIndex) {
         return Observable.fromCallable(() -> {
 
-            BigInteger suggestedFeePerKb = BigDecimal.valueOf(
-                    dynamicFeeCache.getCachedDynamicFee().getDefaultFee().getFee())
-                    .toBigInteger();
+            BigInteger suggestedFeePerKb =
+                    BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000);
 
             List<PendingTransaction> pendingTransactionList = new ArrayList<>();
             List<LegacyAddress> legacyAddresses = payloadDataManager.getWallet().getLegacyAddressList();

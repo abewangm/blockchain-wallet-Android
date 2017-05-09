@@ -220,7 +220,7 @@ public class AccountEditViewModelTest {
         when(payloadDataManager.getAddressBalance(anyString())).thenReturn(BigInteger.TEN);
         Fee mockFee = mock(Fee.class);
         when(mockFee.getFee()).thenReturn(100.0d);
-        when(dynamicFeeCache.getCachedDynamicFee().getDefaultFee()).thenReturn(mockFee);
+        when(dynamicFeeCache.getFeeOptions().getRegularFee()).thenReturn(100L);
         when(sendDataManager.estimatedFee(anyInt(), anyInt(), any(BigInteger.class)))
                 .thenReturn(BigInteger.TEN);
         // Act

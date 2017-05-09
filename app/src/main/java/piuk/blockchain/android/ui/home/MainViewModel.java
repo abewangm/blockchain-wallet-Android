@@ -388,9 +388,7 @@ public class MainViewModel extends BaseViewModel {
 
     private void cacheDynamicFee() {
         compositeDisposable.add(
-                sendDataManager.getSuggestedFee()
-                        .doOnNext(feeList -> dynamicFeeCache.setCachedDynamicFee(feeList))
-                        .flatMap(ignored -> feeDataManager.getFeeOptions())
+                feeDataManager.getFeeOptions()
                         .doOnNext(feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions))
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(ignored -> {

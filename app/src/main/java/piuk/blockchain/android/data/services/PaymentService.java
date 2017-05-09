@@ -1,7 +1,6 @@
 package piuk.blockchain.android.data.services;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
@@ -73,17 +72,6 @@ public class PaymentService {
                 }
             }
         });
-    }
-
-    /**
-     * Returns a {@link FeeList} object containing an ArrayList of the current suggested fees based
-     * on network congestion and the global fee average.
-     *
-     * @return An {@link Observable<FeeList>}
-     */
-    @WebRequest
-    public Observable<FeeList> getSuggestedFee() {
-        return payment.getDynamicFee();
     }
 
     /**

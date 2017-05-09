@@ -25,7 +25,6 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
 import org.bitcoinj.params.MainNetParams;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -198,10 +197,7 @@ public class AccountEditViewModel extends BaseViewModel {
                     long balanceAfterFee = payloadDataManager.getAddressBalance(
                             legacyAddress.getAddress()).longValue() -
                             sendDataManager.estimatedFee(1, 1,
-                                    BigDecimal.valueOf(dynamicFeeCache.getCachedDynamicFee()
-                                            .getDefaultFee()
-                                            .getFee())
-                                            .toBigInteger())
+                                    BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000))
                                     .longValue();
 
                     if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {

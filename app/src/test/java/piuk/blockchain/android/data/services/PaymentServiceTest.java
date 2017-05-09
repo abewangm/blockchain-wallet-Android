@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.services;
 
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.payment.InsufficientMoneyException;
 import info.blockchain.wallet.payment.Payment;
@@ -21,7 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.RxTest;
@@ -158,21 +156,6 @@ public class PaymentServiceTest extends RxTest {
         testObserver.assertNoValues();
         testObserver.assertError(InsufficientMoneyException.class);
         verify(payment).makeTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress));
-        verifyNoMoreInteractions(payment);
-    }
-
-    @Test
-    public void getSuggestedFee() throws Exception {
-        // Arrange
-        FeeList mockFeeList = mock(FeeList.class);
-        when(payment.getDynamicFee()).thenReturn(Observable.just(mockFeeList));
-        // Act
-        TestObserver<FeeList> testObserver = subject.getSuggestedFee().test();
-        // Assert
-        testObserver.assertComplete();
-        testObserver.assertNoErrors();
-        assertEquals(mockFeeList, testObserver.values().get(0));
-        verify(payment).getDynamicFee();
         verifyNoMoreInteractions(payment);
     }
 
