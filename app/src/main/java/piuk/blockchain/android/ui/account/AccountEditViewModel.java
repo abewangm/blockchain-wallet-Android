@@ -62,15 +62,15 @@ public class AccountEditViewModel extends BaseViewModel {
 
     private DataListener dataListener;
 
-    @Inject protected PrefsUtil prefsUtil;
-    @Inject protected StringUtils stringUtils;
-    @Inject protected AccountEditDataManager accountEditDataManager;
-    @Inject protected PayloadDataManager payloadDataManager;
-    @Inject protected ExchangeRateFactory exchangeRateFactory;
-    @Inject protected SendDataManager sendDataManager;
-    @Inject protected PrivateKeyFactory privateKeyFactory;
-    @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
-    @Inject protected DynamicFeeCache dynamicFeeCache;
+    @Inject PrefsUtil prefsUtil;
+    @Inject StringUtils stringUtils;
+    @Inject AccountEditDataManager accountEditDataManager;
+    @Inject PayloadDataManager payloadDataManager;
+    @Inject ExchangeRateFactory exchangeRateFactory;
+    @Inject SendDataManager sendDataManager;
+    @Inject PrivateKeyFactory privateKeyFactory;
+    @Inject SwipeToReceiveHelper swipeToReceiveHelper;
+    @Inject DynamicFeeCache dynamicFeeCache;
 
     // Visible for data binding
     public AccountEditModel accountModel;
@@ -78,6 +78,7 @@ public class AccountEditViewModel extends BaseViewModel {
     @VisibleForTesting LegacyAddress legacyAddress;
     @VisibleForTesting Account account;
     @VisibleForTesting String secondPassword;
+    @VisibleForTesting PendingTransaction pendingTransaction;
     private MonetaryUtil monetaryUtil;
     private int accountIndex;
 
@@ -107,7 +108,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
         void showAddressDetails(String heading, String note, String copy, Bitmap bitmap, String qrString);
 
-        void showPaymentDetails(PaymentConfirmationDetails details, PendingTransaction pendingTransaction);
+        void showPaymentDetails(PaymentConfirmationDetails details);
 
         void showTransactionSuccess();
 
@@ -327,10 +328,11 @@ public class AccountEditViewModel extends BaseViewModel {
         compositeDisposable.add(
                 accountEditDataManager.getPendingTransactionForLegacyAddress(legacyAddress)
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .doOnNext(pending -> pendingTransaction = pending)
                         .subscribe(pendingTransaction -> {
                             if (pendingTransaction != null && pendingTransaction.bigIntAmount.compareTo(BigInteger.ZERO) == 1) {
                                 PaymentConfirmationDetails details = getTransactionDetailsForDisplay(pendingTransaction);
-                                dataListener.showPaymentDetails(details, pendingTransaction);
+                                dataListener.showPaymentDetails(details);
                             } else {
                                 dataListener.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR);
                             }
@@ -374,6 +376,7 @@ public class AccountEditViewModel extends BaseViewModel {
         details.fiatTotal = monetaryUtil.getFiatFormat(fiatUnit)
                 .format(exchangeRate * totalFiat.doubleValue() / 1e8);
 
+        details.fiatSymbol = exchangeRateFactory.getSymbol(fiatUnit);
         details.isLargeTransaction = isLargeTransaction(pendingTransaction);
         details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.getConsumedAmount().compareTo(BigInteger.ZERO) == 1;
 
@@ -389,7 +392,7 @@ public class AccountEditViewModel extends BaseViewModel {
                 && relativeFee > SendModel.LARGE_TX_PERCENTAGE;
     }
 
-    void submitPayment(PendingTransaction pendingTransaction) {
+    void submitPayment() {
         dataListener.showProgressDialog(R.string.please_wait);
 
         LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);

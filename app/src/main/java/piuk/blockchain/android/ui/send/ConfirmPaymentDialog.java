@@ -24,13 +24,16 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
         implements ConfirmPaymentView {
 
     private static final String ARGUMENT_PAYMENT_DETAILS = "argument_payment_details";
+    private static final String ARGUMENT_SHOW_FEE_CHOICE = "argument_show_fee_choice";
 
     private DialogConfirmTransactionBinding binding;
     private OnConfirmDialogInteractionListener listener;
 
-    public static ConfirmPaymentDialog newInstance(PaymentConfirmationDetails details) {
+    public static ConfirmPaymentDialog newInstance(PaymentConfirmationDetails details,
+                                                   boolean showFeeChoice) {
         Bundle args = new Bundle();
         args.putParcelable(ARGUMENT_PAYMENT_DETAILS, details);
+        args.putBoolean(ARGUMENT_SHOW_FEE_CHOICE, showFeeChoice);
         ConfirmPaymentDialog fragment = new ConfirmPaymentDialog();
         fragment.setArguments(args);
         fragment.setStyle(DialogFragment.STYLE_NO_FRAME, R.style.FullscreenDialog);
@@ -68,6 +71,10 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
 
         binding.buttonChangeFee.setOnClickListener(v -> getPresenter().onChangeFeeClicked());
         binding.buttonSend.setOnClickListener(v -> listener.onSendClicked());
+
+        if (!getArguments().getBoolean(ARGUMENT_SHOW_FEE_CHOICE, true)) {
+            binding.buttonChangeFee.setVisibility(View.GONE);
+        }
 
         onViewReady();
     }

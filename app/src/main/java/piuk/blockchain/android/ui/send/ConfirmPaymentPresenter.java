@@ -1,9 +1,7 @@
 package piuk.blockchain.android.ui.send;
 
-import javax.inject.Inject;
+import android.support.annotation.VisibleForTesting;
 
-import piuk.blockchain.android.data.cache.DynamicFeeCache;
-import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -13,9 +11,8 @@ public class ConfirmPaymentPresenter extends BasePresenter<ConfirmPaymentView> {
 
     private static final String AMOUNT_FORMAT = "%1$s %2$s (%3$s%4$s)";
 
-    @Inject SendDataManager sendDataManager;
-    @Inject DynamicFeeCache dynamicFeeCache;
-    private PaymentConfirmationDetails paymentDetails;
+    @SuppressWarnings("WeakerAccess")
+    @VisibleForTesting PaymentConfirmationDetails paymentDetails;
 
     ConfirmPaymentPresenter() {
         Injector.getInstance().getDataManagerComponent().inject(this);

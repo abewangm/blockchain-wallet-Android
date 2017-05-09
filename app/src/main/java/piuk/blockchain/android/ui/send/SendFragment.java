@@ -812,7 +812,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     @Override
     public void onShowPaymentDetails(PaymentConfirmationDetails details) {
-        confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details);
+        confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details, true);
         confirmPaymentDialog
                 .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
 

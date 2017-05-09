@@ -20,7 +20,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -28,11 +27,10 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.databinding.ActivityAccountEditBinding;
-import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.send.PendingTransaction;
+import piuk.blockchain.android.ui.send.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AndroidUtils;
@@ -41,7 +39,8 @@ import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-public class AccountEditActivity extends BaseAuthActivity implements AccountEditViewModel.DataListener {
+public class AccountEditActivity extends BaseAuthActivity implements AccountEditViewModel.DataListener,
+        ConfirmPaymentDialog.OnConfirmDialogInteractionListener {
 
     private static final int ADDRESS_LABEL_MAX_LENGTH = 17;
     private static final int SCAN_PRIVX = 302;
@@ -178,66 +177,30 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
     }
 
     @Override
-    public void showPaymentDetails(PaymentConfirmationDetails details, PendingTransaction pendingTransaction) {
-        // STOPSHIP: 08/05/2017 This needs to be updated
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        FragmentSendConfirmBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
-                R.layout.fragment_send_confirm, null, false);
-        dialogBuilder.setView(dialogBinding.getRoot());
-
-        final AlertDialog alertDialog = dialogBuilder.create();
-        alertDialog.setCanceledOnTouchOutside(false);
-
-        dialogBinding.confirmFromLabel.setText(details.fromLabel);
-        dialogBinding.confirmToLabel.setText(details.toLabel);
-        dialogBinding.confirmAmountBtcUnit.setText(details.btcUnit);
-        dialogBinding.confirmAmountFiatUnit.setText(details.fiatUnit);
-        dialogBinding.confirmAmountBtc.setText(details.btcAmount);
-        dialogBinding.confirmAmountFiat.setText(details.fiatAmount);
-        dialogBinding.confirmFeeBtc.setText(details.btcFee);
-        dialogBinding.confirmFeeFiat.setText(details.fiatFee);
-        dialogBinding.confirmTotalBtc.setText(details.btcTotal);
-        dialogBinding.confirmTotalFiat.setText(details.fiatTotal);
-
-        String feeMessage = "";
-
-        if (details.hasConsumedAmounts) {
-            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
-            feeMessage = getString(R.string.large_tx_high_fee_warning);
-        }
-
-        final String finalFeeMessage = feeMessage;
-        dialogBinding.ivFeeInfo.setOnClickListener(view -> new AlertDialog.Builder(this)
-                .setTitle(R.string.transaction_fee)
-                .setMessage(finalFeeMessage)
-                .setPositiveButton(android.R.string.ok, null).show());
-
-        dialogBinding.tvCustomizeFee.setVisibility(View.GONE);
-
-        dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (alertDialog.isShowing()) {
-                alertDialog.cancel();
-            }
-        });
-
-        dialogBinding.confirmSend.setOnClickListener(v -> {
-            viewModel.submitPayment(pendingTransaction);
-            alertDialog.dismiss();
-        });
-
-        alertDialog.show();
+    public void showPaymentDetails(PaymentConfirmationDetails details) {
+        ConfirmPaymentDialog.newInstance(details, false)
+                .show(getSupportFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
 
         if (details.isLargeTransaction) {
-            onShowLargeTransactionWarning(alertDialog);
+            binding.getRoot().postDelayed(this::onShowLargeTransactionWarning, 500);
         }
     }
 
-    private void onShowLargeTransactionWarning(AlertDialog alertDialog) {
+    @Override
+    public void onChangeFeeClicked(String feeInBtc, String btcUnit) {
+        // No-op
+    }
+
+    @Override
+    public void onSendClicked() {
+        viewModel.submitPayment();
+    }
+
+    private void onShowLargeTransactionWarning() {
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setCancelable(false)
                 .setTitle(R.string.warning)
                 .setMessage(R.string.large_tx_warning)
-                .setNegativeButton(R.string.go_back, (dialog, which) -> alertDialog.dismiss())
                 .setPositiveButton(R.string.accept_higher_fee, null)
                 .create()
                 .show();
@@ -354,11 +317,12 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
     public void showTransactionSuccess() {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         View dialogView = View.inflate(this, R.layout.modal_transaction_success, null);
-        dialogBuilder.setView(dialogView)
+        transactionSuccessDialog = dialogBuilder.setView(dialogView)
                 .setPositiveButton(getString(R.string.done), (dialog, which) -> dialog.dismiss())
                 .setOnDismissListener(dialogInterface -> finish())
-                .create()
-                .show();
+                .create();
+
+        transactionSuccessDialog.show();
 
         dialogView.postDelayed(dialogRunnable, 5 * 1000);
     }
