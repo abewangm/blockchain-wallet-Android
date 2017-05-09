@@ -25,7 +25,6 @@ import piuk.blockchain.android.util.AndroidUtils;
 public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataListener, FrontendJavascript<String> {
 
     public static final String TAG = BuyActivity.class.getSimpleName();
-    private static final String JS_INTERFACE_NAME = "android";
     private FrontendJavascriptManager frontendJavascriptManager;
     private PayloadManager payloadManager;
 
@@ -59,7 +58,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         frontendJavascriptManager = new FrontendJavascriptManager(this, webView);
         payloadManager = PayloadManager.getInstance();
 
-        webView.addJavascriptInterface(frontendJavascriptManager, JS_INTERFACE_NAME);
+        webView.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.restoreState(getIntent().getParcelableExtra(MainActivity.WEB_VIEW_STATE_KEY));
 
@@ -71,7 +70,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         super.onDestroy();
         frontendJavascriptManager.teardown();
         WebView webView = binding.webview;
-        webView.removeJavascriptInterface(JS_INTERFACE_NAME);
+        webView.removeJavascriptInterface(FrontendJavascriptManager.JS_INTERFACE_NAME);
 
         if (didBuyBitcoin) {
             viewModel.reloadExchangeDate();
@@ -80,22 +79,26 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         compositeDisposable.clear();
     }
 
+    @Override
     public void onReceiveValue(String value) {
         Log.d(TAG, "Received JS value: " + value);
     }
 
+    @Override
     public void setExchangeData(Metadata buyMetadata) {
         Log.d(TAG, "onMetadataLoaded: done");
         this.buyMetadata = buyMetadata;
         activateIfReady();
     }
 
+    @Override
     public void onFrontendInitialized() {
         Log.d(TAG, "onFrontendInitialized: done");
         frontendInitialized = true;
         activateIfReady();
     }
 
+    @Override
     public void onBuyCompleted() {
         Log.d(TAG, "onBuyCompleted: done");
         didBuyBitcoin = true;
@@ -128,5 +131,13 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    /**
+     * Handled in {@link MainActivity}
+     */
+    @Override
+    public void onCompletedTrade(String txHash) {
+        // no-op
     }
 }

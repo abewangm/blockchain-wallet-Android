@@ -12,11 +12,12 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
 public class FrontendJavascriptManager {
     public static final String TAG = FrontendJavascriptManager.class.getSimpleName();
+    public static final String JS_INTERFACE_NAME = "android";
 
     private FrontendJavascript frontendJavascript;
     private WebView webView;
 
-    FrontendJavascriptManager(FrontendJavascript frontendJavascript, WebView webView) {
+    public FrontendJavascriptManager(FrontendJavascript frontendJavascript, WebView webView) {
         this.frontendJavascript = frontendJavascript;
         this.webView = webView;
     }
@@ -31,6 +32,11 @@ public class FrontendJavascriptManager {
         frontendJavascript.onBuyCompleted();
     }
 
+    @JavascriptInterface
+    public void completedTrade(String txHash) {
+        frontendJavascript.onCompletedTrade(txHash);
+    }
+
     public void activateMobileBuy(String uid, String sharedKey, String password) {
         String script = FrontendJavascriptManager.createActivateScript(uid, sharedKey, password);
         executeScript(script);
@@ -38,6 +44,11 @@ public class FrontendJavascriptManager {
 
     public void activateMobileBuyFromJson(String walletJson, String externalJson, String magicHash, String password, boolean firstLogin) {
         String script = FrontendJavascriptManager.createActivateFromJsonScript(walletJson, externalJson, magicHash, password, firstLogin);
+        executeScript(script);
+    }
+
+    public void checkForCompletedTrades(String walletJson, String externalJson, String magicHash, String password) {
+        String script = createCheckForCompletedTradesScript(walletJson, externalJson, magicHash, password);
         executeScript(script);
     }
 
@@ -68,6 +79,16 @@ public class FrontendJavascriptManager {
                 StringEscapeUtils.escapeEcmaScript(magicHash),
                 StringEscapeUtils.escapeEcmaScript(password),
                 firstLogin
+        );
+    }
+
+    public static String createCheckForCompletedTradesScript(String walletJson, String externalJson, String magicHash, String password) {
+        return String.format(
+                "checkForCompletedTrades('%s','%s','%s','%s')",
+                StringEscapeUtils.escapeEcmaScript(walletJson),
+                StringEscapeUtils.escapeEcmaScript(externalJson),
+                StringEscapeUtils.escapeEcmaScript(magicHash),
+                StringEscapeUtils.escapeEcmaScript(password)
         );
     }
 }
