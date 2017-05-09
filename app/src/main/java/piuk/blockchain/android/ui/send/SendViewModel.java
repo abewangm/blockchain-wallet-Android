@@ -319,6 +319,7 @@ public class SendViewModel extends BaseViewModel {
     /**
      * Get cached dynamic fee from new Fee options endpoint
      */
+    // TODO: 09/05/2017 If this fails, null pointers can be thrown elsewhere
     private void getSuggestedFee() {
         sendModel.feeOptions = dynamicFeeCache.getFeeOptions();
 
