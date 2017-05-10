@@ -24,6 +24,7 @@ import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.exchange.ExchangeData;
 import piuk.blockchain.android.data.exchange.TradeData;
+import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketReceiveEvent;
@@ -61,6 +62,21 @@ public class ExchangeService {
             instance = new ExchangeService();
         }
         return instance;
+    }
+
+    public Observable<WebViewLoginDetails> getWebViewLoginDetails() {
+        return Observable.zip(
+                getExchangeData().flatMap(buyMetadata -> Observable
+                        .fromCallable(buyMetadata::getMetadata)
+                        .compose(RxUtil.applySchedulersToObservable())
+                ),
+                getExchangeData().map(Metadata::getMagicHash),
+                (externalJson, magicHash) -> {
+                    String walletJson = payloadManager.getPayload().toJson();
+                    String password = payloadManager.getTempPassword();
+                    return new WebViewLoginDetails(walletJson, password, externalJson, magicHash);
+                }
+        );
     }
 
     public Observable<Metadata> getExchangeData() {

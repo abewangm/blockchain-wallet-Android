@@ -33,6 +33,7 @@ import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
+import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
@@ -122,6 +123,8 @@ public class MainViewModel extends BaseViewModel {
         void setBuySellEnabled(boolean enabled);
 
         void onTradeCompleted(String txHash);
+
+        void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails);
     }
 
     public MainViewModel(DataListener dataListener) {
@@ -381,6 +384,8 @@ public class MainViewModel extends BaseViewModel {
                                         buyDataManager.watchPendingTrades()
                                                 .compose(RxUtil.applySchedulersToObservable())
                                                 .subscribe(dataListener::onTradeCompleted);
+                                        buyDataManager.getWebViewLoginDetails()
+                                                .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
                                     },
                                     throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
         } else {
