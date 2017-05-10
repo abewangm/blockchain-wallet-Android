@@ -123,8 +123,7 @@ public class ExchangeService {
                         !tradeData.isConfirmed()
                 )
                 .map(tradeData ->
-                        // TODO: This gets the wrong receive address since "position" is relative to current receive index, not absolute. Must fix.
-                        payloadDataManager.getReceiveAddressAtPosition(
+                        payloadDataManager.getReceiveAddressAtArbitraryPosition(
                                 payloadDataManager.getAccount(tradeData.getAccountIndex()),
                                 tradeData.getReceiveIndex()
                         )
