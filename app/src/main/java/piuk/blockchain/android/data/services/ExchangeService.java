@@ -13,7 +13,6 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;
-import org.spongycastle.util.encoders.Hex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,7 @@ import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.exchange.ExchangeData;
 import piuk.blockchain.android.data.exchange.TradeData;
-import piuk.blockchain.android.data.exchange.WebLoginDetails;
+import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketReceiveEvent;
@@ -65,20 +64,18 @@ public class ExchangeService {
         return instance;
     }
 
-    public Observable<WebLoginDetails> getWebLoginDetails() {
+    public Observable<WebViewLoginDetails> getWebViewLoginDetails() {
         return Observable.zip(
                 getExchangeData().flatMap(buyMetadata -> Observable
                         .fromCallable(buyMetadata::getMetadata)
                         .compose(RxUtil.applySchedulersToObservable())
                 ),
                 getExchangeData().map(Metadata::getMagicHash),
-                (externalJson, magicHash) ->
-                        new WebLoginDetails(
-                                payloadManager.getPayload().toJson(),
-                                payloadManager.getTempPassword(),
-                                externalJson == null ? "" : externalJson,
-                                magicHash == null ? "" : Hex.toHexString(magicHash)
-                        )
+                (externalJson, magicHash) -> {
+                    String walletJson = payloadManager.getPayload().toJson();
+                    String password = payloadManager.getTempPassword();
+                    return new WebViewLoginDetails(walletJson, password, externalJson, magicHash);
+                }
         );
     }
 

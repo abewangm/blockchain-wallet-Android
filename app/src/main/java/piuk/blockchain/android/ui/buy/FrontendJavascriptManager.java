@@ -8,6 +8,8 @@ import android.webkit.WebView;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
+
 /**
  * Created by justin on 2/22/17.
  */
@@ -39,18 +41,13 @@ public class FrontendJavascriptManager {
         frontendJavascript.onCompletedTrade(txHash);
     }
 
-    public void activateMobileBuy(String uid, String sharedKey, String password) {
-        String script = FrontendJavascriptManager.createActivateScript(uid, sharedKey, password);
+    public void activateMobileBuyFromJson(WebViewLoginDetails webViewLoginDetails, boolean firstLogin) {
+        String script = createActivateFromJsonScript(webViewLoginDetails, firstLogin);
         executeScript(script);
     }
 
-    public void activateMobileBuyFromJson(String walletJson, String externalJson, String magicHash, String password, boolean firstLogin) {
-        String script = FrontendJavascriptManager.createActivateFromJsonScript(walletJson, externalJson, magicHash, password, firstLogin);
-        executeScript(script);
-    }
-
-    public void checkForCompletedTrades(String walletJson, String externalJson, String magicHash, String password) {
-        String script = createCheckForCompletedTradesScript(walletJson, externalJson, magicHash, password);
+    public void checkForCompletedTrades(WebViewLoginDetails webViewLoginDetails) {
+        String script = createCheckForCompletedTradesScript(webViewLoginDetails);
         executeScript(script);
     }
 
@@ -64,33 +61,24 @@ public class FrontendJavascriptManager {
         new Handler(Looper.getMainLooper()).post(() -> webView.evaluateJavascript(script, frontendJavascript));
     }
 
-    public static String createActivateScript(String uid, String sharedKey, String password) {
-        return String.format(
-                "activateMobileBuy('%s','%s','%s')",
-                StringEscapeUtils.escapeEcmaScript(uid),
-                StringEscapeUtils.escapeEcmaScript(sharedKey),
-                StringEscapeUtils.escapeEcmaScript(password)
-        );
-    }
-
-    public static String createActivateFromJsonScript(String walletJson, String externalJson, String magicHash, String password, boolean firstLogin) {
+    public static String createActivateFromJsonScript(WebViewLoginDetails webViewLoginDetails, boolean firstLogin) {
         return String.format(
                 "activateMobileBuyFromJson('%s','%s','%s','%s', %b)",
-                StringEscapeUtils.escapeEcmaScript(walletJson),
-                StringEscapeUtils.escapeEcmaScript(externalJson),
-                StringEscapeUtils.escapeEcmaScript(magicHash),
-                StringEscapeUtils.escapeEcmaScript(password),
+                StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getWalletJson()),
+                StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getExternalJson()),
+                StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getMagicHash()),
+                StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getPassword()),
                 firstLogin
         );
     }
 
-    public static String createCheckForCompletedTradesScript(String walletJson, String externalJson, String magicHash, String password) {
+    public static String createCheckForCompletedTradesScript(WebViewLoginDetails webViewLoginDetails) {
         return String.format(
                 "checkForCompletedTrades('%s','%s','%s','%s')",
-                StringEscapeUtils.escapeEcmaScript(walletJson),
-                StringEscapeUtils.escapeEcmaScript(externalJson),
-                StringEscapeUtils.escapeEcmaScript(magicHash),
-                StringEscapeUtils.escapeEcmaScript(password)
+                StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getWalletJson()),
+                StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getExternalJson()),
+                StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getMagicHash()),
+                StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getPassword())
         );
     }
 }

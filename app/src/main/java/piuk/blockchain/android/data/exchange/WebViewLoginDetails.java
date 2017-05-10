@@ -1,20 +1,22 @@
 package piuk.blockchain.android.data.exchange;
 
+import org.spongycastle.util.encoders.Hex;
+
 /**
  * Created by justin on 5/9/17.
  */
 
-public class WebLoginDetails {
+public class WebViewLoginDetails {
     private String walletJson;
     private String password;
     private String externalJson;
     private String magicHash;
 
-    public WebLoginDetails(String walletJson, String password, String externalJson, String magicHash) {
+    public WebViewLoginDetails(String walletJson, String password, String externalJson, byte[] magicHash) {
         this.walletJson = walletJson;
         this.password = password;
-        this.externalJson = externalJson;
-        this.magicHash = magicHash;
+        this.externalJson = externalJson == null ? "" : externalJson;
+        this.magicHash = magicHash == null ? "" : Hex.toHexString(magicHash);
     }
 
     public String getWalletJson() {

@@ -49,7 +49,7 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
-import piuk.blockchain.android.data.exchange.WebLoginDetails;
+import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
@@ -124,8 +124,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private Typeface typeface;
     private WebView buyWebView;
     private BalanceFragment balanceFragment;
-    private FrontendJavascriptManager jsManager;
-    private WebLoginDetails loginDetails;
+    private FrontendJavascriptManager frontendJavascriptManager;
+    private WebViewLoginDetails webViewLoginDetails;
     private boolean initialized;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -751,25 +751,19 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         buyWebView.getSettings().setJavaScriptEnabled(true);
         buyWebView.loadUrl("http://localhost:8080/wallet/#/intermediate");
 
-        this.jsManager = new FrontendJavascriptManager(this, buyWebView);
-        buyWebView.addJavascriptInterface(jsManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
+        frontendJavascriptManager = new FrontendJavascriptManager(this, buyWebView);
+        buyWebView.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
     }
 
     private void checkTradesIfReady() {
-        if (initialized && loginDetails != null) {
-            jsManager.checkForCompletedTrades(
-                    loginDetails.getWalletJson(),
-                    loginDetails.getExternalJson(),
-                    loginDetails.getMagicHash(),
-                    loginDetails.getPassword()
-            );
+        if (initialized && webViewLoginDetails != null) {
+            frontendJavascriptManager.checkForCompletedTrades(webViewLoginDetails);
         }
     }
 
-    @Override
-    public void onWebLoginDetailsAcquired(WebLoginDetails details) {
-        Log.d(TAG, "onWebLoginDetailsAcquired: called");
-        loginDetails = details;
+    public void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails) {
+        Log.d(TAG, "setWebViewLoginDetails: called");
+        this.webViewLoginDetails = webViewLoginDetails;
         checkTradesIfReady();
     }
 

@@ -1,8 +1,7 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import info.blockchain.wallet.metadata.Metadata;
 import io.reactivex.Observable;
-import piuk.blockchain.android.data.exchange.WebLoginDetails;
+import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.services.ExchangeService;
 
 /**
@@ -24,12 +23,8 @@ public class BuyDataManager {
         this.exchangeService = ExchangeService.getInstance();
     }
 
-    public Observable<WebLoginDetails> getWebLoginDetails() {
-        return this.exchangeService.getWebLoginDetails();
-    }
-
-    public Observable<Metadata> getExchangeData() {
-        return this.exchangeService.getExchangeData();
+    public Observable<WebViewLoginDetails> getWebViewLoginDetails() {
+        return this.exchangeService.getWebViewLoginDetails();
     }
 
     public Observable<String> watchPendingTrades() {

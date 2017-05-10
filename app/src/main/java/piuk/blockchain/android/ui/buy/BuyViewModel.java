@@ -1,12 +1,9 @@
 package piuk.blockchain.android.ui.buy;
 
-import android.util.Log;
-
-import info.blockchain.wallet.metadata.Metadata;
-
 import javax.inject.Inject;
 
 import piuk.blockchain.android.data.datamanagers.BuyDataManager;
+import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.util.AppUtil;
@@ -23,7 +20,7 @@ public class BuyViewModel extends BaseViewModel {
     @Inject protected BuyDataManager buyDataManager;
 
     public interface DataListener {
-        void setExchangeData(Metadata metadata);
+        void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails);
     }
 
     BuyViewModel(DataListener dataListener) {
@@ -43,9 +40,9 @@ public class BuyViewModel extends BaseViewModel {
     public void onViewReady() {
         compositeDisposable.add(
                 buyDataManager
-                        .getExchangeData()
-                        .subscribe(metadata -> {
-                            dataListener.setExchangeData(metadata);
+                        .getWebViewLoginDetails()
+                        .subscribe(webViewLoginDetails -> {
+                            dataListener.setWebViewLoginDetails(webViewLoginDetails);
                         }, Throwable::printStackTrace)
         );
     }
