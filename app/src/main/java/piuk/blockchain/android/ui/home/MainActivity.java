@@ -238,12 +238,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         if (!BuildConfig.CONTACTS_ENABLED) {
             hideContacts();
         }
-        if (!BuildConfig.BUY_BITCOIN_ENABLED) {
-            //Hide Buy Bitcoin
-            setBuyBitcoinVisible(false);
-        } else {
-            setupBuyWebView();
-        }
     }
 
     @SuppressLint("NewApi")
@@ -748,7 +742,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private void setupBuyWebView() {
         // Setup buy WebView
         // TODO: 17/03/2017 Check if there's a better way to improve loading time of this webview
-        // TODO: 09/05/2017 This function is called twice, should prevent that so only one webview is instantiated
         buyWebView = new WebView(this);
         if (AndroidUtils.is21orHigher()) {
             buyWebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
