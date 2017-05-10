@@ -1,5 +1,7 @@
 package piuk.blockchain.android.ui.buy;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -59,7 +61,7 @@ public class FrontendJavascriptManager {
     private void executeScript(String script) {
         Log.d(TAG, "Executing: " + script);
         // TODO: 06/04/2017 evaluateJavascript isn't available on pre-19 devices
-        webView.post(() -> webView.evaluateJavascript(script, frontendJavascript));
+        new Handler(Looper.getMainLooper()).post(() -> webView.evaluateJavascript(script, frontendJavascript));
     }
 
     public static String createActivateScript(String uid, String sharedKey, String password) {

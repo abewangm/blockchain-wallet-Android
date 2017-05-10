@@ -44,11 +44,13 @@ import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 import java.util.Arrays;
 import java.util.Locale;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.exchange.WebLoginDetails;
+import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
 import piuk.blockchain.android.ui.account.AccountActivity;
@@ -784,7 +786,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void onCompletedTrade(String txHash) {
-        onTradeCompleted(txHash);
+        Observable.just(txHash)
+                .compose(RxUtil.applySchedulersToObservable())
+                .subscribe(this::onTradeCompleted);
     }
 
     @Override

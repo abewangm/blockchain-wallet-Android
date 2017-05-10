@@ -72,12 +72,12 @@ public class ExchangeService {
                         .compose(RxUtil.applySchedulersToObservable())
                 ),
                 getExchangeData().map(Metadata::getMagicHash),
-                (walletJson, magicHash) ->
+                (externalJson, magicHash) ->
                         new WebLoginDetails(
                                 payloadManager.getPayload().toJson(),
-                                walletJson == null ? "" : walletJson,
-                                magicHash == null ? "" : Hex.toHexString(magicHash),
-                                payloadManager.getTempPassword()
+                                payloadManager.getTempPassword(),
+                                externalJson == null ? "" : externalJson,
+                                magicHash == null ? "" : Hex.toHexString(magicHash)
                         )
         );
     }

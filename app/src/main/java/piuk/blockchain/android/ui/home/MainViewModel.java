@@ -385,7 +385,6 @@ public class MainViewModel extends BaseViewModel {
                                                 .compose(RxUtil.applySchedulersToObservable())
                                                 .subscribe(dataListener::onTradeCompleted);
                                         buyDataManager.getWebLoginDetails()
-                                                .compose(RxUtil.applySchedulersToObservable())
                                                 .subscribe(dataListener::onWebLoginDetailsAcquired, Throwable::printStackTrace);
                                     },
                                     throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
