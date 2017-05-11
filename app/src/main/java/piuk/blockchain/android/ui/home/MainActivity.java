@@ -794,10 +794,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void onChangeFeeClicked(String feeInBtc, String btcUnit) {
+    public void onChangeFeeClicked() {
         SendFragment fragment = (SendFragment) getSupportFragmentManager()
                 .findFragmentByTag(SendFragment.class.getSimpleName());
-        fragment.onChangeFeeClicked(feeInBtc, btcUnit);
+        fragment.onChangeFeeClicked();
     }
 
     @Override

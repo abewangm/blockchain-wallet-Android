@@ -696,7 +696,17 @@
 
     <!-- CONFIRM PAYMENT -->
     <string name="confirm_payment_change_fee">Change fee</string>
-    <string name="confirm_payment_fee_toggle_title">Priority Fee</string>
     <string name="confirm_payment_fee_sync_error">Error getting fee options</string>
+
+    <!-- FEE OPTIONS -->
+    <string name="fee_options_regular">Regular</string>
+    <string name="fee_options_priority">Priority</string>
+    <string name="fee_options_custom">Custom</string>
+    <string name="fee_options_regular_time">1+ hour</string>
+    <string name="fee_options_priority_time">~0–60 min</string>
+    <string name="fee_options_custom_warning">Advanced users only</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b</string>
+    <string name="fee_options_fee_too_low">Low fee not recommended</string>
+    <string name="fee_options_fee_too_high">Unnecessarily high fee</string>
 
 </resources>

@@ -187,7 +187,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
     }
 
     @Override
-    public void onChangeFeeClicked(String feeInBtc, String btcUnit) {
+    public void onChangeFeeClicked() {
         // No-op
     }
 

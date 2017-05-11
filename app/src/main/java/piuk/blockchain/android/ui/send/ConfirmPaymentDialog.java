@@ -79,7 +79,7 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> dismiss());
 
-        binding.buttonChangeFee.setOnClickListener(v -> getPresenter().onChangeFeeClicked());
+        binding.buttonChangeFee.setOnClickListener(v -> listener.onChangeFeeClicked());
         binding.buttonSend.setOnClickListener(v -> listener.onSendClicked());
 
         if (!getArguments().getBoolean(ARGUMENT_SHOW_FEE_CHOICE, true)) {
@@ -147,11 +147,6 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
     }
 
     @Override
-    public void onFeeChangeClicked(String feeInBtc, String btcUnit) {
-        listener.onChangeFeeClicked(feeInBtc, btcUnit);
-    }
-
-    @Override
     protected ConfirmPaymentPresenter createPresenter() {
         return new ConfirmPaymentPresenter();
     }
@@ -179,7 +174,7 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
 
     public interface OnConfirmDialogInteractionListener {
 
-        void onChangeFeeClicked(String feeInBtc, String btcUnit);
+        void onChangeFeeClicked();
 
         void onSendClicked();
 

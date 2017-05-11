@@ -72,6 +72,8 @@ interface SendContract {
 
         void dismissConfirmationDialog();
 
+        void updateFeeField(String fee);
+
     }
 
 }

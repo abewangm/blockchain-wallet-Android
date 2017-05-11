@@ -150,6 +150,7 @@ dependencies {
     // RxJava
     compile "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
     compile "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
+    compile 'com.jakewharton.rxbinding2:rxbinding-support-v4:2.0.0'
     // Retrofit
     compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
     compile "com.squareup.retrofit2:converter-jackson:$retrofitVersion"

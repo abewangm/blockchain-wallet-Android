@@ -24,6 +24,4 @@ interface ConfirmPaymentView extends View {
 
     void closeDialog();
 
-    void onFeeChangeClicked(String feeInBtc, String btcUnit);
-
 }

@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.send;
 
-import android.support.annotation.VisibleForTesting;
-
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -11,16 +9,13 @@ public class ConfirmPaymentPresenter extends BasePresenter<ConfirmPaymentView> {
 
     private static final String AMOUNT_FORMAT = "%1$s %2$s (%3$s%4$s)";
 
-    @SuppressWarnings("WeakerAccess")
-    @VisibleForTesting PaymentConfirmationDetails paymentDetails;
-
     ConfirmPaymentPresenter() {
         Injector.getInstance().getDataManagerComponent().inject(this);
     }
 
     @Override
     public void onViewReady() {
-        paymentDetails = getView().getPaymentDetails();
+        PaymentConfirmationDetails paymentDetails = getView().getPaymentDetails();
 
         if (paymentDetails == null) {
             getView().closeDialog();
@@ -42,10 +37,6 @@ public class ConfirmPaymentPresenter extends BasePresenter<ConfirmPaymentView> {
         getView().setTotalBtc(paymentDetails.btcTotal + " " + paymentDetails.btcUnit);
         getView().setTotalFiat(paymentDetails.fiatSymbol + paymentDetails.fiatTotal);
         getView().setUiState(UiState.CONTENT);
-    }
-
-    void onChangeFeeClicked() {
-        getView().onFeeChangeClicked(paymentDetails.btcSuggestedFee, paymentDetails.btcUnit);
     }
 
 }

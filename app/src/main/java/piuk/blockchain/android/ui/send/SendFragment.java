@@ -36,10 +36,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jakewharton.rxbinding2.widget.RxTextView;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.payload.data.Account;
@@ -48,11 +50,14 @@ import info.blockchain.wallet.payload.data.LegacyAddress;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
@@ -302,8 +307,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
                 viewModel.calculateTransactionAmounts(chosenItem,
                         binding.amountRow.amountBtc.getText().toString(),
-                        getFeePriority(),
-                        null);
+                        getFeePriority());
 
             } catch (ClassNotFoundException | IOException e) {
                 throw new RuntimeException(e);
@@ -421,8 +425,15 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         setupBtcTextField();
         setupFiatTextField();
 
-        binding.max.setOnClickListener(view ->
-                viewModel.spendAllClicked(viewModel.getSendingItemAccount(), getFeePriority()));
+        binding.max.setOnClickListener(view -> {
+            if (getFeePriority() == FeeType.FEE_OPTION_CUSTOM) {
+                viewModel.spendAllClicked(
+                        viewModel.getSendingItemAccount(),
+                        BigInteger.valueOf(Long.valueOf(binding.edittextCustomFee.getText().toString()) * 1000));
+            } else {
+                viewModel.spendAllClicked(viewModel.getSendingItemAccount(), getFeePriority());
+            }
+        });
 
         binding.buttonSend.setOnClickListener(v -> {
             customKeypad.setNumpadVisibility(View.GONE);
@@ -432,18 +443,20 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
             }
         });
-
-        binding.switchPriority.setOnCheckedChangeListener((buttonView, isChecked) ->
-                viewModel.calculateTransactionAmounts(viewModel.getSendingItemAccount(),
-                        binding.amountRow.amountBtc.getText().toString(),
-                        getFeePriority(),
-                        null));
     }
 
     private void requestSendPayment() {
-        viewModel.onSendClicked(binding.amountRow.amountBtc.getText().toString(),
-                binding.destination.getText().toString(),
-                getFeePriority());
+        String text = binding.edittextCustomFee.getText().toString();
+        if (text.isEmpty()) {
+            viewModel.onSendClicked(binding.amountRow.amountBtc.getText().toString(),
+                    binding.destination.getText().toString(),
+                    getFeePriority());
+        } else {
+            viewModel.onSendClicked(
+                    binding.amountRow.amountBtc.getText().toString(),
+                    binding.destination.getText().toString(),
+                    BigInteger.valueOf(Long.valueOf(text) * 1000));
+        }
     }
 
     private void setupDestinationView() {
@@ -473,18 +486,26 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         viewModel.setSendingAddress(itemAccount);
         viewModel.calculateTransactionAmounts(itemAccount,
                 binding.amountRow.amountBtc.getText().toString(),
-                getFeePriority(),
-                null);
+                getFeePriority());
         binding.from.setText(itemAccount.label);
 
         binding.from.setOnClickListener(v -> startFromFragment());
         binding.imageviewDropdownSend.setOnClickListener(v -> startFromFragment());
     }
 
-    private int getFeePriority() {
-        return binding.switchPriority.isChecked()
-                ? FeePriority.FEE_OPTION_PRIORITY
-                : FeePriority.FEE_OPTION_REGULAR;
+    @Thunk
+    @FeeType.FeePriorityDef
+    int getFeePriority() {
+        int position = binding.spinnerPriority.getSelectedItemPosition();
+        switch (position) {
+            case 1:
+                return FeeType.FEE_OPTION_PRIORITY;
+            case 2:
+                return FeeType.FEE_OPTION_CUSTOM;
+            case 0:
+            default:
+                return FeeType.FEE_OPTION_REGULAR;
+        }
     }
 
     private void startFromFragment() {
@@ -907,10 +928,74 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         if (listener != null) listener.onSendFragmentClose();
     }
 
-    public void onChangeFeeClicked(String feeInBtc, String btcUnit) {
+    public void onChangeFeeClicked() {
         binding.customFeeContainer.setVisibility(View.VISIBLE);
         confirmPaymentDialog.dismiss();
-        alertCustomSpend(feeInBtc, btcUnit);
+        FeePriorityAdapter adapter = new FeePriorityAdapter(getActivity(),
+                viewModel.getFeeOptionsForDropDown());
+
+        binding.spinnerPriority.setAdapter(adapter);
+
+        binding.spinnerPriority.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                    case 1:
+                        viewModel.calculateTransactionAmounts(
+                                viewModel.getSendingItemAccount(),
+                                binding.amountRow.amountBtc.getText().toString(),
+                                getFeePriority());
+
+                        binding.textviewFeeAbsolute.setVisibility(View.VISIBLE);
+                        binding.textInputLayout.setVisibility(View.GONE);
+                        break;
+                    case 2:
+                        binding.textviewFeeAbsolute.setVisibility(View.GONE);
+                        binding.textInputLayout.setVisibility(View.VISIBLE);
+                        RxTextView.textChanges(binding.edittextCustomFee)
+                                .filter(charSequence -> !charSequence.toString().isEmpty())
+                                .map(charSequence -> Long.valueOf(charSequence.toString()))
+                                .doOnNext(value -> {
+                                    if (value <= 50) {
+                                        binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_low));
+                                    } else if (value >= 300) {
+                                        binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_high));
+                                    } else {
+                                        binding.textInputLayout.setError(null);
+                                    }
+                                })
+                                .debounce(300, TimeUnit.MILLISECONDS)
+                                .subscribeOn(AndroidSchedulers.mainThread())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(
+                                        value -> viewModel.calculateTransactionAmounts(
+                                                viewModel.getSendingItemAccount(),
+                                                binding.amountRow.amountBtc.getText().toString(),
+                                                BigInteger.valueOf(value * 1000),
+                                                null),
+                                        Throwable::printStackTrace);
+                        break;
+                }
+
+                DisplayFeeOptions options = viewModel.getFeeOptionsForDropDown().get(position);
+                binding.textviewFeeType.setText(options.getTitle());
+                binding.textviewFeeTime.setText(position != 2 ? options.getDescription() : null);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // No-op
+            }
+        });
+
+        binding.textviewFeeType.setText(R.string.fee_options_regular);
+        binding.textviewFeeTime.setText(R.string.fee_options_regular_time);
+    }
+
+    @Override
+    public void updateFeeField(String fee) {
+        binding.textviewFeeAbsolute.setText(fee);
     }
 
     public void onSendClicked() {
@@ -952,6 +1037,9 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         void onSendFragmentClose();
 
-        void onTransactionNotesRequested(String contactId, @Nullable Integer accountPosition, PaymentRequestType paymentRequestType, long satoshis);
+        void onTransactionNotesRequested(String contactId,
+                                         @Nullable Integer accountPosition,
+                                         PaymentRequestType paymentRequestType,
+                                         long satoshis);
     }
 }
