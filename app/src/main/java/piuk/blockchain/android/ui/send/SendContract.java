@@ -74,6 +74,7 @@ interface SendContract {
 
         void updateFeeField(String fee);
 
+        long getCustomFeeValue();
     }
 
 }

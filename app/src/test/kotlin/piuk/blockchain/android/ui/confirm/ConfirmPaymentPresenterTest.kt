@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.send
+package piuk.blockchain.android.ui.confirm
 
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
@@ -79,24 +79,6 @@ class ConfirmPaymentPresenterTest {
         verify(mockActivity).setTotalBtc("$btcTotal $btcUnit")
         verify(mockActivity).setTotalFiat("$fiatSymbol$fiatTotal")
         verify(mockActivity).setUiState(UiState.CONTENT)
-        verifyNoMoreInteractions(mockActivity)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun onChangeFeeClicked() {
-        // Arrange
-        val btcSuggestedFee = "BTC_SUGGESTED_FEE"
-        val btcUnit = "BTC_UNIT"
-        val confirmationDetails = PaymentConfirmationDetails().apply {
-            this.btcSuggestedFee = btcSuggestedFee
-            this.btcUnit = btcUnit
-        }
-        subject.paymentDetails = confirmationDetails
-        // Act
-        subject.onChangeFeeClicked()
-        // Assert
-        verify(mockActivity).onFeeChangeClicked(btcSuggestedFee, btcUnit)
         verifyNoMoreInteractions(mockActivity)
     }
 

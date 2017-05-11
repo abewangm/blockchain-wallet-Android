@@ -211,7 +211,7 @@
                                 android:hint="sat/b"
                                 android:visibility="gone">
 
-                                <piuk.blockchain.android.ui.customviews.EditTextWithKeyboardCallback
+                                <EditText
                                     android:id="@+id/edittext_custom_fee"
                                     fontPath="fonts/Montserrat-Regular.ttf"
                                     android:layout_width="match_parent"

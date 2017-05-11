@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.send;
+package piuk.blockchain.android.ui.confirm;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;

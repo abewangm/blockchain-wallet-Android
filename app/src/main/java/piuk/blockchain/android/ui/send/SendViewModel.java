@@ -74,6 +74,8 @@ import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SCAN_DATA_AD
 public class SendViewModel extends BaseViewModel {
 
     private static final String TAG = SendViewModel.class.getSimpleName();
+    private static final String PREF_WARN_ADVANCED_FEE = "pref_warn_advanced_fee";
+    private static final String PREF_WARN_WATCH_ONLY_SPEND = "pref_warn_watch_only_spend";
 
     public static final int SHOW_BTC = 1;
     public static final int SHOW_FIAT = 2;
@@ -164,14 +166,9 @@ public class SendViewModel extends BaseViewModel {
     }
 
     void onSendClicked(String amount, String address, @FeeType.FeePriorityDef int feePriority) {
-        BigInteger absoluteFee = getFeePerKbFromPriority(feePriority);
-        onSendClicked(amount, address, absoluteFee);
-    }
-
-    void onSendClicked(String amount, String address, BigInteger absoluteFee) {
         // Contact selected but no FacilitationTransaction to respond to
         if (fctxId == null && contactMdid != null) {
-            setupTransaction(amount, absoluteFee, () -> {
+            setupTransaction(amount, feePriority, () -> {
                 if (isValidSpend(sendModel.pendingTransaction, true)) {
                     compositeDisposable.add(
                             contactsDataManager.getContactList()
@@ -186,7 +183,7 @@ public class SendViewModel extends BaseViewModel {
                 }
             });
         } else {
-            setupTransaction(amount, absoluteFee, () -> sendClicked(address));
+            setupTransaction(amount, feePriority, () -> sendClicked(address));
         }
     }
 
@@ -234,7 +231,7 @@ public class SendViewModel extends BaseViewModel {
         if (result.size() == 1) {
             //Only a single account/address available in wallet
             if (dataListener != null) dataListener.hideSendingAddressField();
-            calculateTransactionAmounts(result.get(0), null, feePriority);
+            calculateTransactionAmounts(result.get(0), null, feePriority, null);
         }
 
         if (result.size() == 1) {
@@ -349,41 +346,18 @@ public class SendViewModel extends BaseViewModel {
         calculateTransactionAmounts(true, sendAddressItem, null, feePriority, null);
     }
 
-    void spendAllClicked(ItemAccount sendAddressItem, BigInteger absoluteFee) {
-        calculateTransactionAmounts(true, sendAddressItem, null, absoluteFee, null);
-    }
-
     /**
      * Wrapper for calculateTransactionAmounts
      */
     void calculateTransactionAmounts(ItemAccount sendAddressItem,
                                      String amountToSendText,
-                                     @FeeType.FeePriorityDef int feePriority) {
+                                     @FeeType.FeePriorityDef int feePriority,
+                                     TransactionDataListener listener) {
         calculateTransactionAmounts(false,
                 sendAddressItem,
                 amountToSendText,
                 feePriority,
-                null);
-    }
-
-    void calculateTransactionAmounts(ItemAccount sendAddressItem,
-                                     String amountToSendText,
-                                     BigInteger feePerKb,
-                                     TransactionDataListener listener) {
-
-        calculateTransactionAmounts(false, sendAddressItem, amountToSendText, feePerKb, listener);
-    }
-
-
-    void calculateTransactionAmounts(boolean spendAll,
-                                             ItemAccount sendAddressItem,
-                                             String amountToSendText,
-                                             @FeeType.FeePriorityDef int feePriority,
-                                             TransactionDataListener listener) {
-
-        //Convert selected fee priority to feePerKb
-        BigInteger feePerKb = getFeePerKbFromPriority(feePriority);
-        calculateTransactionAmounts(spendAll, sendAddressItem, amountToSendText, feePerKb, listener);
+                listener);
     }
 
     /**
@@ -394,9 +368,11 @@ public class SendViewModel extends BaseViewModel {
     private void calculateTransactionAmounts(boolean spendAll,
                                              ItemAccount sendAddressItem,
                                              String amountToSendText,
-                                             BigInteger feePerKb,
+                                             @FeeType.FeePriorityDef int feePriority,
                                              TransactionDataListener listener) {
 
+        //Convert selected fee priority to feePerKb
+        BigInteger feePerKb = getFeePerKbFromPriority(feePriority);
 
         dataListener.setMaxAvailableVisible(false);
         dataListener.setUnconfirmedFunds("");
@@ -557,13 +533,13 @@ public class SendViewModel extends BaseViewModel {
     }
 
     private void setupTransaction(String amount,
-                                  BigInteger absoluteFee,
+                                  @FeeType.FeePriorityDef int feePriority,
                                   TransactionDataListener transactionDataListener) {
         ItemAccount selectedItem = getSendingItemAccount();
         setSendingAddress(selectedItem);
         calculateTransactionAmounts(selectedItem,
                 amount,
-                absoluteFee,
+                feePriority,
                 transactionDataListener);
     }
 
@@ -749,7 +725,7 @@ public class SendViewModel extends BaseViewModel {
                 sendModel.pendingTransaction.receivingAddress = legacyAddress.getAddress();
 
                 if (legacyAddress.isWatchOnly())
-                    if (legacyAddress.isWatchOnly() && prefsUtil.getValue("WARN_WATCH_ONLY_SPEND", true)) {
+                    if (legacyAddress.isWatchOnly() && prefsUtil.getValue(PREF_WARN_WATCH_ONLY_SPEND, true)) {
                         if (dataListener != null) {
                             dataListener.onShowReceiveToWatchOnlyWarning(legacyAddress.getAddress());
                         }
@@ -1005,7 +981,15 @@ public class SendViewModel extends BaseViewModel {
     }
 
     void disableWatchOnlySpendWarning() {
-        prefsUtil.setValue("WARN_WATCH_ONLY_SPEND", false);
+        prefsUtil.setValue(PREF_WARN_WATCH_ONLY_SPEND, false);
+    }
+
+    boolean shouldShowAdvancedFeeWarning() {
+        return prefsUtil.getValue(PREF_WARN_ADVANCED_FEE, true);
+    }
+
+    void disableAdvancedFeeWarning() {
+        prefsUtil.setValue(PREF_WARN_ADVANCED_FEE, false);
     }
 
     BigInteger getFeePerKbFromPriority(@FeeType.FeePriorityDef int feePriorityTemp) {
@@ -1014,9 +998,14 @@ public class SendViewModel extends BaseViewModel {
             return BigInteger.ZERO;
         }
 
-        return feePriorityTemp == FeeType.FEE_OPTION_PRIORITY
-                ? BigInteger.valueOf(sendModel.feeOptions.getPriorityFee() * 1000)
-                : BigInteger.valueOf(sendModel.feeOptions.getRegularFee() * 1000);
+        switch (feePriorityTemp) {
+            case FeeType.FEE_OPTION_CUSTOM:
+                return BigInteger.valueOf(dataListener.getCustomFeeValue() * 1000);
+            case FeeType.FEE_OPTION_PRIORITY:
+                return BigInteger.valueOf(sendModel.feeOptions.getPriorityFee() * 1000);
+            default:
+                return BigInteger.valueOf(sendModel.feeOptions.getRegularFee() * 1000);
+        }
     }
 
     interface TransactionDataListener {

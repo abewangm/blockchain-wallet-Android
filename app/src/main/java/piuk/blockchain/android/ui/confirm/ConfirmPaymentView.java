@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.send;
+package piuk.blockchain.android.ui.confirm;
 
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.UiState;
