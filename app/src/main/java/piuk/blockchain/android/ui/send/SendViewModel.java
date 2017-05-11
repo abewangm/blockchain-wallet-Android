@@ -624,14 +624,19 @@ public class SendViewModel extends BaseViewModel {
     }
 
     /**
-     * Returns true if transaction is large by checking if fee > USD 0.50, size > 516, fee > 1% of
-     * total
+     * Returns true if transaction is large by checking against 3 criteria:
+     *
+     * If the fee > $0.50
+     * If the Tx size is over 1kB
+     * If the ratio of fee/amount is over 1%
      */
     boolean isLargeTransaction() {
+        double usdValue = Double.parseDouble(monetaryUtil.getFiatFormat("USD")
+                .format(sendModel.exchangeRate * sendModel.absoluteSuggestedFee.doubleValue() / 1e8));
         int txSize = sendDataManager.estimateSize(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = sendModel.absoluteSuggestedFee.doubleValue() / sendModel.pendingTransaction.bigIntAmount.doubleValue() * 100.0;
 
-        return sendModel.absoluteSuggestedFee.longValue() > SendModel.LARGE_TX_FEE
+        return usdValue > SendModel.LARGE_TX_FEE
                 && txSize > SendModel.LARGE_TX_SIZE
                 && relativeFee > SendModel.LARGE_TX_PERCENTAGE;
     }
@@ -1003,6 +1008,7 @@ public class SendViewModel extends BaseViewModel {
                 return BigInteger.valueOf(dataListener.getCustomFeeValue() * 1000);
             case FeeType.FEE_OPTION_PRIORITY:
                 return BigInteger.valueOf(sendModel.feeOptions.getPriorityFee() * 1000);
+            case FeeType.FEE_OPTION_REGULAR:
             default:
                 return BigInteger.valueOf(sendModel.feeOptions.getRegularFee() * 1000);
         }

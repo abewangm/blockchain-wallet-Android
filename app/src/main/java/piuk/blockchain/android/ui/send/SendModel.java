@@ -13,15 +13,16 @@ public class SendModel {
     /**
      * Large TX Size limit in KB
      */
-    public static final int LARGE_TX_SIZE = 516;
+    public static final int LARGE_TX_SIZE = 1024;
 
     /**
      * Large TX limit fee in USD
      */
-    public static final long LARGE_TX_FEE = 80000;
+    public static final double LARGE_TX_FEE = 0.5;
 
     /**
-     * Large TX limit expressed as percentage
+     * Large TX limit expressed as percentage, where percentage is found by diving the fee by the
+     * amount
      */
     public static final double LARGE_TX_PERCENTAGE = 1.0;
 

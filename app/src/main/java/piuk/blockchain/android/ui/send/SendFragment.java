@@ -410,6 +410,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         //Enable custom keypad and disables default keyboard from popping up
         customKeypad.enableOnView(binding.amountRow.amountBtc);
         customKeypad.enableOnView(binding.amountRow.amountFiat);
+        customKeypad.enableOnView(binding.edittextCustomFee);
 
         binding.amountRow.amountBtc.setText("");
         binding.amountRow.amountBtc.requestFocus();
@@ -918,6 +919,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 switch (position) {
                     case 0:
                     case 1:
+                        binding.buttonSend.setEnabled(true);
                         updateTotals(viewModel.getSendingItemAccount());
                         binding.textviewFeeAbsolute.setVisibility(View.VISIBLE);
                         binding.textInputLayout.setVisibility(View.GONE);
@@ -964,9 +966,13 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     void displayCustomFeeField() {
         binding.textviewFeeAbsolute.setVisibility(View.GONE);
         binding.textInputLayout.setVisibility(View.VISIBLE);
+        binding.buttonSend.setEnabled(false);
         RxTextView.textChanges(binding.edittextCustomFee)
-                .filter(charSequence -> !charSequence.toString().isEmpty())
-                .map(charSequence -> Long.valueOf(charSequence.toString()))
+                .map(CharSequence::toString)
+                .doOnNext(value -> binding.buttonSend.setEnabled(!value.isEmpty() && !value.equals("0")))
+                .filter(value -> !value.isEmpty())
+                .map(Long::valueOf)
+                .onErrorReturnItem(0L)
                 .doOnNext(value -> {
                     if (value < 50) {
                         binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_low));
