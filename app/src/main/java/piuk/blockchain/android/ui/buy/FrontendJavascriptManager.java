@@ -41,6 +41,11 @@ public class FrontendJavascriptManager {
         frontendJavascript.onCompletedTrade(txHash);
     }
 
+    @JavascriptInterface
+    public void showTx(String txHash) {
+        frontendJavascript.onShowTx(txHash);
+    }
+
     public void activateMobileBuyFromJson(WebViewLoginDetails webViewLoginDetails, boolean firstLogin) {
         String script = createActivateFromJsonScript(webViewLoginDetails, firstLogin);
         executeScript(script);

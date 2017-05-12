@@ -10,8 +10,10 @@ import android.webkit.WebView;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.databinding.ActivityBuyBinding;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.home.MainActivity;
+import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.util.AndroidUtils;
 
 public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataListener, FrontendJavascript<String> {
@@ -84,6 +86,13 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
     public void onBuyCompleted() {
         Log.d(TAG, "onBuyCompleted: done");
         didBuyBitcoin = true;
+    }
+
+    @Override
+    public void onShowTx(String txHash) {
+        Bundle bundle = new Bundle();
+        bundle.putString(BalanceFragment.KEY_TRANSACTION_HASH, txHash);
+        TransactionDetailActivity.start(this, bundle);
     }
 
     private void activateIfReady() {

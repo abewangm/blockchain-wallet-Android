@@ -10,4 +10,5 @@ public interface FrontendJavascript<T> extends ValueCallback<T> {
     void onFrontendInitialized();
     void onBuyCompleted();
     void onCompletedTrade(String txHash);
+    void onShowTx(String txHash);
 }

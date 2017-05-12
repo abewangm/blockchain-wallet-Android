@@ -789,6 +789,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public void onReceiveValue(String value) {
     }
 
+    @Override
+    public void onShowTx(String txHash) {
+    }
+
     private void applyFontToMenuItem(MenuItem menuItem) {
         if (typeface == null) {
             typeface = TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf");
