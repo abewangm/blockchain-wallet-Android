@@ -13,6 +13,7 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;
+import org.spongycastle.util.encoders.Hex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,10 +68,16 @@ public class ExchangeService {
     public Observable<WebViewLoginDetails> getWebViewLoginDetails() {
         return Observable.zip(
                 getExchangeData().flatMap(buyMetadata -> Observable
-                        .fromCallable(buyMetadata::getMetadata)
+                        .fromCallable(() -> {
+                            String metadata = buyMetadata.getMetadata();
+                            return metadata == null ? "" : metadata;
+                        })
                         .compose(RxUtil.applySchedulersToObservable())
                 ),
-                getExchangeData().map(Metadata::getMagicHash),
+                getExchangeData().map(buyMetadata -> {
+                    byte[] magicHash = buyMetadata.getMagicHash();
+                    return magicHash == null ? "" : Hex.toHexString(magicHash);
+                }),
                 (externalJson, magicHash) -> {
                     String walletJson = payloadManager.getPayload().toJson();
                     String password = payloadManager.getTempPassword();
