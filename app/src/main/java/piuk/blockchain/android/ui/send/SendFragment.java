@@ -447,7 +447,14 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private void setupDestinationView() {
         binding.destination.setHorizontallyScrolling(false);
         binding.destination.setLines(3);
-        binding.destination.setOnTouchListener((v, event) -> {
+
+        //Avoid OntouchListener - causes paste issues on some Samsung devices
+        binding.destination.setOnClickListener(v -> {
+            binding.destination.setText("");
+            viewModel.setReceivingAddress(null);
+        });
+        //LongClick listener required to clear receive address in memory when user long clicks to paste
+        binding.destination.setOnLongClickListener(v -> {
             binding.destination.setText("");
             viewModel.setReceivingAddress(null);
             v.performClick();
