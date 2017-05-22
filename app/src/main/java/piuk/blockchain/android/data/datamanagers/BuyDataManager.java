@@ -45,7 +45,7 @@ public class BuyDataManager {
                 payloadDataManager.getWallet().getSharedKey()
         ).map(settings -> {
             // TODO: implement settings.invited.sfox
-            return true;
+            return false;
         });
     }
 
