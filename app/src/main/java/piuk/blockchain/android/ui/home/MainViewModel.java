@@ -383,7 +383,7 @@ public class MainViewModel extends BaseViewModel {
                                         dataListener.setBuySellEnabled(canBuy && BuildConfig.BUY_BITCOIN_ENABLED);
                                         buyDataManager.watchPendingTrades()
                                                 .compose(RxUtil.applySchedulersToObservable())
-                                                .subscribe(dataListener::onTradeCompleted);
+                                                .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace);
                                         buyDataManager.getWebViewLoginDetails()
                                                 .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
                                     },
