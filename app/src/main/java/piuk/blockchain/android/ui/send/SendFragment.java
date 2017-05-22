@@ -29,6 +29,7 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,6 +40,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.rxbinding2.widget.RxTextView;
@@ -460,6 +462,25 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
             v.performClick();
             return false;
         });
+        binding.destination.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                //no op
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //no op
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                //TextChanged listener required to invalidate receive address in memory when user
+                //chooses to edit address populated via QR
+                viewModel.setReceivingAddress(null);
+            }
+        });
+
         binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus && customKeypad != null) {
                 customKeypad.setNumpadVisibility(View.GONE);
