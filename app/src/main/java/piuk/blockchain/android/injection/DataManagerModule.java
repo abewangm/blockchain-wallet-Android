@@ -2,6 +2,7 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
+import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
@@ -15,6 +16,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
@@ -177,5 +179,11 @@ public class DataManagerModule {
                 onboardingDataManager,
                 settingsDataManager,
                 payloadDataManager);
+    }
+
+    @Provides
+    @ViewModelScope
+    protected FeeDataManager provideFeeDataManager(RxBus rxBus) {
+        return new FeeDataManager(new FeeApi(), rxBus);
     }
 }

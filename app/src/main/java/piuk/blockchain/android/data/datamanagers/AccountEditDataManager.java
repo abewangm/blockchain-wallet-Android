@@ -7,7 +7,6 @@ import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -43,10 +42,7 @@ public class AccountEditDataManager {
         return sendDataManager.getUnspentOutputs(legacyAddress.getAddress())
                 .flatMap(unspentOutputs -> {
                     BigInteger suggestedFeePerKb =
-                            new BigDecimal(dynamicFeeCache.getCachedDynamicFee()
-                                    .getDefaultFee()
-                                    .getFee())
-                                    .toBigInteger();
+                            BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000);
 
                     Pair<BigInteger, BigInteger> sweepableCoins =
                             sendDataManager.getSweepableCoins(unspentOutputs, suggestedFeePerKb);

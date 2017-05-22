@@ -42,8 +42,6 @@ interface SendContract {
 
         void onShowReceiveToWatchOnlyWarning(String address);
 
-        void onShowAlterFee(String absoluteFeeSuggested, String body, @StringRes int positiveAction, @StringRes int negativeAction);
-
         void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
         void onShowTransactionSuccess(String hash, long transactionValue);
@@ -66,18 +64,17 @@ interface SendContract {
 
         void setMaxAvailableVisible(boolean visible);
 
-        void setEstimate(String estimateText);
-
-        void setEstimateColor(@ColorRes int color);
-
-        void setCustomFeeColor(@ColorRes int color);
-
         void setUnconfirmedFunds(String notice);
 
         void showSecondPasswordDialog();
 
         void navigateToAddNote(String contactId, PaymentRequestType paymentRequestType, long satoshis);
 
+        void dismissConfirmationDialog();
+
+        void updateFeeField(String fee);
+
+        long getCustomFeeValue();
     }
 
 }

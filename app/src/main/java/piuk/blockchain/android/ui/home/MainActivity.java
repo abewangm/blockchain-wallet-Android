@@ -69,6 +69,7 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
+import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
@@ -90,7 +91,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         ReceiveFragment.OnReceiveFragmentInteractionListener,
         ContactPaymentRequestNotesFragment.FragmentInteractionListener,
         ContactPaymentDialog.OnContactPaymentDialogInteractionListener,
-        FrontendJavascript<String> {
+        FrontendJavascript<String>,
+        ConfirmPaymentDialog.OnConfirmDialogInteractionListener {
 
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String ACTION_SEND = "info.blockchain.wallet.ui.BalanceFragment.SEND";
@@ -109,6 +111,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     public static final String WEB_VIEW_STATE_KEY = "web_view_state";
     public static final int SCAN_URI = 2007;
+    public static final int ACCOUNT_EDIT = 2008;
 
     @Thunk boolean drawerIsOpen = false;
 
@@ -132,7 +135,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(ACTION_SEND) && getActivity() != null) {
-                startScanActivity();
+                requestScan();
             } else if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
                 binding.bottomNavigation.setCurrentItem(2);
             } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
@@ -271,11 +274,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 binding.drawerLayout.openDrawer(GravityCompat.START);
                 return true;
             case R.id.action_qr_main:
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), this);
-                } else {
-                    startScanActivity();
-                }
+                requestScan();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -320,6 +319,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_BACKUP) {
             resetNavigationDrawer();
+        } else if (resultCode == RESULT_OK && requestCode == ACCOUNT_EDIT) {
+            if (getCurrentFragment() instanceof BalanceFragment) {
+                ((BalanceFragment) getCurrentFragment()).updateAccountList();
+                ((BalanceFragment) getCurrentFragment()).updateBalanceAndTransactionList(true);
+            }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
@@ -389,7 +393,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 startActivityForResult(new Intent(MainActivity.this, BackupWalletActivity.class), REQUEST_BACKUP);
                 break;
             case R.id.nav_addresses:
-                startActivity(new Intent(MainActivity.this, AccountActivity.class));
+                startActivityForResult(new Intent(MainActivity.this, AccountActivity.class), ACCOUNT_EDIT);
                 break;
             case R.id.nav_buy:
                 startActivity(putWebViewState(new Intent(MainActivity.this, BuyActivity.class)));
@@ -483,6 +487,15 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 Intent intent = new Intent(MainActivity.this, piuk.blockchain.android.ui.directory.MapActivity.class);
                 startActivityForResult(intent, MERCHANT_ACTIVITY);
             }
+        }
+    }
+
+    @Thunk
+    void requestScan() {
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), MainActivity.this);
+        } else {
+            startScanActivity();
         }
     }
 
@@ -840,12 +853,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         binding.bottomNavigation.setCurrentItem(1);
     }
 
-    // Ensure bottom nav button selected after scanning for result
-    @Override
-    public void onSendFragmentStart() {
-        binding.bottomNavigation.setCurrentItem(0);
-    }
-
     @Override
     public void onReceiveFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
@@ -859,6 +866,20 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @Override
     public void onTransactionNotesRequested(String contactId, @Nullable Integer accountPosition, PaymentRequestType paymentRequestType, long satoshis) {
         addFragment(ContactPaymentRequestNotesFragment.newInstance(paymentRequestType, accountPosition, contactId, satoshis));
+    }
+
+    @Override
+    public void onChangeFeeClicked() {
+        SendFragment fragment = (SendFragment) getSupportFragmentManager()
+                .findFragmentByTag(SendFragment.class.getSimpleName());
+        fragment.onChangeFeeClicked();
+    }
+
+    @Override
+    public void onSendClicked() {
+        SendFragment fragment = (SendFragment) getSupportFragmentManager()
+                .findFragmentByTag(SendFragment.class.getSimpleName());
+        fragment.onSendClicked();
     }
 
     @Override
@@ -892,7 +913,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
-                .replace(R.id.content_frame, fragment)
+                .replace(R.id.content_frame, fragment, fragment.getClass().getSimpleName())
                 .commitAllowingStateLoss();
     }
 
@@ -900,14 +921,14 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .addToBackStack(fragment.getClass().getName())
-                .add(R.id.content_frame, fragment)
+                .add(R.id.content_frame, fragment, fragment.getClass().getSimpleName())
                 .commitAllowingStateLoss();
     }
 
     private void addFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .add(R.id.content_frame, fragment)
+                .add(R.id.content_frame, fragment, fragment.getClass().getSimpleName())
                 .commitAllowingStateLoss();
     }
 

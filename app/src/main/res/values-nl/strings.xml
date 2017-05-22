@@ -73,7 +73,6 @@
     <string name="pair_wallet_step_1">Log in op uw Blockchain Portemonnee via uw pc of Mac op %1$s.</string>
     <string name="pair_wallet_step_2">Als u de oude portemonnee gebruikt, klikt u op de accountinstellingen-knop en kiest u het tabblad Apparaten. Als u onze nieuwe beta-portemonnee gebruikt, gaat u naar Instellingen/Portemonnee-informatie.</string>
     <string name="pair_wallet_step_3">Klik op Koppelcode tonen om een QR-code, een vierkante zwart-witte barcode, te onthullen. Scan de code met uw camera.</string>
-    <string name="disable_two_factor">U dient de tweeledige verificatiemethode uit te schakelen voordat u uw portemonnee handmatig kunt gaan koppelen</string>
     <string name="wallet_id">Portemonnee-ID</string>
     <string name="default_wallet_name">Mijn Bitcoin portemonnee</string>
 
@@ -390,7 +389,7 @@
 
     <string name="api_fail">Kan geen verbinding maken met server. Probeer het later opnieuw.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Dit is een extra grote bitcoin-transactie. Uw portemonnee moet vele kleinere betalingen die u in het verleden heeft ontvangen combineren. Dit vereist een relatief hoog tarief om snel te worden bevestigd. Als het prima is dat het langer duurt om de transactie te bevestigen, kunt u het tarief handmatig verlagen door te klikken op "op maat maken". </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Dit is een extra grote bitcoin-transactie. Uw portemonnee moet vele kleinere betalingen die u in het verleden heeft ontvangen combineren. Dit vereist een relatief hoog tarief om snel te worden bevestigd.</string>
     <string name="go_back">Ga terug</string>
     <string name="accept_higher_fee">Hoger tarief accepteren</string>
     <string name="large_tx_high_fee_warning">"Deze transactie vereist een hoger tarief voor dustconsumptie ten gevolg van de kleine hoeveelheid wisselgeld die kan worden teruggegeven."</string>

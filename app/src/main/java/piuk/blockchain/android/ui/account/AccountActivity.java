@@ -221,7 +221,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         List<Account> accountClone = new ArrayList<>(accounts.size());
         accountClone.addAll(accounts);
 
-        if (accountClone.get(accountClone.size() - 1) instanceof ConsolidatedAccount) {
+        if (!accountClone.isEmpty()
+                && accountClone.get(accountClone.size() - 1) instanceof ConsolidatedAccount) {
             accountClone.remove(accountClone.size() - 1);
         }
 
@@ -343,8 +344,10 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
             String strResult = data.getStringExtra(CaptureActivity.SCAN_RESULT);
             viewModel.onAddressScanned(strResult);
+            setResult(resultCode);
         } else if (resultCode == Activity.RESULT_OK && requestCode == EDIT_ACTIVITY_REQUEST_CODE) {
             onUpdateAccountsList();
+            setResult(resultCode);
         }
     }
 

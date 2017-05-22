@@ -1,25 +1,28 @@
 package piuk.blockchain.android.ui.send;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.data.FeeList;
+import info.blockchain.wallet.api.data.FeeOptions;
+
 import java.math.BigInteger;
 import java.util.HashMap;
 
+@SuppressWarnings("WeakerAccess")
 public class SendModel {
 
     // Vars used for warning user of large tx
     /**
      * Large TX Size limit in KB
      */
-    public static final int LARGE_TX_SIZE = 516;
+    public static final int LARGE_TX_SIZE = 1024;
 
     /**
      * Large TX limit fee in USD
      */
-    public static final long LARGE_TX_FEE = 80000;
+    public static final double LARGE_TX_FEE = 0.5;
 
     /**
-     * Large TX limit expressed as percentage
+     * Large TX limit expressed as percentage, where percentage is found by diving the fee by the
+     * amount
      */
     public static final double LARGE_TX_PERCENTAGE = 1.0;
 
@@ -28,7 +31,10 @@ public class SendModel {
     String fiatUnit;
     double exchangeRate;
 
-    FeeList dynamicFeeList;//Fee per kb list
+    /**
+     * Priority and Regular fees, defined as Satoshis per byte
+     */
+    FeeOptions feeOptions;
 
     PendingTransaction pendingTransaction;
     BigInteger maxAvailable;
@@ -37,10 +43,9 @@ public class SendModel {
      * repeatedly
      */
     HashMap<String, UnspentOutputs> unspentApiResponses;
-    public BigInteger[] absoluteSuggestedFeeEstimates;
 
     /**
-     * Fee for 2nd block inclusion
+     * Current total fee amount
      */
     BigInteger absoluteSuggestedFee;
 

@@ -73,7 +73,6 @@
     <string name="pair_wallet_step_1">Melden Sie sich bei Ihrer Blockchain-Wallet per PC oder Mac auf %1$s an.</string>
     <string name="pair_wallet_step_2">Bei Nutzung der alten Wallet klicken Sie auf den Kontoeinstellungsbutton und wählen dann den Geräte-Tab. Bei Nutzung unserer neuen Beta-Wallet gehen Sie zu Einstellungen / Wallet-Information.</string>
     <string name="pair_wallet_step_3">Zur Angabe eines QR-Codes, einem quadratischen schwarzweißen Strichcode, klicken Sie auf \'Kombinationscode anzeigen\'. Scannen Sie den Code mit Ihrer Kamera.</string>
-    <string name="disable_two_factor">Vor einem manuellen Kombiantionsversuch der Wallet muss die Zwei-Faktor-Authentifizierung deaktiviert werden</string>
     <string name="wallet_id">Wallet-ID</string>
     <string name="default_wallet_name">Meine Bitcoin-Wallet</string>
 
@@ -390,7 +389,7 @@
 
     <string name="api_fail">Keine Serververbindung möglich. Bitte versuchen Sie es später erneut.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Diese Bitcoin-Transaktion ist zu groß. In Ihrer Wallet befinden sich viele kleine in der Vergangenheit eingegangene Zahlungen. Für eine schnelle Bestätigung ist eine relativ hohe Gebühr erforderlich. Falls Ihnen eine längere Wartezeit bei der Transaktionsbestätigung recht ist, können Sie die Gebühr eigenständig reduzieren. Klicken Sie dazu auf „Individuell anpassen“. </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Diese Bitcoin-Transaktion ist zu groß. In Ihrer Wallet befinden sich viele kleine in der Vergangenheit eingegangene Zahlungen. Für eine schnelle Bestätigung ist eine relativ hohe Gebühr erforderlich.</string>
     <string name="go_back">Zurück</string>
     <string name="accept_higher_fee">Höhere Gebühr akzeptieren</string>
     <string name="large_tx_high_fee_warning">„Da der zurückzugebene Wechselbetrag klein ist, erfordert diese Transaktion eine höhere Gebühr für Kleinstsummenkonsum.“</string>

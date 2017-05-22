@@ -5,7 +5,6 @@ import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
 import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.api.data.UnspentOutputs
-import info.blockchain.wallet.api.data.FeeList
 import info.blockchain.wallet.payment.SpendableUnspentOutputs
 import io.reactivex.Observable
 import org.amshove.kluent.shouldEqual
@@ -87,22 +86,6 @@ class SendDataManagerTest : RxTest() {
         testObserver.assertNotComplete()
         testObserver.assertTerminated()
         testObserver.assertNoValues()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun getSuggestedFee() {
-        // Arrange
-        val mockFeeList: FeeList = mock()
-        whenever(mockPaymentService.suggestedFee).thenReturn(Observable.just(mockFeeList))
-        // Act
-        val testObserver = subject.suggestedFee.test()
-        // Assert
-        testObserver.assertComplete()
-        testObserver.assertNoErrors()
-        testObserver.values()[0] shouldEqual mockFeeList
-        verify(mockPaymentService).suggestedFee
-        verifyNoMoreInteractions(mockPaymentService)
     }
 
     @Test

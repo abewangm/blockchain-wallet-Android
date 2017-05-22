@@ -83,7 +83,6 @@
     <string name="pair_wallet_step_1">Log in to your Blockchain Wallet via your PC or Mac at %1$s.</string>
     <string name="pair_wallet_step_2">Go to Settings / Wallet Information.</string>
     <string name="pair_wallet_step_3">Click Show Pairing Code to reveal a QR Code, a square black &amp; white barcode. Scan the code with your camera.</string>
-    <string name="disable_two_factor">You must disable two-factor authentication before attempting to manually pair your wallet</string>
     <string name="wallet_id">Wallet ID</string>
     <string name="default_wallet_name">My Bitcoin Wallet</string>
 
@@ -467,8 +466,7 @@
     <!-- FEE WARNING -->
     <string name="large_tx_warning">This is an oversized bitcoin transaction. Your wallet needs to
         consolidate many smaller payments you\'ve received in the past. This requires a relatively
-        high fee in order to be confirmed quickly. If it’s fine for the transaction to take longer
-        to confirm, you could reduce the fee manually by clicking “customize”.
+        high fee in order to be confirmed quickly.
     </string>
     <string name="go_back">Go back</string>
     <string name="accept_higher_fee">Accept higher fee</string>
@@ -698,5 +696,22 @@
     <string name="two_factor_dialog_hint">2FA code</string>
     <string name="two_factor_null_error">2FA code cannot be empty</string>
     <string name="two_factor_incorrect_error">2FA code incorrect</string>
+
+    <!-- CONFIRM PAYMENT -->
+    <string name="confirm_payment_change_fee">Change fee</string>
+    <string name="confirm_payment_fee_sync_error">Error getting fee options</string>
+
+    <!-- FEE OPTIONS -->
+    <string name="fee_options_regular">Regular</string>
+    <string name="fee_options_priority">Priority</string>
+    <string name="fee_options_custom">Custom</string>
+    <string name="fee_options_regular_time">1+ hour</string>
+    <string name="fee_options_priority_time">~0–60 min</string>
+    <string name="fee_options_custom_warning">Advanced users only</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b</string>
+    <string name="fee_options_fee_too_low">Low fee not recommended</string>
+    <string name="fee_options_fee_too_high">Unnecessarily high fee</string>
+    <string name="fee_options_advanced_warning">This feature is recommended for advanced users only. By choosing a custom fee, you risk overpaying or your transaction never being confirmed.</string>
+    <string name="fee_options_sat_byte_hint">sat/b</string>
 
 </resources>

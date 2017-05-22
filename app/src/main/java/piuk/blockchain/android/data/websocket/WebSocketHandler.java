@@ -126,7 +126,6 @@ class WebSocketHandler extends WebSocketListener {
         if (isConnected()) {
             webSocketConnection.close(STATUS_CODE_NORMAL_CLOSURE, "Websocket deliberately stopped");
             webSocketConnection = null;
-            Log.d(TAG, "stop: ");
         }
     }
 
@@ -332,7 +331,8 @@ class WebSocketHandler extends WebSocketListener {
                         // Download changed payload
                         //noinspection ThrowableResultOfMethodCallIgnored
                         downloadChangedPayload().blockingGet();
-                        showToast().subscribeOn(AndroidSchedulers.mainThread());
+                        showToast().subscribeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new IgnorableDefaultObserver<>());
                     }
 
                     onChangeHashSet.add(message);

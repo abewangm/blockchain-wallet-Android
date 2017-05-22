@@ -73,7 +73,6 @@
     <string name="pair_wallet_step_1">Přihlaste se ke své peněžence Blockchain přes počítač nebo Mac na stránce %1$s.</string>
     <string name="pair_wallet_step_2">Pokud používáte původní peněženku, klikněte na tlačítko Nastavení účtu a vyberte kartu Zařízení. Pokud používáte svoji novou beta peněženku, přejděte do nabídky Nastavení / Informace o peněžence.</string>
     <string name="pair_wallet_step_3">Kliknutím na Zobrazit párovací kód zobrazíte QR kód, což je černobílý čárový kód ve tvaru čtverce. Naskenujte kód pomocí fotoaparátu.</string>
-    <string name="disable_two_factor">Dříve než se pokusíte spárovat svoji peněženku ručně, musíte deaktivovat dvoufaktorovou autentizaci</string>
     <string name="wallet_id">ID peněženky</string>
     <string name="default_wallet_name">Moje bitcoinová peněženka</string>
 
@@ -390,7 +389,7 @@
 
     <string name="api_fail">Nelze se připojit k serveru. Zkuste to prosím později.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Toto je příliš velká bitcoinová transakce. Vaše peněženka musí sloučit drobné částky, které jste přijali v minulosti. Je vyžadován relativně vysoký poplatek za účelem rychlého potvrzení. Pokud Vám nevadí, že potvrzení transakce potrvá déle, můžete snížit poplatek ručně kliknutím na možnost Přizpůsobit. </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Toto je příliš velká bitcoinová transakce. Vaše peněženka musí sloučit drobné částky, které jste přijali v minulosti. Je vyžadován relativně vysoký poplatek za účelem rychlého potvrzení.</string>
     <string name="go_back">Přejít zpět</string>
     <string name="accept_higher_fee">Přijmout vyšší poplatek</string>
     <string name="large_tx_high_fee_warning">„Tato transakce vyžaduje vyšší poplatek za drobné částky, které mají být vráceny.“</string>

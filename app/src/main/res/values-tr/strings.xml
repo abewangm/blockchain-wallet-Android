@@ -73,7 +73,6 @@
     <string name="pair_wallet_step_1">Blockchain Cüzdanınıza %1$s adresinden PC veya Mac cihazınızla giriş yapın.</string>
     <string name="pair_wallet_step_2">Eski bir cüzdan kullanıyorsanız, Hesap Ayarları düğmesini tıklayın ve Cihazlar sekmesini seçin. Yeni beta cüzdanımızı kullanıyorsanız, Ayarlar / Cüzdan Bilgileri sekmesine gidin.</string>
     <string name="pair_wallet_step_3">Kare şeklindeki siyah ve beyaz QR kodunu görüntülemek için Eşleştirme Kodunu Göster seçeneğine tıklayın. Kameranızla kodu tarayın.</string>
-    <string name="disable_two_factor">Cüzdanınızı manüel olarak eşleştirmeden önce iki aşamalı kimlik doğrulamayı devre dışı bırakmalısınız</string>
     <string name="wallet_id">Cüzdan Kimliği</string>
     <string name="default_wallet_name">Bitcoin Cüzdanım</string>
 
@@ -390,7 +389,7 @@
 
     <string name="api_fail">Sunucuya bağlanamadı. Lütfen daha sonra tekrar deneyin.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Büyük boyuta bir bitcoin işlemi. Cüzdanınız geçmişte almış olduğunuz birçok daha küçük ödemeyi birleştirmek zorundadır. Bu da hızlıca onaylanması için nispeten daha yüksek bir ücret gerektirir. Eğer işlemin onaylanmasının daha uzun sürmesi sorun değilse, ücreti manüel olarak “kişiselleştir” seçeneğine tıklayarak azaltabilirsiniz. </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Büyük boyuta bir bitcoin işlemi. Cüzdanınız geçmişte almış olduğunuz birçok daha küçük ödemeyi birleştirmek zorundadır. Bu da hızlıca onaylanması için nispeten daha yüksek bir ücret gerektirir.</string>
     <string name="go_back">Geri git</string>
     <string name="accept_higher_fee">Daha yüksek ücreti kabul et</string>
     <string name="large_tx_high_fee_warning">"Bu işlem, küçük miktarda para üstü iadesi sebebiyle toz tüketimi için daha yüksek bir ücret gerektirir."</string>

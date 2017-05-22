@@ -73,7 +73,6 @@
     <string name="pair_wallet_step_1">Đăng nhập vào Ví Blockchain của bạn bằng PC hoặc Mac tại %1$s.</string>
     <string name="pair_wallet_step_2">Nếu bạn đang sử dụng ví cũ, nhấn vào Cài đặt Tài khoản và chọn thẻ Thiết bị. Nếu bạn đang sử dụng ví phiên bản thử nghiệm mới, đến Cài đặt / Thông tin Ví.</string>
     <string name="pair_wallet_step_3">Nhấn hiển thị mã kết nối để hiện mã QR, mã vạch gồm các hình vuông đen &amp; trắng. Quét mã bằng camera.</string>
-    <string name="disable_two_factor">Bạn phải tắt Bảo mật 2 lớp trước khi thử kết nối thủ công đến ví của mình</string>
     <string name="wallet_id">ID Ví</string>
     <string name="default_wallet_name">Ví Bitcoin của tôi</string>
 
@@ -390,7 +389,7 @@
 
     <string name="api_fail">Không thể kết nối đến máy chủ. Vui lòng thử lại sau.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Đây là một giao dịch bitcoin vượt kích cỡ. Ví của bạn cần tổng hợp nhiều thanh toán nhỏ hơn mà bạn đã nhận trong quá khứ. Điều này cần một khoản phí tương đối cao để được xác nhận nhanh chóng. Xác nhận giao dịch lâu hơn vẫn không sao, bạn có thể tự giảm phí bằng cách nhấn "tùy chỉnh". </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Đây là một giao dịch bitcoin vượt kích cỡ. Ví của bạn cần tổng hợp nhiều thanh toán nhỏ hơn mà bạn đã nhận trong quá khứ. Điều này cần một khoản phí tương đối cao để được xác nhận nhanh chóng. </string>
     <string name="go_back">Trở lại</string>
     <string name="accept_higher_fee">Chấp nhận phí cao hơn</string>
     <string name="large_tx_high_fee_warning">"Giao dịch này yêu cầu phí cao hơn vì thực hiện giao dịch với số tiền quá nhỏ."</string>

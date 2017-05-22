@@ -73,7 +73,6 @@
     <string name="pair_wallet_step_1">Zaloguj się do swojego Portfela Blockchain na swoim komputerze lub Macu pod adresem %1$s</string>
     <string name="pair_wallet_step_2">Jeśli korzystasz ze starego portfela, kliknij przycisk Ustawienia Konta i wybierz zakładkę Urządzenia. Jeśli korzystasz z nowej wersji beta Portfela, przejdź do Ustawień / Informacji o Portfelu.</string>
     <string name="pair_wallet_step_3">Kliknij "Pokaż kod parowania", by zobaczyć kwadratowy, czarno-biały kod QR. Zeskanuj kod swoim aparatem.</string>
-    <string name="disable_two_factor">Musisz wyłączyć Uwierzytelnianie Dwustopniowe przed próbą ręcznego parowania swojego urządzenia</string>
     <string name="wallet_id">Identyfikator portfela</string>
     <string name="default_wallet_name">Mój portfel bitcoin</string>
 
@@ -390,7 +389,7 @@
 
     <string name="api_fail">Nie udało się połączyć z serwerem. Spróbuj ponownie później.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Ta transakcja bitcoin jest za duża. Twój portfel musi skonsolidować wiele mniejszych płatności, otrzymanych przez Ciebie w przeszłości. Wymaga to stosunkowo wysokiej opłaty w celu szybkiego potwierdzenia. Jeśli transakcja może poczekać dłużej na potwierdzenie, możesz ręcznie obniżyć opłatę, klikając "spersonalizuj" </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Ta transakcja bitcoin jest za duża. Twój portfel musi skonsolidować wiele mniejszych płatności, otrzymanych przez Ciebie w przeszłości. Wymaga to stosunkowo wysokiej opłaty w celu szybkiego potwierdzenia.</string>
     <string name="go_back">Wróć</string>
     <string name="accept_higher_fee">Zaakceptuj wyższą opłatę</string>
     <string name="large_tx_high_fee_warning">"Ta transakcja wymaga wyższej opłaty dla konsumpcji "kurzu" z powodu małej kwoty reszty."</string>

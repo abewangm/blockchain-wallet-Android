@@ -73,7 +73,6 @@
     <string name="pair_wallet_step_1">Connectez-vous à votre portefeuille Blockchain via votre PC ou votre Mac à l\’adresse %1$s.</string>
     <string name="pair_wallet_step_2">Si vous utilisez l\'ancien portefeuille, cliquez sur le bouton « Paramètres du compte » et choisissez l\'onglet « Appareils ». Si vous utilisez notre nouveau portefeuille bêta, allez dans Paramètres / Informations portefeuille.</string>
     <string name="pair_wallet_step_3">Cliquez sur « Afficher le code de jumelage » afin de révéler le code QR, un code-barres carré en noir et blanc. Scannez le code avec votre appareil photo.</string>
-    <string name="disable_two_factor">Vous devez désactiver l\'authentification à deux facteurs avant d\'essayer de jumeler votre portefeuille manuellement</string>
     <string name="wallet_id">Identifiant du portefeuille</string>
     <string name="default_wallet_name">Mon portefeuille bitcoin</string>
 
@@ -390,7 +389,7 @@
 
     <string name="api_fail">Impossible de se connecter au serveur. Veuillez réessayer plus tard.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Cette transaction de bitcoin est trop grande. Votre portefeuille doit consolider tous les petits paiements que vous avez reçus dans le passé. Pour pouvoir être confirmés rapidement, ils nécessitent des frais de transaction relativement élevés. Si cette transaction n\'a plus besoin d\'être confirmée, vous devriez réduire les frais manuellement en cliquant sur « personnaliser ».   </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Cette transaction de bitcoin est trop grande. Votre portefeuille doit consolider tous les petits paiements que vous avez reçus dans le passé. Pour pouvoir être confirmés rapidement, ils nécessitent des frais de transaction relativement élevés.</string>
     <string name="go_back">Retour</string>
     <string name="accept_higher_fee">Accepter des frais plus élevés</string>
     <string name="large_tx_high_fee_warning">« Le montant des modifications à rembourser étant faible, cette transaction requière des frais plus élevés pour la consommation de montants inférieurs au montant minimal accepté par le réseau bitcoin. »</string>
