@@ -389,7 +389,7 @@
 
     <string name="api_fail">Keine Serververbindung möglich. Bitte versuchen Sie es später erneut.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Diese Bitcoin-Transaktion ist zu groß. In Ihrer Wallet befinden sich viele kleine in der Vergangenheit eingegangene Zahlungen. Für eine schnelle Bestätigung ist eine relativ hohe Gebühr erforderlich. Falls Ihnen eine längere Wartezeit bei der Transaktionsbestätigung recht ist, können Sie die Gebühr eigenständig reduzieren. Klicken Sie dazu auf „Individuell anpassen“. </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Diese Bitcoin-Transaktion ist zu groß. In Ihrer Wallet befinden sich viele kleine in der Vergangenheit eingegangene Zahlungen. Für eine schnelle Bestätigung ist eine relativ hohe Gebühr erforderlich.</string>
     <string name="go_back">Zurück</string>
     <string name="accept_higher_fee">Höhere Gebühr akzeptieren</string>
     <string name="large_tx_high_fee_warning">„Da der zurückzugebene Wechselbetrag klein ist, erfordert diese Transaktion eine höhere Gebühr für Kleinstsummenkonsum.“</string>

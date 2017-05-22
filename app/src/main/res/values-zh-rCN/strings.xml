@@ -389,7 +389,7 @@
 
     <string name="api_fail">无法连接服务器。请稍后再试。</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">这是一个超大尺寸的比特币交易。您的钱包需要整合您在过去接收的许多更小额的支付。这要求一笔相对高的费用以快速确认。交易确认时间更长是可以的，您可以点击“自定义”手动降低费用。 </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">这是一个超大尺寸的比特币交易。您的钱包需要整合您在过去接收的许多更小额的支付。这要求一笔相对高的费用以快速确认。</string>
     <string name="go_back">返回</string>
     <string name="accept_higher_fee">接受更高的费用</string>
     <string name="large_tx_high_fee_warning">“该交易要求更高的费用用于因为返回少量变化而造成的微额量消费”。</string>

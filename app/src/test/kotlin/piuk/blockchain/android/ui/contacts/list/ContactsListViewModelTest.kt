@@ -26,6 +26,7 @@ import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.injection.*
+import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import java.util.*
 import kotlin.test.assertNull
@@ -110,7 +111,7 @@ class ContactsListViewModelTest {
         // Assert
         verify(mockRxBus).register(NotificationPayload::class.java)
         verifyNoMoreInteractions(mockRxBus)
-        verify(mockActivity, times(3)).setUiState(ContactsListActivity.LOADING)
+        verify(mockActivity, times(3)).setUiState(UiState.LOADING)
         verify(mockPayloadDataManager).loadNodes()
         verify(mockContactsManager, times(2)).fetchContacts()
         verify(mockContactsManager, times(2)).contactList
@@ -131,7 +132,7 @@ class ContactsListViewModelTest {
         // Assert
         verify(mockRxBus).register(NotificationPayload::class.java)
         verifyNoMoreInteractions(mockRxBus)
-        verify(mockActivity, times(2)).setUiState(ContactsListActivity.LOADING)
+        verify(mockActivity, times(2)).setUiState(UiState.LOADING)
         verify(mockPayloadDataManager).loadNodes()
         verify(mockContactsManager).fetchContacts()
         verify(mockContactsManager).contactList
@@ -153,9 +154,9 @@ class ContactsListViewModelTest {
         // Assert
         verify(mockPayloadDataManager).isDoubleEncrypted
         verify(mockActivity).pageIntent
-        verify(mockActivity).setUiState(ContactsListActivity.LOADING)
+        verify(mockActivity).setUiState(UiState.LOADING)
         verify(mockActivity).showSecondPasswordDialog()
-        verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
+        verify(mockActivity).setUiState(UiState.FAILURE)
         verifyNoMoreInteractions(mockActivity)
         subject.link shouldEqual uri
     }
@@ -183,8 +184,8 @@ class ContactsListViewModelTest {
         subject.onViewReady()
         // Assert
         verify(mockActivity).pageIntent
-        verify(mockActivity, times(2)).setUiState(ContactsListActivity.LOADING)
-        verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
+        verify(mockActivity, times(2)).setUiState(UiState.LOADING)
+        verify(mockActivity).setUiState(UiState.FAILURE)
         // There will be other interactions with the mocks, but they are not tested here
         verify(mockPayloadDataManager).isDoubleEncrypted
         verify(mockPayloadDataManager).generateNodes(isNull())
@@ -220,8 +221,8 @@ class ContactsListViewModelTest {
         subject.onViewReady()
         // Assert
         verify(mockActivity).pageIntent
-        verify(mockActivity, times(2)).setUiState(ContactsListActivity.LOADING)
-        verify(mockActivity).setUiState(ContactsListActivity.CONTENT)
+        verify(mockActivity, times(2)).setUiState(UiState.LOADING)
+        verify(mockActivity).setUiState(UiState.CONTENT)
         verify(mockActivity).onContactsLoaded(any())
         verifyNoMoreInteractions(mockActivity)
     }
@@ -242,8 +243,8 @@ class ContactsListViewModelTest {
         subject.onViewReady()
         // Assert
         verify(mockActivity).pageIntent
-        verify(mockActivity, times(2)).setUiState(ContactsListActivity.LOADING)
-        verify(mockActivity).setUiState(ContactsListActivity.EMPTY)
+        verify(mockActivity, times(2)).setUiState(UiState.LOADING)
+        verify(mockActivity).setUiState(UiState.EMPTY)
         verify(mockActivity).onContactsLoaded(any())
         verifyNoMoreInteractions(mockActivity)
     }
@@ -264,8 +265,8 @@ class ContactsListViewModelTest {
         subject.onViewReady()
         // Assert
         verify(mockActivity).pageIntent
-        verify(mockActivity, times(2)).setUiState(ContactsListActivity.LOADING)
-        verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
+        verify(mockActivity, times(2)).setUiState(UiState.LOADING)
+        verify(mockActivity).setUiState(UiState.FAILURE)
         verify(mockActivity).onContactsLoaded(any())
         verifyNoMoreInteractions(mockActivity)
     }
@@ -282,8 +283,8 @@ class ContactsListViewModelTest {
         subject.onViewReady()
         // Assert
         verify(mockActivity).pageIntent
-        verify(mockActivity, times(2)).setUiState(ContactsListActivity.LOADING)
-        verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
+        verify(mockActivity, times(2)).setUiState(UiState.LOADING)
+        verify(mockActivity).setUiState(UiState.FAILURE)
         verifyNoMoreInteractions(mockActivity)
     }
 
@@ -304,8 +305,8 @@ class ContactsListViewModelTest {
         // Act
         subject.initContactsService(password)
         // Assert
-        verify(mockActivity).setUiState(ContactsListActivity.LOADING)
-        verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
+        verify(mockActivity).setUiState(UiState.LOADING)
+        verify(mockActivity).setUiState(UiState.FAILURE)
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         verifyNoMoreInteractions(mockActivity)
         verify(mockPayloadDataManager).generateNodes(password)
@@ -330,8 +331,8 @@ class ContactsListViewModelTest {
         // Act
         subject.initContactsService(password)
         // Assert
-        verify(mockActivity).setUiState(ContactsListActivity.LOADING)
-        verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
+        verify(mockActivity).setUiState(UiState.LOADING)
+        verify(mockActivity).setUiState(UiState.FAILURE)
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         verifyNoMoreInteractions(mockActivity)
         verify(mockPayloadDataManager).generateNodes(password)
@@ -352,8 +353,8 @@ class ContactsListViewModelTest {
         verify(mockContactsManager, times(3)).readInvitationSent(any<Contact>())
         verify(mockContactsManager, times(3)).contactList
         verifyNoMoreInteractions(mockContactsManager)
-        verify(mockActivity, times(3)).setUiState(ContactsListActivity.LOADING)
-        verify(mockActivity, times(3)).setUiState(ContactsListActivity.FAILURE)
+        verify(mockActivity, times(3)).setUiState(UiState.LOADING)
+        verify(mockActivity, times(3)).setUiState(UiState.FAILURE)
         verifyNoMoreInteractions(mockActivity)
     }
 
@@ -369,8 +370,8 @@ class ContactsListViewModelTest {
         verify(mockContactsManager).fetchContacts()
         verify(mockContactsManager).contactList
         verifyNoMoreInteractions(mockContactsManager)
-        verify(mockActivity).setUiState(ContactsListActivity.LOADING)
-        verify(mockActivity).setUiState(ContactsListActivity.FAILURE)
+        verify(mockActivity).setUiState(UiState.LOADING)
+        verify(mockActivity).setUiState(UiState.FAILURE)
         verifyNoMoreInteractions(mockActivity)
     }
 

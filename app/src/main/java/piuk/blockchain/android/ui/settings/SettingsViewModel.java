@@ -111,8 +111,8 @@ public class SettingsViewModel extends BaseViewModel {
         // Fetch updated settings
         compositeDisposable.add(
                 settingsDataManager.initSettings(
-                        payloadManager.getPayload().getGuid(),
-                        payloadManager.getPayload().getSharedKey())
+                        prefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
+                        prefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""))
                         .subscribe(
                                 updatedSettings -> {
                                     settings = updatedSettings;

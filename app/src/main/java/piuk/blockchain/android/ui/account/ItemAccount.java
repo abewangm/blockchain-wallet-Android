@@ -12,6 +12,10 @@ public class ItemAccount {
 
     @Nullable public Object accountObject;
 
+    public ItemAccount() {
+        // Empty constructor for serialization
+    }
+
     public ItemAccount(@NonNull String label,
                        @NonNull String displayBalance,
                        @Nullable String tag,

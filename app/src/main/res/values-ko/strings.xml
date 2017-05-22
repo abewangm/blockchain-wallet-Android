@@ -388,7 +388,7 @@
 
     <string name="api_fail">서버 연결 불가 나중에 다시 해 보세요.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">너무 큰 비트코인 거래가 있습니다. 귀하 지갑은 이제까지 받아 온 수많은 작은 지불들을 합쳐야 합니다. 이에 대해 확인을 빨리 받으려면 비교적 높은 수수료를 내야 합니다. 거래 확인에 시간이 오래 걸려도 상관 없으면, \'사용자 설정\'을 클릭해서 수수료를 직접 낮추세요 </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">너무 큰 비트코인 거래가 있습니다. 귀하 지갑은 이제까지 받아 온 수많은 작은 지불들을 합쳐야 합니다. 이에 대해 확인을 빨리 받으려면 비교적 높은 수수료를 내야 합니다. </string>
     <string name="go_back">뒤로 가기</string>
     <string name="accept_higher_fee">높은 수수료 승인</string>
     <string name="large_tx_high_fee_warning">"이 거래는 작은 거스름 돈 반환으로 인한 아주 작은 금액 (dust amount) 소비를 위해 높은 수수료가 필요합니다."</string>

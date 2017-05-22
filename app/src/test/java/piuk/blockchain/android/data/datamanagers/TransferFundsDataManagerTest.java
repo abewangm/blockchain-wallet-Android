@@ -1,7 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
@@ -55,9 +54,7 @@ public class TransferFundsDataManagerTest extends RxTest {
         legacyAddress1.setAddress("address");
         legacyAddress1.setPrivateKey("");
         List<LegacyAddress> legacyAddresses = Arrays.asList(legacyAddress1, legacyAddress1, legacyAddress1);
-        Fee suggestedFee = mock(Fee.class);
-        when(suggestedFee.getFee()).thenReturn(100.0d);
-        when(dynamicFeeCache.getCachedDynamicFee().getDefaultFee()).thenReturn(suggestedFee);
+        when(dynamicFeeCache.getFeeOptions().getRegularFee()).thenReturn(1L);
         when(payloadDataManager.getWallet().getLegacyAddressList()).thenReturn(legacyAddresses);
         when(payloadDataManager.getAddressBalance(anyString())).thenReturn(BigInteger.TEN);
         UnspentOutputs unspentOutputs = mock(UnspentOutputs.class);
@@ -67,7 +64,7 @@ public class TransferFundsDataManagerTest extends RxTest {
         spendableUnspentOutputs.setAbsoluteFee(BigInteger.TEN);
         when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
                 .thenReturn(spendableUnspentOutputs);
-        when(sendDataManager.getSweepableCoins(unspentOutputs, BigInteger.valueOf(100)))
+        when(sendDataManager.getSweepableCoins(unspentOutputs, BigInteger.valueOf(1_000L)))
                 .thenReturn(Pair.of(BigInteger.valueOf(1_000_000L), BigInteger.TEN));
         // Act
         TestObserver<Triple<List<PendingTransaction>, Long, Long>> testObserver =

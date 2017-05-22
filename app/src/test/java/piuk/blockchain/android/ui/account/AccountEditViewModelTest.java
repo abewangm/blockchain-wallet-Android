@@ -103,7 +103,6 @@ public class AccountEditViewModelTest {
         subject = new AccountEditViewModel(accountEditModel, activity);
     }
 
-
     @Test
     public void setAccountModel() throws Exception {
         // Arrange
@@ -221,7 +220,7 @@ public class AccountEditViewModelTest {
         when(payloadDataManager.getAddressBalance(anyString())).thenReturn(BigInteger.TEN);
         Fee mockFee = mock(Fee.class);
         when(mockFee.getFee()).thenReturn(100.0d);
-        when(dynamicFeeCache.getCachedDynamicFee().getDefaultFee()).thenReturn(mockFee);
+        when(dynamicFeeCache.getFeeOptions().getRegularFee()).thenReturn(100L);
         when(sendDataManager.estimatedFee(anyInt(), anyInt(), any(BigInteger.class)))
                 .thenReturn(BigInteger.TEN);
         // Act
@@ -261,7 +260,8 @@ public class AccountEditViewModelTest {
         // Assert
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
-        verify(activity).showPaymentDetails(any(PaymentConfirmationDetails.class), eq(pendingTransaction));
+        verify(activity).showPaymentDetails(any(PaymentConfirmationDetails.class));
+        assertEquals(pendingTransaction, subject.pendingTransaction);
     }
 
     @Test
@@ -332,8 +332,9 @@ public class AccountEditViewModelTest {
                 any(BigInteger.class),
                 any(BigInteger.class))).thenReturn(Observable.just("hash"));
         when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.complete());
+        subject.pendingTransaction = pendingTransaction;
         // Act
-        subject.submitPayment(pendingTransaction);
+        subject.submitPayment();
         // Assert
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
@@ -364,8 +365,9 @@ public class AccountEditViewModelTest {
                 isNull(),
                 any(BigInteger.class),
                 any(BigInteger.class))).thenReturn(Observable.error(new Throwable()));
+        subject.pendingTransaction = pendingTransaction;
         // Act
-        subject.submitPayment(pendingTransaction);
+        subject.submitPayment();
         // Assert
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
@@ -384,8 +386,9 @@ public class AccountEditViewModelTest {
         Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
         when(mockPayload.isDoubleEncryption()).thenReturn(true);
         when(payloadDataManager.getWallet()).thenReturn(mockPayload);
+        subject.pendingTransaction = pendingTransaction;
         // Act
-        subject.submitPayment(pendingTransaction);
+        subject.submitPayment();
         // Assert
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();

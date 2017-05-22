@@ -389,7 +389,7 @@
 
     <string name="api_fail">Kan geen verbinding maken met server. Probeer het later opnieuw.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Dit is een extra grote bitcoin-transactie. Uw portemonnee moet vele kleinere betalingen die u in het verleden heeft ontvangen combineren. Dit vereist een relatief hoog tarief om snel te worden bevestigd. Als het prima is dat het langer duurt om de transactie te bevestigen, kunt u het tarief handmatig verlagen door te klikken op "op maat maken". </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Dit is een extra grote bitcoin-transactie. Uw portemonnee moet vele kleinere betalingen die u in het verleden heeft ontvangen combineren. Dit vereist een relatief hoog tarief om snel te worden bevestigd.</string>
     <string name="go_back">Ga terug</string>
     <string name="accept_higher_fee">Hoger tarief accepteren</string>
     <string name="large_tx_high_fee_warning">"Deze transactie vereist een hoger tarief voor dustconsumptie ten gevolg van de kleine hoeveelheid wisselgeld die kan worden teruggegeven."</string>

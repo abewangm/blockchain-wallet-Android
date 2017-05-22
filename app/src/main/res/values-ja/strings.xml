@@ -389,7 +389,7 @@
 
     <string name="api_fail">サーバーに接続できません。後で再試行してください。</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">このビットコイン取引は大きすぎます。あなたの財布は過去に受信した多くの少額支払いを統合する必要があります。迅速に確認されるためには比較的高額な手数料が必要です。確認されるまでに時間がかかっても問題がない場合は、「カスタマイズ」をクリックして手数料を手動で減らすことができます。 </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">このビットコイン取引は大きすぎます。あなたの財布は過去に受信した多くの少額支払いを統合する必要があります。迅速に確認されるためには比較的高額な手数料が必要です。</string>
     <string name="go_back">戻る</string>
     <string name="accept_higher_fee">より高額な費用に同意する</string>
     <string name="large_tx_high_fee_warning">"この取引では少額の釣り銭金額が払い戻されるため、ダスト消費により高額な手数料が必要です。"</string>
