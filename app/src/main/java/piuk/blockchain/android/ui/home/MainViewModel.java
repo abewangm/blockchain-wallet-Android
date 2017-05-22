@@ -88,6 +88,8 @@ public class MainViewModel extends BaseViewModel {
          */
         boolean getIfContactsEnabled();
 
+        boolean isBuySellPermitted();
+
         void onRooted();
 
         void onConnectivityFail();
@@ -382,7 +384,7 @@ public class MainViewModel extends BaseViewModel {
                             .subscribe(
                                     canBuy -> {
                                         Log.d(TAG, "preLaunchChecks: canBuy " + canBuy);
-                                        dataListener.setBuySellEnabled(canBuy && BuildConfig.BUY_BITCOIN_ENABLED);
+                                        dataListener.setBuySellEnabled(canBuy && dataListener.isBuySellPermitted());
                                         buyDataManager.watchPendingTrades()
                                                 .compose(RxUtil.applySchedulersToObservable())
                                                 .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace);
