@@ -384,12 +384,15 @@ public class MainViewModel extends BaseViewModel {
                             .subscribe(
                                     canBuy -> {
                                         Log.d(TAG, "preLaunchChecks: canBuy " + canBuy);
-                                        dataListener.setBuySellEnabled(canBuy && dataListener.isBuySellPermitted());
-                                        buyDataManager.watchPendingTrades()
-                                                .compose(RxUtil.applySchedulersToObservable())
-                                                .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace);
-                                        buyDataManager.getWebViewLoginDetails()
-                                                .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
+                                        boolean isEnabled = canBuy && dataListener.isBuySellPermitted();
+                                        dataListener.setBuySellEnabled(isEnabled);
+                                        if (isEnabled) {
+                                            buyDataManager.watchPendingTrades()
+                                                    .compose(RxUtil.applySchedulersToObservable())
+                                                    .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace);
+                                            buyDataManager.getWebViewLoginDetails()
+                                                    .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
+                                        }
                                     },
                                     throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
         } else {
