@@ -505,8 +505,7 @@ public class SendViewModel extends BaseViewModel {
     private BigInteger getSatoshisFromText(String text) {
         if (text == null || text.isEmpty()) return BigInteger.ZERO;
 
-        //Format string to parsable double
-        String amountToSend = text.trim().replace(" ", "").replace(getDefaultDecimalSeparator(), ".");
+        String amountToSend = stripSeparator(text);
 
         double amount;
         try {
@@ -515,8 +514,8 @@ public class SendViewModel extends BaseViewModel {
             amount = 0.0;
         }
 
-        long amountL = BigDecimal.valueOf(
-                monetaryUtil.getUndenominatedAmount(amount)).multiply(BigDecimal.valueOf(100000000))
+        long amountL = BigDecimal.valueOf(monetaryUtil.getUndenominatedAmount(amount))
+                .multiply(BigDecimal.valueOf(100000000))
                 .longValue();
         return BigInteger.valueOf(amountL);
     }
@@ -631,8 +630,9 @@ public class SendViewModel extends BaseViewModel {
      * If the ratio of fee/amount is over 1%
      */
     boolean isLargeTransaction() {
-        double usdValue = Double.parseDouble(monetaryUtil.getFiatFormat("USD")
-                .format(sendModel.exchangeRate * sendModel.absoluteSuggestedFee.doubleValue() / 1e8));
+        String valueString = monetaryUtil.getFiatFormat("USD")
+                .format(exchangeRateFactory.getLastPrice("USD") * sendModel.absoluteSuggestedFee.doubleValue() / 1e8);
+        double usdValue = Double.parseDouble(stripSeparator(valueString));
         int txSize = sendDataManager.estimateSize(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = sendModel.absoluteSuggestedFee.doubleValue() / sendModel.pendingTransaction.bigIntAmount.doubleValue() * 100.0;
 
@@ -983,6 +983,12 @@ public class SendViewModel extends BaseViewModel {
 
     private void showToast(@StringRes int message, @ToastCustom.ToastType String type) {
         if (dataListener != null) dataListener.showToast(message, type);
+    }
+
+    private String stripSeparator(String text) {
+        return text.trim()
+                .replace(" ", "")
+                .replace(getDefaultDecimalSeparator(), ".");
     }
 
     void disableWatchOnlySpendWarning() {
