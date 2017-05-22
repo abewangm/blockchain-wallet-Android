@@ -8,6 +8,7 @@ import android.webkit.WebView;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 
 /**
@@ -61,7 +62,9 @@ public class FrontendJavascriptManager {
     }
 
     private void executeScript(String script) {
-        Log.d(TAG, "Executing: " + script);
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "Executing: " + script);
+        }
         // TODO: 06/04/2017 evaluateJavascript isn't available on pre-19 devices
         new Handler(Looper.getMainLooper()).post(() -> webView.evaluateJavascript(script, frontendJavascript));
     }
