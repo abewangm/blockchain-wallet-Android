@@ -63,6 +63,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentSendBinding;
@@ -462,24 +463,12 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
             v.performClick();
             return false;
         });
-        binding.destination.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                //no op
-            }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //no op
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                //TextChanged listener required to invalidate receive address in memory when user
-                //chooses to edit address populated via QR
-                viewModel.setReceivingAddress(null);
-            }
-        });
+        //TextChanged listener required to invalidate receive address in memory when user
+        //chooses to edit address populated via QR
+        RxTextView.textChanges(binding.destination)
+                .doOnNext(ignored -> viewModel.setReceivingAddress(null))
+                .subscribe(new IgnorableDefaultObserver<>());
 
         binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus && customKeypad != null) {
