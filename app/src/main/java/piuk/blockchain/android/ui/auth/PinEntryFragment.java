@@ -404,7 +404,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     @Thunk
     void dismissFingerprintDialog() {
         if (fingerprintDialog != null && fingerprintDialog.isVisible()) {
-            fingerprintDialog.dismiss();
+            fingerprintDialog.dismissAllowingStateLoss();
             fingerprintDialog = null;
         }
 
