@@ -35,7 +35,7 @@ public class BuyDataManager {
         return Observable.combineLatest(
                 this.onboardingDataManager.getIfSepaCountry(),
                 this.getIsInvited(),
-                (isSepa, isInvited) -> isSepa && isInvited
+                (isSepa, isInvited) -> isSepa || isInvited
         );
     }
 
