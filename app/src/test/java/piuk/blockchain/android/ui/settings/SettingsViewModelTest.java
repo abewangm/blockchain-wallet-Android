@@ -98,6 +98,8 @@ public class SettingsViewModelTest {
         }});
         when(mockSettings.getSmsNumber()).thenReturn("sms");
         when(mockSettings.getEmail()).thenReturn("email");
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn(guid);
+        when(prefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, "")).thenReturn(sharedKey);
         when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.just(mockSettings));
         Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.getGuid()).thenReturn(guid);
@@ -118,6 +120,8 @@ public class SettingsViewModelTest {
         String guid = "GUID";
         String sharedKey = "SHARED_KEY";
         Settings settings = new Settings();
+        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn(guid);
+        when(prefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, "")).thenReturn(sharedKey);
         when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.error(new Throwable()));
         Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.getGuid()).thenReturn(guid);
