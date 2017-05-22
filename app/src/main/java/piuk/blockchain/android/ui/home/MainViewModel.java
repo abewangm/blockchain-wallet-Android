@@ -329,8 +329,8 @@ public class MainViewModel extends BaseViewModel {
 
     private Observable<Settings> getSettingsApi() {
         return settingsDataManager.initSettings(
-                payloadManager.getPayload().getGuid(),
-                payloadManager.getPayload().getSharedKey());
+                prefs.getValue(PrefsUtil.KEY_GUID, ""),
+                prefs.getValue(PrefsUtil.KEY_SHARED_KEY, ""));
     }
 
     private void checkRooted() {

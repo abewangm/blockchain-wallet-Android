@@ -175,8 +175,8 @@ public class BalanceViewModel extends BaseViewModel {
                                     if (!getIfNeverPrompt2Fa()) {
                                         compositeDisposable.add(
                                                 settingsDataManager.initSettings(
-                                                        payloadDataManager.getWallet().getGuid(),
-                                                        payloadDataManager.getWallet().getSharedKey())
+                                                        prefs.getValue(PrefsUtil.KEY_GUID, ""),
+                                                        prefs.getValue(PrefsUtil.KEY_SHARED_KEY, ""))
                                                         .subscribe(settings -> {
                                                             if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
                                                                 // Show dialog for 2FA, store date of dialog launch
