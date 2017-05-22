@@ -29,6 +29,7 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,6 +40,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.rxbinding2.widget.RxTextView;
@@ -61,6 +63,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentSendBinding;
@@ -460,6 +463,13 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
             v.performClick();
             return false;
         });
+
+        //TextChanged listener required to invalidate receive address in memory when user
+        //chooses to edit address populated via QR
+        RxTextView.textChanges(binding.destination)
+                .doOnNext(ignored -> viewModel.setReceivingAddress(null))
+                .subscribe(new IgnorableDefaultObserver<>());
+
         binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus && customKeypad != null) {
                 customKeypad.setNumpadVisibility(View.GONE);
