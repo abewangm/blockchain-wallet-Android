@@ -29,7 +29,6 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,7 +39,6 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.rxbinding2.widget.RxTextView;
@@ -467,7 +465,11 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         //TextChanged listener required to invalidate receive address in memory when user
         //chooses to edit address populated via QR
         RxTextView.textChanges(binding.destination)
-                .doOnNext(ignored -> viewModel.setReceivingAddress(null))
+                .doOnNext(ignored -> {
+                    if (getActivity().getCurrentFocus() == binding.destination) {
+                        viewModel.setReceivingAddress(null);
+                    }
+                })
                 .subscribe(new IgnorableDefaultObserver<>());
 
         binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
@@ -939,6 +941,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                         binding.buttonSend.setEnabled(true);
                         updateTotals(viewModel.getSendingItemAccount());
                         binding.textviewFeeAbsolute.setVisibility(View.VISIBLE);
+                        binding.textviewFeeTime.setVisibility(View.VISIBLE);
                         binding.textInputLayout.setVisibility(View.GONE);
                         break;
                     case 2:
@@ -982,6 +985,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     @Thunk
     void displayCustomFeeField() {
         binding.textviewFeeAbsolute.setVisibility(View.GONE);
+        binding.textviewFeeTime.setVisibility(View.GONE);
         binding.textInputLayout.setVisibility(View.VISIBLE);
         binding.buttonSend.setEnabled(false);
         RxTextView.textChanges(binding.edittextCustomFee)

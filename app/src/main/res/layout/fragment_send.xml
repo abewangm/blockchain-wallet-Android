@@ -33,8 +33,7 @@
                         android:gravity="center_vertical"
                         android:orientation="vertical"
                         android:paddingBottom="12dp"
-                        android:paddingLeft="16dp"
-                        android:paddingTop="16dp">
+                        android:paddingLeft="16dp">
 
                         <TextView
                             fontPath="fonts/Montserrat-Light.ttf"
@@ -134,6 +133,35 @@
                         android:id="@+id/amount_row"
                         layout="@layout/include_amount_row" />
 
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ProgressBar
+                            android:id="@+id/progressBarMaxAvailable"
+                            style="?android:attr/progressBarStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:paddingBottom="8dp"
+                            tools:visibility="gone" />
+
+                        <TextView
+                            android:id="@+id/max"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="left"
+                            android:paddingBottom="8dp"
+                            android:paddingLeft="16dp"
+                            android:paddingRight="16dp"
+                            android:textSize="14sp"
+                            tools:text="Use total minus fees: 0.00394932"
+                            tools:textColor="@color/primary_blue_accent" />
+                    </FrameLayout>
+
+                    <include layout="@layout/divider_grey" />
+
                     <!-- FEES TYPE -->
                     <LinearLayout
                         android:id="@+id/custom_fee_container"
@@ -163,7 +191,9 @@
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 android:layout_marginTop="8dp"
+                                android:gravity="center_vertical"
                                 android:orientation="vertical">
 
                                 <TextView
@@ -206,6 +236,7 @@
                                 android:id="@+id/text_input_layout"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 android:layout_marginLeft="8dp"
                                 android:layout_weight="0.9"
                                 android:hint="@string/fee_options_sat_byte_hint"
@@ -241,33 +272,6 @@
                         <include layout="@layout/divider_grey" />
 
                     </LinearLayout>
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <ProgressBar
-                            android:id="@+id/progressBarMaxAvailable"
-                            style="?android:attr/progressBarStyleSmall"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:gravity="center_horizontal|center_vertical"
-                            android:paddingBottom="16dp"
-                            android:paddingTop="16dp" />
-
-                        <TextView
-                            android:id="@+id/max"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal|center_vertical"
-                            android:gravity="center_horizontal|center_vertical"
-                            android:padding="16dp"
-                            android:textAlignment="gravity" />
-                    </FrameLayout>
-
-                    <include layout="@layout/divider_grey" />
-
                 </LinearLayout>
 
                 <Button
