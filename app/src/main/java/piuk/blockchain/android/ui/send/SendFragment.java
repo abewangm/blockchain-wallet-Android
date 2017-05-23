@@ -991,9 +991,10 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 .map(Long::valueOf)
                 .onErrorReturnItem(0L)
                 .doOnNext(value -> {
-                    if (value < 50) {
+
+                    if (value < viewModel.getFeeLimits().getMin()) {
                         binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_low));
-                    } else if (value > 300) {
+                    } else if (value > viewModel.getFeeLimits().getMax()) {
                         binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_high));
                     } else {
                         binding.textInputLayout.setError(null);
