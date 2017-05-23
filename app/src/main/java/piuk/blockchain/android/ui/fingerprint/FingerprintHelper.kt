@@ -112,7 +112,7 @@ class FingerprintHelper(private val applicationContext: Context,
                                 FingerprintResult.AUTHENTICATED -> callback.onAuthenticated(null)
                                 else -> throw RuntimeException("$it.result was null")
                             }
-                        }) { _ -> callback.onFatalError() })
+                        }, { _ -> callback.onFatalError() }))
     }
 
     /**
@@ -134,7 +134,7 @@ class FingerprintHelper(private val applicationContext: Context,
                                 FingerprintResult.AUTHENTICATED -> callback.onAuthenticated(it.encrypted)
                                 else -> throw RuntimeException("$it.result was null")
                             }
-                        }) { _ -> callback.onFatalError() })
+                        }, { _ -> callback.onFatalError() }))
     }
 
     /**
@@ -156,7 +156,7 @@ class FingerprintHelper(private val applicationContext: Context,
                                 FingerprintResult.AUTHENTICATED -> callback.onAuthenticated(it.decrypted)
                                 else -> throw RuntimeException("$it.result was null")
                             }
-                        }) { throwable ->
+                        }, { throwable ->
                             if (RxFingerprint.keyInvalidated(throwable)) {
                                 // The keys you wanted to use are invalidated because the user has turned off his
                                 // secure lock screen or changed the fingerprints stored on the device
@@ -165,7 +165,7 @@ class FingerprintHelper(private val applicationContext: Context,
                             } else {
                                 callback.onFatalError()
                             }
-                        })
+                        }))
     }
 
     /**

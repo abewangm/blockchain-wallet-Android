@@ -116,7 +116,7 @@ public class FingerprintHelperTest {
         // Arrange
 
         // Act
-        boolean result = subject.storeEncryptedData("key", new String("data"));
+        boolean result = subject.storeEncryptedData("key", "data");
         // Assert
         verify(prefsUtil).setValue("key", "ZGF0YQ==\n");
         assertTrue(result);
@@ -131,7 +131,7 @@ public class FingerprintHelperTest {
         // Assert
         verify(prefsUtil).getValue("key", "");
         assert result != null;
-        assertEquals("data", result.toString());
+        assertEquals("data", result);
     }
 
     @Test
@@ -147,7 +147,8 @@ public class FingerprintHelperTest {
     @Test
     public void authenticateFingerprintFailed() throws Exception {
         // Arrange
-        FingerprintAuthenticationResult result = new FingerprintAuthenticationResult(FingerprintResult.FAILED, "");
+        FingerprintAuthenticationResult result =
+                new FingerprintAuthenticationResult(FingerprintResult.FAILED, "");
         when(fingerprintAuth.authenticate(applicationContext)).thenReturn(Observable.just(result));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
@@ -160,7 +161,8 @@ public class FingerprintHelperTest {
     public void authenticateFingerprintOnHelp() throws Exception {
         // Arrange
         String message = "help";
-        FingerprintAuthenticationResult result = new FingerprintAuthenticationResult(FingerprintResult.HELP, message);
+        FingerprintAuthenticationResult result =
+                new FingerprintAuthenticationResult(FingerprintResult.HELP, message);
         when(fingerprintAuth.authenticate(applicationContext)).thenReturn(Observable.just(result));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
@@ -172,7 +174,8 @@ public class FingerprintHelperTest {
     @Test
     public void authenticateFingerprintOnAuthenticated() throws Exception {
         // Arrange
-        FingerprintAuthenticationResult result = new FingerprintAuthenticationResult(FingerprintResult.AUTHENTICATED, "");
+        FingerprintAuthenticationResult result =
+                new FingerprintAuthenticationResult(FingerprintResult.AUTHENTICATED, "");
         when(fingerprintAuth.authenticate(applicationContext)).thenReturn(Observable.just(result));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
@@ -184,7 +187,8 @@ public class FingerprintHelperTest {
     @Test
     public void authenticateFingerprintException() throws Exception {
         // Arrange
-        when(fingerprintAuth.authenticate(applicationContext)).thenReturn(Observable.error(new Throwable()));
+        when(fingerprintAuth.authenticate(applicationContext))
+                .thenReturn(Observable.error(new Throwable()));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
         subject.authenticateFingerprint(mockAuthCallback);
@@ -195,8 +199,10 @@ public class FingerprintHelperTest {
     @Test
     public void encryptStringFailed() throws Exception {
         // Arrange
-        FingerprintEncryptionResult result = new FingerprintEncryptionResult(FingerprintResult.FAILED, "", "");
-        when(fingerprintAuth.encrypt(eq(applicationContext), anyString(), anyString())).thenReturn(Observable.just(result));
+        FingerprintEncryptionResult result =
+                new FingerprintEncryptionResult(FingerprintResult.FAILED, "", "");
+        when(fingerprintAuth.encrypt(eq(applicationContext), anyString(), anyString()))
+                .thenReturn(Observable.just(result));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
         subject.encryptString("", "", mockAuthCallback);
@@ -208,8 +214,10 @@ public class FingerprintHelperTest {
     public void encryptStringOnHelp() throws Exception {
         // Arrange
         String message = "help";
-        FingerprintEncryptionResult result = new FingerprintEncryptionResult(FingerprintResult.HELP, message, "");
-        when(fingerprintAuth.encrypt(eq(applicationContext), anyString(), anyString())).thenReturn(Observable.just(result));
+        FingerprintEncryptionResult result =
+                new FingerprintEncryptionResult(FingerprintResult.HELP, message, "");
+        when(fingerprintAuth.encrypt(eq(applicationContext), anyString(), anyString()))
+                .thenReturn(Observable.just(result));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
         subject.encryptString("", "", mockAuthCallback);
@@ -220,8 +228,10 @@ public class FingerprintHelperTest {
     @Test
     public void encryptStringOnAuthenticated() throws Exception {
         // Arrange
-        FingerprintEncryptionResult result = new FingerprintEncryptionResult(FingerprintResult.AUTHENTICATED, "", "");
-        when(fingerprintAuth.encrypt(eq(applicationContext), anyString(), anyString())).thenReturn(Observable.just(result));
+        FingerprintEncryptionResult result =
+                new FingerprintEncryptionResult(FingerprintResult.AUTHENTICATED, "", "");
+        when(fingerprintAuth.encrypt(eq(applicationContext), anyString(), anyString()))
+                .thenReturn(Observable.just(result));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
         subject.encryptString("", "", mockAuthCallback);
@@ -232,7 +242,8 @@ public class FingerprintHelperTest {
     @Test
     public void encryptStringException() throws Exception {
         // Arrange
-        when(fingerprintAuth.encrypt(eq(applicationContext), anyString(), anyString())).thenReturn(Observable.error(new Throwable()));
+        when(fingerprintAuth.encrypt(eq(applicationContext), anyString(), anyString()))
+                .thenReturn(Observable.error(new Throwable()));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
         subject.encryptString("", "", mockAuthCallback);
@@ -243,8 +254,10 @@ public class FingerprintHelperTest {
     @Test
     public void decryptStringFailed() throws Exception {
         // Arrange
-        FingerprintDecryptionResult result = new FingerprintDecryptionResult(FingerprintResult.FAILED, "", "");
-        when(fingerprintAuth.decrypt(eq(applicationContext), anyString(), anyString())).thenReturn(Observable.just(result));
+        FingerprintDecryptionResult result =
+                new FingerprintDecryptionResult(FingerprintResult.FAILED, "", "");
+        when(fingerprintAuth.decrypt(eq(applicationContext), anyString(), anyString()))
+                .thenReturn(Observable.just(result));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
         subject.decryptString("", "", mockAuthCallback);
@@ -256,8 +269,10 @@ public class FingerprintHelperTest {
     public void decryptStringOnHelp() throws Exception {
         // Arrange
         String message = "help";
-        FingerprintDecryptionResult result = new FingerprintDecryptionResult(FingerprintResult.HELP, message, "");
-        when(fingerprintAuth.decrypt(eq(applicationContext), anyString(), anyString())).thenReturn(Observable.just(result));
+        FingerprintDecryptionResult result =
+                new FingerprintDecryptionResult(FingerprintResult.HELP, message, "");
+        when(fingerprintAuth.decrypt(eq(applicationContext), anyString(), anyString()))
+                .thenReturn(Observable.just(result));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
         subject.decryptString("", "", mockAuthCallback);
@@ -268,8 +283,10 @@ public class FingerprintHelperTest {
     @Test
     public void decryptStringOnAuthenticated() throws Exception {
         // Arrange
-        FingerprintDecryptionResult result = new FingerprintDecryptionResult(FingerprintResult.AUTHENTICATED, "", "");
-        when(fingerprintAuth.decrypt(eq(applicationContext), anyString(), anyString())).thenReturn(Observable.just(result));
+        FingerprintDecryptionResult result =
+                new FingerprintDecryptionResult(FingerprintResult.AUTHENTICATED, "", "");
+        when(fingerprintAuth.decrypt(eq(applicationContext), anyString(), anyString()))
+                .thenReturn(Observable.just(result));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
         subject.decryptString("", "", mockAuthCallback);
@@ -280,7 +297,8 @@ public class FingerprintHelperTest {
     @Test
     public void decryptStringException() throws Exception {
         // Arrange
-        when(fingerprintAuth.decrypt(eq(applicationContext), anyString(), anyString())).thenReturn(Observable.error(new Throwable()));
+        when(fingerprintAuth.decrypt(eq(applicationContext), anyString(), anyString()))
+                .thenReturn(Observable.error(new Throwable()));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
         subject.decryptString("", "", mockAuthCallback);
@@ -292,7 +310,8 @@ public class FingerprintHelperTest {
     @Test
     public void decryptStringKeyPermanentlyInvalidatedException() throws Exception {
         // Arrange
-        when(fingerprintAuth.decrypt(eq(applicationContext), anyString(), anyString())).thenReturn(Observable.error(new KeyPermanentlyInvalidatedException()));
+        when(fingerprintAuth.decrypt(eq(applicationContext), anyString(), anyString()))
+                .thenReturn(Observable.error(new KeyPermanentlyInvalidatedException()));
         FingerprintHelper.AuthCallback mockAuthCallback = mock(FingerprintHelper.AuthCallback.class);
         // Act
         subject.decryptString("", "", mockAuthCallback);
