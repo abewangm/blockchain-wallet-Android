@@ -31,7 +31,7 @@ android {
 
         // Flag for Buy and Contacts feature
         buildConfigField "boolean", "CONTACTS_ENABLED", "false"
-        buildConfigField "boolean", "BUY_BITCOIN_ENABLED", "false"
+        buildConfigField "boolean", "BUY_BITCOIN_ENABLED", "true"
     }
     buildTypes {
         release {

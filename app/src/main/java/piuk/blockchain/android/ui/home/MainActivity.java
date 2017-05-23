@@ -762,7 +762,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             buyWebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         }
         buyWebView.getSettings().setJavaScriptEnabled(true);
-        buyWebView.loadUrl("http://localhost:8080/wallet/#/intermediate");
+        buyWebView.loadUrl(viewModel.getCurrentServerUrl()+"wallet/#/intermediate");
 
         frontendJavascriptManager = new FrontendJavascriptManager(this, buyWebView);
         buyWebView.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
