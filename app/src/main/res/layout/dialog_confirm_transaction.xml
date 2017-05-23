@@ -86,7 +86,10 @@
                         <TextView
                             android:id="@+id/textview_to_address"
                             style="@style/ConfirmPaymentField"
+                            android:layout_width="1dp"
+                            android:layout_gravity="fill"
                             android:ellipsize="end"
+                            android:scrollHorizontally="true"
                             android:singleLine="true"
                             tools:text="1Pbu3p5TWsrYujGWbgT4MDeBa2J9bSkGoP" />
 
