@@ -966,6 +966,22 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         binding.textviewFeeType.setText(R.string.fee_options_regular);
         binding.textviewFeeTime.setText(R.string.fee_options_regular_time);
+
+        RxTextView.textChanges(binding.amountRow.amountBtc)
+                .debounce(400, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        value -> updateTotals(viewModel.getSendingItemAccount()),
+                        Throwable::printStackTrace);
+
+        RxTextView.textChanges(binding.amountRow.amountFiat)
+                .debounce(400, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        value -> updateTotals(viewModel.getSendingItemAccount()),
+                        Throwable::printStackTrace);
     }
 
     @Thunk
@@ -995,7 +1011,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 .map(Long::valueOf)
                 .onErrorReturnItem(0L)
                 .doOnNext(value -> {
-
                     if (value < viewModel.getFeeLimits().getMin()) {
                         binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_low));
                     } else if (value > viewModel.getFeeLimits().getMax()) {
