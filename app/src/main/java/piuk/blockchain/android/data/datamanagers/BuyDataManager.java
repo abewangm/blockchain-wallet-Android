@@ -35,7 +35,7 @@ public class BuyDataManager {
         return Observable.combineLatest(
                 this.onboardingDataManager.getIfSepaCountry(),
                 this.getIsInvited(),
-                (isSepa, isInvited) -> isSepa && isInvited
+                (isSepa, isInvited) -> isSepa || isInvited
         );
     }
 
@@ -45,7 +45,7 @@ public class BuyDataManager {
                 payloadDataManager.getWallet().getSharedKey()
         ).map(settings -> {
             // TODO: implement settings.invited.sfox
-            return true;
+            return false;
         });
     }
 

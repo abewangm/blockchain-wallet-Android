@@ -725,6 +725,11 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
+    public boolean isBuySellPermitted() {
+        return BuildConfig.BUY_BITCOIN_ENABLED && AndroidUtils.is19orHigher();
+    }
+
+    @Override
     public void setBuySellEnabled(boolean enabled) {
         if (enabled) {
             setupBuyWebView();
