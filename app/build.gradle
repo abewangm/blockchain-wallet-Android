@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'kotlin-android'
+apply plugin: "kotlin-allopen"
 apply from: 'environment.gradle'
 apply from: '../quality/jacoco.gradle'
 apply from: '../quality/releasechecks.gradle'
@@ -105,6 +106,10 @@ android {
     }
 }
 
+allOpen {
+    annotation("piuk.blockchain.android.util.annotations.Mockable")
+}
+
 afterEvaluate {
     // Ensure correct JSON file is being used when signing the app
     assembleProdRelease.dependsOn checkFirebaseConfig
@@ -193,6 +198,7 @@ dependencies {
     testCompile("com.nhaarman:mockito-kotlin:1.4.0") {
         exclude module: 'kotlin-stdlib'
     }
+    compile 'com.android.support:support-v4:25.3.1'
 }
 
 buildscript {

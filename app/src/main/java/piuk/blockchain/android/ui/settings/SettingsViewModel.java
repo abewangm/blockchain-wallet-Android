@@ -243,7 +243,7 @@ public class SettingsViewModel extends BaseViewModel {
      * @return true if the user has previously enabled fingerprint login
      */
     boolean getIfFingerprintUnlockEnabled() {
-        return fingerprintHelper.getIfFingerprintUnlockEnabled();
+        return fingerprintHelper.isFingerprintUnlockEnabled();
     }
 
     /**

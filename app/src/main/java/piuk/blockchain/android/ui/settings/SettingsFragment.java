@@ -50,6 +50,8 @@ import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
+import piuk.blockchain.android.ui.fingerprint.FingerprintDialogKt;
+import piuk.blockchain.android.ui.fingerprint.FingerprintStage;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -386,7 +388,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
     @Override
     public void showFingerprintDialog(String pincode) {
-        FingerprintDialog dialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
+        FingerprintDialog dialog = FingerprintDialog.Companion.newInstance(pincode, FingerprintStage.REGISTER_FINGERPRINT);
         dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
             @Override
             public void onAuthenticated(String data) {
@@ -401,7 +403,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 fingerprintPref.setChecked(viewModel.getIfFingerprintUnlockEnabled());
             }
         });
-        dialog.show(getFragmentManager(), FingerprintDialog.TAG);
+        dialog.show(getFragmentManager(), FingerprintDialogKt.TAG);
     }
 
     @Override

@@ -211,7 +211,7 @@ public class PinEntryViewModelTest {
         subject.mValidatingPinForResult = false;
         subject.mRecoveringFunds = false;
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234");
-        when(fingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(true);
+        when(fingerprintHelper.isFingerprintUnlockEnabled()).thenReturn(true);
         when(fingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(null);
         when(fingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn("");
         // Act

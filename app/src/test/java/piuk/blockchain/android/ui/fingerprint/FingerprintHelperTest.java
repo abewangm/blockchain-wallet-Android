@@ -85,7 +85,7 @@ public class FingerprintHelperTest {
         when(fingerprintAuth.isFingerprintAvailable(applicationContext)).thenReturn(true);
         when(prefsUtil.getValue(PrefsUtil.KEY_FINGERPRINT_ENABLED, false)).thenReturn(true);
         // Act
-        boolean value = subject.getIfFingerprintUnlockEnabled();
+        boolean value = subject.isFingerprintUnlockEnabled();
         // Assert
         assertEquals(true, value);
     }
@@ -96,7 +96,7 @@ public class FingerprintHelperTest {
         when(fingerprintAuth.isFingerprintAvailable(applicationContext)).thenReturn(true);
         when(prefsUtil.getValue(PrefsUtil.KEY_FINGERPRINT_ENABLED, false)).thenReturn(false);
         // Act
-        boolean value = subject.getIfFingerprintUnlockEnabled();
+        boolean value = subject.isFingerprintUnlockEnabled();
         // Assert
         assertEquals(false, value);
     }
@@ -307,7 +307,7 @@ public class FingerprintHelperTest {
         // Act
         subject.releaseFingerprintReader();
         // Assert
-        assertEquals(0, subject.compositeDisposable.size());
+        assertEquals(0, subject.getCompositeDisposable().size());
     }
 
 }
