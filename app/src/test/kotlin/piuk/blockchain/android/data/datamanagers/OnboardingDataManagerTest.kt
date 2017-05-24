@@ -44,6 +44,19 @@ class OnboardingDataManagerTest: RxTest() {
     }
 
     @Test
+    fun getRolloutPercentage() {
+        // Arrange
+        val rolloutPercentage = 0.5
+        whenever(mockAccessState.buySellRolloutPercent).thenReturn(rolloutPercentage)
+        // Act
+        val result = subject.rolloutPercentage
+        // Assert
+        verify(mockAccessState).buySellRolloutPercent
+        verifyNoMoreInteractions(mockAccessState)
+        result shouldEqual rolloutPercentage
+    }
+
+    @Test
     @Throws(Exception::class)
     fun getIfSepaCountry() {
         // Arrange
@@ -51,12 +64,14 @@ class OnboardingDataManagerTest: RxTest() {
         val mockSettings: Settings = mock()
         val guid = "GUID"
         val sharedKey = "SHARED_KEY"
+        val rolloutPercent = 0.5
         whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(mockWalletOptions))
         whenever(mockPayloadDataManager.wallet.guid).thenReturn(guid)
         whenever(mockPayloadDataManager.wallet.sharedKey).thenReturn(sharedKey)
         whenever(mockSettingsDataManager.initSettings(guid, sharedKey))
                 .thenReturn(Observable.just(mockSettings))
         whenever(mockWalletOptions.buySellCountries).thenReturn(listOf("GB"))
+        whenever(mockWalletOptions.rolloutPercentage).thenReturn(rolloutPercent)
         whenever(mockSettings.countryCode).thenReturn("GB")
         // Act
         val testObserver = subject.ifSepaCountry.test()
@@ -68,6 +83,7 @@ class OnboardingDataManagerTest: RxTest() {
         verify(mockSettingsDataManager).initSettings(guid, sharedKey)
         verifyNoMoreInteractions(mockSettingsDataManager)
         verify(mockAccessState).inSepaCountry = true
+        verify(mockAccessState).buySellRolloutPercent = rolloutPercent
         verifyNoMoreInteractions(mockAccessState)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
