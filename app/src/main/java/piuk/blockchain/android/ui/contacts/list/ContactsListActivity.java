@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -18,8 +17,6 @@ import android.widget.FrameLayout;
 
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,12 +24,18 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactsBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.ui.contacts.detail.ContactDetailActivity;
 import piuk.blockchain.android.ui.contacts.pairing.ContactInviteActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.ViewUtils;
+
+import static piuk.blockchain.android.ui.base.UiState.CONTENT;
+import static piuk.blockchain.android.ui.base.UiState.EMPTY;
+import static piuk.blockchain.android.ui.base.UiState.FAILURE;
+import static piuk.blockchain.android.ui.base.UiState.LOADING;
 
 
 public class ContactsListActivity extends BaseAuthActivity implements ContactsListViewModel.DataListener {
@@ -162,18 +165,8 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         }
     }
 
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({LOADING, CONTENT, FAILURE, EMPTY})
-    @interface UiState {
-    }
-
-    public static final int LOADING = 0;
-    public static final int CONTENT = 1;
-    public static final int FAILURE = 2;
-    public static final int EMPTY = 3;
-
     @Override
-    public void setUiState(@UiState int uiState) {
+    public void setUiState(@UiState.UiStateDef int uiState) {
         switch (uiState) {
             case LOADING:
                 binding.swipeRefreshLayout.setRefreshing(true);

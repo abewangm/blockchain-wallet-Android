@@ -389,7 +389,7 @@
 
     <string name="api_fail">Nelze se připojit k serveru. Zkuste to prosím později.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Toto je příliš velká bitcoinová transakce. Vaše peněženka musí sloučit drobné částky, které jste přijali v minulosti. Je vyžadován relativně vysoký poplatek za účelem rychlého potvrzení. Pokud Vám nevadí, že potvrzení transakce potrvá déle, můžete snížit poplatek ručně kliknutím na možnost Přizpůsobit. </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Toto je příliš velká bitcoinová transakce. Vaše peněženka musí sloučit drobné částky, které jste přijali v minulosti. Je vyžadován relativně vysoký poplatek za účelem rychlého potvrzení.</string>
     <string name="go_back">Přejít zpět</string>
     <string name="accept_higher_fee">Přijmout vyšší poplatek</string>
     <string name="large_tx_high_fee_warning">„Tato transakce vyžaduje vyšší poplatek za drobné částky, které mají být vráceny.“</string>

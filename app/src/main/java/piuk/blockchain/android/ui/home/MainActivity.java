@@ -62,6 +62,7 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
+import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
@@ -81,7 +82,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         SendFragment.OnSendFragmentInteractionListener,
         ReceiveFragment.OnReceiveFragmentInteractionListener,
         ContactPaymentRequestNotesFragment.FragmentInteractionListener,
-        ContactPaymentDialog.OnContactPaymentDialogInteractionListener {
+        ContactPaymentDialog.OnContactPaymentDialogInteractionListener,
+        ConfirmPaymentDialog.OnConfirmDialogInteractionListener{
 
     public static final String ACTION_SEND = "info.blockchain.wallet.ui.BalanceFragment.SEND";
     public static final String ACTION_RECEIVE = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE";
@@ -792,6 +794,20 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
+    public void onChangeFeeClicked() {
+        SendFragment fragment = (SendFragment) getSupportFragmentManager()
+                .findFragmentByTag(SendFragment.class.getSimpleName());
+        fragment.onChangeFeeClicked();
+    }
+
+    @Override
+    public void onSendClicked() {
+        SendFragment fragment = (SendFragment) getSupportFragmentManager()
+                .findFragmentByTag(SendFragment.class.getSimpleName());
+        fragment.onSendClicked();
+    }
+
+    @Override
     public void onPageFinished() {
         onStartBalanceFragment(false);
     }
@@ -822,7 +838,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
-                .replace(R.id.content_frame, fragment)
+                .replace(R.id.content_frame, fragment, fragment.getClass().getSimpleName())
                 .commitAllowingStateLoss();
     }
 
@@ -830,14 +846,14 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .addToBackStack(fragment.getClass().getName())
-                .add(R.id.content_frame, fragment)
+                .add(R.id.content_frame, fragment, fragment.getClass().getSimpleName())
                 .commitAllowingStateLoss();
     }
 
     private void addFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .add(R.id.content_frame, fragment)
+                .add(R.id.content_frame, fragment, fragment.getClass().getSimpleName())
                 .commitAllowingStateLoss();
     }
 

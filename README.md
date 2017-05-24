@@ -11,7 +11,7 @@ Install Android Studio: https://developer.android.com/sdk/index.html
 
 Import as Android Studio project.
 
-Run the bootstrap script from terminal via `scripts/bootstrap.sh`. This will install the Google code style and remove any file header templates. The script may indicate that you need to restart Android Studio for it's changes to take affect.
+Run the bootstrap script from terminal via `scripts/bootstrap.sh`. This will install the Google code style and remove any file header templates. The script may indicate that you need to restart Android Studio for it's changes to take effect.
 
 Build -> Make Project
 

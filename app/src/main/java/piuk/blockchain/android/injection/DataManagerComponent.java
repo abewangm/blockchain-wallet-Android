@@ -27,6 +27,7 @@ import piuk.blockchain.android.ui.pairing.PairingViewModel;
 import piuk.blockchain.android.ui.receive.ReceiveQrViewModel;
 import piuk.blockchain.android.ui.receive.ReceiveViewModel;
 import piuk.blockchain.android.ui.recover.RecoverFundsViewModel;
+import piuk.blockchain.android.ui.confirm.ConfirmPaymentPresenter;
 import piuk.blockchain.android.ui.send.SendViewModel;
 import piuk.blockchain.android.ui.settings.SettingsViewModel;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveViewModel;
@@ -103,4 +104,6 @@ public interface DataManagerComponent {
     void inject(OnboardingViewModel onboardingViewModel);
 
     void inject(UpgradeWalletPresenter upgradeWalletViewModel);
+
+    void inject(ConfirmPaymentPresenter confirmPaymentPresenter);
 }

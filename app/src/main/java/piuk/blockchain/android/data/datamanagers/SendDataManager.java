@@ -1,7 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -73,21 +72,10 @@ public class SendDataManager {
     }
 
     /**
-     * Returns a {@link FeeList} object containing an ArrayList of the current suggested fees based
-     * on network congestion and the global fee average.
-     *
-     * @return An {@link Observable<FeeList>}
-     */
-    public Observable<FeeList> getSuggestedFee() {
-        return rxPinning.call(() -> paymentService.getSuggestedFee())
-                .compose(RxUtil.applySchedulersToObservable());
-    }
-
-    /**
      * Returns an {@link UnspentOutputs} object containing all the unspent outputs for a given
      * address.
      *
-     * @param address The addess you wish to query, as a String
+     * @param address The address you wish to query, as a String
      * @return An {@link Observable<UnspentOutputs>}
      */
     public Observable<UnspentOutputs> getUnspentOutputs(String address) {

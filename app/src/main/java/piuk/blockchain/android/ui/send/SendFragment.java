@@ -33,14 +33,15 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jakewharton.rxbinding2.widget.RxTextView;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.payload.data.Account;
@@ -53,21 +54,24 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentSendBinding;
-import piuk.blockchain.android.databinding.FragmentSendConfirmBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
+import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
 import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -106,8 +110,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private OnSendFragmentInteractionListener listener;
     private CustomKeypad customKeypad;
     private MaterialProgressDialog progressDialog;
-    private AlertDialog confirmationDialog;
     private AlertDialog largeTxWarning;
+    private ConfirmPaymentDialog confirmPaymentDialog;
 
     private int selectedAccountPosition = -1;
     private long backPressed;
@@ -302,9 +306,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
                 viewModel.setSendingAddress(chosenItem);
 
-                viewModel.calculateTransactionAmounts(chosenItem,
-                        binding.amountRow.amountBtc.getText().toString(),
-                        binding.customFee.getText().toString(), null);
+                updateTotals(chosenItem);
 
             } catch (ClassNotFoundException | IOException e) {
                 throw new RuntimeException(e);
@@ -409,7 +411,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         //Enable custom keypad and disables default keyboard from popping up
         customKeypad.enableOnView(binding.amountRow.amountBtc);
         customKeypad.enableOnView(binding.amountRow.amountFiat);
-        customKeypad.enableOnView(binding.customFee);
+        customKeypad.enableOnView(binding.edittextCustomFee);
 
         binding.amountRow.amountBtc.setText("");
         binding.amountRow.amountBtc.requestFocus();
@@ -423,45 +425,24 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         setupBtcTextField();
         setupFiatTextField();
 
-        binding.customFee.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable customizedFee) {
-                ItemAccount selectedItem = viewModel.getSendingItemAccount();
-                viewModel.calculateTransactionAmounts(selectedItem,
-                        binding.amountRow.amountBtc.getText().toString(),
-                        customizedFee.toString(),
-                        null);
-            }
-        });
-
         binding.max.setOnClickListener(view ->
-                viewModel.spendAllClicked(viewModel.getSendingItemAccount(), binding.customFee.getText().toString()));
+                viewModel.spendAllClicked(viewModel.getSendingItemAccount(), getFeePriority()));
 
         binding.buttonSend.setOnClickListener(v -> {
             customKeypad.setNumpadVisibility(View.GONE);
             if (ConnectivityStatus.hasConnectivity(getActivity())) {
-                requestSendPayment(false);
+                requestSendPayment();
             } else {
                 showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
             }
         });
     }
 
-    private void requestSendPayment(boolean feeWarningSeen) {
-        viewModel.onSendClicked(binding.customFee.getText().toString(),
+    private void requestSendPayment() {
+        viewModel.onSendClicked(
                 binding.amountRow.amountBtc.getText().toString(),
-                feeWarningSeen,
-                binding.destination.getText().toString());
+                binding.destination.getText().toString(),
+                getFeePriority());
     }
 
     private void setupDestinationView() {
@@ -477,8 +458,20 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         binding.destination.setOnLongClickListener(v -> {
             binding.destination.setText("");
             viewModel.setReceivingAddress(null);
+            v.performClick();
             return false;
         });
+
+        //TextChanged listener required to invalidate receive address in memory when user
+        //chooses to edit address populated via QR
+        RxTextView.textChanges(binding.destination)
+                .doOnNext(ignored -> {
+                    if (getActivity().getCurrentFocus() == binding.destination) {
+                        viewModel.setReceivingAddress(null);
+                    }
+                })
+                .subscribe(new IgnorableDefaultObserver<>());
+
         binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus && customKeypad != null) {
                 customKeypad.setNumpadVisibility(View.GONE);
@@ -489,19 +482,39 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private void setupSendFromView() {
         ItemAccount itemAccount;
         if (selectedAccountPosition != -1) {
-            itemAccount = viewModel.getAddressList(false).get(selectedAccountPosition);
+            itemAccount = viewModel.getAddressList(getFeePriority()).get(selectedAccountPosition);
         } else {
-            itemAccount = viewModel.getAddressList(false).get(viewModel.getDefaultAccount());
+            itemAccount = viewModel.getAddressList(getFeePriority()).get(viewModel.getDefaultAccount());
         }
 
         viewModel.setSendingAddress(itemAccount);
-        viewModel.calculateTransactionAmounts(itemAccount,
-                binding.amountRow.amountBtc.getText().toString(),
-                binding.customFee.getText().toString(), null);
+        updateTotals(itemAccount);
         binding.from.setText(itemAccount.label);
 
         binding.from.setOnClickListener(v -> startFromFragment());
         binding.imageviewDropdownSend.setOnClickListener(v -> startFromFragment());
+    }
+
+    @Thunk
+    void updateTotals(ItemAccount itemAccount) {
+        viewModel.calculateTransactionAmounts(itemAccount,
+                binding.amountRow.amountBtc.getText().toString(),
+                getFeePriority(),
+                null);
+    }
+
+    @FeeType.FeePriorityDef
+    private int getFeePriority() {
+        int position = binding.spinnerPriority.getSelectedItemPosition();
+        switch (position) {
+            case 1:
+                return FeeType.FEE_OPTION_PRIORITY;
+            case 2:
+                return FeeType.FEE_OPTION_CUSTOM;
+            case 0:
+            default:
+                return FeeType.FEE_OPTION_REGULAR;
+        }
     }
 
     private void startFromFragment() {
@@ -546,21 +559,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     @Override
     public void setMaxAvailable(String max) {
         binding.max.setText(max);
-    }
-
-    @Override
-    public void setEstimate(String estimate) {
-        binding.tvEstimate.setText(estimate);
-    }
-
-    @Override
-    public void setEstimateColor(@ColorRes int color) {
-        binding.tvEstimate.setTextColor(ContextCompat.getColor(getContext(), color));
-    }
-
-    @Override
-    public void setCustomFeeColor(@ColorRes int color) {
-        binding.customFee.setTextColor(ContextCompat.getColor(getContext(), color));
     }
 
     @Override
@@ -671,7 +669,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 .setNegativeButton(android.R.string.cancel, null).show();
     }
 
-    private void onShowLargeTransactionWarning(AlertDialog alertDialog) {
+    private void onShowLargeTransactionWarning() {
         if (largeTxWarning != null && largeTxWarning.isShowing()) {
             largeTxWarning.dismiss();
         }
@@ -680,8 +678,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 .setCancelable(false)
                 .setTitle(R.string.warning)
                 .setMessage(R.string.large_tx_warning)
-                .setNegativeButton(R.string.go_back, (dialog, which) -> alertDialog.dismiss())
-                .setPositiveButton(R.string.accept_higher_fee, null)
+                .setPositiveButton(android.R.string.ok, null)
                 .create();
 
         largeTxWarning.show();
@@ -845,104 +842,12 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
     @Override
     public void onShowPaymentDetails(PaymentConfirmationDetails details) {
-        // Clear dialog incase of accidental double tap
-        if (confirmationDialog != null && confirmationDialog.isShowing()) {
-            confirmationDialog.dismiss();
-        }
-
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-        FragmentSendConfirmBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
-                R.layout.fragment_send_confirm, null, false);
-        dialogBuilder.setView(dialogBinding.getRoot());
-
-        confirmationDialog = dialogBuilder.create();
-        confirmationDialog.setCanceledOnTouchOutside(false);
-
-        dialogBinding.confirmFromLabel.setText(details.fromLabel);
-        dialogBinding.confirmToLabel.setText(details.toLabel);
-        dialogBinding.confirmAmountBtcUnit.setText(details.btcUnit);
-        dialogBinding.confirmAmountFiatUnit.setText(details.fiatUnit);
-        dialogBinding.confirmAmountBtc.setText(details.btcAmount);
-        dialogBinding.confirmAmountFiat.setText(details.fiatAmount);
-        dialogBinding.confirmFeeBtc.setText(details.btcFee);
-        dialogBinding.confirmFeeFiat.setText(details.fiatFee);
-        dialogBinding.confirmTotalBtc.setText(details.btcTotal);
-        dialogBinding.confirmTotalFiat.setText(details.fiatTotal);
-
-        String feeMessage = "";
-        if (details.isSurge) {
-            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
-            feeMessage += getString(R.string.transaction_surge);
-
-        }
-
-        if (details.hasConsumedAmounts) {
-            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
-            if (details.hasConsumedAmounts) {
-                if (details.isSurge) feeMessage += "\n\n";
-                feeMessage += getString(R.string.large_tx_high_fee_warning);
-            }
-
-        }
-
-        final String finalFeeMessage = feeMessage;
-        dialogBinding.ivFeeInfo.setOnClickListener(view -> new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.transaction_fee)
-                .setMessage(finalFeeMessage)
-                .setPositiveButton(android.R.string.ok, null).show());
-
-        if (details.isSurge) {
-            dialogBinding.confirmFeeBtc.setTextColor(ContextCompat.getColor(getContext(), R.color.product_red_medium));
-            dialogBinding.confirmFeeFiat.setTextColor(ContextCompat.getColor(getContext(), R.color.product_red_medium));
-            dialogBinding.ivFeeInfo.setVisibility(View.VISIBLE);
-        }
-
-        dialogBinding.tvCustomizeFee.setOnClickListener(v -> {
-            if (confirmationDialog.isShowing()) {
-                confirmationDialog.cancel();
-            }
-
-            getActivity().runOnUiThread(() -> {
-                binding.customFeeContainer.setVisibility(View.VISIBLE);
-
-                binding.customFee.setText(details.btcFee);
-                binding.customFee.setHint(details.btcSuggestedFee);
-                binding.customFee.requestFocus();
-                binding.customFee.setSelection(binding.customFee.getText().length());
-                customKeypad.setNumpadVisibility(View.GONE);
-            });
-
-            alertCustomSpend(details.btcSuggestedFee, details.btcUnit);
-
-        });
-
-        dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (confirmationDialog.isShowing()) {
-                confirmationDialog.cancel();
-            }
-        });
-
-        dialogBinding.confirmSend.setOnClickListener(v -> {
-            if (ConnectivityStatus.hasConnectivity(getActivity())) {
-                dialogBinding.confirmSend.setClickable(false);
-                viewModel.submitPayment(confirmationDialog);
-            } else {
-                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
-                // Queue tx here
-            }
-        });
-
-        if (getActivity() != null && !getActivity().isFinishing()) {
-            confirmationDialog.show();
-        }
-
-        // To prevent the dialog from appearing too large on Android N
-        if (confirmationDialog.getWindow() != null) {
-            confirmationDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-        }
+        confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details, true);
+        confirmPaymentDialog
+                .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
 
         if (viewModel.isLargeTransaction()) {
-            onShowLargeTransactionWarning(confirmationDialog);
+            binding.getRoot().postDelayed(this::onShowLargeTransactionWarning, 500);
         }
     }
 
@@ -960,52 +865,18 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         dialogBinding.confirmCancel.setOnClickListener(v -> {
             binding.destination.setText("");
             if (dialogBinding.confirmDontAskAgain.isChecked())
-                viewModel.setWatchOnlySpendWarning(false);
+                viewModel.disableWatchOnlySpendWarning();
             alertDialog.dismiss();
         });
 
         dialogBinding.confirmContinue.setOnClickListener(v -> {
             binding.destination.setText(address);
             if (dialogBinding.confirmDontAskAgain.isChecked())
-                viewModel.setWatchOnlySpendWarning(false);
+                viewModel.disableWatchOnlySpendWarning();
             alertDialog.dismiss();
         });
 
         alertDialog.show();
-    }
-
-    @Override
-    public void onShowAlterFee(String suggestedAbsoluteFee,
-                               String body,
-                               @StringRes int positiveAction,
-                               @StringRes int negativeAction) {
-
-        new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
-                .setTitle(R.string.warning)
-                .setMessage(body)
-                .setCancelable(false)
-                .setPositiveButton(positiveAction, (dialog, which) -> {
-                    //Accept suggested fee
-                    binding.customFee.setText(suggestedAbsoluteFee);
-                    requestSendPayment(true);
-                })
-                .setNegativeButton(negativeAction, (dialog, which) ->
-                        //User rejected suggested fee. Don't alter.
-                        requestSendPayment(true))
-                .create()
-                .show();
-    }
-
-    private void alertCustomSpend(String btcFee, String btcFeeUnit) {
-        String message = getResources().getString(R.string.recommended_fee)
-                + "\n\n"
-                + btcFee
-                + " " + btcFeeUnit;
-
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.transaction_fee)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, null).show();
     }
 
     private void playAudio() {
@@ -1053,6 +924,133 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         if (listener != null) listener.onSendFragmentClose();
     }
 
+    public void onChangeFeeClicked() {
+        binding.customFeeContainer.setVisibility(View.VISIBLE);
+        confirmPaymentDialog.dismiss();
+        FeePriorityAdapter adapter = new FeePriorityAdapter(getActivity(),
+                viewModel.getFeeOptionsForDropDown());
+
+        binding.spinnerPriority.setAdapter(adapter);
+
+        binding.spinnerPriority.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                    case 1:
+                        binding.buttonSend.setEnabled(true);
+                        updateTotals(viewModel.getSendingItemAccount());
+                        binding.textviewFeeAbsolute.setVisibility(View.VISIBLE);
+                        binding.textviewFeeTime.setVisibility(View.VISIBLE);
+                        binding.textInputLayout.setVisibility(View.GONE);
+                        break;
+                    case 2:
+                        if (viewModel.shouldShowAdvancedFeeWarning()) {
+                            alertCustomSpend();
+                        } else {
+                            displayCustomFeeField();
+                        }
+                        break;
+                }
+
+                DisplayFeeOptions options = viewModel.getFeeOptionsForDropDown().get(position);
+                binding.textviewFeeType.setText(options.getTitle());
+                binding.textviewFeeTime.setText(position != 2 ? options.getDescription() : null);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // No-op
+            }
+        });
+
+        binding.textviewFeeType.setText(R.string.fee_options_regular);
+        binding.textviewFeeTime.setText(R.string.fee_options_regular_time);
+
+        RxTextView.textChanges(binding.amountRow.amountBtc)
+                .debounce(400, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        value -> updateTotals(viewModel.getSendingItemAccount()),
+                        Throwable::printStackTrace);
+
+        RxTextView.textChanges(binding.amountRow.amountFiat)
+                .debounce(400, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        value -> updateTotals(viewModel.getSendingItemAccount()),
+                        Throwable::printStackTrace);
+    }
+
+    @Thunk
+    void alertCustomSpend() {
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.transaction_fee)
+                .setMessage(R.string.fee_options_advanced_warning)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    viewModel.disableAdvancedFeeWarning();
+                    displayCustomFeeField();
+                })
+                .setNegativeButton(android.R.string.cancel, (dialog, which) ->
+                        binding.spinnerPriority.setSelection(0))
+                .show();
+    }
+
+    @Thunk
+    void displayCustomFeeField() {
+        binding.textviewFeeAbsolute.setVisibility(View.GONE);
+        binding.textviewFeeTime.setVisibility(View.GONE);
+        binding.textInputLayout.setVisibility(View.VISIBLE);
+        binding.buttonSend.setEnabled(false);
+        RxTextView.textChanges(binding.edittextCustomFee)
+                .map(CharSequence::toString)
+                .doOnNext(value -> binding.buttonSend.setEnabled(!value.isEmpty() && !value.equals("0")))
+                .filter(value -> !value.isEmpty())
+                .map(Long::valueOf)
+                .onErrorReturnItem(0L)
+                .doOnNext(value -> {
+                    if (value < viewModel.getFeeLimits().getMin()) {
+                        binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_low));
+                    } else if (value > viewModel.getFeeLimits().getMax()) {
+                        binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_high));
+                    } else {
+                        binding.textInputLayout.setError(null);
+                    }
+                })
+                .debounce(300, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        value -> updateTotals(viewModel.getSendingItemAccount()),
+                        Throwable::printStackTrace);
+    }
+
+    @Override
+    public long getCustomFeeValue() {
+        String amount = binding.edittextCustomFee.getText().toString();
+        return !amount.isEmpty() ? Long.valueOf(amount) : 0;
+    }
+
+    @Override
+    public void updateFeeField(String fee) {
+        binding.textviewFeeAbsolute.setText(fee);
+    }
+
+    public void onSendClicked() {
+        if (ConnectivityStatus.hasConnectivity(getActivity())) {
+            viewModel.submitPayment();
+        } else {
+            showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+        }
+    }
+
+    @Override
+    public void dismissConfirmationDialog() {
+        confirmPaymentDialog.dismiss();
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -1079,6 +1077,9 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         void onSendFragmentClose();
 
-        void onTransactionNotesRequested(String contactId, @Nullable Integer accountPosition, PaymentRequestType paymentRequestType, long satoshis);
+        void onTransactionNotesRequested(String contactId,
+                                         @Nullable Integer accountPosition,
+                                         PaymentRequestType paymentRequestType,
+                                         long satoshis);
     }
 }

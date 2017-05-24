@@ -1,7 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
@@ -50,10 +49,8 @@ public class AccountEditDataManagerTest extends RxTest {
         // Arrange
         LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setAddress("");
-        Fee suggestedFee = mock(Fee.class);
         Pair<BigInteger, BigInteger> sweepableCoins = Pair.of(BigInteger.ONE, BigInteger.TEN);
-        when(suggestedFee.getFee()).thenReturn(100.0d);
-        when(dynamicFeeCache.getCachedDynamicFee().getDefaultFee()).thenReturn(suggestedFee);
+        when(dynamicFeeCache.getFeeOptions().getRegularFee()).thenReturn(100L);
         when(payloadDataManager.getDefaultAccount()).thenReturn(mock(Account.class));
         when(payloadDataManager.getNextReceiveAddress(any(Account.class)))
                 .thenReturn(Observable.just("address"));

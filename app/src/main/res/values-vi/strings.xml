@@ -389,7 +389,7 @@
 
     <string name="api_fail">Không thể kết nối đến máy chủ. Vui lòng thử lại sau.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Đây là một giao dịch bitcoin vượt kích cỡ. Ví của bạn cần tổng hợp nhiều thanh toán nhỏ hơn mà bạn đã nhận trong quá khứ. Điều này cần một khoản phí tương đối cao để được xác nhận nhanh chóng. Xác nhận giao dịch lâu hơn vẫn không sao, bạn có thể tự giảm phí bằng cách nhấn "tùy chỉnh". </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Đây là một giao dịch bitcoin vượt kích cỡ. Ví của bạn cần tổng hợp nhiều thanh toán nhỏ hơn mà bạn đã nhận trong quá khứ. Điều này cần một khoản phí tương đối cao để được xác nhận nhanh chóng. </string>
     <string name="go_back">Trở lại</string>
     <string name="accept_higher_fee">Chấp nhận phí cao hơn</string>
     <string name="large_tx_high_fee_warning">"Giao dịch này yêu cầu phí cao hơn vì thực hiện giao dịch với số tiền quá nhỏ."</string>

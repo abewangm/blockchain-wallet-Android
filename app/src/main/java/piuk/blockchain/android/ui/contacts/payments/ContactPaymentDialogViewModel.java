@@ -7,7 +7,7 @@ import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.data.FeeList;
+import info.blockchain.wallet.api.data.FeeOptions;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.util.FormatsUtil;
 
@@ -15,7 +15,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Locale;
@@ -27,6 +26,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.injection.Injector;
@@ -55,7 +55,7 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
     private ReceiveCurrencyHelper currencyHelper;
     private Disposable unspentApiDisposable;
     @VisibleForTesting BigInteger maxAvailable;
-    @VisibleForTesting FeeList dynamicFeeList;
+    @VisibleForTesting FeeOptions feeOptions;
     @VisibleForTesting PendingTransaction pendingTransaction = new PendingTransaction();
     @Nullable private String contactMdid;
     @Nullable private String fctxId;
@@ -66,6 +66,7 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
     @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected SendDataManager sendDataManager;
     @Inject protected DynamicFeeCache dynamicFeeCache;
+    @Inject protected FeeDataManager feeDataManager;
 
     interface DataListener {
 
@@ -207,15 +208,15 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
     }
 
     private void getSuggestedFee() {
-        dynamicFeeList = dynamicFeeCache.getCachedDynamicFee();
+        feeOptions = dynamicFeeCache.getFeeOptions();
+
         // Refresh fee cache
         compositeDisposable.add(
-                sendDataManager.getSuggestedFee()
-                        .doAfterTerminate(() -> dynamicFeeList = dynamicFeeCache.getCachedDynamicFee())
-                        .subscribe(suggestedFee -> dynamicFeeCache.setCachedDynamicFee(suggestedFee)
-                                , throwable -> {
-                                    // No-op
-                                }));
+                feeDataManager.getFeeOptions()
+                        .doOnTerminate(() -> feeOptions = dynamicFeeCache.getFeeOptions())
+                        .subscribe(
+                                feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions),
+                                Throwable::printStackTrace));
     }
 
     private void handleIncomingUri(String uri) {
@@ -251,8 +252,8 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
 
     private void suggestedFeePayment(final UnspentOutputs coins, BigInteger amountToSend)
             throws UnsupportedEncodingException {
-        if (dynamicFeeList != null) {
-            BigInteger feePerKb = new BigDecimal(dynamicFeeList.getDefaultFee().getFee()).toBigInteger();
+        if (feeOptions != null) {
+            BigInteger feePerKb = BigInteger.valueOf(feeOptions.getRegularFee() * 1000);
             pendingTransaction.unspentOutputBundle = sendDataManager.getSpendableCoins(coins,
                     amountToSend,
                     feePerKb);

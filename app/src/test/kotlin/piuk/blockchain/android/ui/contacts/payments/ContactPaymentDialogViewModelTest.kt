@@ -5,7 +5,7 @@ import android.os.Bundle
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.api.data.UnspentOutput
 import info.blockchain.api.data.UnspentOutputs
-import info.blockchain.wallet.api.data.FeeList
+import info.blockchain.wallet.api.data.FeeOptions
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
@@ -26,6 +26,7 @@ import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.cache.DynamicFeeCache
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.datamanagers.FeeDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.SendDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
@@ -57,8 +58,9 @@ class ContactPaymentDialogViewModelTest {
     private val mockPayloadDataManager: PayloadDataManager = mock()
     private val mockSendDataManager: SendDataManager = mock()
     private val mockDynamicFeeCache: DynamicFeeCache = mock()
+    private val mockFeeDataManager: FeeDataManager = mock()
     private val mockActivity: ContactPaymentDialogViewModel.DataListener = mock()
-    private val mockFeeList: FeeList = mock(defaultAnswer = RETURNS_DEEP_STUBS)
+    private val mockFeeOptions: FeeOptions = mock(defaultAnswer = RETURNS_DEEP_STUBS)
 
     @Before
     @Throws(Exception::class)
@@ -70,11 +72,9 @@ class ContactPaymentDialogViewModelTest {
                 MockApiModule(),
                 MockDataManagerModule())
 
-        whenever(mockSendDataManager.suggestedFee).thenReturn(Observable.just(mockFeeList))
-        whenever(mockDynamicFeeCache.cachedDynamicFee).thenReturn(mockFeeList)
+        whenever(mockFeeDataManager.feeOptions).thenReturn(Observable.just(mockFeeOptions))
+        whenever(mockDynamicFeeCache.feeOptions).thenReturn(mockFeeOptions)
         subject = ContactPaymentDialogViewModel(mockActivity)
-        verify(mockSendDataManager).suggestedFee
-        verify(mockDynamicFeeCache).cachedDynamicFee = mockFeeList
     }
 
     @Test
@@ -248,8 +248,8 @@ class ContactPaymentDialogViewModelTest {
         whenever(mockPayloadDataManager.getAccount(accountPosition)).thenReturn(account)
         val unspentOutputs = UnspentOutputs()
         whenever(mockSendDataManager.getUnspentOutputs(xPub)).thenReturn(Observable.just(unspentOutputs))
-        whenever(mockDynamicFeeCache.cachedDynamicFee).thenReturn(null)
-        subject.dynamicFeeList = null
+        whenever(mockDynamicFeeCache.feeOptions).thenReturn(null)
+        subject.feeOptions = null
         // Act
         subject.accountSelected(accountPosition)
         // Assert
@@ -279,7 +279,7 @@ class ContactPaymentDialogViewModelTest {
                 .thenReturn(accountPosition)
         whenever(mockPayloadDataManager.getAccount(accountPosition)).thenReturn(account)
         whenever(mockSendDataManager.getUnspentOutputs(xPub)).thenReturn(Observable.just(unspentOutputs))
-        whenever(mockFeeList.defaultFee.fee).thenReturn(10.0)
+        whenever(mockFeeOptions.regularFee).thenReturn(1L)
         whenever(mockSendDataManager.getSpendableCoins(eq(unspentOutputs), eq(amount), any()))
                 .thenReturn(spendableUnspent)
         whenever(mockSendDataManager.getSweepableCoins(eq(unspentOutputs), any())).thenReturn(pair)

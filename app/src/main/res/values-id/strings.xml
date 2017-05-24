@@ -390,7 +390,7 @@
 
     <string name="api_fail">Tidak dapat terhubung ke server. Mohon coba lagi nanti.</string>
 
-    <!-- FEE WARNING --><string name="large_tx_warning">Ini merupakan transaksi bitcoin yang terlalu besar. Dompet Anda perlu mengonsolidasi pembayaran yang lebih kecil yang Anda terima di masa lalu. Ini membutuhkan biaya yang relatif tinggi agar dapat dikonfirmasi dengan cepat. Jika itu baik untuk transaksi yang membutuhkan waktu lebih lama untuk dikonfirmasi, Anda bisa mengurangi biaya secara manual dengan mengklik "menyesuaikan". </string>
+    <!-- FEE WARNING --><string name="large_tx_warning">Ini merupakan transaksi bitcoin yang terlalu besar. Dompet Anda perlu mengonsolidasi pembayaran yang lebih kecil yang Anda terima di masa lalu. Ini membutuhkan biaya yang relatif tinggi agar dapat dikonfirmasi dengan cepat.</string>
     <string name="go_back">Kembali</string>
     <string name="accept_higher_fee">Terima biaya yang lebih tinggi</string>
     <string name="large_tx_high_fee_warning">"Transaksi ini membutuhkan biaya yang lebih tinggi untuk recehan karena jumlah kecil dari kembalian untuk dikembalikan."</string>
