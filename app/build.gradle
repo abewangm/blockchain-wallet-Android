@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'kotlin-android'
 apply from: 'environment.gradle'
@@ -13,8 +14,8 @@ android {
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 25
-        versionCode 253
-        versionName "6.4.9"
+        versionCode 254
+        versionName "6.5.0-rc1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
@@ -43,11 +44,13 @@ android {
             resValue "string", "google_maps_key", "AIzaSyB_5WN2exwvF4pqQ6rW6JdkHcYWjZOim4w"
             multiDexEnabled false
             buildConfigField "boolean", "DOGFOOD", "false"
+            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
         }
         debug {
             resValue "string", "google_maps_key", "AIzaSyDOrXqr30C3vjiUM4HMeZO8HFpTIH8CVaM"
             multiDexEnabled true
             buildConfigField "boolean", "DOGFOOD", "false"
+            buildConfigField "boolean", "USE_CRASHLYTICS", "false"
         }
         dogfood {
             signingConfig signingConfigs.debug
@@ -61,6 +64,7 @@ android {
             resValue "string", "google_maps_key", "AIzaSyB_5WN2exwvF4pqQ6rW6JdkHcYWjZOim4w"
             multiDexEnabled false
             buildConfigField "boolean", "DOGFOOD", "true"
+            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
         }
     }
     productFlavors {
@@ -127,8 +131,6 @@ dependencies {
     compile "com.android.support:support-v13:$supportVersion"
     compile "com.android.support:preference-v7:$supportVersion"
     compile "com.android.support:preference-v14:$supportVersion"
-    // Enable crash reporting only for release version
-    releaseCompile "com.google.firebase:firebase-crash:$googleServicesVersion"
     compile "com.google.firebase:firebase-messaging:$googleServicesVersion"
     compile "com.google.android.gms:play-services-maps:$googleServicesVersion"
     compile 'org.bitcoinj:bitcoinj-core:0.14.4'
@@ -166,6 +168,10 @@ dependencies {
     devCompile 'org.slf4j:slf4j-simple:1.7.20'
     // ViewPager Indicator
     compile 'me.relex:circleindicator:1.2.2@aar'
+    // Crash reporting
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
+        transitive = true
+    }
 
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
@@ -198,19 +204,20 @@ dependencies {
 buildscript {
     repositories {
         jcenter()
+        maven { url 'https://maven.fabric.io/public' }
     }
 
     dependencies {
         classpath 'me.tatarka:gradle-retrolambda:3.6.1'
+        classpath 'io.fabric.tools:gradle:1.22.1'
     }
 }
 
 // Required for CountryPicker
 repositories {
     jcenter()
-    maven {
-        url "https://jitpack.io"
-    }
+    maven { url "https://jitpack.io" }
+    maven { url 'https://maven.fabric.io/public' }
 }
 
 // This must remain at the bottom of this file until Google work out a better way to do this

@@ -7,6 +7,7 @@ import android.util.Log;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.api.data.FeeLimits;
 import info.blockchain.wallet.api.data.FeeOptions;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
@@ -957,6 +958,10 @@ public class SendViewModel extends BaseViewModel {
                 stringUtils.getString(R.string.fee_options_custom_warning),
                 null);
         return Arrays.asList(regular, priority, custom);
+    }
+
+    FeeLimits getFeeLimits() {
+        return dynamicFeeCache.getFeeOptions().getLimits();
     }
 
     private void setTempLegacyAddressPrivateKey(LegacyAddress legacyAddress, ECKey key) {

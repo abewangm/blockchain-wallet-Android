@@ -29,8 +29,15 @@ public class OnboardingDataManager {
     }
 
     /**
+     * Returns the current Buy/Sell rollout percent for Android. If 0, Buy/Sell should be disabled.
+     */
+    public double getRolloutPercentage() {
+        return accessState.getBuySellRolloutPercent();
+    }
+
+    /**
      * Checks whether or not a user is accessing their wallet from a SEPA country and stores the
-     * result in {@link AccessState}.
+     * result in {@link AccessState}. Also stores the current rollout value for Android.
      *
      * @return An {@link Observable} wrapping a boolean value
      */
@@ -40,6 +47,7 @@ public class OnboardingDataManager {
                         payloadDataManager.getWallet().getGuid(),
                         payloadDataManager.getWallet().getSharedKey())
                         .map(settings -> walletOptions.getBuySellCountries().contains(settings.getCountryCode()))
-                        .doOnNext(sepaCountry -> accessState.setInSepaCountry(sepaCountry)));
+                        .doOnNext(sepaCountry -> accessState.setInSepaCountry(sepaCountry))
+                        .doOnNext(ignored -> accessState.setBuySellRolloutPercent(walletOptions.getRolloutPercentage())));
     }
 }

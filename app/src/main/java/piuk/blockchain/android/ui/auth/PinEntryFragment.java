@@ -150,7 +150,10 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
 
             HANDLER.postDelayed(() -> {
                 if (getActivity() != null && !getActivity().isFinishing() && !isPaused) {
-                    fingerprintDialog.show(getActivity().getSupportFragmentManager(), FingerprintDialog.TAG);
+                    getActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .add(fingerprintDialog, FingerprintDialog.TAG)
+                            .commitAllowingStateLoss();
                 } else {
                     fingerprintDialog = null;
                 }
@@ -401,7 +404,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     @Thunk
     void dismissFingerprintDialog() {
         if (fingerprintDialog != null && fingerprintDialog.isVisible()) {
-            fingerprintDialog.dismiss();
+            fingerprintDialog.dismissAllowingStateLoss();
             fingerprintDialog = null;
         }
 
