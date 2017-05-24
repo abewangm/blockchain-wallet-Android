@@ -19,7 +19,7 @@ local.properties
 # QA
 *credentials_qa.xml
 
-# Migration to Android Studio 2.4 Preview
+# Migration to Android Studio 3.0 Preview
 projectFilesBackup/
 
 # Captures
@@ -30,3 +30,6 @@ google-services.json
 
 # Environment URLs
 urls.properties
+
+# Fabric API Key
+fabric.properties
