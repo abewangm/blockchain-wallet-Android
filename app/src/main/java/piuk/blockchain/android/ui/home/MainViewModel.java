@@ -149,6 +149,9 @@ public class MainViewModel extends BaseViewModel {
         if (dataListener.getIfContactsEnabled()) {
             registerNodeForMetaDataService();
         }
+        if (dataListener.isBuySellPermitted()) {
+            initializeBuy();
+        }
     }
 
     void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
@@ -364,14 +367,13 @@ public class MainViewModel extends BaseViewModel {
             dataListener.onStartBalanceFragment(false);
             dataListener.onFetchTransactionsStart();
 
+            logEvents();
+
             compositeDisposable.add(
-                    Completable.fromCallable(() -> {
-                        cacheDynamicFee();
-                        logEvents();
-                        return Void.TYPE;
-                    }).compose(RxUtil.applySchedulersToCompletable())
-                            .andThen(exchangeRateFactory.updateTicker())
-                            .andThen(buyDataManager.getCanBuy())
+                    feeDataManager.getFeeOptions()
+                            .doOnNext(feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions))
+                            .compose(RxUtil.applySchedulersToObservable())
+                            .flatMapCompletable(feeOptions -> exchangeRateFactory.updateTicker())
                             .doAfterTerminate(() -> {
                                 if (dataListener != null) {
                                     dataListener.onFetchTransactionCompleted();
@@ -382,37 +384,14 @@ public class MainViewModel extends BaseViewModel {
                                     prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
                                     dataListener.onScanInput(strUri);
                                 }
-                            })
-                            .subscribe(
-                                    canBuy -> {
-                                        Log.d(TAG, "preLaunchChecks: canBuy " + canBuy);
-                                        boolean isEnabled = canBuy && dataListener.isBuySellPermitted();
-                                        dataListener.setBuySellEnabled(isEnabled);
-                                        if (isEnabled) {
-                                            buyDataManager.watchPendingTrades()
-                                                    .compose(RxUtil.applySchedulersToObservable())
-                                                    .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace);
-                                            buyDataManager.getWebViewLoginDetails()
-                                                    .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
-                                        }
-                                    },
-                                    throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
+                            }).subscribe(() -> {
+                        //no op
+                    }, Throwable::printStackTrace));
         } else {
             // This should never happen, but handle the scenario anyway by starting the launcher
             // activity, which handles all login/auth/corruption scenarios itself
             dataListener.kickToLauncherPage();
         }
-    }
-
-    private void cacheDynamicFee() {
-        compositeDisposable.add(
-                feeDataManager.getFeeOptions()
-                        .doOnNext(feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions))
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(ignored -> {
-                                    // No-op
-                                },
-                                Throwable::printStackTrace));
     }
 
     @Override
@@ -471,5 +450,21 @@ public class MainViewModel extends BaseViewModel {
 
     public String getCurrentServerUrl() {
         return debugSettings.getCurrentServerUrl();
+    }
+
+    private void initializeBuy() {
+
+        compositeDisposable.add(buyDataManager.getCanBuy()
+                .subscribe(isEnabled -> {
+                            dataListener.setBuySellEnabled(isEnabled);
+                            if (isEnabled) {
+                                buyDataManager.watchPendingTrades()
+                                        .compose(RxUtil.applySchedulersToObservable())
+                                        .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace);
+                                buyDataManager.getWebViewLoginDetails()
+                                        .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
+                            }
+                        },
+                        throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
     }
 }

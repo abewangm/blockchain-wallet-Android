@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.buy;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.webkit.CookieManager;
@@ -12,9 +13,11 @@ import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.databinding.ActivityBuyBinding;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.util.AndroidUtils;
+import piuk.blockchain.android.util.annotations.Thunk;
 
 public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataListener, FrontendJavascript<String> {
 
@@ -27,6 +30,8 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
 
     private ActivityBuyBinding binding;
     private BuyViewModel viewModel;
+
+    @Thunk MaterialProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +54,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         webView.getSettings().setJavaScriptEnabled(true);
         webView.restoreState(getIntent().getParcelableExtra(MainActivity.WEB_VIEW_STATE_KEY));
 
+        showProgressDialog(R.string.please_wait);
         viewModel.onViewReady();
     }
 
@@ -62,6 +68,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         if (didBuyBitcoin) {
             viewModel.reloadExchangeDate();
         }
+        dismissProgressDialog();
     }
 
     @Override
@@ -101,6 +108,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
                     webViewLoginDetails,
                     viewModel.isNewlyCreated()
             );
+            dismissProgressDialog();
         }
     }
 
@@ -120,5 +128,22 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
     @Override
     public void onCompletedTrade(String txHash) {
         // no-op
+    }
+
+    public void showProgressDialog(@StringRes int message) {
+        dismissProgressDialog();
+        if (!isFinishing()) {
+            progress = new MaterialProgressDialog(this);
+            progress.setMessage(message);
+            progress.setCancelable(false);
+            progress.show();
+        }
+    }
+
+    public void dismissProgressDialog() {
+        if (progress != null && progress.isShowing()) {
+            progress.dismiss();
+            progress = null;
+        }
     }
 }
