@@ -960,8 +960,8 @@ public class SendViewModel extends BaseViewModel {
         return Arrays.asList(regular, priority, custom);
     }
 
-    FeeLimits getFeeLimits() {
-        return dynamicFeeCache.getFeeOptions().getLimits();
+    FeeOptions getFeeOptions() {
+        return dynamicFeeCache.getFeeOptions();
     }
 
     private void setTempLegacyAddressPrivateKey(LegacyAddress legacyAddress, ECKey key) {
