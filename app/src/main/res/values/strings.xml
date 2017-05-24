@@ -710,5 +710,6 @@
     <string name="fee_options_fee_too_high">Unnecessarily high fee</string>
     <string name="fee_options_advanced_warning">This feature is recommended for advanced users only. By choosing a custom fee, you risk overpaying or your transaction never being confirmed.</string>
     <string name="fee_options_sat_byte_hint">sat/b</string>
+    <string name="fee_options_sat_byte_inline_hint">Regular: %1$s, Priority: %2$s</string>
 
 </resources>

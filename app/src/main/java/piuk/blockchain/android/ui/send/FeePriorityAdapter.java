@@ -49,7 +49,6 @@ public class FeePriorityAdapter extends ArrayAdapter<DisplayFeeOptions> {
             DisplayFeeOptions option = feeOptions.get(position);
             binding.title.setText(option.getTitle());
             binding.description.setText(option.getDescription());
-            binding.fee.setText(option.getFee());
             return binding.getRoot();
 
         } else {

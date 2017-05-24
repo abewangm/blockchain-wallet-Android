@@ -169,6 +169,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         setCustomKeypad();
         setupViews();
+        setupFeesView();
         viewModel.onViewReady();
 
         return binding.getRoot();
@@ -436,6 +437,65 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
             }
         });
+    }
+
+    private void setupFeesView() {
+        FeePriorityAdapter adapter = new FeePriorityAdapter(getActivity(),
+                viewModel.getFeeOptionsForDropDown());
+
+        binding.spinnerPriority.setAdapter(adapter);
+
+        binding.spinnerPriority.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                    case 1:
+                        binding.buttonSend.setEnabled(true);
+                        updateTotals(viewModel.getSendingItemAccount());
+                        binding.textviewFeeAbsolute.setVisibility(View.VISIBLE);
+                        binding.textviewFeeTime.setVisibility(View.VISIBLE);
+                        binding.textInputLayout.setVisibility(View.GONE);
+                        break;
+                    case 2:
+                        if (viewModel.shouldShowAdvancedFeeWarning()) {
+                            alertCustomSpend();
+                        } else {
+                            displayCustomFeeField();
+                        }
+                        break;
+                }
+
+                DisplayFeeOptions options = viewModel.getFeeOptionsForDropDown().get(position);
+                binding.textviewFeeType.setText(options.getTitle());
+                binding.textviewFeeTime.setText(position != 2 ? options.getDescription() : null);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // No-op
+            }
+        });
+
+        binding.textviewFeeAbsolute.setOnClickListener(v -> binding.spinnerPriority.performClick());
+        binding.textviewFeeType.setText(R.string.fee_options_regular);
+        binding.textviewFeeTime.setText(R.string.fee_options_regular_time);
+
+        RxTextView.textChanges(binding.amountRow.amountBtc)
+                .debounce(400, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        value -> updateTotals(viewModel.getSendingItemAccount()),
+                        Throwable::printStackTrace);
+
+        RxTextView.textChanges(binding.amountRow.amountFiat)
+                .debounce(400, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        value -> updateTotals(viewModel.getSendingItemAccount()),
+                        Throwable::printStackTrace);
     }
 
     private void requestSendPayment() {
@@ -925,63 +985,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     public void onChangeFeeClicked() {
-        binding.customFeeContainer.setVisibility(View.VISIBLE);
         confirmPaymentDialog.dismiss();
-        FeePriorityAdapter adapter = new FeePriorityAdapter(getActivity(),
-                viewModel.getFeeOptionsForDropDown());
-
-        binding.spinnerPriority.setAdapter(adapter);
-
-        binding.spinnerPriority.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                    case 0:
-                    case 1:
-                        binding.buttonSend.setEnabled(true);
-                        updateTotals(viewModel.getSendingItemAccount());
-                        binding.textviewFeeAbsolute.setVisibility(View.VISIBLE);
-                        binding.textviewFeeTime.setVisibility(View.VISIBLE);
-                        binding.textInputLayout.setVisibility(View.GONE);
-                        break;
-                    case 2:
-                        if (viewModel.shouldShowAdvancedFeeWarning()) {
-                            alertCustomSpend();
-                        } else {
-                            displayCustomFeeField();
-                        }
-                        break;
-                }
-
-                DisplayFeeOptions options = viewModel.getFeeOptionsForDropDown().get(position);
-                binding.textviewFeeType.setText(options.getTitle());
-                binding.textviewFeeTime.setText(position != 2 ? options.getDescription() : null);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // No-op
-            }
-        });
-
-        binding.textviewFeeType.setText(R.string.fee_options_regular);
-        binding.textviewFeeTime.setText(R.string.fee_options_regular_time);
-
-        RxTextView.textChanges(binding.amountRow.amountBtc)
-                .debounce(400, TimeUnit.MILLISECONDS)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        value -> updateTotals(viewModel.getSendingItemAccount()),
-                        Throwable::printStackTrace);
-
-        RxTextView.textChanges(binding.amountRow.amountFiat)
-                .debounce(400, TimeUnit.MILLISECONDS)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        value -> updateTotals(viewModel.getSendingItemAccount()),
-                        Throwable::printStackTrace);
     }
 
     @Thunk
@@ -1004,6 +1008,20 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         binding.textviewFeeTime.setVisibility(View.GONE);
         binding.textInputLayout.setVisibility(View.VISIBLE);
         binding.buttonSend.setEnabled(false);
+        binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint));
+
+        binding.edittextCustomFee.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus || !binding.edittextCustomFee.getText().toString().isEmpty()) {
+                binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_inline_hint,
+                        String.valueOf(viewModel.getFeeOptions().getRegularFee()),
+                        String.valueOf(viewModel.getFeeOptions().getPriorityFee())));
+            } else if (binding.edittextCustomFee.getText().toString().isEmpty()) {
+                binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint));
+            } else {
+                binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint));
+            }
+        });
+
         RxTextView.textChanges(binding.edittextCustomFee)
                 .map(CharSequence::toString)
                 .doOnNext(value -> binding.buttonSend.setEnabled(!value.isEmpty() && !value.equals("0")))
@@ -1011,9 +1029,9 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 .map(Long::valueOf)
                 .onErrorReturnItem(0L)
                 .doOnNext(value -> {
-                    if (value < viewModel.getFeeLimits().getMin()) {
+                    if (value < viewModel.getFeeOptions().getLimits().getMin()) {
                         binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_low));
-                    } else if (value > viewModel.getFeeLimits().getMax()) {
+                    } else if (value > viewModel.getFeeOptions().getLimits().getMax()) {
                         binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_high));
                     } else {
                         binding.textInputLayout.setError(null);
