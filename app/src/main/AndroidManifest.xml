@@ -131,8 +131,8 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-          android:name=".ui.buy.BuyActivity"
-          android:configChanges="keyboardHidden|orientation|screenSize" />
+            android:name=".ui.buy.BuyActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <service
             android:name=".data.websocket.WebSocketService"
@@ -156,6 +156,10 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/white" />
+
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="697b88bc5b5646cd6ac3aebf86e525ff14c51426" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
