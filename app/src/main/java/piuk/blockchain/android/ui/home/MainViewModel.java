@@ -20,7 +20,6 @@ import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.DebugSettings;
@@ -399,6 +398,7 @@ public class MainViewModel extends BaseViewModel {
         super.destroy();
         rxBus.unregister(NotificationPayload.class, notificationObservable);
         appUtil.deleteQR();
+        dismissAnnouncementIfOnboardingCompleted();
     }
 
     public void updateTicker() {
@@ -466,5 +466,11 @@ public class MainViewModel extends BaseViewModel {
                             }
                         },
                         throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
+    }
+
+    private void dismissAnnouncementIfOnboardingCompleted() {
+        if(prefs.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false) && prefs.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, false)) {
+            prefs.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true);
+        }
     }
 }

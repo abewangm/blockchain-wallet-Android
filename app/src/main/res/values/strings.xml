@@ -688,6 +688,8 @@
     <string name="trade_complete">Trade Complete</string>
     <string name="trade_complete_details">Your Buy Bitcoin trade has been completed!</string>
     <string name="view_details">View details</string>
+    <string name="onboarding_available_now">Available now</string>
+    <string name="onboarding_buy_details">Buy bitcoin directly from your mobile wallet. It\'s simple, seamless, and secure.</string>
 
     <!-- 2FA Pairing -->
     <string name="two_factor_dialog_title">Enter 2FA code</string>

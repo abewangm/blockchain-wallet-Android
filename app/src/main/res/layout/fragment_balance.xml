@@ -77,23 +77,33 @@
                 android:layout_height="match_parent"
                 android:animateLayoutChanges="true">
 
-                <FrameLayout
+                <LinearLayout
                     android:id="@+id/refresh_container"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:background="@color/primary_gray_lightest">
+
+                    <!-- ANNOUNCEMENTS -->
+                    <include
+                        android:id="@+id/announcement_card_include"
+                        layout="@layout/item_announcement" />
 
                     <!-- NO TRANSACTION LAYOUT -->
                     <include
                         android:id="@+id/no_transaction_include"
                         layout="@layout/include_no_transaction_message" />
 
+                    <!-- TRANSACTION LAYOUT -->
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/rvTransactions"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:clipToPadding="false"
+                        android:background="@color/white"
                         tools:listitem="@layout/item_balance" />
-                </FrameLayout>
+
+                </LinearLayout>
 
             </android.support.v4.widget.SwipeRefreshLayout>
         </FrameLayout>

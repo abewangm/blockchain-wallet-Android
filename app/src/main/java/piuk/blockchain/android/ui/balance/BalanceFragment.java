@@ -8,9 +8,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -513,7 +515,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.VISIBLE);
             } else {
                 binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
-                binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
+
+                if(binding.announcementCardInclude.onboardingCardviewLayout.getVisibility() != View.VISIBLE) {
+                    binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
+                }
             }
         }
     }
@@ -700,13 +705,19 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         binding.noTransactionInclude.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(v -> {
             binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
-            binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
+
+            if(binding.announcementCardInclude.onboardingCardviewLayout.getVisibility() != View.VISIBLE) {
+                binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
+            }
             viewModel.setOnboardingComplete(true);
         });
 
         binding.noTransactionInclude.onboardingCompleteLayout.onboardingClose.setOnClickListener(v -> {
             binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
-            binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
+
+            if(binding.announcementCardInclude.onboardingCardviewLayout.getVisibility() != View.VISIBLE) {
+                binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
+            }
             viewModel.setOnboardingComplete(true);
         });
 
@@ -739,5 +750,33 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     public void startReceiveFragment() {
         Intent intent = new Intent(MainActivity.ACTION_RECEIVE);
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+    }
+
+    @Override
+    public void onShowAnnouncement() {
+
+        binding.announcementCardInclude.onboardingCardviewLayout.setVisibility(View.VISIBLE);
+        binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.GONE);
+
+        binding.announcementCardInclude.ivIcon.setImageResource(R.drawable.vector_wallet_offset);
+        binding.announcementCardInclude.tvHeading1.setText(R.string.onboarding_available_now);
+        binding.announcementCardInclude.tvContent.setText(R.string.onboarding_buy_details);
+        binding.announcementCardInclude.tvLink.setText(R.string.onboarding_buy_bitcoin);
+
+        binding.announcementCardInclude.tvLink.setOnClickListener(v -> {
+            startBuyActivity();
+            viewModel.disableAnnouncement();
+        });
+        binding.announcementCardInclude.ivClose.setOnClickListener(v -> {
+            binding.announcementCardInclude.onboardingCardviewLayout.setVisibility(View.GONE);
+            binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
+            viewModel.disableAnnouncement();
+        });
+    }
+
+    @Override
+    public void onHideAnnouncement() {
+        binding.announcementCardInclude.onboardingCardviewLayout.setVisibility(View.GONE);
+        binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
     }
 }
