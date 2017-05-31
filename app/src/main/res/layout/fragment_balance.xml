@@ -85,9 +85,10 @@
                     android:background="@color/primary_gray_lightest">
 
                     <!-- ANNOUNCEMENTS -->
-                    <include
-                        android:id="@+id/announcement_card_include"
-                        layout="@layout/item_announcement" />
+                    <piuk.blockchain.android.ui.customviews.AnnouncementView
+                        android:id="@+id/announcement_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="240dp"/>
 
                     <!-- NO TRANSACTION LAYOUT -->
                     <include

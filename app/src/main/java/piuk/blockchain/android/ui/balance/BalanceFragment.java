@@ -432,6 +432,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 R.color.product_red_medium);
 
         binding.noTransactionInclude.buttonGetBitcoin.setOnClickListener(v -> viewModel.getBitcoinClicked());
+
+        setAnnouncement();
     }
 
     @Override
@@ -516,7 +518,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             } else {
                 binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
 
-                if(binding.announcementCardInclude.onboardingCardviewLayout.getVisibility() != View.VISIBLE) {
+                if(binding.announcementView.getVisibility() != View.VISIBLE) {
                     binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
                 }
             }
@@ -706,7 +708,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.noTransactionInclude.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(v -> {
             binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
 
-            if(binding.announcementCardInclude.onboardingCardviewLayout.getVisibility() != View.VISIBLE) {
+            if(binding.announcementView.getVisibility() != View.VISIBLE) {
                 binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
             }
             viewModel.setOnboardingComplete(true);
@@ -715,7 +717,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.noTransactionInclude.onboardingCompleteLayout.onboardingClose.setOnClickListener(v -> {
             binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
 
-            if(binding.announcementCardInclude.onboardingCardviewLayout.getVisibility() != View.VISIBLE) {
+            if(binding.announcementView.getVisibility() != View.VISIBLE) {
                 binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
             }
             viewModel.setOnboardingComplete(true);
@@ -752,31 +754,33 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
     }
 
-    @Override
-    public void onShowAnnouncement() {
+    private void setAnnouncement() {
 
-        binding.announcementCardInclude.onboardingCardviewLayout.setVisibility(View.VISIBLE);
-        binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.GONE);
-
-        binding.announcementCardInclude.ivIcon.setImageResource(R.drawable.vector_wallet_offset);
-        binding.announcementCardInclude.tvHeading1.setText(R.string.onboarding_available_now);
-        binding.announcementCardInclude.tvContent.setText(R.string.onboarding_buy_details);
-        binding.announcementCardInclude.tvLink.setText(R.string.onboarding_buy_bitcoin);
-
-        binding.announcementCardInclude.tvLink.setOnClickListener(v -> {
+        binding.announcementView.setTitle(R.string.onboarding_available_now);
+        binding.announcementView.setContent(R.string.onboarding_buy_details);
+        binding.announcementView.setLink(R.string.onboarding_buy_bitcoin);
+        binding.announcementView.setImage(R.drawable.vector_wallet_offset);
+        binding.announcementView.setEmoji(R.drawable.celebration_emoji);
+        binding.announcementView.setLinkOnclickListener(v -> {
             startBuyActivity();
             viewModel.disableAnnouncement();
         });
-        binding.announcementCardInclude.ivClose.setOnClickListener(v -> {
-            binding.announcementCardInclude.onboardingCardviewLayout.setVisibility(View.GONE);
+        binding.announcementView.setCloseOnclickListener(v -> {
+            binding.announcementView.setVisibility(View.GONE);
             binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
             viewModel.disableAnnouncement();
         });
     }
 
     @Override
+    public void onShowAnnouncement() {
+        binding.announcementView.setVisibility(View.VISIBLE);
+        binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.GONE);
+    }
+
+    @Override
     public void onHideAnnouncement() {
-        binding.announcementCardInclude.onboardingCardviewLayout.setVisibility(View.GONE);
+        binding.announcementView.setVisibility(View.GONE);
         binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
     }
 }
