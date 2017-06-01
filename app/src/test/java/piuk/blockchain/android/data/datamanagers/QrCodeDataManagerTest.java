@@ -52,14 +52,18 @@ public class QrCodeDataManagerTest extends RxTest {
         // Arrange
 
         // Act
-        TestObserver<Bitmap> observer = subject.generatePairingCode(UUID.randomUUID().toString(),
-                UUID.randomUUID().toString(),"phrase", 100).test();
+        TestObserver<Bitmap> observer = subject.generatePairingCode(
+                UUID.randomUUID().toString(),
+                "",
+                UUID.randomUUID().toString(),
+                "phrase",
+                180).test();
         getTestScheduler().triggerActions();
         // Assert
         Bitmap bitmap = observer.values().get(0);
         assertNotNull(bitmap);
-        assertEquals(100, bitmap.getWidth());
-        assertEquals(100, bitmap.getHeight());
+        assertEquals(180, bitmap.getWidth());
+        assertEquals(180, bitmap.getHeight());
         observer.assertComplete();
         observer.assertNoErrors();
     }
