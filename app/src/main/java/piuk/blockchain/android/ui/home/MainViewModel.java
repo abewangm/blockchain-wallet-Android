@@ -20,19 +20,21 @@ import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.api.DebugSettings;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
+import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
+import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
@@ -69,10 +71,12 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected StringUtils stringUtils;
     @Inject protected SettingsDataManager settingsDataManager;
     @Inject protected OnboardingDataManager onboardingDataManager;
+    @Inject protected BuyDataManager buyDataManager;
     @Inject protected DynamicFeeCache dynamicFeeCache;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
     @Inject protected RxBus rxBus;
     @Inject protected FeeDataManager feeDataManager;
+    @Inject protected DebugSettings debugSettings;
 
     public interface DataListener {
 
@@ -84,6 +88,8 @@ public class MainViewModel extends BaseViewModel {
          * TODO: This should be removed once/if Contacts ships
          */
         boolean getIfContactsEnabled();
+
+        boolean isBuySellPermitted();
 
         void onRooted();
 
@@ -119,7 +125,11 @@ public class MainViewModel extends BaseViewModel {
 
         void updateCurrentPrice(String price);
 
-        void setBuyBitcoinVisible(boolean hide);
+        void setBuySellEnabled(boolean enabled);
+
+        void onTradeCompleted(String txHash);
+
+        void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails);
     }
 
     public MainViewModel(DataListener dataListener) {
@@ -137,6 +147,9 @@ public class MainViewModel extends BaseViewModel {
         subscribeToNotifications();
         if (dataListener.getIfContactsEnabled()) {
             registerNodeForMetaDataService();
+        }
+        if (dataListener.isBuySellPermitted()) {
+            initializeBuy();
         }
     }
 
@@ -353,14 +366,13 @@ public class MainViewModel extends BaseViewModel {
             dataListener.onStartBalanceFragment(false);
             dataListener.onFetchTransactionsStart();
 
+            logEvents();
+
             compositeDisposable.add(
-                    Completable.fromCallable(() -> {
-                        cacheDynamicFee();
-                        logEvents();
-                        return Void.TYPE;
-                    }).compose(RxUtil.applySchedulersToCompletable())
-                            .andThen(exchangeRateFactory.updateTicker())
-                            .andThen(onboardingDataManager.getIfSepaCountry())
+                    feeDataManager.getFeeOptions()
+                            .doOnNext(feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions))
+                            .compose(RxUtil.applySchedulersToObservable())
+                            .flatMapCompletable(feeOptions -> exchangeRateFactory.updateTicker())
                             .doAfterTerminate(() -> {
                                 if (dataListener != null) {
                                     dataListener.onFetchTransactionCompleted();
@@ -371,14 +383,9 @@ public class MainViewModel extends BaseViewModel {
                                     prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
                                     dataListener.onScanInput(strUri);
                                 }
-                            })
-                            .subscribe(
-                                    isSepaCountry -> {
-                                        if (isSepaCountry && BuildConfig.BUY_BITCOIN_ENABLED) {
-                                            enableBuySell();
-                                        }
-                                    },
-                                    throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
+                            }).subscribe(() -> {
+                        //no op
+                    }, Throwable::printStackTrace));
         } else {
             // This should never happen, but handle the scenario anyway by starting the launcher
             // activity, which handles all login/auth/corruption scenarios itself
@@ -386,26 +393,12 @@ public class MainViewModel extends BaseViewModel {
         }
     }
 
-    private void cacheDynamicFee() {
-        compositeDisposable.add(
-                feeDataManager.getFeeOptions()
-                        .doOnNext(feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions))
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(ignored -> {
-                                    // No-op
-                                },
-                                Throwable::printStackTrace));
-    }
-
-    private void enableBuySell() {
-        dataListener.setBuyBitcoinVisible(true);
-    }
-
     @Override
     public void destroy() {
         super.destroy();
         rxBus.unregister(NotificationPayload.class, notificationObservable);
         appUtil.deleteQR();
+        dismissAnnouncementIfOnboardingCompleted();
     }
 
     public void updateTicker() {
@@ -455,4 +448,29 @@ public class MainViewModel extends BaseViewModel {
         }
     }
 
+    public String getCurrentServerUrl() {
+        return debugSettings.getCurrentServerUrl();
+    }
+
+    private void initializeBuy() {
+
+        compositeDisposable.add(buyDataManager.getCanBuy()
+                .subscribe(isEnabled -> {
+                            dataListener.setBuySellEnabled(isEnabled);
+                            if (isEnabled) {
+                                buyDataManager.watchPendingTrades()
+                                        .compose(RxUtil.applySchedulersToObservable())
+                                        .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace);
+                                buyDataManager.getWebViewLoginDetails()
+                                        .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
+                            }
+                        },
+                        throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
+    }
+
+    private void dismissAnnouncementIfOnboardingCompleted() {
+        if(prefs.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false) && prefs.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, false)) {
+            prefs.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true);
+        }
+    }
 }

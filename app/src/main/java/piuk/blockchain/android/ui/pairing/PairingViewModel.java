@@ -53,6 +53,7 @@ public class PairingViewModel extends BaseViewModel {
                         .subscribe(() -> {
                             prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.getWallet().getGuid());
                             prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
+                            prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, true);
                             dataListener.startPinEntryActivity();
                         }, throwable -> {
                             if (throwable instanceof SSLPeerUnverifiedException) {

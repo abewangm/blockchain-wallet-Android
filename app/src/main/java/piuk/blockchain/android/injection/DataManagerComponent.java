@@ -1,6 +1,7 @@
 package piuk.blockchain.android.injection;
 
 import dagger.Subcomponent;
+import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.account.AccountEditViewModel;
 import piuk.blockchain.android.ui.account.AccountViewModel;
@@ -10,6 +11,7 @@ import piuk.blockchain.android.ui.backup.BackupVerifyViewModel;
 import piuk.blockchain.android.ui.backup.BackupWalletViewModel;
 import piuk.blockchain.android.ui.backup.ConfirmFundsTransferViewModel;
 import piuk.blockchain.android.ui.balance.BalanceViewModel;
+import piuk.blockchain.android.ui.buy.BuyViewModel;
 import piuk.blockchain.android.ui.chooser.AccountChooserViewModel;
 import piuk.blockchain.android.ui.contacts.detail.ContactDetailViewModel;
 import piuk.blockchain.android.ui.contacts.list.ContactsListViewModel;
@@ -102,6 +104,10 @@ public interface DataManagerComponent {
     void inject(ContactPaymentDialogViewModel contactPaymentDialogViewModel);
 
     void inject(OnboardingViewModel onboardingViewModel);
+
+    void inject(BuyViewModel buyViewModel);
+
+    void inject(ExchangeService exchangeService);
 
     void inject(UpgradeWalletPresenter upgradeWalletViewModel);
 

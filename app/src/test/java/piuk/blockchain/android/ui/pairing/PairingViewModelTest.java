@@ -84,6 +84,7 @@ public class PairingViewModelTest {
         verifyNoMoreInteractions(appUtil);
         verify(prefsUtil).setValue(PrefsUtil.KEY_GUID, guid);
         verify(prefsUtil).setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
+        verify(prefsUtil).setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, true);
         verifyNoMoreInteractions(prefsUtil);
         verify(payloadDataManager).handleQrCode(qrCode);
         verify(payloadDataManager, atLeastOnce()).getWallet();

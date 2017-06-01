@@ -18,6 +18,7 @@ import javax.inject.Inject;
 
 import okhttp3.OkHttpClient;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -35,6 +36,7 @@ public class WebSocketService extends Service {
     @Inject protected PersistentUrls persistentUrls;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
     @Inject protected OkHttpClient okHttpClient;
+    @Inject protected RxBus rxBus;
     @Thunk WebSocketHandler webSocketHandler;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -79,7 +81,8 @@ public class WebSocketService extends Service {
                 new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
                 prefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
                 xpubs,
-                addrs);
+                addrs,
+                rxBus);
 
         webSocketHandler.start();
     }

@@ -42,6 +42,9 @@ interface PersistentPrefs {
     String KEY_ONBOARDING_COMPLETE = "onboarding_complete";
     String KEY_OVERLAY_TRUSTED = "overlay_trusted";
 
+    String KEY_LATEST_ANNOUNCEMENT_DISMISSED = "latest_announcement_dismissed";
+    String KEY_LATEST_ANNOUNCEMENT_SEEN = "latest_announcement_seen";
+
     String getValue(String name, String value);
 
     void setValue(String name, String value);
