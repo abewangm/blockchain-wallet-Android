@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-allopen'
 apply from: 'environment.gradle'
 apply from: '../quality/jacoco.gradle'
 apply from: '../quality/releasechecks.gradle'
@@ -107,6 +109,10 @@ android {
         test.java.srcDirs += 'src/test/kotlin'
         androidTest.java.srcDirs += 'src/androidTest/kotlin'
     }
+}
+
+allOpen {
+    annotation("piuk.blockchain.android.util.annotations.Mockable")
 }
 
 afterEvaluate {

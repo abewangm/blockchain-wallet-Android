@@ -149,7 +149,7 @@ public class SettingsViewModelTest {
     @Test
     public void getIfFingerprintUnlockEnabled() throws Exception {
         // Arrange
-        when(fingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(true);
+        when(fingerprintHelper.isFingerprintUnlockEnabled()).thenReturn(true);
         // Act
         boolean value = subject.getIfFingerprintUnlockEnabled();
         // Assert
@@ -170,7 +170,7 @@ public class SettingsViewModelTest {
     @Test
     public void onFingerprintClickedAlreadyEnabled() throws Exception {
         // Arrange
-        when(fingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(true);
+        when(fingerprintHelper.isFingerprintUnlockEnabled()).thenReturn(true);
         // Act
         subject.onFingerprintClicked();
         // Assert
@@ -180,7 +180,7 @@ public class SettingsViewModelTest {
     @Test
     public void onFingerprintClickedNoFingerprintsEnrolled() throws Exception {
         // Arrange
-        when(fingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(false);
+        when(fingerprintHelper.isFingerprintUnlockEnabled()).thenReturn(false);
         when(fingerprintHelper.areFingerprintsEnrolled()).thenReturn(false);
         // Act
         subject.onFingerprintClicked();
@@ -192,7 +192,7 @@ public class SettingsViewModelTest {
     public void onFingerprintClickedPinStored() throws Exception {
         // Arrange
         String pinCode = "1234";
-        when(fingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(false);
+        when(fingerprintHelper.isFingerprintUnlockEnabled()).thenReturn(false);
         when(fingerprintHelper.areFingerprintsEnrolled()).thenReturn(true);
         when(accessState.getPIN()).thenReturn(pinCode);
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -206,13 +206,13 @@ public class SettingsViewModelTest {
     @Test(expected = IllegalStateException.class)
     public void onFingerprintClickedPinNotFound() throws Exception {
         // Arrange
-        when(fingerprintHelper.getIfFingerprintUnlockEnabled()).thenReturn(false);
+        when(fingerprintHelper.isFingerprintUnlockEnabled()).thenReturn(false);
         when(fingerprintHelper.areFingerprintsEnrolled()).thenReturn(true);
         when(accessState.getPIN()).thenReturn(null);
         // Act
         subject.onFingerprintClicked();
         // Assert
-        verify(fingerprintHelper).getIfFingerprintUnlockEnabled();
+        verify(fingerprintHelper).isFingerprintUnlockEnabled();
         verify(fingerprintHelper).areFingerprintsEnrolled();
         verify(accessState).getPIN();
     }
