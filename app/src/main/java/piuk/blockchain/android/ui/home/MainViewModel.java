@@ -448,7 +448,7 @@ public class MainViewModel extends BaseViewModel {
         }
     }
 
-    public String getCurrentServerUrl() {
+    String getCurrentServerUrl() {
         return debugSettings.getCurrentServerUrl();
     }
 

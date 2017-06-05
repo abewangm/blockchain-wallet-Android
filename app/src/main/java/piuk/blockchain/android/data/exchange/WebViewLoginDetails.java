@@ -7,12 +7,16 @@ import android.support.annotation.NonNull;
  */
 
 public class WebViewLoginDetails {
+
     private String walletJson;
     private String password;
     private String externalJson;
     private String magicHash;
 
-    public WebViewLoginDetails(String walletJson, String password, @NonNull String externalJson, @NonNull String magicHash) {
+    public WebViewLoginDetails(String walletJson,
+                               String password,
+                               @NonNull String externalJson,
+                               @NonNull String magicHash) {
         this.walletJson = walletJson;
         this.password = password;
         this.externalJson = externalJson;

@@ -42,7 +42,6 @@ import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import java.util.Arrays;
-import java.util.Locale;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.BuildConfig;
@@ -62,6 +61,7 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.buy.BuyActivity;
 import piuk.blockchain.android.ui.buy.FrontendJavascript;
 import piuk.blockchain.android.ui.buy.FrontendJavascriptManager;
+import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment;
@@ -69,7 +69,6 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
-import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
@@ -724,6 +723,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         menu.findItem(R.id.nav_contacts).setVisible(false);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public boolean isBuySellPermitted() {
         return BuildConfig.BUY_BITCOIN_ENABLED && AndroidUtils.is19orHigher();
@@ -739,12 +739,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void onTradeCompleted(String txHash) {
-        String tradeDetailsMessage = getString(R.string.trade_complete_details);
-        String alertMessage = String.format(Locale.getDefault(), tradeDetailsMessage);
-
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(getString(R.string.trade_complete))
-                .setMessage(alertMessage)
+                .setMessage(R.string.trade_complete_details)
                 .setCancelable(false)
                 .setPositiveButton(R.string.ok_cap, null)
                 .setNegativeButton(R.string.view_details, (dialog, whichButton) -> {
@@ -759,15 +756,16 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         menu.findItem(R.id.nav_buy).setVisible(visible);
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void setupBuyWebView() {
-        // Setup buy WebView
         // TODO: 17/03/2017 Check if there's a better way to improve loading time of this webview
-        buyWebView = new WebView(this);
         if (AndroidUtils.is21orHigher()) {
-            buyWebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+            WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         }
+        // Setup buy WebView
+        buyWebView = new WebView(this);
         buyWebView.getSettings().setJavaScriptEnabled(true);
-        buyWebView.loadUrl(viewModel.getCurrentServerUrl()+"wallet/#/intermediate");
+        buyWebView.loadUrl(viewModel.getCurrentServerUrl() + "wallet/#/intermediate");
 
         frontendJavascriptManager = new FrontendJavascriptManager(this, buyWebView);
         buyWebView.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
@@ -794,6 +792,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void onBuyCompleted() {
+        // No-op
     }
 
     @Override
@@ -805,10 +804,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void onReceiveValue(String value) {
+        Log.d(TAG, "onReceiveValue: " + value);
     }
 
     @Override
     public void onShowTx(String txHash) {
+        Log.d(TAG, "onShowTx: " + txHash);
     }
 
     private void applyFontToMenuItem(MenuItem menuItem) {

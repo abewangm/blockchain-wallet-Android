@@ -16,6 +16,7 @@ import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
  */
 
 public class FrontendJavascriptManager {
+
     public static final String TAG = FrontendJavascriptManager.class.getSimpleName();
     public static final String JS_INTERFACE_NAME = "android";
 
@@ -47,7 +48,7 @@ public class FrontendJavascriptManager {
         frontendJavascript.onShowTx(txHash);
     }
 
-    public void activateMobileBuyFromJson(WebViewLoginDetails webViewLoginDetails, boolean firstLogin) {
+    void activateMobileBuyFromJson(WebViewLoginDetails webViewLoginDetails, boolean firstLogin) {
         String script = createActivateFromJsonScript(webViewLoginDetails, firstLogin);
         executeScript(script);
     }
@@ -57,7 +58,7 @@ public class FrontendJavascriptManager {
         executeScript(script);
     }
 
-    public void teardown() {
+    void teardown() {
         executeScript("teardown()");
     }
 
@@ -65,28 +66,25 @@ public class FrontendJavascriptManager {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "Executing: " + script);
         }
-        // TODO: 06/04/2017 evaluateJavascript isn't available on pre-19 devices
         new Handler(Looper.getMainLooper()).post(() -> webView.evaluateJavascript(script, frontendJavascript));
     }
 
-    public static String createActivateFromJsonScript(WebViewLoginDetails webViewLoginDetails, boolean firstLogin) {
+    private String createActivateFromJsonScript(WebViewLoginDetails webViewLoginDetails, boolean firstLogin) {
         return String.format(
                 "activateMobileBuyFromJson('%s','%s','%s','%s', %b)",
                 StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getWalletJson()),
                 StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getExternalJson()),
                 StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getMagicHash()),
                 StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getPassword()),
-                firstLogin
-        );
+                firstLogin);
     }
 
-    public static String createCheckForCompletedTradesScript(WebViewLoginDetails webViewLoginDetails) {
+    private String createCheckForCompletedTradesScript(WebViewLoginDetails webViewLoginDetails) {
         return String.format(
                 "checkForCompletedTrades('%s','%s','%s','%s')",
                 StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getWalletJson()),
                 StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getExternalJson()),
                 StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getMagicHash()),
-                StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getPassword())
-        );
+                StringEscapeUtils.escapeEcmaScript(webViewLoginDetails.getPassword()));
     }
 }

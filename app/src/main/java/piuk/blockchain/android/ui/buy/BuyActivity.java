@@ -1,12 +1,11 @@
 package piuk.blockchain.android.ui.buy;
 
+import android.annotation.SuppressLint;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.webkit.CookieManager;
-import android.webkit.WebView;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
@@ -17,44 +16,40 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.util.AndroidUtils;
-import piuk.blockchain.android.util.annotations.Thunk;
 
 public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataListener, FrontendJavascript<String> {
 
     public static final String TAG = BuyActivity.class.getSimpleName();
+
     private FrontendJavascriptManager frontendJavascriptManager;
-
-    private Boolean frontendInitialized = false;
     private WebViewLoginDetails webViewLoginDetails;
-    private Boolean didBuyBitcoin = false;
-
-    private ActivityBuyBinding binding;
     private BuyViewModel viewModel;
+    private MaterialProgressDialog progress;
+    private ActivityBuyBinding binding;
 
-    @Thunk MaterialProgressDialog progress;
+    private boolean frontendInitialized = false;
+    private boolean didBuyBitcoin = false;
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_buy);
+
+        setupToolbar(binding.toolbarContainer.toolbarGeneral, R.string.onboarding_buy_bitcoin);
         viewModel = new BuyViewModel(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        setupToolbar(toolbar, R.string.onboarding_buy_bitcoin);
-
-        WebView webView = binding.webview;
+        showProgressDialog(R.string.please_wait);
 
         if (AndroidUtils.is21orHigher()) {
-            CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+            CookieManager.getInstance().setAcceptThirdPartyCookies(binding.webview, true);
         }
 
-        frontendJavascriptManager = new FrontendJavascriptManager(this, webView);
+        frontendJavascriptManager = new FrontendJavascriptManager(this, binding.webview);
 
-        webView.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.restoreState(getIntent().getParcelableExtra(MainActivity.WEB_VIEW_STATE_KEY));
-
-        showProgressDialog(R.string.please_wait);
+        binding.webview.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
+        binding.webview.getSettings().setJavaScriptEnabled(true);
+        binding.webview.restoreState(getIntent().getParcelableExtra(MainActivity.WEB_VIEW_STATE_KEY));
         viewModel.onViewReady();
     }
 
@@ -62,8 +57,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
     protected void onDestroy() {
         super.onDestroy();
         frontendJavascriptManager.teardown();
-        WebView webView = binding.webview;
-        webView.removeJavascriptInterface(FrontendJavascriptManager.JS_INTERFACE_NAME);
+        binding.webview.removeJavascriptInterface(FrontendJavascriptManager.JS_INTERFACE_NAME);
 
         if (didBuyBitcoin) {
             viewModel.reloadExchangeDate();
@@ -106,8 +100,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         if (isReady()) {
             frontendJavascriptManager.activateMobileBuyFromJson(
                     webViewLoginDetails,
-                    viewModel.isNewlyCreated()
-            );
+                    viewModel.isNewlyCreated());
             dismissProgressDialog();
         }
     }
@@ -127,7 +120,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
      */
     @Override
     public void onCompletedTrade(String txHash) {
-        // no-op
+        // No-op
     }
 
     public void showProgressDialog(@StringRes int message) {

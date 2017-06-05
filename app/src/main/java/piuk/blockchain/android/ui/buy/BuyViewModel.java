@@ -12,15 +12,18 @@ import piuk.blockchain.android.util.AppUtil;
  * Created by justin on 4/27/17.
  */
 
+@SuppressWarnings("WeakerAccess")
 public class BuyViewModel extends BaseViewModel {
-    private static final String TAG = BuyViewModel.class.getSimpleName();
+
     private DataListener dataListener;
 
-    @Inject protected AppUtil appUtil;
-    @Inject protected BuyDataManager buyDataManager;
+    @Inject AppUtil appUtil;
+    @Inject BuyDataManager buyDataManager;
 
     public interface DataListener {
+
         void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails);
+
     }
 
     BuyViewModel(DataListener dataListener) {
@@ -28,22 +31,21 @@ public class BuyViewModel extends BaseViewModel {
         this.dataListener = dataListener;
     }
 
-    public Boolean isNewlyCreated() {
-        return appUtil.isNewlyCreated();
-    }
-
-    public void reloadExchangeDate() {
-        buyDataManager.reloadExchangeData();
-    }
-
     @Override
     public void onViewReady() {
         compositeDisposable.add(
                 buyDataManager
                         .getWebViewLoginDetails()
-                        .subscribe(webViewLoginDetails -> {
-                            dataListener.setWebViewLoginDetails(webViewLoginDetails);
-                        }, Throwable::printStackTrace)
-        );
+                        .subscribe(webViewLoginDetails -> dataListener.setWebViewLoginDetails(webViewLoginDetails),
+                                Throwable::printStackTrace));
     }
+
+    Boolean isNewlyCreated() {
+        return appUtil.isNewlyCreated();
+    }
+
+    void reloadExchangeDate() {
+        buyDataManager.reloadExchangeData();
+    }
+
 }

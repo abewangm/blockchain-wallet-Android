@@ -16,15 +16,17 @@ public class BuyDataManager {
     private PayloadDataManager payloadDataManager;
     private ExchangeService exchangeService;
 
-    public BuyDataManager(OnboardingDataManager onboardingDataManager, SettingsDataManager settingsDataManager, PayloadDataManager payloadDataManager) {
+    public BuyDataManager(OnboardingDataManager onboardingDataManager,
+                          SettingsDataManager settingsDataManager,
+                          PayloadDataManager payloadDataManager) {
         this.onboardingDataManager = onboardingDataManager;
         this.settingsDataManager = settingsDataManager;
         this.payloadDataManager = payloadDataManager;
-        this.exchangeService = ExchangeService.getInstance();
+        exchangeService = ExchangeService.getInstance();
     }
 
     public Observable<WebViewLoginDetails> getWebViewLoginDetails() {
-        return this.exchangeService.getWebViewLoginDetails();
+        return exchangeService.getWebViewLoginDetails();
     }
 
     public Observable<String> watchPendingTrades() {
@@ -33,23 +35,22 @@ public class BuyDataManager {
 
     public Observable<Boolean> getCanBuy() {
         return Observable.combineLatest(
-                this.onboardingDataManager.getIfSepaCountry(),
-                this.getIsInvited(),
-                (isSepa, isInvited) -> isSepa || isInvited
-        );
+                onboardingDataManager.getIfSepaCountry(),
+                getIsInvited(),
+                (isSepa, isInvited) -> isSepa || isInvited);
     }
 
     private Observable<Boolean> getIsInvited() {
-        return this.settingsDataManager.initSettings(
+        return settingsDataManager.initSettings(
                 payloadDataManager.getWallet().getGuid(),
-                payloadDataManager.getWallet().getSharedKey()
-        ).map(settings -> {
-            // TODO: implement settings.invited.sfox
-            return false;
-        });
+                payloadDataManager.getWallet().getSharedKey())
+                .map(settings -> {
+                    // TODO: implement settings.invited.sfox
+                    return false;
+                });
     }
 
     public void reloadExchangeData() {
-        this.exchangeService.reloadExchangeData();
+        exchangeService.reloadExchangeData();
     }
 }

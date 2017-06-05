@@ -35,6 +35,7 @@ import piuk.blockchain.android.injection.Injector;
  * Created by justin on 5/1/17.
  */
 
+@SuppressWarnings("WeakerAccess")
 public class ExchangeService {
     private static ExchangeService instance;
     private static final int METADATA_TYPE_EXCHANGE = 3;
@@ -51,10 +52,10 @@ public class ExchangeService {
     @Inject RxBus rxBus;
 
     private ExchangeService() {
-        this.payloadManager = PayloadManager.getInstance();
-        this.metadataSubject = ReplaySubject.create(1);
-        this.coinifyApi = new CoinifyApi();
-        this.sfoxApi = new SFOXApi();
+        payloadManager = PayloadManager.getInstance();
+        metadataSubject = ReplaySubject.create(1);
+        coinifyApi = new CoinifyApi();
+        sfoxApi = new SFOXApi();
         Injector.getInstance().getDataManagerComponent().inject(this);
     }
 
@@ -86,12 +87,12 @@ public class ExchangeService {
         );
     }
 
-    public Observable<Metadata> getExchangeData() {
+    private Observable<Metadata> getExchangeData() {
         if (!didStartLoad) {
             reloadExchangeData();
             didStartLoad = true;
         }
-        return this.metadataSubject;
+        return metadataSubject;
     }
 
     public Observable<String> watchPendingTrades() {
@@ -99,25 +100,22 @@ public class ExchangeService {
 
         return getPendingTradeAddresses()
                 .doOnNext(address ->
-                    Log.d(TAG, "watchPendingTrades: watching receive address: " + address)
-                )
+                        Log.d(TAG, "watchPendingTrades: watching receive address: " + address))
                 .flatMap(address -> receiveEvents
                         .filter(event -> event.getAddress().equals(address))
-                        .map(event -> event.getHash())
-                );
+                        .map(WebSocketReceiveEvent::getHash));
     }
 
-    public Observable<String> getPendingTradeAddresses() {
-        return this.getExchangeData()
+    private Observable<String> getPendingTradeAddresses() {
+        return getExchangeData()
                 .flatMap(metadata -> Observable
                         .fromCallable(metadata::getMetadata)
-                        .compose(RxUtil.applySchedulersToObservable())
-                )
+                        .compose(RxUtil.applySchedulersToObservable()))
                 .flatMapIterable(exchangeData -> {
                     ObjectMapper mapper = new ObjectMapper();
                     ExchangeData data = mapper.readValue(exchangeData, ExchangeData.class);
 
-                    List<TradeData> trades = new ArrayList<TradeData>();
+                    List<TradeData> trades = new ArrayList<>();
                     if (data.getCoinify() != null) {
                         trades.addAll(data.getCoinify().getTrades());
                     } else if (data.getSfox() != null) {
@@ -126,15 +124,11 @@ public class ExchangeService {
 
                     return trades;
                 })
-                .filter(tradeData ->
-                        !tradeData.isConfirmed()
-                )
+                .filter(tradeData -> !tradeData.isConfirmed())
                 .map(tradeData ->
                         payloadDataManager.getReceiveAddressAtArbitraryPosition(
                                 payloadDataManager.getAccount(tradeData.getAccountIndex()),
-                                tradeData.getReceiveIndex()
-                        )
-                )
+                                tradeData.getReceiveIndex()))
                 .distinct();
     }
 
@@ -145,7 +139,7 @@ public class ExchangeService {
 
     private Observable<Metadata> getMetadata() {
         return Observable.fromCallable(() -> {
-            DeterministicKey masterKey = this.payloadManager
+            DeterministicKey masterKey = payloadManager
                     .getPayload()
                     .getHdWallets().get(0)
                     .getMasterKey();
