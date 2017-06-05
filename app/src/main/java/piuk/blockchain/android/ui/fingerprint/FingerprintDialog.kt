@@ -14,11 +14,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
+import kotlinx.android.synthetic.main.dialog_fingerprint.*
 import piuk.blockchain.android.R
-import piuk.blockchain.android.util.annotations.Thunk
 
 const val TAG = "FingerprintDialog"
 const val KEY_BUNDLE_PIN_CODE = "pin_code"
@@ -29,11 +26,7 @@ private const val FATAL_ERROR_TIMEOUT_MILLIS: Long = 3500
 
 class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.DataListener {
 
-    @Thunk lateinit var fingerprintIcon: ImageView
-    @Thunk lateinit var statusTextView: TextView
     private lateinit var viewModel: FingerprintDialogViewModel
-    private lateinit var descriptionTextView: TextView
-    private lateinit var cancelButton: Button
     private var authCallback: FingerprintAuthCallback? = null
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -54,19 +47,16 @@ class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.
             setOnKeyListener(BackButtonListener(authCallback!!))
         }
 
+        return inflater!!.inflate(R.layout.dialog_fingerprint, container, false)
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        button_cancel.setOnClickListener { _ -> authCallback!!.onCanceled() }
+
         viewModel = FingerprintDialogViewModel(this)
-
-        val view = inflater!!.inflate(R.layout.dialog_fingerprint, container, false)
-
-        fingerprintIcon = view.findViewById(R.id.icon_fingerprint) as ImageView
-        descriptionTextView = view.findViewById(R.id.fingerprint_description) as TextView
-        statusTextView = view.findViewById(R.id.fingerprint_status) as TextView
-        cancelButton = view.findViewById(R.id.action_cancel) as Button
-        cancelButton.setOnClickListener { _ -> authCallback!!.onCanceled() }
-
         viewModel.onViewReady()
-
-        return view
     }
 
     fun setAuthCallback(authCallback: FingerprintAuthCallback) {
@@ -74,34 +64,34 @@ class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.
     }
 
     override fun setCancelButtonText(@StringRes text: Int) {
-        cancelButton.setText(text)
+        button_cancel.setText(text)
     }
 
     override fun setDescriptionText(@StringRes text: Int) {
-        descriptionTextView.setText(text)
+        textview_description.setText(text)
     }
 
     override fun setStatusText(@StringRes text: Int) {
-        statusTextView.setText(text)
+        textview_status.setText(text)
     }
 
     override fun setStatusText(text: String) {
-        statusTextView.text = text
+        textview_status.text = text
     }
 
     override fun setStatusTextColor(@ColorRes color: Int) {
-        statusTextView.setTextColor(ContextCompat.getColor(context, color))
+        textview_status.setTextColor(ContextCompat.getColor(context, color))
     }
 
     override fun setIcon(@DrawableRes drawable: Int) {
-        fingerprintIcon.setImageResource(drawable)
+        icon_fingerprint.setImageResource(drawable)
     }
 
     override fun getBundle(): Bundle = arguments
 
     override fun onAuthenticated(data: String?) {
-        statusTextView.removeCallbacks(resetErrorTextRunnable)
-        fingerprintIcon.postDelayed({ authCallback!!.onAuthenticated(data) }, SUCCESS_DELAY_MILLIS)
+        textview_status.removeCallbacks(resetErrorTextRunnable)
+        icon_fingerprint.postDelayed({ authCallback!!.onAuthenticated(data) }, SUCCESS_DELAY_MILLIS)
     }
 
     override fun onRecoverableError() {
@@ -110,7 +100,7 @@ class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.
 
     override fun onFatalError() {
         showErrorAnimation(FATAL_ERROR_TIMEOUT_MILLIS)
-        fingerprintIcon.postDelayed({ authCallback!!.onCanceled() }, FATAL_ERROR_TIMEOUT_MILLIS)
+        icon_fingerprint.postDelayed({ authCallback!!.onCanceled() }, FATAL_ERROR_TIMEOUT_MILLIS)
     }
 
     override fun onCanceled() {
@@ -128,18 +118,18 @@ class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.
 
     private val resetErrorTextRunnable = Runnable {
         if (context != null) {
-            statusTextView.setTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
-            statusTextView.text = getString(R.string.fingerprint_hint)
-            fingerprintIcon.setImageResource(R.drawable.ic_fingerprint_logo)
+            textview_status.setTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
+            textview_status.text = getString(R.string.fingerprint_hint)
+            icon_fingerprint.setImageResource(R.drawable.ic_fingerprint_logo)
         }
     }
 
     private fun showErrorAnimation(timeout: Long) {
         val shake = AnimationUtils.loadAnimation(context, R.anim.fingerprint_failed_shake)
-        fingerprintIcon.animation = shake
-        fingerprintIcon.animate()
-        statusTextView.removeCallbacks(resetErrorTextRunnable)
-        statusTextView.postDelayed(resetErrorTextRunnable, timeout)
+        icon_fingerprint.animation = shake
+        icon_fingerprint.animate()
+        textview_status.removeCallbacks(resetErrorTextRunnable)
+        textview_status.postDelayed(resetErrorTextRunnable, timeout)
     }
 
     interface FingerprintAuthCallback {
