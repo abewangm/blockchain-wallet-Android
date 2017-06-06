@@ -2,14 +2,17 @@ package piuk.blockchain.android.ui.backup;
 
 import android.annotation.SuppressLint;
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -17,12 +20,11 @@ import java.util.Date;
 
 import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.databinding.AlertPromptTransferFundsBinding;
 import piuk.blockchain.android.databinding.FragmentBackupCompleteBinding;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-public class BackupWalletCompletedFragment extends Fragment implements BackupWalletViewModel.DataListener{
+public class BackupWalletCompletedFragment extends Fragment implements BackupWalletViewModel.DataListener {
 
     public static final String TAG = BackupWalletCompletedFragment.class.getSimpleName();
     private static final String KEY_CHECK_TRANSFER = "check_transfer";
@@ -76,20 +78,17 @@ public class BackupWalletCompletedFragment extends Fragment implements BackupWal
 
     @Override
     public void showTransferFundsPrompt() {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle);
-        AlertPromptTransferFundsBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(getActivity()),
-                R.layout.alert_prompt_transfer_funds, null, false);
-        dialogBuilder.setView(dialogBinding.getRoot());
-
-        AlertDialog alertDialog = dialogBuilder.create();
-        dialogBinding.confirmDontAskAgain.setVisibility(View.GONE);
-        dialogBinding.confirmCancel.setOnClickListener(v -> alertDialog.dismiss());
-        dialogBinding.confirmSend.setOnClickListener(v -> {
-            alertDialog.dismiss();
-            showTransferFundsConfirmationDialog();
-        });
+        AlertDialog alertDialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.transfer_funds)
+                .setMessage(getString(R.string.transfer_recommend))
+                .setPositiveButton(R.string.transfer, (dialog, which) -> showTransferFundsConfirmationDialog())
+                .setNegativeButton(R.string.not_now, null)
+                .create();
 
         alertDialog.show();
+
+        Button negative = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        negative.setTextColor(ContextCompat.getColor(getActivity(), R.color.primary_gray_dark));
     }
 
     private void showTransferFundsConfirmationDialog() {
