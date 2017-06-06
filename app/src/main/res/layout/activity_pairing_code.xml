@@ -37,7 +37,7 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:paddingRight="16dp"
-                    android:text="@string/web_pair_instruction_1"
+                    android:text="@string/pairing_code_instruction_1"
                     android:textColor="@color/black" />
 
             </LinearLayout>
@@ -63,7 +63,7 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:paddingRight="16dp"
-                    android:text="@string/web_pair_instruction_2"
+                    android:text="@string/pairing_code_instruction_2"
                     android:textColor="@color/black" />
 
             </LinearLayout>
@@ -89,7 +89,7 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:paddingRight="16dp"
-                    android:text="@string/web_pair_instruction_3"
+                    android:text="@string/pairing_code_instruction_3"
                     android:textColor="@color/black" />
 
             </LinearLayout>
@@ -111,7 +111,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="32dp"
                 android:gravity="center"
-                android:text="@string/web_pair_warning_1"
+                android:text="@string/pairing_code_warning_1"
                 android:alpha="0.7"
                 android:textSize="14sp" />
 
@@ -146,7 +146,7 @@
                 android:layout_marginLeft="32dp"
                 android:layout_marginRight="32dp"
                 android:layout_marginTop="16dp"
-                android:text="@string/web_pair_show_qr"
+                android:text="@string/pairing_code_show_qr"
                 android:onClick="onClickQRToggle"
                 android:theme="@style/ButtonLightBlueTheme" />
 

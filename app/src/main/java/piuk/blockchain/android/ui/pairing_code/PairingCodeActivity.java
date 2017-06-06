@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.web_pair;
+package piuk.blockchain.android.ui.pairing_code;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,19 +12,17 @@ import android.util.Log;
 import android.view.View;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.databinding.ActivityWebPairBinding;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.databinding.ActivityPairingCodeBinding;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
-public class WebPairActivity extends BaseAuthActivity implements WebPairViewModel.DataListener {
+public class PairingCodeActivity extends BaseMvpActivity<PairingCodeView, PairingCodePresenter>
+        implements PairingCodeView {
 
-    private final String TAG = getClass().getName();
-
-    WebPairViewModel viewModel;
-    ActivityWebPairBinding binding;
+    private ActivityPairingCodeBinding binding;
 
     public static void start(Context context) {
-        Intent intent = new Intent(context, WebPairActivity.class);
+        Intent intent = new Intent(context, PairingCodeActivity.class);
         context.startActivity(intent);
     }
 
@@ -32,15 +30,24 @@ public class WebPairActivity extends BaseAuthActivity implements WebPairViewMode
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_web_pair);
-        viewModel = new WebPairViewModel(this);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_pairing_code);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
-        setupToolbar(toolbar, R.string.web_pair_log_in);
+        setupToolbar(toolbar, R.string.pairing_code_log_in);
 
-        binding.pairingFirstStep.setText(viewModel.getFirstStep());
+        binding.pairingFirstStep.setText(getPresenter().getFirstStep());
 
-        viewModel.onViewReady();
+        onViewReady();
+    }
+
+    @Override
+    protected PairingCodePresenter createPresenter() {
+        return new PairingCodePresenter();
+    }
+
+    @Override
+    protected PairingCodeView getView() {
+        return this;
     }
 
     @Override
@@ -51,22 +58,22 @@ public class WebPairActivity extends BaseAuthActivity implements WebPairViewMode
 
     public void onClickQRToggle(View view) {
 
-        if(binding.mainLayout.getVisibility() == View.VISIBLE) {
+        if (binding.mainLayout.getVisibility() == View.VISIBLE) {
 
             //Show pairing QR
             binding.mainLayout.setVisibility(View.GONE);
-            binding.btnQrToggle.setText(R.string.web_pair_hide_qr);
+            binding.btnQrToggle.setText(R.string.pairing_code_hide_qr);
 
             binding.qrLayout.setVisibility(View.VISIBLE);
             binding.ivQr.setVisibility(View.GONE);
 
-            viewModel.generatePairingQr();
+            getPresenter().generatePairingQr();
         } else {
 
             //Hide pairing QR
-            binding.tvWarning.setText(R.string.web_pair_warning_1);
+            binding.tvWarning.setText(R.string.pairing_code_warning_1);
             binding.mainLayout.setVisibility(View.VISIBLE);
-            binding.btnQrToggle.setText(R.string.web_pair_show_qr);
+            binding.btnQrToggle.setText(R.string.pairing_code_show_qr);
 
             binding.qrLayout.setVisibility(View.GONE);
         }
@@ -74,12 +81,11 @@ public class WebPairActivity extends BaseAuthActivity implements WebPairViewMode
 
     @Override
     public void onQrLoaded(Bitmap bitmap) {
-        binding.tvWarning.setText(R.string.web_pair_warning_2);
-        binding.progressBar.setVisibility(View.GONE);
+        binding.tvWarning.setText(R.string.pairing_code_warning_2);
         binding.ivQr.setVisibility(View.VISIBLE);
 
         int width = getResources().getDisplayMetrics().widthPixels;
-        int height = (width*bitmap.getHeight())/bitmap.getWidth();
+        int height = (width * bitmap.getHeight()) / bitmap.getWidth();
         bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
 
         binding.ivQr.setImageBitmap(bitmap);
@@ -93,5 +99,10 @@ public class WebPairActivity extends BaseAuthActivity implements WebPairViewMode
     @Override
     public void showProgressSpinner() {
         binding.progressBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hideProgressSpinner() {
+        binding.progressBar.setVisibility(View.GONE);
     }
 }

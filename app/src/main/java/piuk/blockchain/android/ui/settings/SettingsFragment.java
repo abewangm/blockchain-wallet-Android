@@ -51,7 +51,7 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
-import piuk.blockchain.android.ui.web_pair.WebPairActivity;
+import piuk.blockchain.android.ui.pairing_code.PairingCodeActivity;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -132,7 +132,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         smsPref = findPreference("mobile");
         smsPref.setOnPreferenceClickListener(this);
 
-        webPairPref = findPreference("web_pair");
+        webPairPref = findPreference("pairing_code");
         webPairPref.setOnPreferenceClickListener(this);
 
         // Preferences
@@ -440,8 +440,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
             case "mobile":
                 showDialogMobile();
                 break;
-            case "web_pair":
-                WebPairActivity.start(getContext());
+            case "pairing_code":
+                PairingCodeActivity.start(getContext());
                 break;
             case "verify_mobile":
                 showDialogVerifySms();
