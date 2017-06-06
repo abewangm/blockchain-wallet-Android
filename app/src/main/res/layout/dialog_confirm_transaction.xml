@@ -54,17 +54,17 @@
                     android:visibility="gone"
                     tools:visibility="visible">
 
-                    <GridLayout
+                    <android.support.v7.widget.GridLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="14dp"
                         android:layout_marginRight="14dp"
                         android:layout_marginTop="16dp"
-                        android:alignmentMode="alignBounds"
-                        android:columnCount="2"
-                        android:columnOrderPreserved="false"
-                        android:rowCount="3"
-                        android:useDefaultMargins="true">
+                        app:alignmentMode="alignBounds"
+                        app:columnCount="2"
+                        app:columnOrderPreserved="false"
+                        app:rowCount="3"
+                        app:useDefaultMargins="true">
 
                         <!-- FROM -->
                         <TextView
@@ -74,8 +74,11 @@
                         <TextView
                             android:id="@+id/textview_from_address"
                             style="@style/ConfirmPaymentField"
+                            android:layout_width="0dp"
                             android:ellipsize="end"
+                            android:scrollHorizontally="true"
                             android:singleLine="true"
+                            app:layout_gravity="fill_horizontal"
                             tools:text="My Bitcoin Wallet" />
 
                         <!-- TO -->
@@ -86,11 +89,11 @@
                         <TextView
                             android:id="@+id/textview_to_address"
                             style="@style/ConfirmPaymentField"
-                            android:layout_width="1dp"
-                            android:layout_gravity="fill"
+                            android:layout_width="0dp"
                             android:ellipsize="end"
                             android:scrollHorizontally="true"
                             android:singleLine="true"
+                            app:layout_gravity="fill_horizontal"
                             tools:text="1Pbu3p5TWsrYujGWbgT4MDeBa2J9bSkGoP" />
 
                         <!-- To transfer -->
@@ -101,6 +104,7 @@
                         <TextView
                             android:id="@+id/textview_amount"
                             style="@style/ConfirmPaymentField"
+                            app:layout_gravity="fill_horizontal"
                             tools:text="0.0011242 BTC ($6.22)" />
 
                         <!-- Fees -->
@@ -111,9 +115,10 @@
                         <TextView
                             android:id="@+id/textview_fees"
                             style="@style/ConfirmPaymentField"
+                            app:layout_gravity="fill_horizontal"
                             tools:text="0.0003685 BTC ($0.23)" />
 
-                    </GridLayout>
+                    </android.support.v7.widget.GridLayout>
 
                     <TextView
                         android:id="@+id/button_change_fee"
