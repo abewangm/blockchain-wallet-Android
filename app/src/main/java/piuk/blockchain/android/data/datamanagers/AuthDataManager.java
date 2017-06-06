@@ -314,4 +314,14 @@ public class AuthDataManager {
         });
     }
 
+    /**
+     * Get the encryption password for pairing
+     *
+     * @param guid A user's GUID
+     * @return {@link Observable<ResponseBody>} wrapping the pairing encryption password
+     */
+    public Observable<ResponseBody> getPairingEncryptionPassword(String guid) {
+        return rxPinning.call(() -> walletService.getPairingEncryptionPassword(guid))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
 }

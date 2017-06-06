@@ -442,6 +442,14 @@
     <string name="why_has_my_address_changed">Why has my address changed?</string>
     <string name="information">Information</string>
     <string name="learn_more">Learn More</string>
+    <string name="pairing_code_log_in">Log in to Web Wallet</string>
+    <string name="pairing_code_instruction_1">Go to %1$s on your computer.</string>
+    <string name="pairing_code_instruction_2">Select Log in via mobile</string>
+    <string name="pairing_code_instruction_3">Using your computer\'s camera, scan the QR code below.</string>
+    <string name="pairing_code_show_qr">Show QR code</string>
+    <string name="pairing_code_hide_qr">Hide QR code</string>
+    <string name="pairing_code_warning_1">Keep this code hidden until you\'re ready.</string>
+    <string name="pairing_code_warning_2">Keep this code safe!\nDo not share with others.</string>
 
     <!-- SHARE RECEIVE ADDRESS -->
     <string name="email_request_subject">Bitcoin payment request</string>

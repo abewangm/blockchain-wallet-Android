@@ -8,6 +8,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.UUID;
+
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
@@ -45,4 +47,24 @@ public class QrCodeDataManagerTest extends RxTest {
         observer.assertNoErrors();
     }
 
+    @Test
+    public void generatePairingCode() throws Exception {
+        // Arrange
+
+        // Act
+        TestObserver<Bitmap> observer = subject.generatePairingCode(
+                UUID.randomUUID().toString(),
+                "",
+                UUID.randomUUID().toString(),
+                "phrase",
+                180).test();
+        getTestScheduler().triggerActions();
+        // Assert
+        Bitmap bitmap = observer.values().get(0);
+        assertNotNull(bitmap);
+        assertEquals(180, bitmap.getWidth());
+        assertEquals(180, bitmap.getHeight());
+        observer.assertComplete();
+        observer.assertNoErrors();
+    }
 }
