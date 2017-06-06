@@ -782,7 +782,9 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     public boolean isOnboardingComplete() {
-        return prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false);
+        // If wallet isn't newly created, don't show onboarding
+        return prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
+                || !appUtil.isNewlyCreated();
     }
 
     public void setOnboardingComplete(boolean completed) {
@@ -800,9 +802,9 @@ public class BalanceViewModel extends BaseViewModel {
     public void checkLatestAnnouncement(List<TransactionSummary> txList) {
 
         //If user hasn't completed onboarding, ignore announcements
-        if(isOnboardingComplete() && onboardingDataManager.isSepa() && BuildConfig.BUY_BITCOIN_ENABLED){
+        if (isOnboardingComplete() && onboardingDataManager.isSepa() && BuildConfig.BUY_BITCOIN_ENABLED) {
 
-            if(!prefsUtil.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, false) && txList.size() > 0) {
+            if (!prefsUtil.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, false) && !txList.isEmpty()) {
                 prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, true);
                 dataListener.onShowAnnouncement();
             } else {
