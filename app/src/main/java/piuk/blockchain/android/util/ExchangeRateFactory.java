@@ -1,16 +1,17 @@
 package piuk.blockchain.android.util;
 
-import info.blockchain.api.data.Ticker;
+import android.util.Log;
+
 import info.blockchain.api.data.TickerItem;
 import info.blockchain.api.exchangerates.ExchangeRates;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.exceptions.ApiException;
 
-import org.apache.commons.lang3.EnumUtils;
-
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 
@@ -26,17 +27,12 @@ import retrofit2.Response;
 public class ExchangeRateFactory {
 
     //Regularly updated ticker data
-    private Ticker tickerData;
+    private TreeMap<String, TickerItem> tickerData;
     private ExchangeRates api;
 
     @Inject protected PrefsUtil prefsUtil;
 
     private static ExchangeRateFactory instance = null;
-
-    public enum Currency {
-        AUD, BRL, CAD, CHF, CLP, CNY, DKK, EUR, GBP, HKD,
-        ISK, JPY, KRW, NZD, PLN, RUB, SEK, SGD, THB, TWD, USD
-    }
 
     private ExchangeRateFactory() {
         Injector.getInstance().getAppComponent().inject(this);
@@ -55,7 +51,7 @@ public class ExchangeRateFactory {
 
     public Completable updateTicker() {
         return Completable.fromCallable(() -> {
-            Response<Ticker> call = api.getTicker().execute();
+            Response<TreeMap<String, TickerItem>> call = api.getTickerMap().execute();
             if (call.isSuccessful()) {
                 tickerData = call.body();
                 return Void.TYPE;
@@ -65,72 +61,26 @@ public class ExchangeRateFactory {
         }).compose(RxUtil.applySchedulersToCompletable());
     }
 
-    private TickerItem getTickerItem(Currency currency) {
-        switch (currency) {
-            case AUD:
-                return tickerData.getAUD();
-            case BRL:
-                return tickerData.getBRL();
-            case CAD:
-                return tickerData.getCAD();
-            case CHF:
-                return tickerData.getCHF();
-            case CLP:
-                return tickerData.getCLP();
-            case CNY:
-                return tickerData.getCNY();
-            case DKK:
-                return tickerData.getDKK();
-            case EUR:
-                return tickerData.getEUR();
-            case GBP:
-                return tickerData.getGBP();
-            case HKD:
-                return tickerData.getHKD();
-            case ISK:
-                return tickerData.getISK();
-            case JPY:
-                return tickerData.getJPY();
-            case KRW:
-                return tickerData.getKRW();
-            case NZD:
-                return tickerData.getNZD();
-            case PLN:
-                return tickerData.getPLN();
-            case RUB:
-                return tickerData.getRUB();
-            case SEK:
-                return tickerData.getSEK();
-            case SGD:
-                return tickerData.getSGD();
-            case THB:
-                return tickerData.getTHB();
-            case TWD:
-                return tickerData.getTWD();
-            case USD:
-                return tickerData.getUSD();
-            default:
-                return tickerData.getUSD();
-        }
+    private TickerItem getTickerItem(String currencyName) {
+        return tickerData.get(currencyName);
     }
 
     public double getLastPrice(String currencyName) {
         if (currencyName.isEmpty()) {
-            currencyName = Currency.USD.name();
+            currencyName = "USD";
         }
 
         double lastPrice;
-        Currency currency = Currency.valueOf(currencyName.toUpperCase().trim());
-        double lastKnown = Double.parseDouble(prefsUtil.getValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency, "0.0"));
+        double lastKnown = Double.parseDouble(prefsUtil.getValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currencyName, "0.0"));
 
         if (tickerData == null) {
             lastPrice = lastKnown;
         } else {
-            TickerItem tickerItem = getTickerItem(currency);
+            TickerItem tickerItem = getTickerItem(currencyName);
             lastPrice = tickerItem.getLast();
 
             if (lastPrice > 0.0) {
-                prefsUtil.setValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currency, Double.toString(lastPrice));
+                prefsUtil.setValue("LAST_KNOWN_VALUE_FOR_CURRENCY_" + currencyName, Double.toString(lastPrice));
             } else {
                 lastPrice = lastKnown;
             }
@@ -141,12 +91,10 @@ public class ExchangeRateFactory {
 
     public String getSymbol(String currencyName) {
         if (currencyName.isEmpty()) {
-            currencyName = Currency.USD.name();
+            currencyName = "USD";
         }
 
-        Currency currency = Currency.valueOf(currencyName.toUpperCase().trim());
-
-        TickerItem tickerItem = getTickerItem(currency);
+        TickerItem tickerItem = getTickerItem(currencyName);
         return tickerItem.getSymbol();
     }
 
@@ -175,14 +123,7 @@ public class ExchangeRateFactory {
         });
     }
 
-    /**
-     * Parse the data supplied to this instance.
-     */
-    public void setData(Ticker data) {
-        tickerData = data;
-    }
-
     public String[] getCurrencyLabels() {
-        return EnumUtils.getEnumMap(Currency.class).keySet().toArray(new String[0]);
+        return tickerData.keySet().toArray(new String[0]);
     }
 }
