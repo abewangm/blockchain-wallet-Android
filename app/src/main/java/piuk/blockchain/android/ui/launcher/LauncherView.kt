@@ -4,7 +4,6 @@ import android.content.Intent
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.util.annotations.Mockable
 
-@Mockable
 interface LauncherView: View {
 
     fun getPageIntent(): Intent

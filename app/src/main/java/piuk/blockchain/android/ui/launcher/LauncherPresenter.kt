@@ -93,7 +93,7 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
                                 } else {
                                     view.onStartMainActivity()
                                 }
-                            }) { _ -> view.onStartMainActivity() }
+                            }, { _ -> view.onStartMainActivity() })
 
                 }
             }
