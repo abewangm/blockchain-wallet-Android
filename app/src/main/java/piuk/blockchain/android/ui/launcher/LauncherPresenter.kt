@@ -63,42 +63,46 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
         // Installed app, check sanity
             !appUtil.isSane -> view.onCorruptPayload()
         // Legacy app has not been prompted for upgrade
-            isPinValidated && !payloadDataManager.wallet.isUpgraded -> {
-                accessState.setIsLoggedIn(true)
-                view.onRequestUpgrade()
-            }
+            isPinValidated && !payloadDataManager.wallet.isUpgraded -> promptUpgrade()
         // App has been PIN validated
-            isPinValidated || accessState.isLoggedIn -> {
-                accessState.setIsLoggedIn(true)
-                if (appUtil.isNewlyCreated) {
-                    view.onStartOnboarding(false)
-                } else {
-                    settingsDataManager.initSettings(
-                            payloadDataManager.wallet.guid,
-                            payloadDataManager.wallet.sharedKey)
-                            .compose(RxUtil.addObservableToCompositeDisposable(this))
-                            .subscribe({ settings ->
-                                if (!settings.isEmailVerified
-                                        && settings.email != null
-                                        && !settings.email.isEmpty()) {
-                                    var visits = prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0)
-                                    // Nag user to verify email after second login
-                                    when (visits) {
-                                        1 -> view.onStartOnboarding(true)
-                                        else -> view.onStartMainActivity()
-                                    }
-
-                                    visits++
-                                    prefsUtil.setValue(PrefsUtil.KEY_APP_VISITS, visits)
-                                } else {
-                                    view.onStartMainActivity()
-                                }
-                            }, { _ -> view.onStartMainActivity() })
-
-                }
-            }
+            isPinValidated || accessState.isLoggedIn -> checkOnboardingStatus()
         // Normal login
             else -> view.onRequestPin()
+        }
+    }
+
+    private fun promptUpgrade() {
+        accessState.setIsLoggedIn(true)
+        view.onRequestUpgrade()
+    }
+
+    private fun checkOnboardingStatus() {
+        accessState.setIsLoggedIn(true)
+        if (appUtil.isNewlyCreated) {
+            view.onStartOnboarding(false)
+        } else {
+            settingsDataManager.initSettings(
+                    payloadDataManager.wallet.guid,
+                    payloadDataManager.wallet.sharedKey)
+                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .subscribe({ settings ->
+                        if (!settings.isEmailVerified
+                                && settings.email != null
+                                && !settings.email.isEmpty()) {
+                            var visits = prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0)
+                            // Nag user to verify email after second login
+                            when (visits) {
+                                1 -> view.onStartOnboarding(true)
+                                else -> view.onStartMainActivity()
+                            }
+
+                            visits++
+                            prefsUtil.setValue(PrefsUtil.KEY_APP_VISITS, visits)
+                        } else {
+                            view.onStartMainActivity()
+                        }
+                    }, { _ -> view.onStartMainActivity() })
+
         }
     }
 

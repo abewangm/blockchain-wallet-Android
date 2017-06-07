@@ -6,7 +6,7 @@ package piuk.blockchain.android.util
 
 /**
  * Allows you to call a passed function whilst returning true. Inlined for performance reasons.
- * Useful for exaple in onOptionsItemSelected where you may want to invoke a function but also
+ * Useful for example in onOptionsItemSelected where you may want to invoke a function but also
  * have to return a value:
  *
  *      override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {

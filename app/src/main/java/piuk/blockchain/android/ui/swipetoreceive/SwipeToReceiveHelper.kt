@@ -68,7 +68,6 @@ class SwipeToReceiveHelper(private val payloadDataManager: PayloadDataManager,
             addressString.isEmpty() -> emptyList()
             else -> addressString.split(",").dropLastWhile { it.isEmpty() }
         }
-
     }
 
     /**
@@ -92,7 +91,7 @@ class SwipeToReceiveHelper(private val payloadDataManager: PayloadDataManager,
     }
 
     companion object {
-        // Allows fields to be accessed statically by Java callers rather than using .Companion
+        // Allows fields to be accessed statically by Java callers rather than using .Companion.KEY_
         @JvmField
         val KEY_SWIPE_RECEIVE_ADDRESSES = "swipe_receive_addresses"
         @JvmField
