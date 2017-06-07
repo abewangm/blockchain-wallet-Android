@@ -22,12 +22,12 @@ class SwipeToReceivePresenter : BasePresenter<SwipeToReceiveView>() {
         view.setUiState(UiState.LOADING)
 
         // Check we actually have addresses stored
-        if (swipeToReceiveHelper.receiveAddresses.isEmpty()) {
+        if (swipeToReceiveHelper.getReceiveAddresses().isEmpty()) {
             view.setUiState(UiState.EMPTY)
         } else {
-            view.displayReceiveAccount(swipeToReceiveHelper.accountName)
+            view.displayReceiveAccount(swipeToReceiveHelper.getAccountName())
 
-            swipeToReceiveHelper.nextAvailableAddress
+            swipeToReceiveHelper.getNextAvailableAddress()
                     .doOnNext { s ->
                         if (s.isEmpty()) {
                             throw Exceptions.propagate(Throwable(
