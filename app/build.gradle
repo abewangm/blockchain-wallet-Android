@@ -179,6 +179,8 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true
     }
+    // Device specs
+    compile 'com.facebook.device.yearclass:yearclass:2.0.0'
 
     // UI/Instrumentation Tests
     androidTestCompile 'junit:junit:4.12'
