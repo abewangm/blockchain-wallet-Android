@@ -27,7 +27,6 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.PinEntryKeypad;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
-import piuk.blockchain.android.ui.fingerprint.FingerprintDialogKt;
 import piuk.blockchain.android.ui.fingerprint.FingerprintStage;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.util.DialogButtonCallback;
@@ -154,7 +153,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
                 if (getActivity() != null && !getActivity().isFinishing() && !isPaused) {
                     getActivity().getSupportFragmentManager()
                             .beginTransaction()
-                            .add(fingerprintDialog, FingerprintDialogKt.TAG)
+                            .add(fingerprintDialog, FingerprintDialog.TAG)
                             .commitAllowingStateLoss();
                 } else {
                     fingerprintDialog = null;
