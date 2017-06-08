@@ -36,7 +36,7 @@
 
                 <include
                     android:id="@+id/onboarding_complete_layout"
-                    layout="@layout/fragment_onboarding_complete" />
+                    layout="@layout/include_onboarding_complete" />
 
                 <include
                     android:id="@+id/onboarding_viewpager_layout"

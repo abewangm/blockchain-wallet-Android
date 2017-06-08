@@ -27,6 +27,7 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.PinEntryKeypad;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
+import piuk.blockchain.android.ui.fingerprint.FingerprintStage;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.ViewUtils;
@@ -133,7 +134,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
         binding.fingerprintLogo.setOnClickListener(v -> viewModel.checkFingerprintStatus());
         // Show dialog itself if not already showing
         if (fingerprintDialog == null && viewModel.canShowFingerprintDialog()) {
-            fingerprintDialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.AUTHENTICATE);
+            fingerprintDialog = FingerprintDialog.Companion.newInstance(pincode, FingerprintStage.AUTHENTICATE);
             fingerprintDialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
                 @Override
                 public void onAuthenticated(String data) {

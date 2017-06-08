@@ -1,6 +1,7 @@
 package piuk.blockchain.android.injection;
 
 import dagger.Subcomponent;
+import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.account.AccountEditViewModel;
 import piuk.blockchain.android.ui.account.AccountViewModel;
@@ -10,6 +11,7 @@ import piuk.blockchain.android.ui.backup.BackupVerifyViewModel;
 import piuk.blockchain.android.ui.backup.BackupWalletViewModel;
 import piuk.blockchain.android.ui.backup.ConfirmFundsTransferViewModel;
 import piuk.blockchain.android.ui.balance.BalanceViewModel;
+import piuk.blockchain.android.ui.buy.BuyViewModel;
 import piuk.blockchain.android.ui.chooser.AccountChooserViewModel;
 import piuk.blockchain.android.ui.contacts.detail.ContactDetailViewModel;
 import piuk.blockchain.android.ui.contacts.list.ContactsListViewModel;
@@ -20,7 +22,7 @@ import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialogViewMode
 import piuk.blockchain.android.ui.contacts.payments.ContactsPaymentRequestViewModel;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialogViewModel;
 import piuk.blockchain.android.ui.home.MainViewModel;
-import piuk.blockchain.android.ui.launcher.LauncherViewModel;
+import piuk.blockchain.android.ui.launcher.LauncherPresenter;
 import piuk.blockchain.android.ui.onboarding.OnboardingViewModel;
 import piuk.blockchain.android.ui.pairing.ManualPairingViewModel;
 import piuk.blockchain.android.ui.pairing.PairingViewModel;
@@ -30,9 +32,10 @@ import piuk.blockchain.android.ui.recover.RecoverFundsViewModel;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentPresenter;
 import piuk.blockchain.android.ui.send.SendViewModel;
 import piuk.blockchain.android.ui.settings.SettingsViewModel;
-import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveViewModel;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceivePresenter;
 import piuk.blockchain.android.ui.transactions.TransactionDetailViewModel;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletPresenter;
+import piuk.blockchain.android.ui.pairing_code.PairingCodePresenter;
 
 /**
  * Subcomponents have access to all upstream objects in the graph but can have their own scope -
@@ -43,7 +46,7 @@ import piuk.blockchain.android.ui.upgrade.UpgradeWalletPresenter;
 @Subcomponent(modules = DataManagerModule.class)
 public interface DataManagerComponent {
 
-    void inject(LauncherViewModel launcherViewModel);
+    void inject(LauncherPresenter launcherPresenter);
 
     void inject(PasswordRequiredViewModel passwordRequiredViewModel);
 
@@ -81,7 +84,7 @@ public interface DataManagerComponent {
 
     void inject(ContactPairingMethodViewModel contactPairingMethodViewModel);
 
-    void inject(SwipeToReceiveViewModel swipeToReceiveViewModel);
+    void inject(SwipeToReceivePresenter swipeToReceivePresenter);
 
     void inject(ContactsInvitationBuilderViewModel contactsInvitationBuilderViewModel);
 
@@ -103,7 +106,13 @@ public interface DataManagerComponent {
 
     void inject(OnboardingViewModel onboardingViewModel);
 
+    void inject(BuyViewModel buyViewModel);
+
+    void inject(ExchangeService exchangeService);
+
     void inject(UpgradeWalletPresenter upgradeWalletViewModel);
 
     void inject(ConfirmPaymentPresenter confirmPaymentPresenter);
+
+    void inject(PairingCodePresenter pairingCodePresenter);
 }

@@ -26,6 +26,7 @@ import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
+import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.mockito.Matchers.any;
@@ -37,10 +38,10 @@ import static org.mockito.Mockito.when;
 
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
-public class SwipeToReceiveViewModelTest {
+public class SwipeToReceivePresenterTest {
 
-    private SwipeToReceiveViewModel subject;
-    @Mock private SwipeToReceiveViewModel.DataListener activity;
+    private SwipeToReceivePresenter subject;
+    @Mock private SwipeToReceiveView activity;
     @Mock private SwipeToReceiveHelper swipeToReceiveHelper;
     @Mock private QrCodeDataManager qrCodeDataManager;
 
@@ -54,7 +55,8 @@ public class SwipeToReceiveViewModelTest {
                 new ApiModule(),
                 new MockDataManagerModule());
 
-        subject = new SwipeToReceiveViewModel(activity);
+        subject = new SwipeToReceivePresenter();
+        subject.initView(activity);
     }
 
     @Test
@@ -64,8 +66,8 @@ public class SwipeToReceiveViewModelTest {
         // Act
         subject.onViewReady();
         // Assert
-        verify(activity).displayLoading();
-        verify(activity).showNoAddressesAvailable();
+        verify(activity).setUiState(UiState.LOADING);
+        verify(activity).setUiState(UiState.EMPTY);
     }
 
     @Test
@@ -78,9 +80,9 @@ public class SwipeToReceiveViewModelTest {
         // Act
         subject.onViewReady();
         // Assert
-        verify(activity).displayLoading();
+        verify(activity).setUiState(UiState.LOADING);
         verify(activity).displayReceiveAccount("Account");
-        verify(activity).showNoAddressesAvailable();
+        verify(activity).setUiState(UiState.FAILURE);
     }
 
     @Test
@@ -94,9 +96,10 @@ public class SwipeToReceiveViewModelTest {
         // Act
         subject.onViewReady();
         // Assert
-        verify(activity).displayLoading();
+        verify(activity).setUiState(UiState.LOADING);
         verify(activity).displayReceiveAccount("Account");
         verify(activity).displayQrCode(any(Bitmap.class));
+        verify(activity).setUiState(UiState.CONTENT);
         verify(activity).displayReceiveAddress("addr0");
     }
 

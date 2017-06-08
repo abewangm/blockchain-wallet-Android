@@ -11,6 +11,8 @@ import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
+
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
 
@@ -20,6 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import dagger.Lazy;
+import io.fabric.sdk.android.Fabric;
 import io.reactivex.plugins.RxJavaPlugins;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityManager;
@@ -76,6 +79,10 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Override
     public void onCreate() {
         super.onCreate();
+        if (BuildConfig.USE_CRASHLYTICS) {
+            // Init crash reporting
+            Fabric.with(this, new Crashlytics());
+        }
         // Init objects first
         Injector.getInstance().init(this);
         // Inject into Application

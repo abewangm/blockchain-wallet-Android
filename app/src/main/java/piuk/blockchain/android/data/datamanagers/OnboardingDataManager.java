@@ -1,5 +1,8 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import org.bitcoinj.core.Sha256Hash;
+import org.spongycastle.util.encoders.Hex;
+
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.access.AccessState;
 
@@ -30,7 +33,7 @@ public class OnboardingDataManager {
 
     /**
      * Checks whether or not a user is accessing their wallet from a SEPA country and stores the
-     * result in {@link AccessState}.
+     * result in {@link AccessState}. Also stores the current rollout value for Android.
      *
      * @return An {@link Observable} wrapping a boolean value
      */
@@ -40,6 +43,25 @@ public class OnboardingDataManager {
                         payloadDataManager.getWallet().getGuid(),
                         payloadDataManager.getWallet().getSharedKey())
                         .map(settings -> walletOptions.getBuySellCountries().contains(settings.getCountryCode()))
-                        .doOnNext(sepaCountry -> accessState.setInSepaCountry(sepaCountry)));
+                        .doOnNext(sepaCountry -> accessState.setInSepaCountry(sepaCountry))
+                        .doOnNext(ignored -> accessState.setBuySellRolloutPercent(walletOptions.getRolloutPercentage())));
+    }
+
+    /**
+     * Checks whether or not buy/sell is allowed to be rolled out based on percentage check on user's GUID.
+     *
+     * @return An {@link Observable} wrapping a boolean value
+     */
+    public Observable<Boolean> isRolloutAllowed() {
+
+        String plainGuid = payloadDataManager.getWallet().getGuid().replace("-", "");
+
+        byte[] guidHashBytes = Sha256Hash.hash(Hex.encode(plainGuid.getBytes()));
+        int unsignedByte = guidHashBytes[0] & 0xff;
+        double rolloutPercentage = accessState.getBuySellRolloutPercent();
+
+        boolean userHasAccess = ((unsignedByte + 1.0) / 256.0) <= rolloutPercentage;
+
+        return Observable.just(userHasAccess);
     }
 }

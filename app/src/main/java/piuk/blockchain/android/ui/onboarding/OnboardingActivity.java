@@ -9,6 +9,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
+import piuk.blockchain.android.ui.fingerprint.FingerprintStage;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -83,7 +84,7 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
 
     @Override
     public void showFingerprintDialog(String pincode) {
-        FingerprintDialog dialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
+        FingerprintDialog dialog = FingerprintDialog.Companion.newInstance(pincode, FingerprintStage.REGISTER_FINGERPRINT);
         //noinspection AnonymousInnerClassMayBeStatic
         dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
             @Override

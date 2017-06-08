@@ -13,6 +13,9 @@
         <piuk.blockchain.android.ui.settings.customprefs.CustomPreference
             android:key="mobile"
             android:title="@string/mobile" />
+        <piuk.blockchain.android.ui.settings.customprefs.CustomPreference
+            android:key="pairing_code"
+            android:title="@string/pairing_code_log_in" />
     </piuk.blockchain.android.ui.settings.customprefs.CustomPreferenceCategory>
 
     <piuk.blockchain.android.ui.settings.customprefs.CustomPreferenceCategory

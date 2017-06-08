@@ -85,7 +85,7 @@ class OnboardingViewModelTest {
         whenever(mockPayloadDataManager.wallet.sharedKey).thenReturn(sharedKey)
         whenever(mockSettingsDataManager.initSettings(guid, sharedKey))
                 .thenReturn(Observable.just(mockSettings))
-        whenever(mockFingerprintHelper.isHardwareDetected).thenReturn(true)
+        whenever(mockFingerprintHelper.isHardwareDetected()).thenReturn(true)
         // Act
         subject.onViewReady()
         // Assert
@@ -93,7 +93,7 @@ class OnboardingViewModelTest {
         verifyNoMoreInteractions(mockPayloadDataManager)
         verify(mockSettingsDataManager).initSettings(guid, sharedKey)
         verifyNoMoreInteractions(mockSettingsDataManager)
-        verify(mockFingerprintHelper).isHardwareDetected
+        verify(mockFingerprintHelper).isHardwareDetected()
         verifyNoMoreInteractions(mockFingerprintHelper)
         verify(mockActivity).pageIntent
         verify(mockActivity).showFingerprintPrompt()
@@ -111,7 +111,7 @@ class OnboardingViewModelTest {
         whenever(mockPayloadDataManager.wallet.sharedKey).thenReturn(sharedKey)
         whenever(mockSettingsDataManager.initSettings(guid, sharedKey))
                 .thenReturn(Observable.just(mockSettings))
-        whenever(mockFingerprintHelper.isHardwareDetected).thenReturn(false)
+        whenever(mockFingerprintHelper.isHardwareDetected()).thenReturn(false)
         // Act
         subject.onViewReady()
         // Assert
@@ -119,7 +119,7 @@ class OnboardingViewModelTest {
         verifyNoMoreInteractions(mockPayloadDataManager)
         verify(mockSettingsDataManager).initSettings(guid, sharedKey)
         verifyNoMoreInteractions(mockSettingsDataManager)
-        verify(mockFingerprintHelper).isHardwareDetected
+        verify(mockFingerprintHelper).isHardwareDetected()
         verifyNoMoreInteractions(mockFingerprintHelper)
         verify(mockActivity).pageIntent
         verify(mockActivity).showEmailPrompt()
@@ -132,12 +132,12 @@ class OnboardingViewModelTest {
         // Arrange
         val captor = argumentCaptor<String>()
         val pin = "1234"
-        whenever(mockFingerprintHelper.isFingerprintAvailable).thenReturn(true)
+        whenever(mockFingerprintHelper.isFingerprintAvailable()).thenReturn(true)
         whenever(mockAccessState.pin).thenReturn(pin)
         // Act
         subject.onEnableFingerprintClicked()
         // Assert
-        verify(mockFingerprintHelper).isFingerprintAvailable
+        verify(mockFingerprintHelper).isFingerprintAvailable()
         verifyNoMoreInteractions(mockFingerprintHelper)
         verify(mockAccessState, times(3)).pin
         verifyNoMoreInteractions(mockAccessState)
@@ -150,12 +150,12 @@ class OnboardingViewModelTest {
     @Throws(Exception::class)
     fun onEnableFingerprintClickedNoPinFound() {
         // Arrange
-        whenever(mockFingerprintHelper.isFingerprintAvailable).thenReturn(true)
+        whenever(mockFingerprintHelper.isFingerprintAvailable()).thenReturn(true)
         whenever(mockAccessState.pin).thenReturn(null)
         // Act
         subject.onEnableFingerprintClicked()
         // Assert
-        verify(mockFingerprintHelper).isFingerprintAvailable
+        verify(mockFingerprintHelper).isFingerprintAvailable()
         verifyNoMoreInteractions(mockFingerprintHelper)
         verify(mockAccessState, times(3)).pin
         verifyNoMoreInteractions(mockAccessState)
@@ -166,13 +166,13 @@ class OnboardingViewModelTest {
     @Throws(Exception::class)
     fun onEnableFingerprintClickedNoFingerprintEnrolled() {
         // Arrange
-        whenever(mockFingerprintHelper.isFingerprintAvailable).thenReturn(false)
-        whenever(mockFingerprintHelper.isHardwareDetected).thenReturn(true)
+        whenever(mockFingerprintHelper.isFingerprintAvailable()).thenReturn(false)
+        whenever(mockFingerprintHelper.isHardwareDetected()).thenReturn(true)
         // Act
         subject.onEnableFingerprintClicked()
         // Assert
-        verify(mockFingerprintHelper).isFingerprintAvailable
-        verify(mockFingerprintHelper).isHardwareDetected
+        verify(mockFingerprintHelper).isFingerprintAvailable()
+        verify(mockFingerprintHelper).isHardwareDetected()
         verifyNoMoreInteractions(mockFingerprintHelper)
         verify(mockActivity).showEnrollFingerprintsDialog()
         verifyNoMoreInteractions(mockActivity)
@@ -183,13 +183,13 @@ class OnboardingViewModelTest {
     @Throws(Exception::class)
     fun onEnableFingerprintClickedNoHardwareMethodCalledAccidentally() {
         // Arrange
-        whenever(mockFingerprintHelper.isFingerprintAvailable).thenReturn(false)
-        whenever(mockFingerprintHelper.isHardwareDetected).thenReturn(false)
+        whenever(mockFingerprintHelper.isFingerprintAvailable()).thenReturn(false)
+        whenever(mockFingerprintHelper.isHardwareDetected()).thenReturn(false)
         // Act
         subject.onEnableFingerprintClicked()
         // Assert
-        verify(mockFingerprintHelper).isFingerprintAvailable
-        verify(mockFingerprintHelper).isHardwareDetected
+        verify(mockFingerprintHelper).isFingerprintAvailable()
+        verify(mockFingerprintHelper).isHardwareDetected()
         verifyNoMoreInteractions(mockFingerprintHelper)
         verifyZeroInteractions(mockActivity)
         verifyZeroInteractions(mockAccessState)

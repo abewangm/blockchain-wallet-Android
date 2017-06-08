@@ -178,7 +178,7 @@ public class PinEntryViewModel extends BaseViewModel {
 
     public boolean getIfShouldShowFingerprintLogin() {
         return !(mValidatingPinForResult || mRecoveringFunds || isCreatingNewPin())
-                && mFingerprintHelper.getIfFingerprintUnlockEnabled()
+                && mFingerprintHelper.isFingerprintUnlockEnabled()
                 && mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE) != null;
     }
 

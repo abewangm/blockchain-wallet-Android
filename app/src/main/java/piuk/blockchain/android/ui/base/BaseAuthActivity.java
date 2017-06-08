@@ -203,10 +203,7 @@ public class BaseAuthActivity extends AppCompatActivity {
                 .setCancelable(false);
 
         if (!forceExit) {
-            builder.setPositiveButton(R.string.retry, (d, id) -> {
-                // Retry
-                mSSLVerifyUtil.validateSSL();
-            });
+            builder.setPositiveButton(R.string.retry, (d, id) -> mSSLVerifyUtil.validateSSL());
         }
 
         builder.setNegativeButton(R.string.exit, (d, id) -> finish());

@@ -344,6 +344,18 @@ public class PayloadDataManager {
     }
 
     /**
+     * Allows you to get an address from any given point on the receive chain.
+     *
+     * @param account  The {@link Account} you wish to generate an address from
+     * @param position What position on the chain the address you wish to create is
+     * @return A bitcoin address
+     */
+    @Nullable
+    public String getReceiveAddressAtArbitraryPosition(Account account, int position) {
+        return payloadManager.getReceiveAddressAtArbitraryPosition(account, position);
+    }
+
+    /**
      * Updates the balance of the address as well as that of the entire wallet. To be called after a
      * successful sweep to ensure that balances are displayed correctly before syncing the wallet.
      *

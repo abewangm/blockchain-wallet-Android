@@ -50,6 +50,8 @@ import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
+import piuk.blockchain.android.ui.fingerprint.FingerprintStage;
+import piuk.blockchain.android.ui.pairing_code.PairingCodeActivity;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -77,6 +79,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     private Preference guidPref;
     private Preference emailPref;
     private Preference smsPref;
+    private Preference webPairPref;
 
     // Preferences
     private Preference unitsPref;
@@ -129,6 +132,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
         smsPref = findPreference("mobile");
         smsPref.setOnPreferenceClickListener(this);
+
+        webPairPref = findPreference("pairing_code");
+        webPairPref.setOnPreferenceClickListener(this);
 
         // Preferences
         unitsPref = findPreference("units");
@@ -386,7 +392,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
     @Override
     public void showFingerprintDialog(String pincode) {
-        FingerprintDialog dialog = FingerprintDialog.newInstance(pincode, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
+        FingerprintDialog dialog = FingerprintDialog.Companion.newInstance(pincode, FingerprintStage.REGISTER_FINGERPRINT);
         dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
             @Override
             public void onAuthenticated(String data) {
@@ -434,6 +440,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 break;
             case "mobile":
                 showDialogMobile();
+                break;
+            case "pairing_code":
+                PairingCodeActivity.start(getContext());
                 break;
             case "verify_mobile":
                 showDialogVerifySms();

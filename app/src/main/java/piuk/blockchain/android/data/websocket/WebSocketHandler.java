@@ -28,6 +28,7 @@ import okhttp3.WebSocketListener;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
+import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -63,6 +64,7 @@ class WebSocketHandler extends WebSocketListener {
     private boolean connected;
     private PayloadDataManager payloadDataManager;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private RxBus rxBus;
 
     public WebSocketHandler(Context context,
                             OkHttpClient okHttpClient,
@@ -72,7 +74,8 @@ class WebSocketHandler extends WebSocketListener {
                             MonetaryUtil monetaryUtil,
                             String guid,
                             String[] xpubs,
-                            String[] addrs) {
+                            String[] addrs,
+                            RxBus rxBus) {
 
         this.context = context;
         this.okHttpClient = okHttpClient;
@@ -83,6 +86,7 @@ class WebSocketHandler extends WebSocketListener {
         this.guid = guid;
         this.xpubs = xpubs;
         this.addrs = addrs;
+        this.rxBus = rxBus;
     }
 
     public void subscribeToXpub(String xpub) {
@@ -282,6 +286,12 @@ class WebSocketHandler extends WebSocketListener {
                         outObj = (JSONObject) outArray.get(j);
                         if (outObj.has("value")) {
                             value = outObj.getLong("value");
+                        }
+                        if (outObj.has("addr") && objX.has("hash")) {
+                            rxBus.emitEvent(WebSocketReceiveEvent.class, new WebSocketReceiveEvent(
+                                    (String) outObj.get("addr"),
+                                    (String) objX.get("hash")
+                            ));
                         }
                         if (outObj.has("xpub")) {
                             totalValue += value;

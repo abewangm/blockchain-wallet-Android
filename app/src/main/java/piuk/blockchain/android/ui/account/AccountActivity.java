@@ -6,6 +6,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -20,12 +21,11 @@ import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.CheckBox;
 
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -38,7 +38,6 @@ import java.util.List;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityAccountsBinding;
-import piuk.blockchain.android.databinding.AlertPromptTransferFundsBinding;
 import piuk.blockchain.android.ui.backup.ConfirmFundsTransferDialogFragment;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -423,43 +422,36 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     @Override
     public void onShowTransferableLegacyFundsWarning(boolean isAutoPopup) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.AlertDialogStyle);
-        AlertPromptTransferFundsBinding dialogBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
-                R.layout.alert_prompt_transfer_funds, null, false);
-        dialogBuilder.setView(dialogBinding.getRoot());
+        CheckBox checkBox = new CheckBox(this);
+        checkBox.setChecked(false);
+        checkBox.setText(R.string.dont_ask_again);
 
-        final AlertDialog alertDialog = dialogBuilder.create();
-        alertDialog.setCanceledOnTouchOutside(false);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.transfer_funds)
+                .setMessage(getString(R.string.transfer_recommend) + "\n")
+                .setPositiveButton(R.string.transfer, (dialog, which) -> {
+                    transferSpendableFunds();
+                    if (checkBox.isChecked()) {
+                        prefsUtil.setValue(KEY_WARN_TRANSFER_ALL, false);
+                    }
+                })
+                .setNegativeButton(R.string.not_now, (dialog, which) -> {
+                    if (checkBox.isChecked()) {
+                        prefsUtil.setValue(KEY_WARN_TRANSFER_ALL, false);
+                    }
+                });
 
-        if (!isAutoPopup) {
-            dialogBinding.confirmDontAskAgain.setVisibility(View.GONE);
+        if (isAutoPopup) {
+            builder.setView(ViewUtils.getAlertDialogPaddedView(this, checkBox));
         }
 
-        dialogBinding.confirmCancel.setOnClickListener(v -> {
-            if (dialogBinding.confirmDontAskAgain.isChecked())
-                prefsUtil.setValue(KEY_WARN_TRANSFER_ALL, false);
-            alertDialog.dismiss();
-        });
-
-        dialogBinding.confirmSend.setOnClickListener(v -> {
-            if (dialogBinding.confirmDontAskAgain.isChecked())
-                prefsUtil.setValue(KEY_WARN_TRANSFER_ALL, false);
-            transferSpendableFunds();
-            alertDialog.dismiss();
-        });
-
+        AlertDialog alertDialog = builder.create();
         if (!isFinishing()) {
             alertDialog.show();
-
-            // This corrects the layout size after view drawn
-            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-            if (alertDialog.getWindow() != null) {
-                lp.copyFrom(alertDialog.getWindow().getAttributes());
-                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                alertDialog.getWindow().setAttributes(lp);
-            }
         }
+
+        Button negative = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        negative.setTextColor(ContextCompat.getColor(this, R.color.primary_gray_dark));
     }
 
     private void transferSpendableFunds() {

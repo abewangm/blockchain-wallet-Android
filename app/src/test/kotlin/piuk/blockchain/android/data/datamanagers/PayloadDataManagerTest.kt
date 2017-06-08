@@ -436,6 +436,23 @@ class PayloadDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
+    fun getReceiveAddressAtArbitraryPosition() {
+        // Arrange
+        val mockAccount: Account = mock()
+        val position = 1337
+        val address = "ADDRESS"
+        whenever(mockPayloadManager.getReceiveAddressAtArbitraryPosition(mockAccount, position))
+                .thenReturn(address)
+        // Act
+        val result = subject.getReceiveAddressAtArbitraryPosition(mockAccount, position)
+        // Assert
+        verify(mockPayloadManager).getReceiveAddressAtArbitraryPosition(mockAccount, position)
+        verifyNoMoreInteractions(mockPayloadManager)
+        result shouldEqual address
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun subtractAmountFromAddressBalance() {
         // Arrange
         val address = "ADDRESS"

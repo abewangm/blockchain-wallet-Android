@@ -1,95 +1,98 @@
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical"
     tools:context="piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveFragment">
 
-    <LinearLayout
+    <!-- MAIN LAYOUT -->
+    <RelativeLayout
+        android:id="@+id/layout_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <!-- MAIN LAYOUT -->
-        <RelativeLayout
-            android:id="@+id/content_layout"
+        <FrameLayout
+            android:id="@+id/qr_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="48dp">
 
-            <FrameLayout
-                android:id="@+id/qr_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginTop="48dp">
-
-                <ProgressBar
-                    android:id="@+id/progressbar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center" />
-
-                <ImageView
-                    android:id="@+id/qr_code"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:adjustViewBounds="true"
-                    android:maxHeight="@dimen/swipe_receive_qr_size"
-                    android:maxWidth="@dimen/swipe_receive_qr_size"
-                    android:paddingLeft="32dp"
-                    android:paddingRight="32dp"
-                    android:visibility="invisible" />
-            </FrameLayout>
-
-            <TextView
-                android:id="@+id/receiving_account"
-                fontPath="fonts/Montserrat-Regular.ttf"
+            <ProgressBar
+                android:id="@+id/progress_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/qr_layout"
-                android:layout_centerHorizontal="true"
-                android:gravity="center"
-                android:padding="16dp"
-                android:textColor="@color/primary_navy_medium"
-                android:textSize="20sp"
-                tools:text="My Bitcoin Wallet" />
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/primary_blue_accent" />
 
-            <EditText
-                android:id="@+id/receiving_address"
-                fontPath="fonts/Montserrat-Regular.ttf"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/receiving_account"
-                android:layout_centerHorizontal="true"
-                android:background="@android:color/transparent"
-                android:gravity="center"
-                android:inputType="none"
-                android:padding="16dp"
-                android:textColor="@color/primary_navy_medium"
-                android:textIsSelectable="true"
-                android:textSize="14sp"
-                tools:text="A bitcoin address" />
-
-        </RelativeLayout>
-
-        <!-- NO AVAILABLE ADDRESSES LAYOUT -->
-
-        <RelativeLayout
-            android:id="@+id/error_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
-
-            <TextView
-                fontPath="fonts/Montserrat-Regular.ttf"
+            <ImageView
+                android:id="@+id/imageview_qr"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:gravity="center"
-                android:padding="16dp"
-                android:text="@string/swipe_receive_no_addresses"
-                android:textAppearance="?android:textAppearanceMedium"
-                android:textColor="@color/primary_navy_medium" />
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:maxHeight="@dimen/swipe_receive_qr_size"
+                android:maxWidth="@dimen/swipe_receive_qr_size"
+                android:minHeight="96dp"
+                android:minWidth="96dp"
+                android:paddingLeft="32dp"
+                android:paddingRight="32dp"
+                android:visibility="invisible" />
+        </FrameLayout>
 
-        </RelativeLayout>
-    </LinearLayout>
-</layout>
+        <TextView
+            android:id="@+id/edittext_account"
+            fontPath="fonts/Montserrat-Regular.ttf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/qr_layout"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:padding="16dp"
+            android:textColor="@color/primary_navy_medium"
+            android:textSize="20sp"
+            tools:ignore="MissingPrefix"
+            tools:text="My Bitcoin Wallet" />
+
+        <EditText
+            android:id="@+id/edittext_address"
+            fontPath="fonts/Montserrat-Regular.ttf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edittext_account"
+            android:layout_centerHorizontal="true"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:inputType="none"
+            android:padding="16dp"
+            android:textColor="@color/primary_navy_medium"
+            android:textIsSelectable="true"
+            android:textSize="14sp"
+            tools:ignore="MissingPrefix"
+            tools:text="A bitcoin address" />
+
+    </RelativeLayout>
+
+    <!-- NO AVAILABLE ADDRESSES LAYOUT -->
+
+    <RelativeLayout
+        android:id="@+id/layout_error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <TextView
+            fontPath="fonts/Montserrat-Regular.ttf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="@string/swipe_receive_no_addresses"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/primary_navy_medium"
+            tools:ignore="MissingPrefix" />
+
+    </RelativeLayout>
+</LinearLayout>

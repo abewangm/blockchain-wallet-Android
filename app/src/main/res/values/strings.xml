@@ -89,9 +89,9 @@
     <!-- Recover Funds -->
     <string name="recover_funds">Recover Funds</string>
     <string name="recover_funds_warning_message">You should always pair or login if you have access to your Wallet ID and password. Recovering your funds will create a new Wallet ID. Would you like to continue?</string>
-    <string name="recover_funds_instructions">Enter your 12 recovery words with spaces to recover your funds &amp; transactions</string>
-    <string name="recovery_passphrase">Recovery passphrase</string>
-    <string name="invalid_recovery_phrase">Invalid recovery phrase. Please try again</string>
+    <string name="recover_funds_instructions">Enter your 12 backup words with spaces to recover your funds &amp; transactions</string>
+    <string name="recovery_passphrase">Backup phrase</string>
+    <string name="invalid_recovery_phrase">Invalid backup phrase. Please try again</string>
     <string name="creating_wallet">Creating wallet</string>
     <string name="restore_failed">Restoring wallet failed. Please try again</string>
 
@@ -346,7 +346,7 @@
     <!-- FUNDS TRANSFER -->
     <string name="transfer">Transfer</string>
     <string name="transfer_funds">Transfer Imported Addresses?</string>
-    <string name="transfer_recommend">Looks like you have some bitcoins in imported addresses. Imported addresses are not backed up by your Recovery Phrase. To secure these funds, we recommend transferring these balances to include in your backup.</string>
+    <string name="transfer_recommend">Looks like you have some bitcoins in imported addresses. Imported addresses are not backed up by your Backup Phrase. To secure these funds, we recommend transferring these balances to include in your backup.</string>
     <string name="spendable_addresses">spendable addresses</string>
     <string name="transfer_confirmed">Transfer Confirmed</string>
     <string name="transfer_confirm">Confirm Transfer</string>
@@ -425,7 +425,7 @@
     <string name="password_hint_summary">Your Blockchain Wallet never communicates your password to our servers. This means we have no idea what your password is and we cannot reset it if you forget it. Create a memorable password hint that we can send to your verified email address in case you forget your password.</string>
     <string name="change_password">Change Password</string>
     <string name="change_password_summary">Your password is never shared with our servers, which means we cannot help reset your password if you forget it. Make sure you backup your funds from the side menu which can restore access to your wallet in the event of a lost password.</string>
-    <string name="verify_email_notice">We have sent your email address a verification link. Click the verification link to verify your email address.</string>
+    <string name="verify_email_notice">We have sent your email address a verification link. Click the link to verify your email address.</string>
     <string name="email_notifications">Email Notifications</string>
     <string name="email_notifications_summary">Get notified when you receive bitcoin.</string>
     <string name="current_password">Current Password</string>
@@ -442,6 +442,14 @@
     <string name="why_has_my_address_changed">Why has my address changed?</string>
     <string name="information">Information</string>
     <string name="learn_more">Learn More</string>
+    <string name="pairing_code_log_in">Log in to Web Wallet</string>
+    <string name="pairing_code_instruction_1">Go to %1$s on your computer.</string>
+    <string name="pairing_code_instruction_2">Select Log in via mobile</string>
+    <string name="pairing_code_instruction_3">Using your computer\'s camera, scan the QR code below.</string>
+    <string name="pairing_code_show_qr">Show QR code</string>
+    <string name="pairing_code_hide_qr">Hide QR code</string>
+    <string name="pairing_code_warning_1">Keep this code hidden until you\'re ready.</string>
+    <string name="pairing_code_warning_2">Keep this code safe!\nDo not share with others.</string>
 
     <!-- SHARE RECEIVE ADDRESS -->
     <string name="email_request_subject">Bitcoin payment request</string>
@@ -508,23 +516,23 @@
     <string name="security_centre_two_fa_message">Prevent unauthorized access to your wallet. Enable 2-Step Verification to increase wallet security.</string>
 
     <!-- BACKUP -->
-    <string name="backup_header">Recovery Phrase</string>
-    <string name="backup_explanation">For your security, Blockchain does not keep any passwords on file. The following 12 word Recovery Phrase will give you access to your funds in case you lose your password. Be sure to write it on a piece of paper and to keep it somewhere safe and secure. </string>
+    <string name="backup_header">Backup Phrase</string>
+    <string name="backup_explanation">For your security, Blockchain does not keep any passwords on file. The following 12 word Backup Phrase will give you access to your funds in case you lose your password. Be sure to write it on a piece of paper and to keep it somewhere safe and secure. </string>
     <string name="backup_button_start">Start backup</string>
     <string name="backup_write_down_words">It is important to make sure you write down your words exactly as they appear here and in this order.</string>
     <string name="backup_header_complete">Backup Complete</string>
-    <string name="backup_complete_message">You can use your Recovery Phrase to restore your funds if you lose your password. Anyone with access to your Recovery Phrase can access your bitcoin so remember to keep it offline somewhere safe and secure.</string>
+    <string name="backup_complete_message">You can use your Backup Phrase to restore your funds if you lose your password. Anyone with access to your Backup Phrase can access your bitcoin so remember to keep it offline somewhere safe and secure.</string>
     <string name="backup_again">Backup again</string>
     <string name="backup_confirmed">Backup confirmed</string>
     <string name="backup_last">Last backup: %1$s</string>
-    <string name="backup_verify_heading">Enter the following words from your Recovery Phrase to complete the backup process.</string>
+    <string name="backup_verify_heading">Enter the following words from your Backup Phrase to complete the backup process.</string>
     <string name="backup_next_word">NEXT WORD</string>
     <string name="backup_previous_word">PREVIOUS WORD</string>
     <string name="backup_word">Word</string>
     <string name="backup_of">of</string>
     <string name="backup_word_mismatch">Word Mismatch</string>
     <string name="backup_done">DONE</string>
-    <string name="backup_lost_mnemonic">Lost your 12 word recovery phrase?</string>
+    <string name="backup_lost_mnemonic">Lost your 12 word backup phrase?</string>
 
     <!-- FINGERPRINT -->
     <string name="fingerprint_prompt">Use your fingerprint for faster, easier access to your wallet.\n\nConfirm fingerprint to continue</string>
@@ -685,6 +693,12 @@
     <string name="onboarding_complete_content">We’ll keep you up-to-date here with recommendations and new features.</string>
     <string name="onboarding_start_over">Start Over</string>
     <string name="onboarding_skip_all">Skip All</string>
+    <string name="trade_complete">Trade Complete</string>
+    <string name="trade_complete_details">Your Buy Bitcoin trade has been completed!</string>
+    <string name="view_details">View details</string>
+    <string name="onboarding_available_now">Available now</string>
+    <string name="onboarding_buy_details">Buy bitcoin directly from your mobile wallet. It\'s simple, seamless, and secure.</string>
+    <string name="onboarding_buy_performance_warning">The buy experience may be a little slow on your device. Thanks in advance for your patience.</string>
 
     <!-- 2FA Pairing -->
     <string name="two_factor_dialog_title">Enter 2FA code</string>

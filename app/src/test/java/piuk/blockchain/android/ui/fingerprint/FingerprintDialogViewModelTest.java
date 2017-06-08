@@ -69,7 +69,7 @@ public class FingerprintDialogViewModelTest {
     public void onViewReadyRegister() throws Exception {
         // Arrange
         Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
+        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.REGISTER_FINGERPRINT.name());
         String pincode = "1234";
         bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
         when(activity.getBundle()).thenReturn(bundle);
@@ -85,7 +85,7 @@ public class FingerprintDialogViewModelTest {
     public void onViewReadyAuthenticate() throws Exception {
         // Arrange
         Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintDialog.Stage.AUTHENTICATE);
+        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.AUTHENTICATE.name());
         String pincode = "1234";
         bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
         when(activity.getBundle()).thenReturn(bundle);
@@ -99,7 +99,7 @@ public class FingerprintDialogViewModelTest {
     @Test
     public void onFailure() throws Exception {
         Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
+        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.REGISTER_FINGERPRINT.name());
         String pincode = "1234";
         bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
         when(activity.getBundle()).thenReturn(bundle);
@@ -120,7 +120,7 @@ public class FingerprintDialogViewModelTest {
     @Test
     public void onHelp() throws Exception {
         Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
+        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.REGISTER_FINGERPRINT.name());
         String pincode = "1234";
         String message = "help";
         bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
@@ -142,7 +142,7 @@ public class FingerprintDialogViewModelTest {
     @Test
     public void onAuthenticated() throws Exception {
         Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
+        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.REGISTER_FINGERPRINT.name());
         String pincode = "1234";
         String data = "";
         bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
@@ -165,7 +165,7 @@ public class FingerprintDialogViewModelTest {
     @Test
     public void onKeyInvalidated() throws Exception {
         Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
+        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.REGISTER_FINGERPRINT.name());
         String pincode = "1234";
         bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
         when(activity.getBundle()).thenReturn(bundle);
@@ -189,7 +189,7 @@ public class FingerprintDialogViewModelTest {
     @Test
     public void onFatalErrorWhilstRegistering() throws Exception {
         Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintDialog.Stage.REGISTER_FINGERPRINT);
+        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.REGISTER_FINGERPRINT.name());
         String pincode = "1234";
         bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
         when(activity.getBundle()).thenReturn(bundle);
@@ -213,7 +213,7 @@ public class FingerprintDialogViewModelTest {
     @Test
     public void onFatalErrorWhilstAuthenticating() throws Exception {
         Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintDialog.Stage.AUTHENTICATE);
+        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.AUTHENTICATE.name());
         String pincode = "1234";
         bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
         when(activity.getBundle()).thenReturn(bundle);

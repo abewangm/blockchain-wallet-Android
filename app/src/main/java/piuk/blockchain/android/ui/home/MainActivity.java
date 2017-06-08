@@ -27,6 +27,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,10 +43,13 @@ import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import java.util.Arrays;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
+import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
 import piuk.blockchain.android.ui.account.AccountActivity;
@@ -55,6 +59,9 @@ import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.buy.BuyActivity;
+import piuk.blockchain.android.ui.buy.FrontendJavascript;
+import piuk.blockchain.android.ui.buy.FrontendJavascriptManager;
+import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment;
@@ -62,9 +69,9 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
-import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
+import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AndroidUtils;
@@ -83,8 +90,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         ReceiveFragment.OnReceiveFragmentInteractionListener,
         ContactPaymentRequestNotesFragment.FragmentInteractionListener,
         ContactPaymentDialog.OnContactPaymentDialogInteractionListener,
-        ConfirmPaymentDialog.OnConfirmDialogInteractionListener{
+        FrontendJavascript<String>,
+        ConfirmPaymentDialog.OnConfirmDialogInteractionListener {
 
+    public static final String TAG = MainActivity.class.getSimpleName();
     public static final String ACTION_SEND = "info.blockchain.wallet.ui.BalanceFragment.SEND";
     public static final String ACTION_RECEIVE = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE";
     public static final String ACTION_BUY = "info.blockchain.wallet.ui.BalanceFragment.BUY";
@@ -117,6 +126,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private Typeface typeface;
     private WebView buyWebView;
     private BalanceFragment balanceFragment;
+    private FrontendJavascriptManager frontendJavascriptManager;
+    private WebViewLoginDetails webViewLoginDetails;
+    private boolean initialized;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -229,12 +241,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         applyFontToNavDrawer();
         if (!BuildConfig.CONTACTS_ENABLED) {
             hideContacts();
-        }
-        if (!BuildConfig.BUY_BITCOIN_ENABLED) {
-            //Hide Buy Bitcoin
-            setBuyBitcoinVisible(false);
-        } else {
-            setupBuyWebView();
         }
     }
 
@@ -717,18 +723,93 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         menu.findItem(R.id.nav_contacts).setVisible(false);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public void setBuyBitcoinVisible(boolean visible) {
+    public boolean isBuySellPermitted() {
+        return BuildConfig.BUY_BITCOIN_ENABLED && AndroidUtils.is19orHigher();
+    }
+
+    @Override
+    public void setBuySellEnabled(boolean enabled) {
+        if (enabled) {
+            setupBuyWebView();
+        }
+        setBuyBitcoinVisible(enabled);
+    }
+
+    @Override
+    public void onTradeCompleted(String txHash) {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(getString(R.string.trade_complete))
+                .setMessage(R.string.trade_complete_details)
+                .setCancelable(false)
+                .setPositiveButton(R.string.ok_cap, null)
+                .setNegativeButton(R.string.view_details, (dialog, whichButton) -> {
+                    Bundle bundle = new Bundle();
+                    bundle.putString(BalanceFragment.KEY_TRANSACTION_HASH, txHash);
+                    TransactionDetailActivity.start(this, bundle);
+                }).show();
+    }
+
+    private void setBuyBitcoinVisible(boolean visible) {
         Menu menu = binding.navigationView.getMenu();
         menu.findItem(R.id.nav_buy).setVisible(visible);
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void setupBuyWebView() {
-        // Setup buy WebView
         // TODO: 17/03/2017 Check if there's a better way to improve loading time of this webview
+        if (AndroidUtils.is21orHigher()) {
+            WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+        }
+        // Setup buy WebView
         buyWebView = new WebView(this);
         buyWebView.getSettings().setJavaScriptEnabled(true);
-        buyWebView.loadUrl("http://localhost:8080/wallet/#/intermediate");
+        buyWebView.loadUrl(viewModel.getCurrentServerUrl() + "wallet/#/intermediate");
+
+        frontendJavascriptManager = new FrontendJavascriptManager(this, buyWebView);
+        buyWebView.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
+    }
+
+    private void checkTradesIfReady() {
+        if (initialized && webViewLoginDetails != null) {
+            frontendJavascriptManager.checkForCompletedTrades(webViewLoginDetails);
+        }
+    }
+
+    public void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails) {
+        Log.d(TAG, "setWebViewLoginDetails: called");
+        this.webViewLoginDetails = webViewLoginDetails;
+        checkTradesIfReady();
+    }
+
+    @Override
+    public void onFrontendInitialized() {
+        Log.d(TAG, "onFrontendInitialized: called");
+        initialized = true;
+        checkTradesIfReady();
+    }
+
+    @Override
+    public void onBuyCompleted() {
+        // No-op
+    }
+
+    @Override
+    public void onCompletedTrade(String txHash) {
+        Observable.just(txHash)
+                .compose(RxUtil.applySchedulersToObservable())
+                .subscribe(this::onTradeCompleted);
+    }
+
+    @Override
+    public void onReceiveValue(String value) {
+        Log.d(TAG, "onReceiveValue: " + value);
+    }
+
+    @Override
+    public void onShowTx(String txHash) {
+        Log.d(TAG, "onShowTx: " + txHash);
     }
 
     private void applyFontToMenuItem(MenuItem menuItem) {

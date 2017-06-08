@@ -27,6 +27,7 @@ public class AccessState {
     private PendingIntent logoutPendingIntent;
     private boolean isLoggedIn = false;
     private boolean inSepaCountry = false;
+    private double buySellRolloutPercent = 0.0D;
 
     public void initAccessState(Context context, PrefsUtil prefs, RxBus rxBus) {
         this.prefs = prefs;
@@ -86,6 +87,17 @@ public class AccessState {
 
     public void setInSepaCountry(boolean inSepaCountry) {
         this.inSepaCountry = inSepaCountry;
+    }
+
+    /**
+     * Returns the current Buy/Sell rollout percent for Android. If 0, Buy/Sell should be disabled.
+     */
+    public double getBuySellRolloutPercent() {
+        return buySellRolloutPercent;
+    }
+
+    public void setBuySellRolloutPercent(double buySellRolloutPercent) {
+        this.buySellRolloutPercent = buySellRolloutPercent;
     }
 
     public boolean isLoggedIn() {

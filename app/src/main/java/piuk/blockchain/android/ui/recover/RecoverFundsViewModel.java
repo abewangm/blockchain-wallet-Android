@@ -11,6 +11,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.PrefsUtil;
 
 import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_EMAIL;
 import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_PASSWORD;
@@ -20,6 +21,7 @@ public class RecoverFundsViewModel extends BaseViewModel {
     private DataListener dataListener;
     @Inject AuthDataManager authDataManager;
     @Inject AppUtil appUtil;
+    @Inject PrefsUtil prefsUtil;
 
     public interface DataListener {
 
@@ -79,7 +81,10 @@ public class RecoverFundsViewModel extends BaseViewModel {
 
         authDataManager.restoreHdWallet(email, password, recoveryPhrase)
                 .doOnSubscribe(ignored -> dataListener.showProgressDialog(R.string.creating_wallet))
-                .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                .doAfterTerminate(() -> {
+                    setOnboardingComplete();
+                    dataListener.dismissProgressDialog();
+                })
                 .subscribe(
                         payload -> dataListener.goToPinEntryPage(),
                         throwable -> dataListener.showToast(R.string.restore_failed, ToastCustom.TYPE_ERROR));
@@ -89,4 +94,7 @@ public class RecoverFundsViewModel extends BaseViewModel {
         return appUtil;
     }
 
+    public void setOnboardingComplete() {
+        prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, true);
+    }
 }

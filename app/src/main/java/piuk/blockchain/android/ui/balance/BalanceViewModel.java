@@ -85,7 +85,6 @@ public class BalanceViewModel extends BaseViewModel {
     @Inject protected RxBus rxBus;
     @Inject protected OnboardingDataManager onboardingDataManager;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
-    @Inject protected PrefsUtil prefs;
     @Inject protected AppUtil appUtil;
 
     public interface DataListener {
@@ -146,6 +145,10 @@ public class BalanceViewModel extends BaseViewModel {
         void startReceiveFragment();
 
         void onExchangeRateUpdated();
+
+        void onShowAnnouncement();
+
+        void onHideAnnouncement();
     }
 
     public BalanceViewModel(DataListener dataListener) {
@@ -175,8 +178,8 @@ public class BalanceViewModel extends BaseViewModel {
                                     if (!getIfNeverPrompt2Fa()) {
                                         compositeDisposable.add(
                                                 settingsDataManager.initSettings(
-                                                        prefs.getValue(PrefsUtil.KEY_GUID, ""),
-                                                        prefs.getValue(PrefsUtil.KEY_SHARED_KEY, ""))
+                                                        prefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
+                                                        prefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""))
                                                         .subscribe(settings -> {
                                                             if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
                                                                 // Show dialog for 2FA, store date of dialog launch
@@ -432,6 +435,7 @@ public class BalanceViewModel extends BaseViewModel {
         }
 
         displayList.addAll(txList);
+        checkLatestAnnouncement(txList);
 
         if (dataListener != null) {
             dataListener.onRefreshBalanceAndTransactions();
@@ -767,7 +771,7 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     private String getFormattedPriceString() {
-        String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
+        String fiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
         double lastPrice = exchangeRateFactory.getLastPrice(fiat);
         String fiatSymbol = exchangeRateFactory.getSymbol(fiat);
         DecimalFormat format = new DecimalFormat();
@@ -778,11 +782,13 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     public boolean isOnboardingComplete() {
-        return prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false);
+        // If wallet isn't newly created, don't show onboarding
+        return prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
+                || !appUtil.isNewlyCreated();
     }
 
-    public void setOnboardingComplete(boolean competed) {
-        prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, competed);
+    public void setOnboardingComplete(boolean completed) {
+        prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, completed);
     }
 
     public void getBitcoinClicked() {
@@ -791,5 +797,25 @@ public class BalanceViewModel extends BaseViewModel {
         } else {
             dataListener.startReceiveFragment();
         }
+    }
+
+    public void checkLatestAnnouncement(List<TransactionSummary> txList) {
+
+        //If user hasn't completed onboarding, ignore announcements
+        if (isOnboardingComplete() && onboardingDataManager.isSepa() && BuildConfig.BUY_BITCOIN_ENABLED) {
+
+            if (!prefsUtil.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, false) && !txList.isEmpty()) {
+                prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, true);
+                dataListener.onShowAnnouncement();
+            } else {
+                dataListener.onHideAnnouncement();
+            }
+        } else {
+            dataListener.onHideAnnouncement();
+        }
+    }
+
+    public void disableAnnouncement() {
+        prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true);
     }
 }
