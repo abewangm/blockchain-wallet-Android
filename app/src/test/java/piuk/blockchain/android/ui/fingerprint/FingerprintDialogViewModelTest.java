@@ -30,8 +30,8 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static piuk.blockchain.android.ui.fingerprint.FingerprintDialogKt.KEY_BUNDLE_PIN_CODE;
-import static piuk.blockchain.android.ui.fingerprint.FingerprintDialogKt.KEY_BUNDLE_STAGE;
+import static piuk.blockchain.android.ui.fingerprint.FingerprintDialog.KEY_BUNDLE_PIN_CODE;
+import static piuk.blockchain.android.ui.fingerprint.FingerprintDialog.KEY_BUNDLE_STAGE;
 
 @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)

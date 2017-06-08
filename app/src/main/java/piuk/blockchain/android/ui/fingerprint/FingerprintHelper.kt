@@ -12,9 +12,11 @@ import piuk.blockchain.android.util.annotations.Mockable
 import java.io.UnsupportedEncodingException
 
 @Mockable
-class FingerprintHelper(private val applicationContext: Context,
-                        private val prefsUtil: PrefsUtil,
-                        private val fingerprintAuth: FingerprintAuth) {
+class FingerprintHelper(
+        private val applicationContext: Context,
+        private val prefsUtil: PrefsUtil,
+        private val fingerprintAuth: FingerprintAuth
+) {
 
     @VisibleForTesting var compositeDisposable: CompositeDisposable = CompositeDisposable()
 

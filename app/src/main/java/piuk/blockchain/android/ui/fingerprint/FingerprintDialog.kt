@@ -17,15 +17,27 @@ import android.view.animation.AnimationUtils
 import kotlinx.android.synthetic.main.dialog_fingerprint.*
 import piuk.blockchain.android.R
 
-const val TAG = "FingerprintDialog"
-const val KEY_BUNDLE_PIN_CODE = "pin_code"
-const val KEY_BUNDLE_STAGE = "stage"
 private const val ERROR_TIMEOUT_MILLIS: Long = 1500
 private const val SUCCESS_DELAY_MILLIS: Long = 600
 private const val FATAL_ERROR_TIMEOUT_MILLIS: Long = 3500
 
 class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.DataListener {
 
+    companion object {
+
+        @JvmField val TAG = "FingerprintDialog"
+        @JvmField val KEY_BUNDLE_PIN_CODE = "pin_code"
+        @JvmField val KEY_BUNDLE_STAGE = "stage"
+
+        fun newInstance(pin: String, stage: FingerprintStage): FingerprintDialog {
+            val fragment = FingerprintDialog()
+            fragment.arguments = Bundle().apply {
+                putString(KEY_BUNDLE_PIN_CODE, pin)
+                putString(KEY_BUNDLE_STAGE, stage.name)
+            }
+            return fragment
+        }
+    }
     private lateinit var viewModel: FingerprintDialogViewModel
     private var authCallback: FingerprintAuthCallback? = null
 
@@ -132,14 +144,6 @@ class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.
         textview_status.postDelayed(resetErrorTextRunnable, timeout)
     }
 
-    interface FingerprintAuthCallback {
-
-        fun onAuthenticated(data: String?)
-
-        fun onCanceled()
-
-    }
-
     private class BackButtonListener constructor(
             private val fingerprintAuthCallback: FingerprintAuthCallback
     ) : DialogInterface.OnKeyListener {
@@ -158,15 +162,12 @@ class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.
         }
     }
 
-    companion object {
-        fun newInstance(pin: String, stage: FingerprintStage): FingerprintDialog {
-            val fragment = FingerprintDialog()
-            fragment.arguments = Bundle().apply {
-                putString(KEY_BUNDLE_PIN_CODE, pin)
-                putString(KEY_BUNDLE_STAGE, stage.name)
-            }
-            return fragment
-        }
+    interface FingerprintAuthCallback {
+
+        fun onAuthenticated(data: String?)
+
+        fun onCanceled()
+
     }
 
 }
