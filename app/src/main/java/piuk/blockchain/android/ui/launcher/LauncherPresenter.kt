@@ -15,15 +15,19 @@ import javax.inject.Inject
 
 class LauncherPresenter : BasePresenter<LauncherView>() {
 
+    init {
+        Injector.getInstance().dataManagerComponent.inject(this)
+    }
+
+    companion object {
+        @JvmField val INTENT_EXTRA_VERIFIED = "verified"
+    }
+
     @Inject lateinit var appUtil: AppUtil
     @Inject lateinit var payloadDataManager: PayloadDataManager
     @Inject lateinit var prefsUtil: PrefsUtil
     @Inject lateinit var accessState: AccessState
     @Inject lateinit var settingsDataManager: SettingsDataManager
-
-    init {
-        Injector.getInstance().dataManagerComponent.inject(this)
-    }
 
     override fun onViewReady() {
         val intent = view.getPageIntent()
@@ -104,10 +108,6 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
                     }, { _ -> view.onStartMainActivity() })
 
         }
-    }
-
-    companion object {
-        val INTENT_EXTRA_VERIFIED = "verified"
     }
 
 }

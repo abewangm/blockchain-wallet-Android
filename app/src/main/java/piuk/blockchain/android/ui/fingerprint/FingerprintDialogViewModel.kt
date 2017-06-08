@@ -8,12 +8,18 @@ import android.support.annotation.VisibleForTesting
 import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseViewModel
+import piuk.blockchain.android.ui.fingerprint.FingerprintDialog.Companion.KEY_BUNDLE_PIN_CODE
+import piuk.blockchain.android.ui.fingerprint.FingerprintDialog.Companion.KEY_BUNDLE_STAGE
 import piuk.blockchain.android.util.PrefsUtil
 import javax.inject.Inject
 
 class FingerprintDialogViewModel internal constructor(
         private val dataListener: FingerprintDialogViewModel.DataListener?
 ) : BaseViewModel(), FingerprintHelper.AuthCallback {
+
+    init {
+        Injector.getInstance().dataManagerComponent.inject(this)
+    }
 
     @VisibleForTesting var currentStage: FingerprintStage? = null
     @VisibleForTesting var pincode: String? = null
@@ -43,10 +49,6 @@ class FingerprintDialogViewModel internal constructor(
 
         fun onCanceled()
 
-    }
-
-    init {
-        Injector.getInstance().dataManagerComponent.inject(this)
     }
 
     override fun onViewReady() {

@@ -15,7 +15,8 @@ import piuk.blockchain.android.data.websocket.WebSocketService
 import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
-import piuk.blockchain.android.util.*
+import piuk.blockchain.android.util.OSUtil
+import piuk.blockchain.android.util.extensions.*
 
 class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePresenter>(), SwipeToReceiveView {
 

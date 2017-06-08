@@ -82,8 +82,8 @@ public class LauncherPresenterTest {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
-        when(extras.getBoolean(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
@@ -112,8 +112,8 @@ public class LauncherPresenterTest {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
-        when(extras.getBoolean(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
@@ -136,8 +136,8 @@ public class LauncherPresenterTest {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
-        when(extras.getBoolean(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
@@ -168,8 +168,8 @@ public class LauncherPresenterTest {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
-        when(extras.getBoolean(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
@@ -201,8 +201,8 @@ public class LauncherPresenterTest {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
-        when(extras.getBoolean(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
@@ -233,8 +233,8 @@ public class LauncherPresenterTest {
         when(intent.getScheme()).thenReturn("bitcoin");
         when(intent.getData()).thenReturn(Uri.parse("bitcoin uri"));
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
-        when(extras.getBoolean(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
@@ -265,7 +265,7 @@ public class LauncherPresenterTest {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(false);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(false);
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
@@ -287,7 +287,7 @@ public class LauncherPresenterTest {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(false);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(false);
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
@@ -317,7 +317,7 @@ public class LauncherPresenterTest {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(false);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(false);
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("");
         // Act
         subject.onViewReady();
@@ -333,7 +333,7 @@ public class LauncherPresenterTest {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(false);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(false);
         when(prefsUtil.getValue(eq(PrefsUtil.KEY_GUID), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.KEY_PIN_IDENTIFIER), anyString())).thenReturn("");
         // Act
@@ -350,7 +350,7 @@ public class LauncherPresenterTest {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(false);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(false);
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(appUtil.isSane()).thenReturn(false);
         // Act
@@ -368,8 +368,8 @@ public class LauncherPresenterTest {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
-        when(extras.getBoolean(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(true);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
+        when(extras.getBoolean(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(true);
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
@@ -390,7 +390,7 @@ public class LauncherPresenterTest {
         // Arrange
         when(launcherActivity.getPageIntent()).thenReturn(intent);
         when(intent.getExtras()).thenReturn(extras);
-        when(extras.containsKey(LauncherPresenter.Companion.getINTENT_EXTRA_VERIFIED())).thenReturn(false);
+        when(extras.containsKey(LauncherPresenter.INTENT_EXTRA_VERIFIED)).thenReturn(false);
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(true);
         // Act

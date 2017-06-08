@@ -10,8 +10,16 @@ import java.math.BigInteger
 import java.util.*
 
 @Mockable
-class SwipeToReceiveHelper(private val payloadDataManager: PayloadDataManager,
-                           private val prefsUtil: PrefsUtil) {
+class SwipeToReceiveHelper(
+        private val payloadDataManager: PayloadDataManager,
+        private val prefsUtil: PrefsUtil
+) {
+
+    companion object {
+        // Allows fields to be accessed statically by Java callers rather than using .Companion.KEY_
+        @JvmField val KEY_SWIPE_RECEIVE_ADDRESSES = "swipe_receive_addresses"
+        @JvmField val KEY_SWIPE_RECEIVE_ACCOUNT_NAME = "swipe_receive_account_name"
+    }
 
     /**
      * Derives 5 addresses from the current point on the receive chain. Stores them alongside the
@@ -90,12 +98,4 @@ class SwipeToReceiveHelper(private val payloadDataManager: PayloadDataManager,
         prefsUtil.setValue(KEY_SWIPE_RECEIVE_ACCOUNT_NAME, accountName)
     }
 
-    companion object {
-        // Allows fields to be accessed statically by Java callers rather than using .Companion.KEY_
-        @JvmField
-        val KEY_SWIPE_RECEIVE_ADDRESSES = "swipe_receive_addresses"
-        @JvmField
-        val KEY_SWIPE_RECEIVE_ACCOUNT_NAME = "swipe_receive_account_name"
-
-    }
 }

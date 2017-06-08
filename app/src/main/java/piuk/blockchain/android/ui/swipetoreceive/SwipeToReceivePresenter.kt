@@ -11,12 +11,14 @@ import javax.inject.Inject
 
 class SwipeToReceivePresenter : BasePresenter<SwipeToReceiveView>() {
 
-    @Inject lateinit var dataManager: QrCodeDataManager
-    @Inject lateinit var swipeToReceiveHelper: SwipeToReceiveHelper
-
     init {
         Injector.getInstance().dataManagerComponent.inject(this)
     }
+
+    private val DIMENSION_QR_CODE = 600
+
+    @Inject lateinit var dataManager: QrCodeDataManager
+    @Inject lateinit var swipeToReceiveHelper: SwipeToReceiveHelper
 
     override fun onViewReady() {
         view.setUiState(UiState.LOADING)
@@ -44,10 +46,6 @@ class SwipeToReceivePresenter : BasePresenter<SwipeToReceiveView>() {
                             },
                             { _ -> view.setUiState(UiState.FAILURE) })
         }
-    }
-
-    companion object {
-        private val DIMENSION_QR_CODE = 600
     }
 
 }
