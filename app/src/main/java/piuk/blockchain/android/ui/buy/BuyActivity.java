@@ -7,6 +7,8 @@ import android.support.annotation.StringRes;
 import android.util.Log;
 import android.webkit.CookieManager;
 
+import com.facebook.device.yearclass.YearClass;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.databinding.ActivityBuyBinding;
@@ -39,7 +41,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         setupToolbar(binding.toolbarContainer.toolbarGeneral, R.string.onboarding_buy_bitcoin);
         viewModel = new BuyViewModel(this);
 
-        showProgressDialog(R.string.please_wait);
+        showProgressDialog();
 
         if (AndroidUtils.is21orHigher()) {
             CookieManager.getInstance().setAcceptThirdPartyCookies(binding.webview, true);
@@ -123,7 +125,16 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         // No-op
     }
 
-    public void showProgressDialog(@StringRes int message) {
+    public void showProgressDialog() {
+
+        int message = R.string.please_wait;
+
+        int year = YearClass.get(this);
+        if (year < 2013) {
+            // Phone too slow, show performance warning
+            message = R.string.onboarding_buy_performance_warning;
+        }
+
         dismissProgressDialog();
         if (!isFinishing()) {
             progress = new MaterialProgressDialog(this);
