@@ -1,6 +1,7 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import io.reactivex.Observable;
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.services.ExchangeService;
 
@@ -34,10 +35,16 @@ public class BuyDataManager {
     }
 
     public Observable<Boolean> getCanBuy() {
+
+        if(BuildConfig.DEBUG) {
+            return Observable.just(true);
+        }
+
         return Observable.combineLatest(
+                onboardingDataManager.isRolloutAllowed(),
                 onboardingDataManager.getIfSepaCountry(),
                 getIsInvited(),
-                (isSepa, isInvited) -> isSepa || isInvited);
+                (allowRollout, isSepa, isInvited) -> allowRollout && (isSepa || isInvited));
     }
 
     private Observable<Boolean> getIsInvited() {

@@ -44,16 +44,35 @@ class OnboardingDataManagerTest: RxTest() {
     }
 
     @Test
-    fun getRolloutPercentage() {
+    fun `allowRollout should return true for guid`() {
         // Arrange
         val rolloutPercentage = 0.5
+        whenever(mockPayloadDataManager.wallet.guid).thenReturn("7279615c-23eb-4a1c-92df-2440acea8e1a")
         whenever(mockAccessState.buySellRolloutPercent).thenReturn(rolloutPercentage)
         // Act
-        val result = subject.rolloutPercentage
+        val testObserver = subject.isRolloutAllowed.test()
         // Assert
         verify(mockAccessState).buySellRolloutPercent
         verifyNoMoreInteractions(mockAccessState)
-        result shouldEqual rolloutPercentage
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(true)
+    }
+
+    @Test
+    fun `allowRollout should return false for guid`() {
+        // Arrange
+        val rolloutPercentage = 0.5
+        whenever(mockPayloadDataManager.wallet.guid).thenReturn("99617f39-0f7d-41ae-8b8f-4f8984a73606")
+        whenever(mockAccessState.buySellRolloutPercent).thenReturn(rolloutPercentage)
+        // Act
+        val testObserver = subject.isRolloutAllowed.test()
+        // Assert
+        verify(mockAccessState).buySellRolloutPercent
+        verifyNoMoreInteractions(mockAccessState)
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(false)
     }
 
     @Test
