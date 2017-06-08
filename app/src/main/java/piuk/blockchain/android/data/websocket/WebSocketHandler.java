@@ -330,9 +330,11 @@ class WebSocketHandler extends WebSocketListener {
                     if (payloadDataManager.getTempPassword() != null) {
                         // Download changed payload
                         //noinspection ThrowableResultOfMethodCallIgnored
-                        downloadChangedPayload().blockingGet();
-                        showToast().subscribeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new IgnorableDefaultObserver<>());
+                        downloadChangedPayload().subscribe(
+                                () -> showToast().subscribeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(new IgnorableDefaultObserver<>()),
+                                throwable -> Log.e(TAG, "attemptParseMessage: ", throwable));
+
                     }
 
                     onChangeHashSet.add(message);
