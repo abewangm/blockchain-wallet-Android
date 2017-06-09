@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import info.blockchain.wallet.api.PersistentUrls;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,6 +24,7 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxBus;
@@ -56,7 +55,7 @@ class WebSocketHandler extends WebSocketListener {
     private String guid;
     private HashSet<String> subHashSet = new HashSet<>();
     private HashSet<String> onChangeHashSet = new HashSet<>();
-    private PersistentUrls persistentUrls;
+    private EnvironmentSettings environmentSettings;
     private MonetaryUtil monetaryUtil;
     private Context context;
     private OkHttpClient okHttpClient;
@@ -70,7 +69,7 @@ class WebSocketHandler extends WebSocketListener {
                             OkHttpClient okHttpClient,
                             PayloadDataManager payloadDataManager,
                             NotificationManager notificationManager,
-                            PersistentUrls persistentUrls,
+                            EnvironmentSettings environmentSettings,
                             MonetaryUtil monetaryUtil,
                             String guid,
                             String[] xpubs,
@@ -81,7 +80,7 @@ class WebSocketHandler extends WebSocketListener {
         this.okHttpClient = okHttpClient;
         this.payloadDataManager = payloadDataManager;
         this.notificationManager = notificationManager;
-        this.persistentUrls = persistentUrls;
+        this.environmentSettings = environmentSettings;
         this.monetaryUtil = monetaryUtil;
         this.guid = guid;
         this.xpubs = xpubs;
@@ -192,7 +191,7 @@ class WebSocketHandler extends WebSocketListener {
 
     private void startWebSocket() {
         Request request = new Request.Builder()
-                .url(persistentUrls.getCurrentWebsocketUrl())
+                .url(environmentSettings.getWebsocketUrl())
                 .addHeader("Origin", "https://blockchain.info")
                 .build();
 

@@ -6,7 +6,6 @@ import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
-import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.payload.data.Account;
@@ -24,6 +23,7 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
@@ -52,7 +52,7 @@ public class AccountViewModel extends BaseViewModel {
     @Inject PrefsUtil prefsUtil;
     @Inject AppUtil appUtil;
     @Inject PrivateKeyFactory privateKeyFactory;
-    @Inject PersistentUrls persistentUrls;
+    @Inject EnvironmentSettings environmentSettings;
     @VisibleForTesting String doubleEncryptionPassword;
 
     AccountViewModel(DataListener dataListener) {
@@ -192,7 +192,7 @@ public class AccountViewModel extends BaseViewModel {
     void importBip38Address(String data, String password) {
         dataListener.showProgressDialog(R.string.please_wait);
         try {
-            BIP38PrivateKey bip38 = new BIP38PrivateKey(persistentUrls.getCurrentNetworkParams(), data);
+            BIP38PrivateKey bip38 = new BIP38PrivateKey(environmentSettings.getNetworkParameters(), data);
             ECKey key = bip38.decrypt(password);
             handlePrivateKey(key, doubleEncryptionPassword);
         } catch (Exception e) {

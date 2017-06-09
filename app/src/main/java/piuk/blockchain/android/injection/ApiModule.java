@@ -22,7 +22,7 @@ import okhttp3.OkHttpClient;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.ApiInterceptor;
 import piuk.blockchain.android.data.api.ConnectionApi;
-import piuk.blockchain.android.data.api.DebugSettings;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
@@ -137,10 +137,10 @@ public class ApiModule {
     protected Retrofit provideRetrofitApiInstance(OkHttpClient okHttpClient,
                                                   JacksonConverterFactory converterFactory,
                                                   RxJava2CallAdapterFactory rxJavaCallFactory,
-                                                  DebugSettings debugSettings) {
+                                                  EnvironmentSettings environmentSettings) {
 
         return new Retrofit.Builder()
-                .baseUrl(debugSettings.getCurrentApiUrl())
+                .baseUrl(environmentSettings.getApiUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .addCallAdapterFactory(rxJavaCallFactory)
@@ -149,13 +149,13 @@ public class ApiModule {
 
     @Provides
     @Singleton
-    @Named("server")
-    protected Retrofit provideRetrofitBlockchainInstance(OkHttpClient okHttpClient,
+    @Named("explorer")
+    protected Retrofit provideRetrofitExplorerInstance(OkHttpClient okHttpClient,
                                                          JacksonConverterFactory converterFactory,
                                                          RxJava2CallAdapterFactory rxJavaCallFactory,
-                                                         DebugSettings debugSettings) {
+                                                         EnvironmentSettings environmentSettings) {
         return new Retrofit.Builder()
-                .baseUrl(debugSettings.getCurrentServerUrl())
+                .baseUrl(environmentSettings.getExplorerUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .addCallAdapterFactory(rxJavaCallFactory)
@@ -168,9 +168,9 @@ public class ApiModule {
     protected Retrofit provideRetrofitSFOXInstance(OkHttpClient okHttpClient,
                                                    JacksonConverterFactory converterFactory,
                                                    RxJava2CallAdapterFactory rxJavaCallFactory,
-                                                   DebugSettings debugSettings) {
+                                                   EnvironmentSettings environmentSettings) {
         return new Retrofit.Builder()
-                .baseUrl(debugSettings.getCurrentSFOXUrl())
+                .baseUrl(environmentSettings.getCurrentSFOXUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .addCallAdapterFactory(rxJavaCallFactory)
@@ -183,9 +183,9 @@ public class ApiModule {
     protected Retrofit provideRetrofitCoinifyInstance(OkHttpClient okHttpClient,
                                                       JacksonConverterFactory converterFactory,
                                                       RxJava2CallAdapterFactory rxJavaCallFactory,
-                                                      DebugSettings debugSettings) {
+                                                      EnvironmentSettings environmentSettings) {
         return new Retrofit.Builder()
-                .baseUrl(debugSettings.getCurrentCoinifyUrl())
+                .baseUrl(environmentSettings.getCurrentCoinifyUrl())
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .addCallAdapterFactory(rxJavaCallFactory)
@@ -194,7 +194,7 @@ public class ApiModule {
 
     @Provides
     @Singleton
-    protected SSLVerifyUtil provideSSlVerifyUtil(@Named("server") Retrofit retrofit,
+    protected SSLVerifyUtil provideSSlVerifyUtil(@Named("explorer") Retrofit retrofit,
                                                  RxBus rxBus) {
 
         return new SSLVerifyUtil(rxBus, new ConnectionApi(retrofit));
