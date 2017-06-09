@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.buy;
 import android.annotation.SuppressLint;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.StringRes;
 import android.util.Log;
 import android.webkit.CookieManager;
 
@@ -113,7 +112,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        finish();
         return true;
     }
 
