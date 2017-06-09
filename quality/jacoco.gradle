@@ -1,7 +1,7 @@
 apply plugin: 'jacoco-android'
 apply plugin: 'com.github.kt3k.coveralls'
 
-task testEnvProdDebugUnitTestCoverage(type: JacocoReport, dependsOn: "testEnvProdDebugUnitTest") {
+task testEnvProdMinApi21DebugUnitTestCoverage(type: JacocoReport, dependsOn: "testEnvProdMinApi21DebugUnitTest") {
     group = "Reporting"
     description = "Generate Jacoco coverage reports on the Debug build."
 
@@ -27,7 +27,7 @@ task testEnvProdDebugUnitTestCoverage(type: JacocoReport, dependsOn: "testEnvPro
             '**/directory**'
     ]
     classDirectories = fileTree(
-            dir: "${project.buildDir}/intermediates/classes/envProd/debug",
+            dir: "${project.buildDir}/intermediates/classes/envProdMinApi21/debug",
             excludes: excludedDirs)
 
     def coverageSourceDirs = [
@@ -35,7 +35,7 @@ task testEnvProdDebugUnitTestCoverage(type: JacocoReport, dependsOn: "testEnvPro
     ]
     additionalSourceDirs = files(coverageSourceDirs)
     sourceDirectories = files(coverageSourceDirs)
-    executionData = files("${project.buildDir}/jacoco/testEnvProdDebugUnitTest.exec")
+    executionData = files("${project.buildDir}/jacoco/testEnvProdMinApi21DebugUnitTest.exec")
     reports {
         xml.enabled = true
         html.enabled = true
@@ -43,9 +43,9 @@ task testEnvProdDebugUnitTestCoverage(type: JacocoReport, dependsOn: "testEnvPro
 }
 
 coveralls {
-    jacocoReportPath = "${buildDir}/reports/jacoco/testEnvProdDebugUnitTestCoverage/testEnvProdDebugUnitTestCoverage.xml"
+    jacocoReportPath = "${buildDir}/reports/jacoco/testEnvProdMinApi21DebugUnitTestCoverage/testEnvProdMinApi21DebugUnitTestCoverage.xml"
 }
 
 tasks.coveralls {
-    dependsOn 'testEnvProdDebugUnitTestCoverage'
+    dependsOn 'testEnvProdMinApi21DebugUnitTestCoverage'
 }

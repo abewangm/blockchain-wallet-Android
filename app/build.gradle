@@ -16,7 +16,6 @@ android {
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 25
-        minSdkVersion 16
         versionCode 256
         versionName "6.5.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -60,14 +59,35 @@ android {
             buildConfigField "boolean", "USE_CRASHLYTICS", "true"
         }
     }
+
+    flavorDimensions "environment", "minSdk"
+
     productFlavors {
+        /**
+         * API LEVELS
+         */
+        minApi16 {
+            dimension "minSdk"
+            minSdkVersion 16
+        }
+        minApi21 {
+            // Specifically to avoid Multidexing on CI, which is causing OOM errors for now
+            // This should be removed when possible
+            dimension "minSdk"
+            minSdkVersion 21
+        }
+        /**
+         * Environments
+         */
         envProd {
+            dimension "environment"
             buildConfigField "String", "EXPLORER_URL", prodExplorer
             buildConfigField "String", "API_URL", prodApiServer
             buildConfigField "String", "WEBSOCKET_URL", prodWebsocketServer
             buildConfigField "String", "ENVIRONMENT", '"env_prod"'
         }
         envDev {
+            dimension "environment"
             buildConfigField "String", "EXPLORER_URL", devExplorer
             buildConfigField "String", "API_URL", devApiServer
             buildConfigField "String", "WEBSOCKET_URL", devWebsocket
@@ -75,6 +95,7 @@ android {
             versionNameSuffix '-dev'
         }
         envStaging {
+            dimension "environment"
             buildConfigField "String", "EXPLORER_URL", stagingExplorer
             buildConfigField "String", "API_URL", stagingApiServer
             buildConfigField "String", "WEBSOCKET_URL", stagingWebsocket
@@ -82,6 +103,7 @@ android {
             versionNameSuffix '-staging'
         }
         envTestnet {
+            dimension "environment"
             buildConfigField "String", "EXPLORER_URL", testnetExplorer
             buildConfigField "String", "API_URL", testnetApiServer
             buildConfigField "String", "WEBSOCKET_URL", testnetWebsocket
@@ -130,7 +152,7 @@ allOpen {
 
 afterEvaluate {
     // Ensure correct JSON file is being used when signing the app
-    assembleEnvProdRelease.dependsOn checkFirebaseConfig
+    assembleEnvProdMinApi16Release.dependsOn checkFirebaseConfig
 }
 
 dependencies {

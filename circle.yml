@@ -36,10 +36,9 @@ test:
     # Decode Firebase API key
     - echo $FIREBASE_API_JSON | base64 --decode > app/google-services.json
   override:
-    - ./gradlew assembleEnvProdDebug testEnvProdDebugUnitTest testEnvProdDebugUnitTestCoverage lintEnvProdRelease coveralls --no-daemon -Dpre-dex=false -Porg.gradle.parallel=false -Pcom.android.build.threadPoolSize=1 --stacktrace
+    - ./gradlew assembleEnvProdMinApi21Debug testEnvProdMinApi21DebugUnitTest testEnvProdMinApi21DebugUnitTestCoverage coveralls --no-daemon -Dpre-dex=false -Porg.gradle.parallel=false -Pcom.android.build.threadPoolSize=1 --stacktrace
   post:
     # Move unit test XML to correct directory
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - mkdir -p $CIRCLE_TEST_REPORTS/lint/
     - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
-    - find . -type f -regex ".*/build/reports/lint-results-prodRelease.html" -exec cp {} $CIRCLE_TEST_REPORTS/lint/ \;
