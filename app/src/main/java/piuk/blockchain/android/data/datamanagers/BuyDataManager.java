@@ -1,7 +1,8 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.api.Environment;
 import io.reactivex.Observable;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.services.ExchangeService;
 
@@ -16,14 +17,17 @@ public class BuyDataManager {
     private SettingsDataManager settingsDataManager;
     private PayloadDataManager payloadDataManager;
     private ExchangeService exchangeService;
+    private EnvironmentSettings environmentSettings;
 
     public BuyDataManager(OnboardingDataManager onboardingDataManager,
                           SettingsDataManager settingsDataManager,
-                          PayloadDataManager payloadDataManager) {
+                          PayloadDataManager payloadDataManager,
+                          EnvironmentSettings environmentSettings) {
         this.onboardingDataManager = onboardingDataManager;
         this.settingsDataManager = settingsDataManager;
         this.payloadDataManager = payloadDataManager;
         exchangeService = ExchangeService.getInstance();
+        this.environmentSettings = environmentSettings;
     }
 
     public Observable<WebViewLoginDetails> getWebViewLoginDetails() {
@@ -36,7 +40,7 @@ public class BuyDataManager {
 
     public synchronized Observable<Boolean> getCanBuy() {
 
-        if (!PersistentUrls.getInstance().getCurrentEnvironment().equals(PersistentUrls.Environment.PRODUCTION)) {
+        if (!environmentSettings.getEnvironment().equals(Environment.PRODUCTION)) {
             return Observable.just(true);
         } else {
             return Observable.combineLatest(

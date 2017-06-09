@@ -812,7 +812,7 @@ public class BalanceViewModel extends BaseViewModel {
             } else {
                 dataListener.startReceiveFragment();
             }
-        }));
+        }, Throwable::printStackTrace));
     }
 
     public void checkLatestAnnouncement(List<TransactionSummary> txList) {
