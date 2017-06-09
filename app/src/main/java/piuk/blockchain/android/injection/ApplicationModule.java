@@ -4,7 +4,6 @@ import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
 
-import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import javax.inject.Singleton;
@@ -79,11 +78,6 @@ public class ApplicationModule {
     @Provides
     protected PrivateKeyFactory privateKeyFactory() {
         return new PrivateKeyFactory();
-    }
-
-    @Provides
-    protected PersistentUrls providePersistentUrls() {
-        return PersistentUrls.getInstance();
     }
 
     @Provides

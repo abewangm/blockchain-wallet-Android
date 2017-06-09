@@ -18,8 +18,6 @@ import info.blockchain.wallet.FrameworkInterface;
 import info.blockchain.wallet.api.Environment;
 
 import org.bitcoinj.params.AbstractBitcoinNetParams;
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.params.TestNet3Params;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
@@ -157,15 +155,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
     @Override
     public AbstractBitcoinNetParams getNetworkParameters() {
-        switch (getEnvironment()) {
-            case TESTNET:
-                return TestNet3Params.get();
-            case PRODUCTION:
-            case DEV:
-            case STAGING:
-            default:
-                return MainNetParams.get();
-        }
+        return environmentSettings.getNetworkParameters();
     }
 
     @Override
