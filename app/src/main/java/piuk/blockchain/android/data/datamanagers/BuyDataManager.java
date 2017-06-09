@@ -1,7 +1,7 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import info.blockchain.wallet.api.PersistentUrls;
 import io.reactivex.Observable;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.services.ExchangeService;
 
@@ -34,17 +34,17 @@ public class BuyDataManager {
         return exchangeService.watchPendingTrades();
     }
 
-    public Observable<Boolean> getCanBuy() {
+    public synchronized Observable<Boolean> getCanBuy() {
 
-        if(BuildConfig.DEBUG) {
+        if (!PersistentUrls.getInstance().getCurrentEnvironment().equals(PersistentUrls.Environment.PRODUCTION)) {
             return Observable.just(true);
+        } else {
+            return Observable.combineLatest(
+                    onboardingDataManager.isRolloutAllowed(),
+                    onboardingDataManager.getIfSepaCountry(),
+                    getIsInvited(),
+                    (allowRollout, isSepa, isInvited) -> allowRollout && (isSepa || isInvited));
         }
-
-        return Observable.combineLatest(
-                onboardingDataManager.isRolloutAllowed(),
-                onboardingDataManager.getIfSepaCountry(),
-                getIsInvited(),
-                (allowRollout, isSepa, isInvited) -> allowRollout && (isSepa || isInvited));
     }
 
     private Observable<Boolean> getIsInvited() {

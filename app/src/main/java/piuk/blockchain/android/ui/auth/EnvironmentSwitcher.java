@@ -112,6 +112,8 @@ class EnvironmentSwitcher {
         prefsUtil.removeValue(PrefsUtil.KEY_SURVEY_VISITS);
         prefsUtil.removeValue(PrefsUtil.KEY_APP_VISITS);
         prefsUtil.removeValue(PrefsUtil.KEY_ONBOARDING_COMPLETE);
+        prefsUtil.removeValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN);
+        prefsUtil.removeValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED);
 
         AppRate.reset(context);
         AccessState.getInstance().setPIN(null);
