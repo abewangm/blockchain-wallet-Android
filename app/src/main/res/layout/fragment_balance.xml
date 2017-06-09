@@ -88,11 +88,13 @@
                     <piuk.blockchain.android.ui.customviews.AnnouncementView
                         android:id="@+id/announcement_view"
                         android:layout_width="match_parent"
+                        android:visibility="gone"
                         android:layout_height="240dp"/>
 
                     <!-- NO TRANSACTION LAYOUT -->
                     <include
                         android:id="@+id/no_transaction_include"
+                        android:visibility="gone"
                         layout="@layout/include_no_transaction_message" />
 
                     <!-- TRANSACTION LAYOUT -->

@@ -29,6 +29,7 @@ public class LogoutActivity extends AppCompatActivity {
                 // TODO: 04/01/2017 This is only supposed to be here until before Jun 30th
                 prefsUtil.setValue(PrefsUtil.KEY_SURVEY_VISITS, 0);
 
+                //When user logs out, assume onboarding has been completed
                 prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, true);
 
                 if (new OSUtil(this).isServiceRunning(WebSocketService.class)) {
