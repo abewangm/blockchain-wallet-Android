@@ -1,7 +1,5 @@
 package piuk.blockchain.android.util;
 
-import android.util.Log;
-
 import info.blockchain.api.data.TickerItem;
 import info.blockchain.api.exchangerates.ExchangeRates;
 import info.blockchain.wallet.BlockchainFramework;
@@ -10,7 +8,6 @@ import info.blockchain.wallet.exceptions.ApiException;
 
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.Set;
 import java.util.TreeMap;
 
 import javax.inject.Inject;
@@ -37,7 +34,7 @@ public class ExchangeRateFactory {
     private ExchangeRateFactory() {
         Injector.getInstance().getAppComponent().inject(this);
         api = new ExchangeRates(
-                BlockchainFramework.getRetrofitServerInstance(),
+                BlockchainFramework.getRetrofitExplorerInstance(),
                 BlockchainFramework.getApiCode());
     }
 

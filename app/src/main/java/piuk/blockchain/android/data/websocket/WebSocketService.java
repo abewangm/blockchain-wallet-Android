@@ -10,13 +10,12 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 
-import info.blockchain.wallet.api.PersistentUrls;
-
 import java.util.List;
 
 import javax.inject.Inject;
 
 import okhttp3.OkHttpClient;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
@@ -33,7 +32,6 @@ public class WebSocketService extends Service {
     @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected NotificationManager notificationManager;
-    @Inject protected PersistentUrls persistentUrls;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
     @Inject protected OkHttpClient okHttpClient;
     @Inject protected RxBus rxBus;
@@ -77,7 +75,7 @@ public class WebSocketService extends Service {
                 okHttpClient,
                 payloadDataManager,
                 notificationManager,
-                persistentUrls,
+                new EnvironmentSettings(),
                 new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
                 prefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
                 xpubs,

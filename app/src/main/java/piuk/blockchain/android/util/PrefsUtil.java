@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 
-import piuk.blockchain.android.data.api.DebugSettings;
-
 public class PrefsUtil implements PersistentPrefs {
 
     private SharedPreferences preferenceManager;
@@ -111,10 +109,4 @@ public class PrefsUtil implements PersistentPrefs {
         setValue(PrefsUtil.LOGGED_OUT, false);
     }
 
-    @Override
-    public void clearPrefsAndKeepEnvironment() {
-        String environment = getValue(DebugSettings.KEY_CURRENT_ENVIRONMENT, "");
-        clear();
-        setValue(DebugSettings.KEY_CURRENT_ENVIRONMENT, environment);
-    }
 }

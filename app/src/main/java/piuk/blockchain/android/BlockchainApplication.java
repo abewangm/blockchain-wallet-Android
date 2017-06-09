@@ -15,6 +15,11 @@ import com.crashlytics.android.Crashlytics;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
+import info.blockchain.wallet.api.Environment;
+
+import org.bitcoinj.params.AbstractBitcoinNetParams;
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.TestNet3Params;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
@@ -25,6 +30,7 @@ import dagger.Lazy;
 import io.fabric.sdk.android.Fabric;
 import io.reactivex.plugins.RxJavaPlugins;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
@@ -49,8 +55,8 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Named("api")
     protected Lazy<Retrofit> retrofitApi;
     @Inject
-    @Named("server")
-    protected Lazy<Retrofit> retrofitServer;
+    @Named("explorer")
+    protected Lazy<Retrofit> retrofitExplorer;
     @Inject
     @Named("sfox")
     protected Lazy<Retrofit> sfoxApi;
@@ -60,6 +66,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected RxBus rxBus;
+    @Inject protected EnvironmentSettings environmentSettings;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -129,8 +136,8 @@ public class BlockchainApplication extends Application implements FrameworkInter
     }
 
     @Override
-    public Retrofit getRetrofitServerInstance() {
-        return retrofitServer.get();
+    public Retrofit getRetrofitExplorerInstance() {
+        return retrofitExplorer.get();
     }
 
     @Override
@@ -141,6 +148,24 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Override
     public Retrofit getRetrofitCoinifyInstance() {
         return coinify.get();
+    }
+
+    @Override
+    public Environment getEnvironment() {
+        return environmentSettings.getEnvironment();
+    }
+
+    @Override
+    public AbstractBitcoinNetParams getNetworkParameters() {
+        switch (getEnvironment()) {
+            case TESTNET:
+                return TestNet3Params.get();
+            case PRODUCTION:
+            case DEV:
+            case STAGING:
+            default:
+                return MainNetParams.get();
+        }
     }
 
     @Override
