@@ -4,7 +4,6 @@ import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
 
-import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import javax.inject.Singleton;
@@ -12,7 +11,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.api.DebugSettings;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.util.AESUtilWrapper;
@@ -21,9 +20,6 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
-/**
- * Created by adambennett on 08/08/2016.
- */
 
 @SuppressWarnings("WeakerAccess")
 @Module
@@ -85,11 +81,6 @@ public class ApplicationModule {
     }
 
     @Provides
-    protected PersistentUrls providePersistentUrls() {
-        return PersistentUrls.getInstance();
-    }
-
-    @Provides
     @Singleton
     protected NotificationManager provideNotificationManager(Context context) {
         return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -103,8 +94,8 @@ public class ApplicationModule {
 
     @Provides
     @Singleton
-    protected DebugSettings provideDebugSettings(PrefsUtil prefsUtil, PersistentUrls persistentUrls) {
-        return new DebugSettings(prefsUtil, persistentUrls);
+    protected EnvironmentSettings provideDebugSettings() {
+        return new EnvironmentSettings();
     }
 
 }

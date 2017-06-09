@@ -4,10 +4,14 @@
  * without it, but will crash if switched to another environment via the debug menu.
  */
 
-// Base Server URL
-ext.devBaseServer = '"Base server dev URL not set"'
-ext.stagingBaseServer = '"Base server staging URL not set"'
-ext.testnetBaseServer = '"Base server TestNet URL not set"'
+ext.prodExplorer = '"https://blockchain.info/"'
+ext.prodApiServer = '"https://api.blockchain.info/"'
+ext.prodWebsocketServer = '"wss://ws.blockchain.info/inv"'
+
+// Explorer URL
+ext.devExplorer = '"Explorer dev URL not set"'
+ext.stagingExplorer = '"Explorer staging URL not set"'
+ext.testnetExplorer = '"Explorer TestNet URL not set"'
 
 // API URL
 ext.devApiServer = '"API dev URL not set"'
@@ -26,9 +30,9 @@ if (propsFile.exists()) {
     def props = new Properties()
     props.load(new FileInputStream(propsFile))
 
-    devBaseServer = new String(props['devBaseServer'])
-    stagingBaseServer = new String(props['stagingBaseServer'])
-    testnetBaseServer = new String(props['testnetBaseServer'])
+    devExplorer = new String(props['devExplorer'])
+    stagingExplorer = new String(props['stagingExplorer'])
+    testnetExplorer = new String(props['testnetExplorer'])
 
     devApiServer = new String(props['devApiServer'])
     stagingApiServer = new String(props['stagingApiServer'])

@@ -22,7 +22,7 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.api.DebugSettings;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
@@ -76,7 +76,7 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected ExchangeRateFactory exchangeRateFactory;
     @Inject protected RxBus rxBus;
     @Inject protected FeeDataManager feeDataManager;
-    @Inject protected DebugSettings debugSettings;
+    @Inject protected EnvironmentSettings environmentSettings;
 
     public interface DataListener {
 
@@ -449,7 +449,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     String getCurrentServerUrl() {
-        return debugSettings.getCurrentServerUrl();
+        return environmentSettings.getExplorerUrl();
     }
 
     private void initializeBuy() {

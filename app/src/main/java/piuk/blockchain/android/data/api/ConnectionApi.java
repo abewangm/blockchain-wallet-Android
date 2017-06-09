@@ -10,7 +10,7 @@ public class ConnectionApi {
 
     private final ConnectionEndpoint connectionEndpoint;
 
-    public ConnectionApi(@Named("server") Retrofit retrofit) {
+    public ConnectionApi(@Named("explorer") Retrofit retrofit) {
         connectionEndpoint = retrofit.create(ConnectionEndpoint.class);
     }
 

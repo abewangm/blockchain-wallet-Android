@@ -49,15 +49,6 @@ public class AppUtil {
         restartApp();
     }
 
-    /**
-     * Only for debugging purposes
-     */
-    public void clearCredentialsAndKeepEnvironment() {
-        payloadManager.wipe();
-        prefs.clearPrefsAndKeepEnvironment();
-        restartApp();
-    }
-
     public void restartApp() {
         Intent intent = new Intent(context, LauncherActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

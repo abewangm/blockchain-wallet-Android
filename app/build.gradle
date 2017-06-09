@@ -21,16 +21,6 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
-        // URLs for Staging, Dev and TestNet Support
-        buildConfigField "String", "DEV_BASE_SERVER", devBaseServer
-        buildConfigField "String", "STAGING_BASE_SERVER", stagingBaseServer
-        buildConfigField "String", "TESTNET_BASE_SERVER", testnetBaseServer
-        buildConfigField "String", "DEV_API_SERVER", devApiServer
-        buildConfigField "String", "STAGING_API_SERVER", stagingApiServer
-        buildConfigField "String", "TESTNET_API_SERVER", testnetApiServer
-        buildConfigField "String", "DEV_WEBSOCKET", devWebsocket
-        buildConfigField "String", "STAGING_WEBSOCKET", stagingWebsocket
-        buildConfigField "String", "TESTNET_WEBSOCKET", testnetWebsocket
 
         // Flag for Buy and Contacts feature
         buildConfigField "boolean", "CONTACTS_ENABLED", "false"
@@ -69,12 +59,57 @@ android {
             buildConfigField "boolean", "USE_CRASHLYTICS", "true"
         }
     }
+
+    flavorDimensions "environment", "minSdk"
+
     productFlavors {
-        // For release and testing on <API21 devices
-        prod.minSdkVersion 16
-        // For everyday work, setting minSdkVersion to 21 bypasses MultiDex, resulting in
-        // much faster builds
-        dev.minSdkVersion 21
+        /**
+         * API LEVELS
+         */
+        minApi16 {
+            dimension "minSdk"
+            minSdkVersion 16
+        }
+        minApi21 {
+            // Specifically to avoid Multidexing on CI, which is causing OOM errors for now
+            // This should be removed when possible
+            dimension "minSdk"
+            minSdkVersion 21
+        }
+        /**
+         * Environments
+         */
+        envProd {
+            dimension "environment"
+            buildConfigField "String", "EXPLORER_URL", prodExplorer
+            buildConfigField "String", "API_URL", prodApiServer
+            buildConfigField "String", "WEBSOCKET_URL", prodWebsocketServer
+            buildConfigField "String", "ENVIRONMENT", '"env_prod"'
+        }
+        envDev {
+            dimension "environment"
+            buildConfigField "String", "EXPLORER_URL", devExplorer
+            buildConfigField "String", "API_URL", devApiServer
+            buildConfigField "String", "WEBSOCKET_URL", devWebsocket
+            buildConfigField "String", "ENVIRONMENT", '"env_dev"'
+            versionNameSuffix '-dev'
+        }
+        envStaging {
+            dimension "environment"
+            buildConfigField "String", "EXPLORER_URL", stagingExplorer
+            buildConfigField "String", "API_URL", stagingApiServer
+            buildConfigField "String", "WEBSOCKET_URL", stagingWebsocket
+            buildConfigField "String", "ENVIRONMENT", '"env_staging"'
+            versionNameSuffix '-staging'
+        }
+        envTestnet {
+            dimension "environment"
+            buildConfigField "String", "EXPLORER_URL", testnetExplorer
+            buildConfigField "String", "API_URL", testnetApiServer
+            buildConfigField "String", "WEBSOCKET_URL", testnetWebsocket
+            buildConfigField "String", "ENVIRONMENT", '"env_testnet"'
+            versionNameSuffix '-testnet'
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -117,7 +152,7 @@ allOpen {
 
 afterEvaluate {
     // Ensure correct JSON file is being used when signing the app
-    assembleProdRelease.dependsOn checkFirebaseConfig
+    assembleEnvProdMinApi16Release.dependsOn checkFirebaseConfig
 }
 
 dependencies {
@@ -171,8 +206,9 @@ dependencies {
     // Custom fonts
     compile 'uk.co.chrisjenx:calligraphy:2.2.0'
     // Logging
-    prodCompile 'org.slf4j:slf4j-nop:1.7.20'
-    devCompile 'org.slf4j:slf4j-simple:1.7.20'
+    releaseCompile 'org.slf4j:slf4j-nop:1.7.20'
+    dogfoodCompile 'org.slf4j:slf4j-nop:1.7.20'
+    debugCompile 'org.slf4j:slf4j-simple:1.7.20'
     // ViewPager Indicator
     compile 'me.relex:circleindicator:1.2.2@aar'
     // Crash reporting

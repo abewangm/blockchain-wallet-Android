@@ -38,7 +38,6 @@ import android.widget.RelativeLayout;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -59,6 +58,7 @@ import java.util.Locale;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentReceiveBinding;
@@ -377,7 +377,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         if (receiveAddress != null) {
             if (!amountBigInt.equals(BigInteger.ZERO)) {
                 uri = BitcoinURI.convertToBitcoinURI(
-                        Address.fromBase58(PersistentUrls.getInstance().getCurrentNetworkParams(), receiveAddress),
+                        Address.fromBase58(new EnvironmentSettings().getNetworkParameters(), receiveAddress),
                         Coin.valueOf(amountBigInt.longValue()), "", "");
             } else {
                 uri = "bitcoin:" + receiveAddress;
