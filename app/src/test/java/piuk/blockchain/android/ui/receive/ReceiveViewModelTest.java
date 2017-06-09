@@ -360,7 +360,7 @@ public class ReceiveViewModelTest {
 
     private class MockApiModule extends ApiModule {
         @Override
-        protected SSLVerifyUtil provideSSlVerifyUtil(@Named("server") Retrofit retrofit,
+        protected SSLVerifyUtil provideSSlVerifyUtil(@Named("explorer") Retrofit retrofit,
                                                      RxBus rxBus) {
             return sslVerifyUtil;
         }

@@ -8,13 +8,11 @@ import android.support.v7.app.AlertDialog;
 import android.view.MotionEvent;
 import android.view.View;
 
-import info.blockchain.wallet.api.PersistentUrls;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.api.DebugSettings;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityLandingBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -46,21 +44,19 @@ public class LandingActivity extends BaseAuthActivity {
                 DataBindingUtil.setContentView(this, R.layout.activity_landing);
         appUtil = new AppUtil(this);
 
-        PrefsUtil prefsUtil = new PrefsUtil(this);
-        DebugSettings debugSettings = new DebugSettings(prefsUtil, PersistentUrls.getInstance());
+        EnvironmentSettings environmentSettings = new EnvironmentSettings();
 
-        if (debugSettings.shouldShowDebugMenu()) {
+        if (environmentSettings.shouldShowDebugMenu()) {
             ToastCustom.makeText(
                     this,
                     "Current environment: "
-                            + debugSettings.getCurrentEnvironment().getName(),
+                            + environmentSettings.getEnvironment().getName(),
                     ToastCustom.LENGTH_SHORT,
                     ToastCustom.TYPE_GENERAL);
 
             binding.buttonSettings.setVisibility(View.VISIBLE);
             binding.buttonSettings.setOnClickListener(view ->
-                    new EnvironmentSwitcher(this, debugSettings, new AppUtil(this), prefsUtil)
-                            .showEnvironmentSelectionDialog());
+                    new EnvironmentSwitcher(this, new PrefsUtil(this)).showDebugMenu());
         }
 
         binding.create.setOnClickListener(view -> startLandingActivity(CREATE_FRAGMENT));

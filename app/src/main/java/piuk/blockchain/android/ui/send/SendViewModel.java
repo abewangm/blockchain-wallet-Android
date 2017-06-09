@@ -5,7 +5,6 @@ import android.support.annotation.StringRes;
 import android.util.Log;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.FeeOptions;
 import info.blockchain.wallet.contacts.data.Contact;
@@ -39,6 +38,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
@@ -104,7 +104,7 @@ public class SendViewModel extends BaseViewModel {
     @Inject PayloadDataManager payloadDataManager;
     @Inject DynamicFeeCache dynamicFeeCache;
     @Inject TransactionListDataManager transactionListDataManager;
-    @Inject PersistentUrls persistentUrls;
+    @Inject EnvironmentSettings environmentSettings;
     @Inject FeeDataManager feeDataManager;
 
     SendViewModel(SendContract.DataListener dataListener, Locale locale) {
@@ -935,7 +935,7 @@ public class SendViewModel extends BaseViewModel {
 
     void spendFromWatchOnlyBIP38(String pw, String scanData) {
         compositeDisposable.add(
-                sendDataManager.getEcKeyFromBip38(pw, scanData, persistentUrls.getCurrentNetworkParams())
+                sendDataManager.getEcKeyFromBip38(pw, scanData, environmentSettings.getNetworkParameters())
                         .subscribe(ecKey -> {
                             LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
                             setTempLegacyAddressPrivateKey(legacyAddress, ecKey);
@@ -961,12 +961,12 @@ public class SendViewModel extends BaseViewModel {
 
     private void setTempLegacyAddressPrivateKey(LegacyAddress legacyAddress, ECKey key) {
         if (key != null && key.hasPrivKey() && legacyAddress.getAddress().equals(key.toAddress(
-                persistentUrls.getCurrentNetworkParams()).toString())) {
+                environmentSettings.getNetworkParameters()).toString())) {
 
             //Create copy, otherwise pass by ref will override private key in wallet payload
             LegacyAddress tempLegacyAddress = new LegacyAddress();
             tempLegacyAddress.setPrivateKeyFromBytes(key.getPrivKeyBytes());
-            tempLegacyAddress.setAddress(key.toAddress(persistentUrls.getCurrentNetworkParams()).toString());
+            tempLegacyAddress.setAddress(key.toAddress(environmentSettings.getNetworkParameters()).toString());
             tempLegacyAddress.setLabel(legacyAddress.getLabel());
             sendModel.pendingTransaction.sendingObject.accountObject = tempLegacyAddress;
 

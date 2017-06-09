@@ -14,8 +14,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import info.blockchain.wallet.api.PersistentUrls;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.databinding.FragmentPairWalletBinding;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
@@ -34,7 +34,7 @@ public class PairWalletFragment extends Fragment implements FragmentCompat.OnReq
         ((PairOrCreateWalletActivity) getActivity()).setupToolbar(
                 ((AppCompatActivity) getActivity()).getSupportActionBar(), R.string.pair_your_wallet);
 
-        binding.pairingFirstStep.setText(getString(R.string.pair_wallet_step_1, PersistentUrls.getInstance().getCurrentBaseServerUrl() + "wallet"));
+        binding.pairingFirstStep.setText(getString(R.string.pair_wallet_step_1, new EnvironmentSettings().getExplorerUrl() + "wallet"));
 
         binding.commandScan.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {

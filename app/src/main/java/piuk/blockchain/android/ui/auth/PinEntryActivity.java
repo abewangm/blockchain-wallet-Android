@@ -11,11 +11,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 
-import info.blockchain.wallet.api.PersistentUrls;
-
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.api.DebugSettings;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.databinding.ActivityPinEntryBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -65,21 +63,20 @@ public class PinEntryActivity extends BaseAuthActivity implements
         binding.viewpager.setAdapter(fragmentPagerAdapter);
         binding.viewpager.addOnPageChangeListener(this);
 
-        PrefsUtil prefsUtil = new PrefsUtil(this);
-        DebugSettings debugSettings = new DebugSettings(prefsUtil, PersistentUrls.getInstance());
+        EnvironmentSettings environmentSettings = new EnvironmentSettings();
 
-        if (debugSettings.shouldShowDebugMenu()) {
+        if (environmentSettings.shouldShowDebugMenu()) {
             ToastCustom.makeText(
                     this,
                     "Current environment: "
-                            + debugSettings.getCurrentEnvironment().getName(),
+                            + environmentSettings.getEnvironment().getName(),
                     ToastCustom.LENGTH_SHORT,
                     ToastCustom.TYPE_GENERAL);
 
             binding.buttonSettings.setVisibility(View.VISIBLE);
             binding.buttonSettings.setOnClickListener(view ->
-                    new EnvironmentSwitcher(this, debugSettings, new AppUtil(this), prefsUtil)
-                            .showEnvironmentSelectionDialog());
+                    new EnvironmentSwitcher(this, new PrefsUtil(this))
+                            .showDebugMenu());
         }
     }
 

@@ -22,6 +22,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -43,6 +44,7 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.home.SecurityPromptDialog;
 import piuk.blockchain.android.ui.home.TransactionSelectedListener;
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerAdapter;
+import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
@@ -189,6 +191,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void onExchangeRateUpdated() {
+        viewModel.addOnboardingPages();
         updateAdapters();
     }
 
@@ -668,26 +671,43 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     }
 
+    @Override
+    public void onLoadOnboardingPages(List<OnboardingPagerContent> pages) {
+        onboardingPagerAdapter.notifyPagesChanged(pages);
+
+        binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.post(() ->
+                binding.noTransactionInclude.progressBar.setVisibility(View.GONE));
+
+        binding.noTransactionInclude.onboardingViewpagerLayout.indicator.setViewPager(
+                binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding);
+    }
+
     private void initOnboardingPager() {
+
         if (onboardingPagerAdapter == null) {
+
             onboardingPagerAdapter = new OnboardingPagerAdapter(getContext());
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setAdapter(onboardingPagerAdapter);
-            notifyLayoutLoaded();
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(
                     new ViewPager.OnPageChangeListener() {
                         @Override
                         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                            if (position == viewModel.getOnboardingPages().size()) {
+
+                            if (position == onboardingPagerAdapter.getCount() - 1) {
+                                //Last page
                                 binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setPagingEnabled(false);
-                                viewModel.setOnboardingComplete(true);
-                            } else if (position == viewModel.getOnboardingPages().size() - 1) {
                                 binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.VISIBLE);
+                                viewModel.setOnboardingComplete(true);
+                            } else if (position == onboardingPagerAdapter.getCount() - 2) {
+                                //Second last page
                                 binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1 - positionOffset);
                                 binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setAlpha(positionOffset);
+                                viewModel.setOnboardingComplete(false);
                             } else {
                                 binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setVisibility(View.VISIBLE);
                                 binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.INVISIBLE);
                                 binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1.0f);
+                                viewModel.setOnboardingComplete(false);
                             }
                         }
 
@@ -701,8 +721,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                             // No-op
                         }
                     });
-        } else {
-            notifyLayoutLoaded();
         }
 
         binding.noTransactionInclude.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(v -> {
@@ -732,14 +750,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1.0f);
             viewModel.setOnboardingComplete(false);
         });
-    }
-
-    private void notifyLayoutLoaded() {
-        onboardingPagerAdapter.notifyPagesChanged(viewModel.getOnboardingPages());
-        binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.post(() ->
-                binding.noTransactionInclude.progressBar.setVisibility(View.GONE));
-        binding.noTransactionInclude.onboardingViewpagerLayout.indicator.setViewPager(
-                binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding);
     }
 
     @Override
