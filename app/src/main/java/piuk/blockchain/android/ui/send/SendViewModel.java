@@ -852,7 +852,7 @@ public class SendViewModel extends BaseViewModel {
         TransactionSummary tx = new TransactionSummary();
         tx.setDirection(Direction.SENT);
         tx.setTime(System.currentTimeMillis() / 1000);
-        tx.setTotal(pendingTransaction.bigIntAmount);
+        tx.setTotal(pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee));
         tx.setHash(hash);
         tx.setFee(pendingTransaction.bigIntFee);
         tx.setInputsMap(inputs);
