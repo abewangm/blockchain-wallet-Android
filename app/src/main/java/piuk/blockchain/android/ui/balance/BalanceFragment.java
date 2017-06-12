@@ -8,11 +8,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -22,7 +20,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,12 +28,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentBalanceBinding;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
+import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter;
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -79,11 +78,13 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     // Accounts list
     @Thunk AppCompatSpinner accountSpinner;
     // Tx list
-    @Thunk BalanceListAdapter transactionAdapter;
+//    @Thunk BalanceListAdapter transactionAdapter;
     private DateUtil dateUtil;
 
     @Thunk FragmentBalanceBinding binding;
     @Thunk BalanceViewModel viewModel;
+
+    private BalanceAdapter balanceAdapter;
 
     public BalanceFragment() {
         // Required empty constructor
@@ -174,8 +175,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         double lastPrice = viewModel.getLastPrice(fiat);
 
-        if (transactionAdapter != null) {
-            transactionAdapter.notifyAdapterDataSetChanged(lastPrice);
+        if (balanceAdapter != null) {
+            // TODO: 12/06/2017 Notify price changed
+            balanceAdapter.notifyDataSetChanged();
         }
 
         if (accountsAdapter != null) {
@@ -333,7 +335,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 updateBalanceAndTransactionList(false);
             }
 
-            transactionAdapter.onViewFormatUpdated(isBTC);
+//            transactionAdapter.onViewFormatUpdated(isBTC);
             viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, balanceDisplayState);
             return false;
         });
@@ -373,43 +375,45 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         double lastPrice = viewModel.getLastPrice(fiatString);
 
-        transactionAdapter = new BalanceListAdapter(
-                viewModel.getContactsTransactionMap(),
-                viewModel.getNotesTransactionMap(),
-                viewModel.getPrefsUtil(),
-                viewModel.getMonetaryUtil(),
-                viewModel.stringUtils,
-                dateUtil,
-                lastPrice,
-                isBTC);
-        transactionAdapter.setTxListClickListener(new BalanceListAdapter.BalanceListClickListener() {
-            @Override
-            public void onTransactionClicked(int correctedPosition, int absolutePosition) {
-                goToTransactionDetail(correctedPosition);
-            }
+//        transactionAdapter = new BalanceListAdapter(
+//                viewModel.getContactsTransactionMap(),
+//                viewModel.getNotesTransactionMap(),
+//                viewModel.getPrefsUtil(),
+//                viewModel.getMonetaryUtil(),
+//                viewModel.stringUtils,
+//                dateUtil,
+//                lastPrice,
+//                isBTC);
+//        transactionAdapter.setTxListClickListener(new BalanceListAdapter.BalanceListClickListener() {
+//            @Override
+//            public void onTransactionClicked(int correctedPosition, int absolutePosition) {
+//                goToTransactionDetail(correctedPosition);
+//            }
+//
+//            @Override
+//            public void onValueClicked(boolean isBtc) {
+//                isBTC = isBtc;
+//                viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
+//                transactionAdapter.onViewFormatUpdated(isBtc);
+//                updateBalanceAndTransactionList(false);
+//            }
+//
+//            @Override
+//            public void onFctxClicked(String fctxId) {
+//                viewModel.onPendingTransactionClicked(fctxId);
+//            }
+//
+//            @Override
+//            public void onFctxLongClicked(String fctxId) {
+//                viewModel.onPendingTransactionLongClicked(fctxId);
+//            }
+//        });
 
-            @Override
-            public void onValueClicked(boolean isBtc) {
-                isBTC = isBtc;
-                viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
-                transactionAdapter.onViewFormatUpdated(isBtc);
-                updateBalanceAndTransactionList(false);
-            }
-
-            @Override
-            public void onFctxClicked(String fctxId) {
-                viewModel.onPendingTransactionClicked(fctxId);
-            }
-
-            @Override
-            public void onFctxLongClicked(String fctxId) {
-                viewModel.onPendingTransactionLongClicked(fctxId);
-            }
-        });
+        balanceAdapter = new BalanceAdapter(Collections.emptyList());
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         binding.rvTransactions.setHasFixedSize(true);
         binding.rvTransactions.setLayoutManager(layoutManager);
-        binding.rvTransactions.setAdapter(transactionAdapter);
+        binding.rvTransactions.setAdapter(balanceAdapter);
         // Disable blinking animations in RecyclerView
         RecyclerView.ItemAnimator animator = binding.rvTransactions.getItemAnimator();
         if (animator instanceof SimpleItemAnimator) {
@@ -479,7 +483,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         // Notify adapter of change, let DiffUtil work out what needs changing
         List<Object> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
-        transactionAdapter.onTransactionsUpdated(newTransactions);
+//        transactionAdapter.onTransactionsUpdated(newTransactions);
+        balanceAdapter.setItems(newTransactions);
 
         //Display help text to user if no transactionList on selected account/address
         handleTransactionsVisibility();
@@ -530,9 +535,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void onRefreshContactList() {
-        transactionAdapter.onContactsMapChanged(
-                viewModel.getContactsTransactionMap(),
-                viewModel.getNotesTransactionMap());
+//        transactionAdapter.onContactsMapChanged(
+//                viewModel.getContactsTransactionMap(),
+//                viewModel.getNotesTransactionMap());
     }
 
     @Override
