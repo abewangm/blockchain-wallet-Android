@@ -48,7 +48,7 @@ class FctxDelegate<in T>(
 
         // Click listener
         holder.itemView.setOnClickListener { listClickListener.onFctxClicked(transaction.id) }
-        //Long click listener
+        // Long click listener
         holder.itemView.setOnLongClickListener {
             consume { listClickListener.onFctxLongClicked(transaction.id) }
         }

@@ -5,8 +5,8 @@ import android.view.ViewGroup
 
 
 /**
- * This delegate provide method to hook in this delegate to [RecyclerView.Adapter] lifecycle.
- * This "hook in" mechanism is provided by [AdapterDelegatesManager].
+ * This delegate provides methods to hook in this delegate to [RecyclerView.Adapter] lifecycle.
+ * This hook is provided by [AdapterDelegatesManager].
  *
  * @param T The type of the data source
  */
@@ -15,8 +15,8 @@ interface AdapterDelegate<in T> {
     /**
      * Determines whether or not this [AdapterDelegate] is responsible for the given data element
      *
-     * @param items The adapter's data source
-     * @param position The current position in the data source
+     * @param items     The adapter's data source
+     * @param position  The current position in the data source
      */
     fun isForViewType(items: T, position: Int): Boolean
 
@@ -32,8 +32,8 @@ interface AdapterDelegate<in T> {
     /**
      * Called to bind the [RecyclerView.ViewHolder] to the item of the data source set
      *
-     * @param items The adapter's data source
-     * @param position The current position in the data source
+     * @param items     The adapter's data source
+     * @param position  The current position in the data source
      *
      * @param holder The [RecyclerView.ViewHolder] to bind
      */

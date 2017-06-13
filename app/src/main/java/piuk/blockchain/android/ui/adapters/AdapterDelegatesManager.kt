@@ -6,6 +6,10 @@ import android.view.ViewGroup
 
 
 /**
+ * This class manages the [AdapterDelegate] objects and delegates functions to the appropriate
+ * delegates for the current object type. Register and remove [AdapterDelegate] objects here, and
+ * call the appropriate functions from your [RecyclerView.Adapter].
+ *
  * @param T The type of the data source
  */
 class AdapterDelegatesManager<T> {

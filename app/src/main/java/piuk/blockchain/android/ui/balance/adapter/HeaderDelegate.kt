@@ -13,9 +13,8 @@ import piuk.blockchain.android.util.extensions.inflate
 
 class HeaderDelegate<in T> : AdapterDelegate<List<T>> {
 
-    override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
-        return HeaderViewHolder(parent.inflate(R.layout.item_accounts_row_header))
-    }
+    override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
+            HeaderViewHolder(parent.inflate(R.layout.item_accounts_row_header))
 
     override fun onBindViewHolder(items: List<T>, position: Int, holder: RecyclerView.ViewHolder, payloads: List<*>) {
         val headerViewHolder = holder as HeaderViewHolder

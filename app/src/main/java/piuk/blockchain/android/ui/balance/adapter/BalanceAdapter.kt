@@ -25,7 +25,7 @@ class BalanceAdapter(
     }
 
     /**
-     * Observes the items list and automatically notify the adapter of changes to the data based
+     * Observes the items list and automatically notifies the adapter of changes to the data based
      * on the comparison we make here, which is a simple equality check.
      */
     override var items: List<Any> by Delegates.observable(emptyList()) {
