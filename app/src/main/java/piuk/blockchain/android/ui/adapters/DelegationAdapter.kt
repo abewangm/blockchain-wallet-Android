@@ -5,7 +5,7 @@ import android.view.ViewGroup
 
 abstract class DelegationAdapter<T>constructor(
         protected var delegatesManager: AdapterDelegatesManager<T> = AdapterDelegatesManager<T>(),
-        var items: T
+        open var items: T
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =

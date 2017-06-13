@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.balance.adapter
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import kotlinx.android.synthetic.main.item_accounts_row_header.view.*
 import piuk.blockchain.android.R
@@ -26,9 +27,10 @@ class HeaderDelegate<in T> : AdapterDelegate<List<T>> {
     private class HeaderViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         internal var header: TextView = itemView.header_name
+        internal var button: ImageView = itemView.imageview_plus
 
         init {
-            header.gone()
+            button.gone()
         }
     }
 }

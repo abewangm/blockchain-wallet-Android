@@ -3,18 +3,28 @@ package piuk.blockchain.android.ui.balance.adapter
 import android.app.Activity
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
 import piuk.blockchain.android.ui.adapters.ListDelegationAdapter
+import piuk.blockchain.android.util.extensions.autoNotify
+import kotlin.properties.Delegates
 
 
 class BalanceAdapter(
         activity: Activity,
-        items: List<Any>,
         btcExchangeRate: Double,
         isBtc: Boolean,
         listClickListener: BalanceListClickListener
-) : ListDelegationAdapter<List<Any>>(AdapterDelegatesManager(), items) {
+) : ListDelegationAdapter<List<Any>>(AdapterDelegatesManager(), emptyList()) {
 
     val summaryDelegate = TransactionSummaryDelegate<Any>(activity, btcExchangeRate, isBtc, listClickListener)
     val fctxDelegate = FctxDelegate<Any>(activity, btcExchangeRate, isBtc, listClickListener)
+
+    /**
+     *  Observe items list and automatically notify the adapter of changes to the data based on the
+     *  comparison we make here, which is a simple equality check.
+     */
+    override var items: List<Any> by Delegates.observable(emptyList()) {
+        _, oldList, newList ->
+        autoNotify(oldList, newList) { o, n -> o == n }
+    }
 
     init {
         delegatesManager.addAdapterDelegate(HeaderDelegate())
@@ -28,11 +38,10 @@ class BalanceAdapter(
         notifyDataSetChanged()
     }
 
-    fun onDataSetUpdated(items: List<Any>) {
-        this.items = items
-        notifyDataSetChanged()
-        // TODO Diff Util
-    }
+    fun onContactsMapChanged(
+            contactsMap: MutableMap<String, String>,
+            notesTransactionMap: MutableMap<String, String>
+    ) = summaryDelegate.onContactsMapChanged(contactsMap, notesTransactionMap)
 
 }
 

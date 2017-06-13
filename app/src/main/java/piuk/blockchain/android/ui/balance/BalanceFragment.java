@@ -29,7 +29,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import piuk.blockchain.android.BuildConfig;
@@ -375,7 +374,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         balanceAdapter = new BalanceAdapter(
                 getActivity(),
-                Collections.emptyList(),
                 lastPrice,
                 isBTC,
                 new BalanceListClickListener() {
@@ -402,8 +400,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                         viewModel.onPendingTransactionLongClicked(fctxId);
                     }
                 });
+        balanceAdapter.setHasStableIds(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        binding.rvTransactions.setHasFixedSize(true);
         binding.rvTransactions.setLayoutManager(layoutManager);
         binding.rvTransactions.setAdapter(balanceAdapter);
         // Disable blinking animations in RecyclerView
@@ -472,16 +470,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void onRefreshBalanceAndTransactions() {
-        // Notify adapter of change, let DiffUtil work out what needs changing
-        List<Object> newTransactions = new ArrayList<>();
-        ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
-        balanceAdapter.onDataSetUpdated(newTransactions);
+        onPendingTxUpdate();
 
         //Display help text to user if no transactionList on selected account/address
         handleTransactionsVisibility();
 
         accountsAdapter.notifyBtcChanged(isBTC);
-        binding.rvTransactions.scrollToPosition(0);
 
         viewModel.storeSwipeReceiveAddresses();
 
@@ -501,6 +495,15 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         }
         binding.rvTransactions.removeItemDecoration(spacerDecoration);
         binding.rvTransactions.addItemDecoration(spacerDecoration);
+    }
+
+    @Override
+    public void onPendingTxUpdate() {
+        // Notify adapter of change, let DiffUtil work out what needs changing
+        List<Object> newTransactions = new ArrayList<>();
+        ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
+        balanceAdapter.setItems(newTransactions);
+        binding.rvTransactions.scrollToPosition(0);
     }
 
     private void handleTransactionsVisibility() {
@@ -526,9 +529,9 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void onRefreshContactList() {
-//        transactionAdapter.onContactsMapChanged(
-//                viewModel.getContactsTransactionMap(),
-//                viewModel.getNotesTransactionMap());
+        balanceAdapter.onContactsMapChanged(
+                viewModel.getContactsTransactionMap(),
+                viewModel.getNotesTransactionMap());
     }
 
     @Override

@@ -34,7 +34,13 @@ class FctxDelegate<in T>(
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
             FctxViewHolder(parent.inflate(R.layout.item_contact_transactions))
 
-    override fun onBindViewHolder(items: List<T>, position: Int, holder: RecyclerView.ViewHolder, payloads: List<*>) {
+    override fun onBindViewHolder(
+            items: List<T>,
+            position: Int,
+            holder: RecyclerView.ViewHolder,
+            payloads: List<*>
+    ) {
+
         val fctxViewHolder = holder as FctxViewHolder
         val model = items[position] as ContactTransactionModel
         val transaction = model.facilitatedTransaction

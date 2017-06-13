@@ -34,17 +34,22 @@ class TransactionSummaryDelegate<in T>(
     val prefsUtil = PrefsUtil(activity)
     val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
     val dateUtil = DateUtil(activity)
-    var contactsTransactionMap = mutableMapOf<String, String>()
+    var contactsMap = mutableMapOf<String, String>()
     var notesTransactionMap = mutableMapOf<String, String>()
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             items[position] is TransactionSummary
 
-    override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
-        return TxViewHolder(parent.inflate(R.layout.item_balance))
-    }
+    override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
+            TxViewHolder(parent.inflate(R.layout.item_balance))
 
-    override fun onBindViewHolder(items: List<T>, position: Int, holder: RecyclerView.ViewHolder, payloads: List<*>) {
+    override fun onBindViewHolder(
+            items: List<T>,
+            position: Int,
+            holder: RecyclerView.ViewHolder,
+            payloads: List<*>
+    ) {
+
         val txViewHolder = holder as TxViewHolder
         val tx = items[position] as TransactionSummary
 
@@ -111,13 +116,21 @@ class TransactionSummaryDelegate<in T>(
         this.isBtc = isBtc
     }
 
+    fun onContactsMapChanged(
+            contactsMap: MutableMap<String, String>,
+            notesTransactionMap: MutableMap<String, String>
+    ) {
+        this.contactsMap = contactsMap
+        this.notesTransactionMap = notesTransactionMap
+    }
+
     private fun displayTransferred(txViewHolder: TxViewHolder) {
         txViewHolder.direction.text = txViewHolder.direction.context.getString(R.string.MOVED)
     }
 
     private fun displayReceived(txViewHolder: TxViewHolder, tx: TransactionSummary) {
-        if (contactsTransactionMap.containsKey(tx.hash)) {
-            val contactName = contactsTransactionMap[tx.hash]
+        if (contactsMap.containsKey(tx.hash)) {
+            val contactName = contactsMap[tx.hash]
             txViewHolder.direction.text = stringUtils.getFormattedString(R.string.contacts_received, contactName)
         } else {
             txViewHolder.direction.text = stringUtils.getString(R.string.RECEIVED)
@@ -125,8 +138,8 @@ class TransactionSummaryDelegate<in T>(
     }
 
     private fun displaySent(txViewHolder: TxViewHolder, tx: TransactionSummary) {
-        if (contactsTransactionMap.containsKey(tx.hash)) {
-            val contactName = contactsTransactionMap[tx.hash]
+        if (contactsMap.containsKey(tx.hash)) {
+            val contactName = contactsMap[tx.hash]
             txViewHolder.direction.text = stringUtils.getFormattedString(R.string.contacts_sent, contactName)
         } else {
             txViewHolder.direction.text = stringUtils.getString(R.string.SENT)

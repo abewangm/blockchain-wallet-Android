@@ -113,6 +113,8 @@ public class BalanceViewModel extends BaseViewModel {
 
         void onRefreshContactList();
 
+        void onPendingTxUpdate();
+
         void showBackupPromptDialog(boolean showNeverAgain);
 
         void show2FaDialog();
@@ -726,9 +728,9 @@ public class BalanceViewModel extends BaseViewModel {
             displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction));
             displayList.addAll(1, transactions);
             displayList.add(transactions.size() + 1, stringUtils.getString(R.string.contacts_transaction_history));
-            dataListener.onRefreshBalanceAndTransactions();
+            dataListener.onPendingTxUpdate();
         } else {
-            dataListener.onRefreshBalanceAndTransactions();
+            dataListener.onPendingTxUpdate();
         }
     }
 
