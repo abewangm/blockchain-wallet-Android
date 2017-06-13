@@ -14,13 +14,15 @@ import kotlinx.android.synthetic.main.item_contact_transactions.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.ContactTransactionModel
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
-import piuk.blockchain.android.util.MonetaryUtil
-import piuk.blockchain.android.util.PrefsUtil
-import piuk.blockchain.android.util.SpanFormatter
-import piuk.blockchain.android.util.StringUtils
+import piuk.blockchain.android.util.*
 import piuk.blockchain.android.util.extensions.inflate
 
-class FctxDelegate<in T>(val activity: Activity) : AdapterDelegate<List<T>> {
+class FctxDelegate<in T>(
+        val activity: Activity,
+        val btcExchangeRate: Double,
+        var isBtc: Boolean,
+        val listClickListener: BalanceListClickListener
+) : AdapterDelegate<List<T>> {
 
     val stringUtils = StringUtils(activity)
     val prefsUtil = PrefsUtil(activity)
@@ -38,20 +40,18 @@ class FctxDelegate<in T>(val activity: Activity) : AdapterDelegate<List<T>> {
         val transaction = model.facilitatedTransaction
         val contactName = model.contactName
 
-//        // Click listener
-//        holder.itemView.setOnClickListener { view -> if (listClickListener != null) listClickListener.onFctxClicked(transaction.getId()) }
-//
-//        holder.itemView.setOnLongClickListener { view ->
-//            if (listClickListener != null) listClickListener.onFctxLongClicked(transaction.getId())
-//            true
-//        }
+        // Click listener
+        holder.itemView.setOnClickListener { listClickListener.onFctxClicked(transaction.id) }
+        //Long click listener
+        holder.itemView.setOnLongClickListener {
+            consume { listClickListener.onFctxLongClicked(transaction.id) }
+        }
 
         fctxViewHolder.indicator.visibility = View.GONE
         fctxViewHolder.title.setTextColor(ContextCompat.getColor(fctxViewHolder.title.context, R.color.black))
 
         val btcBalance = transaction.intendedAmount / 1e8
-        val fiatBalance = 0.5 * btcBalance
-//        val fiatBalance = btcExchangeRate * btcBalance
+        val fiatBalance = btcExchangeRate * btcBalance
 
         val fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         val amountSpannable = getDisplaySpannable(transaction.intendedAmount.toDouble(), fiatBalance, fiatString)
@@ -104,10 +104,13 @@ class FctxDelegate<in T>(val activity: Activity) : AdapterDelegate<List<T>> {
 
     }
 
+    fun onViewFormatUpdated(isBtc: Boolean) {
+        this.isBtc = isBtc
+    }
+
     private fun getDisplaySpannable(btcAmount: Double, fiatAmount: Double, fiatString: String): Spannable {
         val spannable: Spannable
-//        if (isBtc) {
-        if (true) {
+        if (isBtc) {
             spannable = Spannable.Factory.getInstance().newSpannable(
                     monetaryUtil.getDisplayAmountWithFormatting(Math.abs(btcAmount)) + " " + getDisplayUnits())
             spannable.setSpan(
