@@ -409,7 +409,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 //            }
 //        });
 
-        balanceAdapter = new BalanceAdapter(Collections.emptyList());
+        balanceAdapter = new BalanceAdapter(getActivity(), Collections.emptyList());
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         binding.rvTransactions.setHasFixedSize(true);
         binding.rvTransactions.setLayoutManager(layoutManager);

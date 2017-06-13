@@ -9,11 +9,12 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import info.blockchain.wallet.multiaddress.TransactionSummary
+import kotlinx.android.synthetic.main.item_balance.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.util.extensions.inflate
 
-class TransactionSummaryDelegate<T> : AdapterDelegate<List<T>> {
+class TransactionSummaryDelegate<in T> : AdapterDelegate<List<T>> {
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
         return TxViewHolder(parent.inflate(R.layout.item_balance))
@@ -110,13 +111,13 @@ class TransactionSummaryDelegate<T> : AdapterDelegate<List<T>> {
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             items[position] is TransactionSummary
 
-    private class TxViewHolder internal constructor(view: View) : RecyclerView.ViewHolder(view) {
+    private class TxViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        internal var result: TextView = view.findViewById(R.id.result) as TextView
-        internal var timeSince: TextView = view.findViewById(R.id.ts) as TextView
-        internal var direction: TextView = view.findViewById(R.id.direction) as TextView
-        internal var watchOnly: TextView = view.findViewById(R.id.watch_only) as TextView
-        internal var note: TextView = view.findViewById(R.id.note) as TextView
-        internal var doubleSpend: ImageView = view.findViewById(R.id.double_spend_warning) as ImageView
+        internal var result: TextView = itemView.result
+        internal var timeSince: TextView = itemView.ts
+        internal var direction: TextView = itemView.direction
+        internal var watchOnly: TextView = itemView.watch_only
+        internal var note: TextView = itemView.note
+        internal var doubleSpend: ImageView = itemView.double_spend_warning
     }
 }

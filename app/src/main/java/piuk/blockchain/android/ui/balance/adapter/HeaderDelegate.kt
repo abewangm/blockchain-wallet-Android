@@ -23,9 +23,7 @@ class HeaderDelegate<in T> : AdapterDelegate<List<T>> {
 
     override fun isForViewType(items: List<T>, position: Int): Boolean = items[position] is String
 
-    private class HeaderViewHolder internal constructor(
-            itemView: View
-    ) : RecyclerView.ViewHolder(itemView) {
+    private class HeaderViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         internal var header: TextView = itemView.header_name
 
