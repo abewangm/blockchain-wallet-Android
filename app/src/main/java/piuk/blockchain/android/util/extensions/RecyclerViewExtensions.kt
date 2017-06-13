@@ -6,6 +6,10 @@ import android.support.v7.widget.RecyclerView
 /**
  * Allows us to dispatch changes to a [RecyclerView] and have the diff calculated automatically
  * regardless of the item type.
+ *
+ * @param oldList The old list of items
+ * @param newList The new, updated list of items
+ * @param compare A function which returns [Boolean], handling the comparison of the objects
  */
 fun <T> RecyclerView.Adapter<*>.autoNotify(oldList: List<T>, newList: List<T>, compare: (T, T) -> Boolean) {
 

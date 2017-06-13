@@ -158,7 +158,7 @@ public class BalanceViewModel extends BaseViewModel {
         void onLoadOnboardingPages(List<OnboardingPagerContent> pages);
     }
 
-    public BalanceViewModel(DataListener dataListener) {
+    BalanceViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
 
@@ -634,10 +634,6 @@ public class BalanceViewModel extends BaseViewModel {
 
     public List<ItemAccount> getActiveAccountAndAddressList() {
         return activeAccountAndAddressList;
-    }
-
-    public StringUtils getStringUtils() {
-        return stringUtils;
     }
 
     public PayloadManager getPayloadManager() {

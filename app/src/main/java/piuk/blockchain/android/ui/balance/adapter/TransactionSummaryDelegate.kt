@@ -25,7 +25,7 @@ import piuk.blockchain.android.util.extensions.visible
 
 class TransactionSummaryDelegate<in T>(
         val activity: Activity,
-        val btcExchangeRate: Double,
+        var btcExchangeRate: Double,
         var isBtc: Boolean,
         val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<List<T>> {
@@ -34,7 +34,7 @@ class TransactionSummaryDelegate<in T>(
     val prefsUtil = PrefsUtil(activity)
     val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
     val dateUtil = DateUtil(activity)
-    var contactsMap = mutableMapOf<String, String>()
+    var contactsTransactionMap = mutableMapOf<String, String>()
     var notesTransactionMap = mutableMapOf<String, String>()
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
@@ -116,11 +116,15 @@ class TransactionSummaryDelegate<in T>(
         this.isBtc = isBtc
     }
 
-    fun onContactsMapChanged(
-            contactsMap: MutableMap<String, String>,
+    fun onPriceUpdated(btcExchangeRate: Double) {
+        this.btcExchangeRate = btcExchangeRate
+    }
+
+    fun onContactsMapUpdated(
+            contactsTransactionMap: MutableMap<String, String>,
             notesTransactionMap: MutableMap<String, String>
     ) {
-        this.contactsMap = contactsMap
+        this.contactsTransactionMap = contactsTransactionMap
         this.notesTransactionMap = notesTransactionMap
     }
 
@@ -129,8 +133,8 @@ class TransactionSummaryDelegate<in T>(
     }
 
     private fun displayReceived(txViewHolder: TxViewHolder, tx: TransactionSummary) {
-        if (contactsMap.containsKey(tx.hash)) {
-            val contactName = contactsMap[tx.hash]
+        if (contactsTransactionMap.containsKey(tx.hash)) {
+            val contactName = contactsTransactionMap[tx.hash]
             txViewHolder.direction.text = stringUtils.getFormattedString(R.string.contacts_received, contactName)
         } else {
             txViewHolder.direction.text = stringUtils.getString(R.string.RECEIVED)
@@ -138,8 +142,8 @@ class TransactionSummaryDelegate<in T>(
     }
 
     private fun displaySent(txViewHolder: TxViewHolder, tx: TransactionSummary) {
-        if (contactsMap.containsKey(tx.hash)) {
-            val contactName = contactsMap[tx.hash]
+        if (contactsTransactionMap.containsKey(tx.hash)) {
+            val contactName = contactsTransactionMap[tx.hash]
             txViewHolder.direction.text = stringUtils.getFormattedString(R.string.contacts_sent, contactName)
         } else {
             txViewHolder.direction.text = stringUtils.getString(R.string.SENT)

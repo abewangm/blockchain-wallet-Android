@@ -173,8 +173,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         double lastPrice = viewModel.getLastPrice(fiat);
 
         if (balanceAdapter != null) {
-            // TODO: 12/06/2017 Notify price changed
-            balanceAdapter.notifyDataSetChanged();
+            balanceAdapter.onPriceUpdated(lastPrice);
         }
 
         if (accountsAdapter != null) {
@@ -400,6 +399,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                         viewModel.onPendingTransactionLongClicked(fctxId);
                     }
                 });
+
         balanceAdapter.setHasStableIds(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         binding.rvTransactions.setLayoutManager(layoutManager);
@@ -499,6 +499,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void onPendingTxUpdate() {
+        notifyAdapterOfUpdate();
+    }
+
+    private void notifyAdapterOfUpdate() {
         // Notify adapter of change, let DiffUtil work out what needs changing
         List<Object> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());

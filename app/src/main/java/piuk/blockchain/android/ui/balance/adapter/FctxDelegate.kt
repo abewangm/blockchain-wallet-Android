@@ -19,7 +19,7 @@ import piuk.blockchain.android.util.extensions.inflate
 
 class FctxDelegate<in T>(
         val activity: Activity,
-        val btcExchangeRate: Double,
+        var btcExchangeRate: Double,
         var isBtc: Boolean,
         val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<List<T>> {
@@ -111,6 +111,10 @@ class FctxDelegate<in T>(
 
     fun onViewFormatUpdated(isBtc: Boolean) {
         this.isBtc = isBtc
+    }
+
+    fun onPriceUpdated(btcExchangeRate: Double) {
+        this.btcExchangeRate = btcExchangeRate
     }
 
     private fun getDisplaySpannable(btcAmount: Double, fiatAmount: Double, fiatString: String): Spannable {
