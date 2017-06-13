@@ -73,7 +73,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     private BalanceHeaderAdapter accountsAdapter;
     private MaterialProgressDialog progressDialog;
     private BottomSpacerDecoration spacerDecoration;
-    private OnboardingPagerAdapter onboardingPagerAdapter;
+    @Thunk OnboardingPagerAdapter onboardingPagerAdapter;
     @Thunk OnFragmentInteractionListener interactionListener;
     @Thunk boolean isBTC = true;
     // Accounts list
@@ -379,29 +379,29 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 lastPrice,
                 isBTC,
                 new BalanceListClickListener() {
-            @Override
-            public void onTransactionClicked(int correctedPosition, int absolutePosition) {
-                goToTransactionDetail(correctedPosition);
-            }
+                    @Override
+                    public void onTransactionClicked(int correctedPosition, int absolutePosition) {
+                        goToTransactionDetail(correctedPosition);
+                    }
 
-            @Override
-            public void onValueClicked(boolean isBtc) {
-                isBTC = isBtc;
-                viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
-                balanceAdapter.onViewFormatUpdated(isBTC);
-                updateBalanceAndTransactionList(false);
-            }
+                    @Override
+                    public void onValueClicked(boolean isBtc) {
+                        isBTC = isBtc;
+                        viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
+                        balanceAdapter.onViewFormatUpdated(isBTC);
+                        updateBalanceAndTransactionList(false);
+                    }
 
-            @Override
-            public void onFctxClicked(@NonNull String fctxId) {
-                viewModel.onPendingTransactionClicked(fctxId);
-            }
+                    @Override
+                    public void onFctxClicked(@NonNull String fctxId) {
+                        viewModel.onPendingTransactionClicked(fctxId);
+                    }
 
-            @Override
-            public void onFctxLongClicked(@NonNull String fctxId) {
-                viewModel.onPendingTransactionLongClicked(fctxId);
-            }
-        });
+                    @Override
+                    public void onFctxLongClicked(@NonNull String fctxId) {
+                        viewModel.onPendingTransactionLongClicked(fctxId);
+                    }
+                });
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         binding.rvTransactions.setHasFixedSize(true);
         binding.rvTransactions.setLayoutManager(layoutManager);
@@ -475,8 +475,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         // Notify adapter of change, let DiffUtil work out what needs changing
         List<Object> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
-        balanceAdapter.setItems(newTransactions);
-//        balanceAdapter.onTransactionsUpdated(newTransactions);
+        balanceAdapter.onDataSetUpdated(newTransactions);
 
         //Display help text to user if no transactionList on selected account/address
         handleTransactionsVisibility();
@@ -518,7 +517,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             } else {
                 binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
 
-                if(binding.announcementView.getVisibility() != View.VISIBLE) {
+                if (binding.announcementView.getVisibility() != View.VISIBLE) {
                     binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
                 }
             }
@@ -670,19 +669,19 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void onLoadOnboardingPages(List<OnboardingPagerContent> pages) {
-        onboardingPagerAdapter.notifyPagesChanged(pages);
+        if (onboardingPagerAdapter != null) {
+            onboardingPagerAdapter.notifyPagesChanged(pages);
 
-        binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.post(() ->
-                binding.noTransactionInclude.progressBar.setVisibility(View.GONE));
+            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.post(() ->
+                    binding.noTransactionInclude.progressBar.setVisibility(View.GONE));
 
-        binding.noTransactionInclude.onboardingViewpagerLayout.indicator.setViewPager(
-                binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding);
+            binding.noTransactionInclude.onboardingViewpagerLayout.indicator.setViewPager(
+                    binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding);
+        }
     }
 
     private void initOnboardingPager() {
-
         if (onboardingPagerAdapter == null) {
-
             onboardingPagerAdapter = new OnboardingPagerAdapter(getContext());
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setAdapter(onboardingPagerAdapter);
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(
@@ -723,7 +722,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.noTransactionInclude.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(v -> {
             binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
 
-            if(binding.announcementView.getVisibility() != View.VISIBLE) {
+            if (binding.announcementView.getVisibility() != View.VISIBLE) {
                 binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
             }
             viewModel.setOnboardingComplete(true);
@@ -732,7 +731,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.noTransactionInclude.onboardingCompleteLayout.onboardingClose.setOnClickListener(v -> {
             binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
 
-            if(binding.announcementView.getVisibility() != View.VISIBLE) {
+            if (binding.announcementView.getVisibility() != View.VISIBLE) {
                 binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
             }
             viewModel.setOnboardingComplete(true);

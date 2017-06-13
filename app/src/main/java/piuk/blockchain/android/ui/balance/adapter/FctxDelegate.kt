@@ -101,7 +101,6 @@ class FctxDelegate<in T>(
         }
 
         fctxViewHolder.subtitle.text = transaction.note
-
     }
 
     fun onViewFormatUpdated(isBtc: Boolean) {

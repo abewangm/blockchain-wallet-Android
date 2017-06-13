@@ -28,6 +28,12 @@ class BalanceAdapter(
         notifyDataSetChanged()
     }
 
+    fun onDataSetUpdated(items: List<Any>) {
+        this.items = items
+        notifyDataSetChanged()
+        // TODO Diff Util
+    }
+
 }
 
 interface BalanceListClickListener {

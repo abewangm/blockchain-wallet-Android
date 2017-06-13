@@ -37,6 +37,9 @@ class TransactionSummaryDelegate<in T>(
     var contactsTransactionMap = mutableMapOf<String, String>()
     var notesTransactionMap = mutableMapOf<String, String>()
 
+    override fun isForViewType(items: List<T>, position: Int): Boolean =
+            items[position] is TransactionSummary
+
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
         return TxViewHolder(parent.inflate(R.layout.item_balance))
     }
@@ -168,9 +171,6 @@ class TransactionSummaryDelegate<in T>(
         val diff = items.size - items.count { it is TransactionSummary }
         return position - diff
     }
-
-    override fun isForViewType(items: List<T>, position: Int): Boolean =
-            items[position] is TransactionSummary
 
     private class TxViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
