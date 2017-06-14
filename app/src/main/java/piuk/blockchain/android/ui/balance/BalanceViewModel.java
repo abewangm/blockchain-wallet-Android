@@ -803,29 +803,33 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     public void getBitcoinClicked() {
-        compositeDisposable.add(buyDataManager.getCanBuy().subscribe(buyAllowed -> {
-            if (buyAllowed) {
-                dataListener.startBuyActivity();
-            } else {
-                dataListener.startReceiveFragment();
-            }
-        }, Throwable::printStackTrace));
+        compositeDisposable.add(
+                buyDataManager.getCanBuy()
+                        .subscribe(buyAllowed -> {
+                            if (buyAllowed) {
+                                dataListener.startBuyActivity();
+                            } else {
+                                dataListener.startReceiveFragment();
+                            }
+                        }, Throwable::printStackTrace));
     }
 
     public void checkLatestAnnouncement(List<TransactionSummary> txList) {
         //If user hasn't completed onboarding, ignore announcements
-        compositeDisposable.add(buyDataManager.getCanBuy().subscribe(buyAllowed -> {
-            if (isOnboardingComplete() && buyAllowed) {
-                if (!prefsUtil.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, false) && !txList.isEmpty()) {
-                    prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, true);
-                    dataListener.onShowAnnouncement();
-                } else {
-                    dataListener.onHideAnnouncement();
-                }
-            } else {
-                dataListener.onHideAnnouncement();
-            }
-        }));
+        compositeDisposable.add(
+                buyDataManager.getCanBuy()
+                        .subscribe(buyAllowed -> {
+                            if (isOnboardingComplete() && buyAllowed) {
+                                if (!prefsUtil.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, false) && !txList.isEmpty()) {
+                                    prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, true);
+                                    dataListener.onShowAnnouncement();
+                                } else {
+                                    dataListener.onHideAnnouncement();
+                                }
+                            } else {
+                                dataListener.onHideAnnouncement();
+                            }
+                        }));
     }
 
     public void disableAnnouncement() {
