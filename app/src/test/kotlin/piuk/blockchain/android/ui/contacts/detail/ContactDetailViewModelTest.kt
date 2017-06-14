@@ -237,29 +237,6 @@ class ContactDetailViewModelTest {
 
     @Test
     @Throws(Exception::class)
-    fun getMonetaryUtil() {
-        // Arrange
-
-        // Act
-        val result = subject.monetaryUtil
-        // Assert
-        verify(mockPrefsUtil).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        result shouldBeInstanceOf MonetaryUtil::class
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun getStringUtils() {
-        // Arrange
-
-        // Act
-        val result = subject.getStringUtils()
-        // Assert
-        result shouldBeInstanceOf StringUtils::class
-    }
-
-    @Test
-    @Throws(Exception::class)
     fun onDeleteContactClicked() {
         // Arrange
 

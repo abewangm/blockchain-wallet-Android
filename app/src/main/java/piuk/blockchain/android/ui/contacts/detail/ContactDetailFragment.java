@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.contacts.detail;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
@@ -23,10 +24,10 @@ import java.util.List;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentContactDetailBinding;
-import piuk.blockchain.android.ui.balance.BalanceListAdapter;
+import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter;
+import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.util.DateUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
@@ -41,7 +42,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
     private static final String ARGUMENT_CONTACT_ID = "contact_id";
 
     @Thunk ContactDetailViewModel viewModel;
-    @Thunk BalanceListAdapter transactionAdapter;
+    @Thunk BalanceAdapter balanceAdapter;
     private FragmentContactDetailBinding binding;
     private MaterialProgressDialog progressDialog;
     private OnFragmentInteractionListener listener;
@@ -145,14 +146,14 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
 
     @Override
     public void onTransactionsUpdated(List<Object> transactions) {
-        if (transactionAdapter == null) {
+        if (balanceAdapter == null) {
             setUpAdapter();
         }
 
-        transactionAdapter.onContactsMapChanged(
+        balanceAdapter.onContactsMapChanged(
                 viewModel.getContactsTransactionMap(),
                 viewModel.getNotesTransactionMap());
-        transactionAdapter.onTransactionsUpdated(transactions);
+        balanceAdapter.setItems(transactions);
         if (!transactions.isEmpty()) {
             binding.recyclerView.setVisibility(View.VISIBLE);
             binding.layoutNoTransactions.setVisibility(View.GONE);
@@ -170,17 +171,11 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
                 viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
         boolean isBTC = balanceDisplayState != SHOW_FIAT;
 
-        transactionAdapter = new BalanceListAdapter(
-                viewModel.getContactsTransactionMap(),
-                viewModel.getNotesTransactionMap(),
-                viewModel.getPrefsUtil(),
-                viewModel.getMonetaryUtil(),
-                viewModel.getStringUtils(),
-                new DateUtil(getContext()),
+        balanceAdapter = new BalanceAdapter(
+                getActivity(),
                 lastPrice,
-                isBTC);
-
-        transactionAdapter.setTxListClickListener(new BalanceListAdapter.BalanceListClickListener() {
+                isBTC,
+                new BalanceListClickListener() {
             @Override
             public void onTransactionClicked(int correctedPosition, int absolutePosition) {
                 viewModel.onCompletedTransactionClicked(absolutePosition);
@@ -191,21 +186,21 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
                 viewModel.getPrefsUtil().setValue(
                         PrefsUtil.KEY_BALANCE_DISPLAY_STATE,
                         isBtc ? SHOW_BTC : SHOW_FIAT);
-                transactionAdapter.onViewFormatUpdated(isBtc);
+                balanceAdapter.onViewFormatUpdated(isBtc);
             }
 
             @Override
-            public void onFctxClicked(String fctxId) {
+            public void onFctxClicked(@NonNull String fctxId) {
                 viewModel.onTransactionClicked(fctxId);
             }
 
             @Override
-            public void onFctxLongClicked(String fctxId) {
+            public void onFctxLongClicked(@NonNull String fctxId) {
                 viewModel.onTransactionLongClicked(fctxId);
             }
         });
 
-        binding.recyclerView.setAdapter(transactionAdapter);
+        binding.recyclerView.setAdapter(balanceAdapter);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 

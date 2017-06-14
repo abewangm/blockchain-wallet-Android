@@ -34,7 +34,6 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
@@ -116,14 +115,6 @@ public class ContactDetailViewModel extends BaseViewModel {
 
     HashMap<String, String> getNotesTransactionMap() {
         return contactsDataManager.getNotesTransactionMap();
-    }
-
-    MonetaryUtil getMonetaryUtil() {
-        return new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
-    }
-
-    StringUtils getStringUtils() {
-        return stringUtils;
     }
 
     void onDeleteContactClicked() {
