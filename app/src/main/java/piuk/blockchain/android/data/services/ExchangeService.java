@@ -66,6 +66,10 @@ public class ExchangeService {
         return instance;
     }
 
+    public void wipe() {
+        instance = null;
+    }
+
     public Observable<WebViewLoginDetails> getWebViewLoginDetails() {
         return Observable.zip(
                 getExchangeData().flatMap(buyMetadata -> Observable
