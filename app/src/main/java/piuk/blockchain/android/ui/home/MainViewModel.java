@@ -40,6 +40,7 @@ import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
+import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
@@ -237,6 +238,7 @@ public class MainViewModel extends BaseViewModel {
         accessState.unpairWallet();
         appUtil.restartApp();
         accessState.setPIN(null);
+        ExchangeService.getInstance().wipe();
     }
 
     PayloadManager getPayloadManager() {
@@ -453,23 +455,23 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void initializeBuy() {
-
-        compositeDisposable.add(buyDataManager.getCanBuy()
-                .subscribe(isEnabled -> {
-                            dataListener.setBuySellEnabled(isEnabled);
-                            if (isEnabled) {
-                                buyDataManager.watchPendingTrades()
-                                        .compose(RxUtil.applySchedulersToObservable())
-                                        .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace);
-                                buyDataManager.getWebViewLoginDetails()
-                                        .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
-                            }
-                        },
-                        throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
+        compositeDisposable.add(
+                buyDataManager.getCanBuy()
+                        .subscribe(isEnabled -> {
+                                    dataListener.setBuySellEnabled(isEnabled);
+                                    if (isEnabled) {
+                                        buyDataManager.watchPendingTrades()
+                                                .compose(RxUtil.applySchedulersToObservable())
+                                                .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace);
+                                        buyDataManager.getWebViewLoginDetails()
+                                                .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
+                                    }
+                                },
+                                throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
     }
 
     private void dismissAnnouncementIfOnboardingCompleted() {
-        if(prefs.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false) && prefs.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, false)) {
+        if (prefs.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false) && prefs.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, false)) {
             prefs.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true);
         }
     }

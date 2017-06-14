@@ -8,11 +8,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -22,7 +21,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -37,6 +35,8 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentBalanceBinding;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
+import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter;
+import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener;
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -52,7 +52,6 @@ import piuk.blockchain.android.ui.settings.SettingsFragment;
 import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.util.AndroidUtils;
-import piuk.blockchain.android.util.DateUtil;
 import piuk.blockchain.android.util.ListUtil;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -73,17 +72,17 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     private BalanceHeaderAdapter accountsAdapter;
     private MaterialProgressDialog progressDialog;
     private BottomSpacerDecoration spacerDecoration;
-    private OnboardingPagerAdapter onboardingPagerAdapter;
+    @Thunk OnboardingPagerAdapter onboardingPagerAdapter;
     @Thunk OnFragmentInteractionListener interactionListener;
     @Thunk boolean isBTC = true;
     // Accounts list
     @Thunk AppCompatSpinner accountSpinner;
     // Tx list
-    @Thunk BalanceListAdapter transactionAdapter;
-    private DateUtil dateUtil;
 
     @Thunk FragmentBalanceBinding binding;
     @Thunk BalanceViewModel viewModel;
+
+    @Thunk BalanceAdapter balanceAdapter;
 
     public BalanceFragment() {
         // Required empty constructor
@@ -116,7 +115,6 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         setHasOptionsMenu(true);
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_balance, container, false);
         viewModel = new BalanceViewModel(this);
-        dateUtil = new DateUtil(getContext());
 
         balanceDisplayState = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
         isBTC = balanceDisplayState != SHOW_FIAT;
@@ -174,8 +172,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         double lastPrice = viewModel.getLastPrice(fiat);
 
-        if (transactionAdapter != null) {
-            transactionAdapter.notifyAdapterDataSetChanged(lastPrice);
+        if (balanceAdapter != null) {
+            balanceAdapter.onPriceUpdated(lastPrice);
         }
 
         if (accountsAdapter != null) {
@@ -333,7 +331,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 updateBalanceAndTransactionList(false);
             }
 
-            transactionAdapter.onViewFormatUpdated(isBTC);
+            balanceAdapter.onViewFormatUpdated(isBTC);
             viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, balanceDisplayState);
             return false;
         });
@@ -373,43 +371,39 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         double lastPrice = viewModel.getLastPrice(fiatString);
 
-        transactionAdapter = new BalanceListAdapter(
-                viewModel.getContactsTransactionMap(),
-                viewModel.getNotesTransactionMap(),
-                viewModel.getPrefsUtil(),
-                viewModel.getMonetaryUtil(),
-                viewModel.stringUtils,
-                dateUtil,
+        balanceAdapter = new BalanceAdapter(
+                getActivity(),
                 lastPrice,
-                isBTC);
-        transactionAdapter.setTxListClickListener(new BalanceListAdapter.BalanceListClickListener() {
-            @Override
-            public void onTransactionClicked(int correctedPosition, int absolutePosition) {
-                goToTransactionDetail(correctedPosition);
-            }
+                isBTC,
+                new BalanceListClickListener() {
+                    @Override
+                    public void onTransactionClicked(int correctedPosition, int absolutePosition) {
+                        goToTransactionDetail(correctedPosition);
+                    }
 
-            @Override
-            public void onValueClicked(boolean isBtc) {
-                isBTC = isBtc;
-                viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
-                transactionAdapter.onViewFormatUpdated(isBtc);
-                updateBalanceAndTransactionList(false);
-            }
+                    @Override
+                    public void onValueClicked(boolean isBtc) {
+                        isBTC = isBtc;
+                        viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
+                        balanceAdapter.onViewFormatUpdated(isBTC);
+                        updateBalanceAndTransactionList(false);
+                    }
 
-            @Override
-            public void onFctxClicked(String fctxId) {
-                viewModel.onPendingTransactionClicked(fctxId);
-            }
+                    @Override
+                    public void onFctxClicked(@NonNull String fctxId) {
+                        viewModel.onPendingTransactionClicked(fctxId);
+                    }
 
-            @Override
-            public void onFctxLongClicked(String fctxId) {
-                viewModel.onPendingTransactionLongClicked(fctxId);
-            }
-        });
+                    @Override
+                    public void onFctxLongClicked(@NonNull String fctxId) {
+                        viewModel.onPendingTransactionLongClicked(fctxId);
+                    }
+                });
+
+        balanceAdapter.setHasStableIds(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        binding.rvTransactions.setHasFixedSize(true);
         binding.rvTransactions.setLayoutManager(layoutManager);
-        binding.rvTransactions.setAdapter(transactionAdapter);
+        binding.rvTransactions.setAdapter(balanceAdapter);
         // Disable blinking animations in RecyclerView
         RecyclerView.ItemAnimator animator = binding.rvTransactions.getItemAnimator();
         if (animator instanceof SimpleItemAnimator) {
@@ -476,16 +470,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void onRefreshBalanceAndTransactions() {
-        // Notify adapter of change, let DiffUtil work out what needs changing
-        List<Object> newTransactions = new ArrayList<>();
-        ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
-        transactionAdapter.onTransactionsUpdated(newTransactions);
+        onPendingTxUpdate();
 
         //Display help text to user if no transactionList on selected account/address
         handleTransactionsVisibility();
 
         accountsAdapter.notifyBtcChanged(isBTC);
-        binding.rvTransactions.scrollToPosition(0);
 
         viewModel.storeSwipeReceiveAddresses();
 
@@ -507,6 +497,19 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.rvTransactions.addItemDecoration(spacerDecoration);
     }
 
+    @Override
+    public void onPendingTxUpdate() {
+        notifyAdapterOfUpdate();
+    }
+
+    private void notifyAdapterOfUpdate() {
+        // Notify adapter of change, let DiffUtil work out what needs changing
+        List<Object> newTransactions = new ArrayList<>();
+        ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
+        balanceAdapter.setItems(newTransactions);
+        binding.rvTransactions.scrollToPosition(0);
+    }
+
     private void handleTransactionsVisibility() {
         if (!viewModel.getTransactionList().isEmpty()) {
             binding.rvTransactions.setVisibility(View.VISIBLE);
@@ -521,7 +524,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             } else {
                 binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
 
-                if(binding.announcementView.getVisibility() != View.VISIBLE) {
+                if (binding.announcementView.getVisibility() != View.VISIBLE) {
                     binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
                 }
             }
@@ -530,7 +533,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void onRefreshContactList() {
-        transactionAdapter.onContactsMapChanged(
+        balanceAdapter.onContactsMapChanged(
                 viewModel.getContactsTransactionMap(),
                 viewModel.getNotesTransactionMap());
     }
@@ -673,19 +676,19 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void onLoadOnboardingPages(List<OnboardingPagerContent> pages) {
-        onboardingPagerAdapter.notifyPagesChanged(pages);
+        if (onboardingPagerAdapter != null) {
+            onboardingPagerAdapter.notifyPagesChanged(pages);
 
-        binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.post(() ->
-                binding.noTransactionInclude.progressBar.setVisibility(View.GONE));
+            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.post(() ->
+                    binding.noTransactionInclude.progressBar.setVisibility(View.GONE));
 
-        binding.noTransactionInclude.onboardingViewpagerLayout.indicator.setViewPager(
-                binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding);
+            binding.noTransactionInclude.onboardingViewpagerLayout.indicator.setViewPager(
+                    binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding);
+        }
     }
 
     private void initOnboardingPager() {
-
         if (onboardingPagerAdapter == null) {
-
             onboardingPagerAdapter = new OnboardingPagerAdapter(getContext());
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setAdapter(onboardingPagerAdapter);
             binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(
@@ -726,7 +729,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.noTransactionInclude.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(v -> {
             binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
 
-            if(binding.announcementView.getVisibility() != View.VISIBLE) {
+            if (binding.announcementView.getVisibility() != View.VISIBLE) {
                 binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
             }
             viewModel.setOnboardingComplete(true);
@@ -735,7 +738,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         binding.noTransactionInclude.onboardingCompleteLayout.onboardingClose.setOnClickListener(v -> {
             binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
 
-            if(binding.announcementView.getVisibility() != View.VISIBLE) {
+            if (binding.announcementView.getVisibility() != View.VISIBLE) {
                 binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
             }
             viewModel.setOnboardingComplete(true);

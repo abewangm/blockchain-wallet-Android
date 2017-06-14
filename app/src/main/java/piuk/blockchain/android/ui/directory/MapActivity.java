@@ -400,6 +400,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
                             },
                             Throwable::printStackTrace));
         } else {
+            handleMerchantList(lat, lng, doListView);
             setZoomLevel();
         }
     }
