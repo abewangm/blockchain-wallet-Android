@@ -79,10 +79,14 @@ public class ExchangeService {
                         })
                         .compose(RxUtil.applySchedulersToObservable())
                 ),
-                getExchangeData().map(buyMetadata -> {
-                    byte[] magicHash = buyMetadata.getMagicHash();
-                    return magicHash == null ? "" : Hex.toHexString(magicHash);
-                }),
+                getExchangeData().flatMap(buyMetadata -> Observable
+                        .fromCallable(() -> {
+                            buyMetadata.fetchMagic();
+                            byte[] magicHash = buyMetadata.getMagicHash();
+                            return magicHash == null ? "" : Hex.toHexString(magicHash);
+                        })
+                        .compose(RxUtil.applySchedulersToObservable())
+                ),
                 (externalJson, magicHash) -> {
                     String walletJson = payloadManager.getPayload().toJson();
                     String password = payloadManager.getTempPassword();
