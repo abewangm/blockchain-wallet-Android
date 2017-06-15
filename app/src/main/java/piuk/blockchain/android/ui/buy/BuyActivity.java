@@ -57,8 +57,8 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        frontendJavascriptManager.teardown();
         binding.webview.removeJavascriptInterface(FrontendJavascriptManager.JS_INTERFACE_NAME);
+        binding.webview.reload();
 
         if (didBuyBitcoin) {
             viewModel.reloadExchangeDate();
