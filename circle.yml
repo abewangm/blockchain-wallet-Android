@@ -16,16 +16,14 @@ general:
 
 dependencies:
   pre:
-    # Copy license hashes
-    - mkdir -p "$ANDROID_HOME/licenses"
-    - echo -e "\n89b01d42a0b84ec0ddbafaf63ec4d1c4cb22ccfe" > "$ANDROID_HOME/licenses/android-sdk-license"
-    - echo -e "\n965d6e32756485b82a49eae586d67759956085e0" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
+    # Install platform tools including sdkmanager
+    - echo y | android -s update sdk -u -a -t "tools"
     # Android SDK Platform 25
-    - if [ ! -d "/usr/local/android-sdk-linux/platforms/android-25" ]; then echo y | android update sdk --no-ui --all --filter "android-25"; fi
+    - if [ ! -d "/usr/local/android-sdk-linux/platforms/android-25" ]; then echo y | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-25"; fi
     # Android SDK Build-tools, revision 25.0.3
-    - if [ ! -d "/usr/local/android-sdk-linux/build-tools/25.0.3" ]; then echo y | android update sdk --no-ui --all --filter "build-tools-25.0.3"; fi
-    # Google Repository, revision 54 / Local Maven repository for Google Play Services
-    - if [ ! -d "/usr/local/android-sdk-linux/extras/google/m2repository/com/google/android/gms/play-services/11.0.1" ]; then echo y | android update sdk --no-ui --all --filter "extra-google-m2repository"; fi
+    - if [ ! -d "/usr/local/android-sdk-linux/build-tools/25.0.3" ]; then echo y | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;25.0.3"; fi
+    # Google Support Repository, revision 54 / Local Maven repository for Google Play Services
+    - if [ ! -d "/usr/local/android-sdk-linux/extras/google/m2repository/com/google/android/gms/play-services/11.0.1" ]; then echo y | $ANDROID_HOME/tools/bin/sdkmanager "extras;google;m2repository"; fi
     - ANDROID_HOME=/usr/local/android-sdk-linux ./gradlew dependencies
 
   cache_directories:
@@ -33,6 +31,8 @@ dependencies:
     - '~/android'
     - '/usr/local/android-sdk-linux/platforms/android-25'
     - '/usr/local/android-sdk-linux/build-tools/25.0.3'
+    - '/usr/local/android-sdk-linux/extras/m2repository'
+    - '/usr/local/android-sdk-linux/extras/android/m2repository'
     - '/usr/local/android-sdk-linux/extras/google/m2repository'
 
 test:
