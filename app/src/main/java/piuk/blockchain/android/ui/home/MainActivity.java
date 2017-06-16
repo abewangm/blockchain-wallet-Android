@@ -387,7 +387,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @Thunk
     Intent putWebViewState(Intent intent) {
         Bundle state = new Bundle();
-        buyWebView.saveState(state);
+        if (buyWebView != null) {
+            buyWebView.saveState(state);
+        }
         return intent.putExtra(WEB_VIEW_STATE_KEY, state);
     }
 
