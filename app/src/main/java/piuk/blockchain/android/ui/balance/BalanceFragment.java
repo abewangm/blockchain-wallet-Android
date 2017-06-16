@@ -412,7 +412,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         // drawerTitle account now that wallet has been created
         if (!viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, "").isEmpty()) {
-            viewModel.getPayloadManager().getPayload().getHdWallets().get(0).getAccounts().get(0).setLabel(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, ""));
+            viewModel.getAccounts().get(0).setLabel(viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, ""));
             viewModel.getPrefsUtil().removeValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME);
             viewModel.getPayloadDataManager().syncPayloadWithServer()
                     .subscribe(() -> {

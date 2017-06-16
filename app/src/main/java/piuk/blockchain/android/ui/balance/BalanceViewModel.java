@@ -11,7 +11,6 @@ import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
@@ -76,7 +75,6 @@ public class BalanceViewModel extends BaseViewModel {
     private HashBiMap<Object, Integer> activeAccountAndAddressBiMap;
     private List<Object> displayList;
     @Inject protected PrefsUtil prefsUtil;
-    @Inject protected PayloadManager payloadManager;
     @Inject protected StringUtils stringUtils;
     @Inject protected TransactionListDataManager transactionListDataManager;
     @Inject protected ContactsDataManager contactsDataManager;
@@ -205,7 +203,7 @@ public class BalanceViewModel extends BaseViewModel {
                         txListObservable
                                 .compose(RxUtil.applySchedulersToObservable())
                                 .subscribe(txs -> {
-                                    if (hasTransactions() && !isBackedUp() && !getIfNeverPromptBackup()) {
+                                    if (hasTransactions() && !payloadDataManager.isBackedUp() && !getIfNeverPromptBackup()) {
                                         // Show dialog and store date of dialog launch
                                         if (getTimeOfLastSecurityPrompt() == 0) {
                                             dataListener.showBackupPromptDialog(false);
@@ -275,11 +273,11 @@ public class BalanceViewModel extends BaseViewModel {
 
         //All accounts/addresses
         List<Account> allAccounts;
-        List<LegacyAddress> allLegacyAddresses = payloadManager.getPayload().getLegacyAddressList();
+        List<LegacyAddress> allLegacyAddresses = payloadDataManager.getLegacyAddresses();
 
         //Only active accounts/addresses (exclude archived)
         List<Account> activeAccounts = new ArrayList<>();
-        allAccounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();//V3
+        allAccounts = payloadDataManager.getAccounts();//V3
 
         for (Account item : allAccounts) {
             if (!item.isArchived()) {
@@ -301,7 +299,7 @@ public class BalanceViewModel extends BaseViewModel {
             all.setLabel(stringUtils.getString(R.string.all_accounts));
             all.setType(Type.ALL_ACCOUNTS);
 
-            BigInteger bal = payloadManager.getWalletBalance();
+            BigInteger bal = payloadDataManager.getWalletBalance();
             String balance = getBalanceString(true, bal.longValue());
             activeAccountAndAddressList.add(new ItemAccount(
                     all.getLabel(),
@@ -342,7 +340,7 @@ public class BalanceViewModel extends BaseViewModel {
             importedAddresses.setLabel(stringUtils.getString(R.string.imported_addresses));
             importedAddresses.setType(Type.ALL_IMPORTED_ADDRESSES);
 
-            BigInteger bal = payloadManager.getImportedAddressesBalance();
+            BigInteger bal = payloadDataManager.getImportedAddressesBalance();
             String balance = getBalanceString(true, bal.longValue());
 
             activeAccountAndAddressList.add(new ItemAccount(
@@ -502,7 +500,7 @@ public class BalanceViewModel extends BaseViewModel {
 
                                     List<String> accountNames = new ArrayList<>();
                                     //noinspection Convert2streamapi
-                                    for (Account account : payloadManager.getPayload().getHdWallets().get(0).getAccounts()) {
+                                    for (Account account : payloadDataManager.getAccounts()) {
                                         if (!account.isArchived()) {
                                             accountNames.add(account.getLabel());
                                         }
@@ -636,8 +634,8 @@ public class BalanceViewModel extends BaseViewModel {
         return activeAccountAndAddressList;
     }
 
-    public PayloadManager getPayloadManager() {
-        return payloadManager;
+    public List<Account> getAccounts() {
+        return payloadDataManager.getAccounts();
     }
 
     public MonetaryUtil getMonetaryUtil() {
@@ -646,12 +644,6 @@ public class BalanceViewModel extends BaseViewModel {
 
     public PrefsUtil getPrefsUtil() {
         return prefsUtil;
-    }
-
-    private boolean isBackedUp() {
-        return payloadManager.getPayload() != null
-                && payloadManager.getPayload().getHdWallets() != null
-                && payloadManager.getPayload().getHdWallets().get(0).isMnemonicVerified();
     }
 
     private boolean hasTransactions() {
@@ -677,7 +669,7 @@ public class BalanceViewModel extends BaseViewModel {
     private int getCorrectedAccountIndex(int accountIndex) {
         // Filter accounts by active
         List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = payloadManager.getPayload().getHdWallets().get(0).getAccounts();
+        List<Account> accounts = payloadDataManager.getAccounts();
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
             if (!account.isArchived()) {
@@ -686,7 +678,7 @@ public class BalanceViewModel extends BaseViewModel {
         }
 
         // Find corrected position
-        return payloadManager.getPayload().getHdWallets().get(0).getAccounts().indexOf(activeAccounts.get(accountIndex));
+        return payloadDataManager.getAccounts().indexOf(activeAccounts.get(accountIndex));
     }
 
     private int getNumberOfFctxRequiringAttention(List<ContactTransactionModel> facilitatedTransactions) {
