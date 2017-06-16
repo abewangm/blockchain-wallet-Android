@@ -19,8 +19,10 @@ import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
+import piuk.blockchain.android.data.settings.SettingsDataManager
+import piuk.blockchain.android.data.settings.SettingsService
+import piuk.blockchain.android.data.settings.datastore.SettingsDataStore
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper
 import piuk.blockchain.android.ui.onboarding.OnboardingActivity.EXTRAS_EMAIL_ONLY
@@ -244,11 +246,18 @@ class OnboardingViewModelTest {
             return mockFingerprintHelper
         }
 
-        override fun provideSettingsDataManager(rxBus: RxBus?): SettingsDataManager {
+        override fun provideSettingsDataManager(
+                settingsService: SettingsService?,
+                settingsDataStore: SettingsDataStore?,
+                rxBus: RxBus?
+        ): SettingsDataManager {
             return mockSettingsDataManager
         }
 
-        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?): PayloadDataManager {
+        override fun providePayloadDataManager(
+                payloadManager: PayloadManager?,
+                rxBus: RxBus?
+        ): PayloadDataManager {
             return mockPayloadDataManager
         }
     }

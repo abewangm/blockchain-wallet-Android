@@ -1,7 +1,6 @@
 package piuk.blockchain.android.data.stores
 
 import io.reactivex.Observable
-import piuk.blockchain.android.data.rxjava.RxUtil
 
 /**
  * Attempts to fetch from local storage and if not found, triggers a webcall to obtain the data.
@@ -15,13 +14,14 @@ class DefaultFetchStrategy<T>(
     /**
      * Return first source with data and store result
      */
-    override fun fetch(): Observable<T> = memorySource.flatMap {
-        optional ->
-        when (optional) {
-            is Optional.Some -> Observable.just(optional.element)
-            else -> webSource
-        }
-    }.flatMap(memoryStore::store)
-            .compose(RxUtil.applySchedulersToObservable())
+    override fun fetch(): Observable<T> = Observable.defer {
+        memorySource.flatMap {
+            optional ->
+            when (optional) {
+                is Optional.Some -> Observable.just(optional.element)
+                else -> webSource
+            }
+        }.flatMap(memoryStore::store)
+    }
 
 }

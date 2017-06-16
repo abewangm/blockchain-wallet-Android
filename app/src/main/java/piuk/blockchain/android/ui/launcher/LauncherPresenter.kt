@@ -3,7 +3,7 @@ package piuk.blockchain.android.ui.launcher
 import android.content.Intent
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager
+import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.data.notifications.FcmCallbackService.EXTRA_CONTACT_ACCEPTED
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.injection.Injector

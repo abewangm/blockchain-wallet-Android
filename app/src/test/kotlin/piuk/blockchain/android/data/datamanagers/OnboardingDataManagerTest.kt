@@ -10,6 +10,7 @@ import org.junit.Test
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.access.AccessState
+import piuk.blockchain.android.data.settings.SettingsDataManager
 
 class OnboardingDataManagerTest: RxTest() {
 

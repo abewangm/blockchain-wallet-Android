@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.services;
+package piuk.blockchain.android.data.settings;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.settings.SettingsManager;

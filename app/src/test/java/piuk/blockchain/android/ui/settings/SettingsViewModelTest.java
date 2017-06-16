@@ -27,8 +27,10 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.settings.SettingsService;
+import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -671,7 +673,9 @@ public class SettingsViewModelTest {
         }
 
         @Override
-        protected SettingsDataManager provideSettingsDataManager(RxBus rxBus) {
+        protected SettingsDataManager provideSettingsDataManager(SettingsService settingsService,
+                                                                 SettingsDataStore settingsDataStore,
+                                                                 RxBus rxBus) {
             return settingsDataManager;
         }
 

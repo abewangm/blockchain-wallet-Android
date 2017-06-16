@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.datamanagers;
+package piuk.blockchain.android.data.settings;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.settings.SettingsManager;
@@ -9,23 +9,25 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.services.SettingsService;
-import piuk.blockchain.android.data.stores.settings.SettingsDataStore;
-import piuk.blockchain.android.data.stores.settings.SettingsMemoryStore;
+import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
 
 public class SettingsDataManager {
 
     private SettingsService settingsService;
+    private SettingsDataStore settingsDataStore;
     private RxPinning rxPinning;
-    private SettingsDataStore settingsStore = new SettingsDataStore(new SettingsMemoryStore(), fetchSettings());
 
-    public SettingsDataManager(SettingsService settingsService, RxBus rxBus) {
+    public SettingsDataManager(SettingsService settingsService,
+                               SettingsDataStore settingsDataStore,
+                               RxBus rxBus) {
         this.settingsService = settingsService;
+        this.settingsDataStore = settingsDataStore;
         rxPinning = new RxPinning(rxBus);
     }
 
     /**
-     * Updates the settings object by syncing it with the server
+     * Updates the settings object by syncing it with the server. Must be called to set up the
+     * {@link SettingsManager} class before a fetch is called.
      *
      * @param guid      The user's GUID
      * @param sharedKey The shared key
@@ -35,6 +37,16 @@ public class SettingsDataManager {
         settingsService.initSettings(guid, sharedKey);
         return rxPinning.call(this::fetchSettings)
                 .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Grabs the latest user {@link Settings} object from memory, or makes a web request if not
+     * available.
+     *
+     * @return An {@link Observable<Settings>} object
+     */
+    public Observable<Settings> getSettings() {
+        return rxPinning.call(() -> settingsDataStore.getSettings());
     }
 
     /**
@@ -183,10 +195,10 @@ public class SettingsDataManager {
     /**
      * Fetches the latest user {@link Settings} object.
      *
-     * @return A {@link Observable<Settings>} object
+     * @return An {@link Observable<Settings>} object
      */
     private Observable<Settings> fetchSettings() {
-        return settingsService.getSettings();
+        return rxPinning.call(() -> settingsDataStore.fetchSettings());
     }
 
 }

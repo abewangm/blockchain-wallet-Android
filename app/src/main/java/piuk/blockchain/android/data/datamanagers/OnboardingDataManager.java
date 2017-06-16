@@ -5,6 +5,7 @@ import org.spongycastle.util.encoders.Hex;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
 
 public class OnboardingDataManager {
 

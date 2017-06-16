@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.services;
+package piuk.blockchain.android.data.settings;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.settings.SettingsManager;
@@ -26,13 +26,14 @@ public class SettingsService {
     }
 
     /**
-     * Fetches the latest {@link Settings} object for the user
+     * Fetches the latest {@link Settings} object for the user. Defers execution so that no calls
+     * are made until subscription.
      *
      * @return An {@link Observable<Settings>} for the current user
      */
     @WebRequest
     public Observable<Settings> getSettings() {
-        return settingsApi.getInfo();
+        return Observable.defer(() -> settingsApi.getInfo());
     }
 
     /**
@@ -42,7 +43,7 @@ public class SettingsService {
      * @return An {@link Observable<ResponseBody>} containing the response from the server
      */
     @WebRequest
-    public Observable<ResponseBody> updateEmail(String email) {
+    Observable<ResponseBody> updateEmail(String email) {
         return settingsApi.updateSetting(SettingsManager.METHOD_UPDATE_EMAIL, email);
     }
 
@@ -53,7 +54,7 @@ public class SettingsService {
      * @return An {@link Observable<ResponseBody>} containing the response from the server
      */
     @WebRequest
-    public Observable<ResponseBody> updateSms(String sms) {
+    Observable<ResponseBody> updateSms(String sms) {
         return settingsApi.updateSetting(SettingsManager.METHOD_UPDATE_SMS, sms);
     }
 
@@ -64,7 +65,7 @@ public class SettingsService {
      * @return An {@link Observable<ResponseBody>} containing the response from the server
      */
     @WebRequest
-    public Observable<ResponseBody> verifySms(String code) {
+    Observable<ResponseBody> verifySms(String code) {
         return settingsApi.updateSetting(SettingsManager.METHOD_VERIFY_SMS, code);
     }
 
@@ -75,7 +76,7 @@ public class SettingsService {
      * @return An {@link Observable<ResponseBody>} containing the response from the server
      */
     @WebRequest
-    public Observable<ResponseBody> updateTor(boolean blocked) {
+    Observable<ResponseBody> updateTor(boolean blocked) {
         return settingsApi.updateSetting(SettingsManager.METHOD_UPDATE_BLOCK_TOR_IPS, blocked ? 1 : 0);
     }
 
@@ -87,7 +88,7 @@ public class SettingsService {
      * @see Settings
      */
     @WebRequest
-    public Observable<ResponseBody> updateNotifications(int notificationType) {
+    Observable<ResponseBody> updateNotifications(int notificationType) {
         return settingsApi.updateSetting(SettingsManager.METHOD_UPDATE_NOTIFICATION_TYPE, notificationType);
     }
 
@@ -99,7 +100,7 @@ public class SettingsService {
      * @see Settings
      */
     @WebRequest
-    public Observable<ResponseBody> enableNotifications(boolean enable) {
+    Observable<ResponseBody> enableNotifications(boolean enable) {
         return settingsApi.updateSetting(SettingsManager.METHOD_UPDATE_NOTIFICATION_ON,
                 enable ? SettingsManager.NOTIFICATION_ON : SettingsManager.NOTIFICATION_OFF);
     }
@@ -112,7 +113,7 @@ public class SettingsService {
      * @see Settings
      */
     @WebRequest
-    public Observable<ResponseBody> updateTwoFactor(int authType) {
+    Observable<ResponseBody> updateTwoFactor(int authType) {
         return settingsApi.updateSetting(SettingsManager.METHOD_UPDATE_AUTH_TYPE, authType);
     }
 

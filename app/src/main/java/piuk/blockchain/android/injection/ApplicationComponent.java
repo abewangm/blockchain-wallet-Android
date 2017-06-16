@@ -26,7 +26,9 @@ import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
 @Singleton
 @Component(modules = {
         ApplicationModule.class,
-        ApiModule.class
+        ApiModule.class,
+        PersistentStoreModule.class,
+        ServiceModule.class
 })
 public interface ApplicationComponent {
 

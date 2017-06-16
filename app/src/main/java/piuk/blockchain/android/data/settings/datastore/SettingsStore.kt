@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.stores.settings
+package piuk.blockchain.android.data.settings.datastore
 
 import info.blockchain.wallet.api.data.Settings
 import io.reactivex.Observable

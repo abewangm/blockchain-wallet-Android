@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.stores.settings
+package piuk.blockchain.android.data.settings.datastore
 
 import info.blockchain.wallet.api.data.Settings
 import io.reactivex.Observable
@@ -10,8 +10,8 @@ class SettingsMemoryStore: SettingsStore, PersistentStore<Settings> {
 
     var settings: Optional<Settings> = Optional.None
 
-    override fun store(data: Settings): Observable<Settings> {
-        settings = Optional.Some(data)
+    override fun store(data: Settings): io.reactivex.Observable<Settings> {
+        settings = piuk.blockchain.android.data.stores.Optional.Some(data)
         return Observable.just((settings as Optional.Some<Settings>).element)
     }
 

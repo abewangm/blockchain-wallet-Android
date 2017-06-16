@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.datamanagers;
+package piuk.blockchain.android.data.settings;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.settings.SettingsManager;
@@ -17,7 +17,7 @@ import io.reactivex.observers.TestObserver;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.services.SettingsService;
+import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -29,6 +29,7 @@ public class SettingsDataManagerTest extends RxTest {
 
     private SettingsDataManager subject;
     @Mock private SettingsService settingsService;
+    @Mock private SettingsDataStore settingsDataStore;
     @Mock private RxBus rxBus;
 
     @Before
@@ -36,7 +37,7 @@ public class SettingsDataManagerTest extends RxTest {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        subject = new SettingsDataManager(settingsService, rxBus);
+        subject = new SettingsDataManager(settingsService, settingsDataStore, rxBus);
     }
 
     @Test

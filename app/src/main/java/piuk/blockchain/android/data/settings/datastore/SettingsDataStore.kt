@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.stores.settings
+package piuk.blockchain.android.data.settings.datastore
 
 import info.blockchain.wallet.api.data.Settings
 import io.reactivex.Observable
@@ -13,7 +13,7 @@ class SettingsDataStore(
     fun getSettings(): Observable<Settings> =
             DefaultFetchStrategy(webSource, memoryStore.getSettings(), memoryStore).fetch()
 
-    fun refreshSettings() : Observable<Settings> =
+    fun fetchSettings(): Observable<Settings> =
             FreshFetchStrategy(webSource, memoryStore).fetch()
 
 }

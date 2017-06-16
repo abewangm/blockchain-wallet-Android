@@ -15,7 +15,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -110,9 +110,7 @@ public class SettingsViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
         // Fetch updated settings
         compositeDisposable.add(
-                settingsDataManager.initSettings(
-                        prefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
-                        prefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""))
+                settingsDataManager.getSettings()
                         .subscribe(
                                 updatedSettings -> {
                                     settings = updatedSettings;
