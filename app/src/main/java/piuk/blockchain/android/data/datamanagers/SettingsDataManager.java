@@ -10,11 +10,14 @@ import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.SettingsService;
+import piuk.blockchain.android.data.stores.settings.SettingsDataStore;
+import piuk.blockchain.android.data.stores.settings.SettingsMemoryStore;
 
 public class SettingsDataManager {
 
     private SettingsService settingsService;
     private RxPinning rxPinning;
+    private SettingsDataStore settingsStore = new SettingsDataStore(new SettingsMemoryStore(), fetchSettings());
 
     public SettingsDataManager(SettingsService settingsService, RxBus rxBus) {
         this.settingsService = settingsService;
