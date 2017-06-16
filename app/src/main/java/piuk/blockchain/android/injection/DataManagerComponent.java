@@ -10,6 +10,7 @@ import piuk.blockchain.android.ui.auth.PinEntryViewModel;
 import piuk.blockchain.android.ui.backup.BackupVerifyViewModel;
 import piuk.blockchain.android.ui.backup.BackupWalletViewModel;
 import piuk.blockchain.android.ui.backup.ConfirmFundsTransferViewModel;
+import piuk.blockchain.android.ui.balance.BalancePresenter;
 import piuk.blockchain.android.ui.balance.BalanceViewModel;
 import piuk.blockchain.android.ui.buy.BuyViewModel;
 import piuk.blockchain.android.ui.chooser.AccountChooserViewModel;
@@ -115,4 +116,6 @@ public interface DataManagerComponent {
     void inject(ConfirmPaymentPresenter confirmPaymentPresenter);
 
     void inject(PairingCodePresenter pairingCodePresenter);
+
+    void inject(BalancePresenter balancePresenter);
 }
