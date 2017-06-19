@@ -162,7 +162,7 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
     }
 
     void onSendClicked(@Nullable String verifiedSecondPassword) {
-        Account account = (Account) pendingTransaction.sendingObject.accountObject;
+        Account account = (Account) pendingTransaction.sendingObject.getAccountObject();
         compositeDisposable.add(
                 payloadDataManager.getNextChangeAddress(account)
                         .doOnSubscribe(disposable -> dataListener.showProgressDialog())
@@ -191,7 +191,7 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
 
     @SuppressWarnings("ConstantConditions")
     private void handleSuccessfulPayment(String hash) {
-        Account account = (Account) pendingTransaction.sendingObject.accountObject;
+        Account account = (Account) pendingTransaction.sendingObject.getAccountObject();
         payloadDataManager.incrementChangeAddress(account);
         payloadDataManager.incrementReceiveAddress(account);
         try {
@@ -242,7 +242,7 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
 
     @SuppressWarnings("ConstantConditions")
     private void calculateTransactionAmounts() {
-        String address = ((Account) pendingTransaction.sendingObject.accountObject).getXpub();
+        String address = ((Account) pendingTransaction.sendingObject.getAccountObject()).getXpub();
         if (unspentApiDisposable != null) unspentApiDisposable.dispose();
         unspentApiDisposable = sendDataManager.getUnspentOutputs(address)
                 .subscribe(

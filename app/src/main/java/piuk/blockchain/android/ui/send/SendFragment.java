@@ -288,7 +288,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     Account account = ((Account) object);
                     chosenItem = new ItemAccount(account.getLabel(), null, null, null, account);
 
-                    String label = chosenItem.label;
+                    String label = chosenItem.getLabel();
                     if (label == null || label.isEmpty()) {
                         label = account.getXpub();
                     }
@@ -298,7 +298,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
                     chosenItem = new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress);
 
-                    String label = chosenItem.label;
+                    String label = chosenItem.getLabel();
                     if (label == null || label.isEmpty()) {
                         label = legacyAddress.getAddress();
                     }
@@ -549,7 +549,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         viewModel.setSendingAddress(itemAccount);
         updateTotals(itemAccount);
-        binding.from.setText(itemAccount.label);
+        binding.from.setText(itemAccount.getLabel());
 
         binding.from.setOnClickListener(v -> startFromFragment());
         binding.imageviewDropdownSend.setOnClickListener(v -> startFromFragment());

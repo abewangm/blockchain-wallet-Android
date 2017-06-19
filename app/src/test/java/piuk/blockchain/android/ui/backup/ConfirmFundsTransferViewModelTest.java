@@ -159,7 +159,7 @@ public class ConfirmFundsTransferViewModelTest {
         when(activity.getIfArchiveChecked()).thenReturn(true);
         PendingTransaction transaction = new PendingTransaction();
         transaction.sendingObject = new ItemAccount("", "", null, null, null);
-        transaction.sendingObject.accountObject = new LegacyAddress();
+        transaction.sendingObject.setAccountObject(new LegacyAddress());
         subject.mPendingTransactions = Collections.singletonList(transaction);
         when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.complete());
         // Act
@@ -248,7 +248,7 @@ public class ConfirmFundsTransferViewModelTest {
         // Arrange
         PendingTransaction transaction = new PendingTransaction();
         transaction.sendingObject = new ItemAccount("", "", null, null, null);
-        transaction.sendingObject.accountObject = new LegacyAddress();
+        transaction.sendingObject.setAccountObject(new LegacyAddress());
         subject.mPendingTransactions = Collections.singletonList(transaction);
         when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.complete());
         // Act
@@ -267,7 +267,7 @@ public class ConfirmFundsTransferViewModelTest {
         // Arrange
         PendingTransaction transaction = new PendingTransaction();
         transaction.sendingObject = new ItemAccount("", "", null, null, null);
-        transaction.sendingObject.accountObject = new LegacyAddress();
+        transaction.sendingObject.setAccountObject(new LegacyAddress());
         subject.mPendingTransactions = Collections.singletonList(transaction);
         when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.error(new Throwable()));
         // Act

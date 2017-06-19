@@ -342,11 +342,11 @@ public class AccountEditViewModel extends BaseViewModel {
 
     private PaymentConfirmationDetails getTransactionDetailsForDisplay(PendingTransaction pendingTransaction) {
         PaymentConfirmationDetails details = new PaymentConfirmationDetails();
-        details.fromLabel = pendingTransaction.sendingObject.label;
+        details.fromLabel = pendingTransaction.sendingObject.getLabel();
         if (pendingTransaction.receivingObject != null
-                && pendingTransaction.receivingObject.label != null
-                && !pendingTransaction.receivingObject.label.isEmpty()) {
-            details.toLabel = pendingTransaction.receivingObject.label;
+                && pendingTransaction.receivingObject.getLabel() != null
+                && !pendingTransaction.receivingObject.getLabel().isEmpty()) {
+            details.toLabel = pendingTransaction.receivingObject.getLabel();
         } else {
             details.toLabel = pendingTransaction.receivingAddress;
         }
@@ -391,7 +391,7 @@ public class AccountEditViewModel extends BaseViewModel {
     void submitPayment() {
         dataListener.showProgressDialog(R.string.please_wait);
 
-        LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
+        LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.getAccountObject());
         String changeAddress = legacyAddress.getAddress();
 
         List<ECKey> keys = new ArrayList<>();
@@ -423,12 +423,12 @@ public class AccountEditViewModel extends BaseViewModel {
                             // Update V2 balance immediately after spend - until refresh from server
                             long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
 
-                            if (pendingTransaction.sendingObject.accountObject instanceof Account) {
+                            if (pendingTransaction.sendingObject.getAccountObject() instanceof Account) {
                                 payloadDataManager.subtractAmountFromAddressBalance(
-                                        ((Account) pendingTransaction.sendingObject.accountObject).getXpub(), spentAmount);
+                                        ((Account) pendingTransaction.sendingObject.getAccountObject()).getXpub(), spentAmount);
                             } else {
                                 payloadDataManager.subtractAmountFromAddressBalance(
-                                        ((LegacyAddress) pendingTransaction.sendingObject.accountObject).getAddress(), spentAmount);
+                                        ((LegacyAddress) pendingTransaction.sendingObject.getAccountObject()).getAddress(), spentAmount);
                             }
 
                             payloadDataManager.syncPayloadWithServer()

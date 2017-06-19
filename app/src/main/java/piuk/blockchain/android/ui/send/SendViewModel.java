@@ -379,12 +379,12 @@ public class SendViewModel extends BaseViewModel {
 
         String address;
 
-        if (sendAddressItem.accountObject instanceof Account) {
+        if (sendAddressItem.getAccountObject() instanceof Account) {
             //xpub
-            address = ((Account) sendAddressItem.accountObject).getXpub();
+            address = ((Account) sendAddressItem.getAccountObject()).getXpub();
         } else {
             //legacy address
-            address = ((LegacyAddress) sendAddressItem.accountObject).getAddress();
+            address = ((LegacyAddress) sendAddressItem.getAccountObject()).getAddress();
         }
 
         if (unspentApiDisposable != null) unspentApiDisposable.dispose();
@@ -554,13 +554,13 @@ public class SendViewModel extends BaseViewModel {
         if (isValidSpend(sendModel.pendingTransaction, false)) {
             LegacyAddress legacyAddress = null;
             if (!sendModel.pendingTransaction.isHD()) {
-                legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
+                legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.getAccountObject());
             }
 
             if (legacyAddress != null && legacyAddress.isWatchOnly() &&
                     (legacyAddress.getPrivateKey() == null || legacyAddress.getPrivateKey().isEmpty())) {
                 if (dataListener != null) {
-                    dataListener.onShowSpendFromWatchOnly(((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject).getAddress());
+                    dataListener.onShowSpendFromWatchOnly(((LegacyAddress) sendModel.pendingTransaction.sendingObject.getAccountObject()).getAddress());
                 }
             } else if ((legacyAddress != null && legacyAddress.isWatchOnly()) || sendModel.verifiedSecondPassword != null) {
                 confirmPayment();
@@ -588,13 +588,13 @@ public class SendViewModel extends BaseViewModel {
         PendingTransaction pendingTransaction = sendModel.pendingTransaction;
 
         PaymentConfirmationDetails details = new PaymentConfirmationDetails();
-        details.fromLabel = pendingTransaction.sendingObject.label;
+        details.fromLabel = pendingTransaction.sendingObject.getLabel();
         if (contactMdid != null) {
             details.toLabel = sendModel.recipient;
         } else if (pendingTransaction.receivingObject != null
-                && pendingTransaction.receivingObject.label != null
-                && !pendingTransaction.receivingObject.label.isEmpty()) {
-            details.toLabel = pendingTransaction.receivingObject.label;
+                && pendingTransaction.receivingObject.getLabel() != null
+                && !pendingTransaction.receivingObject.getLabel().isEmpty()) {
+            details.toLabel = pendingTransaction.receivingObject.getLabel();
         } else {
             details.toLabel = pendingTransaction.receivingAddress;
         }
@@ -688,7 +688,7 @@ public class SendViewModel extends BaseViewModel {
             }
 
             if (sendModel.pendingTransaction.receivingObject != null
-                    && sendModel.pendingTransaction.receivingObject.accountObject == sendModel.pendingTransaction.sendingObject.accountObject) {
+                    && sendModel.pendingTransaction.receivingObject.getAccountObject() == sendModel.pendingTransaction.sendingObject.getAccountObject()) {
                 showToast(R.string.send_to_same_address_warning, ToastCustom.TYPE_ERROR);
                 return false;
             }
@@ -714,9 +714,9 @@ public class SendViewModel extends BaseViewModel {
 
         sendModel.pendingTransaction.receivingObject = selectedItem;
         if (selectedItem != null) {
-            if (selectedItem.accountObject instanceof Account) {
+            if (selectedItem.getAccountObject() instanceof Account) {
                 //V3
-                Account account = ((Account) selectedItem.accountObject);
+                Account account = ((Account) selectedItem.getAccountObject());
 
                 compositeDisposable.add(
                         payloadDataManager.getNextReceiveAddress(account)
@@ -724,9 +724,9 @@ public class SendViewModel extends BaseViewModel {
                                         address -> sendModel.pendingTransaction.receivingAddress = address,
                                         throwable -> showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
 
-            } else if (selectedItem.accountObject instanceof LegacyAddress) {
+            } else if (selectedItem.getAccountObject() instanceof LegacyAddress) {
                 //V2
-                LegacyAddress legacyAddress = ((LegacyAddress) selectedItem.accountObject);
+                LegacyAddress legacyAddress = ((LegacyAddress) selectedItem.getAccountObject());
                 sendModel.pendingTransaction.receivingAddress = legacyAddress.getAddress();
 
                 if (legacyAddress.isWatchOnly())
@@ -737,7 +737,7 @@ public class SendViewModel extends BaseViewModel {
                     }
             } else {
                 //Address book
-                AddressBook addressBook = ((AddressBook) selectedItem.accountObject);
+                AddressBook addressBook = ((AddressBook) selectedItem.getAccountObject());
                 sendModel.pendingTransaction.receivingAddress = addressBook.getAddress();
             }
 
@@ -777,7 +777,7 @@ public class SendViewModel extends BaseViewModel {
         LegacyAddress legacyAddress;
         try {
             if (sendModel.pendingTransaction.isHD()) {
-                account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);
+                account = ((Account) sendModel.pendingTransaction.sendingObject.getAccountObject());
                 changeAddress = payloadManager.getNextChangeAddress(account);
 
                 if (payloadManager.getPayload().isDoubleEncryption()) {
@@ -789,7 +789,7 @@ public class SendViewModel extends BaseViewModel {
                         account, sendModel.pendingTransaction.unspentOutputBundle));
 
             } else {
-                legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
+                legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.getAccountObject());
                 changeAddress = legacyAddress.getAddress();
                 keys.add(payloadManager.getAddressECKey(legacyAddress, sendModel.verifiedSecondPassword));
             }
@@ -824,7 +824,7 @@ public class SendViewModel extends BaseViewModel {
         insertPlaceHolderTransaction(hash, sendModel.pendingTransaction);
 
         if (sendModel.pendingTransaction.isHD()) {
-            Account account = (Account) sendModel.pendingTransaction.sendingObject.accountObject;
+            Account account = (Account) sendModel.pendingTransaction.sendingObject.getAccountObject();
             payloadDataManager.incrementChangeAddress(account);
             payloadDataManager.incrementReceiveAddress(account);
             updateInternalBalances();
@@ -840,12 +840,12 @@ public class SendViewModel extends BaseViewModel {
     private void insertPlaceHolderTransaction(String hash, PendingTransaction pendingTransaction) {
         // After sending btc we create a "placeholder" tx until websocket handler refreshes list
         HashMap<String, BigInteger> inputs = new HashMap<>();
-        inputs.put(pendingTransaction.sendingObject.label, pendingTransaction.bigIntAmount);
+        inputs.put(pendingTransaction.sendingObject.getLabel(), pendingTransaction.bigIntAmount);
         HashMap<String, BigInteger> outputs = new HashMap<>();
 
         String outLabel = pendingTransaction.receivingAddress;
-        if (pendingTransaction.receivingObject != null && pendingTransaction.receivingObject.label != null) {
-            outLabel = pendingTransaction.receivingObject.label;
+        if (pendingTransaction.receivingObject != null && pendingTransaction.receivingObject.getLabel() != null) {
+            outLabel = pendingTransaction.receivingObject.getLabel();
         }
         outputs.put(outLabel, pendingTransaction.bigIntAmount);
 
@@ -876,10 +876,10 @@ public class SendViewModel extends BaseViewModel {
 
     private void clearUnspentResponseCache() {
         if (sendModel.pendingTransaction.isHD()) {
-            Account account = ((Account) sendModel.pendingTransaction.sendingObject.accountObject);
+            Account account = ((Account) sendModel.pendingTransaction.sendingObject.getAccountObject());
             sendModel.unspentApiResponses.remove(account.getXpub());
         } else {
-            LegacyAddress legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject);
+            LegacyAddress legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.getAccountObject());
             sendModel.unspentApiResponses.remove(legacyAddress.getAddress());
         }
     }
@@ -891,10 +891,10 @@ public class SendViewModel extends BaseViewModel {
         try {
             BigInteger totalSent = sendModel.pendingTransaction.bigIntAmount.add(sendModel.pendingTransaction.bigIntFee);
             if (sendModel.pendingTransaction.isHD()) {
-                Account account = (Account) sendModel.pendingTransaction.sendingObject.accountObject;
+                Account account = (Account) sendModel.pendingTransaction.sendingObject.getAccountObject();
                 payloadManager.subtractAmountFromAddressBalance(account.getXpub(), totalSent);
             } else {
-                LegacyAddress address = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
+                LegacyAddress address = (LegacyAddress) sendModel.pendingTransaction.sendingObject.getAccountObject();
                 payloadManager.subtractAmountFromAddressBalance(address.getAddress(), totalSent);
             }
         } catch (Exception e) {
@@ -924,7 +924,7 @@ public class SendViewModel extends BaseViewModel {
     private void spendFromWatchOnlyNonBIP38(final String format, final String scanData) {
         try {
             ECKey key = privateKeyFactory.getKey(format, scanData);
-            LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
+            LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.getAccountObject();
             setTempLegacyAddressPrivateKey(legacyAddress, key);
 
         } catch (Exception e) {
@@ -937,7 +937,7 @@ public class SendViewModel extends BaseViewModel {
         compositeDisposable.add(
                 sendDataManager.getEcKeyFromBip38(pw, scanData, environmentSettings.getNetworkParameters())
                         .subscribe(ecKey -> {
-                            LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.accountObject;
+                            LegacyAddress legacyAddress = (LegacyAddress) sendModel.pendingTransaction.sendingObject.getAccountObject();
                             setTempLegacyAddressPrivateKey(legacyAddress, ecKey);
                         }, throwable -> showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR)));
     }
@@ -968,7 +968,7 @@ public class SendViewModel extends BaseViewModel {
             tempLegacyAddress.setPrivateKeyFromBytes(key.getPrivKeyBytes());
             tempLegacyAddress.setAddress(key.toAddress(environmentSettings.getNetworkParameters()).toString());
             tempLegacyAddress.setLabel(legacyAddress.getLabel());
-            sendModel.pendingTransaction.sendingObject.accountObject = tempLegacyAddress;
+            sendModel.pendingTransaction.sendingObject.setAccountObject(tempLegacyAddress);
 
             confirmPayment();
         } else {
