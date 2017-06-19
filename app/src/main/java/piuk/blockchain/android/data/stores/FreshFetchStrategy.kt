@@ -1,7 +1,6 @@
 package piuk.blockchain.android.data.stores
 
 import io.reactivex.Observable
-import piuk.blockchain.android.data.rxjava.RxUtil
 
 /**
  * Fetches data from the web and then stores it in memory
@@ -12,6 +11,5 @@ class FreshFetchStrategy<T>(
 ) : FetchStrategy<T>() {
 
     override fun fetch(): Observable<T> = webSource.flatMap(memoryStore::store)
-            .compose(RxUtil.applySchedulersToObservable())
 
 }
