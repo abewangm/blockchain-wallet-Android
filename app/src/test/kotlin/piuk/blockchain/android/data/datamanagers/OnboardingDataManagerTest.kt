@@ -82,13 +82,9 @@ class OnboardingDataManagerTest: RxTest() {
         // Arrange
         val mockWalletOptions: WalletOptions = mock()
         val mockSettings: Settings = mock()
-        val guid = "GUID"
-        val sharedKey = "SHARED_KEY"
         val rolloutPercent = 0.5
         whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(mockWalletOptions))
-        whenever(mockPayloadDataManager.wallet.guid).thenReturn(guid)
-        whenever(mockPayloadDataManager.wallet.sharedKey).thenReturn(sharedKey)
-        whenever(mockSettingsDataManager.initSettings(guid, sharedKey))
+        whenever(mockSettingsDataManager.settings)
                 .thenReturn(Observable.just(mockSettings))
         whenever(mockWalletOptions.buySellCountries).thenReturn(listOf("GB"))
         whenever(mockWalletOptions.rolloutPercentage).thenReturn(rolloutPercent)
@@ -98,13 +94,12 @@ class OnboardingDataManagerTest: RxTest() {
         // Assert
         verify(mockAuthDataManager).walletOptions
         verifyNoMoreInteractions(mockAuthDataManager)
-        verify(mockPayloadDataManager, atLeastOnce()).wallet
-        verifyNoMoreInteractions(mockPayloadDataManager)
-        verify(mockSettingsDataManager).initSettings(guid, sharedKey)
+        verify(mockSettingsDataManager).settings
         verifyNoMoreInteractions(mockSettingsDataManager)
         verify(mockAccessState).inSepaCountry = true
         verify(mockAccessState).buySellRolloutPercent = rolloutPercent
         verifyNoMoreInteractions(mockAccessState)
+        verifyZeroInteractions(mockPayloadDataManager)
         testObserver.assertComplete()
         testObserver.assertNoErrors()
         testObserver.assertValue(true)

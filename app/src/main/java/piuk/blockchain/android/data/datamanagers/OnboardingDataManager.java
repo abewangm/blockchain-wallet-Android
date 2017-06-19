@@ -40,16 +40,15 @@ public class OnboardingDataManager {
      */
     public Observable<Boolean> getIfSepaCountry() {
         return authDataManager.getWalletOptions()
-                .flatMap(walletOptions -> settingsDataManager.initSettings(
-                        payloadDataManager.getWallet().getGuid(),
-                        payloadDataManager.getWallet().getSharedKey())
+                .flatMap(walletOptions -> settingsDataManager.getSettings()
                         .map(settings -> walletOptions.getBuySellCountries().contains(settings.getCountryCode()))
                         .doOnNext(sepaCountry -> accessState.setInSepaCountry(sepaCountry))
                         .doOnNext(ignored -> accessState.setBuySellRolloutPercent(walletOptions.getRolloutPercentage())));
     }
 
     /**
-     * Checks whether or not buy/sell is allowed to be rolled out based on percentage check on user's GUID.
+     * Checks whether or not buy/sell is allowed to be rolled out based on percentage check on
+     * user's GUID.
      *
      * @return An {@link Observable} wrapping a boolean value
      */

@@ -55,15 +55,11 @@ public class OnboardingViewModel extends BaseViewModel {
         }
 
         compositeDisposable.add(
-                settingsDataManager.initSettings(
-                        payloadDataManager.getWallet().getGuid(),
-                        payloadDataManager.getWallet().getSharedKey())
+                settingsDataManager.getSettings()
+                        .doAfterTerminate(this::checkAppState)
                         .subscribe(
-                                settings -> {
-                                    email = settings.getEmail();
-                                    checkAppState();
-                                },
-                                throwable -> checkAppState()));
+                                settings -> email = settings.getEmail(),
+                                Throwable::printStackTrace));
     }
 
     /**
