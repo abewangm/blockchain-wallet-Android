@@ -20,15 +20,19 @@ import org.robolectric.annotation.Config;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
+import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
+import piuk.blockchain.android.data.settings.SettingsService;
+import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
@@ -117,7 +121,13 @@ public class LauncherPresenterTest {
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
+        String guid = "GUID";
+        String sharedKey = "SHARED_KEY";
+        when(wallet.getGuid()).thenReturn(guid);
+        when(wallet.getSharedKey()).thenReturn(sharedKey);
         when(payloadDataManager.getWallet()).thenReturn(wallet);
+        Settings mockSettings = mock(Settings.class);
+        when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.just(mockSettings));
         when(wallet.isUpgraded()).thenReturn(true);
         when(accessState.isLoggedIn()).thenReturn(true);
         when(appUtil.isNewlyCreated()).thenReturn(true);
@@ -125,6 +135,7 @@ public class LauncherPresenterTest {
         subject.onViewReady();
         // Assert
         verify(launcherActivity).onStartOnboarding(false);
+        verify(accessState).setIsLoggedIn(true);
     }
 
     /**
@@ -158,6 +169,7 @@ public class LauncherPresenterTest {
         subject.onViewReady();
         // Assert
         verify(launcherActivity).onStartOnboarding(true);
+        verify(accessState).setIsLoggedIn(true);
     }
 
     /**
@@ -190,11 +202,12 @@ public class LauncherPresenterTest {
         subject.onViewReady();
         // Assert
         verify(launcherActivity).onStartMainActivity();
+        verify(accessState).setIsLoggedIn(true);
     }
 
     /**
      * Everything is good, email not verified and getting {@link Settings} object failed. Should
-     * launch MainActivity.
+     * re-request PIN code.
      */
     @Test
     public void onViewReadyNonVerifiedEmailSettingsFailure() throws Exception {
@@ -218,7 +231,8 @@ public class LauncherPresenterTest {
         // Act
         subject.onViewReady();
         // Assert
-        verify(launcherActivity).onStartMainActivity();
+        verify(launcherActivity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+        verify(launcherActivity).onRequestPin();
     }
 
     /**
@@ -439,7 +453,9 @@ public class LauncherPresenterTest {
         }
 
         @Override
-        protected SettingsDataManager provideSettingsDataManager(RxBus rxBus) {
+        protected SettingsDataManager provideSettingsDataManager(SettingsService settingsService,
+                                                                 SettingsDataStore settingsDataStore,
+                                                                 RxBus rxBus) {
             return settingsDataManager;
         }
     }

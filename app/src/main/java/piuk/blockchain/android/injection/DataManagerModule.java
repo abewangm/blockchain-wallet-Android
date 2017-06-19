@@ -6,7 +6,6 @@ import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
-import info.blockchain.wallet.settings.SettingsManager;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import dagger.Module;
@@ -17,21 +16,22 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
-import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.services.PayloadService;
 import piuk.blockchain.android.data.services.PaymentService;
-import piuk.blockchain.android.data.services.SettingsService;
 import piuk.blockchain.android.data.services.WalletService;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
+import piuk.blockchain.android.data.settings.SettingsService;
+import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
@@ -124,8 +124,10 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected SettingsDataManager provideSettingsDataManager(RxBus rxBus) {
-        return new SettingsDataManager(new SettingsService(new SettingsManager()), rxBus);
+    protected SettingsDataManager provideSettingsDataManager(SettingsService settingsService,
+                                                             SettingsDataStore settingsDataStore,
+                                                             RxBus rxBus) {
+        return new SettingsDataManager(settingsService, settingsDataStore, rxBus);
     }
 
     @Provides

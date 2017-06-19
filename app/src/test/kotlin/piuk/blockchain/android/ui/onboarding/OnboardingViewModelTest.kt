@@ -19,8 +19,10 @@ import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
+import piuk.blockchain.android.data.settings.SettingsDataManager
+import piuk.blockchain.android.data.settings.SettingsService
+import piuk.blockchain.android.data.settings.datastore.SettingsDataStore
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper
 import piuk.blockchain.android.ui.onboarding.OnboardingActivity.EXTRAS_EMAIL_ONLY
@@ -54,20 +56,14 @@ class OnboardingViewModelTest {
     @Throws(Exception::class)
     fun onViewReadySettingsFailureEmailOnly() {
         // Arrange
-        val guid = "GUID"
-        val sharedKey = "SHARED_KEY"
         val intent = Intent().apply { putExtra(EXTRAS_EMAIL_ONLY, true) }
         whenever(mockActivity.pageIntent).thenReturn(intent)
-        whenever(mockPayloadDataManager.wallet.guid).thenReturn(guid)
-        whenever(mockPayloadDataManager.wallet.sharedKey).thenReturn(sharedKey)
-        whenever(mockSettingsDataManager.initSettings(guid, sharedKey))
-                .thenReturn(Observable.error { Throwable() })
+        whenever(mockSettingsDataManager.settings).thenReturn(Observable.error { Throwable() })
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockPayloadDataManager, atLeastOnce()).wallet
         verifyNoMoreInteractions(mockPayloadDataManager)
-        verify(mockSettingsDataManager).initSettings(guid, sharedKey)
+        verify(mockSettingsDataManager).settings
         verifyNoMoreInteractions(mockSettingsDataManager)
         verify(mockActivity).pageIntent
         verify(mockActivity).showEmailPrompt()
@@ -78,20 +74,14 @@ class OnboardingViewModelTest {
     @Throws(Exception::class)
     fun onViewReadyFingerprintHardwareAvailable() {
         // Arrange
-        val guid = "GUID"
-        val sharedKey = "SHARED_KEY"
         val mockSettings: Settings = mock()
-        whenever(mockPayloadDataManager.wallet.guid).thenReturn(guid)
-        whenever(mockPayloadDataManager.wallet.sharedKey).thenReturn(sharedKey)
-        whenever(mockSettingsDataManager.initSettings(guid, sharedKey))
-                .thenReturn(Observable.just(mockSettings))
+        whenever(mockSettingsDataManager.settings).thenReturn(Observable.just(mockSettings))
         whenever(mockFingerprintHelper.isHardwareDetected()).thenReturn(true)
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockPayloadDataManager, atLeastOnce()).wallet
         verifyNoMoreInteractions(mockPayloadDataManager)
-        verify(mockSettingsDataManager).initSettings(guid, sharedKey)
+        verify(mockSettingsDataManager).settings
         verifyNoMoreInteractions(mockSettingsDataManager)
         verify(mockFingerprintHelper).isHardwareDetected()
         verifyNoMoreInteractions(mockFingerprintHelper)
@@ -104,20 +94,14 @@ class OnboardingViewModelTest {
     @Throws(Exception::class)
     fun onViewReadyNoFingerprintHardware() {
         // Arrange
-        val guid = "GUID"
-        val sharedKey = "SHARED_KEY"
         val mockSettings: Settings = mock()
-        whenever(mockPayloadDataManager.wallet.guid).thenReturn(guid)
-        whenever(mockPayloadDataManager.wallet.sharedKey).thenReturn(sharedKey)
-        whenever(mockSettingsDataManager.initSettings(guid, sharedKey))
-                .thenReturn(Observable.just(mockSettings))
+        whenever(mockSettingsDataManager.settings).thenReturn(Observable.just(mockSettings))
         whenever(mockFingerprintHelper.isHardwareDetected()).thenReturn(false)
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockPayloadDataManager, atLeastOnce()).wallet
         verifyNoMoreInteractions(mockPayloadDataManager)
-        verify(mockSettingsDataManager).initSettings(guid, sharedKey)
+        verify(mockSettingsDataManager).settings
         verifyNoMoreInteractions(mockSettingsDataManager)
         verify(mockFingerprintHelper).isHardwareDetected()
         verifyNoMoreInteractions(mockFingerprintHelper)
@@ -244,11 +228,18 @@ class OnboardingViewModelTest {
             return mockFingerprintHelper
         }
 
-        override fun provideSettingsDataManager(rxBus: RxBus?): SettingsDataManager {
+        override fun provideSettingsDataManager(
+                settingsService: SettingsService?,
+                settingsDataStore: SettingsDataStore?,
+                rxBus: RxBus?
+        ): SettingsDataManager {
             return mockSettingsDataManager
         }
 
-        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?): PayloadDataManager {
+        override fun providePayloadDataManager(
+                payloadManager: PayloadManager?,
+                rxBus: RxBus?
+        ): PayloadDataManager {
             return mockPayloadDataManager
         }
     }

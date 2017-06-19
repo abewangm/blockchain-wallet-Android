@@ -6,6 +6,7 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.services.ExchangeService;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
 
 /**
  * Created by justin on 4/28/17.

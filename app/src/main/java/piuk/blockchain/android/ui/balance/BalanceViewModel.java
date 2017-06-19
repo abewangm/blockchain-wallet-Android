@@ -38,7 +38,7 @@ import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
@@ -182,9 +182,7 @@ public class BalanceViewModel extends BaseViewModel {
                                 .subscribe(txs -> {
                                     if (!getIfNeverPrompt2Fa()) {
                                         compositeDisposable.add(
-                                                settingsDataManager.initSettings(
-                                                        prefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
-                                                        prefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""))
+                                                settingsDataManager.getSettings()
                                                         .subscribe(settings -> {
                                                             if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
                                                                 // Show dialog for 2FA, store date of dialog launch

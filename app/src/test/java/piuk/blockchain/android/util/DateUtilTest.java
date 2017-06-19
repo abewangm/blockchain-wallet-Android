@@ -3,7 +3,6 @@ package piuk.blockchain.android.util;
 import android.annotation.SuppressLint;
 import android.content.Context;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -26,7 +25,6 @@ public class DateUtilTest {
 
     @Mock private Context mMockContext;
 
-    @Ignore("This test breaks around this time of year. Can be re-enabled soon, but better to refactor date util to accept current date as a param.")
     @Test
     public void dateFormatTest() throws Exception {
         DateUtil dateUtil = new DateUtil(mMockContext);

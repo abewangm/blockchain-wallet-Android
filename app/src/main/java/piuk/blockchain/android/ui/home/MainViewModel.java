@@ -7,7 +7,6 @@ import android.support.annotation.StringRes;
 import android.util.Log;
 
 import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -33,7 +32,6 @@ import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
@@ -42,6 +40,7 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.services.WalletService;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
@@ -328,7 +327,7 @@ public class MainViewModel extends BaseViewModel {
 
     private void checkIfShouldShowEmailVerification() {
         compositeDisposable.add(
-                getSettingsApi()
+                settingsDataManager.getSettings()
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(settings -> {
                             if (!settings.isEmailVerified()) {
@@ -340,12 +339,6 @@ public class MainViewModel extends BaseViewModel {
                                 }
                             }
                         }, Throwable::printStackTrace));
-    }
-
-    private Observable<Settings> getSettingsApi() {
-        return settingsDataManager.initSettings(
-                prefs.getValue(PrefsUtil.KEY_GUID, ""),
-                prefs.getValue(PrefsUtil.KEY_SHARED_KEY, ""));
     }
 
     private void checkRooted() {
