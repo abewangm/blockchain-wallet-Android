@@ -18,9 +18,8 @@ class DefaultFetchStrategy<T>(
         optional ->
         when (optional) {
             is Optional.Some -> Observable.just(optional.element)
-            else -> webSource
+            else -> webSource.flatMap(memoryStore::store)
         }
-    }.flatMap(memoryStore::store)
-
+    }
 
 }

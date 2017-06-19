@@ -4,13 +4,14 @@ import info.blockchain.wallet.api.data.Settings
 import io.reactivex.Observable
 import piuk.blockchain.android.data.stores.Optional
 import piuk.blockchain.android.data.stores.PersistentStore
+import piuk.blockchain.android.util.annotations.Mockable
 
-
+@Mockable
 class SettingsMemoryStore: SettingsStore, PersistentStore<Settings> {
 
-    var settings: Optional<Settings> = Optional.None
+    private var settings: Optional<Settings> = Optional.None
 
-    override fun store(data: Settings): io.reactivex.Observable<Settings> {
+    override fun store(data: Settings): Observable<Settings> {
         settings = Optional.Some(data)
         return Observable.just((settings as Optional.Some<Settings>).element)
     }
