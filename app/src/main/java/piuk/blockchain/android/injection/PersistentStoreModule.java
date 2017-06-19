@@ -14,7 +14,7 @@ class PersistentStoreModule {
     @Provides
     @Singleton
     SettingsDataStore provideSettingsDataStore(SettingsService settingsService) {
-        return new SettingsDataStore(new SettingsMemoryStore(), settingsService.getSettings());
+        return new SettingsDataStore(new SettingsMemoryStore(), settingsService.getSettingsObservable());
     }
 
 }

@@ -16,24 +16,32 @@ public class SettingsService {
     }
 
     /**
+     * Fetches a new {@link Settings} object from the server and returns it as an Observable.
+     * @return An {@link Observable<Settings>} containing the user's settings
+     */
+    @WebRequest
+    public Observable<Settings> getSettingsObservable() {
+        return Observable.defer(this::getSettings);
+    }
+
+    /**
      * Initializes the {@link SettingsManager} with the user's GUID and SharedKey.
      *
      * @param guid      The user's GUID
      * @param sharedKey The shared key
      */
-    public void initSettings(String guid, String sharedKey) {
+    void initSettings(String guid, String sharedKey) {
         settingsApi.initSettings(guid, sharedKey);
     }
 
     /**
-     * Fetches the latest {@link Settings} object for the user. Defers execution so that no calls
-     * are made until subscription.
+     * Fetches the latest {@link Settings} object for the user.
      *
      * @return An {@link Observable<Settings>} for the current user
      */
     @WebRequest
-    public Observable<Settings> getSettings() {
-        return Observable.defer(() -> settingsApi.getInfo());
+    Observable<Settings> getSettings() {
+        return settingsApi.getInfo();
     }
 
     /**

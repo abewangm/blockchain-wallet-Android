@@ -11,9 +11,7 @@ class FreshFetchStrategy<T>(
         private val memoryStore: PersistentStore<T>
 ) : FetchStrategy<T>() {
 
-    override fun fetch(): Observable<T> = Observable.defer {
-        webSource.flatMap(memoryStore::store)
-                .compose(RxUtil.applySchedulersToObservable())
-    }
+    override fun fetch(): Observable<T> = webSource.flatMap(memoryStore::store)
+            .compose(RxUtil.applySchedulersToObservable())
 
 }

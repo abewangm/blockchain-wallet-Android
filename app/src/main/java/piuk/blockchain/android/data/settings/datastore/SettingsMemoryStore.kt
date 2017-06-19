@@ -11,7 +11,7 @@ class SettingsMemoryStore: SettingsStore, PersistentStore<Settings> {
     var settings: Optional<Settings> = Optional.None
 
     override fun store(data: Settings): io.reactivex.Observable<Settings> {
-        settings = piuk.blockchain.android.data.stores.Optional.Some(data)
+        settings = Optional.Some(data)
         return Observable.just((settings as Optional.Some<Settings>).element)
     }
 

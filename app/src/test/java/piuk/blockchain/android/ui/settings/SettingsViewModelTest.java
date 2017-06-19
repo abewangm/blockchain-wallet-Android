@@ -5,7 +5,6 @@ import android.content.Context;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payload.data.Wallet;
 import info.blockchain.wallet.settings.SettingsManager;
 
 import org.junit.Before;
@@ -27,8 +26,8 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.settings.SettingsService;
 import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
 import piuk.blockchain.android.injection.ApiModule;
@@ -89,8 +88,6 @@ public class SettingsViewModelTest {
     @Test
     public void onViewReadySuccess() throws Exception {
         // Arrange
-        String guid = "GUID";
-        String sharedKey = "SHARED_KEY";
         Settings mockSettings = mock(Settings.class);
         when(mockSettings.isNotificationsOn()).thenReturn(true);
         //noinspection unchecked
@@ -100,13 +97,7 @@ public class SettingsViewModelTest {
         }});
         when(mockSettings.getSmsNumber()).thenReturn("sms");
         when(mockSettings.getEmail()).thenReturn("email");
-        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn(guid);
-        when(prefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, "")).thenReturn(sharedKey);
-        when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.just(mockSettings));
-        Wallet mockPayload = mock(Wallet.class);
-        when(mockPayload.getGuid()).thenReturn(guid);
-        when(mockPayload.getSharedKey()).thenReturn(sharedKey);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(settingsDataManager.getSettings()).thenReturn(Observable.just(mockSettings));
         // Act
         subject.onViewReady();
         // Assert
@@ -119,16 +110,8 @@ public class SettingsViewModelTest {
     @Test
     public void onViewReadyFailed() throws Exception {
         // Arrange
-        String guid = "GUID";
-        String sharedKey = "SHARED_KEY";
         Settings settings = new Settings();
-        when(prefsUtil.getValue(PrefsUtil.KEY_GUID, "")).thenReturn(guid);
-        when(prefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, "")).thenReturn(sharedKey);
-        when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.error(new Throwable()));
-        Wallet mockPayload = mock(Wallet.class);
-        when(mockPayload.getGuid()).thenReturn(guid);
-        when(mockPayload.getSharedKey()).thenReturn(sharedKey);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(settingsDataManager.getSettings()).thenReturn(Observable.error(new Throwable()));
         // Act
         subject.onViewReady();
         // Assert

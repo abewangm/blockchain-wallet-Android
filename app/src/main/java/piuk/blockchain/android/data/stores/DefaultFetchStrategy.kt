@@ -14,14 +14,13 @@ class DefaultFetchStrategy<T>(
     /**
      * Return first source with data and store result
      */
-    override fun fetch(): Observable<T> = Observable.defer {
-        memorySource.flatMap {
-            optional ->
-            when (optional) {
-                is Optional.Some -> Observable.just(optional.element)
-                else -> webSource
-            }
-        }.flatMap(memoryStore::store)
-    }
+    override fun fetch(): Observable<T> = memorySource.flatMap {
+        optional ->
+        when (optional) {
+            is Optional.Some -> Observable.just(optional.element)
+            else -> webSource
+        }
+    }.flatMap(memoryStore::store)
+
 
 }

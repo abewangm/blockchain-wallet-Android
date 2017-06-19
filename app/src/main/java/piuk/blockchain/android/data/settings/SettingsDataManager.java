@@ -46,7 +46,16 @@ public class SettingsDataManager {
      * @return An {@link Observable<Settings>} object
      */
     public Observable<Settings> getSettings() {
-        return rxPinning.call(() -> settingsDataStore.getSettings());
+        return rxPinning.call(this::attemptFetchSettingsFromMemory);
+    }
+
+    /**
+     * Fetches the latest user {@link Settings} object from the server
+     *
+     * @return An {@link Observable<Settings>} object
+     */
+    private Observable<Settings> fetchSettings() {
+        return rxPinning.call(this::fetchSettingsFromWeb);
     }
 
     /**
@@ -192,13 +201,12 @@ public class SettingsDataManager {
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-    /**
-     * Fetches the latest user {@link Settings} object.
-     *
-     * @return An {@link Observable<Settings>} object
-     */
-    private Observable<Settings> fetchSettings() {
-        return rxPinning.call(() -> settingsDataStore.fetchSettings());
+    private Observable<Settings> fetchSettingsFromWeb() {
+        return Observable.defer(() -> settingsDataStore.fetchSettings());
+    }
+
+    private Observable<Settings> attemptFetchSettingsFromMemory() {
+        return Observable.defer(() -> settingsDataStore.getSettings());
     }
 
 }

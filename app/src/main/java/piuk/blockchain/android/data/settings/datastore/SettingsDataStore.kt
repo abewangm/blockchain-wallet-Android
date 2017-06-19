@@ -4,10 +4,12 @@ import info.blockchain.wallet.api.data.Settings
 import io.reactivex.Observable
 import piuk.blockchain.android.data.stores.DefaultFetchStrategy
 import piuk.blockchain.android.data.stores.FreshFetchStrategy
+import piuk.blockchain.android.util.annotations.Mockable
 
+@Mockable
 class SettingsDataStore(
-        val memoryStore: SettingsMemoryStore,
-        val webSource: Observable<Settings>
+        private val memoryStore: SettingsMemoryStore,
+        private val webSource: Observable<Settings>
 ) {
 
     fun getSettings(): Observable<Settings> =

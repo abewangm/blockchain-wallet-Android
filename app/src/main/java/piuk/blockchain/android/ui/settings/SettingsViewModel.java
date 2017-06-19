@@ -111,17 +111,14 @@ public class SettingsViewModel extends BaseViewModel {
         // Fetch updated settings
         compositeDisposable.add(
                 settingsDataManager.getSettings()
+                        .doAfterTerminate(this::handleUpdate)
                         .subscribe(
-                                updatedSettings -> {
-                                    settings = updatedSettings;
-                                    handleUpdate();
-                                },
+                                updatedSettings -> settings = updatedSettings,
                                 throwable -> {
                                     if (settings == null) {
                                         // Show unloaded if necessary, keep old settings if failed update
                                         settings = new Settings();
                                     }
-                                    handleUpdate();
                                     // Warn error when updating
                                     dataListener.showToast(R.string.settings_error_updating, ToastCustom.TYPE_ERROR);
                                 }));

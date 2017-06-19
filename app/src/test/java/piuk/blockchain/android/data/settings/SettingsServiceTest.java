@@ -33,6 +33,20 @@ public class SettingsServiceTest extends RxTest {
     }
 
     @Test
+    public void getSettingsObservable() throws Exception {
+        Settings mockSettings = mock(Settings.class);
+        when(settingsManager.getInfo()).thenReturn(Observable.just(mockSettings));
+        // Act
+        TestObserver<Settings> testObserver = subject.getSettingsObservable().test();
+        // Assert
+        verify(settingsManager).getInfo();
+        verifyNoMoreInteractions(settingsManager);
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        assertEquals(mockSettings, testObserver.values().get(0));
+    }
+
+    @Test
     public void initSettings() throws Exception {
         // Arrange
         String guid = "GUID";
