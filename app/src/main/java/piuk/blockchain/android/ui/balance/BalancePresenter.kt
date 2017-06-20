@@ -1,7 +1,9 @@
 package piuk.blockchain.android.ui.balance
 
+import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
+import io.reactivex.Observable
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
@@ -10,6 +12,7 @@ import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ConsolidatedAccount
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
+import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
@@ -43,8 +46,8 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
         val initialDisplayAccount = activeAccountAndAddressList[0]
 
-        val fetchTransactionsObservable =
-                transactionListDataManager.fetchTransactions(initialDisplayAccount.accountObject, 50, 0)
+        val fetchTransactionsObservable = getTransactionsListObservable(initialDisplayAccount)
+
 
         val updateTickerCompletable = exchangeRateFactory.updateTicker()
                 .doOnComplete(view::onExchangeRateUpdated)
@@ -56,7 +59,10 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
         val balanceCompletable = getBalanceCompletable(initialDisplayAccount)
 
-        balanceCompletable.subscribe()
+        Observable.merge(balanceCompletable.toObservable(), fetchTransactionsObservable)
+                .subscribe(
+                        { /* No-op */ },
+                        { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
 
         /**
          * TODO: Ideally here we would concatenate:
@@ -74,10 +80,14 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     }
 
     fun onAccountChosen(position: Int) {
-        getBalanceCompletable(activeAccountAndAddressList[position])
-                .subscribe({
-                    // No-op
-                }, { t: Throwable? -> t?.printStackTrace() })
+        val itemAccount = activeAccountAndAddressList[position]
+        val fetchTransactionsObservable = getTransactionsListObservable(itemAccount)
+        val balanceCompletable = getBalanceCompletable(itemAccount)
+
+        Observable.merge(balanceCompletable.toObservable(), fetchTransactionsObservable)
+                .subscribe(
+                        { /* No-op */ },
+                        { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
     }
 
     private fun getAllDisplayableAccounts(): List<ItemAccount> {
@@ -137,6 +147,12 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
         return activeAccountAndAddressList
     }
+
+    private fun getTransactionsListObservable(itemAccount: ItemAccount): Observable<List<TransactionSummary>> =
+            transactionListDataManager.fetchTransactions(itemAccount.accountObject, 50, 0)
+                    .doOnNext {
+                        view.onTransactionsUpdated(it)
+                    }
 
     private fun getBalanceCompletable(itemAccount: ItemAccount): Completable {
         return payloadDataManager.updateAllBalances()

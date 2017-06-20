@@ -2,6 +2,8 @@ package piuk.blockchain.android.ui.balance
 
 import android.content.Context
 import android.os.Bundle
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.SimpleItemAnimator
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -11,21 +13,31 @@ import kotlinx.android.synthetic.main.fragment_balance.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.ui.account.ItemAccount
+import piuk.blockchain.android.ui.balance.LegacyBalanceFragment.SHOW_BTC
+import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter
+import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener
 import piuk.blockchain.android.ui.base.BaseFragment
+import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.home.MainActivity
+import piuk.blockchain.android.ui.send.SendViewModel.SHOW_FIAT
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.OnItemSelectedListener
+import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
+import java.util.*
 
-class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView {
+class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
 
     private var progressDialog: MaterialProgressDialog? = null
     private var accountsAdapter: BalanceHeaderAdapter? = null
     private var interactionListener: OnFragmentInteractionListener? = null
+    private var balanceAdapter: BalanceAdapter? = null
+    private var spacerDecoration: BottomSpacerDecoration? = null
 
     override fun onCreateView(
             inflater: LayoutInflater?,
@@ -38,6 +50,56 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         onViewReady()
 //        setShowRefreshing(true)
 //        no_tx_message_layout.gone()
+
+        val fiatString = PrefsUtil(context).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+//        val lastPrice = viewModel.getLastPrice(fiatString)
+        val lastPrice = 5.0
+
+        balanceAdapter = BalanceAdapter(
+                activity,
+                lastPrice,
+                isBtc = true,
+                listClickListener = this
+        ).apply { setHasStableIds(true) }
+
+        val layoutManager = LinearLayoutManager(context)
+        recyclerview.layoutManager = layoutManager
+        recyclerview.adapter = balanceAdapter
+        // Disable blinking animations in RecyclerView
+        val animator = recyclerview.itemAnimator
+        if (animator is SimpleItemAnimator) {
+            animator.supportsChangeAnimations = false
+        }
+
+        swipe_container.setProgressViewEndTarget(
+                false,
+                ViewUtils.convertDpToPixel(72F + 20F, context).toInt()
+        )
+        swipe_container.setOnRefreshListener { getPresenter().onRefreshRequested() }
+        swipe_container.setColorSchemeResources(
+                R.color.product_green_medium,
+                R.color.primary_blue_medium,
+                R.color.product_red_medium
+        )
+    }
+
+    override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
+        // goToTransactionDetail(correctedPosition)
+    }
+
+    override fun onValueClicked(isBtc: Boolean) {
+//        isBTC = isBtc
+        PrefsUtil(context).setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, if (isBtc) SHOW_BTC else SHOW_FIAT)
+//        balanceAdapter.onViewFormatUpdated(isBTC)
+//        updateBalanceAndTransactionList(false)
+    }
+
+    override fun onFctxClicked(fctxId: String) {
+//        viewModel.onPendingTransactionClicked(fctxId)
+    }
+
+    override fun onFctxLongClicked(fctxId: String) {
+//        viewModel.onPendingTransactionLongClicked(fctxId)
     }
 
     override fun onAccountsUpdated(
@@ -80,11 +142,22 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun onTransactionsUpdated(displayObjects: List<Any>) {
-        TODO("not implemented")
+        balanceAdapter?.items = ArrayList<Any>().apply { addAll(displayObjects) }
+
+        if (spacerDecoration == null) {
+            spacerDecoration = BottomSpacerDecoration(
+                    context,
+                    ViewUtils.convertDpToPixel(56f, context).toInt()
+            )
+        }
+        recyclerview.apply {
+            removeItemDecoration(spacerDecoration)
+            addItemDecoration(spacerDecoration)
+        }
     }
 
     override fun onExchangeRateUpdated() {
-        TODO("not implemented")
+        TODO("not implemented, maybe want to pass the new value here to update adapter")
     }
 
     override fun setShowRefreshing(showRefreshing: Boolean) {
