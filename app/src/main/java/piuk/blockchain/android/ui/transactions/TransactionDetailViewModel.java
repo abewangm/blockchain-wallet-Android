@@ -37,8 +37,8 @@ import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
-import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
-import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
+import static piuk.blockchain.android.ui.balance.LegacyBalanceFragment.KEY_TRANSACTION_HASH;
+import static piuk.blockchain.android.ui.balance.LegacyBalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
 @SuppressWarnings("WeakerAccess")
 public class TransactionDetailViewModel extends BaseViewModel {

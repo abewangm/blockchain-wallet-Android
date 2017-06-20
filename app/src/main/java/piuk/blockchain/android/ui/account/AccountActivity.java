@@ -39,7 +39,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityAccountsBinding;
 import piuk.blockchain.android.ui.backup.ConfirmFundsTransferDialogFragment;
-import piuk.blockchain.android.ui.balance.BalanceFragment;
+import piuk.blockchain.android.ui.balance.LegacyBalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -62,7 +62,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
-            if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
+            if (LegacyBalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
                 onUpdateAccountsList();
                 // Check if we need to hide/show the transfer funds icon in the Toolbar
                 viewModel.checkTransferableLegacyFunds(false, false);
@@ -325,7 +325,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     @Override
     protected void onResume() {
         super.onResume();
-        IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
+        IntentFilter filter = new IntentFilter(LegacyBalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(AccountActivity.this).registerReceiver(receiver, filter);
         onUpdateAccountsList();
     }

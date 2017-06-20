@@ -57,6 +57,7 @@ import piuk.blockchain.android.ui.auth.LandingActivity;
 import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
+import piuk.blockchain.android.ui.balance.LegacyBalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.buy.BuyActivity;
 import piuk.blockchain.android.ui.buy.FrontendJavascript;
@@ -94,9 +95,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         ConfirmPaymentDialog.OnConfirmDialogInteractionListener {
 
     public static final String TAG = MainActivity.class.getSimpleName();
-    public static final String ACTION_SEND = "info.blockchain.wallet.ui.BalanceFragment.SEND";
-    public static final String ACTION_RECEIVE = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE";
-    public static final String ACTION_BUY = "info.blockchain.wallet.ui.BalanceFragment.BUY";
+    public static final String ACTION_SEND = "info.blockchain.wallet.ui.LegacyBalanceFragment.SEND";
+    public static final String ACTION_RECEIVE = "info.blockchain.wallet.ui.LegacyBalanceFragment.RECEIVE";
+    public static final String ACTION_BUY = "info.blockchain.wallet.ui.LegacyBalanceFragment.BUY";
 
     private static final String SUPPORT_URI = "https://support.blockchain.com/";
     private static final int REQUEST_BACKUP = 2225;
@@ -160,7 +161,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
         appUtil = new AppUtil(this);
         viewModel = new MainViewModel(this);
-        balanceFragment = BalanceFragment.newInstance(false);
+//        balanceFragment = LegacyBalanceFragment.newInstance(false);
+        balanceFragment = BalanceFragment.newInstance();
 
         binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -230,8 +232,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                         break;
                 }
             } else {
-                if (position == 1 && getCurrentFragment() instanceof BalanceFragment) {
-                    ((BalanceFragment) getCurrentFragment()).onScrollToTop();
+                if (position == 1 && getCurrentFragment() instanceof LegacyBalanceFragment) {
+                    ((LegacyBalanceFragment) getCurrentFragment()).onScrollToTop();
                 }
             }
 
@@ -320,9 +322,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_BACKUP) {
             resetNavigationDrawer();
         } else if (resultCode == RESULT_OK && requestCode == ACCOUNT_EDIT) {
-            if (getCurrentFragment() instanceof BalanceFragment) {
-                ((BalanceFragment) getCurrentFragment()).updateAccountList();
-                ((BalanceFragment) getCurrentFragment()).updateBalanceAndTransactionList(true);
+            if (getCurrentFragment() instanceof LegacyBalanceFragment) {
+                ((LegacyBalanceFragment) getCurrentFragment()).updateAccountList();
+                ((LegacyBalanceFragment) getCurrentFragment()).updateBalanceAndTransactionList(true);
             }
 
         } else if (requestCode == SETTINGS_EDIT) {
@@ -337,7 +339,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public void onBackPressed() {
         if (drawerIsOpen) {
             binding.drawerLayout.closeDrawers();
-        } else if (getCurrentFragment() instanceof BalanceFragment) {
+        } else if (getCurrentFragment() instanceof LegacyBalanceFragment) {
             handleBackPressed();
         } else if (getCurrentFragment() instanceof SendFragment) {
             ((SendFragment) getCurrentFragment()).onBackPressed();
@@ -349,7 +351,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             fragmentManager.beginTransaction().remove(getCurrentFragment()).commit();
         } else {
             // Switch to balance fragment
-            BalanceFragment fragment = new BalanceFragment();
+            LegacyBalanceFragment fragment = new LegacyBalanceFragment();
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
         }
@@ -433,7 +435,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void resetNavigationDrawer() {
-        // Called onResume from BalanceFragment
+        // Called onResume from LegacyBalanceFragment
         toolbar.setTitle("");
         MenuItem backUpMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_backup);
         MenuItem upgradeMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_upgrade);
@@ -455,7 +457,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 });
 
         // Set selected appropriately.
-        if (getCurrentFragment() instanceof BalanceFragment) {
+        if (getCurrentFragment() instanceof LegacyBalanceFragment) {
             binding.bottomNavigation.setCurrentItem(1);
         } else if (getCurrentFragment() instanceof SendFragment) {
             binding.bottomNavigation.setCurrentItem(0);
@@ -704,12 +706,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void onStartBalanceFragment(boolean paymentToContactMade) {
-        if (paymentToContactMade) {
-            balanceFragment = BalanceFragment.newInstance(true);
-        }
+        // TODO: 20/06/2017
+//        if (paymentToContactMade) {
+//            balanceFragment = LegacyBalanceFragment.newInstance(true);
+//        }
         replaceFragmentWithAnimation(balanceFragment);
         toolbar.setTitle("");
-        balanceFragment.checkCachedTransactions();
+//        balanceFragment.checkCachedTransactions();
         viewModel.checkIfShouldShowSurvey();
     }
 
@@ -753,7 +756,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 .setPositiveButton(R.string.ok_cap, null)
                 .setNegativeButton(R.string.view_details, (dialog, whichButton) -> {
                     Bundle bundle = new Bundle();
-                    bundle.putString(BalanceFragment.KEY_TRANSACTION_HASH, txHash);
+                    bundle.putString(LegacyBalanceFragment.KEY_TRANSACTION_HASH, txHash);
                     TransactionDetailActivity.start(this, bundle);
                 }).show();
     }
@@ -849,8 +852,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void showBroadcastSuccessDialog() {
-        if (getCurrentFragment() instanceof BalanceFragment) {
-            ((BalanceFragment) getCurrentFragment()).refreshFacilitatedTransactions();
+        if (getCurrentFragment() instanceof LegacyBalanceFragment) {
+            ((LegacyBalanceFragment) getCurrentFragment()).refreshFacilitatedTransactions();
         }
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
@@ -912,8 +915,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     private int getSelectedAccountFromFragments() {
         int selectedAccountPosition;
-        if (getCurrentFragment() instanceof BalanceFragment) {
-            selectedAccountPosition = ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
+        if (getCurrentFragment() instanceof LegacyBalanceFragment) {
+            selectedAccountPosition = ((LegacyBalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
             selectedAccountPosition = ((ReceiveFragment) getCurrentFragment()).getSelectedAccountPosition();
         } else {

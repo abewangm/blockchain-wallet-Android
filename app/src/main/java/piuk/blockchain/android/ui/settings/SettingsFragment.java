@@ -46,7 +46,7 @@ import info.blockchain.wallet.util.PasswordUtil;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.auth.PinEntryActivity;
-import piuk.blockchain.android.ui.balance.BalanceFragment;
+import piuk.blockchain.android.ui.balance.LegacyBalanceFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
@@ -102,7 +102,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            if (intent.getAction().equals(BalanceFragment.ACTION_INTENT)) {
+            if (intent.getAction().equals(LegacyBalanceFragment.ACTION_INTENT)) {
                 viewModel.onViewReady();
             }
         }
@@ -267,7 +267,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     @Override
     public void onResume() {
         super.onResume();
-        IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
+        IntentFilter filter = new IntentFilter(LegacyBalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
     }
 

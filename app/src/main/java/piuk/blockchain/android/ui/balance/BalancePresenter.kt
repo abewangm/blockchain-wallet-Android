@@ -32,21 +32,43 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     }
 
     override fun onViewReady() {
-        val finalObject = Any() // TODO find default account position, pass into fetchTransactions
+        val allDisplayableAccounts = getAllDisplayableAccounts()
+        // TODO: Display this only once the exchange rate has been updated
+        view.onAccountsUpdated(
+                allDisplayableAccounts,
+                getLastPrice(getFiatCurrency()),
+                getFiatCurrency(),
+                monetaryUtil
+        )
 
-        val fetchTransactionsObservable = transactionListDataManager.fetchTransactions(finalObject, 50, 0)
+        val initialDisplayAccount = activeAccountAndAddressList[0]
+
+        val fetchTransactionsObservable =
+                transactionListDataManager.fetchTransactions(initialDisplayAccount.accountObject, 50, 0)
+
         val updateTickerCompletable = exchangeRateFactory.updateTicker()
                 .doOnComplete(view::onExchangeRateUpdated)
+
         val contactsObservable = contactsDataManager.fetchContacts()
                 .andThen(contactsDataManager.contactsWithUnreadPaymentRequests)
+
         val fctxObservable = contactsDataManager.facilitatedTransactions
 
+        val balanceCompletable = payloadDataManager.updateAllBalances()
+                .doOnComplete {
+                    val btcBalance = transactionListDataManager.getBtcBalance(initialDisplayAccount.accountObject)
+                    val balanceTotal = getBalanceString(isBTC = true, btcBalance = btcBalance)
+                    view.onTotalBalanceUpdated(balanceTotal)
+                }
+
+        balanceCompletable.subscribe()
 
         /**
          * TODO: Ideally here we would concatenate:
          *
-         * 0) Get all the user's accounts + legacy addresses
+         * 0) Getting all the user's accounts + legacy addresses
          * 1) Updating the ticker price
+         * 2) Updating the current balance
          * 2) Getting the transaction list
          * 3) Getting the Contacts list
          * 4) Get Facilitated Transactions
@@ -56,23 +78,24 @@ class BalancePresenter : BasePresenter<BalanceView>() {
          */
     }
 
-    fun getAllDisplayableAccounts() : List<Any> {
+    fun getAllDisplayableAccounts() : List<ItemAccount> {
         activeAccountAndAddressList.clear()
-        val accounts: List<ItemAccount> = payloadDataManager.accounts
-                .filter { !it.isArchived }
-                .map { it ->
-                    val bal = payloadDataManager.getAddressBalance(it.xpub)
-                    val balanceString = getBalanceString(true, bal.toLong())
-
-                    return@map ItemAccount().apply {
-                        label = it.label
-                        displayBalance = balanceString
-                        absoluteBalance = bal.toLong()
-                    }
-                }
 
         val legacyAddresses = payloadDataManager.legacyAddresses
                 .filter { it.tag != LegacyAddress.ARCHIVED_ADDRESS }
+
+        val accounts: List<ItemAccount> = payloadDataManager.accounts
+                .filter { !it.isArchived }
+                .map { it ->
+                    val bigIntBalance = payloadDataManager.getAddressBalance(it.xpub)
+
+                    ItemAccount().apply {
+                        label = it.label
+                        displayBalance = getBalanceString(true, bigIntBalance.toLong())
+                        absoluteBalance = bigIntBalance.toLong()
+                        accountObject = it
+                    }
+                }
 
         // Show "All Accounts" if necessary
         if (accounts.size > 1 || !legacyAddresses.isEmpty()) {
@@ -81,15 +104,17 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 type = ConsolidatedAccount.Type.ALL_ACCOUNTS
             }
 
-            val bal = payloadDataManager.walletBalance
-            val balance = getBalanceString(true, bal.toLong())
+            val bigIntBalance = payloadDataManager.walletBalance
 
             activeAccountAndAddressList.add(ItemAccount().apply {
                 label = all.label
-                displayBalance = balance
-                absoluteBalance = bal.toLong()
+                displayBalance = getBalanceString(true, bigIntBalance.toLong())
+                absoluteBalance = bigIntBalance.toLong()
+                accountObject = all
             })
         }
+
+        activeAccountAndAddressList.addAll(accounts)
 
         // Show "Imported Addresses" if necessary
         if (!legacyAddresses.isEmpty()) {
@@ -98,15 +123,14 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 type = ConsolidatedAccount.Type.ALL_IMPORTED_ADDRESSES
             }
 
-            val bal = payloadDataManager.importedAddressesBalance
-            val balance = getBalanceString(true, bal.toLong())
+            val bigIntBalance = payloadDataManager.importedAddressesBalance
 
-            activeAccountAndAddressList.add(ItemAccount(
-                    importedAddresses.label,
-                    balance,
-                    null,
-                    bal.toLong(),
-                    null))
+            activeAccountAndAddressList.add(ItemAccount().apply {
+                label = importedAddresses.label
+                displayBalance = getBalanceString(true, bigIntBalance.toLong())
+                absoluteBalance = bigIntBalance.toLong()
+                accountObject = importedAddresses
+            })
         }
 
         return activeAccountAndAddressList
@@ -123,10 +147,15 @@ class BalancePresenter : BasePresenter<BalanceView>() {
             monetaryUtil.getFiatFormat(strFiat).format(fiatBalance) + " " + strFiat
     }
 
-    fun getDisplayUnits(): String =
+    private fun getLastPrice(fiat: String): Double = exchangeRateFactory.getLastPrice(fiat)
+
+    private fun getDisplayUnits(): String =
             monetaryUtil.btcUnits[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)].toString()
 
-    val monetaryUtil: MonetaryUtil by lazy(LazyThreadSafetyMode.NONE) { MonetaryUtil(prefsUtil.getValue(
+    private fun getFiatCurrency(): String =
+            prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+
+    private val monetaryUtil: MonetaryUtil by lazy(LazyThreadSafetyMode.NONE) { MonetaryUtil(prefsUtil.getValue(
             PrefsUtil.KEY_BTC_UNITS,
             MonetaryUtil.UNIT_BTC
     )) }

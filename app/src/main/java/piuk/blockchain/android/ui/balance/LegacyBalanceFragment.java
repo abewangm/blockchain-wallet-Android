@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -59,10 +58,10 @@ import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 
-public class BalanceFragment extends Fragment implements BalanceViewModel.DataListener,
+public class LegacyBalanceFragment extends Fragment implements BalanceViewModel.DataListener,
         TransactionSelectedListener {
 
-    public static final String ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH";
+    public static final String ACTION_INTENT = "info.blockchain.wallet.ui.LegacyBalanceFragment.REFRESH";
     public static final String KEY_TRANSACTION_LIST_POSITION = "transaction_list_position";
     public static final String KEY_TRANSACTION_HASH = "transaction_hash";
     public static final String ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment";
@@ -84,14 +83,10 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Thunk BalanceAdapter balanceAdapter;
 
-    public BalanceFragment() {
-        // Required empty constructor
-    }
-
-    public static BalanceFragment newInstance(boolean broadcastingPayment) {
+    public static LegacyBalanceFragment newInstance(boolean broadcastingPayment) {
         Bundle args = new Bundle();
         args.putBoolean(ARGUMENT_BROADCASTING_PAYMENT, broadcastingPayment);
-        BalanceFragment fragment = new BalanceFragment();
+        LegacyBalanceFragment fragment = new LegacyBalanceFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -113,7 +108,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_balance, container, false);
+        binding = null;
         viewModel = new BalanceViewModel(this);
 
         balanceDisplayState = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
