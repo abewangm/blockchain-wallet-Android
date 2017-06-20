@@ -14,18 +14,16 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.LegacyBalanceFragment.KEY_TRANSACTION_LIST_POSITION
-import piuk.blockchain.android.ui.balance.LegacyBalanceFragment.SHOW_BTC
 import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter
 import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener
 import piuk.blockchain.android.ui.base.BaseFragment
+import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.home.MainActivity
-import piuk.blockchain.android.ui.send.SendViewModel.SHOW_FIAT
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.OnItemSelectedListener
-import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
 
@@ -65,10 +63,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun onValueClicked(isBtc: Boolean) {
-//        isBTC = isBtc
-        PrefsUtil(context).setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, if (isBtc) SHOW_BTC else SHOW_FIAT)
-//        balanceAdapter.onViewFormatUpdated(isBTC)
-//        updateBalanceAndTransactionList(false)
+        presenter.setViewType(isBtc)
     }
 
     override fun onFctxClicked(fctxId: String) {
@@ -77,6 +72,19 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun onFctxLongClicked(fctxId: String) {
 //        viewModel.onPendingTransactionLongClicked(fctxId)
+    }
+
+    override fun onViewTypeChanged(isBtc: Boolean) {
+        balanceAdapter?.onViewFormatUpdated(isBtc)
+        accountsAdapter?.notifyBtcChanged(isBtc)
+    }
+
+    override fun setUiState(uiState: Int) {
+        when (uiState) {
+            UiState.FAILURE, UiState.EMPTY -> onEmptyState()
+            UiState.CONTENT -> onContentLoaded()
+            UiState.LOADING -> setShowRefreshing(true)
+        }
     }
 
     override fun onAccountsUpdated(
@@ -89,13 +97,15 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 context,
                 R.layout.spinner_balance_header,
                 accounts,
-                true,
+                presenter.getViewType(),
                 monetaryUtil,
                 fiat,
                 lastPrice
         ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
 
         accounts_spinner.adapter = accountsAdapter
+
+        textview_balance.setOnClickListener { presenter.setViewType(!presenter.getViewType()) }
 
         if (accounts.size > 1) {
             accounts_spinner.visible()
@@ -118,23 +128,17 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun onTransactionsUpdated(displayObjects: List<Any>) {
-        // TODO: Move this check into Presenter
-        if (displayObjects.isEmpty()) {
-            no_transaction_include.visible()
-        } else {
-            no_transaction_include.gone()
-            balanceAdapter?.items = displayObjects
+        balanceAdapter?.items = displayObjects
 
-            if (spacerDecoration == null) {
-                spacerDecoration = BottomSpacerDecoration(
-                        context,
-                        ViewUtils.convertDpToPixel(56f, context).toInt()
-                )
-            }
-            recyclerview.apply {
-                removeItemDecoration(spacerDecoration)
-                addItemDecoration(spacerDecoration)
-            }
+        if (spacerDecoration == null) {
+            spacerDecoration = BottomSpacerDecoration(
+                    context,
+                    ViewUtils.convertDpToPixel(56f, context).toInt()
+            )
+        }
+        recyclerview.apply {
+            removeItemDecoration(spacerDecoration)
+            addItemDecoration(spacerDecoration)
         }
     }
 
@@ -146,8 +150,19 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
-    override fun setShowRefreshing(showRefreshing: Boolean) {
-        swipe_container.isRefreshing = showRefreshing
+    override fun onPause() {
+        super.onPause()
+        // Fixes issue with Swipe Layout messing with Fragment transitions
+        swipe_container?.let {
+            swipe_container.isRefreshing = false
+            swipe_container.destroyDrawingCache()
+            swipe_container.clearAnimation()
+        }
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        interactionListener = activity as OnFragmentInteractionListener?
     }
 
     override fun showToast(message: Int, toastType: String) {
@@ -169,33 +184,32 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        // Fixes issue with Swipe Layout messing with Fragment transitions
-        swipe_container?.let {
-            swipe_container.isRefreshing = false
-            swipe_container.destroyDrawingCache()
-            swipe_container.clearAnimation()
-        }
-    }
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        interactionListener = activity as OnFragmentInteractionListener?
-    }
-
     override fun getIfContactsEnabled(): Boolean = BuildConfig.CONTACTS_ENABLED
 
     override fun createPresenter(): BalancePresenter = BalancePresenter()
 
     override fun getMvpView(): BalanceView = this
 
+    private fun setShowRefreshing(showRefreshing: Boolean) {
+        swipe_container.isRefreshing = showRefreshing
+    }
+
+    private fun onEmptyState() {
+        setShowRefreshing(false)
+        no_transaction_include.visible()
+    }
+
+    private fun onContentLoaded() {
+        setShowRefreshing(false)
+        no_transaction_include.gone()
+    }
+
     private fun setUpRecyclerView(exchangeRate: Double) {
         balanceAdapter = BalanceAdapter(
                 activity,
                 exchangeRate,
-                isBtc = true,
-                listClickListener = this
+                presenter.getViewType(),
+                this
         ).apply { setHasStableIds(true) }
 
         val layoutManager = LinearLayoutManager(context)

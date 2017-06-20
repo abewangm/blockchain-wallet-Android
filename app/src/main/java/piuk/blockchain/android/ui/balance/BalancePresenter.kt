@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.balance
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Observable
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
@@ -10,6 +11,7 @@ import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ConsolidatedAccount
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
+import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -25,6 +27,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     @Inject lateinit var payloadDataManager: PayloadDataManager
     @Inject lateinit var stringUtils: StringUtils
     @Inject lateinit var prefsUtil: PrefsUtil
+    @Inject lateinit var accessState: AccessState
 
     private var activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
     private var chosenAccount: ItemAccount? = null
@@ -34,7 +37,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     }
 
     override fun onViewReady() {
-        view.setShowRefreshing(true)
+        view.setUiState(UiState.LOADING)
         activeAccountAndAddressList = getAllDisplayableAccounts()
         chosenAccount = activeAccountAndAddressList[0]
 
@@ -43,21 +46,15 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
         val fctxObservable = contactsDataManager.facilitatedTransactions
 
-        refreshTransactionList()
-
-        /**
-         * TODO: Ideally here we would concatenate:
-         *
-         * 0) Getting all the user's accounts + legacy addresses
-         * 1) Updating the ticker price
-         * 2) Updating the current balance
-         * 2) Getting the transaction list
-         * 3) Getting the Contacts list
-         * 4) Get Facilitated Transactions
-         *
-         * All into one Observable and handling onNext in each component Observable.
-         *
-         */
+        chosenAccount?.let { chosenAccount ->
+            Observable.merge(
+                    getBalanceObservable(chosenAccount),
+                    getTransactionsListObservable(chosenAccount),
+                    getUpdateTickerObservable()
+            ).subscribe(
+                    { /* No-op */ },
+                    { view.setUiState(UiState.FAILURE) })
+        }
     }
 
     fun onAccountChosen(position: Int) {
@@ -73,24 +70,25 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         }
     }
 
-    fun onRefreshRequested() = refreshTransactionList()
-
-    private fun refreshTransactionList() {
+    fun onRefreshRequested() {
         chosenAccount?.let { chosenAccount ->
             Observable.merge(
                     getBalanceObservable(chosenAccount),
-                    getTransactionsListObservable(chosenAccount),
-                    getUpdateTickerObservable()
-            ).doOnTerminate { view.setShowRefreshing(false) }
-                    .subscribe(
-                            { /* No-op */ },
-                            {
-                                // TODO: Update UI with failure state here, or perhaps in component observables?
-                                throwable -> throwable.printStackTrace()
-                                view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
-                            })
+                    getTransactionsListObservable(chosenAccount)
+            ).subscribe(
+                    { /* No-op */ },
+                    { view.setUiState(UiState.FAILURE) })
         }
     }
+
+    fun setViewType(isBtc: Boolean) {
+        accessState.setIsBtc(isBtc)
+        view.onViewTypeChanged(isBtc)
+        view.onTotalBalanceUpdated(getBalanceString(isBtc, chosenAccount?.absoluteBalance!!))
+    }
+
+    // TODO: Refactor this out of here
+    fun getViewType() = accessState.isBtc
 
     private fun getAllDisplayableAccounts(): MutableList<ItemAccount> {
         val mutableList = mutableListOf<ItemAccount>()
@@ -102,10 +100,9 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 .filter { !it.isArchived }
                 .map { it ->
                     val bigIntBalance = payloadDataManager.getAddressBalance(it.xpub)
-
                     ItemAccount().apply {
                         label = it.label
-                        displayBalance = getBalanceString(true, bigIntBalance.toLong())
+                        displayBalance = getBalanceString(accessState.isBtc, bigIntBalance.toLong())
                         absoluteBalance = bigIntBalance.toLong()
                         accountObject = it
                     }
@@ -122,7 +119,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
             mutableList.add(ItemAccount().apply {
                 label = all.label
-                displayBalance = getBalanceString(true, bigIntBalance.toLong())
+                displayBalance = getBalanceString(accessState.isBtc, bigIntBalance.toLong())
                 absoluteBalance = bigIntBalance.toLong()
                 accountObject = all
             })
@@ -141,7 +138,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
             mutableList.add(ItemAccount().apply {
                 label = importedAddresses.label
-                displayBalance = getBalanceString(true, bigIntBalance.toLong())
+                displayBalance = getBalanceString(accessState.isBtc, bigIntBalance.toLong())
                 absoluteBalance = bigIntBalance.toLong()
                 accountObject = importedAddresses
             })
@@ -153,6 +150,10 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     private fun getTransactionsListObservable(itemAccount: ItemAccount) =
             transactionListDataManager.fetchTransactions(itemAccount.accountObject, 50, 0)
                     .doOnNext {
+                        when {
+                            it.isEmpty() -> view.setUiState(UiState.EMPTY)
+                            else -> view.setUiState(UiState.CONTENT)
+                        }
                         view.onTransactionsUpdated(it)
                     }
 
@@ -160,7 +161,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
             payloadDataManager.updateAllBalances()
                     .doOnComplete {
                         val btcBalance = transactionListDataManager.getBtcBalance(itemAccount.accountObject)
-                        val balanceTotal = getBalanceString(isBTC = true, btcBalance = btcBalance)
+                        val balanceTotal = getBalanceString(accessState.isBtc, btcBalance)
                         view.onTotalBalanceUpdated(balanceTotal)
                     }.toObservable<Nothing>()
 
