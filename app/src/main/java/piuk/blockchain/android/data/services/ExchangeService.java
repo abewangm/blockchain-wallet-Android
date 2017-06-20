@@ -132,7 +132,7 @@ public class ExchangeService {
 
                     return trades;
                 })
-                .filter(tradeData -> !tradeData.isConfirmed())
+                .filter(tradeData -> tradeData.isBuy() && !tradeData.isConfirmed())
                 .map(tradeData ->
                         payloadDataManager.getReceiveAddressAtArbitraryPosition(
                                 payloadDataManager.getAccount(tradeData.getAccountIndex()),

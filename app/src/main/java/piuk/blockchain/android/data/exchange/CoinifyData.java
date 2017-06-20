@@ -13,6 +13,9 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CoinifyData implements ExchangeAccount {
+    public CoinifyData() {
+    }
+
     @JsonProperty("user")
     private int user = 0;
 
