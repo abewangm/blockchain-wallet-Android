@@ -221,6 +221,7 @@ public class LegacyBalanceFragment extends Fragment implements BalanceViewModel.
     }
 
     @Override
+    // TODO: 19/06/2017 moved to promptManager
     public void show2FaDialog() {
         SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
                 R.string.two_fa,
@@ -253,6 +254,7 @@ public class LegacyBalanceFragment extends Fragment implements BalanceViewModel.
     }
 
     @Override
+    // TODO: 19/06/2017 moved to promptManager
     public void showBackupPromptDialog(boolean showNeverAgain) {
         SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
                 R.string.security_centre_backup_title,

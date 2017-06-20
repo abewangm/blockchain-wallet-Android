@@ -38,7 +38,7 @@ import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
@@ -62,8 +62,6 @@ import piuk.blockchain.android.util.StringUtils;
 public class BalanceViewModel extends BaseViewModel {
 
     private final String TAG = getClass().getName();
-
-    private static final long ONE_MONTH = 28 * 24 * 60 * 60 * 1000L;
 
     private DataListener dataListener;
 
@@ -113,8 +111,10 @@ public class BalanceViewModel extends BaseViewModel {
 
         void onPendingTxUpdate();
 
+        // TODO: 19/06/2017 moved to promptManager
         void showBackupPromptDialog(boolean showNeverAgain);
 
+        // TODO: 19/06/2017 moved to promptManager
         void show2FaDialog();
 
         void updateBalance(String balance);
@@ -167,54 +167,10 @@ public class BalanceViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        if (prefsUtil.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
-            // 1st run of the app
-            prefsUtil.setValue(PrefsUtil.KEY_FIRST_RUN, false);
-        } else {
+
+        if(prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0) > 0) {
             // Check from this point forwards
             txListObservable = rxBus.register(List.class);
-
-            if (prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0) == 3) {
-                // On third visit onwards, prompt 2FA
-                compositeDisposable.add(
-                        txListObservable
-                                .compose(RxUtil.applySchedulersToObservable())
-                                .subscribe(txs -> {
-                                    if (!getIfNeverPrompt2Fa()) {
-                                        compositeDisposable.add(
-                                                settingsDataManager.initSettings(
-                                                        prefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
-                                                        prefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""))
-                                                        .subscribe(settings -> {
-                                                            if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
-                                                                // Show dialog for 2FA, store date of dialog launch
-                                                                if (getTimeOfLastSecurityPrompt() == 0L
-                                                                        || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-                                                                    dataListener.show2FaDialog();
-                                                                    storeTimeOfLastSecurityPrompt();
-                                                                }
-                                                            }
-                                                        }, Throwable::printStackTrace));
-                                    }
-                                }, Throwable::printStackTrace));
-            } else {
-                // From second visit onwards, prompt backup if not already
-                compositeDisposable.add(
-                        txListObservable
-                                .compose(RxUtil.applySchedulersToObservable())
-                                .subscribe(txs -> {
-                                    if (hasTransactions() && !payloadDataManager.isBackedUp() && !getIfNeverPromptBackup()) {
-                                        // Show dialog and store date of dialog launch
-                                        if (getTimeOfLastSecurityPrompt() == 0) {
-                                            dataListener.showBackupPromptDialog(false);
-                                            storeTimeOfLastSecurityPrompt();
-                                        } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-                                            dataListener.showBackupPromptDialog(true);
-                                            storeTimeOfLastSecurityPrompt();
-                                        }
-                                    }
-                                }, Throwable::printStackTrace));
-            }
         }
 
         compositeDisposable.add(
@@ -619,6 +575,7 @@ public class BalanceViewModel extends BaseViewModel {
     /**
      * Saves value of true to prevent users from seeing the backup prompt again
      */
+    // TODO: 19/06/2017 moved to promptManager
     public void neverPromptBackup() {
         prefsUtil.setValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER, true);
     }
@@ -626,6 +583,7 @@ public class BalanceViewModel extends BaseViewModel {
     /**
      * Saves value of true to prevent users from seeing the 2FA prompt again
      */
+    // TODO: 19/06/2017 moved to promptManager
     public void neverPrompt2Fa() {
         prefsUtil.setValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER, true);
     }
@@ -646,24 +604,9 @@ public class BalanceViewModel extends BaseViewModel {
         return prefsUtil;
     }
 
+    // TODO: 19/06/2017 moved to promptManager
     private boolean hasTransactions() {
         return !transactionListDataManager.getTransactionList().isEmpty();
-    }
-
-    private long getTimeOfLastSecurityPrompt() {
-        return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_TIME_ELAPSED, 0L);
-    }
-
-    private void storeTimeOfLastSecurityPrompt() {
-        prefsUtil.setValue(PrefsUtil.KEY_SECURITY_TIME_ELAPSED, System.currentTimeMillis());
-    }
-
-    private boolean getIfNeverPromptBackup() {
-        return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER, false);
-    }
-
-    private boolean getIfNeverPrompt2Fa() {
-        return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER, false);
     }
 
     private int getCorrectedAccountIndex(int accountIndex) {

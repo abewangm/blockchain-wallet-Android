@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.services;
+package piuk.blockchain.android.data.settings;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.settings.SettingsManager;
@@ -30,6 +30,20 @@ public class SettingsServiceTest extends RxTest {
         MockitoAnnotations.initMocks(this);
 
         subject = new SettingsService(settingsManager);
+    }
+
+    @Test
+    public void getSettingsObservable() throws Exception {
+        Settings mockSettings = mock(Settings.class);
+        when(settingsManager.getInfo()).thenReturn(Observable.just(mockSettings));
+        // Act
+        TestObserver<Settings> testObserver = subject.getSettingsObservable().test();
+        // Assert
+        verify(settingsManager).getInfo();
+        verifyNoMoreInteractions(settingsManager);
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        assertEquals(mockSettings, testObserver.values().get(0));
     }
 
     @Test
