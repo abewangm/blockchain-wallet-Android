@@ -1,12 +1,12 @@
 package piuk.blockchain.android.ui.balance
 
 import info.blockchain.wallet.payload.data.LegacyAddress
+import io.reactivex.Completable
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.injection.Injector
-import piuk.blockchain.android.ui.account.AccountActivity
 import piuk.blockchain.android.ui.account.ConsolidatedAccount
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -54,12 +54,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
         val fctxObservable = contactsDataManager.facilitatedTransactions
 
-        val balanceCompletable = payloadDataManager.updateAllBalances()
-                .doOnComplete {
-                    val btcBalance = transactionListDataManager.getBtcBalance(initialDisplayAccount.accountObject)
-                    val balanceTotal = getBalanceString(isBTC = true, btcBalance = btcBalance)
-                    view.onTotalBalanceUpdated(balanceTotal)
-                }
+        val balanceCompletable = getBalanceCompletable(initialDisplayAccount)
 
         balanceCompletable.subscribe()
 
@@ -78,7 +73,14 @@ class BalancePresenter : BasePresenter<BalanceView>() {
          */
     }
 
-    fun getAllDisplayableAccounts() : List<ItemAccount> {
+    fun onAccountChosen(position: Int) {
+        getBalanceCompletable(activeAccountAndAddressList[position])
+                .subscribe({
+                    // No-op
+                }, { t: Throwable? -> t?.printStackTrace() })
+    }
+
+    private fun getAllDisplayableAccounts(): List<ItemAccount> {
         activeAccountAndAddressList.clear()
 
         val legacyAddresses = payloadDataManager.legacyAddresses
@@ -136,6 +138,15 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         return activeAccountAndAddressList
     }
 
+    private fun getBalanceCompletable(itemAccount: ItemAccount): Completable {
+        return payloadDataManager.updateAllBalances()
+                .doOnComplete {
+                    val btcBalance = transactionListDataManager.getBtcBalance(itemAccount.accountObject)
+                    val balanceTotal = getBalanceString(isBTC = true, btcBalance = btcBalance)
+                    view.onTotalBalanceUpdated(balanceTotal)
+                }
+    }
+
     private fun getBalanceString(isBTC: Boolean, btcBalance: Long): String {
         val strFiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         val lastPrice = ExchangeRateFactory.getInstance().getLastPrice(strFiat)
@@ -155,14 +166,14 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     private fun getFiatCurrency(): String =
             prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
-    private val monetaryUtil: MonetaryUtil by lazy(LazyThreadSafetyMode.NONE) { MonetaryUtil(prefsUtil.getValue(
-            PrefsUtil.KEY_BTC_UNITS,
-            MonetaryUtil.UNIT_BTC
-    )) }
+    private val monetaryUtil: MonetaryUtil by lazy(LazyThreadSafetyMode.NONE) {
+        MonetaryUtil(prefsUtil.getValue(
+                PrefsUtil.KEY_BTC_UNITS,
+                MonetaryUtil.UNIT_BTC
+        ))
+    }
 
     fun onRefreshRequested(): Unit = TODO("Update the list of transactions")
-
-    fun onAccountChosen(account: AccountActivity): Unit = TODO("Filter the TX list by Account/LegacyAddress")
 
     fun onViewFormatChanged(): Unit = TODO("Change the stored view format (isBtc) and update the UI to reflect that")
 

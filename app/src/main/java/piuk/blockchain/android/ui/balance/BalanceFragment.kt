@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import kotlinx.android.synthetic.main.activity_contacts.*
 import kotlinx.android.synthetic.main.fragment_balance.*
 import piuk.blockchain.android.BuildConfig
@@ -16,6 +15,7 @@ import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.util.MonetaryUtil
+import piuk.blockchain.android.util.OnItemSelectedListener
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.toast
@@ -61,23 +61,18 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 true,
                 monetaryUtil,
                 fiat,
-                lastPrice).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
+                lastPrice
+        ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
 
         accounts_spinner.adapter = accountsAdapter
-        accounts_spinner.setOnTouchListener({ _, event -> event.action == MotionEvent.ACTION_UP && (activity as MainActivity).drawerOpen })
-        accounts_spinner.post({
-            accounts_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(arg0: AdapterView<*>, arg1: View, arg2: Int, arg3: Long) {
-                    //Refresh balance header and tx list
-//                    updateBalanceAndTransactionList(true)
-//                    binding.rvTransactions.scrollToPosition(0)
-                }
-
-                override fun onNothingSelected(arg0: AdapterView<*>) {
-                    // No-op
-                }
-            }
+        accounts_spinner.setOnTouchListener({ _, event ->
+            event.action == MotionEvent.ACTION_UP && (activity as MainActivity).drawerOpen
         })
+
+        accounts_spinner.onItemSelectedListener = OnItemSelectedListener {
+            getPresenter().onAccountChosen(it)
+            recyclerview.scrollToPosition(0)
+        }
     }
 
     override fun onTotalBalanceUpdated(balance: String) {
