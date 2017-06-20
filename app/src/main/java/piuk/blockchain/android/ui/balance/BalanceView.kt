@@ -14,7 +14,7 @@ interface BalanceView : View {
 
     fun onTotalBalanceUpdated(balance: String)
 
-    fun onExchangeRateUpdated()
+    fun onExchangeRateUpdated(exchangeRate: Double)
 
     fun showProgressDialog()
 
