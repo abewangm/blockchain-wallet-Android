@@ -33,7 +33,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-import static piuk.blockchain.android.ui.balance.BalanceFragment.SHOW_BTC;
+import static piuk.blockchain.android.ui.balance.LegacyBalanceFragment.SHOW_BTC;
 import static piuk.blockchain.android.ui.send.SendViewModel.SHOW_FIAT;
 
 

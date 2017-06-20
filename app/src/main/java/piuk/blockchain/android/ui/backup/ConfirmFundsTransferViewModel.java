@@ -176,7 +176,7 @@ public class ConfirmFundsTransferViewModel extends BaseViewModel {
     void archiveAll() {
         mDataListener.showProgressDialog();
         for (PendingTransaction spend : mPendingTransactions) {
-            ((LegacyAddress) spend.sendingObject.accountObject).setTag(LegacyAddress.ARCHIVED_ADDRESS);
+            ((LegacyAddress) spend.sendingObject.getAccountObject()).setTag(LegacyAddress.ARCHIVED_ADDRESS);
         }
 
         compositeDisposable.add(

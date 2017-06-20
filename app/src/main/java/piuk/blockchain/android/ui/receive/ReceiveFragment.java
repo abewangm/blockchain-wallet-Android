@@ -62,7 +62,7 @@ import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentReceiveBinding;
-import piuk.blockchain.android.ui.balance.BalanceFragment;
+import piuk.blockchain.android.ui.balance.LegacyBalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.customviews.CustomKeypad;
@@ -92,11 +92,11 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     private long backPressed;
     @Thunk int selectedAccountPosition = -1;
 
-    private IntentFilter intentFilter = new IntentFilter(BalanceFragment.ACTION_INTENT);
+    private IntentFilter intentFilter = new IntentFilter(LegacyBalanceFragment.ACTION_INTENT);
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            if (intent.getAction().equals(BalanceFragment.ACTION_INTENT)) {
+            if (intent.getAction().equals(LegacyBalanceFragment.ACTION_INTENT)) {
                 if (viewModel != null) {
                     // Update UI with new Address + QR
                     viewModel.updateAccountList();

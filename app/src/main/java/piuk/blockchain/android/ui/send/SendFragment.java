@@ -68,7 +68,7 @@ import piuk.blockchain.android.databinding.FragmentSendBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
-import piuk.blockchain.android.ui.balance.BalanceFragment;
+import piuk.blockchain.android.ui.balance.LegacyBalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
@@ -128,7 +128,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
+            if (intent.getAction().equals(LegacyBalanceFragment.ACTION_INTENT) && binding != null) {
                 viewModel.updateUI();
             }
         }
@@ -185,7 +185,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         super.onResume();
         setupToolbar();
         closeKeypad();
-        IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
+        IntentFilter filter = new IntentFilter(LegacyBalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
         viewModel.updateUI();
     }
@@ -288,7 +288,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     Account account = ((Account) object);
                     chosenItem = new ItemAccount(account.getLabel(), null, null, null, account);
 
-                    String label = chosenItem.label;
+                    String label = chosenItem.getLabel();
                     if (label == null || label.isEmpty()) {
                         label = account.getXpub();
                     }
@@ -298,7 +298,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
                     chosenItem = new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress);
 
-                    String label = chosenItem.label;
+                    String label = chosenItem.getLabel();
                     if (label == null || label.isEmpty()) {
                         label = legacyAddress.getAddress();
                     }
@@ -549,7 +549,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         viewModel.setSendingAddress(itemAccount);
         updateTotals(itemAccount);
-        binding.from.setText(itemAccount.label);
+        binding.from.setText(itemAccount.getLabel());
 
         binding.from.setOnClickListener(v -> startFromFragment());
         binding.imageviewDropdownSend.setOnClickListener(v -> startFromFragment());

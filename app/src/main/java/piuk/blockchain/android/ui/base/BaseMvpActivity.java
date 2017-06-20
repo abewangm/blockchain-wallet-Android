@@ -7,7 +7,7 @@ import android.support.annotation.Nullable;
 public abstract class BaseMvpActivity<VIEW extends View, PRESENTER extends BasePresenter<VIEW>>
         extends BaseAuthActivity {
 
-    protected PRESENTER presenter;
+    private PRESENTER presenter;
 
     @CallSuper
     @Override

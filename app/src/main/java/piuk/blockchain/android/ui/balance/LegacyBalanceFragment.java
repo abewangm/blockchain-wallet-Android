@@ -7,19 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -33,7 +29,6 @@ import java.util.List;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.databinding.FragmentBalanceBinding;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter;
 import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener;
@@ -59,10 +54,10 @@ import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 
-public class BalanceFragment extends Fragment implements BalanceViewModel.DataListener,
+public class LegacyBalanceFragment extends Fragment implements BalanceViewModel.DataListener,
         TransactionSelectedListener {
 
-    public static final String ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH";
+    public static final String ACTION_INTENT = "info.blockchain.wallet.ui.LegacyBalanceFragment.REFRESH";
     public static final String KEY_TRANSACTION_LIST_POSITION = "transaction_list_position";
     public static final String KEY_TRANSACTION_HASH = "transaction_hash";
     public static final String ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment";
@@ -79,19 +74,15 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Thunk AppCompatSpinner accountSpinner;
     // Tx list
 
-    @Thunk FragmentBalanceBinding binding;
+//    @Thunk FragmentBalanceBinding binding;
     @Thunk BalanceViewModel viewModel;
 
     @Thunk BalanceAdapter balanceAdapter;
 
-    public BalanceFragment() {
-        // Required empty constructor
-    }
-
-    public static BalanceFragment newInstance(boolean broadcastingPayment) {
+    public static LegacyBalanceFragment newInstance(boolean broadcastingPayment) {
         Bundle args = new Bundle();
         args.putBoolean(ARGUMENT_BROADCASTING_PAYMENT, broadcastingPayment);
-        BalanceFragment fragment = new BalanceFragment();
+        LegacyBalanceFragment fragment = new LegacyBalanceFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -105,7 +96,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                 refreshFacilitatedTransactions();
                 // Check backup status on receiving funds
                 viewModel.onViewReady();
-                binding.rvTransactions.scrollToPosition(0);
+//                binding.rvTransactions.scrollToPosition(0);
             }
         }
     };
@@ -113,7 +104,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_balance, container, false);
+//        binding = null;
         viewModel = new BalanceViewModel(this);
 
         balanceDisplayState = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
@@ -125,7 +116,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             refreshFacilitatedTransactions();
         }
 
-        return binding.getRoot();
+        return null;
     }
 
     @Override
@@ -163,7 +154,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         viewModel.getFacilitatedTransactions();
         updateBalanceAndTransactionList(false);
 
-        binding.rvTransactions.clearOnScrollListeners();
+//        binding.rvTransactions.clearOnScrollListeners();
 
         updateAdapters();
     }
@@ -195,12 +186,12 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     @Override
     public void updateBalance(String balance) {
-        binding.balance.setText(balance);
+//        binding.balance.setText(balance);
     }
 
     @Override
     public void setShowRefreshing(boolean showRefreshing) {
-        binding.swipeContainer.setRefreshing(showRefreshing);
+//        binding.swipeContainer.setRefreshing(showRefreshing);
     }
 
     @Override
@@ -208,11 +199,11 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         super.onPause();
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(receiver);
 
-        if (binding.swipeContainer != null) {
-            binding.swipeContainer.setRefreshing(false);
-            binding.swipeContainer.destroyDrawingCache();
-            binding.swipeContainer.clearAnimation();
-        }
+//        if (binding.swipeContainer != null) {
+//            binding.swipeContainer.setRefreshing(false);
+//            binding.swipeContainer.destroyDrawingCache();
+//            binding.swipeContainer.clearAnimation();
+//        }
     }
 
     /**
@@ -320,25 +311,25 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @SuppressLint("ClickableViewAccessibility")
     private void setupViews() {
         setShowRefreshing(true);
-        binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.GONE);
+//        binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.GONE);
 
-        binding.balance.setOnTouchListener((v, event) -> {
-            if (balanceDisplayState == SHOW_BTC) {
-                balanceDisplayState = SHOW_FIAT;
-                isBTC = false;
-                updateBalanceAndTransactionList(false);
-            } else {
-                balanceDisplayState = SHOW_BTC;
-                isBTC = true;
-                updateBalanceAndTransactionList(false);
-            }
+//        binding.balance.setOnTouchListener((v, event) -> {
+//            if (balanceDisplayState == SHOW_BTC) {
+//                balanceDisplayState = SHOW_FIAT;
+//                isBTC = false;
+//                updateBalanceAndTransactionList(false);
+//            } else {
+//                balanceDisplayState = SHOW_BTC;
+//                isBTC = true;
+//                updateBalanceAndTransactionList(false);
+//            }
+//
+//            balanceAdapter.onViewFormatUpdated(isBTC);
+//            viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, balanceDisplayState);
+//            return false;
+//        });
 
-            balanceAdapter.onViewFormatUpdated(isBTC);
-            viewModel.getPrefsUtil().setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, balanceDisplayState);
-            return false;
-        });
-
-        accountSpinner = binding.accountsSpinner;
+//        accountSpinner = binding.accountsSpinner;
         updateAccountList();
 
         String fiat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
@@ -361,7 +352,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                 //Refresh balance header and tx list
                 updateBalanceAndTransactionList(true);
-                binding.rvTransactions.scrollToPosition(0);
+//                binding.rvTransactions.scrollToPosition(0);
             }
 
             @Override
@@ -404,13 +395,13 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
         balanceAdapter.setHasStableIds(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        binding.rvTransactions.setLayoutManager(layoutManager);
-        binding.rvTransactions.setAdapter(balanceAdapter);
+//        binding.rvTransactions.setLayoutManager(layoutManager);
+//        binding.rvTransactions.setAdapter(balanceAdapter);
         // Disable blinking animations in RecyclerView
-        RecyclerView.ItemAnimator animator = binding.rvTransactions.getItemAnimator();
-        if (animator instanceof SimpleItemAnimator) {
-            ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
-        }
+//        RecyclerView.ItemAnimator animator = binding.rvTransactions.getItemAnimator();
+//        if (animator instanceof SimpleItemAnimator) {
+//            ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
+//        }
 
         // drawerTitle account now that wallet has been created
         if (!viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_INITIAL_ACCOUNT_NAME, "").isEmpty()) {
@@ -423,14 +414,14 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
             accountsAdapter.notifyDataSetChanged();
         }
 
-        binding.swipeContainer.setProgressViewEndTarget(false, (int) ViewUtils.convertDpToPixel(72 + 20, getActivity()));
-        binding.swipeContainer.setOnRefreshListener(() -> viewModel.onTransactionListRefreshed());
-        binding.swipeContainer.setColorSchemeResources(
-                R.color.product_green_medium,
-                R.color.primary_blue_medium,
-                R.color.product_red_medium);
-
-        binding.noTransactionInclude.buttonGetBitcoin.setOnClickListener(v -> viewModel.getBitcoinClicked());
+//        binding.swipeContainer.setProgressViewEndTarget(false, (int) ViewUtils.convertDpToPixel(72 + 20, getActivity()));
+//        binding.swipeContainer.setOnRefreshListener(() -> viewModel.onTransactionListRefreshed());
+//        binding.swipeContainer.setColorSchemeResources(
+//                R.color.product_green_medium,
+//                R.color.primary_blue_medium,
+//                R.color.product_red_medium);
+//
+//        binding.noTransactionInclude.buttonGetBitcoin.setOnClickListener(v -> viewModel.getBitcoinClicked());
 
         setAnnouncement();
     }
@@ -495,8 +486,8 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
                     getContext(),
                     (int) ViewUtils.convertDpToPixel(56f, getContext()));
         }
-        binding.rvTransactions.removeItemDecoration(spacerDecoration);
-        binding.rvTransactions.addItemDecoration(spacerDecoration);
+//        binding.rvTransactions.removeItemDecoration(spacerDecoration);
+//        binding.rvTransactions.addItemDecoration(spacerDecoration);
     }
 
     @Override
@@ -509,28 +500,28 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         List<Object> newTransactions = new ArrayList<>();
         ListUtil.addAllIfNotNull(newTransactions, viewModel.getTransactionList());
         balanceAdapter.setItems(newTransactions);
-        binding.rvTransactions.scrollToPosition(0);
+//        binding.rvTransactions.scrollToPosition(0);
     }
 
     private void handleTransactionsVisibility() {
-        if (!viewModel.getTransactionList().isEmpty()) {
-            binding.rvTransactions.setVisibility(View.VISIBLE);
-            binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.GONE);
-        } else {
-            binding.rvTransactions.setVisibility(View.GONE);
-            binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.VISIBLE);
-
-            if (!viewModel.isOnboardingComplete()) {
-                initOnboardingPager();
-                binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.VISIBLE);
-            } else {
-                binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
-
-                if (binding.announcementView.getVisibility() != View.VISIBLE) {
-                    binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
-                }
-            }
-        }
+//        if (!viewModel.getTransactionList().isEmpty()) {
+//            binding.rvTransactions.setVisibility(View.VISIBLE);
+//            binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.GONE);
+//        } else {
+//            binding.rvTransactions.setVisibility(View.GONE);
+//            binding.noTransactionInclude.noTxMessageLayout.setVisibility(View.VISIBLE);
+//
+//            if (!viewModel.isOnboardingComplete()) {
+//                initOnboardingPager();
+//                binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.VISIBLE);
+//            } else {
+//                binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
+//
+//                if (binding.announcementView.getVisibility() != View.VISIBLE) {
+//                    binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
+//                }
+//            }
+//        }
     }
 
     @Override
@@ -664,7 +655,7 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
     @Override
     public void onScrollToTop() {
         if (getActivity() != null && !getActivity().isFinishing()) {
-            binding.rvTransactions.smoothScrollToPosition(0);
+//            binding.rvTransactions.smoothScrollToPosition(0);
         }
     }
 
@@ -681,80 +672,80 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
         if (onboardingPagerAdapter != null) {
             onboardingPagerAdapter.notifyPagesChanged(pages);
 
-            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.post(() ->
-                    binding.noTransactionInclude.progressBar.setVisibility(View.GONE));
-
-            binding.noTransactionInclude.onboardingViewpagerLayout.indicator.setViewPager(
-                    binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding);
+//            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.post(() ->
+//                    binding.noTransactionInclude.progressBar.setVisibility(View.GONE));
+//
+//            binding.noTransactionInclude.onboardingViewpagerLayout.indicator.setViewPager(
+//                    binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding);
         }
     }
 
     private void initOnboardingPager() {
         if (onboardingPagerAdapter == null) {
             onboardingPagerAdapter = new OnboardingPagerAdapter(getContext());
-            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setAdapter(onboardingPagerAdapter);
-            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(
-                    new ViewPager.OnPageChangeListener() {
-                        @Override
-                        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-                            if (position == onboardingPagerAdapter.getCount() - 1) {
-                                //Last page
-                                binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setPagingEnabled(false);
-                                binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.VISIBLE);
-                                viewModel.setOnboardingComplete(true);
-                            } else if (position == onboardingPagerAdapter.getCount() - 2) {
-                                //Second last page
-                                binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1 - positionOffset);
-                                binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setAlpha(positionOffset);
-                                viewModel.setOnboardingComplete(false);
-                            } else {
-                                binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setVisibility(View.VISIBLE);
-                                binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.INVISIBLE);
-                                binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1.0f);
-                                viewModel.setOnboardingComplete(false);
-                            }
-                        }
-
-                        @Override
-                        public void onPageSelected(int position) {
-                            // No-op
-                        }
-
-                        @Override
-                        public void onPageScrollStateChanged(int state) {
-                            // No-op
-                        }
-                    });
+//            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setAdapter(onboardingPagerAdapter);
+//            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(
+//                    new ViewPager.OnPageChangeListener() {
+//                        @Override
+//                        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+//
+//                            if (position == onboardingPagerAdapter.getCount() - 1) {
+//                                //Last page
+//                                binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setPagingEnabled(false);
+//                                binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.VISIBLE);
+//                                viewModel.setOnboardingComplete(true);
+//                            } else if (position == onboardingPagerAdapter.getCount() - 2) {
+//                                //Second last page
+//                                binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1 - positionOffset);
+//                                binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setAlpha(positionOffset);
+//                                viewModel.setOnboardingComplete(false);
+//                            } else {
+//                                binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setVisibility(View.VISIBLE);
+//                                binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.INVISIBLE);
+//                                binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1.0f);
+//                                viewModel.setOnboardingComplete(false);
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onPageSelected(int position) {
+//                            // No-op
+//                        }
+//
+//                        @Override
+//                        public void onPageScrollStateChanged(int state) {
+//                            // No-op
+//                        }
+//                    });
         }
 
-        binding.noTransactionInclude.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(v -> {
-            binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
-
-            if (binding.announcementView.getVisibility() != View.VISIBLE) {
-                binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
-            }
-            viewModel.setOnboardingComplete(true);
-        });
-
-        binding.noTransactionInclude.onboardingCompleteLayout.onboardingClose.setOnClickListener(v -> {
-            binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
-
-            if (binding.announcementView.getVisibility() != View.VISIBLE) {
-                binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
-            }
-            viewModel.setOnboardingComplete(true);
-        });
-
-        binding.noTransactionInclude.onboardingCompleteLayout.buttonStartOver.setOnClickListener(v -> {
-            binding.noTransactionInclude.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.VISIBLE);
-            binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setVisibility(View.VISIBLE);
-            binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.INVISIBLE);
-            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setCurrentItem(0);
-            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setPagingEnabled(true);
-            binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1.0f);
-            viewModel.setOnboardingComplete(false);
-        });
+//        binding.noTransactionInclude.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(v -> {
+//            binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
+//
+//            if (binding.announcementView.getVisibility() != View.VISIBLE) {
+//                binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
+//            }
+//            viewModel.setOnboardingComplete(true);
+//        });
+//
+//        binding.noTransactionInclude.onboardingCompleteLayout.onboardingClose.setOnClickListener(v -> {
+//            binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
+//
+//            if (binding.announcementView.getVisibility() != View.VISIBLE) {
+//                binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
+//            }
+//            viewModel.setOnboardingComplete(true);
+//        });
+//
+//        binding.noTransactionInclude.onboardingCompleteLayout.buttonStartOver.setOnClickListener(v -> {
+//            binding.noTransactionInclude.onboardingViewpagerLayout.onboardingLayout.setVisibility(View.VISIBLE);
+//            binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setVisibility(View.VISIBLE);
+//            binding.noTransactionInclude.onboardingCompleteLayout.onboardingLayout.setVisibility(View.INVISIBLE);
+//            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setCurrentItem(0);
+//            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setPagingEnabled(true);
+//            binding.noTransactionInclude.onboardingViewpagerLayout.viewPagerIndicator.setAlpha(1.0f);
+//            viewModel.setOnboardingComplete(false);
+//        });
     }
 
     @Override
@@ -771,31 +762,31 @@ public class BalanceFragment extends Fragment implements BalanceViewModel.DataLi
 
     private void setAnnouncement() {
 
-        binding.announcementView.setTitle(R.string.onboarding_available_now);
-        binding.announcementView.setContent(R.string.onboarding_buy_details);
-        binding.announcementView.setLink(R.string.onboarding_buy_bitcoin);
-        binding.announcementView.setImage(R.drawable.vector_wallet_offset);
-        binding.announcementView.setEmoji(R.drawable.celebration_emoji);
-        binding.announcementView.setLinkOnclickListener(v -> {
-            startBuyActivity();
-            viewModel.disableAnnouncement();
-        });
-        binding.announcementView.setCloseOnclickListener(v -> {
-            binding.announcementView.setVisibility(View.GONE);
-            binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
-            viewModel.disableAnnouncement();
-        });
+//        binding.announcementView.setTitle(R.string.onboarding_available_now);
+//        binding.announcementView.setContent(R.string.onboarding_buy_details);
+//        binding.announcementView.setLink(R.string.onboarding_buy_bitcoin);
+//        binding.announcementView.setImage(R.drawable.vector_wallet_offset);
+//        binding.announcementView.setEmoji(R.drawable.celebration_emoji);
+//        binding.announcementView.setLinkOnclickListener(v -> {
+//            startBuyActivity();
+//            viewModel.disableAnnouncement();
+//        });
+//        binding.announcementView.setCloseOnclickListener(v -> {
+//            binding.announcementView.setVisibility(View.GONE);
+//            binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
+//            viewModel.disableAnnouncement();
+//        });
     }
 
     @Override
     public void onShowAnnouncement() {
-        binding.announcementView.setVisibility(View.VISIBLE);
-        binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.GONE);
+//        binding.announcementView.setVisibility(View.VISIBLE);
+//        binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.GONE);
     }
 
     @Override
     public void onHideAnnouncement() {
-        binding.announcementView.setVisibility(View.GONE);
-        binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
+//        binding.announcementView.setVisibility(View.GONE);
+//        binding.noTransactionInclude.buttonGetBitcoin.setVisibility(View.VISIBLE);
     }
 }

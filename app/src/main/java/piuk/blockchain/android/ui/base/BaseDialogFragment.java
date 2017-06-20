@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatDialogFragment;
 public abstract class BaseDialogFragment<VIEW extends View, PRESENTER extends BasePresenter<VIEW>>
         extends AppCompatDialogFragment {
 
-    protected PRESENTER presenter;
+    private PRESENTER presenter;
 
     @CallSuper
     @Override

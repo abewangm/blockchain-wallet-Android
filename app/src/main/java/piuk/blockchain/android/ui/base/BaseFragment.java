@@ -8,7 +8,7 @@ import android.support.v4.app.Fragment;
 public abstract class BaseFragment<VIEW extends View, PRESENTER extends BasePresenter<VIEW>>
         extends Fragment {
 
-    protected PRESENTER presenter;
+    private PRESENTER presenter;
 
     @CallSuper
     @Override
