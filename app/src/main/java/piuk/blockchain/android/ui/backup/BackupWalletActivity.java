@@ -1,6 +1,9 @@
 package piuk.blockchain.android.ui.backup;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 
@@ -8,10 +11,17 @@ import info.blockchain.wallet.payload.PayloadManager;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.settings.SettingsActivity;
 
 public class BackupWalletActivity extends BaseAuthActivity {
 
     public static final String BACKUP_DATE_KEY = "BACKUP_DATE_KEY";
+
+    public static void start(Context context, @Nullable Bundle extras) {
+        Intent starter = new Intent(context, BackupWalletActivity.class);
+        if (extras != null) starter.putExtras(extras);
+        context.startActivity(starter);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.util.Log;
 
 import info.blockchain.wallet.api.WalletApi;
@@ -13,7 +15,6 @@ import info.blockchain.wallet.payload.PayloadManager;
 
 import java.math.BigInteger;
 import java.text.DecimalFormat;
-import java.util.Calendar;
 import java.util.Collections;
 
 import javax.inject.Inject;
@@ -24,7 +25,6 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
-import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.BuyDataManager;
@@ -32,6 +32,8 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
+import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
@@ -49,7 +51,6 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.RootUtil;
 import piuk.blockchain.android.util.StringUtils;
 
 @SuppressWarnings("WeakerAccess")
@@ -78,6 +79,8 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected RxBus rxBus;
     @Inject protected FeeDataManager feeDataManager;
     @Inject protected EnvironmentSettings environmentSettings;
+    @Inject protected TransactionListDataManager transactionListDataManager;
+    @Inject protected PromptManager promptManager;
 
     public interface DataListener {
 
@@ -92,10 +95,6 @@ public class MainViewModel extends BaseViewModel {
 
         boolean isBuySellPermitted();
 
-        void onRooted();
-
-        void onConnectivityFail();
-
         void onFetchTransactionsStart();
 
         void onFetchTransactionCompleted();
@@ -108,15 +107,11 @@ public class MainViewModel extends BaseViewModel {
 
         void kickToLauncherPage();
 
-        void showAddEmailDialog();
-
         void showProgressDialog(@StringRes int message);
 
         void hideProgressDialog();
 
         void clearAllDynamicShortcuts();
-
-        void showSurveyPrompt();
 
         void showContactsRegistrationFailure();
 
@@ -131,6 +126,12 @@ public class MainViewModel extends BaseViewModel {
         void onTradeCompleted(String txHash);
 
         void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails);
+
+        void showDefaultPrompt(AlertDialog alertDialog);
+
+        void showCustomPrompt(AppCompatDialogFragment alertFragment);
+
+        Context getSomeContext();
     }
 
     public MainViewModel(DataListener dataListener) {
@@ -139,11 +140,26 @@ public class MainViewModel extends BaseViewModel {
         osUtil = new OSUtil(applicationContext);
     }
 
+    private Observable<Settings> getSettingsObservable() {
+        return settingsDataManager.initSettings(prefs.getValue(PrefsUtil.KEY_GUID, ""), prefs.getValue(PrefsUtil.KEY_SHARED_KEY, ""));
+    }
+
+    public void initPrompts(Context context) {
+
+        compositeDisposable.add(getSettingsObservable()
+                .flatMap(settings -> promptManager.getDefaultPrompts(context))
+                .flatMap(Observable::fromIterable)
+                .forEach(dataListener::showDefaultPrompt));
+
+        compositeDisposable.add(getSettingsObservable()
+                .flatMap(settings -> promptManager.getCustomPrompts(context, settings))
+                .flatMap(Observable::fromIterable)
+                .forEach(dataListener::showCustomPrompt));
+    }
+
     @Override
     public void onViewReady() {
-        checkRooted();
-        checkConnectivity();
-        checkIfShouldShowEmailVerification();
+        preLaunchChecks();
         startWebSocketService();
         subscribeToNotifications();
         if (dataListener.getIfContactsEnabled()) {
@@ -206,29 +222,6 @@ public class MainViewModel extends BaseViewModel {
                                     // No-op
                                 },
                                 throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
-    }
-
-    void checkIfShouldShowSurvey() {
-        if (!prefs.getValue(PrefsUtil.KEY_SURVEY_COMPLETED, false)) {
-            int visitsToPageThisSession = prefs.getValue(PrefsUtil.KEY_SURVEY_VISITS, 0);
-            // Trigger first time coming back to transaction tab
-            if (visitsToPageThisSession == 1) {
-                // Don't show past June 30th
-                Calendar surveyCutoffDate = Calendar.getInstance();
-                surveyCutoffDate.set(Calendar.YEAR, 2017);
-                surveyCutoffDate.set(Calendar.MONTH, Calendar.JUNE);
-                surveyCutoffDate.set(Calendar.DAY_OF_MONTH, 30);
-
-                if (Calendar.getInstance().before(surveyCutoffDate)) {
-                    dataListener.showSurveyPrompt();
-                    prefs.setValue(PrefsUtil.KEY_SURVEY_COMPLETED, true);
-                }
-            } else {
-                visitsToPageThisSession++;
-                prefs.setValue(PrefsUtil.KEY_SURVEY_VISITS, visitsToPageThisSession);
-            }
-        }
-
     }
 
     void unPair() {
@@ -326,41 +319,10 @@ public class MainViewModel extends BaseViewModel {
                         }, throwable -> dataListener.showContactsRegistrationFailure()));
     }
 
-    private void checkIfShouldShowEmailVerification() {
-        compositeDisposable.add(
-                getSettingsApi()
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(settings -> {
-                            if (!settings.isEmailVerified()) {
-                                String email = settings.getEmail();
-                                if (email == null || email.isEmpty()) {
-                                    if (prefs.getValue(PrefsUtil.KEY_FIRST_RUN, true)) {
-                                        dataListener.showAddEmailDialog();
-                                    }
-                                }
-                            }
-                        }, Throwable::printStackTrace));
-    }
-
     private Observable<Settings> getSettingsApi() {
         return settingsDataManager.initSettings(
                 prefs.getValue(PrefsUtil.KEY_GUID, ""),
                 prefs.getValue(PrefsUtil.KEY_SHARED_KEY, ""));
-    }
-
-    private void checkRooted() {
-        if (new RootUtil().isDeviceRooted() &&
-                !prefs.getValue("disable_root_warning", false)) {
-            dataListener.onRooted();
-        }
-    }
-
-    private void checkConnectivity() {
-        if (ConnectivityStatus.hasConnectivity(applicationContext)) {
-            preLaunchChecks();
-        } else {
-            dataListener.onConnectivityFail();
-        }
     }
 
     private void preLaunchChecks() {
@@ -376,6 +338,9 @@ public class MainViewModel extends BaseViewModel {
                             .compose(RxUtil.applySchedulersToObservable())
                             .flatMapCompletable(feeOptions -> exchangeRateFactory.updateTicker())
                             .doAfterTerminate(() -> {
+
+                                initPrompts(dataListener.getSomeContext());
+
                                 if (dataListener != null) {
                                     dataListener.onFetchTransactionCompleted();
                                 }

@@ -20,6 +20,7 @@ import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
@@ -188,5 +189,12 @@ public class DataManagerModule {
     @ViewModelScope
     protected FeeDataManager provideFeeDataManager(RxBus rxBus) {
         return new FeeDataManager(new FeeApi(), rxBus);
+    }
+
+    @Provides
+    @ViewModelScope
+    protected PromptManager providePromptManager(PrefsUtil prefsUtil, PayloadDataManager payloadDataManager,
+                                                            TransactionListDataManager transactionListDataManager) {
+        return new PromptManager(prefsUtil, payloadDataManager, transactionListDataManager);
     }
 }

@@ -94,6 +94,7 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
                                 && settings.email != null
                                 && !settings.email.isEmpty()) {
                             var visits = prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0)
+
                             // Nag user to verify email after second login
                             when (visits) {
                                 1 -> view.onStartOnboarding(true)

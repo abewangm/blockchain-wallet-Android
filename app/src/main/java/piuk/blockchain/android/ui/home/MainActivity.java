@@ -13,7 +13,6 @@ import android.graphics.Typeface;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,6 +25,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -53,8 +53,6 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
 import piuk.blockchain.android.ui.account.AccountActivity;
-import piuk.blockchain.android.ui.auth.LandingActivity;
-import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -77,7 +75,6 @@ import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
-import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -540,66 +537,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         }
     }
 
-    @Override
-    public void onRooted() {
-        Handler handler = new Handler();
-        handler.postDelayed(() -> {
-            if (!isFinishing()) {
-                rootedDialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                        .setMessage(getString(R.string.device_rooted))
-                        .setCancelable(false)
-                        .setPositiveButton(R.string.dialog_continue, null)
-                        .create();
-
-                rootedDialog.show();
-            }
-        }, 500);
-    }
-
     @Thunk
     Context getActivity() {
         return this;
-    }
-
-    @Override
-    public void showAddEmailDialog() {
-        String message = getString(R.string.security_centre_add_email_message);
-        SecurityPromptDialog securityPromptDialog = SecurityPromptDialog.newInstance(
-                R.string.security_centre_add_email_title,
-                message,
-                R.drawable.vector_email,
-                R.string.security_centre_add_email_positive_button,
-                true,
-                false);
-        securityPromptDialog.showDialog(getSupportFragmentManager());
-        securityPromptDialog.setPositiveButtonListener(v -> {
-            securityPromptDialog.dismiss();
-            Intent intent = new Intent(this, SettingsActivity.class);
-            intent.putExtra(EXTRA_SHOW_ADD_EMAIL_DIALOG, true);
-            startActivity(intent);
-        });
-
-        securityPromptDialog.setNegativeButtonListener(view -> securityPromptDialog.dismiss());
-    }
-
-    @Override
-    public void showSurveyPrompt() {
-        binding.getRoot().postDelayed(() -> {
-            if (!isFinishing()) {
-                new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                        .setTitle(R.string.app_name)
-                        .setMessage(R.string.survey_message)
-                        .setPositiveButton(R.string.survey_positive_button, (dialog, which) -> {
-                            String url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV";
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setData(Uri.parse(url));
-                            startActivity(intent);
-                        })
-                        .setNegativeButton(R.string.polite_no, null)
-                        .create()
-                        .show();
-            }
-        }, 1000);
     }
 
     @Override
@@ -611,27 +551,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                     .setPositiveButton(R.string.retry, (dialog, which) -> viewModel.checkForMessages())
                     .create()
                     .show();
-        }
-    }
-
-    @Override
-    public void onConnectivityFail() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogStyle);
-        final String message = getString(R.string.check_connectivity_exit);
-        builder.setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton(R.string.dialog_continue, (d, id) -> {
-                    Class activityClass;
-                    if (new PrefsUtil(MainActivity.this).getValue(PrefsUtil.KEY_GUID, "").isEmpty()) {
-                        activityClass = LandingActivity.class;
-                    } else {
-                        activityClass = PinEntryActivity.class;
-                    }
-                    startSingleActivity(activityClass);
-                });
-
-        if (!isFinishing()) {
-            builder.create().show();
         }
     }
 
@@ -710,7 +629,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         replaceFragmentWithAnimation(balanceFragment);
         toolbar.setTitle("");
         balanceFragment.checkCachedTransactions();
-        viewModel.checkIfShouldShowSurvey();
     }
 
     public AHBottomNavigation getBottomNavigationView() {
@@ -962,4 +880,28 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         paymentDialog.show(getSupportFragmentManager(), ContactPaymentDialog.class.getSimpleName());
     }
 
+    @Override
+    public void showDefaultPrompt(AlertDialog alertDialog) {
+        Log.d(TAG, "showDefaultPrompt 1: ");
+        binding.getRoot().postDelayed(() -> {
+            if (!isFinishing()) {
+                Log.d(TAG, "showDefaultPrompt 2: ");
+                alertDialog.show();
+            }
+        }, 1000);
+    }
+
+    @Override
+    public void showCustomPrompt(AppCompatDialogFragment alertFragments) {
+        Log.d(TAG, "showCustomPrompt 1: ");
+        if (!isFinishing()) {
+            Log.d(TAG, "showCustomPrompt 2: ");
+            alertFragments.show(getSupportFragmentManager(), alertFragments.getTag());
+        }
+    }
+
+    @Override
+    public Context getSomeContext() {
+        return this;
+    }
 }

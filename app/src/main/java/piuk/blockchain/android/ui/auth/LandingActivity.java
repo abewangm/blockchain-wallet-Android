@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.auth;
 
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -28,6 +29,12 @@ public class LandingActivity extends BaseAuthActivity {
     public static final String KEY_INTENT_RECOVERING_FUNDS = "recovering_funds";
 
     private AppUtil appUtil;
+
+    public static void start(Context context) {
+        Intent intent = new Intent(context, LandingActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CREATE_FRAGMENT, LOGIN_FRAGMENT})
