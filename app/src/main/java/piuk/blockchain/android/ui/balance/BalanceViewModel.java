@@ -38,7 +38,7 @@ import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
@@ -172,55 +172,6 @@ public class BalanceViewModel extends BaseViewModel {
             // Check from this point forwards
             txListObservable = rxBus.register(List.class);
         }
-
-        // TODO: 19/06/2017 moved to promptManager
-//        if (!prefsUtil.getValue(PrefsUtil.KEY_FIRST_RUN, true)){
-//            // Check from this point forwards
-//            txListObservable = rxBus.register(List.class);
-//
-//
-//            if (prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0) == 3) {
-//                // On third visit onwards, prompt 2FA
-//                compositeDisposable.add(
-//                        txListObservable
-//                                .compose(RxUtil.applySchedulersToObservable())
-//                                .subscribe(txs -> {
-//                                    if (!getIfNeverPrompt2Fa()) {
-//                                        compositeDisposable.add(
-//                                                settingsDataManager.initSettings(
-//                                                        prefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
-//                                                        prefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""))
-//                                                        .subscribe(settings -> {
-//                                                            if (!settings.isSmsVerified() && settings.getAuthType() == Settings.AUTH_TYPE_OFF) {
-//                                                                // Show dialog for 2FA, store date of dialog launch
-//                                                                if (getTimeOfLastSecurityPrompt() == 0L
-//                                                                        || (System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-//                                                                    dataListener.show2FaDialog();
-//                                                                    storeTimeOfLastSecurityPrompt();
-//                                                                }
-//                                                            }
-//                                                        }, Throwable::printStackTrace));
-//                                    }
-//                                }, Throwable::printStackTrace));
-//            } else {
-//                // From second visit onwards, prompt backup if not already
-//                compositeDisposable.add(
-//                        txListObservable
-//                                .compose(RxUtil.applySchedulersToObservable())
-//                                .subscribe(txs -> {
-//                                    if (hasTransactions() && !payloadDataManager.isBackedUp() && !getIfNeverPromptBackup()) {
-//                                        // Show dialog and store date of dialog launch
-//                                        if (getTimeOfLastSecurityPrompt() == 0) {
-//                                            dataListener.showBackupPromptDialog(false);
-//                                            storeTimeOfLastSecurityPrompt();
-//                                        } else if ((System.currentTimeMillis() - getTimeOfLastSecurityPrompt()) >= ONE_MONTH) {
-//                                            dataListener.showBackupPromptDialog(true);
-//                                            storeTimeOfLastSecurityPrompt();
-//                                        }
-//                                    }
-//                                }, Throwable::printStackTrace));
-//            }
-//        }
 
         compositeDisposable.add(
                 exchangeRateFactory.updateTicker()

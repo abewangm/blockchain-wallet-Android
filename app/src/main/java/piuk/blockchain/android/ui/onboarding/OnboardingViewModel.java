@@ -8,7 +8,7 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
@@ -55,15 +55,11 @@ public class OnboardingViewModel extends BaseViewModel {
         }
 
         compositeDisposable.add(
-                settingsDataManager.initSettings(
-                        payloadDataManager.getWallet().getGuid(),
-                        payloadDataManager.getWallet().getSharedKey())
+                settingsDataManager.getSettings()
+                        .doAfterTerminate(this::checkAppState)
                         .subscribe(
-                                settings -> {
-                                    email = settings.getEmail();
-                                    checkAppState();
-                                },
-                                throwable -> checkAppState()));
+                                settings -> email = settings.getEmail(),
+                                Throwable::printStackTrace));
     }
 
     /**

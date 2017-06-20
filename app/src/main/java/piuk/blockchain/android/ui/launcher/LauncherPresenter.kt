@@ -1,13 +1,15 @@
 package piuk.blockchain.android.ui.launcher
 
 import android.content.Intent
+import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager
 import piuk.blockchain.android.data.notifications.FcmCallbackService.EXTRA_CONTACT_ACCEPTED
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BasePresenter
+import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PrefsUtil
 import javax.inject.Inject
@@ -70,7 +72,7 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
             isPinValidated && !payloadDataManager.wallet.isUpgraded -> promptUpgrade()
         // App has been PIN validated
             isPinValidated || accessState.isLoggedIn -> checkOnboardingStatus()
-        // Normal login
+        // Something odd has happened, re-request PIN
             else -> view.onRequestPin()
         }
     }
@@ -80,35 +82,40 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
         view.onRequestUpgrade()
     }
 
+    /**
+     * Init of the [SettingsDataManager] must complete here so that we can access the [Settings]
+     * object from memory when the user is logged in.
+     */
     private fun checkOnboardingStatus() {
-        accessState.setIsLoggedIn(true)
-        if (appUtil.isNewlyCreated) {
-            view.onStartOnboarding(false)
-        } else {
-            settingsDataManager.initSettings(
-                    payloadDataManager.wallet.guid,
-                    payloadDataManager.wallet.sharedKey)
-                    .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .subscribe({ settings ->
-                        if (!settings.isEmailVerified
+        settingsDataManager.initSettings(
+                payloadDataManager.wallet.guid,
+                payloadDataManager.wallet.sharedKey)
+                .doOnComplete { accessState.setIsLoggedIn(true) }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe({ settings ->
+                    when {
+                        appUtil.isNewlyCreated -> view.onStartOnboarding(false)
+                        !settings.isEmailVerified
                                 && settings.email != null
-                                && !settings.email.isEmpty()) {
-                            var visits = prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0)
+                                && !settings.email.isEmpty() -> checkIfOnboardingNeeded()
+                        else -> view.onStartMainActivity()
+                    }
+                }, { _ ->
+                    view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
+                    view.onRequestPin()
+                })
+    }
 
-                            // Nag user to verify email after second login
-                            when (visits) {
-                                1 -> view.onStartOnboarding(true)
-                                else -> view.onStartMainActivity()
-                            }
-
-                            visits++
-                            prefsUtil.setValue(PrefsUtil.KEY_APP_VISITS, visits)
-                        } else {
-                            view.onStartMainActivity()
-                        }
-                    }, { _ -> view.onStartMainActivity() })
-
+    fun checkIfOnboardingNeeded() {
+        var visits = prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0)
+        // Nag user to verify email after second login
+        when (visits) {
+            1 -> view.onStartOnboarding(true)
+            else -> view.onStartMainActivity()
         }
+
+        visits++
+        prefsUtil.setValue(PrefsUtil.KEY_APP_VISITS, visits)
     }
 
 }
