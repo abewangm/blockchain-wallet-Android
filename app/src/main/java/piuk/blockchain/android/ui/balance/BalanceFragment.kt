@@ -1,6 +1,6 @@
 package piuk.blockchain.android.ui.balance
 
-import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -115,11 +115,18 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
-    /**
-     * Deprecated, but necessary to prevent casting issues on <API21
-     */
-    override fun onAttach(activity: Activity?) {
-        super.onAttach(activity)
+    override fun onPause() {
+        super.onPause()
+        // Fixes issue with Swipe Layout messing with Fragment transitions
+        swipe_container?.let {
+            swipe_container.isRefreshing = false
+            swipe_container.destroyDrawingCache()
+            swipe_container.clearAnimation()
+        }
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
         interactionListener = activity as OnFragmentInteractionListener?
     }
 
