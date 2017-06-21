@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.balance
 
 
+import android.app.Activity
 import android.content.*
 import android.content.pm.ShortcutManager
 import android.os.Bundle
@@ -19,7 +20,6 @@ import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.fragment_balance.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
-import piuk.blockchain.android.R.id.*
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.LegacyBalanceFragment.*
 import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter
@@ -29,6 +29,7 @@ import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.home.MainActivity
+import piuk.blockchain.android.ui.home.MainActivity.ACCOUNT_EDIT
 import piuk.blockchain.android.ui.receive.ReceiveFragment
 import piuk.blockchain.android.ui.send.SendFragment
 import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper
@@ -118,7 +119,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             monetaryUtil: MonetaryUtil,
             isBtc: Boolean
     ) {
-
         if (accountsAdapter == null) {
             accountsAdapter = BalanceHeaderAdapter(
                     context,
@@ -135,7 +135,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
         if (accounts.size > 1) {
             accounts_spinner.visible()
-        } else if (!accounts.isEmpty()) {
+        } else if (accounts.isNotEmpty()) {
             accounts_spinner.setSelection(0, false)
             accounts_spinner.invisible()
         }
@@ -213,12 +213,21 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         interactionListener = activity as OnFragmentInteractionListener?
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK && requestCode == ACCOUNT_EDIT) {
+            // Potentially an Account has been archived - reload all data
+            onViewReady()
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
     override fun showFctxRequiringAttention(number: Int) {
         (activity as MainActivity).setMessagesCount(number)
     }
 
     override fun showToast(message: Int, toastType: String) {
-        activity.toast(message, toastType)
+        context.toast(message, toastType)
     }
 
     override fun showSendAddressDialog(fctxId: String) {
@@ -229,29 +238,23 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         )
     }
 
-    override fun showWaitingForPaymentDialog() {
-        showDialog(R.string.contacts_waiting_for_payment_message, null, false)
-    }
+    override fun showWaitingForPaymentDialog() =
+            showDialog(R.string.contacts_waiting_for_payment_message, null, false)
 
-    override fun showWaitingForAddressDialog() {
-        showDialog(R.string.contacts_waiting_for_address_message, null, false)
-    }
+    override fun showWaitingForAddressDialog() =
+            showDialog(R.string.contacts_waiting_for_address_message, null, false)
 
-    override fun showTransactionDeclineDialog(fctxId: String) {
-        showDialog(
-                R.string.contacts_decline_pending_transaction,
-                DialogInterface.OnClickListener { _, _ -> presenter.confirmDeclineTransaction(fctxId) },
-                true
-        )
-    }
+    override fun showTransactionDeclineDialog(fctxId: String) = showDialog(
+            R.string.contacts_decline_pending_transaction,
+            DialogInterface.OnClickListener { _, _ -> presenter.confirmDeclineTransaction(fctxId) },
+            true
+    )
 
-    override fun showTransactionCancelDialog(fctxId: String) {
-        showDialog(
-                R.string.contacts_cancel_pending_transaction,
-                DialogInterface.OnClickListener { _, _ -> presenter.confirmCancelTransaction(fctxId) },
-                true
-        )
-    }
+    override fun showTransactionCancelDialog(fctxId: String) = showDialog(
+            R.string.contacts_cancel_pending_transaction,
+            DialogInterface.OnClickListener { _, _ -> presenter.confirmCancelTransaction(fctxId) },
+            true
+    )
 
     override fun showAccountChoiceDialog(accounts: List<String>, fctxId: String) {
         val spinner = AppCompatSpinner(activity)

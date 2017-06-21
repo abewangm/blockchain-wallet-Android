@@ -312,13 +312,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_BACKUP) {
             resetNavigationDrawer();
-        } else if (resultCode == RESULT_OK && requestCode == ACCOUNT_EDIT) {
-            if (getCurrentFragment() instanceof BalanceFragment) {
-                // TODO: 20/06/2017
-//                ((BalanceFragment) getCurrentFragment()).updateAccountList();
-//                ((BalanceFragment) getCurrentFragment()).updateBalanceAndTransactionList(true);
-            }
-
         } else if (requestCode == SETTINGS_EDIT) {
             // Reset state incase of changing currency etc
             binding.bottomNavigation.setCurrentItem(1);

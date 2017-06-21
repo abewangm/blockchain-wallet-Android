@@ -503,6 +503,7 @@ public class LegacyBalanceFragment extends Fragment implements BalanceViewModel.
 //        binding.rvTransactions.scrollToPosition(0);
     }
 
+    // TODO: 21/06/2017
     private void handleTransactionsVisibility() {
 //        if (!viewModel.getTransactionList().isEmpty()) {
 //            binding.rvTransactions.setVisibility(View.VISIBLE);

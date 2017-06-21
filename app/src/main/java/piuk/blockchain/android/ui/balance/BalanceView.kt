@@ -5,6 +5,7 @@ import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
 import piuk.blockchain.android.util.MonetaryUtil
 import java.util.*
 
@@ -60,5 +61,11 @@ interface BalanceView : View {
     fun startBuyActivity()
 
     fun startReceiveFragment()
+
+    fun onShowAnnouncement()
+
+    fun onHideAnnouncement()
+
+    fun onLoadOnboardingPages(pages: List<OnboardingPagerContent>)
 
 }

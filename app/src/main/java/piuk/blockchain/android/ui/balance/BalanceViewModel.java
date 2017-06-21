@@ -5,8 +5,6 @@ import com.google.common.collect.HashBiMap;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
-import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
-import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.data.Account;
@@ -16,20 +14,15 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.access.AuthEvent;
-import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.contacts.ContactsEvent;
 import piuk.blockchain.android.data.datamanagers.BuyDataManager;
@@ -206,14 +199,14 @@ public class BalanceViewModel extends BaseViewModel {
 
     void storeSwipeReceiveAddresses() {
         // Defer to background thread as deriving addresses is quite processor intensive
-        compositeDisposable.add(
-                Completable.fromCallable(() -> {
-                    swipeToReceiveHelper.updateAndStoreAddresses();
-                    return Void.TYPE;
-                }).subscribeOn(Schedulers.computation())
-                        .subscribe(() -> {
-                            // No-op
-                        }, Throwable::printStackTrace));
+//        compositeDisposable.add(
+//                Completable.fromCallable(() -> {
+//                    swipeToReceiveHelper.updateAndStoreAddresses();
+//                    return Void.TYPE;
+//                }).subscribeOn(Schedulers.computation())
+//                        .subscribe(() -> {
+//                            // No-op
+//                        }, Throwable::printStackTrace));
     }
 
     @SuppressWarnings("Convert2streamapi")
@@ -328,17 +321,17 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     void onTransactionListRefreshed() {
-        compositeDisposable.add(
-                payloadDataManager.updateAllTransactions()
-                        .doOnSubscribe(disposable -> dataListener.setShowRefreshing(true))
-                        .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
-                        .subscribe(() -> {
-                            updateAccountList();
-                            refreshFacilitatedTransactions();
-                            updateBalanceAndTransactionList(dataListener.getSelectedItemPosition(), dataListener.isBtc(), true);
-                        }, throwable -> {
-                            // No-op
-                        }));
+//        compositeDisposable.add(
+//                payloadDataManager.updateAllTransactions()
+//                        .doOnSubscribe(disposable -> dataListener.setShowRefreshing(true))
+//                        .doAfterTerminate(() -> dataListener.setShowRefreshing(false))
+//                        .subscribe(() -> {
+//                            updateAccountList();
+//                            refreshFacilitatedTransactions();
+//                            updateBalanceAndTransactionList(dataListener.getSelectedItemPosition(), dataListener.isBtc(), true);
+//                        }, throwable -> {
+//                            // No-op
+//                        }));
     }
 
     void updateBalanceAndTransactionList(int accountSpinnerPosition, boolean isBTC, boolean fetchTransactions) {
@@ -384,45 +377,45 @@ public class BalanceViewModel extends BaseViewModel {
     @SuppressWarnings("Java8CollectionRemoveIf")
     private void insertTransactionsAndDisplay(List<TransactionSummary> txList) throws IOException, ApiException {
         // Remove current transactions but keep headers and pending transactions
-        Iterator iterator = displayList.iterator();
-        while (iterator.hasNext()) {
-            Object element = iterator.next();
-            if (element instanceof TransactionSummary) {
-                iterator.remove();
-            }
-        }
-
-        displayList.addAll(txList);
-        checkLatestAnnouncement(txList);
-
-        if (dataListener != null) {
-            dataListener.onRefreshBalanceAndTransactions();
-        }
+//        Iterator iterator = displayList.iterator();
+//        while (iterator.hasNext()) {
+//            Object element = iterator.next();
+//            if (element instanceof TransactionSummary) {
+//                iterator.remove();
+//            }
+//        }
+//
+//        displayList.addAll(txList);
+//        checkLatestAnnouncement(txList);
+//
+//        if (dataListener != null) {
+//            dataListener.onRefreshBalanceAndTransactions();
+//        }
     }
 
     void refreshFacilitatedTransactions() {
-        if (dataListener.getIfContactsEnabled()) {
-            compositeDisposable.add(
-                    contactsDataManager.fetchContacts()
-                            .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
-                            .toList()
-                            .doOnSuccess(contacts -> dataListener.onRefreshContactList())
-                            .flatMapObservable(contacts -> contactsDataManager.refreshFacilitatedTransactions())
-                            .toList()
-                            .subscribe(
-                                    this::handlePendingTransactions,
-                                    Throwable::printStackTrace));
-        }
+//        if (dataListener.getIfContactsEnabled()) {
+//            compositeDisposable.add(
+//                    contactsDataManager.fetchContacts()
+//                            .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
+//                            .toList()
+//                            .doOnSuccess(contacts -> dataListener.onRefreshContactList())
+//                            .flatMapObservable(contacts -> contactsDataManager.refreshFacilitatedTransactions())
+//                            .toList()
+//                            .subscribe(
+//                                    this::handlePendingTransactions,
+//                                    Throwable::printStackTrace));
+//        }
     }
 
     void getFacilitatedTransactions() {
-        compositeDisposable.add(
-                contactsDataManager.getFacilitatedTransactions()
-                        .toList()
-                        .doOnSuccess(contacts -> dataListener.onRefreshContactList())
-                        .subscribe(
-                                this::handlePendingTransactions,
-                                Throwable::printStackTrace));
+//        compositeDisposable.add(
+//                contactsDataManager.getFacilitatedTransactions()
+//                        .toList()
+//                        .doOnSuccess(contacts -> dataListener.onRefreshContactList())
+//                        .subscribe(
+//                                this::handlePendingTransactions,
+//                                Throwable::printStackTrace));
     }
 
     void onPendingTransactionClicked(String fctxId) {
@@ -508,61 +501,62 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     void confirmDeclineTransaction(String fctxId) {
-        compositeDisposable.add(
-                contactsDataManager.getContactFromFctxId(fctxId)
-                        .flatMapCompletable(contact -> contactsDataManager.sendPaymentDeclinedResponse(contact.getMdid(), fctxId))
-                        .doOnError(throwable -> contactsDataManager.fetchContacts())
-                        .doAfterTerminate(this::refreshFacilitatedTransactions)
-                        .subscribe(
-                                () -> dataListener.showToast(R.string.contacts_pending_transaction_decline_success, ToastCustom.TYPE_OK),
-                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_decline_failure, ToastCustom.TYPE_ERROR)));
+//        compositeDisposable.add(
+//                contactsDataManager.getContactFromFctxId(fctxId)
+//                        .flatMapCompletable(contact -> contactsDataManager.sendPaymentDeclinedResponse(contact.getMdid(), fctxId))
+//                        .doOnError(throwable -> contactsDataManager.fetchContacts())
+//                        .doAfterTerminate(this::refreshFacilitatedTransactions)
+//                        .subscribe(
+//                                () -> dataListener.showToast(R.string.contacts_pending_transaction_decline_success, ToastCustom.TYPE_OK),
+//                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_decline_failure, ToastCustom.TYPE_ERROR)));
     }
 
     void confirmCancelTransaction(String fctxId) {
-        compositeDisposable.add(
-                contactsDataManager.getContactFromFctxId(fctxId)
-                        .flatMapCompletable(contact -> contactsDataManager.sendPaymentCancelledResponse(contact.getMdid(), fctxId))
-                        .doOnError(throwable -> contactsDataManager.fetchContacts())
-                        .doAfterTerminate(this::refreshFacilitatedTransactions)
-                        .subscribe(
-                                () -> dataListener.showToast(R.string.contacts_pending_transaction_cancel_success, ToastCustom.TYPE_OK),
-                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_cancel_failure, ToastCustom.TYPE_ERROR)));
+//        compositeDisposable.add(
+//                contactsDataManager.getContactFromFctxId(fctxId)
+//                        .flatMapCompletable(contact -> contactsDataManager.sendPaymentCancelledResponse(contact.getMdid(), fctxId))
+//                        .doOnError(throwable -> contactsDataManager.fetchContacts())
+//                        .doAfterTerminate(this::refreshFacilitatedTransactions)
+//                        .subscribe(
+//                                () -> dataListener.showToast(R.string.contacts_pending_transaction_cancel_success, ToastCustom.TYPE_OK),
+//                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_cancel_failure, ToastCustom.TYPE_ERROR)));
     }
 
     void onAccountChosen(int accountPosition, String fctxId) {
-        dataListener.showProgressDialog();
-        compositeDisposable.add(
-                contactsDataManager.getContactFromFctxId(fctxId)
-                        .subscribe(contact -> {
-                            FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
-
-                            PaymentRequest paymentRequest = new PaymentRequest();
-                            paymentRequest.setIntendedAmount(transaction.getIntendedAmount());
-                            paymentRequest.setId(fctxId);
-
-                            compositeDisposable.add(
-                                    payloadDataManager.getNextReceiveAddressAndReserve(getCorrectedAccountIndex(accountPosition), "Payment request " + transaction.getId())
-                                            .doOnNext(paymentRequest::setAddress)
-                                            .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
-                                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
-                                            .subscribe(
-                                                    () -> {
-                                                        dataListener.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK);
-                                                        refreshFacilitatedTransactions();
-                                                    },
-                                                    throwable -> dataListener.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
-                        }, throwable -> dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)));
+//        dataListener.showProgressDialog();
+//        compositeDisposable.add(
+//                contactsDataManager.getContactFromFctxId(fctxId)
+//                        .subscribe(contact -> {
+//                            FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
+//
+//                            PaymentRequest paymentRequest = new PaymentRequest();
+//                            paymentRequest.setIntendedAmount(transaction.getIntendedAmount());
+//                            paymentRequest.setId(fctxId);
+//
+//                            compositeDisposable.add(
+//                                    payloadDataManager.getNextReceiveAddressAndReserve(getCorrectedAccountIndex(accountPosition), "Payment request " + transaction.getId())
+//                                            .doOnNext(paymentRequest::setAddress)
+//                                            .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
+//                                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+//                                            .subscribe(
+//                                                    () -> {
+//                                                        dataListener.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK);
+//                                                        refreshFacilitatedTransactions();
+//                                                    },
+//                                                    throwable -> dataListener.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
+//                        }, throwable -> dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)));
     }
 
     @NonNull
     private String getBalanceString(boolean isBTC, long btcBalance) {
-        double fiatBalance;
-        String strFiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(strFiat);
-        fiatBalance = lastPrice * (btcBalance / 1e8);
-
-        return isBTC ? getMonetaryUtil().getDisplayAmountWithFormatting(btcBalance) + " " + getDisplayUnits()
-                : getMonetaryUtil().getFiatFormat(strFiat).format(fiatBalance) + " " + strFiat;
+//        double fiatBalance;
+//        String strFiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+//        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(strFiat);
+//        fiatBalance = lastPrice * (btcBalance / 1e8);
+//
+//        return isBTC ? getMonetaryUtil().getDisplayAmountWithFormatting(btcBalance) + " " + getDisplayUnits()
+//                : getMonetaryUtil().getFiatFormat(strFiat).format(fiatBalance) + " " + strFiat;
+        return "";
     }
 
     public String getDisplayUnits() {
@@ -607,70 +601,73 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     private int getCorrectedAccountIndex(int accountIndex) {
-        // Filter accounts by active
-        List<Account> activeAccounts = new ArrayList<>();
-        List<Account> accounts = payloadDataManager.getAccounts();
-        for (int i = 0; i < accounts.size(); i++) {
-            Account account = accounts.get(i);
-            if (!account.isArchived()) {
-                activeAccounts.add(account);
-            }
-        }
-
-        // Find corrected position
-        return payloadDataManager.getAccounts().indexOf(activeAccounts.get(accountIndex));
+//        // Filter accounts by active
+//        List<Account> activeAccounts = new ArrayList<>();
+//        List<Account> accounts = payloadDataManager.getAccounts();
+//        for (int i = 0; i < accounts.size(); i++) {
+//            Account account = accounts.get(i);
+//            if (!account.isArchived()) {
+//                activeAccounts.add(account);
+//            }
+//        }
+//
+//        // Find corrected position
+//        return payloadDataManager.getAccounts().indexOf(activeAccounts.get(accountIndex));
+        return -1;
     }
 
     private int getNumberOfFctxRequiringAttention(List<ContactTransactionModel> facilitatedTransactions) {
-        int value = 0;
-        for (ContactTransactionModel transactionModel : facilitatedTransactions) {
-            FacilitatedTransaction transaction = transactionModel.getFacilitatedTransaction();
-            if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-                value++;
-            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-                value++;
-            }
-        }
-        return value;
+//        int value = 0;
+//        for (ContactTransactionModel transactionModel : facilitatedTransactions) {
+//            FacilitatedTransaction transaction = transactionModel.getFacilitatedTransaction();
+//            if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+//                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+//                value++;
+//            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+//                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+//                value++;
+//            }
+//        }
+//        return value;
+        return -1;
     }
 
     @SuppressWarnings("Java8CollectionRemoveIf")
     private void handlePendingTransactions(List<ContactTransactionModel> transactions) {
         // Remove previous Pending Transactions
-        Iterator iterator = displayList.iterator();
-        while (iterator.hasNext()) {
-            Object element = iterator.next();
-            if (!(element instanceof TransactionSummary)) {
-                iterator.remove();
-            }
-        }
-
-        dataListener.showFctxRequiringAttention(getNumberOfFctxRequiringAttention(transactions));
-
-        if (!transactions.isEmpty()) {
-            //noinspection Java8ListSort
-            Collections.sort(transactions, new ContactTransactionDateComparator());
-            Collections.reverse(transactions);
-            displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction));
-            displayList.addAll(1, transactions);
-            displayList.add(transactions.size() + 1, stringUtils.getString(R.string.contacts_transaction_history));
-            dataListener.onPendingTxUpdate();
-        } else {
-            dataListener.onPendingTxUpdate();
-        }
+//        Iterator iterator = displayList.iterator();
+//        while (iterator.hasNext()) {
+//            Object element = iterator.next();
+//            if (!(element instanceof TransactionSummary)) {
+//                iterator.remove();
+//            }
+//        }
+//
+//        dataListener.showFctxRequiringAttention(getNumberOfFctxRequiringAttention(transactions));
+//
+//        if (!transactions.isEmpty()) {
+//            //noinspection Java8ListSort
+//            Collections.sort(transactions, new ContactTransactionDateComparator());
+//            Collections.reverse(transactions);
+//            displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction));
+//            displayList.addAll(1, transactions);
+//            displayList.add(transactions.size() + 1, stringUtils.getString(R.string.contacts_transaction_history));
+//            dataListener.onPendingTxUpdate();
+//        } else {
+//            dataListener.onPendingTxUpdate();
+//        }
     }
 
     @Override
     public void destroy() {
-        rxBus.unregister(ContactsEvent.class, contactsEventObservable);
-        rxBus.unregister(NotificationPayload.class, notificationObservable);
-        rxBus.unregister(List.class, txListObservable);
-        rxBus.unregister(AuthEvent.class, authEventObservable);
+//        rxBus.unregister(ContactsEvent.class, contactsEventObservable);
+//        rxBus.unregister(NotificationPayload.class, notificationObservable);
+//        rxBus.unregister(List.class, txListObservable);
+//        rxBus.unregister(AuthEvent.class, authEventObservable);
         super.destroy();
     }
 
+    // TODO: 21/06/2017
     void addOnboardingPages() {
         compositeDisposable.add(
                 buyDataManager.getCanBuy()
