@@ -4,9 +4,13 @@ import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Observable
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
+import piuk.blockchain.android.data.access.AuthEvent
+import piuk.blockchain.android.data.contacts.ContactsEvent
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
+import piuk.blockchain.android.data.notifications.NotificationPayload
+import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ConsolidatedAccount
 import piuk.blockchain.android.ui.account.ItemAccount
@@ -28,6 +32,11 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     @Inject lateinit var stringUtils: StringUtils
     @Inject lateinit var prefsUtil: PrefsUtil
     @Inject lateinit var accessState: AccessState
+    @Inject lateinit var rxBus: RxBus
+
+    private var contactsEventObservable: Observable<ContactsEvent>? = null
+    private var notificationObservable: Observable<NotificationPayload>? = null
+    private var authEventObservable: Observable<AuthEvent>? = null
 
     private var activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
     private var chosenAccount: ItemAccount? = null
@@ -37,6 +46,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     }
 
     override fun onViewReady() {
+        subscribeToEvents()
         view.setUiState(UiState.LOADING)
         activeAccountAndAddressList = getAllDisplayableAccounts()
         chosenAccount = activeAccountAndAddressList[0]
@@ -87,8 +97,16 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         view.onTotalBalanceUpdated(getBalanceString(isBtc, chosenAccount?.absoluteBalance!!))
     }
 
-    // TODO: Refactor this out of here
-    fun getViewType() = accessState.isBtc
+    fun invertViewType() {
+        setViewType(!accessState.isBtc)
+    }
+
+    fun onResume() {
+        // Here we check the Fiat and Btc formats and let the UI handle any potential updates
+        val btcBalance = transactionListDataManager.getBtcBalance(chosenAccount?.accountObject)
+        val balanceTotal = getBalanceString(accessState.isBtc, btcBalance)
+        view.onTotalBalanceUpdated(balanceTotal)
+    }
 
     private fun getAllDisplayableAccounts(): MutableList<ItemAccount> {
         val mutableList = mutableListOf<ItemAccount>()
@@ -172,10 +190,38 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                                 activeAccountAndAddressList,
                                 getLastPrice(getFiatCurrency()),
                                 getFiatCurrency(),
-                                monetaryUtil
+                                monetaryUtil,
+                                accessState.isBtc
                         )
-                        view.onExchangeRateUpdated(exchangeRateFactory.getLastPrice(getFiatCurrency()))
+                        view.onExchangeRateUpdated(
+                                exchangeRateFactory.getLastPrice(getFiatCurrency()),
+                                accessState.isBtc
+                        )
                     }.toObservable<Nothing>()
+
+    private fun subscribeToEvents() {
+        contactsEventObservable = rxBus.register(ContactsEvent::class.java)
+        contactsEventObservable?.subscribe({ _: ContactsEvent ->
+            // TODO:
+//            refreshFacilitatedTransactions()
+        })
+
+        authEventObservable = rxBus.register(AuthEvent::class.java)
+        authEventObservable?.subscribe({ _: AuthEvent ->
+            //            displayList.clear()
+            transactionListDataManager.clearTransactionList()
+            contactsDataManager.resetContacts()
+        })
+
+        notificationObservable = rxBus.register(NotificationPayload::class.java)
+        notificationObservable?.subscribe({ notificationPayload ->
+            if (notificationPayload.type != null
+                    && notificationPayload.type == NotificationPayload.NotificationType.PAYMENT) {
+                // TODO:
+//                        refreshFacilitatedTransactions()
+            }
+        })
+    }
 
     private fun getBalanceString(isBTC: Boolean, btcBalance: Long): String {
         val strFiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
@@ -202,8 +248,5 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 MonetaryUtil.UNIT_BTC
         ))
     }
-
-    fun onViewFormatChanged(): Unit = TODO("Change the stored view format (isBtc) and update the UI to reflect that")
-
 
 }

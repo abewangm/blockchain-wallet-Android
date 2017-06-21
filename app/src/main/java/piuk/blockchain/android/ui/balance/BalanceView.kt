@@ -15,7 +15,7 @@ interface BalanceView : View {
 
     fun onTotalBalanceUpdated(balance: String)
 
-    fun onExchangeRateUpdated(exchangeRate: Double)
+    fun onExchangeRateUpdated(exchangeRate: Double, isBtc: Boolean)
 
     fun showProgressDialog()
 
@@ -23,7 +23,13 @@ interface BalanceView : View {
 
     fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)
 
-    fun onAccountsUpdated(accounts: List<ItemAccount>, lastPrice: Double, fiat: String, monetaryUtil: MonetaryUtil)
+    fun onAccountsUpdated(
+            accounts: List<ItemAccount>,
+            lastPrice: Double,
+            fiat: String,
+            monetaryUtil: MonetaryUtil,
+            isBtc: Boolean
+    )
 
     fun setUiState(@UiState.UiStateDef uiState: Int)
 

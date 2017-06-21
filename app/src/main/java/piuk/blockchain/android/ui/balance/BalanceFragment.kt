@@ -91,13 +91,14 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             accounts: List<ItemAccount>,
             lastPrice: Double,
             fiat: String,
-            monetaryUtil: MonetaryUtil
+            monetaryUtil: MonetaryUtil,
+            isBtc: Boolean
     ) {
         accountsAdapter = BalanceHeaderAdapter(
                 context,
                 R.layout.spinner_balance_header,
                 accounts,
-                presenter.getViewType(),
+                isBtc,
                 monetaryUtil,
                 fiat,
                 lastPrice
@@ -105,7 +106,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
         accounts_spinner.adapter = accountsAdapter
 
-        textview_balance.setOnClickListener { presenter.setViewType(!presenter.getViewType()) }
+        textview_balance.setOnClickListener { presenter.invertViewType() }
 
         if (accounts.size > 1) {
             accounts_spinner.visible()
@@ -142,9 +143,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
-    override fun onExchangeRateUpdated(exchangeRate: Double) {
+    override fun onExchangeRateUpdated(exchangeRate: Double, isBtc: Boolean) {
         if (balanceAdapter == null) {
-            setUpRecyclerView(exchangeRate)
+            setUpRecyclerView(exchangeRate, isBtc)
         } else {
             balanceAdapter?.onPriceUpdated(exchangeRate)
         }
@@ -158,6 +159,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             swipe_container.destroyDrawingCache()
             swipe_container.clearAnimation()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.onResume()
+        balanceAdapter?.notifyDataSetChanged()
+        accountsAdapter?.notifyDataSetChanged()
     }
 
     override fun onAttach(context: Context?) {
@@ -204,11 +212,11 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         no_transaction_include.gone()
     }
 
-    private fun setUpRecyclerView(exchangeRate: Double) {
+    private fun setUpRecyclerView(exchangeRate: Double, isBtc: Boolean) {
         balanceAdapter = BalanceAdapter(
                 activity,
                 exchangeRate,
-                presenter.getViewType(),
+                isBtc,
                 this
         ).apply { setHasStableIds(true) }
 
