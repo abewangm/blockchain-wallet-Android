@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.balance
 
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
+import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
@@ -24,11 +25,13 @@ import piuk.blockchain.android.ui.account.ConsolidatedAccount
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.base.UiState
+import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
+import java.util.*
 import javax.inject.Inject
 
 class BalancePresenter : BasePresenter<BalanceView>() {
@@ -76,7 +79,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         }
     }
 
-    fun onAccountChosen(position: Int) {
+    internal fun onAccountChosen(position: Int) {
         chosenAccount = activeAccountAndAddressList[position]
         chosenAccount?.let { chosenAccount ->
             Observable.merge(
@@ -89,7 +92,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         }
     }
 
-    fun onRefreshRequested() {
+    internal fun onRefreshRequested() {
         chosenAccount?.let { chosenAccount ->
             Observable.merge(
                     getBalanceObservable(chosenAccount),
@@ -102,17 +105,17 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         }
     }
 
-    fun setViewType(isBtc: Boolean) {
+    internal fun setViewType(isBtc: Boolean) {
         accessState.setIsBtc(isBtc)
         view.onViewTypeChanged(isBtc)
-        view.onTotalBalanceUpdated(getBalanceString(isBtc, chosenAccount?.absoluteBalance!!))
+        view.onTotalBalanceUpdated(getBalanceString(isBtc, chosenAccount?.absoluteBalance ?: 0L))
     }
 
-    fun invertViewType() {
+    internal fun invertViewType() {
         setViewType(!accessState.isBtc)
     }
 
-    fun onResume() {
+    internal fun onResume() {
         // Here we check the Fiat and Btc formats and let the UI handle any potential updates
         val btcBalance = transactionListDataManager.getBtcBalance(chosenAccount?.accountObject)
         val balanceTotal = getBalanceString(accessState.isBtc, btcBalance)
@@ -120,8 +123,125 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         view.onViewTypeChanged(accessState.isBtc)
     }
 
-    fun areLauncherShortcutsEnabled(): Boolean {
+    internal fun areLauncherShortcutsEnabled(): Boolean {
         return prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
+    }
+
+    internal fun onPendingTransactionClicked(fctxId: String) {
+        contactsDataManager.getContactFromFctxId(fctxId)
+                .compose(RxUtil.addSingleToCompositeDisposable(this))
+                .subscribe({
+                    val transaction = it.facilitatedTransactions[fctxId]
+
+                    if (transaction == null) {
+                        view.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)
+                    } else {
+                        when {
+                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
+                                    && transaction.role == FacilitatedTransaction.ROLE_RPR_INITIATOR ->
+                                // Payment request sent, waiting for address from recipient
+                                view.showWaitingForAddressDialog()
+
+                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+                                    && transaction.role == FacilitatedTransaction.ROLE_PR_INITIATOR ->
+                                // Payment request sent, waiting for payment
+                                view.showWaitingForPaymentDialog()
+
+                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
+                                    && transaction.role == FacilitatedTransaction.ROLE_PR_RECEIVER ->
+                                // Received payment request, need to send address to sender
+                                showSendAddressDialog(fctxId)
+
+                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+                                    && transaction.role == FacilitatedTransaction.ROLE_RPR_RECEIVER ->
+                                // Waiting for payment
+                                view.initiatePayment(
+                                        transaction.toBitcoinURI(),
+                                        it.id,
+                                        it.mdid,
+                                        transaction.id
+                                )
+                        }
+                    }
+                }, {
+                    view.showToast(
+                            R.string.contacts_transaction_not_found_error,
+                            ToastCustom.TYPE_ERROR
+                    )
+                })
+    }
+
+    internal fun onPendingTransactionLongClicked(fctxId: String) {
+        contactsDataManager.facilitatedTransactions
+                .filter { contactTransactionModel -> contactTransactionModel.facilitatedTransaction.id == fctxId }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe({
+                    val fctx = it.facilitatedTransaction
+
+                    if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS) {
+                        when {
+                            fctx.role == FacilitatedTransaction.ROLE_PR_RECEIVER ->
+                                view.showTransactionDeclineDialog(fctxId)
+                            fctx.role == FacilitatedTransaction.ROLE_RPR_INITIATOR ->
+                                view.showTransactionCancelDialog(fctxId)
+                        }
+                    } else if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT) {
+                        when {
+                            fctx.role == FacilitatedTransaction.ROLE_RPR_RECEIVER ->
+                                view.showTransactionDeclineDialog(fctxId)
+                            fctx.role == FacilitatedTransaction.ROLE_PR_INITIATOR ->
+                                view.showTransactionCancelDialog(fctxId)
+                        }
+                    }
+                }, { /* No-op */ })
+    }
+
+    internal fun onAccountChosen(accountPosition: Int, fctxId: String) {
+        contactsDataManager.getContactFromFctxId(fctxId)
+                .doOnSubscribe { view.showProgressDialog() }
+                .doOnError { view.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR) }
+                .flatMapCompletable { contact ->
+                    val transaction = contact.facilitatedTransactions[fctxId]
+
+                    val paymentRequest = PaymentRequest()
+                    paymentRequest.intendedAmount = transaction?.intendedAmount ?: 0L
+                    paymentRequest.id = fctxId
+
+                    payloadDataManager.getNextReceiveAddressAndReserve(
+                            payloadDataManager.getPositionOfAccountInActiveList(
+                                    accountPosition), "Payment request ${transaction?.id}"
+                    ).doOnNext { paymentRequest.address = it }
+                            .flatMapCompletable { contactsDataManager.sendPaymentRequestResponse(contact.mdid, paymentRequest, fctxId) }
+                            .doAfterTerminate { view.dismissProgressDialog() }
+                }
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        {
+                            view.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK)
+                            refreshFacilitatedTransactions()
+                        }, { view.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR) })
+    }
+
+    internal fun confirmDeclineTransaction(fctxId: String) {
+        contactsDataManager.getContactFromFctxId(fctxId)
+                .flatMapCompletable { contactsDataManager.sendPaymentDeclinedResponse(it.mdid, fctxId) }
+                .doOnError { contactsDataManager.fetchContacts() }
+                .doAfterTerminate { this.refreshFacilitatedTransactions() }
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        { view.showToast(R.string.contacts_pending_transaction_decline_success, ToastCustom.TYPE_OK) },
+                        { view.showToast(R.string.contacts_pending_transaction_decline_failure, ToastCustom.TYPE_ERROR) })
+    }
+
+    internal fun confirmCancelTransaction(fctxId: String) {
+        contactsDataManager.getContactFromFctxId(fctxId)
+                .flatMapCompletable { contactsDataManager.sendPaymentCancelledResponse(it.mdid, fctxId) }
+                .doOnError { contactsDataManager.fetchContacts() }
+                .doAfterTerminate { this.refreshFacilitatedTransactions() }
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        { view.showToast(R.string.contacts_pending_transaction_cancel_success, ToastCustom.TYPE_OK) },
+                        { view.showToast(R.string.contacts_pending_transaction_cancel_failure, ToastCustom.TYPE_ERROR) })
     }
 
     private fun getAllDisplayableAccounts(): MutableList<ItemAccount> {
@@ -179,6 +299,20 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         }
 
         return mutableList
+    }
+
+    private fun showSendAddressDialog(fctxId: String) {
+        val accountNames = payloadDataManager.accounts
+                .filterNot { it.isArchived }
+                .mapTo(ArrayList<String>()) { it.label }
+
+        if (accountNames.size == 1) {
+            // Only one account, ask if you want to send an address
+            view.showSendAddressDialog(fctxId)
+        } else {
+            // Show dialog allowing user to select which account they want to use
+            view.showAccountChoiceDialog(accountNames, fctxId)
+        }
     }
 
     private fun getTransactionsListObservable(itemAccount: ItemAccount) =

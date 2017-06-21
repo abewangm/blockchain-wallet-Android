@@ -1,22 +1,25 @@
 package piuk.blockchain.android.ui.balance
 
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.ShortcutManager
 import android.os.Bundle
+import android.support.annotation.StringRes
 import android.support.v4.content.LocalBroadcastManager
+import android.support.v7.app.AlertDialog
+import android.support.v7.widget.AppCompatSpinner
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SimpleItemAnimator
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.fragment_balance.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
+import piuk.blockchain.android.R.id.*
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.LegacyBalanceFragment.*
 import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter
@@ -35,7 +38,7 @@ import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.OnItemSelectedListener
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
-import java.util.HashMap
+import java.util.*
 
 class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
 
@@ -88,11 +91,11 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun onFctxClicked(fctxId: String) {
-//        viewModel.onPendingTransactionClicked(fctxId)
+        presenter.onPendingTransactionClicked(fctxId)
     }
 
     override fun onFctxLongClicked(fctxId: String) {
-//        viewModel.onPendingTransactionLongClicked(fctxId)
+        presenter.onPendingTransactionLongClicked(fctxId)
     }
 
     override fun onViewTypeChanged(isBtc: Boolean) {
@@ -218,6 +221,74 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         activity.toast(message, toastType)
     }
 
+    override fun showSendAddressDialog(fctxId: String) {
+        showDialog(
+                R.string.contacts_send_address_message,
+                DialogInterface.OnClickListener { _, _ -> presenter.onAccountChosen(0, fctxId) },
+                true
+        )
+    }
+
+    override fun showWaitingForPaymentDialog() {
+        showDialog(R.string.contacts_waiting_for_payment_message, null, false)
+    }
+
+    override fun showWaitingForAddressDialog() {
+        showDialog(R.string.contacts_waiting_for_address_message, null, false)
+    }
+
+    override fun showTransactionDeclineDialog(fctxId: String) {
+        showDialog(
+                R.string.contacts_decline_pending_transaction,
+                DialogInterface.OnClickListener { _, _ -> presenter.confirmDeclineTransaction(fctxId) },
+                true
+        )
+    }
+
+    override fun showTransactionCancelDialog(fctxId: String) {
+        showDialog(
+                R.string.contacts_cancel_pending_transaction,
+                DialogInterface.OnClickListener { _, _ -> presenter.confirmCancelTransaction(fctxId) },
+                true
+        )
+    }
+
+    override fun showAccountChoiceDialog(accounts: List<String>, fctxId: String) {
+        val spinner = AppCompatSpinner(activity)
+        spinner.adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, accounts)
+        val selection = intArrayOf(0)
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                selection[0] = position
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // No-op
+            }
+        }
+
+        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_choose_account_message)
+                .setView(ViewUtils.getAlertDialogPaddedView(context, spinner))
+                .setPositiveButton(android.R.string.ok, { _, _ -> presenter.onAccountChosen(selection[0], fctxId) })
+                .create()
+                .show()
+    }
+
+    override fun initiatePayment(uri: String, recipientId: String, mdid: String, fctxId: String) {
+        interactionListener?.onPaymentInitiated(uri, recipientId, mdid, fctxId)
+    }
+
+    override fun startBuyActivity() {
+        LocalBroadcastManager.getInstance(activity).sendBroadcast(Intent(MainActivity.ACTION_BUY))
+    }
+
+    override fun startReceiveFragment() {
+        LocalBroadcastManager.getInstance(activity).sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
+    }
+
     override fun showProgressDialog() {
         progressDialog = MaterialProgressDialog(activity).apply {
             setCancelable(false)
@@ -301,6 +372,23 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
             launcherShortcutHelper.generateReceiveShortcuts()
         }
+    }
+
+    private fun showDialog(
+            @StringRes message: Int,
+            clickListener: DialogInterface.OnClickListener?,
+            showNegativeButton: Boolean
+    ) {
+        val builder = AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, clickListener)
+                .setNegativeButton(android.R.string.cancel, null)
+
+        if (showNegativeButton) {
+            builder.setNegativeButton(android.R.string.cancel, null)
+        }
+        builder.show()
     }
 
     companion object {

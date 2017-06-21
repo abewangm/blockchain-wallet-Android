@@ -43,4 +43,22 @@ interface BalanceView : View {
             notesTransactionMap: HashMap<String, String>
     )
 
+    fun showAccountChoiceDialog(accounts: List<String>, fctxId: String)
+
+    fun initiatePayment(uri: String, recipientId: String, mdid: String, fctxId: String)
+
+    fun showWaitingForPaymentDialog()
+
+    fun showWaitingForAddressDialog()
+
+    fun showSendAddressDialog(fctxId: String)
+
+    fun showTransactionDeclineDialog(fctxId: String)
+
+    fun showTransactionCancelDialog(fctxId: String)
+
+    fun startBuyActivity()
+
+    fun startReceiveFragment()
+
 }

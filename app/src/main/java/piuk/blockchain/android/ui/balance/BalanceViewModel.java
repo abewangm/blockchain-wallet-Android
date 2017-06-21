@@ -426,85 +426,85 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     void onPendingTransactionClicked(String fctxId) {
-        compositeDisposable.add(
-                contactsDataManager.getContactFromFctxId(fctxId)
-                        .subscribe(contact -> {
-                            FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
-
-                            if (transaction == null) {
-                                dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
-                            } else {
-
-                                // Payment request sent, waiting for address from recipient
-                                if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
-
-                                    dataListener.showWaitingForAddressDialog();
-
-                                    // Payment request sent, waiting for payment
-                                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
-
-                                    dataListener.showWaitingForPaymentDialog();
-
-                                    // Received payment request, need to send address to sender
-                                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-
-                                    List<String> accountNames = new ArrayList<>();
-                                    //noinspection Convert2streamapi
-                                    for (Account account : payloadDataManager.getAccounts()) {
-                                        if (!account.isArchived()) {
-                                            accountNames.add(account.getLabel());
-                                        }
-                                    }
-
-                                    if (accountNames.size() == 1) {
-                                        // Only one account, ask if you want to send an address
-                                        dataListener.showSendAddressDialog(fctxId);
-                                    } else {
-                                        // Show dialog allowing user to select which account they want to use
-                                        dataListener.showAccountChoiceDialog(accountNames, fctxId);
-                                    }
-
-                                    // Waiting for payment
-                                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-
-                                    dataListener.initiatePayment(
-                                            transaction.toBitcoinURI(),
-                                            contact.getId(),
-                                            contact.getMdid(),
-                                            transaction.getId());
-                                }
-                            }
-                        }, throwable -> dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)));
+//        compositeDisposable.add(
+//                contactsDataManager.getContactFromFctxId(fctxId)
+//                        .subscribe(contact -> {
+//                            FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
+//
+//                            if (transaction == null) {
+//                                dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
+//                            } else {
+//
+//                                // Payment request sent, waiting for address from recipient
+//                                if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+//                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+//
+//                                    dataListener.showWaitingForAddressDialog();
+//
+//                                    // Payment request sent, waiting for payment
+//                                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+//                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
+//
+//                                    dataListener.showWaitingForPaymentDialog();
+//
+//                                    // Received payment request, need to send address to sender
+//                                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+//                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+//
+//                                    List<String> accountNames = new ArrayList<>();
+//                                    //noinspection Convert2streamapi
+//                                    for (Account account : payloadDataManager.getAccounts()) {
+//                                        if (!account.isArchived()) {
+//                                            accountNames.add(account.getLabel());
+//                                        }
+//                                    }
+//
+//                                    if (accountNames.size() == 1) {
+//                                        // Only one account, ask if you want to send an address
+//                                        dataListener.showSendAddressDialog(fctxId);
+//                                    } else {
+//                                        // Show dialog allowing user to select which account they want to use
+//                                        dataListener.showAccountChoiceDialog(accountNames, fctxId);
+//                                    }
+//
+//                                    // Waiting for payment
+//                                } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+//                                        && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+//
+//                                    dataListener.initiatePayment(
+//                                            transaction.toBitcoinURI(),
+//                                            contact.getId(),
+//                                            contact.getMdid(),
+//                                            transaction.getId());
+//                                }
+//                            }
+//                        }, throwable -> dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)));
     }
 
     void onPendingTransactionLongClicked(String fctxId) {
-        compositeDisposable.add(
-                contactsDataManager.getFacilitatedTransactions()
-                        .filter(contactTransactionModel -> contactTransactionModel.getFacilitatedTransaction().getId().equals(fctxId))
-                        .subscribe(contactTransactionModel -> {
-                            FacilitatedTransaction fctx = contactTransactionModel.getFacilitatedTransaction();
-
-                            if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-                                    dataListener.showTransactionDeclineDialog(fctxId);
-                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
-                                    dataListener.showTransactionCancelDialog(fctxId);
-                                }
-
-                            } else if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-                                    dataListener.showTransactionDeclineDialog(fctxId);
-                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
-                                    dataListener.showTransactionCancelDialog(fctxId);
-                                }
-                            }
-                        }, throwable -> {
-                            // No-op
-                        }));
+//        compositeDisposable.add(
+//                contactsDataManager.getFacilitatedTransactions()
+//                        .filter(contactTransactionModel -> contactTransactionModel.getFacilitatedTransaction().getId().equals(fctxId))
+//                        .subscribe(contactTransactionModel -> {
+//                            FacilitatedTransaction fctx = contactTransactionModel.getFacilitatedTransaction();
+//
+//                            if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+//                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+//                                    dataListener.showTransactionDeclineDialog(fctxId);
+//                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+//                                    dataListener.showTransactionCancelDialog(fctxId);
+//                                }
+//
+//                            } else if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+//                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+//                                    dataListener.showTransactionDeclineDialog(fctxId);
+//                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
+//                                    dataListener.showTransactionCancelDialog(fctxId);
+//                                }
+//                            }
+//                        }, throwable -> {
+//                            // No-op
+//                        }));
     }
 
     void confirmDeclineTransaction(String fctxId) {
