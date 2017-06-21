@@ -35,6 +35,7 @@ import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.OnItemSelectedListener
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
+import java.util.HashMap
 
 class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
 
@@ -159,9 +160,19 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             )
         }
         recyclerview.apply {
+            scrollToPosition(0)
             removeItemDecoration(spacerDecoration)
             addItemDecoration(spacerDecoration)
         }
+
+        generateLauncherShortcuts()
+    }
+
+    override fun onContactsHashMapUpdated(
+            contactsTransactionMap: HashMap<String, String>,
+            notesTransactionMap: HashMap<String, String>
+    ) {
+        balanceAdapter?.onContactsMapChanged(contactsTransactionMap, notesTransactionMap)
     }
 
     override fun onExchangeRateUpdated(exchangeRate: Double, isBtc: Boolean) {
@@ -197,6 +208,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         interactionListener = activity as OnFragmentInteractionListener?
+    }
+
+    override fun showFctxRequiringAttention(number: Int) {
+        (activity as MainActivity).setMessagesCount(number)
     }
 
     override fun showToast(message: Int, toastType: String) {
@@ -269,8 +284,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         if (animator is SimpleItemAnimator) {
             animator.supportsChangeAnimations = false
         }
-
-        generateLauncherShortcuts()
     }
 
     private fun goToTransactionDetail(position: Int) {

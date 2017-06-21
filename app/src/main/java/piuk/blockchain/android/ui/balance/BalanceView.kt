@@ -6,6 +6,7 @@ import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.MonetaryUtil
+import java.util.*
 
 interface BalanceView : View {
 
@@ -34,5 +35,12 @@ interface BalanceView : View {
     fun setUiState(@UiState.UiStateDef uiState: Int)
 
     fun onViewTypeChanged(isBtc: Boolean)
+
+    fun showFctxRequiringAttention(number: Int)
+
+    fun onContactsHashMapUpdated(
+            contactsTransactionMap: HashMap<String, String>,
+            notesTransactionMap: HashMap<String, String>
+    )
 
 }

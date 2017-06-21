@@ -1,5 +1,8 @@
 package piuk.blockchain.android.ui.balance
 
+import info.blockchain.wallet.contacts.data.Contact
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction
+import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -7,6 +10,8 @@ import io.reactivex.schedulers.Schedulers
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.access.AuthEvent
+import piuk.blockchain.android.data.contacts.ContactTransactionDateComparator
+import piuk.blockchain.android.data.contacts.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.ContactsEvent
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
@@ -19,7 +24,6 @@ import piuk.blockchain.android.ui.account.ConsolidatedAccount
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.base.UiState
-import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -44,6 +48,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     private var authEventObservable: Observable<AuthEvent>? = null
 
     private var activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
+    private var displayList: MutableList<Any> = mutableListOf()
     private var chosenAccount: ItemAccount? = null
 
     init {
@@ -51,15 +56,13 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     }
 
     override fun onViewReady() {
-        subscribeToEvents()
         view.setUiState(UiState.LOADING)
+
+        subscribeToEvents()
+        storeSwipeReceiveAddresses()
+
         activeAccountAndAddressList = getAllDisplayableAccounts()
         chosenAccount = activeAccountAndAddressList[0]
-
-        val contactsObservable = contactsDataManager.fetchContacts()
-                .andThen(contactsDataManager.contactsWithUnreadPaymentRequests)
-
-        val fctxObservable = contactsDataManager.facilitatedTransactions
 
         chosenAccount?.let { chosenAccount ->
             Observable.merge(
@@ -76,14 +79,13 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     fun onAccountChosen(position: Int) {
         chosenAccount = activeAccountAndAddressList[position]
         chosenAccount?.let { chosenAccount ->
-            val fetchTransactionsObservable = getTransactionsListObservable(chosenAccount)
-            val balanceCompletable = getBalanceObservable(chosenAccount)
-
-            Observable.merge(balanceCompletable, fetchTransactionsObservable)
-                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+            Observable.merge(
+                    getBalanceObservable(chosenAccount),
+                    getTransactionsListObservable(chosenAccount)
+            ).compose(RxUtil.addObservableToCompositeDisposable(this))
                     .subscribe(
                             { /* No-op */ },
-                            { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
+                            { view.setUiState(UiState.FAILURE) })
         }
     }
 
@@ -91,7 +93,8 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         chosenAccount?.let { chosenAccount ->
             Observable.merge(
                     getBalanceObservable(chosenAccount),
-                    getTransactionsListObservable(chosenAccount)
+                    getTransactionsListObservable(chosenAccount),
+                    getFacilitatedTransactionsObservable()
             ).compose(RxUtil.addObservableToCompositeDisposable(this))
                     .subscribe(
                             { /* No-op */ },
@@ -181,12 +184,15 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     private fun getTransactionsListObservable(itemAccount: ItemAccount) =
             transactionListDataManager.fetchTransactions(itemAccount.accountObject, 50, 0)
                     .doAfterTerminate(this::storeSwipeReceiveAddresses)
-                    .doOnNext {
+                    .doOnNext { list ->
+                        displayList.removeAll { it is TransactionSummary }
+                        displayList.addAll(list)
+
                         when {
-                            it.isEmpty() -> view.setUiState(UiState.EMPTY)
+                            list.isEmpty() -> view.setUiState(UiState.EMPTY)
                             else -> view.setUiState(UiState.CONTENT)
                         }
-                        view.onTransactionsUpdated(it)
+                        view.onTransactionsUpdated(displayList)
                     }
 
     private fun getBalanceObservable(itemAccount: ItemAccount) =
@@ -213,6 +219,35 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                         )
                     }.toObservable<Nothing>()
 
+    private fun getFacilitatedTransactionsObservable(): Observable<MutableList<ContactTransactionModel>> {
+        if (view.getIfContactsEnabled()) {
+            return contactsDataManager.fetchContacts()
+                    .andThen<Contact>(contactsDataManager.contactsWithUnreadPaymentRequests)
+                    .toList()
+                    .flatMapObservable { contactsDataManager.refreshFacilitatedTransactions() }
+                    .toList()
+                    .onErrorReturnItem(emptyList())
+                    .toObservable()
+                    .doOnNext {
+                        handlePendingTransactions(it)
+                        view.onContactsHashMapUpdated(
+                                contactsDataManager.contactsTransactionMap,
+                                contactsDataManager.notesTransactionMap
+                        )
+                    }
+        } else {
+            return Observable.empty<MutableList<ContactTransactionModel>>()
+        }
+    }
+
+    private fun refreshFacilitatedTransactions() {
+        getFacilitatedTransactionsObservable()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        { /* No-op */ },
+                        { throwable -> throwable.printStackTrace() })
+    }
+
     private fun storeSwipeReceiveAddresses() {
         // Defer to background thread as deriving addresses is quite processor intensive
         Completable.fromCallable {
@@ -227,14 +262,11 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
     private fun subscribeToEvents() {
         contactsEventObservable = rxBus.register(ContactsEvent::class.java)
-        contactsEventObservable?.subscribe({ _: ContactsEvent ->
-            // TODO:
-//            refreshFacilitatedTransactions()
-        })
+        contactsEventObservable?.subscribe({ _: ContactsEvent -> refreshFacilitatedTransactions() })
 
         authEventObservable = rxBus.register(AuthEvent::class.java)
         authEventObservable?.subscribe({ _: AuthEvent ->
-            //            displayList.clear()
+            displayList.clear()
             transactionListDataManager.clearTransactionList()
             contactsDataManager.resetContacts()
         })
@@ -243,10 +275,40 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         notificationObservable?.subscribe({ notificationPayload ->
             if (notificationPayload.type != null
                     && notificationPayload.type == NotificationPayload.NotificationType.PAYMENT) {
-                // TODO:
-//                        refreshFacilitatedTransactions()
+                refreshFacilitatedTransactions()
             }
         })
+    }
+
+    private fun handlePendingTransactions(transactions: List<ContactTransactionModel>) {
+        displayList.removeAll { it !is TransactionSummary }
+        view.showFctxRequiringAttention(getNumberOfFctxRequiringAttention(transactions))
+        if (!transactions.isEmpty()) {
+            val reversed = transactions.sortedWith(ContactTransactionDateComparator()).reversed()
+            displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction))
+            displayList.addAll(1, reversed)
+            displayList.add(reversed.size + 1, stringUtils.getString(R.string.contacts_transaction_history))
+            view.onTransactionsUpdated(displayList)
+        } else {
+            view.onTransactionsUpdated(displayList)
+        }
+    }
+
+    private fun getNumberOfFctxRequiringAttention(facilitatedTransactions: List<ContactTransactionModel>): Int {
+        var value = 0
+        facilitatedTransactions
+                .asSequence()
+                .map { it.facilitatedTransaction }
+                .forEach {
+                    if (it.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
+                            && it.role == FacilitatedTransaction.ROLE_RPR_RECEIVER) {
+                        value++
+                    } else if (it.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+                            && it.role == FacilitatedTransaction.ROLE_RPR_RECEIVER) {
+                        value++
+                    }
+                }
+        return value
     }
 
     private fun getBalanceString(isBTC: Boolean, btcBalance: Long): String {

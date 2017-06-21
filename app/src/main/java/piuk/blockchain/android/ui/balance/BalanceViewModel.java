@@ -4,7 +4,6 @@ import com.google.common.collect.HashBiMap;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
-import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
@@ -343,43 +342,43 @@ public class BalanceViewModel extends BaseViewModel {
     }
 
     void updateBalanceAndTransactionList(int accountSpinnerPosition, boolean isBTC, boolean fetchTransactions) {
-        // The current selected item in dropdown (Account or Legacy Address)
-        Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);
-
-        //If current selected item gets edited by another platform object might become null
-        if (object == null && dataListener != null) {
-            dataListener.onAccountSizeChange();
-            object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);
-        }
-
-        //Update balance
-        final Object finalObject = object;
-        compositeDisposable.add(
-                payloadDataManager.updateAllBalances()
-                        .subscribe(() -> {
-                            long btcBalance = transactionListDataManager.getBtcBalance(finalObject);
-                            String balanceTotal = getBalanceString(isBTC, btcBalance);
-
-                            if (dataListener != null) {
-                                dataListener.updateBalance(balanceTotal);
-                            }
-                        }));
-
-        compositeDisposable.add(
-                Observable.just(fetchTransactions)
-                        .flatMap(fetch -> {
-                            if (fetch) {
-                                return transactionListDataManager.fetchTransactions(finalObject, 50, 0);
-                            } else {
-                                return Observable.just(transactionListDataManager.getTransactionList());
-                            }
-                        })
-                        .doAfterTerminate(() -> {
-                            if (dataListener != null) dataListener.setShowRefreshing(false);
-                        })
-                        .subscribe(
-                                this::insertTransactionsAndDisplay,
-                                throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
+//        // The current selected item in dropdown (Account or Legacy Address)
+//        Object object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);
+//
+//        //If current selected item gets edited by another platform object might become null
+//        if (object == null && dataListener != null) {
+//            dataListener.onAccountSizeChange();
+//            object = activeAccountAndAddressBiMap.inverse().get(accountSpinnerPosition);
+//        }
+//
+//        //Update balance
+//        final Object finalObject = object;
+//        compositeDisposable.add(
+//                payloadDataManager.updateAllBalances()
+//                        .subscribe(() -> {
+//                            long btcBalance = transactionListDataManager.getBtcBalance(finalObject);
+//                            String balanceTotal = getBalanceString(isBTC, btcBalance);
+//
+//                            if (dataListener != null) {
+//                                dataListener.updateBalance(balanceTotal);
+//                            }
+//                        }));
+//
+//        compositeDisposable.add(
+//                Observable.just(fetchTransactions)
+//                        .flatMap(fetch -> {
+//                            if (fetch) {
+//                                return transactionListDataManager.fetchTransactions(finalObject, 50, 0);
+//                            } else {
+//                                return Observable.just(transactionListDataManager.getTransactionList());
+//                            }
+//                        })
+//                        .doAfterTerminate(() -> {
+//                            if (dataListener != null) dataListener.setShowRefreshing(false);
+//                        })
+//                        .subscribe(
+//                                this::insertTransactionsAndDisplay,
+//                                throwable -> Log.e(TAG, "updateBalanceAndTransactionList: ", throwable)));
     }
 
     @SuppressWarnings("Java8CollectionRemoveIf")
