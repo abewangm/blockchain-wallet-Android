@@ -885,10 +885,8 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void showDefaultPrompt(AlertDialog alertDialog) {
-        Log.d(TAG, "showDefaultPrompt 1: ");
         binding.getRoot().postDelayed(() -> {
             if (!isFinishing()) {
-                Log.d(TAG, "showDefaultPrompt 2: ");
                 alertDialog.show();
             }
         }, 1000);
@@ -896,15 +894,13 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void showCustomPrompt(AppCompatDialogFragment alertFragments) {
-        Log.d(TAG, "showCustomPrompt 1: ");
         if (!isFinishing()) {
-            Log.d(TAG, "showCustomPrompt 2: ");
             alertFragments.show(getSupportFragmentManager(), alertFragments.getTag());
         }
     }
 
     @Override
-    public Context getSomeContext() {
+    public Context getActivityContext() {
         return this;
     }
 }

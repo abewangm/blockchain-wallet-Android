@@ -34,7 +34,6 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
 
         if (isSurveyAllowed()) list.add(getSurveyDialog(context))
         if (isRooted()) list.add(getRootWarningDialog(context))
-        if (!isConnected(context)) list.add(getConnectivityDialog(context))
 
         return Observable.fromArray(list)
     }
@@ -96,10 +95,6 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
 
     private fun isRooted(): Boolean {
         return RootUtil().isDeviceRooted && !prefsUtil.getValue("disable_root_warning", false)
-    }
-
-    private fun isConnected(context: Context): Boolean {
-        return ConnectivityStatus.hasConnectivity(context);
     }
 
     private fun isVerifyEmailReminderAllowed(settings: Settings): Boolean {
