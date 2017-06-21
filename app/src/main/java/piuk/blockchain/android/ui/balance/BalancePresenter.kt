@@ -107,7 +107,8 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                         label = it.label
                         displayBalance = getBalanceString(true, bigIntBalance.toLong())
                         absoluteBalance = bigIntBalance.toLong()
-                        accountObject = it
+                        address = it.xpub
+                        type = ItemAccount.TYPE.SINGLE_ACCOUNT
                     }
                 }
 
@@ -124,26 +125,22 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 label = all.label
                 displayBalance = getBalanceString(true, bigIntBalance.toLong())
                 absoluteBalance = bigIntBalance.toLong()
-                accountObject = all
+                type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
             })
         }
 
         mutableList.addAll(accounts)
 
-        // Show "Imported Addresses" if necessary
+        // Show "Imported Addresses" if wallet contains legacy addresses
         if (!legacyAddresses.isEmpty()) {
-            val importedAddresses = ConsolidatedAccount().apply {
-                label = stringUtils.getString(R.string.imported_addresses)
-                type = ConsolidatedAccount.Type.ALL_IMPORTED_ADDRESSES
-            }
 
             val bigIntBalance = payloadDataManager.importedAddressesBalance
 
             mutableList.add(ItemAccount().apply {
-                label = importedAddresses.label
+                label = stringUtils.getString(R.string.imported_addresses)
                 displayBalance = getBalanceString(true, bigIntBalance.toLong())
                 absoluteBalance = bigIntBalance.toLong()
-                accountObject = importedAddresses
+                type = ItemAccount.TYPE.ALL_LEGACY
             })
         }
 
@@ -151,7 +148,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     }
 
     private fun getTransactionsListObservable(itemAccount: ItemAccount) =
-            transactionListDataManager.fetchTransactions(itemAccount.accountObject, 50, 0)
+            transactionListDataManager.fetchTransactions(itemAccount, 50, 0)
                     .doOnNext {
                         view.onTransactionsUpdated(it)
                     }
@@ -159,7 +156,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     private fun getBalanceObservable(itemAccount: ItemAccount) =
             payloadDataManager.updateAllBalances()
                     .doOnComplete {
-                        val btcBalance = transactionListDataManager.getBtcBalance(itemAccount.accountObject)
+                        val btcBalance = transactionListDataManager.getBtcBalance(itemAccount)
                         val balanceTotal = getBalanceString(isBTC = true, btcBalance = btcBalance)
                         view.onTotalBalanceUpdated(balanceTotal)
                     }.toObservable<Nothing>()
