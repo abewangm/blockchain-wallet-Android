@@ -13,8 +13,8 @@ class ItemAccount {
         // Empty constructor for serialization
     }
 
-    constructor(label: String,
-                displayBalance: String,
+    constructor(label: String?,
+                displayBalance: String?,
                 tag: String?,
                 absoluteBalance: Long?,
                 accountObject: Any?) {

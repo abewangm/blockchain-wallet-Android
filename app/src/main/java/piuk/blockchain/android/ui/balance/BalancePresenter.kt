@@ -1,7 +1,9 @@
 package piuk.blockchain.android.ui.balance
 
 import info.blockchain.wallet.payload.data.LegacyAddress
+import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.access.AuthEvent
@@ -11,12 +13,14 @@ import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
+import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ConsolidatedAccount
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
@@ -33,6 +37,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     @Inject lateinit var prefsUtil: PrefsUtil
     @Inject lateinit var accessState: AccessState
     @Inject lateinit var rxBus: RxBus
+    @Inject lateinit var swipeToReceiveHelper: SwipeToReceiveHelper
 
     private var contactsEventObservable: Observable<ContactsEvent>? = null
     private var notificationObservable: Observable<NotificationPayload>? = null
@@ -61,9 +66,10 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                     getBalanceObservable(chosenAccount),
                     getTransactionsListObservable(chosenAccount),
                     getUpdateTickerObservable()
-            ).subscribe(
-                    { /* No-op */ },
-                    { view.setUiState(UiState.FAILURE) })
+            ).compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .subscribe(
+                            { /* No-op */ },
+                            { view.setUiState(UiState.FAILURE) })
         }
     }
 
@@ -74,6 +80,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
             val balanceCompletable = getBalanceObservable(chosenAccount)
 
             Observable.merge(balanceCompletable, fetchTransactionsObservable)
+                    .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .subscribe(
                             { /* No-op */ },
                             { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
@@ -85,9 +92,10 @@ class BalancePresenter : BasePresenter<BalanceView>() {
             Observable.merge(
                     getBalanceObservable(chosenAccount),
                     getTransactionsListObservable(chosenAccount)
-            ).subscribe(
-                    { /* No-op */ },
-                    { view.setUiState(UiState.FAILURE) })
+            ).compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .subscribe(
+                            { /* No-op */ },
+                            { view.setUiState(UiState.FAILURE) })
         }
     }
 
@@ -106,6 +114,11 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         val btcBalance = transactionListDataManager.getBtcBalance(chosenAccount?.accountObject)
         val balanceTotal = getBalanceString(accessState.isBtc, btcBalance)
         view.onTotalBalanceUpdated(balanceTotal)
+        view.onViewTypeChanged(accessState.isBtc)
+    }
+
+    fun areLauncherShortcutsEnabled(): Boolean {
+        return prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
     }
 
     private fun getAllDisplayableAccounts(): MutableList<ItemAccount> {
@@ -167,6 +180,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
     private fun getTransactionsListObservable(itemAccount: ItemAccount) =
             transactionListDataManager.fetchTransactions(itemAccount.accountObject, 50, 0)
+                    .doAfterTerminate(this::storeSwipeReceiveAddresses)
                     .doOnNext {
                         when {
                             it.isEmpty() -> view.setUiState(UiState.EMPTY)
@@ -198,6 +212,18 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                                 accessState.isBtc
                         )
                     }.toObservable<Nothing>()
+
+    private fun storeSwipeReceiveAddresses() {
+        // Defer to background thread as deriving addresses is quite processor intensive
+        Completable.fromCallable {
+            swipeToReceiveHelper.updateAndStoreAddresses()
+            Void.TYPE
+        }.subscribeOn(Schedulers.computation())
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        { /* No-op */ },
+                        { it.printStackTrace() })
+    }
 
     private fun subscribeToEvents() {
         contactsEventObservable = rxBus.register(ContactsEvent::class.java)

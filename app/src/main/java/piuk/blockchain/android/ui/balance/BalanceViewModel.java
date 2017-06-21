@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.util.Log;
 
-import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.exceptions.ApiException;
@@ -38,11 +37,10 @@ import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ConsolidatedAccount;
 import piuk.blockchain.android.ui.account.ConsolidatedAccount.Type;
@@ -168,35 +166,35 @@ public class BalanceViewModel extends BaseViewModel {
     @Override
     public void onViewReady() {
 
-        if(prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0) > 0) {
-            // Check from this point forwards
-            txListObservable = rxBus.register(List.class);
-        }
-
-        compositeDisposable.add(
-                exchangeRateFactory.updateTicker()
-                        .subscribe(
-                                () -> dataListener.onExchangeRateUpdated(),
-                                Throwable::printStackTrace));
-
-        contactsEventObservable = rxBus.register(ContactsEvent.class);
-        contactsEventObservable.subscribe(contactsEvent -> refreshFacilitatedTransactions());
-
-        authEventObservable = rxBus.register(AuthEvent.class);
-        authEventObservable.subscribe(authEvent -> {
-            displayList.clear();
-            transactionListDataManager.clearTransactionList();
-            contactsDataManager.resetContacts();
-        });
-
-        notificationObservable = rxBus.register(NotificationPayload.class);
-        notificationObservable
-                .subscribe(notificationPayload -> {
-                    if (notificationPayload.getType() != null
-                            && notificationPayload.getType().equals(NotificationPayload.NotificationType.PAYMENT)) {
-                        refreshFacilitatedTransactions();
-                    }
-                });
+//        if(prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0) > 0) {
+//            // Check from this point forwards
+//            txListObservable = rxBus.register(List.class);
+//        }
+//
+//        compositeDisposable.add(
+//                exchangeRateFactory.updateTicker()
+//                        .subscribe(
+//                                () -> dataListener.onExchangeRateUpdated(),
+//                                Throwable::printStackTrace));
+//
+//        contactsEventObservable = rxBus.register(ContactsEvent.class);
+//        contactsEventObservable.subscribe(contactsEvent -> refreshFacilitatedTransactions());
+//
+//        authEventObservable = rxBus.register(AuthEvent.class);
+//        authEventObservable.subscribe(authEvent -> {
+//            displayList.clear();
+//            transactionListDataManager.clearTransactionList();
+//            contactsDataManager.resetContacts();
+//        });
+//
+//        notificationObservable = rxBus.register(NotificationPayload.class);
+//        notificationObservable
+//                .subscribe(notificationPayload -> {
+//                    if (notificationPayload.getType() != null
+//                            && notificationPayload.getType().equals(NotificationPayload.NotificationType.PAYMENT)) {
+//                        refreshFacilitatedTransactions();
+//                    }
+//                });
     }
 
     boolean areLauncherShortcutsEnabled() {
