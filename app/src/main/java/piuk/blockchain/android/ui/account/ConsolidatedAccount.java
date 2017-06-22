@@ -7,15 +7,11 @@ import info.blockchain.wallet.payload.data.LegacyAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class ConsolidatedAccount extends Account {
-
-    public enum Type {
-        ALL_ACCOUNTS, ALL_IMPORTED_ADDRESSES
-    }
 
     private List<LegacyAddress> legacyAddresses = null;
     private long amount;
-    private Type type;
 
     public ConsolidatedAccount() {
         legacyAddresses = new ArrayList<>();
@@ -44,11 +40,4 @@ public class ConsolidatedAccount extends Account {
         this.amount = amount;
     }
 
-    public Type getType() {
-        return type;
-    }
-
-    public void setType(Type type) {
-        this.type = type;
-    }
 }

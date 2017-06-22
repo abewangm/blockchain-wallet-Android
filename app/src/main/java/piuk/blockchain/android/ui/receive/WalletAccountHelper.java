@@ -86,6 +86,7 @@ public class WalletAccountHelper {
                         addressBalanceHelper.getAccountBalance(account, isBtc, btcExchangeRate, fiatUnit, btcUnit),
                         null,
                         addressBalanceHelper.getAccountAbsoluteBalance(account),
+                        account,
                         account.getXpub()));
             }
         }
@@ -128,6 +129,7 @@ public class WalletAccountHelper {
                     addressBalanceHelper.getAddressBalance(legacyAddress, isBtc, btcExchangeRate, fiatUnit, btcUnit),
                     tag,
                     addressBalanceHelper.getAddressAbsoluteBalance(legacyAddress),
+                    legacyAddress,
                     legacyAddress.getAddress()));
 
         }

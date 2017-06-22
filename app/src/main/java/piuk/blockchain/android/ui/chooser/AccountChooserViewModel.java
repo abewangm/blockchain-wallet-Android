@@ -127,7 +127,7 @@ public class AccountChooserViewModel extends BaseViewModel {
                     if (!contacts.isEmpty()) {
                         itemAccounts.add(new ItemAccount(stringUtils.getString(R.string.contacts_title), null, null, null, null));
                         for (Contact contact : contacts) {
-                            itemAccounts.add(new ItemAccount(null, null, null, null, contact));
+                            itemAccounts.add(new ItemAccount(null, null, null, null, contact, null));
                         }
                     }
                 });

@@ -17,7 +17,7 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 
-import static piuk.blockchain.android.ui.balance.LegacyBalanceFragment.KEY_TRANSACTION_HASH;
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID;
 import static piuk.blockchain.android.ui.home.MainActivity.EXTRA_FCTX_ID;
 import static piuk.blockchain.android.ui.home.MainActivity.EXTRA_MDID;

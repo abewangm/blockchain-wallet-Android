@@ -52,8 +52,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static piuk.blockchain.android.ui.balance.LegacyBalanceFragment.KEY_TRANSACTION_HASH;
-import static piuk.blockchain.android.ui.balance.LegacyBalanceFragment.KEY_TRANSACTION_LIST_POSITION;
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
+import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
 @SuppressWarnings({"PrivateMemberAccessBetweenOuterAndInnerClass", "WeakerAccess"})
 public class TransactionDetailViewModelTest extends RxTest {

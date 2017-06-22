@@ -50,8 +50,8 @@ public class AccountEditDataManager {
 
                     // To default account
                     Account defaultAccount = payloadDataManager.getDefaultAccount();
-                    pendingTransaction.sendingObject = new ItemAccount(legacyAddress.getLabel(), sweepAmount.toString(), "", sweepAmount.longValue(), legacyAddress);
-                    pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", sweepAmount.longValue(), defaultAccount);
+                    pendingTransaction.sendingObject = new ItemAccount(legacyAddress.getLabel(), sweepAmount.toString(), "", sweepAmount.longValue(), legacyAddress, legacyAddress.getAddress());
+                    pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", sweepAmount.longValue(), defaultAccount, null);
                     pendingTransaction.unspentOutputBundle = sendDataManager.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
                     pendingTransaction.bigIntAmount = sweepAmount;
                     pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee();

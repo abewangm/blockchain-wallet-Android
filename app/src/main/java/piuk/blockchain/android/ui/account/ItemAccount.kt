@@ -1,10 +1,8 @@
 package piuk.blockchain.android.ui.account
 
-import org.bitcoinj.core.ECKey
-
 class ItemAccount {
 
-    enum class TYPE{
+    enum class TYPE {
         ALL_ACCOUNTS_AND_LEGACY, ALL_LEGACY, SINGLE_ACCOUNT
     }
 
@@ -24,30 +22,20 @@ class ItemAccount {
         // Empty constructor for serialization
     }
 
-    @Deprecated(message = "Still used in PendingTransaction.java")
-    constructor(label: String,
-                displayBalance: String,
+    @JvmOverloads
+    constructor(label: String?,
+                displayBalance: String?,
                 tag: String?,
                 absoluteBalance: Long?,
-                accountObject: Any?) {
-        this.label = label
-        this.displayBalance = displayBalance
-        this.tag = tag
-        this.absoluteBalance = absoluteBalance
-        this.accountObject = accountObject
-    }
-
-    constructor(label: String,
-                displayBalance: String,
-                tag: String?,
-                absoluteBalance: Long?,
+                accountObject: Any? = null,
                 address: String?,
-                type: TYPE) {
+                type: TYPE = TYPE.SINGLE_ACCOUNT) {
         this.label = label
         this.displayBalance = displayBalance
         this.tag = tag
         this.absoluteBalance = absoluteBalance
         this.address = address
+        this.accountObject = accountObject
         this.type = type
     }
 }

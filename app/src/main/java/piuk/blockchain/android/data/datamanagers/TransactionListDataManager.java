@@ -1,29 +1,22 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payload.data.Account;
-import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.util.FormatsUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import info.blockchain.wallet.util.FormatsUtil;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.stores.TransactionListStore;
-import piuk.blockchain.android.ui.account.ConsolidatedAccount;
-import piuk.blockchain.android.ui.account.ConsolidatedAccount.Type;
 import piuk.blockchain.android.ui.account.ItemAccount;
 
 public class TransactionListDataManager {
-
-    private static final String TAG = TransactionListDataManager.class.getSimpleName();
 
     private PayloadManager payloadManager;
     private TransactionListStore transactionListStore;
@@ -48,41 +41,12 @@ public class TransactionListDataManager {
                 case ALL_LEGACY:
                     result = payloadManager.getImportedAddressesTransactions(limit, offset);
                     break;
-                default: {
+                default:
                     if (FormatsUtil.isValidXpub(itemAccount.getAddress())) {
                         result = payloadManager.getAccountTransactions(itemAccount.getAddress(), limit, offset);
                     } else {
                         result = payloadManager.getImportedAddressesTransactions(limit, offset);
                     }
-                }
-            }
-
-            insertTransactionList(result);
-
-            return transactionListStore.getList();
-        }).compose(RxUtil.applySchedulersToObservable());
-    }
-
-    // TODO: 21/06/2017 Remove after BalanceViewModel removed
-    @Deprecated
-    public Observable<List<TransactionSummary>> fetchTransactions(Object object, int limit, int offset) {
-        return Observable.fromCallable(() -> {
-            List<TransactionSummary> result;
-
-            if (object instanceof ConsolidatedAccount) {
-                ConsolidatedAccount consolidate = (ConsolidatedAccount) object;
-                if (consolidate.getType() == Type.ALL_ACCOUNTS) {
-                    result = payloadManager.getAllTransactions(limit, offset);
-                } else if (consolidate.getType() == Type.ALL_IMPORTED_ADDRESSES) {
-                    result = payloadManager.getImportedAddressesTransactions(limit, offset);
-                } else {
-                    throw new IllegalArgumentException("ConsolidatedAccount did not have a type set");
-                }
-            } else if (object instanceof Account) {
-                // V3
-                result = payloadManager.getAccountTransactions(((Account) object).getXpub(), limit, offset);
-            } else {
-                throw new IllegalArgumentException("Cannot fetch transactions for object type: " + object.getClass().getSimpleName());
             }
 
             insertTransactionList(result);
@@ -122,61 +86,22 @@ public class TransactionListDataManager {
     }
 
     /**
-     * Get total BTC balance from an {@link Account} or {@link LegacyAddress}.
-     *
-     * @param object Either a {@link Account} or a {@link LegacyAddress}
-     * @return A BTC value as a long.
-     */
-    // TODO: 21/06/2017 Remove after BalanceViewModel removed
-    @Deprecated
-    public long getBtcBalance(Object object) {
-        long result = 0;
-
-        if (object instanceof ConsolidatedAccount) {
-            ConsolidatedAccount consolidate = (ConsolidatedAccount) object;
-
-            if (consolidate.getType() == Type.ALL_ACCOUNTS) {
-                result = payloadManager.getWalletBalance().longValue();
-            } else if (consolidate.getType() == Type.ALL_IMPORTED_ADDRESSES) {
-                result = payloadManager.getImportedAddressesBalance().longValue();
-            } else {
-                Log.e(TAG, "ConsolidatedAccount did not have a type set");
-            }
-        } else if (object instanceof Account) {
-            // V3
-            result = payloadManager.getAddressBalance(((Account) object).getXpub()).longValue();
-        } else if (object instanceof LegacyAddress) {
-            // V2
-            result = payloadManager.getAddressBalance(((LegacyAddress) object).getAddress()).longValue();
-        } else {
-            Log.e(TAG, "Cannot fetch transactions for object type: " + object.getClass().getSimpleName());
-        }
-
-        return result;
-    }
-
-    /**
      * Get total BTC balance from {@link ItemAccount}.
      *
      * @param itemAccount {@link ItemAccount}
      * @return A BTC value as a long.
      */
     public long getBtcBalance(ItemAccount itemAccount) {
-        long result = 0;
-
         switch (itemAccount.getType()) {
             case ALL_ACCOUNTS_AND_LEGACY:
-                result = payloadManager.getWalletBalance().longValue();
-                break;
+                return payloadManager.getWalletBalance().longValue();
             case ALL_LEGACY:
-                result = payloadManager.getImportedAddressesBalance().longValue();
-                break;
+                return payloadManager.getImportedAddressesBalance().longValue();
             case SINGLE_ACCOUNT:
-                result = payloadManager.getAddressBalance(itemAccount.getAddress()).longValue();
-                break;
+                return payloadManager.getAddressBalance(itemAccount.getAddress()).longValue();
+            default:
+                return 0;
         }
-
-        return result;
     }
 
     /**
