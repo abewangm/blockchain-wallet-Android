@@ -175,7 +175,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                     }
                 }, {
                     view.showToast(
-                            R.string.contacts_transaction_not_found_error,
+                            R.string.contacts_not_found_error,
                             ToastCustom.TYPE_ERROR
                     )
                 })
@@ -243,7 +243,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         contactsDataManager.getContactFromFctxId(fctxId)
                 .flatMapCompletable { contactsDataManager.sendPaymentDeclinedResponse(it.mdid, fctxId) }
                 .doOnError { contactsDataManager.fetchContacts() }
-                .doAfterTerminate { this.refreshFacilitatedTransactions() }
+                .doAfterTerminate { refreshFacilitatedTransactions() }
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
                         { view.showToast(R.string.contacts_pending_transaction_decline_success, ToastCustom.TYPE_OK) },
@@ -254,7 +254,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         contactsDataManager.getContactFromFctxId(fctxId)
                 .flatMapCompletable { contactsDataManager.sendPaymentCancelledResponse(it.mdid, fctxId) }
                 .doOnError { contactsDataManager.fetchContacts() }
-                .doAfterTerminate { this.refreshFacilitatedTransactions() }
+                .doAfterTerminate { refreshFacilitatedTransactions() }
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
                         { view.showToast(R.string.contacts_pending_transaction_cancel_success, ToastCustom.TYPE_OK) },
@@ -273,7 +273,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         buyDataManager.canBuy
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
-                    if (it ?: false) {
+                    if (it) {
                         view.startBuyActivity()
                     } else {
                         view.startReceiveFragment()
