@@ -11,22 +11,14 @@
         android:minWidth="420dp"
         android:orientation="vertical">
 
-
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_marginTop="16dp"
-            android:gravity="center_horizontal"
-            app:srcCompat="@drawable/vector_icon_blue" />
-
         <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="22dp"
-            android:layout_marginBottom="24dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            android:layout_marginRight="24dp"
+            android:layout_marginLeft="24dp"
             android:gravity="center_horizontal"
-            app:srcCompat="@drawable/vector_blockchain"
-            android:tint="@color/primary_navy_medium" />
+            app:srcCompat="@drawable/vector_logo" />
 
         <TextView
             android:id="@+id/about"
@@ -34,7 +26,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
             android:gravity="center_horizontal"
             android:textColor="@color/primary_navy_medium"
             android:textSize="16sp" />
