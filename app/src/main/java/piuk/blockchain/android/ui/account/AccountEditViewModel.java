@@ -145,13 +145,8 @@ public class AccountEditViewModel extends BaseViewModel {
             // V3
             List<Account> accounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts();
 
-            // Remove "All"
             List<Account> accountClone = new ArrayList<>(accounts.size());
             accountClone.addAll(accounts);
-
-            if (accountClone.get(accountClone.size() - 1) instanceof ConsolidatedAccount) {
-                accountClone.remove(accountClone.size() - 1);
-            }
 
             account = accountClone.get(accountIndex);
             accountModel.setLabel(account.getLabel());
@@ -165,6 +160,7 @@ public class AccountEditViewModel extends BaseViewModel {
 
         } else if (addressIndex >= 0) {
             // V2
+            // TODO: 22/06/2017 Is any of this necessary?
             ConsolidatedAccount iAccount = null;
             if (!payloadDataManager.getWallet().getLegacyAddressList().isEmpty()) {
 

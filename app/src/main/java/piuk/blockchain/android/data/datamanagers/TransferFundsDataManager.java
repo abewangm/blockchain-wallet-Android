@@ -81,7 +81,8 @@ public class TransferFundsDataManager {
                                 "",
                                 "",
                                 null,
-                                legacyAddress);
+                                legacyAddress,
+                                legacyAddress.getAddress());
                         pendingSpend.bigIntFee = pendingSpend.unspentOutputBundle.getAbsoluteFee();
                         pendingSpend.bigIntAmount = sweepAmount;
                         pendingSpend.addressToReceiveIndex = addressToReceiveIndex;

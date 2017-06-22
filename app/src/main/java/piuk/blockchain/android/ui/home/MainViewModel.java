@@ -131,7 +131,7 @@ public class MainViewModel extends BaseViewModel {
 
         void showCustomPrompt(AppCompatDialogFragment alertFragment);
 
-        Context getSomeContext();
+        Context getActivityContext();
     }
 
     public MainViewModel(DataListener dataListener) {
@@ -339,7 +339,7 @@ public class MainViewModel extends BaseViewModel {
                             .flatMapCompletable(feeOptions -> exchangeRateFactory.updateTicker())
                             .doAfterTerminate(() -> {
 
-                                initPrompts(dataListener.getSomeContext());
+                                initPrompts(dataListener.getActivityContext());
 
                                 if (dataListener != null) {
                                     dataListener.onFetchTransactionCompleted();
