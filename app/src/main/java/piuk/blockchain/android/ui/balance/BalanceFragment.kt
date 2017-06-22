@@ -18,10 +18,13 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.fragment_balance.*
+import kotlinx.android.synthetic.main.include_no_transaction_message.*
+import kotlinx.android.synthetic.main.include_no_transaction_message.view.*
+import kotlinx.android.synthetic.main.include_onboarding_complete.*
+import kotlinx.android.synthetic.main.include_onboarding_viewpager.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.ui.account.ItemAccount
-import piuk.blockchain.android.ui.balance.LegacyBalanceFragment.*
 import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter
 import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener
 import piuk.blockchain.android.ui.base.BaseFragment
@@ -30,25 +33,30 @@ import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.home.MainActivity.ACCOUNT_EDIT
+import piuk.blockchain.android.ui.onboarding.OnboardingPagerAdapter
+import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
 import piuk.blockchain.android.ui.receive.ReceiveFragment
 import piuk.blockchain.android.ui.send.SendFragment
 import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity
 import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.MonetaryUtil
-import piuk.blockchain.android.util.OnItemSelectedListener
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
+import piuk.blockchain.android.util.helperfunctions.OnItemSelectedListener
+import piuk.blockchain.android.util.helperfunctions.OnPageChangeListener
 import java.util.*
 
 class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
 
-    private var progressDialog: MaterialProgressDialog? = null
+    // Adapters
     private var accountsAdapter: BalanceHeaderAdapter? = null
-    private var interactionListener: OnFragmentInteractionListener? = null
     private var balanceAdapter: BalanceAdapter? = null
-    private var spacerDecoration: BottomSpacerDecoration? = null
+    private var onboardingPagerAdapter: OnboardingPagerAdapter? = null
 
+    private var progressDialog: MaterialProgressDialog? = null
+    private var interactionListener: OnFragmentInteractionListener? = null
+    private var spacerDecoration: BottomSpacerDecoration? = null
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == ACTION_INTENT && activity != null) {
@@ -79,7 +87,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         )
 
         textview_balance.setOnClickListener { presenter.invertViewType() }
+        button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
 
+        initOnboardingPager()
+        setupAnnouncement()
         onViewReady()
     }
 
@@ -183,6 +194,18 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             setUpRecyclerView(exchangeRate, isBtc)
         } else {
             balanceAdapter?.onPriceUpdated(exchangeRate)
+        }
+    }
+
+    override fun onLoadOnboardingPages(pages: List<OnboardingPagerContent>) {
+        if (onboardingPagerAdapter != null) {
+            onboardingPagerAdapter!!.notifyPagesChanged(pages)
+
+            pager_onboarding.post({
+                progress_bar.visibility = View.GONE
+            })
+
+            indicator.setViewPager(pager_onboarding)
         }
     }
 
@@ -335,6 +358,91 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private fun onEmptyState() {
         setShowRefreshing(false)
         no_transaction_include.visible()
+
+        if (!presenter.isOnboardingComplete()) {
+            framelayout_onboarding.visible()
+        } else {
+            framelayout_onboarding.gone()
+            if (announcement_view.visibility == View.VISIBLE) {
+                button_get_bitcoin.visible()
+            }
+        }
+    }
+
+    private fun initOnboardingPager() {
+        if (onboardingPagerAdapter == null) {
+            onboardingPagerAdapter = OnboardingPagerAdapter(context)
+            pager_onboarding.adapter = onboardingPagerAdapter
+            pager_onboarding.addOnPageChangeListener(OnPageChangeListener { position, positionOffset ->
+                val count = onboardingPagerAdapter?.count ?: 0
+                if (position == count - 1) {
+                    // Last page
+                    pager_onboarding.setPagingEnabled(false)
+                    onboarding_complete_layout.visible()
+                    presenter.setOnboardingComplete(true)
+                } else if (position == count - 2) {
+                    // Second last page
+                    viewPagerIndicator.alpha = 1 - positionOffset
+                    onboarding_complete_layout.alpha = positionOffset
+                    presenter.setOnboardingComplete(false)
+                } else {
+                    viewPagerIndicator.visible()
+                    onboarding_complete_layout.invisible()
+                    viewPagerIndicator.alpha = 1.0f
+                    presenter.setOnboardingComplete(false)
+                }
+            })
+        }
+
+        btn_skip_all.setOnClickListener { dismissOnboarding() }
+        onboarding_close.setOnClickListener { dismissOnboarding() }
+
+        button_start_over.setOnClickListener {
+            onboarding_complete_layout.invisible()
+            pager_onboarding.currentItem = 0
+            pager_onboarding.setPagingEnabled(true)
+            viewPagerIndicator.visible()
+            viewPagerIndicator.alpha = 1.0f
+            presenter.setOnboardingComplete(false)
+        }
+    }
+
+    private fun dismissOnboarding() {
+        if (announcement_view.visibility != View.VISIBLE) {
+            button_get_bitcoin.visible()
+        }
+
+        framelayout_onboarding.gone()
+        presenter.setOnboardingComplete(true)
+    }
+
+    private fun setupAnnouncement() {
+        announcement_view.apply {
+            setTitle(R.string.onboarding_available_now)
+            setContent(R.string.onboarding_buy_details)
+            setLink(R.string.onboarding_buy_bitcoin)
+            setImage(R.drawable.vector_wallet_offset)
+            setEmoji(R.drawable.celebration_emoji)
+            setLinkOnclickListener({
+                startBuyActivity()
+                presenter.disableAnnouncement()
+            })
+            setCloseOnclickListener({
+                gone()
+                no_transaction_include.button_get_bitcoin.visible()
+                presenter.disableAnnouncement()
+            })
+        }
+    }
+
+    override fun onShowAnnouncement() {
+        announcement_view.visible()
+        button_get_bitcoin.gone()
+    }
+
+    override fun onHideAnnouncement() {
+        announcement_view.gone()
+        button_get_bitcoin.visible()
     }
 
     private fun onContentLoaded() {
@@ -395,6 +503,15 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     companion object {
+
+        @JvmStatic
+        val ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH"
+        @JvmStatic
+        val KEY_TRANSACTION_LIST_POSITION = "transaction_list_position"
+        @JvmStatic
+        val KEY_TRANSACTION_HASH = "transaction_hash"
+        @JvmStatic
+        val ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment"
 
         @JvmStatic
         fun newInstance(broadcastingPayment: Boolean): BalanceFragment {

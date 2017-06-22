@@ -52,10 +52,13 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     private var contactsEventObservable: Observable<ContactsEvent>? = null
     private var notificationObservable: Observable<NotificationPayload>? = null
     private var authEventObservable: Observable<AuthEvent>? = null
-
-    private var activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
-    private var displayList: MutableList<Any> = mutableListOf()
     private var chosenAccount: ItemAccount? = null
+
+    private val activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
+    private val displayList: MutableList<Any> = mutableListOf()
+    private val monetaryUtil: MonetaryUtil by lazy(LazyThreadSafetyMode.NONE) {
+        MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
+    }
 
     init {
         Injector.getInstance().dataManagerComponent.inject(this)
@@ -67,7 +70,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         subscribeToEvents()
         storeSwipeReceiveAddresses()
 
-        activeAccountAndAddressList = getAllDisplayableAccounts()
+        activeAccountAndAddressList.addAll(getAllDisplayableAccounts())
         chosenAccount = activeAccountAndAddressList[0]
 
         chosenAccount?.let {
@@ -87,6 +90,14 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         notificationObservable?.let { rxBus.unregister(NotificationPayload::class.java, it) }
         authEventObservable?.let { rxBus.unregister(AuthEvent::class.java, it) }
         super.onViewDestroyed()
+    }
+
+    internal fun onResume() {
+        // Here we check the Fiat and Btc formats and let the UI handle any potential updates
+        val btcBalance = transactionListDataManager.getBtcBalance(chosenAccount?.accountObject)
+        val balanceTotal = getBalanceString(accessState.isBtc, btcBalance)
+        view.onTotalBalanceUpdated(balanceTotal)
+        view.onViewTypeChanged(accessState.isBtc)
     }
 
     internal fun onAccountChosen(position: Int) {
@@ -121,21 +132,10 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         view.onTotalBalanceUpdated(getBalanceString(isBtc, chosenAccount?.absoluteBalance ?: 0L))
     }
 
-    internal fun invertViewType() {
-        setViewType(!accessState.isBtc)
-    }
+    internal fun invertViewType() = setViewType(!accessState.isBtc)
 
-    internal fun onResume() {
-        // Here we check the Fiat and Btc formats and let the UI handle any potential updates
-        val btcBalance = transactionListDataManager.getBtcBalance(chosenAccount?.accountObject)
-        val balanceTotal = getBalanceString(accessState.isBtc, btcBalance)
-        view.onTotalBalanceUpdated(balanceTotal)
-        view.onViewTypeChanged(accessState.isBtc)
-    }
-
-    internal fun areLauncherShortcutsEnabled(): Boolean {
-        return prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
-    }
+    internal fun areLauncherShortcutsEnabled() =
+            prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
 
     internal fun onPendingTransactionClicked(fctxId: String) {
         contactsDataManager.getContactFromFctxId(fctxId)
@@ -261,16 +261,15 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                         { view.showToast(R.string.contacts_pending_transaction_cancel_failure, ToastCustom.TYPE_ERROR) })
     }
 
-    fun isOnboardingComplete(): Boolean {
-        // If wallet isn't newly created, don't show onboarding
-        return prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false) || !appUtil.isNewlyCreated()
-    }
+    internal fun isOnboardingComplete() =
+            // If wallet isn't newly created, don't show onboarding
+            prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false) || !appUtil.isNewlyCreated
 
-    fun setOnboardingComplete(completed: Boolean) {
+    internal fun setOnboardingComplete(completed: Boolean) {
         prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, completed)
     }
 
-    fun getBitcoinClicked() {
+    internal fun getBitcoinClicked() {
         buyDataManager.canBuy
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
@@ -282,26 +281,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 }, { it.printStackTrace() })
     }
 
-    fun checkLatestAnnouncement(txList: List<TransactionSummary>) {
-        // If user hasn't completed onboarding, ignore announcements
-        buyDataManager.canBuy
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe({ buyAllowed ->
-                    if (isOnboardingComplete() && buyAllowed!!) {
-                        if (!prefsUtil.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, false)
-                                && !txList.isEmpty()) {
-                            prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, true)
-                            view.onShowAnnouncement()
-                        } else {
-                            view.onHideAnnouncement()
-                        }
-                    } else {
-                        view.onHideAnnouncement()
-                    }
-                }, { it.printStackTrace() })
-    }
-
-    fun disableAnnouncement() {
+    internal fun disableAnnouncement() {
         prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
     }
 
@@ -324,7 +304,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 }
 
         // Show "All Accounts" if necessary
-        if (accounts.size > 1 || !legacyAddresses.isEmpty()) {
+        if (accounts.size > 1 || legacyAddresses.isNotEmpty()) {
             val all = ConsolidatedAccount().apply {
                 label = stringUtils.getString(R.string.all_accounts)
                 type = ConsolidatedAccount.Type.ALL_ACCOUNTS
@@ -343,7 +323,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         mutableList.addAll(accounts)
 
         // Show "Imported Addresses" if necessary
-        if (!legacyAddresses.isEmpty()) {
+        if (legacyAddresses.isNotEmpty()) {
             val importedAddresses = ConsolidatedAccount().apply {
                 label = stringUtils.getString(R.string.imported_addresses)
                 type = ConsolidatedAccount.Type.ALL_IMPORTED_ADDRESSES
@@ -425,6 +405,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                     .onErrorReturnItem(emptyList())
                     .toObservable()
                     .doOnNext {
+                        checkLatestAnnouncement(it)
                         handlePendingTransactions(it)
                         view.onContactsHashMapUpdated(
                                 contactsDataManager.contactsTransactionMap,
@@ -557,6 +538,25 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         return pages
     }
 
+    private fun checkLatestAnnouncement(txList: MutableList<ContactTransactionModel>) {
+        // If user hasn't completed onboarding, ignore announcements
+        buyDataManager.canBuy
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe({ buyAllowed ->
+                    if (isOnboardingComplete() && buyAllowed!!) {
+                        if (!prefsUtil.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, false)
+                                && txList.isNotEmpty()) {
+                            prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, true)
+                            view.onShowAnnouncement()
+                        } else {
+                            view.onHideAnnouncement()
+                        }
+                    } else {
+                        view.onHideAnnouncement()
+                    }
+                }, { it.printStackTrace() })
+    }
+
     private fun getFormattedPriceString(): String {
         val lastPrice = getLastPrice(getFiatCurrency())
         val fiatSymbol = exchangeRateFactory.getSymbol(getFiatCurrency())
@@ -586,9 +586,5 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
     private fun getFiatCurrency(): String =
             prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-
-    private val monetaryUtil: MonetaryUtil by lazy(LazyThreadSafetyMode.NONE) {
-        MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
-    }
 
 }

@@ -16,6 +16,7 @@ import piuk.blockchain.android.data.contacts.ContactTransactionModel
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.util.*
 import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.helperfunctions.consume
 
 class FctxDelegate<in T>(
         val activity: Activity,

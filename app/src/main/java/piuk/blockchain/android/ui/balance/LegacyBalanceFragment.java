@@ -682,8 +682,8 @@ public class LegacyBalanceFragment extends Fragment implements BalanceViewModel.
     }
 
     private void initOnboardingPager() {
-        if (onboardingPagerAdapter == null) {
-            onboardingPagerAdapter = new OnboardingPagerAdapter(getContext());
+//        if (onboardingPagerAdapter == null) {
+//            onboardingPagerAdapter = new OnboardingPagerAdapter(getContext());
 //            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.setAdapter(onboardingPagerAdapter);
 //            binding.noTransactionInclude.onboardingViewpagerLayout.pagerOnboarding.addOnPageChangeListener(
 //                    new ViewPager.OnPageChangeListener() {
@@ -718,8 +718,8 @@ public class LegacyBalanceFragment extends Fragment implements BalanceViewModel.
 //                            // No-op
 //                        }
 //                    });
-        }
-
+//        }
+//
 //        binding.noTransactionInclude.onboardingViewpagerLayout.btnSkipAll.setOnClickListener(v -> {
 //            binding.noTransactionInclude.framelayoutOnboarding.setVisibility(View.GONE);
 //
