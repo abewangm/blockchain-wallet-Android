@@ -1,6 +1,8 @@
 package piuk.blockchain.android.ui.launcher
 
 import android.content.Intent
+import android.util.Log
+import info.blockchain.wallet.api.data.Settings
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
@@ -8,9 +10,11 @@ import piuk.blockchain.android.data.notifications.FcmCallbackService.EXTRA_CONTA
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.injection.Injector
+import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.AppUtil
+import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import javax.inject.Inject
 
@@ -71,7 +75,7 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
         // Legacy app has not been prompted for upgrade
             isPinValidated && !payloadDataManager.wallet.isUpgraded -> promptUpgrade()
         // App has been PIN validated
-            isPinValidated || accessState.isLoggedIn -> checkOnboardingStatus()
+            isPinValidated || accessState.isLoggedIn -> initSettings()
         // Something odd has happened, re-request PIN
             else -> view.onRequestPin()
         }
@@ -86,24 +90,29 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
      * Init of the [SettingsDataManager] must complete here so that we can access the [Settings]
      * object from memory when the user is logged in.
      */
-    private fun checkOnboardingStatus() {
+    private fun initSettings() {
         settingsDataManager.initSettings(
                 payloadDataManager.wallet.guid,
                 payloadDataManager.wallet.sharedKey)
                 .doOnComplete { accessState.setIsLoggedIn(true) }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({ settings ->
-                    when {
-                        appUtil.isNewlyCreated -> view.onStartOnboarding(false)
-                        !settings.isEmailVerified
-                                && settings.email != null
-                                && !settings.email.isEmpty() -> checkIfOnboardingNeeded()
-                        else -> view.onStartMainActivity()
-                    }
+                    checkOnboardingStatus(settings)
+                    setCurrencyUnits(settings)
                 }, { _ ->
                     view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
                     view.onRequestPin()
                 })
+    }
+
+    private fun checkOnboardingStatus(settings: Settings) {
+        when {
+            appUtil.isNewlyCreated -> view.onStartOnboarding(false)
+            !settings.isEmailVerified
+                    && settings.email != null
+                    && !settings.email.isEmpty() -> checkIfOnboardingNeeded()
+            else -> view.onStartMainActivity()
+        }
     }
 
     fun checkIfOnboardingNeeded() {
@@ -118,4 +127,14 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
         prefsUtil.setValue(PrefsUtil.KEY_APP_VISITS, visits)
     }
 
+    private fun setCurrencyUnits(settings: Settings) {
+
+        when (settings.btcCurrency){
+            Settings.UNIT_BTC -> prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, 0)
+            Settings.UNIT_MBC -> prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, 1)
+            Settings.UNIT_UBC -> prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, 2)
+        }
+
+        prefsUtil.setValue(PrefsUtil.KEY_SELECTED_FIAT, settings.currency)
+    }
 }
