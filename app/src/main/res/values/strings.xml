@@ -123,7 +123,7 @@
     <string name="rate_us">Rate us</string>
     <string name="licenses">Licenses</string>
     <string name="email_chooser">Send e-mail…</string>
-    <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
+    <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain Luxembourg S.A.\nAll rights reserved.</string>
     <string name="merchant_download">Free Merchant app</string>
     <string name="password_or_wipe">Enter using your password or forget this wallet</string>
     <string name="use_password">Use password</string>
