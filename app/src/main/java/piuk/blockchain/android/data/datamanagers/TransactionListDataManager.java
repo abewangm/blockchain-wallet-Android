@@ -12,12 +12,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import info.blockchain.wallet.util.FormatsUtil;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.account.ConsolidatedAccount;
 import piuk.blockchain.android.ui.account.ConsolidatedAccount.Type;
+import piuk.blockchain.android.ui.account.ItemAccount;
 
 public class TransactionListDataManager {
 
@@ -35,6 +37,34 @@ public class TransactionListDataManager {
         this.rxBus = rxBus;
     }
 
+    public Observable<List<TransactionSummary>> fetchTransactions(ItemAccount itemAccount, int limit, int offset) {
+        return Observable.fromCallable(() -> {
+            List<TransactionSummary> result;
+
+            switch (itemAccount.getType()) {
+                case ALL_ACCOUNTS_AND_LEGACY:
+                    result = payloadManager.getAllTransactions(limit, offset);
+                    break;
+                case ALL_LEGACY:
+                    result = payloadManager.getImportedAddressesTransactions(limit, offset);
+                    break;
+                default: {
+                    if (FormatsUtil.isValidXpub(itemAccount.getAddress())) {
+                        result = payloadManager.getAccountTransactions(itemAccount.getAddress(), limit, offset);
+                    } else {
+                        result = payloadManager.getImportedAddressesTransactions(limit, offset);
+                    }
+                }
+            }
+
+            insertTransactionList(result);
+
+            return transactionListStore.getList();
+        }).compose(RxUtil.applySchedulersToObservable());
+    }
+
+    // TODO: 21/06/2017 Remove after BalanceViewModel removed
+    @Deprecated
     public Observable<List<TransactionSummary>> fetchTransactions(Object object, int limit, int offset) {
         return Observable.fromCallable(() -> {
             List<TransactionSummary> result;
@@ -97,6 +127,8 @@ public class TransactionListDataManager {
      * @param object Either a {@link Account} or a {@link LegacyAddress}
      * @return A BTC value as a long.
      */
+    // TODO: 21/06/2017 Remove after BalanceViewModel removed
+    @Deprecated
     public long getBtcBalance(Object object) {
         long result = 0;
 
@@ -118,6 +150,30 @@ public class TransactionListDataManager {
             result = payloadManager.getAddressBalance(((LegacyAddress) object).getAddress()).longValue();
         } else {
             Log.e(TAG, "Cannot fetch transactions for object type: " + object.getClass().getSimpleName());
+        }
+
+        return result;
+    }
+
+    /**
+     * Get total BTC balance from {@link ItemAccount}.
+     *
+     * @param itemAccount {@link ItemAccount}
+     * @return A BTC value as a long.
+     */
+    public long getBtcBalance(ItemAccount itemAccount) {
+        long result = 0;
+
+        switch (itemAccount.getType()) {
+            case ALL_ACCOUNTS_AND_LEGACY:
+                result = payloadManager.getWalletBalance().longValue();
+                break;
+            case ALL_LEGACY:
+                result = payloadManager.getImportedAddressesBalance().longValue();
+                break;
+            case SINGLE_ACCOUNT:
+                result = payloadManager.getAddressBalance(itemAccount.getAddress()).longValue();
+                break;
         }
 
         return result;
