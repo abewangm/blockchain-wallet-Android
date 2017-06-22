@@ -55,7 +55,6 @@ import piuk.blockchain.android.databinding.ActivityMainBinding;
 import piuk.blockchain.android.ui.account.AccountActivity;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
-import piuk.blockchain.android.ui.balance.LegacyBalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.buy.BuyActivity;
 import piuk.blockchain.android.ui.buy.FrontendJavascript;
@@ -660,7 +659,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 .setPositiveButton(R.string.ok_cap, null)
                 .setNegativeButton(R.string.view_details, (dialog, whichButton) -> {
                     Bundle bundle = new Bundle();
-                    bundle.putString(LegacyBalanceFragment.KEY_TRANSACTION_HASH, txHash);
+                    bundle.putString(BalanceFragment.KEY_TRANSACTION_HASH, txHash);
                     TransactionDetailActivity.start(this, bundle);
                 }).show();
     }

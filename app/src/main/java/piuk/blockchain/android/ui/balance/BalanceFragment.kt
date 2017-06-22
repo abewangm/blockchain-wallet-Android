@@ -330,6 +330,16 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
+    override fun onShowAnnouncement() {
+        announcement_view.visible()
+        button_get_bitcoin.gone()
+    }
+
+    override fun onHideAnnouncement() {
+        announcement_view.gone()
+        button_get_bitcoin.visible()
+    }
+
     override fun getIfContactsEnabled(): Boolean = BuildConfig.CONTACTS_ENABLED
 
     override fun createPresenter(): BalancePresenter = BalancePresenter()
@@ -377,11 +387,12 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 val count = onboardingPagerAdapter?.count ?: 0
                 if (position == count - 1) {
                     // Last page
-                    pager_onboarding.setPagingEnabled(false)
                     onboarding_complete_layout.visible()
+                    pager_onboarding.setPagingEnabled(false)
                     presenter.setOnboardingComplete(true)
                 } else if (position == count - 2) {
                     // Second last page
+                    onboarding_complete_layout.visible()
                     viewPagerIndicator.alpha = 1 - positionOffset
                     onboarding_complete_layout.alpha = positionOffset
                     presenter.setOnboardingComplete(false)
@@ -433,16 +444,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 presenter.disableAnnouncement()
             })
         }
-    }
-
-    override fun onShowAnnouncement() {
-        announcement_view.visible()
-        button_get_bitcoin.gone()
-    }
-
-    override fun onHideAnnouncement() {
-        announcement_view.gone()
-        button_get_bitcoin.visible()
     }
 
     private fun onContentLoaded() {
@@ -504,14 +505,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     companion object {
 
-        @JvmStatic
-        val ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH"
-        @JvmStatic
-        val KEY_TRANSACTION_LIST_POSITION = "transaction_list_position"
-        @JvmStatic
-        val KEY_TRANSACTION_HASH = "transaction_hash"
-        @JvmStatic
-        val ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment"
+        @JvmField val ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH"
+        @JvmField val KEY_TRANSACTION_LIST_POSITION = "transaction_list_position"
+        @JvmField val KEY_TRANSACTION_HASH = "transaction_hash"
+        @JvmField val ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment"
 
         @JvmStatic
         fun newInstance(broadcastingPayment: Boolean): BalanceFragment {

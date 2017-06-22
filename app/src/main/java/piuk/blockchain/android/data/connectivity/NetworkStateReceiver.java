@@ -7,7 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v4.content.LocalBroadcastManager;
 
-import piuk.blockchain.android.ui.balance.LegacyBalanceFragment;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 
 class NetworkStateReceiver extends BroadcastReceiver {
 
@@ -23,7 +23,7 @@ class NetworkStateReceiver extends BroadcastReceiver {
             if (networkInfo != null && networkInfo.isConnected()) {
                 // Sends max of one broadcast every 30s if network connection is spotty
                 if (System.currentTimeMillis() - lastBroadcastTime > COOL_DOWN_INTERVAL) {
-                    LocalBroadcastManager.getInstance(context).sendBroadcastSync(new Intent(LegacyBalanceFragment.ACTION_INTENT));
+                    LocalBroadcastManager.getInstance(context).sendBroadcastSync(new Intent(BalanceFragment.ACTION_INTENT));
                     lastBroadcastTime = System.currentTimeMillis();
                 }
             }
