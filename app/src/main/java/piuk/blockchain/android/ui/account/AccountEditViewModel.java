@@ -160,52 +160,41 @@ public class AccountEditViewModel extends BaseViewModel {
 
         } else if (addressIndex >= 0) {
             // V2
-            // TODO: 22/06/2017 Is any of this necessary?
-            ConsolidatedAccount iAccount = null;
-            if (!payloadDataManager.getWallet().getLegacyAddressList().isEmpty()) {
+            List<LegacyAddress> legacy = payloadDataManager.getWallet().getLegacyAddressList();
+            legacyAddress = legacy.get(addressIndex);
 
-                iAccount = new ConsolidatedAccount(stringUtils.getString(R.string.imported_addresses),
-                        payloadDataManager.getWallet().getLegacyAddressList(),
-                        payloadDataManager.getImportedAddressesBalance().longValue());
+            accountModel.setLabel(legacyAddress.getLabel());
+            accountModel.setLabelHeader(stringUtils.getString(R.string.name));
+            accountModel.setXpubDescriptionVisibility(View.GONE);
+            accountModel.setXpubText(stringUtils.getString(R.string.address));
+            accountModel.setDefaultAccountVisibility(View.GONE);//No default for V2
+            setArchive(legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS);
+
+            if (legacyAddress.isWatchOnly()) {
+                accountModel.setScanPrivateKeyVisibility(View.VISIBLE);
+                accountModel.setArchiveVisibility(View.GONE);
+            } else {
+                accountModel.setScanPrivateKeyVisibility(View.GONE);
+                accountModel.setArchiveVisibility(View.VISIBLE);
             }
 
-            if (iAccount != null) {
-                List<LegacyAddress> legacy = iAccount.getLegacyAddresses();
-                legacyAddress = legacy.get(addressIndex);
+            if (payloadDataManager.getWallet().isUpgraded()) {
+                // Subtract fee
+                long balanceAfterFee = payloadDataManager.getAddressBalance(
+                        legacyAddress.getAddress()).longValue() -
+                        sendDataManager.estimatedFee(1, 1,
+                                BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000))
+                                .longValue();
 
-                accountModel.setLabel(legacyAddress.getLabel());
-                accountModel.setLabelHeader(stringUtils.getString(R.string.name));
-                accountModel.setXpubDescriptionVisibility(View.GONE);
-                accountModel.setXpubText(stringUtils.getString(R.string.address));
-                accountModel.setDefaultAccountVisibility(View.GONE);//No default for V2
-                setArchive(legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS);
-
-                if (legacyAddress.isWatchOnly()) {
-                    accountModel.setScanPrivateKeyVisibility(View.VISIBLE);
-                    accountModel.setArchiveVisibility(View.GONE);
+                if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
+                    accountModel.setTransferFundsVisibility(View.VISIBLE);
                 } else {
-                    accountModel.setScanPrivateKeyVisibility(View.GONE);
-                    accountModel.setArchiveVisibility(View.VISIBLE);
-                }
-
-                if (payloadDataManager.getWallet().isUpgraded()) {
-                    // Subtract fee
-                    long balanceAfterFee = payloadDataManager.getAddressBalance(
-                            legacyAddress.getAddress()).longValue() -
-                            sendDataManager.estimatedFee(1, 1,
-                                    BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000))
-                                    .longValue();
-
-                    if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
-                        accountModel.setTransferFundsVisibility(View.VISIBLE);
-                    } else {
-                        // No need to show 'transfer' if funds are less than dust amount
-                        accountModel.setTransferFundsVisibility(View.GONE);
-                    }
-                } else {
-                    // No transfer option for V2
+                    // No need to show 'transfer' if funds are less than dust amount
                     accountModel.setTransferFundsVisibility(View.GONE);
                 }
+            } else {
+                // No transfer option for V2
+                accountModel.setTransferFundsVisibility(View.GONE);
             }
         }
     }
