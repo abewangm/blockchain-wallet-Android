@@ -535,7 +535,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         buyDataManager.canBuy
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({ buyAllowed ->
-                    if (isOnboardingComplete() && buyAllowed!!) {
+                    if (isOnboardingComplete() && buyAllowed) {
                         if (!prefsUtil.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, false)
                                 && txList.isNotEmpty()) {
                             prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, true)
