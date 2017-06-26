@@ -29,7 +29,6 @@ class PromptManager(
     private val ONE_MONTH = 28 * 24 * 60 * 60 * 1000L
 
     fun getDefaultPrompts(context: Context): Observable<List<AlertDialog>> {
-
         val list = mutableListOf<AlertDialog>()
 
         if (isSurveyAllowed()) list.add(getSurveyDialog(context))
@@ -39,7 +38,6 @@ class PromptManager(
     }
 
     fun getCustomPrompts(context: Context, settings: Settings): Observable<List<AppCompatDialogFragment>> {
-
         val list = mutableListOf<AppCompatDialogFragment>()
 
         if (isBackedUpReminderAllowed()) list.add(getBackupCustomDialog(context))
@@ -85,7 +83,7 @@ class PromptManager(
         return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER, false)
     }
 
-    fun setBackupCompleted() {
+    private fun setBackupCompleted() {
         prefsUtil.setValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER, true)
     }
 
@@ -102,9 +100,6 @@ class PromptManager(
     }
 
     private fun isSurveyAllowed(): Boolean {
-
-        var allow = false
-
         if (!isSurveyComplete()) {
             var visitsToPageThisSession = getAppVisitCount()
             // Trigger first time coming back to transaction tab
@@ -117,7 +112,7 @@ class PromptManager(
 
                 if (Calendar.getInstance().before(surveyCutoffDate)) {
                     prefsUtil.setValue(PrefsUtil.KEY_SURVEY_COMPLETED, true)
-                    allow = true
+                    return true
                 }
             } else {
                 visitsToPageThisSession++
@@ -125,7 +120,7 @@ class PromptManager(
             }
         }
 
-        return allow
+        return false
     }
 
     private fun is2FAReminderAllowed(settings: Settings): Boolean {
@@ -142,27 +137,24 @@ class PromptManager(
         return !isFirstRun() && isEnoughVisits && isNeeded && isCorrectTime
     }
 
-    fun isBackedUpReminderAllowed(): Boolean {
-        val isAllowed = !isFirstRun() && !getIfNeverPromptBackup() && !payloadDataManager.isBackedUp && hasTransactions()
+    private fun isBackedUpReminderAllowed(): Boolean {
+        val isAllowed = !isFirstRun()
+                && !getIfNeverPromptBackup()
+                && !payloadDataManager.isBackedUp && hasTransactions()
 
-        if (isAllowed) {
+        val isCorrectTime = getTimeOfLastSecurityPrompt() == 0L
+                || System.currentTimeMillis() - getTimeOfLastSecurityPrompt() >= ONE_MONTH
+
+        if (isAllowed && isCorrectTime) {
             storeTimeOfLastSecurityPrompt()
+            return true
         }
 
-        return isAllowed
+        return false
     }
 
-    fun isLastBackupReminder(): Boolean {
-        var showNeverAgain = true
-
-        // Show dialog and store date of dialog launch
-        if (getTimeOfLastSecurityPrompt() == 0L) {
-            showNeverAgain = false
-        } else if (System.currentTimeMillis() - getTimeOfLastSecurityPrompt() >= ONE_MONTH) {
-            showNeverAgain = true
-        }
-
-        return showNeverAgain
+    private fun isLastBackupReminder(): Boolean {
+        return System.currentTimeMillis() - getTimeOfLastSecurityPrompt() >= ONE_MONTH
     }
 
     //********************************************************************************************//
@@ -178,7 +170,6 @@ class PromptManager(
     }
 
     private fun getConnectivityDialog(context: Context): AlertDialog {
-
         return AlertDialog.Builder(context, R.style.AlertDialogStyle)
                 .setMessage(R.string.check_connectivity_exit)
                 .setCancelable(false)
@@ -258,7 +249,6 @@ class PromptManager(
     }
 
     private fun getBackupCustomDialog(context: Context): SecurityPromptDialog {
-
         val securityPromptDialog = SecurityPromptDialog.newInstance(
                 R.string.security_centre_backup_title,
                 context.getString(R.string.security_centre_backup_message),
