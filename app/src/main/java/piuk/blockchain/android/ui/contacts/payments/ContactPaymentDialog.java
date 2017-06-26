@@ -26,7 +26,7 @@ import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.DialogPayContactBinding;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
-import piuk.blockchain.android.ui.balance.LegacyBalanceFragment;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.AddressAdapter;
@@ -190,7 +190,7 @@ public class ContactPaymentDialog extends AppCompatDialogFragment
 
     @Override
     public void onShowTransactionSuccess(String contactMdid, String hash, String fctxId, long amount) {
-        Intent intent = new Intent(LegacyBalanceFragment.ACTION_INTENT);
+        Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
 
         View dialogView = View.inflate(getActivity(), R.layout.modal_transaction_success, null);

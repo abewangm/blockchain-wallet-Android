@@ -24,12 +24,11 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.stores.TransactionListStore;
-import piuk.blockchain.android.ui.account.ConsolidatedAccount;
+import piuk.blockchain.android.ui.account.ItemAccount;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
@@ -55,14 +54,16 @@ public class TransactionListDataManagerTest extends RxTest {
     }
 
     @Test
-    public void fetchTransactionsConsolidatedAccountTagAll() throws Exception {
+    public void fetchTransactionsAccountTagAll() throws Exception {
         // Arrange
-        ConsolidatedAccount account = new ConsolidatedAccount();
-        account.setType(ConsolidatedAccount.Type.ALL_ACCOUNTS);
+        Account account = new Account();
         List<TransactionSummary> transactionSummaries = Collections.singletonList(new TransactionSummary());
         when(payloadManager.getAllTransactions(0, 0)).thenReturn(transactionSummaries);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setAccountObject(account);
+        itemAccount.setType(ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY);
         // Act
-        TestObserver<List<TransactionSummary>> testObserver = subject.fetchTransactions(account, 0, 0).test();
+        TestObserver<List<TransactionSummary>> testObserver = subject.fetchTransactions(itemAccount, 0, 0).test();
         // Assert
         verify(payloadManager).getAllTransactions(0, 0);
         testObserver.assertComplete();
@@ -71,14 +72,16 @@ public class TransactionListDataManagerTest extends RxTest {
     }
 
     @Test
-    public void fetchTransactionsConsolidatedAccountTagImported() throws Exception {
+    public void fetchTransactionsAccountTagImported() throws Exception {
         // Arrange
-        ConsolidatedAccount account = new ConsolidatedAccount();
-        account.setType(ConsolidatedAccount.Type.ALL_IMPORTED_ADDRESSES);
+        Account account = new Account();
         List<TransactionSummary> transactionSummaries = Collections.singletonList(new TransactionSummary());
         when(payloadManager.getImportedAddressesTransactions(0, 0)).thenReturn(transactionSummaries);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setAccountObject(account);
+        itemAccount.setType(ItemAccount.TYPE.ALL_LEGACY);
         // Act
-        TestObserver<List<TransactionSummary>> testObserver = subject.fetchTransactions(account, 0, 0).test();
+        TestObserver<List<TransactionSummary>> testObserver = subject.fetchTransactions(itemAccount, 0, 0).test();
         // Assert
         verify(payloadManager).getImportedAddressesTransactions(0, 0);
         testObserver.assertComplete();
@@ -87,44 +90,23 @@ public class TransactionListDataManagerTest extends RxTest {
     }
 
     @Test
-    public void fetchTransactionsConsolidatedAccountNoTag() throws Exception {
-        // Arrange
-        ConsolidatedAccount account = new ConsolidatedAccount();
-        // Act
-        TestObserver<List<TransactionSummary>> testObserver = subject.fetchTransactions(account, 0, 0).test();
-        // Assert
-        verifyZeroInteractions(payloadManager);
-        testObserver.assertNotComplete();
-        testObserver.assertError(IllegalArgumentException.class);
-    }
-
-    @Test
     public void fetchTransactionsAccount() throws Exception {
         // Arrange
         Account account = new Account();
-        String xPub = "X_PUB";
-        account.setXpub(xPub);
+        String xPub = "xpub6CfLQa8fLgtp8E7tc1khAhrZYPm82okmugxP7TrhMPkPFKANhdCUd4TDJKUYLCxZskG2U7Q689CVBxs2EjJA7dyvjCzN5UYWwZbY2qVpymw";
         List<TransactionSummary> transactionSummaries = Collections.singletonList(new TransactionSummary());
         when(payloadManager.getAccountTransactions(xPub, 0, 0)).thenReturn(transactionSummaries);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setAccountObject(account);
+        itemAccount.setAddress(xPub);
         // Act
-        TestObserver<List<TransactionSummary>> testObserver = subject.fetchTransactions(account, 0, 0).test();
+        TestObserver<List<TransactionSummary>> testObserver =
+                subject.fetchTransactions(itemAccount, 0, 0).test();
         // Assert
         verify(payloadManager).getAccountTransactions(xPub, 0, 0);
         testObserver.assertComplete();
         testObserver.assertNoErrors();
         testObserver.assertValue(transactionSummaries);
-    }
-
-    @Test
-    public void fetchTransactionsWrongObject() throws Exception {
-        // Arrange
-        Object object = new Object();
-        // Act
-        TestObserver<List<TransactionSummary>> testObserver = subject.fetchTransactions(object, 0, 0).test();
-        // Assert
-        verifyZeroInteractions(payloadManager);
-        testObserver.assertNotComplete();
-        testObserver.assertError(IllegalArgumentException.class);
     }
 
     @Test
@@ -168,42 +150,35 @@ public class TransactionListDataManagerTest extends RxTest {
     }
 
     @Test
-    public void getBtcBalanceConsolidatedAccountTagAll() throws Exception {
+    public void getBtcBalanceAccountTagAll() throws Exception {
         // Arrange
-        ConsolidatedAccount account = new ConsolidatedAccount();
-        account.setType(ConsolidatedAccount.Type.ALL_ACCOUNTS);
+        Account account = new Account();
         BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
         when(payloadManager.getWalletBalance()).thenReturn(balance);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setAccountObject(account);
+        itemAccount.setType(ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY);
         // Act
-        long value = subject.getBtcBalance(account);
+        long value = subject.getBtcBalance(itemAccount);
         // Assert
         verify(payloadManager).getWalletBalance();
         assertEquals(1_000_000_000_000L, value);
     }
 
     @Test
-    public void getBtcBalanceConsolidatedAccountTagImported() throws Exception {
+    public void getBtcBalanceAccountTagImported() throws Exception {
         // Arrange
-        ConsolidatedAccount account = new ConsolidatedAccount();
-        account.setType(ConsolidatedAccount.Type.ALL_IMPORTED_ADDRESSES);
+        Account account = new Account();
         BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
         when(payloadManager.getImportedAddressesBalance()).thenReturn(balance);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setAccountObject(account);
+        itemAccount.setType(ItemAccount.TYPE.ALL_LEGACY);
         // Act
-        long value = subject.getBtcBalance(account);
+        long value = subject.getBtcBalance(itemAccount);
         // Assert
         verify(payloadManager).getImportedAddressesBalance();
         assertEquals(1_000_000_000_000L, value);
-    }
-
-    @Test
-    public void getBtcBalanceConsolidatedAccountNoTag() throws Exception {
-        // Arrange
-        ConsolidatedAccount account = new ConsolidatedAccount();
-        // Act
-        long value = subject.getBtcBalance(account);
-        // Assert
-        verifyZeroInteractions(payloadManager);
-        assertEquals(0L, value);
     }
 
     @Test
@@ -211,11 +186,13 @@ public class TransactionListDataManagerTest extends RxTest {
         // Arrange
         Account account = new Account();
         String xPub = "X_PUB";
-        account.setXpub(xPub);
         BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
         when(payloadManager.getAddressBalance(xPub)).thenReturn(balance);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setAccountObject(account);
+        itemAccount.setAddress(xPub);
         // Act
-        long value = subject.getBtcBalance(account);
+        long value = subject.getBtcBalance(itemAccount);
         // Assert
         verify(payloadManager).getAddressBalance(xPub);
         assertEquals(1_000_000_000_000L, value);
@@ -226,25 +203,16 @@ public class TransactionListDataManagerTest extends RxTest {
         // Arrange
         LegacyAddress legacyAddress = new LegacyAddress();
         String address = "ADDRESS";
-        legacyAddress.setAddress(address);
         BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
         when(payloadManager.getAddressBalance(address)).thenReturn(balance);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setAccountObject(legacyAddress);
+        itemAccount.setAddress(address);
         // Act
-        long value = subject.getBtcBalance(legacyAddress);
+        long value = subject.getBtcBalance(itemAccount);
         // Assert
         verify(payloadManager).getAddressBalance(address);
         assertEquals(1_000_000_000_000L, value);
-    }
-
-    @Test
-    public void getBtcBalanceWrongObject() throws Exception {
-        // Arrange
-        Object object = new Object();
-        // Act
-        long value = subject.getBtcBalance(object);
-        // Assert
-        verifyZeroInteractions(payloadManager);
-        assertEquals(0L, value);
     }
 
     @Test

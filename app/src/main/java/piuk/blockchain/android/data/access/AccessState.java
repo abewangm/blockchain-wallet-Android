@@ -15,14 +15,17 @@ import piuk.blockchain.android.util.PrefsUtil;
 
 public class AccessState {
 
-    private static final long LOGOUT_TIMEOUT_MILLIS = 1000L * 30L;
     public static final String LOGOUT_ACTION = "info.blockchain.wallet.LOGOUT";
+    public static final int SHOW_BTC = 1;
+    public static final int SHOW_FIAT = 2;
+
+    private static final long LOGOUT_TIMEOUT_MILLIS = 1000L * 30L;
 
     private static AccessState instance;
-    
+
     private PrefsUtil prefs;
     private RxBus rxBus;
-    
+
     private String pin;
     private PendingIntent logoutPendingIntent;
     private boolean isLoggedIn = false;
@@ -98,6 +101,15 @@ public class AccessState {
 
     public void setBuySellRolloutPercent(double buySellRolloutPercent) {
         this.buySellRolloutPercent = buySellRolloutPercent;
+    }
+
+    public boolean isBtc() {
+        final int balanceDisplayState = prefs.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+        return balanceDisplayState != SHOW_FIAT;
+    }
+
+    public void setIsBtc(boolean isBtc) {
+        prefs.setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
     }
 
     public boolean isLoggedIn() {

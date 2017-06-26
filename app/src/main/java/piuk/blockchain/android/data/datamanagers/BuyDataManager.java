@@ -13,7 +13,6 @@ import piuk.blockchain.android.data.settings.SettingsDataManager;
  */
 
 public class BuyDataManager {
-    public static final String TAG = BuyDataManager.class.getSimpleName();
 
     private OnboardingDataManager onboardingDataManager;
     private SettingsDataManager settingsDataManager;
@@ -56,9 +55,7 @@ public class BuyDataManager {
     }
 
     private Observable<Boolean> getIsInvited() {
-        return settingsDataManager.initSettings(
-                payloadDataManager.getWallet().getGuid(),
-                payloadDataManager.getWallet().getSharedKey())
+        return settingsDataManager.getSettings()
                 .map(settings -> {
                     // TODO: implement settings.invited.sfox
                     return false;

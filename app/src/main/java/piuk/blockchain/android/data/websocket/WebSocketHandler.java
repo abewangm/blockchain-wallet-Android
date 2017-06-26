@@ -29,7 +29,7 @@ import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.ui.balance.LegacyBalanceFragment;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -185,7 +185,7 @@ class WebSocketHandler extends WebSocketListener {
     }
 
     private void sendBroadcast() {
-        Intent intent = new Intent(LegacyBalanceFragment.ACTION_INTENT);
+        Intent intent = new Intent(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 

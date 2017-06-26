@@ -6,11 +6,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatDialogFragment
-import android.util.Log
 import info.blockchain.wallet.api.data.Settings
 import io.reactivex.Observable
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.connectivity.ConnectivityStatus
 import piuk.blockchain.android.ui.auth.LandingActivity
 import piuk.blockchain.android.ui.auth.PinEntryActivity
 import piuk.blockchain.android.ui.backup.BackupWalletActivity
@@ -22,15 +20,16 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.RootUtil
 import java.util.*
 
-class PromptManager constructor(private val prefsUtil: PrefsUtil
-                                , private val payloadDataManager: PayloadDataManager
-                                , private val transactionListDataManager: TransactionListDataManager) {
+class PromptManager(
+        private val prefsUtil: PrefsUtil,
+        private val payloadDataManager: PayloadDataManager,
+        private val transactionListDataManager: TransactionListDataManager
+) {
 
     private val ONE_MONTH = 28 * 24 * 60 * 60 * 1000L
 
-    fun getDefaultPrompts(context: Context): Observable<ArrayList<AlertDialog>> {
-
-        val list = ArrayList<AlertDialog>()
+    fun getDefaultPrompts(context: Context): Observable<List<AlertDialog>> {
+        val list = mutableListOf<AlertDialog>()
 
         if (isSurveyAllowed()) list.add(getSurveyDialog(context))
         if (isRooted()) list.add(getRootWarningDialog(context))
@@ -38,9 +37,8 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
         return Observable.fromArray(list)
     }
 
-    fun getCustomPrompts(context: Context, settings: Settings): Observable<ArrayList<AppCompatDialogFragment>> {
-
-        val list = ArrayList<AppCompatDialogFragment>()
+    fun getCustomPrompts(context: Context, settings: Settings): Observable<List<AppCompatDialogFragment>> {
+        val list = mutableListOf<AppCompatDialogFragment>()
 
         if (isBackedUpReminderAllowed()) list.add(getBackupCustomDialog(context))
         if (is2FAReminderAllowed(settings)) list.add(get2FACustomDialog(context))
@@ -58,11 +56,11 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
     }
 
     private fun isSurveyComplete(): Boolean {
-        return prefsUtil.getValue(PrefsUtil.KEY_SURVEY_COMPLETED, false);
+        return prefsUtil.getValue(PrefsUtil.KEY_SURVEY_COMPLETED, false)
     }
 
     private fun getGuid(): String {
-        return prefsUtil.getValue(PrefsUtil.KEY_GUID, "");
+        return prefsUtil.getValue(PrefsUtil.KEY_GUID, "")
     }
 
     private fun getIfNeverPrompt2Fa(): Boolean {
@@ -85,12 +83,12 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
         return prefsUtil.getValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER, false)
     }
 
-    fun setBackupCompleted() {
+    private fun setBackupCompleted() {
         prefsUtil.setValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER, true)
     }
 
     private fun hasTransactions(): Boolean {
-        return !transactionListDataManager.getTransactionList().isEmpty()
+        return !transactionListDataManager.transactionList.isEmpty()
     }
 
     private fun isRooted(): Boolean {
@@ -98,26 +96,23 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
     }
 
     private fun isVerifyEmailReminderAllowed(settings: Settings): Boolean {
-        return !isFirstRun() && settings.isEmailVerified && !settings.email.isEmpty();
+        return !isFirstRun() && settings.isEmailVerified && !settings.email.isEmpty()
     }
 
     private fun isSurveyAllowed(): Boolean {
-
-        var allow = false;
-
         if (!isSurveyComplete()) {
             var visitsToPageThisSession = getAppVisitCount()
             // Trigger first time coming back to transaction tab
             if (visitsToPageThisSession == 1) {
                 // Don't show past June 30th
-                var surveyCutoffDate = Calendar.getInstance();
+                val surveyCutoffDate = Calendar.getInstance()
                 surveyCutoffDate.set(Calendar.YEAR, 2017)
                 surveyCutoffDate.set(Calendar.MONTH, Calendar.JUNE)
                 surveyCutoffDate.set(Calendar.DAY_OF_MONTH, 30)
 
                 if (Calendar.getInstance().before(surveyCutoffDate)) {
                     prefsUtil.setValue(PrefsUtil.KEY_SURVEY_COMPLETED, true)
-                    allow = true;
+                    return true
                 }
             } else {
                 visitsToPageThisSession++
@@ -125,7 +120,7 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
             }
         }
 
-        return allow;
+        return false
     }
 
     private fun is2FAReminderAllowed(settings: Settings): Boolean {
@@ -142,27 +137,24 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
         return !isFirstRun() && isEnoughVisits && isNeeded && isCorrectTime
     }
 
-    fun isBackedUpReminderAllowed(): Boolean {
-        val isAllowed = !isFirstRun() && !getIfNeverPromptBackup() && !payloadDataManager.isBackedUp && hasTransactions()
+    private fun isBackedUpReminderAllowed(): Boolean {
+        val isAllowed = !isFirstRun()
+                && !getIfNeverPromptBackup()
+                && !payloadDataManager.isBackedUp && hasTransactions()
 
-        if (isAllowed) {
+        val isCorrectTime = getTimeOfLastSecurityPrompt() == 0L
+                || System.currentTimeMillis() - getTimeOfLastSecurityPrompt() >= ONE_MONTH
+
+        if (isAllowed && isCorrectTime) {
             storeTimeOfLastSecurityPrompt()
+            return true
         }
 
-        return isAllowed
+        return false
     }
 
-    fun isLastBackupReminder(): Boolean {
-        var showNeverAgain = true
-
-        // Show dialog and store date of dialog launch
-        if (getTimeOfLastSecurityPrompt() == 0L) {
-            showNeverAgain = false
-        } else if (System.currentTimeMillis() - getTimeOfLastSecurityPrompt() >= ONE_MONTH) {
-            showNeverAgain = true
-        }
-
-        return showNeverAgain
+    private fun isLastBackupReminder(): Boolean {
+        return System.currentTimeMillis() - getTimeOfLastSecurityPrompt() >= ONE_MONTH
     }
 
     //********************************************************************************************//
@@ -178,11 +170,10 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
     }
 
     private fun getConnectivityDialog(context: Context): AlertDialog {
-
         return AlertDialog.Builder(context, R.style.AlertDialogStyle)
                 .setMessage(R.string.check_connectivity_exit)
                 .setCancelable(false)
-                .setPositiveButton(R.string.dialog_continue) { d, id ->
+                .setPositiveButton(R.string.dialog_continue) { _, _ ->
                     if (getGuid().isEmpty()) {
                         LandingActivity.start(context)
                     } else {
@@ -195,7 +186,7 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
         return AlertDialog.Builder(context, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.survey_message)
-                .setPositiveButton(R.string.survey_positive_button) { dialog, which ->
+                .setPositiveButton(R.string.survey_positive_button) { _, _ ->
                     val url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV"
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data = Uri.parse(url)
@@ -217,16 +208,16 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
                 R.string.security_centre_add_email_positive_button,
                 true,
                 false)
-        securityPromptDialog.setPositiveButtonListener { v ->
+        securityPromptDialog.setPositiveButtonListener {
             securityPromptDialog.dismiss()
             val bundle = Bundle()
             bundle.putBoolean(EXTRA_SHOW_ADD_EMAIL_DIALOG, true)
-            SettingsActivity.start(context, bundle);
+            SettingsActivity.start(context, bundle)
         }
 
-        securityPromptDialog.setNegativeButtonListener { view -> securityPromptDialog.dismiss() }
+        securityPromptDialog.setNegativeButtonListener { securityPromptDialog.dismiss() }
 
-        return securityPromptDialog;
+        return securityPromptDialog
     }
 
     private fun get2FACustomDialog(context: Context): SecurityPromptDialog {
@@ -237,28 +228,27 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
                 R.string.enable,
                 true,
                 true)
-        securityPromptDialog.setPositiveButtonListener { v ->
+        securityPromptDialog.setPositiveButtonListener {
             securityPromptDialog.dismiss()
             if (securityPromptDialog.isChecked) {
                 neverPrompt2Fa()
             }
             val bundle = Bundle()
             bundle.putBoolean(SettingsFragment.EXTRA_SHOW_TWO_FA_DIALOG, true)
-            SettingsActivity.start(context, bundle);
+            SettingsActivity.start(context, bundle)
         }
 
-        securityPromptDialog.setNegativeButtonListener { v ->
+        securityPromptDialog.setNegativeButtonListener {
             securityPromptDialog.dismiss()
             if (securityPromptDialog.isChecked) {
                 neverPrompt2Fa()
             }
         }
 
-        return securityPromptDialog;
+        return securityPromptDialog
     }
 
     private fun getBackupCustomDialog(context: Context): SecurityPromptDialog {
-
         val securityPromptDialog = SecurityPromptDialog.newInstance(
                 R.string.security_centre_backup_title,
                 context.getString(R.string.security_centre_backup_message),
@@ -266,7 +256,7 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
                 R.string.security_centre_backup_positive_button,
                 true,
                 isLastBackupReminder())
-        securityPromptDialog.setPositiveButtonListener { v ->
+        securityPromptDialog.setPositiveButtonListener {
             securityPromptDialog.dismiss()
             if (securityPromptDialog.isChecked) {
                 setBackupCompleted()
@@ -274,13 +264,13 @@ class PromptManager constructor(private val prefsUtil: PrefsUtil
             BackupWalletActivity.start(context, null)
         }
 
-        securityPromptDialog.setNegativeButtonListener { v ->
+        securityPromptDialog.setNegativeButtonListener {
             securityPromptDialog.dismiss()
             if (securityPromptDialog.isChecked) {
                 setBackupCompleted()
             }
         }
 
-        return securityPromptDialog;
+        return securityPromptDialog
     }
 }

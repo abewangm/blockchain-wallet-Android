@@ -7,6 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 public class ExchangeData {
+    public ExchangeData() {
+    }
+
     @JsonProperty("coinify")
     private CoinifyData coinify = null;
 

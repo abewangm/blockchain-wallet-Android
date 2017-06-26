@@ -67,7 +67,7 @@ public final class RxUtil {
      * cancelled automatically by the Presenter on Android lifecycle events.
      *
      * @param presenter A class extending {@link BasePresenter}
-     * @param <T>       The upstream {@link Observable}
+     * @param <T>       The type of the upstream {@link Observable}
      */
     public static <T> ObservableTransformer<T, T> addObservableToCompositeDisposable(BasePresenter presenter) {
         return upstream -> upstream.doOnSubscribe(disposable ->
@@ -85,4 +85,18 @@ public final class RxUtil {
         return upstream -> upstream.doOnSubscribe(disposable ->
                 presenter.getCompositeDisposable().add(disposable));
     }
+
+    /**
+     * Adds the subscription to the upstream {@link Single} to the {@link CompositeDisposable}
+     * supplied by a class extending {@link BasePresenter}. This allows the subscription to be
+     * cancelled automatically by the Presenter on Android lifecycle events.
+     *
+     * @param presenter A class extending {@link BasePresenter}
+     * @param <T>       The type of the upstream {@link Single}
+     */
+    public static <T> SingleTransformer<T, T> addSingleToCompositeDisposable(BasePresenter presenter) {
+        return upstream -> upstream.doOnSubscribe(disposable ->
+                presenter.getCompositeDisposable().add(disposable));
+    }
+
 }

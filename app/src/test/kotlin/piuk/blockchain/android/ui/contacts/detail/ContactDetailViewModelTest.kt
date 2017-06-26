@@ -33,9 +33,7 @@ import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID
 import piuk.blockchain.android.ui.customviews.ToastCustom
-import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
-import piuk.blockchain.android.util.StringUtils
 import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)

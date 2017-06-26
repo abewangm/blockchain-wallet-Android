@@ -11,6 +11,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TradeData {
+    public TradeData() {
+    }
+
     @JsonProperty("id")
     private int id = 0;
 

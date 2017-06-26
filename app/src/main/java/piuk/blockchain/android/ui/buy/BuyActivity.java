@@ -11,7 +11,7 @@ import com.facebook.device.yearclass.YearClass;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.databinding.ActivityBuyBinding;
-import piuk.blockchain.android.ui.balance.LegacyBalanceFragment;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.home.MainActivity;
@@ -93,7 +93,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
     @Override
     public void onShowTx(String txHash) {
         Bundle bundle = new Bundle();
-        bundle.putString(LegacyBalanceFragment.KEY_TRANSACTION_HASH, txHash);
+        bundle.putString(BalanceFragment.KEY_TRANSACTION_HASH, txHash);
         TransactionDetailActivity.start(this, bundle);
     }
 

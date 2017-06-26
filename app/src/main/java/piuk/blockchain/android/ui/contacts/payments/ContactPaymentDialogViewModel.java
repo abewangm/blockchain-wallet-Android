@@ -157,7 +157,7 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
         Account account =
                 payloadDataManager.getAccount(payloadDataManager.getPositionOfAccountFromActiveList(position));
 
-        pendingTransaction.sendingObject = new ItemAccount(account.getLabel(), "", null, null, account);
+        pendingTransaction.sendingObject = new ItemAccount(account.getLabel(), "", null, null, account, null);
         calculateTransactionAmounts();
     }
 

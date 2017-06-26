@@ -12,7 +12,7 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_swipe_to_receive.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.websocket.WebSocketService
-import piuk.blockchain.android.ui.balance.LegacyBalanceFragment
+import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.util.OSUtil
@@ -22,9 +22,9 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == LegacyBalanceFragment.ACTION_INTENT) {
+            if (intent.action == BalanceFragment.ACTION_INTENT) {
                 // Update UI with new Address + QR
-                getPresenter()?.onViewReady()
+                presenter?.onViewReady()
             }
         }
     }
@@ -60,7 +60,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
         // Listen for corresponding broadcasts
         LocalBroadcastManager.getInstance(context).registerReceiver(
-                broadcastReceiver, IntentFilter(LegacyBalanceFragment.ACTION_INTENT))
+                broadcastReceiver, IntentFilter(BalanceFragment.ACTION_INTENT))
     }
 
     override fun displayReceiveAccount(accountName: String) {

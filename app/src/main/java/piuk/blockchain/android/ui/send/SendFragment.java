@@ -68,7 +68,7 @@ import piuk.blockchain.android.databinding.FragmentSendBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
-import piuk.blockchain.android.ui.balance.LegacyBalanceFragment;
+import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
@@ -128,7 +128,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            if (intent.getAction().equals(LegacyBalanceFragment.ACTION_INTENT) && binding != null) {
+            if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
                 viewModel.updateUI();
             }
         }
@@ -185,7 +185,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         super.onResume();
         setupToolbar();
         closeKeypad();
-        IntentFilter filter = new IntentFilter(LegacyBalanceFragment.ACTION_INTENT);
+        IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
         viewModel.updateUI();
     }
@@ -253,7 +253,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     viewModel.setContact(((Contact) object));
                 } else if (object instanceof Account) {
                     Account account = ((Account) object);
-                    viewModel.setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account));
+                    viewModel.setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account, null));
 
                     String label = account.getLabel();
                     if (label == null || label.isEmpty()) {
@@ -262,7 +262,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     binding.destination.setText(StringUtils.abbreviate(label, 32));
                 } else if (object instanceof LegacyAddress) {
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
-                    viewModel.setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress));
+                    viewModel.setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress, legacyAddress.getAddress()));
 
                     String label = legacyAddress.getLabel();
                     if (label == null || label.isEmpty()) {
@@ -286,7 +286,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 ItemAccount chosenItem = null;
                 if (object instanceof Account) {
                     Account account = ((Account) object);
-                    chosenItem = new ItemAccount(account.getLabel(), null, null, null, account);
+                    chosenItem = new ItemAccount(account.getLabel(), null, null, null, account, null);
 
                     String label = chosenItem.getLabel();
                     if (label == null || label.isEmpty()) {
@@ -296,7 +296,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
                 } else if (object instanceof LegacyAddress) {
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
-                    chosenItem = new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress);
+                    chosenItem = new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress, legacyAddress.getAddress());
 
                     String label = chosenItem.getLabel();
                     if (label == null || label.isEmpty()) {
