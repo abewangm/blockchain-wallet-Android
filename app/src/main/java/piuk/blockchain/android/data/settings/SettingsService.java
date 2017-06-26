@@ -125,4 +125,25 @@ public class SettingsService {
         return settingsApi.updateSetting(SettingsManager.METHOD_UPDATE_AUTH_TYPE, authType);
     }
 
+    /**
+     * Update the user's btc unit preference
+     *
+     * @param btcUnit The user's preference for btc unit
+     * @return An {@link Observable<ResponseBody>} containing the response from the server
+     */
+    @WebRequest
+    Observable<ResponseBody> updateBtcUnit(String btcUnit) {
+        return settingsApi.updateSetting(SettingsManager.METHOD_UPDATE_BTC_CURRENCY, btcUnit);
+    }
+
+    /**
+     * Update the user's fiat unit preference
+     *
+     * @param fiatUnit The user's preference for fiat unit
+     * @return An {@link Observable<ResponseBody>} containing the response from the server
+     */
+    @WebRequest
+    Observable<ResponseBody> updateFiatUnit(String fiatUnit) {
+        return settingsApi.updateSetting(SettingsManager.METHOD_UPDATE_CURRENCY, fiatUnit);
+    }
 }

@@ -209,4 +209,27 @@ public class SettingsDataManager {
         return Observable.defer(() -> settingsDataStore.getSettings());
     }
 
+    /**
+     * Update the user's btcUnit unit preference and fetches an updated {@link Settings} object.
+     *
+     * @param btcUnit The user's preference for btcUnit unit
+     * @return {@link Observable<Settings>} wrapping the Settings object
+     */
+    public Observable<Settings> updateBtcUnit(String btcUnit) {
+        return rxPinning.call(() -> settingsService.updateBtcUnit(btcUnit))
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Update the user's fiat unit preference and fetches an updated {@link Settings} object.
+     *
+     * @param fiatUnit The user's preference for fiat unit
+     * @return {@link Observable<Settings>} wrapping the Settings object
+     */
+    public Observable<Settings> updateFiatUnit(String fiatUnit) {
+        return rxPinning.call(() -> settingsService.updateFiatUnit(fiatUnit))
+                .flatMap(responseBody -> fetchSettings())
+                .compose(RxUtil.applySchedulersToObservable());
+    }
 }

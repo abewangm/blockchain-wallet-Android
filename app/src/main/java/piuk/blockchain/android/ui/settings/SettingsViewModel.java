@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -554,5 +555,42 @@ public class SettingsViewModel extends BaseViewModel {
 
         dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
         dataListener.showToast(R.string.password_unchanged, ToastCustom.TYPE_ERROR);
+    }
+
+    /**
+     * Updates the user's btcUnit unit preference
+     *
+     * @param btcUnitIndex
+     */
+    void updateBtcUnit(int btcUnitIndex) {
+
+        String btcUnit = Settings.UNIT_BTC;
+
+        switch (btcUnitIndex) {
+            case 0: btcUnit = Settings.UNIT_BTC; break;
+            case 1: btcUnit = Settings.UNIT_MBC; break;
+            case 2: btcUnit = Settings.UNIT_UBC; break;
+        }
+
+        compositeDisposable.add(
+                settingsDataManager.updateBtcUnit(btcUnit)
+                        .doAfterTerminate(this::updateUi)
+                        .subscribe(
+                                settings -> this.settings = settings,
+                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+    }
+
+    /**
+     * Updates the user's fiat unit preference
+     *
+     * @param fiatUnit
+     */
+    void updateFiatUnit(String fiatUnit) {
+        compositeDisposable.add(
+                settingsDataManager.updateFiatUnit(fiatUnit)
+                        .doAfterTerminate(this::updateUi)
+                        .subscribe(
+                                settings -> this.settings = settings,
+                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 }

@@ -636,6 +636,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 .setTitle(R.string.select_units)
                 .setSingleChoiceItems(units, sel, (dialog, which) -> {
                     viewModel.updatePreferences(PrefsUtil.KEY_BTC_UNITS, which);
+                    viewModel.updateBtcUnit(which);
                     dialog.dismiss();
                 })
                 .show();
@@ -652,10 +653,12 @@ public class SettingsFragment extends PreferenceFragmentCompat
             }
         }
 
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+        new Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.select_currency)
                 .setSingleChoiceItems(currencies, selected, (dialog, which) -> {
-                    viewModel.updatePreferences(PrefsUtil.KEY_SELECTED_FIAT, currencies[which].substring(currencies[which].length() - 3));
+                    String fiatUnit = currencies[which].substring(currencies[which].length() - 3);
+                    viewModel.updatePreferences(PrefsUtil.KEY_SELECTED_FIAT, fiatUnit);
+                    viewModel.updateFiatUnit(fiatUnit);
                     dialog.dismiss();
                 })
                 .show();
