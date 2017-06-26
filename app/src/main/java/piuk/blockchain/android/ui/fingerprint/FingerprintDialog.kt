@@ -23,21 +23,6 @@ private const val FATAL_ERROR_TIMEOUT_MILLIS: Long = 3500
 
 class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.DataListener {
 
-    companion object {
-
-        @JvmField val TAG = "FingerprintDialog"
-        @JvmField val KEY_BUNDLE_PIN_CODE = "pin_code"
-        @JvmField val KEY_BUNDLE_STAGE = "stage"
-
-        fun newInstance(pin: String, stage: FingerprintStage): FingerprintDialog {
-            val fragment = FingerprintDialog()
-            fragment.arguments = Bundle().apply {
-                putString(KEY_BUNDLE_PIN_CODE, pin)
-                putString(KEY_BUNDLE_STAGE, stage.name)
-            }
-            return fragment
-        }
-    }
     private lateinit var viewModel: FingerprintDialogViewModel
     private var authCallback: FingerprintAuthCallback? = null
 
@@ -168,6 +153,22 @@ class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.
 
         fun onCanceled()
 
+    }
+
+    companion object {
+
+        const val TAG = "FingerprintDialog"
+        const val KEY_BUNDLE_PIN_CODE = "pin_code"
+        const val KEY_BUNDLE_STAGE = "stage"
+
+        fun newInstance(pin: String, stage: FingerprintStage): FingerprintDialog {
+            val fragment = FingerprintDialog()
+            fragment.arguments = Bundle().apply {
+                putString(KEY_BUNDLE_PIN_CODE, pin)
+                putString(KEY_BUNDLE_STAGE, stage.name)
+            }
+            return fragment
+        }
     }
 
 }
