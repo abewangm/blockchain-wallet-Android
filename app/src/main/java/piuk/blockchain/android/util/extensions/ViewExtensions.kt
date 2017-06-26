@@ -36,5 +36,5 @@ fun View.gone() {
  * @return The inflated [View]
  */
 fun ViewGroup.inflate(layoutId: Int, attachToRoot: Boolean = false): View {
-    return LayoutInflater.from(context).inflate(layoutId, this, false)
+    return LayoutInflater.from(context).inflate(layoutId, this, attachToRoot)
 }

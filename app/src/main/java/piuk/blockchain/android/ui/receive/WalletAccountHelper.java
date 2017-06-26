@@ -86,7 +86,8 @@ public class WalletAccountHelper {
                         addressBalanceHelper.getAccountBalance(account, isBtc, btcExchangeRate, fiatUnit, btcUnit),
                         null,
                         addressBalanceHelper.getAccountAbsoluteBalance(account),
-                        account));
+                        account,
+                        account.getXpub()));
             }
         }
 
@@ -128,7 +129,8 @@ public class WalletAccountHelper {
                     addressBalanceHelper.getAddressBalance(legacyAddress, isBtc, btcExchangeRate, fiatUnit, btcUnit),
                     tag,
                     addressBalanceHelper.getAddressAbsoluteBalance(legacyAddress),
-                    legacyAddress));
+                    legacyAddress,
+                    legacyAddress.getAddress()));
 
         }
 
@@ -155,7 +157,7 @@ public class WalletAccountHelper {
                         ? addressBookEntry.getAddress() : addressBookEntry.getLabel();
 
                 itemAccountList.add(new ItemAccount(labelOrAddress, "",
-                    stringUtils.getString(R.string.address_book_label), null, addressBookEntry));
+                    stringUtils.getString(R.string.address_book_label), null, addressBookEntry.getAddress()));
             }
         }
 

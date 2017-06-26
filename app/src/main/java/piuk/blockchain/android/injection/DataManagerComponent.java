@@ -10,9 +10,10 @@ import piuk.blockchain.android.ui.auth.PinEntryViewModel;
 import piuk.blockchain.android.ui.backup.BackupVerifyViewModel;
 import piuk.blockchain.android.ui.backup.BackupWalletViewModel;
 import piuk.blockchain.android.ui.backup.ConfirmFundsTransferViewModel;
-import piuk.blockchain.android.ui.balance.BalanceViewModel;
+import piuk.blockchain.android.ui.balance.BalancePresenter;
 import piuk.blockchain.android.ui.buy.BuyViewModel;
 import piuk.blockchain.android.ui.chooser.AccountChooserViewModel;
+import piuk.blockchain.android.ui.confirm.ConfirmPaymentPresenter;
 import piuk.blockchain.android.ui.contacts.detail.ContactDetailViewModel;
 import piuk.blockchain.android.ui.contacts.list.ContactsListViewModel;
 import piuk.blockchain.android.ui.contacts.pairing.ContactPairingMethodViewModel;
@@ -26,16 +27,15 @@ import piuk.blockchain.android.ui.launcher.LauncherPresenter;
 import piuk.blockchain.android.ui.onboarding.OnboardingViewModel;
 import piuk.blockchain.android.ui.pairing.ManualPairingViewModel;
 import piuk.blockchain.android.ui.pairing.PairingViewModel;
+import piuk.blockchain.android.ui.pairing_code.PairingCodePresenter;
 import piuk.blockchain.android.ui.receive.ReceiveQrViewModel;
 import piuk.blockchain.android.ui.receive.ReceiveViewModel;
 import piuk.blockchain.android.ui.recover.RecoverFundsViewModel;
-import piuk.blockchain.android.ui.confirm.ConfirmPaymentPresenter;
 import piuk.blockchain.android.ui.send.SendViewModel;
 import piuk.blockchain.android.ui.settings.SettingsViewModel;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceivePresenter;
 import piuk.blockchain.android.ui.transactions.TransactionDetailViewModel;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletPresenter;
-import piuk.blockchain.android.ui.pairing_code.PairingCodePresenter;
 
 /**
  * Subcomponents have access to all upstream objects in the graph but can have their own scope -
@@ -57,8 +57,6 @@ public interface DataManagerComponent {
     void inject(PinEntryViewModel pinEntryViewModel);
 
     void inject(MainViewModel mainViewModel);
-
-    void inject(BalanceViewModel balanceViewModel);
 
     void inject(PairingViewModel pairingViewModel);
 
@@ -115,4 +113,6 @@ public interface DataManagerComponent {
     void inject(ConfirmPaymentPresenter confirmPaymentPresenter);
 
     void inject(PairingCodePresenter pairingCodePresenter);
+
+    void inject(BalancePresenter balancePresenter);
 }

@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.auth;
 
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -32,6 +33,12 @@ public class PinEntryActivity extends BaseAuthActivity implements
     // Fragments
     private PinEntryFragment pinEntryFragment;
     private AppUtil appUtil;
+
+    public static void start(Context context) {
+        Intent intent = new Intent(context, PinEntryActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

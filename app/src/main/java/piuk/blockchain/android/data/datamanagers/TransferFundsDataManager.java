@@ -81,7 +81,8 @@ public class TransferFundsDataManager {
                                 "",
                                 "",
                                 null,
-                                legacyAddress);
+                                legacyAddress,
+                                legacyAddress.getAddress());
                         pendingSpend.bigIntFee = pendingSpend.unspentOutputBundle.getAbsoluteFee();
                         pendingSpend.bigIntAmount = sweepAmount;
                         pendingSpend.addressToReceiveIndex = addressToReceiveIndex;
@@ -128,7 +129,7 @@ public class TransferFundsDataManager {
                 PendingTransaction pendingTransaction = pendingTransactions.get(i);
 
                 final int finalI = i;
-                LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
+                LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.getAccountObject());
                 String changeAddress = legacyAddress.getAddress();
                 String receivingAddress =
                         payloadDataManager.getNextReceiveAddress(pendingTransaction.addressToReceiveIndex)

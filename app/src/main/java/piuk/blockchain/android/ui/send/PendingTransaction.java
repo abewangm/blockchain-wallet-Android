@@ -22,6 +22,6 @@ public class PendingTransaction {
 
     @JsonIgnore
     public boolean isHD() {
-        return (sendingObject.accountObject instanceof Account);
+        return (sendingObject.getAccountObject() instanceof Account);
     }
 }

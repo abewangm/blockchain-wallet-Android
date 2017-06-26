@@ -145,13 +145,8 @@ public class AccountEditViewModel extends BaseViewModel {
             // V3
             List<Account> accounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts();
 
-            // Remove "All"
             List<Account> accountClone = new ArrayList<>(accounts.size());
             accountClone.addAll(accounts);
-
-            if (accountClone.get(accountClone.size() - 1) instanceof ConsolidatedAccount) {
-                accountClone.remove(accountClone.size() - 1);
-            }
 
             account = accountClone.get(accountIndex);
             accountModel.setLabel(account.getLabel());
@@ -165,51 +160,41 @@ public class AccountEditViewModel extends BaseViewModel {
 
         } else if (addressIndex >= 0) {
             // V2
-            ConsolidatedAccount iAccount = null;
-            if (!payloadDataManager.getWallet().getLegacyAddressList().isEmpty()) {
+            List<LegacyAddress> legacy = payloadDataManager.getWallet().getLegacyAddressList();
+            legacyAddress = legacy.get(addressIndex);
 
-                iAccount = new ConsolidatedAccount(stringUtils.getString(R.string.imported_addresses),
-                        payloadDataManager.getWallet().getLegacyAddressList(),
-                        payloadDataManager.getImportedAddressesBalance().longValue());
+            accountModel.setLabel(legacyAddress.getLabel());
+            accountModel.setLabelHeader(stringUtils.getString(R.string.name));
+            accountModel.setXpubDescriptionVisibility(View.GONE);
+            accountModel.setXpubText(stringUtils.getString(R.string.address));
+            accountModel.setDefaultAccountVisibility(View.GONE);//No default for V2
+            setArchive(legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS);
+
+            if (legacyAddress.isWatchOnly()) {
+                accountModel.setScanPrivateKeyVisibility(View.VISIBLE);
+                accountModel.setArchiveVisibility(View.GONE);
+            } else {
+                accountModel.setScanPrivateKeyVisibility(View.GONE);
+                accountModel.setArchiveVisibility(View.VISIBLE);
             }
 
-            if (iAccount != null) {
-                List<LegacyAddress> legacy = iAccount.getLegacyAddresses();
-                legacyAddress = legacy.get(addressIndex);
+            if (payloadDataManager.getWallet().isUpgraded()) {
+                // Subtract fee
+                long balanceAfterFee = payloadDataManager.getAddressBalance(
+                        legacyAddress.getAddress()).longValue() -
+                        sendDataManager.estimatedFee(1, 1,
+                                BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000))
+                                .longValue();
 
-                accountModel.setLabel(legacyAddress.getLabel());
-                accountModel.setLabelHeader(stringUtils.getString(R.string.name));
-                accountModel.setXpubDescriptionVisibility(View.GONE);
-                accountModel.setXpubText(stringUtils.getString(R.string.address));
-                accountModel.setDefaultAccountVisibility(View.GONE);//No default for V2
-                setArchive(legacyAddress.getTag() == LegacyAddress.ARCHIVED_ADDRESS);
-
-                if (legacyAddress.isWatchOnly()) {
-                    accountModel.setScanPrivateKeyVisibility(View.VISIBLE);
-                    accountModel.setArchiveVisibility(View.GONE);
+                if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
+                    accountModel.setTransferFundsVisibility(View.VISIBLE);
                 } else {
-                    accountModel.setScanPrivateKeyVisibility(View.GONE);
-                    accountModel.setArchiveVisibility(View.VISIBLE);
-                }
-
-                if (payloadDataManager.getWallet().isUpgraded()) {
-                    // Subtract fee
-                    long balanceAfterFee = payloadDataManager.getAddressBalance(
-                            legacyAddress.getAddress()).longValue() -
-                            sendDataManager.estimatedFee(1, 1,
-                                    BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000))
-                                    .longValue();
-
-                    if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
-                        accountModel.setTransferFundsVisibility(View.VISIBLE);
-                    } else {
-                        // No need to show 'transfer' if funds are less than dust amount
-                        accountModel.setTransferFundsVisibility(View.GONE);
-                    }
-                } else {
-                    // No transfer option for V2
+                    // No need to show 'transfer' if funds are less than dust amount
                     accountModel.setTransferFundsVisibility(View.GONE);
                 }
+            } else {
+                // No transfer option for V2
+                accountModel.setTransferFundsVisibility(View.GONE);
             }
         }
     }
@@ -342,11 +327,11 @@ public class AccountEditViewModel extends BaseViewModel {
 
     private PaymentConfirmationDetails getTransactionDetailsForDisplay(PendingTransaction pendingTransaction) {
         PaymentConfirmationDetails details = new PaymentConfirmationDetails();
-        details.fromLabel = pendingTransaction.sendingObject.label;
+        details.fromLabel = pendingTransaction.sendingObject.getLabel();
         if (pendingTransaction.receivingObject != null
-                && pendingTransaction.receivingObject.label != null
-                && !pendingTransaction.receivingObject.label.isEmpty()) {
-            details.toLabel = pendingTransaction.receivingObject.label;
+                && pendingTransaction.receivingObject.getLabel() != null
+                && !pendingTransaction.receivingObject.getLabel().isEmpty()) {
+            details.toLabel = pendingTransaction.receivingObject.getLabel();
         } else {
             details.toLabel = pendingTransaction.receivingAddress;
         }
@@ -391,7 +376,7 @@ public class AccountEditViewModel extends BaseViewModel {
     void submitPayment() {
         dataListener.showProgressDialog(R.string.please_wait);
 
-        LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
+        LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.getAccountObject());
         String changeAddress = legacyAddress.getAddress();
 
         List<ECKey> keys = new ArrayList<>();
@@ -423,12 +408,12 @@ public class AccountEditViewModel extends BaseViewModel {
                             // Update V2 balance immediately after spend - until refresh from server
                             long spentAmount = (pendingTransaction.bigIntAmount.longValue() + pendingTransaction.bigIntFee.longValue());
 
-                            if (pendingTransaction.sendingObject.accountObject instanceof Account) {
+                            if (pendingTransaction.sendingObject.getAccountObject() instanceof Account) {
                                 payloadDataManager.subtractAmountFromAddressBalance(
-                                        ((Account) pendingTransaction.sendingObject.accountObject).getXpub(), spentAmount);
+                                        ((Account) pendingTransaction.sendingObject.getAccountObject()).getXpub(), spentAmount);
                             } else {
                                 payloadDataManager.subtractAmountFromAddressBalance(
-                                        ((LegacyAddress) pendingTransaction.sendingObject.accountObject).getAddress(), spentAmount);
+                                        ((LegacyAddress) pendingTransaction.sendingObject.getAccountObject()).getAddress(), spentAmount);
                             }
 
                             payloadDataManager.syncPayloadWithServer()

@@ -1,4 +1,4 @@
-package piuk.blockchain.android.util
+package piuk.blockchain.android.util.helperfunctions
 
 /**
  * Contains general high-order convenience functions for various uses

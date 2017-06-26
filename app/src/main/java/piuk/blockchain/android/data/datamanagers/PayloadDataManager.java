@@ -527,12 +527,23 @@ public class PayloadDataManager {
     }
 
     @NonNull
+    public BigInteger getWalletBalance() {
+        return payloadManager.getWalletBalance();
+    }
+
+    @NonNull
     public BigInteger getImportedAddressesBalance() {
         return payloadManager.getImportedAddressesBalance();
     }
 
     public boolean isDoubleEncrypted() {
         return getWallet().isDoubleEncryption();
+    }
+
+    public boolean isBackedUp() {
+        return payloadManager.getPayload() != null
+                && payloadManager.getPayload().getHdWallets() != null
+                && payloadManager.getPayload().getHdWallets().get(0).isMnemonicVerified();
     }
 
     ///////////////////////////////////////////////////////////////////////////

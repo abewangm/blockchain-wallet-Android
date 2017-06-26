@@ -178,7 +178,7 @@ class ContactPaymentDialogViewModelTest {
     @Throws(Exception::class)
     fun getSendFromList() {
         // Arrange
-        val list = listOf(mock<ItemAccount>())
+        val list = listOf(ItemAccount())
         whenever(mockWalletAccountHelper.getHdAccounts(true))
                 .thenReturn(list)
         // Act
@@ -307,7 +307,7 @@ class ContactPaymentDialogViewModelTest {
     fun onSendClickedException() {
         // Arrange
         val account = Account()
-        subject.pendingTransaction.sendingObject = ItemAccount("", "", null, null, account)
+        subject.pendingTransaction.sendingObject = ItemAccount("", "", null, null, account, null)
         whenever(mockPayloadDataManager.getNextChangeAddress(account))
                 .thenReturn(Observable.error { Throwable() })
         // Act
@@ -334,7 +334,7 @@ class ContactPaymentDialogViewModelTest {
         val txHash = "TX_HASH"
         subject.pendingTransaction.apply {
             unspentOutputBundle = spendableOutputs
-            sendingObject = ItemAccount("", "", null, null, account)
+            sendingObject = ItemAccount("", "", null, null, account, null)
             bigIntAmount = BigInteger.TEN
             bigIntFee = BigInteger.TEN
             receivingAddress = receiveAddress
@@ -389,7 +389,7 @@ class ContactPaymentDialogViewModelTest {
         val mockWallet: Wallet = mock()
         subject.pendingTransaction.apply {
             unspentOutputBundle = spendableOutputs
-            sendingObject = ItemAccount("", "", null, null, account)
+            sendingObject = ItemAccount("", "", null, null, account, null)
             bigIntAmount = BigInteger.TEN
             bigIntFee = BigInteger.TEN
             receivingAddress = receiveAddress

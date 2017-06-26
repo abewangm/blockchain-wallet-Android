@@ -1,0 +1,15 @@
+package piuk.blockchain.android.data.stores
+
+import io.reactivex.Observable
+
+/**
+ * Fetches data from the web and then stores it in memory
+ */
+class FreshFetchStrategy<T>(
+        private val webSource: Observable<T>,
+        private val memoryStore: PersistentStore<T>
+) : FetchStrategy<T>() {
+
+    override fun fetch(): Observable<T> = webSource.flatMap(memoryStore::store)
+
+}

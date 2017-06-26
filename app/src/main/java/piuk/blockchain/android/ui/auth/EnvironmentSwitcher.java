@@ -32,7 +32,6 @@ class EnvironmentSwitcher {
 
     private void resetAllTimers() {
         prefsUtil.removeValue(PrefsUtil.KEY_PIN_FAILS);
-        prefsUtil.removeValue(PrefsUtil.KEY_FIRST_RUN);
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_TIME_ELAPSED);
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_BACKUP_NEVER);
         prefsUtil.removeValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER);

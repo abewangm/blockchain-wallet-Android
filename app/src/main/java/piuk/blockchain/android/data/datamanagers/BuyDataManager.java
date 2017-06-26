@@ -6,13 +6,13 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.services.ExchangeService;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
 
 /**
  * Created by justin on 4/28/17.
  */
 
 public class BuyDataManager {
-    public static final String TAG = BuyDataManager.class.getSimpleName();
 
     private OnboardingDataManager onboardingDataManager;
     private SettingsDataManager settingsDataManager;
@@ -55,9 +55,7 @@ public class BuyDataManager {
     }
 
     private Observable<Boolean> getIsInvited() {
-        return settingsDataManager.initSettings(
-                payloadDataManager.getWallet().getGuid(),
-                payloadDataManager.getWallet().getSharedKey())
+        return settingsDataManager.getSettings()
                 .map(settings -> {
                     // TODO: implement settings.invited.sfox
                     return false;

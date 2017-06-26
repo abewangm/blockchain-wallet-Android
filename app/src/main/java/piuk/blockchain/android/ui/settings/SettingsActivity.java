@@ -1,6 +1,9 @@
 package piuk.blockchain.android.ui.settings;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 
@@ -8,6 +11,12 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 
 public class SettingsActivity extends BaseAuthActivity {
+
+    public static void start(Context context, @Nullable Bundle extras) {
+        Intent starter = new Intent(context, SettingsActivity.class);
+        if (extras != null) starter.putExtras(extras);
+        context.startActivity(starter);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

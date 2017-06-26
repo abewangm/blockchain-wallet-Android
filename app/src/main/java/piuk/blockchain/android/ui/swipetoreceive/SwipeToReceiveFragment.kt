@@ -24,7 +24,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == BalanceFragment.ACTION_INTENT) {
                 // Update UI with new Address + QR
-                getPresenter()?.onViewReady()
+                presenter?.onViewReady()
             }
         }
     }

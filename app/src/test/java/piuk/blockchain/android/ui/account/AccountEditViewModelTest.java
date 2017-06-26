@@ -241,10 +241,10 @@ public class AccountEditViewModelTest {
         LegacyAddress legacyAddress = new LegacyAddress();
         subject.legacyAddress = legacyAddress;
         PendingTransaction pendingTransaction = new PendingTransaction();
-        pendingTransaction.sendingObject = new ItemAccount("", "", "", 100L, legacyAddress);
+        pendingTransaction.sendingObject = new ItemAccount("", "", "", 100L, legacyAddress, null);
         pendingTransaction.bigIntAmount = BigInteger.TEN;
         pendingTransaction.bigIntFee = BigInteger.TEN;
-        pendingTransaction.receivingObject = new ItemAccount("", "", "", 100L, legacyAddress);
+        pendingTransaction.receivingObject = new ItemAccount("", "", "", 100L, legacyAddress, null);
         SpendableUnspentOutputs spendableUnspentOutputs = new SpendableUnspentOutputs();
         spendableUnspentOutputs.setConsumedAmount(BigInteger.TEN);
         spendableUnspentOutputs.setSpendableOutputs(Collections.singletonList(new UnspentOutput()));
@@ -317,7 +317,7 @@ public class AccountEditViewModelTest {
         pendingTransaction.bigIntAmount = new BigInteger("1");
         pendingTransaction.bigIntFee = new BigInteger("1");
         LegacyAddress legacyAddress = new LegacyAddress();
-        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress);
+        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress, null);
         pendingTransaction.unspentOutputBundle = new SpendableUnspentOutputs();
         Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
         when(mockPayload.isDoubleEncryption()).thenReturn(false);
@@ -351,7 +351,7 @@ public class AccountEditViewModelTest {
         pendingTransaction.bigIntAmount = new BigInteger("1");
         pendingTransaction.bigIntFee = new BigInteger("1");
         LegacyAddress legacyAddress = new LegacyAddress();
-        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress);
+        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress, null);
         pendingTransaction.unspentOutputBundle = new SpendableUnspentOutputs();
         Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
         when(mockPayload.isDoubleEncryption()).thenReturn(false);
@@ -382,7 +382,7 @@ public class AccountEditViewModelTest {
         pendingTransaction.bigIntAmount = new BigInteger("1");
         pendingTransaction.bigIntFee = new BigInteger("1");
         LegacyAddress legacyAddress = new LegacyAddress();
-        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress);
+        pendingTransaction.sendingObject = new ItemAccount("", "", "", null, legacyAddress, null);
         Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
         when(mockPayload.isDoubleEncryption()).thenReturn(true);
         when(payloadDataManager.getWallet()).thenReturn(mockPayload);

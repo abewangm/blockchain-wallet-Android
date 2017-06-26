@@ -23,7 +23,6 @@ interface PersistentPrefs {
     String KEY_NEWLY_CREATED_WALLET = "newly_created_wallet";
     String LOGGED_OUT = "logged_out";
     String KEY_BACKEND_ENVIRONMENT = "backend_environment";
-    String KEY_FIRST_RUN = "first_run";
     String KEY_SECURITY_TIME_ELAPSED = "security_time_elapsed";
     String KEY_SECURITY_TWO_FA_NEVER = "security_two_fa_never";
     String KEY_SECURITY_BACKUP_NEVER = "security_backup_never";
