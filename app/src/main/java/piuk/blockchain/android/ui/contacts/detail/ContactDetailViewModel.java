@@ -22,6 +22,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.FctxDateComparator;
@@ -55,6 +56,7 @@ public class ContactDetailViewModel extends BaseViewModel {
     @Inject RxBus rxBus;
     @Inject StringUtils stringUtils;
     @Inject TransactionListDataManager transactionListDataManager;
+    @Inject AccessState accessState;
 
     interface DataListener {
 
@@ -74,7 +76,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
         void showDeleteUserDialog();
 
-        void onTransactionsUpdated(List<Object> transactions);
+        void onTransactionsUpdated(List<Object> transactions, boolean isBtc);
 
         void showAccountChoiceDialog(List<String> accounts, String fctxId);
 
@@ -285,6 +287,11 @@ public class ContactDetailViewModel extends BaseViewModel {
 
     }
 
+
+    void onBtcFormatChanged(boolean isBtc) {
+        accessState.setIsBtc(isBtc);
+    }
+
     private void subscribeToNotifications() {
         notificationObservable = rxBus.register(NotificationPayload.class);
         compositeDisposable.add(
@@ -366,7 +373,7 @@ public class ContactDetailViewModel extends BaseViewModel {
             }
         }
 
-        dataListener.onTransactionsUpdated(displayList);
+        dataListener.onTransactionsUpdated(displayList, accessState.isBtc());
     }
 
     private void showErrorAndQuitPage() {

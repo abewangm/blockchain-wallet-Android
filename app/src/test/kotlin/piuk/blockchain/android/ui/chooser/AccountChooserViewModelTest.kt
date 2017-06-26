@@ -14,6 +14,7 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
+import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.contacts.PaymentRequestType
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
@@ -36,6 +37,7 @@ class AccountChooserViewModelTest {
     private var mockWalletAccountHelper: WalletAccountHelper = mock()
     private var mockStringUtils: StringUtils = mock()
     private var mockContactsManager: ContactsDataManager = mock()
+    private var mockAccessState: AccessState = mock()
 
     @Before
     @Throws(Exception::class)
@@ -181,28 +183,24 @@ class AccountChooserViewModelTest {
     }
 
     inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-        override fun providePrefsUtil(): PrefsUtil {
-            return mockPrefsUtil
-        }
+        override fun providePrefsUtil() = mockPrefsUtil
 
-        override fun provideStringUtils(): StringUtils {
-            return mockStringUtils
-        }
+        override fun provideStringUtils() = mockStringUtils
+
+        override fun provideAccessState() = mockAccessState
     }
 
     inner class MockDataManagerModule : DataManagerModule() {
-        override fun provideWalletAccountHelper(payloadManager: PayloadManager?,
+        override fun provideWalletAccountHelper(
+                payloadManager: PayloadManager?,
                                                 prefsUtil: PrefsUtil?,
                                                 stringUtils: StringUtils?,
-                                                exchangeRateFactory: ExchangeRateFactory?): WalletAccountHelper {
-            return mockWalletAccountHelper
-        }
+                                                exchangeRateFactory: ExchangeRateFactory?
+        ) = mockWalletAccountHelper
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(rxBus: RxBus?): ContactsDataManager {
-            return mockContactsManager
-        }
+        override fun provideContactsManager(rxBus: RxBus?) = mockContactsManager
     }
 
 }

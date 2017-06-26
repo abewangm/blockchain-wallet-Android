@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
@@ -19,9 +20,6 @@ import piuk.blockchain.android.ui.base.BaseViewModel;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
-
-import static piuk.blockchain.android.ui.send.SendViewModel.SHOW_BTC;
-import static piuk.blockchain.android.ui.send.SendViewModel.SHOW_FIAT;
 
 
 @SuppressWarnings("WeakerAccess")
@@ -33,9 +31,9 @@ public class AccountChooserViewModel extends BaseViewModel {
     @Inject WalletAccountHelper walletAccountHelper;
     @Inject StringUtils stringUtils;
     @Inject ContactsDataManager contactsDataManager;
+    @Inject AccessState accessState;
 
     private List<ItemAccount> itemAccounts = new ArrayList<>();
-    private boolean isBtc;
 
     interface DataListener {
 
@@ -59,9 +57,6 @@ public class AccountChooserViewModel extends BaseViewModel {
     AccountChooserViewModel(DataListener dataListener) {
         Injector.getInstance().getDataManagerComponent().inject(this);
         this.dataListener = dataListener;
-
-        int balanceDisplayState = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-        isBtc = balanceDisplayState != SHOW_FIAT;
     }
 
     @Override
@@ -155,13 +150,13 @@ public class AccountChooserViewModel extends BaseViewModel {
 
     private Observable<List<ItemAccount>> getAccountList() {
         ArrayList<ItemAccount> result = new ArrayList<>();
-        result.addAll(walletAccountHelper.getHdAccounts(isBtc));
+        result.addAll(walletAccountHelper.getHdAccounts(accessState.isBtc()));
         return Observable.just(result);
     }
 
     private Observable<List<ItemAccount>> getImportedList() {
         ArrayList<ItemAccount> result = new ArrayList<>();
-        result.addAll(walletAccountHelper.getLegacyAddresses(isBtc));
+        result.addAll(walletAccountHelper.getLegacyAddresses(accessState.isBtc()));
         return Observable.just(result);
     }
 
