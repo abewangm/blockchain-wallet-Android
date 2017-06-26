@@ -17,7 +17,7 @@ import piuk.blockchain.android.util.StringUtils;
 
 public class PairingCodePresenter extends BasePresenter<PairingCodeView> {
 
-    private final String webWalletUrl = "blockchain.info/wallet/login";
+    private static final String WEB_WALLET_URL = "blockchain.info/wallet/login";
 
     @Inject QrCodeDataManager qrCodeDataManager;
     @Inject StringUtils stringUtils;
@@ -34,7 +34,7 @@ public class PairingCodePresenter extends BasePresenter<PairingCodeView> {
     }
 
     public String getFirstStep() {
-        return String.format(stringUtils.getString(R.string.pairing_code_instruction_1), webWalletUrl);
+        return String.format(stringUtils.getString(R.string.pairing_code_instruction_1), WEB_WALLET_URL);
     }
 
     public void generatePairingQr() {

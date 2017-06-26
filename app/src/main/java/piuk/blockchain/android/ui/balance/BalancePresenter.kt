@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.balance
 
+import android.support.annotation.VisibleForTesting
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
@@ -48,15 +49,15 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     @Inject lateinit var rxBus: RxBus
     @Inject lateinit var appUtil: AppUtil
 
-    private var contactsEventObservable: Observable<ContactsEvent>? = null
-    private var notificationObservable: Observable<NotificationPayload>? = null
-    private var authEventObservable: Observable<AuthEvent>? = null
-    private var chosenAccount: ItemAccount? = null
+    @VisibleForTesting var contactsEventObservable: Observable<ContactsEvent>? = null
+    @VisibleForTesting var notificationObservable: Observable<NotificationPayload>? = null
+    @VisibleForTesting var authEventObservable: Observable<AuthEvent>? = null
+    @VisibleForTesting var chosenAccount: ItemAccount? = null
 
-    private val activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
+    @VisibleForTesting internal val activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
     private val displayList: MutableList<Any> = mutableListOf()
     private val monetaryUtil: MonetaryUtil by lazy(LazyThreadSafetyMode.NONE) {
-        MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
+        MonetaryUtil(getBtcUnitType())
     }
 
     init {
@@ -175,7 +176,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                     }
                 }, {
                     view.showToast(
-                            R.string.contacts_transaction_not_found_error,
+                            R.string.contacts_not_found_error,
                             ToastCustom.TYPE_ERROR
                     )
                 })
@@ -218,8 +219,8 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                     paymentRequest.id = fctxId
 
                     payloadDataManager.getNextReceiveAddressAndReserve(
-                            payloadDataManager.getPositionOfAccountInActiveList(
-                                    accountPosition), "Payment request ${transaction?.id}"
+                            payloadDataManager.getPositionOfAccountInActiveList(accountPosition),
+                            "Payment request ${transaction?.id}"
                     ).doOnNext { paymentRequest.address = it }
                             .flatMapCompletable {
                                 contactsDataManager.sendPaymentRequestResponse(
@@ -228,8 +229,8 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                                         fctxId
                                 )
                             }
-                            .doAfterTerminate { view.dismissProgressDialog() }
                 }
+                .doAfterTerminate { view.dismissProgressDialog() }
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
                         {
@@ -243,7 +244,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         contactsDataManager.getContactFromFctxId(fctxId)
                 .flatMapCompletable { contactsDataManager.sendPaymentDeclinedResponse(it.mdid, fctxId) }
                 .doOnError { contactsDataManager.fetchContacts() }
-                .doAfterTerminate { this.refreshFacilitatedTransactions() }
+                .doAfterTerminate(this::refreshFacilitatedTransactions)
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
                         { view.showToast(R.string.contacts_pending_transaction_decline_success, ToastCustom.TYPE_OK) },
@@ -254,7 +255,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         contactsDataManager.getContactFromFctxId(fctxId)
                 .flatMapCompletable { contactsDataManager.sendPaymentCancelledResponse(it.mdid, fctxId) }
                 .doOnError { contactsDataManager.fetchContacts() }
-                .doAfterTerminate { this.refreshFacilitatedTransactions() }
+                .doAfterTerminate(this::refreshFacilitatedTransactions)
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
                         { view.showToast(R.string.contacts_pending_transaction_cancel_success, ToastCustom.TYPE_OK) },
@@ -273,7 +274,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         buyDataManager.canBuy
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
-                    if (it ?: false) {
+                    if (it) {
                         view.startBuyActivity()
                     } else {
                         view.startReceiveFragment()
@@ -285,7 +286,8 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
     }
 
-    private fun getAllDisplayableAccounts(): MutableList<ItemAccount> {
+    @VisibleForTesting
+    internal fun getAllDisplayableAccounts(): MutableList<ItemAccount> {
         val mutableList = mutableListOf<ItemAccount>()
 
         val legacyAddresses = payloadDataManager.legacyAddresses
@@ -481,10 +483,9 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     private fun checkOnboardingStatus() {
         buyDataManager.canBuy
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe({
-                    val onboardingPages = getOnboardingPages(it ?: false)
-                    view.onLoadOnboardingPages(onboardingPages)
-                }, { it.printStackTrace() })
+                .subscribe(
+                        { view.onLoadOnboardingPages(getOnboardingPages(it)) },
+                        { it.printStackTrace() })
     }
 
     private fun getOnboardingPages(isBuyAllowed: Boolean): List<OnboardingPagerContent> {
@@ -570,12 +571,14 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         }
     }
 
-    private fun getLastPrice(fiat: String): Double = exchangeRateFactory.getLastPrice(fiat)
+    private fun getLastPrice(fiat: String) = exchangeRateFactory.getLastPrice(fiat)
 
-    private fun getDisplayUnits(): String =
-            monetaryUtil.btcUnits[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)].toString()
+    private fun getDisplayUnits() = monetaryUtil.btcUnits[getBtcUnitType()].toString()
 
-    private fun getFiatCurrency(): String =
+    private fun getBtcUnitType() =
+            prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+
+    private fun getFiatCurrency() =
             prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
 }

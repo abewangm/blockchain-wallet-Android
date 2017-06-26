@@ -45,7 +45,7 @@ class LauncherActivity : BaseMvpActivity<LauncherView, LauncherPresenter>(), Lau
                 .setMessage(getString(R.string.not_sane_error))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, { _, _ ->
-                    getPresenter().appUtil.clearCredentialsAndRestart()
+                    presenter.appUtil.clearCredentialsAndRestart()
                 })
                 .show()
     }
@@ -68,9 +68,7 @@ class LauncherActivity : BaseMvpActivity<LauncherView, LauncherPresenter>(), Lau
         startSingleActivity(PasswordRequiredActivity::class.java, null)
     }
 
-    override fun showToast(message: Int, toastType: String) {
-        toast(message, toastType)
-    }
+    override fun showToast(message: Int, toastType: String) = toast(message, toastType)
 
     private fun startSingleActivity(clazz: Class<*>, extras: Bundle?) {
         val intent = Intent(this, clazz).apply {
@@ -80,7 +78,9 @@ class LauncherActivity : BaseMvpActivity<LauncherView, LauncherPresenter>(), Lau
         startActivity(intent)
     }
 
-    private class DelayStartRunnable internal constructor(private val activity: LauncherActivity) : Runnable {
+    private class DelayStartRunnable internal constructor(
+            private val activity: LauncherActivity
+    ) : Runnable {
 
         override fun run() {
             activity.onViewReady()

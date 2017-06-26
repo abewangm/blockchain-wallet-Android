@@ -24,6 +24,7 @@ import kotlinx.android.synthetic.main.include_onboarding_complete.*
 import kotlinx.android.synthetic.main.include_onboarding_viewpager.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.websocket.WebSocketService.ACTION_INTENT
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter
 import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener
@@ -505,10 +506,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     companion object {
 
-        @JvmField val ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH"
-        @JvmField val KEY_TRANSACTION_LIST_POSITION = "transaction_list_position"
-        @JvmField val KEY_TRANSACTION_HASH = "transaction_hash"
-        @JvmField val ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment"
+        const val ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH"
+        const val KEY_TRANSACTION_LIST_POSITION = "transaction_list_position"
+        const val KEY_TRANSACTION_HASH = "transaction_hash"
+        const val ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment"
 
         @JvmStatic
         fun newInstance(broadcastingPayment: Boolean): BalanceFragment {

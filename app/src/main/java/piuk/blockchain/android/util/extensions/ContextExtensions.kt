@@ -4,9 +4,6 @@ package piuk.blockchain.android.util.extensions
 
 import android.content.Context
 import android.support.annotation.StringRes
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import piuk.blockchain.android.ui.customviews.ToastCustom
 
 /**

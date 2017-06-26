@@ -28,9 +28,9 @@ class PromptManager(
 
     private val ONE_MONTH = 28 * 24 * 60 * 60 * 1000L
 
-    fun getDefaultPrompts(context: Context): Observable<ArrayList<AlertDialog>> {
+    fun getDefaultPrompts(context: Context): Observable<List<AlertDialog>> {
 
-        val list = ArrayList<AlertDialog>()
+        val list = mutableListOf<AlertDialog>()
 
         if (isSurveyAllowed()) list.add(getSurveyDialog(context))
         if (isRooted()) list.add(getRootWarningDialog(context))
@@ -38,9 +38,9 @@ class PromptManager(
         return Observable.fromArray(list)
     }
 
-    fun getCustomPrompts(context: Context, settings: Settings): Observable<ArrayList<AppCompatDialogFragment>> {
+    fun getCustomPrompts(context: Context, settings: Settings): Observable<List<AppCompatDialogFragment>> {
 
-        val list = ArrayList<AppCompatDialogFragment>()
+        val list = mutableListOf<AppCompatDialogFragment>()
 
         if (isBackedUpReminderAllowed()) list.add(getBackupCustomDialog(context))
         if (is2FAReminderAllowed(settings)) list.add(get2FACustomDialog(context))

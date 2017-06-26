@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatDialogFragment;
 import android.util.Log;
 
 import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.payload.PayloadManager;
 
@@ -32,9 +31,9 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
+import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
@@ -140,21 +139,18 @@ public class MainViewModel extends BaseViewModel {
         osUtil = new OSUtil(applicationContext);
     }
 
-    private Observable<Settings> getSettingsObservable() {
-        return settingsDataManager.initSettings(prefs.getValue(PrefsUtil.KEY_GUID, ""), prefs.getValue(PrefsUtil.KEY_SHARED_KEY, ""));
-    }
-
     public void initPrompts(Context context) {
 
-        compositeDisposable.add(getSettingsObservable()
-                .flatMap(settings -> promptManager.getDefaultPrompts(context))
-                .flatMap(Observable::fromIterable)
-                .forEach(dataListener::showDefaultPrompt));
+        compositeDisposable.add(
+                promptManager.getDefaultPrompts(context)
+                        .flatMap(Observable::fromIterable)
+                        .forEach(dataListener::showDefaultPrompt));
 
-        compositeDisposable.add(getSettingsObservable()
-                .flatMap(settings -> promptManager.getCustomPrompts(context, settings))
-                .flatMap(Observable::fromIterable)
-                .forEach(dataListener::showCustomPrompt));
+        compositeDisposable.add(
+                settingsDataManager.getSettings()
+                        .flatMap(settings -> promptManager.getCustomPrompts(context, settings))
+                        .flatMap(Observable::fromIterable)
+                        .forEach(dataListener::showCustomPrompt));
     }
 
     @Override
@@ -317,12 +313,6 @@ public class MainViewModel extends BaseViewModel {
                                 checkForMessages();
                             }
                         }, throwable -> dataListener.showContactsRegistrationFailure()));
-    }
-
-    private Observable<Settings> getSettingsApi() {
-        return settingsDataManager.initSettings(
-                prefs.getValue(PrefsUtil.KEY_GUID, ""),
-                prefs.getValue(PrefsUtil.KEY_SHARED_KEY, ""));
     }
 
     private void preLaunchChecks() {

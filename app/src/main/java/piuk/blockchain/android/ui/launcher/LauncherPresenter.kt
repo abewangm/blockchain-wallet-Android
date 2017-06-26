@@ -21,10 +21,6 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
         Injector.getInstance().dataManagerComponent.inject(this)
     }
 
-    companion object {
-        @JvmField val INTENT_EXTRA_VERIFIED = "verified"
-    }
-
     @Inject lateinit var appUtil: AppUtil
     @Inject lateinit var payloadDataManager: PayloadDataManager
     @Inject lateinit var prefsUtil: PrefsUtil
@@ -116,6 +112,10 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
 
         visits++
         prefsUtil.setValue(PrefsUtil.KEY_APP_VISITS, visits)
+    }
+
+    companion object {
+        const val INTENT_EXTRA_VERIFIED = "verified"
     }
 
 }

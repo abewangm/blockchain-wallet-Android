@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.upgrade
+package piuk.blockchain.android.ui.pairing_code
 
 import android.app.Application
 import android.graphics.Bitmap
@@ -22,8 +22,6 @@ import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.injection.*
-import piuk.blockchain.android.ui.pairing_code.PairingCodePresenter
-import piuk.blockchain.android.ui.pairing_code.PairingCodeView
 import piuk.blockchain.android.util.AESUtilWrapper
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PrefsUtil
@@ -60,13 +58,13 @@ class PairingCodePresenterTest {
     fun generatePairingQr() {
 
         // Arrange
-        val bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.RGB_565);
+        val bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.RGB_565)
         whenever(mockPayloadDataManager.wallet.guid).thenReturn("asdf")
         whenever(mockPayloadDataManager.wallet.sharedKey).thenReturn("ghjk")
         whenever(mockPayloadDataManager.tempPassword).thenReturn("zxcv")
         whenever(mockQrCodeDataManager.generatePairingCode(any(), any(), any(), any(), any())).thenReturn(Observable.just(bitmap))
 
-        val body = ResponseBody.create(MediaType.parse("application/text"), "asdasdasd");
+        val body = ResponseBody.create(MediaType.parse("application/text"), "asdasdasd")
         whenever(mockAuthDataManager.getPairingEncryptionPassword(any()))
                 .thenReturn(Observable.just(body))
         // Act

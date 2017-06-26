@@ -114,7 +114,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     private MainViewModel viewModel;
     @Thunk ActivityMainBinding binding;
     private MaterialProgressDialog fetchTransactionsProgress;
-    private AlertDialog rootedDialog;
     private MaterialProgressDialog materialProgressDialog;
     private AppUtil appUtil;
     private long backPressed;
@@ -491,14 +490,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (rootedDialog != null && rootedDialog.isShowing()) {
-            rootedDialog.dismiss();
-        }
-    }
-
     private void startSingleActivity(Class clazz) {
         Intent intent = new Intent(MainActivity.this, clazz);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -754,11 +745,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void showBroadcastSuccessDialog() {
-        // TODO: 21/06/2017 Not sure if this is strictly necessary
-//        if (getCurrentFragment() instanceof BalanceFragment) {
-//            ((BalanceFragment) getCurrentFragment()).refreshFacilitatedTransactions();
-//        }
-
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_payment_sent_success)
