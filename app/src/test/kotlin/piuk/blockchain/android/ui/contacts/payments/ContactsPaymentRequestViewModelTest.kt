@@ -21,6 +21,7 @@ import piuk.blockchain.android.data.contacts.PaymentRequestType
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
+import piuk.blockchain.android.data.stores.PendingTransactionListStore
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -338,15 +339,15 @@ class ContactsPaymentRequestViewModelTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(rxBus: RxBus?): ContactsDataManager {
-            return mockContactsManager
-        }
+        override fun provideContactsManager(
+                pendingTransactionListStore: PendingTransactionListStore?,
+                rxBus: RxBus?
+        ) = mockContactsManager
     }
 
     inner class MockDataManagerModule : DataManagerModule() {
-        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?): PayloadDataManager {
-            return mockPayloadDataManager
-        }
+        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?) =
+                mockPayloadDataManager
     }
 
 }

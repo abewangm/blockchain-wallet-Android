@@ -497,6 +497,17 @@ public class PayloadDataManager {
     }
 
     /**
+     * Returns the transaction notes for a given transaction hash. May return null if not found.
+     *
+     * @param txHash The Tx hash
+     * @return A string representing the Tx note, which can be null
+     */
+    @Nullable
+    public String getTransactionNotes(String txHash) {
+        return payloadManager.getPayload().getTxNotes().get(txHash);
+    }
+
+    /**
      * Returns a list of {@link ECKey} objects for signing transactions.
      *
      * @param account             The {@link Account} that you wish to send funds from

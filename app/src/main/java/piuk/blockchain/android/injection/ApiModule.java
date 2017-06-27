@@ -24,13 +24,11 @@ import piuk.blockchain.android.data.api.ApiInterceptor;
 import piuk.blockchain.android.data.api.ConnectionApi;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.services.ContactsService;
 import piuk.blockchain.android.data.services.NotificationService;
 import piuk.blockchain.android.data.stores.PendingTransactionListStore;
-import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.TLSSocketFactory;
@@ -47,19 +45,9 @@ public class ApiModule {
     private static final int API_TIMEOUT = 30;
     private static final int PING_INTERVAL = 10;
 
-    /**
-     * This should be phased out for {@link PayloadDataManager}
-     */
     @Provides
-    @Deprecated
     protected PayloadManager providePayloadManager() {
         return PayloadManager.getInstance();
-    }
-
-    @Provides
-    @Singleton
-    protected TransactionListStore provideTransactionListStore() {
-        return new TransactionListStore();
     }
 
     @Provides
@@ -80,10 +68,11 @@ public class ApiModule {
     // TODO: 09/02/2017 This should be moved to DataManagerModule eventually
     @Provides
     @Singleton
-    protected ContactsDataManager provideContactsManager(RxBus rxBus) {
+    protected ContactsDataManager provideContactsManager(PendingTransactionListStore pendingTransactionListStore,
+                                                         RxBus rxBus) {
         return new ContactsDataManager(
                 new ContactsService(new Contacts()),
-                new PendingTransactionListStore(),
+                pendingTransactionListStore,
                 rxBus);
     }
 

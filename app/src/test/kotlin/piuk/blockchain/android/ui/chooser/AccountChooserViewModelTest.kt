@@ -18,6 +18,7 @@ import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.contacts.PaymentRequestType
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
+import piuk.blockchain.android.data.stores.PendingTransactionListStore
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
@@ -200,7 +201,10 @@ class AccountChooserViewModelTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(rxBus: RxBus?) = mockContactsManager
+        override fun provideContactsManager(
+                pendingTransactionListStore: PendingTransactionListStore?,
+                rxBus: RxBus?
+        ) = mockContactsManager
     }
 
 }

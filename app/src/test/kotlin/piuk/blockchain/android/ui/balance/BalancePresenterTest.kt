@@ -31,6 +31,7 @@ import piuk.blockchain.android.data.datamanagers.*
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.settings.SettingsDataManager
+import piuk.blockchain.android.data.stores.PendingTransactionListStore
 import piuk.blockchain.android.data.stores.TransactionListStore
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.account.ItemAccount
@@ -1028,7 +1029,10 @@ class BalancePresenterTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(rxBus: RxBus?) = contactsDataManager
+        override fun provideContactsManager(
+                pendingTransactionListStore: PendingTransactionListStore?,
+                rxBus: RxBus?
+        ) = contactsDataManager
     }
 
     inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {

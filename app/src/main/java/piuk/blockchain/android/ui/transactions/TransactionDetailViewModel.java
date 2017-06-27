@@ -7,7 +7,6 @@ import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
-import info.blockchain.wallet.payload.PayloadManager;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -49,7 +48,6 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private MonetaryUtil mMonetaryUtil;
     @Inject TransactionHelper transactionHelper;
     @Inject PrefsUtil mPrefsUtil;
-    @Inject PayloadManager mPayloadManager;
     @Inject PayloadDataManager mPayloadDataManager;
     @Inject StringUtils mStringUtils;
     @Inject TransactionListDataManager mTransactionListDataManager;
@@ -152,7 +150,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
         ArrayList<String> labelList = new ArrayList<>();
         Set<Entry<String, BigInteger>> entrySet = inputMap.entrySet();
         for (Entry<String, BigInteger> set : entrySet) {
-            String label = mPayloadManager.getLabelFromAddress(set.getKey());
+            String label = mPayloadDataManager.addressToLabel(set.getKey());
             if (!labelList.contains(label)) labelList.add(label);
         }
 
@@ -175,7 +173,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
         for (Entry<String, BigInteger> item : outputMap.entrySet()) {
             RecipientModel recipientModel = new RecipientModel(
-                    mPayloadManager.getLabelFromAddress(item.getKey()),
+                    mPayloadDataManager.addressToLabel(item.getKey()),
                     mMonetaryUtil.getDisplayAmountWithFormatting(item.getValue().longValue()),
                     getDisplayUnits());
 
@@ -221,12 +219,12 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
 
     private void setTransactionNote(String txHash) {
-        String notes = mPayloadManager.getPayload().getTxNotes().get(txHash);
+        String notes = mPayloadDataManager.getTransactionNotes(txHash);
         mDataListener.setDescription(notes);
     }
 
     public String getTransactionNote() {
-        return mPayloadManager.getPayload().getTxNotes().get(mTransaction.getHash());
+        return mPayloadDataManager.getTransactionNotes(mTransaction.getHash());
     }
 
     public String getTransactionHash() {

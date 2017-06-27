@@ -30,6 +30,7 @@ import piuk.blockchain.android.data.datamanagers.FeeDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.SendDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
+import piuk.blockchain.android.data.stores.PendingTransactionListStore
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog.ARGUMENT_CONTACT_ID
@@ -509,26 +510,24 @@ class ContactPaymentDialogViewModelTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(rxBus: RxBus?): ContactsDataManager {
-            return mockContactsDataManager
-        }
+        override fun provideContactsManager(
+                pendingTransactionListStore: PendingTransactionListStore?,
+                rxBus: RxBus?
+        ) = mockContactsDataManager
     }
 
     inner class MockDataManagerModule : DataManagerModule() {
-        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?): PayloadDataManager {
-            return mockPayloadDataManager
-        }
+        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?) =
+                mockPayloadDataManager
 
-        override fun provideSendDataManager(rxBus: RxBus?): SendDataManager {
-            return mockSendDataManager
-        }
+        override fun provideSendDataManager(rxBus: RxBus?) = mockSendDataManager
 
-        override fun provideWalletAccountHelper(payloadManager: PayloadManager?,
-                                                prefsUtil: PrefsUtil?,
-                                                stringUtils: StringUtils?,
-                                                exchangeRateFactory: ExchangeRateFactory?): WalletAccountHelper {
-            return mockWalletAccountHelper
-        }
+        override fun provideWalletAccountHelper(
+                payloadManager: PayloadManager?,
+                prefsUtil: PrefsUtil?,
+                stringUtils: StringUtils?,
+                exchangeRateFactory: ExchangeRateFactory?
+        ) = mockWalletAccountHelper
     }
 
 }

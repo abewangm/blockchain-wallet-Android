@@ -31,6 +31,7 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
+import piuk.blockchain.android.data.stores.PendingTransactionListStore
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -889,7 +890,10 @@ class ContactDetailViewModelTest {
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(rxBus: RxBus?) = mockContactsManager
+        override fun provideContactsManager(
+                pendingTransactionListStore: PendingTransactionListStore?,
+                rxBus: RxBus?
+        ) = mockContactsManager
     }
 
     inner class MockDataManagerModule : DataManagerModule() {

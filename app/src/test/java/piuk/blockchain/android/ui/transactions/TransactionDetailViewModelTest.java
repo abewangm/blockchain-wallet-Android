@@ -31,6 +31,7 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
@@ -62,7 +63,10 @@ public class TransactionDetailViewModelTest extends RxTest {
     private TransactionDetailViewModel subject;
     @Mock TransactionHelper transactionHelper;
     @Mock PrefsUtil prefsUtil;
-    @Mock PayloadManager payloadManager;
+    /**
+     * This can be removed once providesPayloadManager is removed from the API module
+     */
+    @Mock PayloadManager mockPayloadManager;
     @Mock PayloadDataManager payloadDataManager;
     @Mock StringUtils stringUtils;
     @Mock TransactionListDataManager transactionListDataManager;
@@ -202,7 +206,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         when(mockIntent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1)).thenReturn(0);
         when(mockPayload.getTxNotes()).thenReturn(new HashMap<>());
         when(activity.getPageIntent()).thenReturn(mockIntent);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(transactionListDataManager.getTransactionList()).thenReturn(txList);
         when(stringUtils.getString(R.string.transaction_detail_pending)).thenReturn("Pending (%1$s/%2$s Confirmations)");
         HashMap<String, BigInteger> inputs = new HashMap<>();
@@ -211,8 +215,8 @@ public class TransactionDetailViewModelTest extends RxTest {
         outputs.put("addr2", BigInteger.valueOf(2000L));
         Pair pair = Pair.of(inputs, outputs);
         when(transactionHelper.filterNonChangeAddresses(any(TransactionSummary.class))).thenReturn(pair);
-        when(payloadManager.getLabelFromAddress("addr1")).thenReturn("account1");
-        when(payloadManager.getLabelFromAddress("addr2")).thenReturn("account2");
+        when(payloadDataManager.addressToLabel("addr1")).thenReturn("account1");
+        when(payloadDataManager.addressToLabel("addr2")).thenReturn("account2");
         double price = 1000.00D;
         when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
         when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
@@ -250,7 +254,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         when(mockIntent.getStringExtra(KEY_TRANSACTION_HASH)).thenReturn("txMoved_hash");
         when(activity.getPageIntent()).thenReturn(mockIntent);
         when(mockPayload.getTxNotes()).thenReturn(new HashMap<>());
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(activity.getPageIntent()).thenReturn(mockIntent);
         when(transactionListDataManager.getTxFromHash("txMoved_hash"))
                 .thenReturn(Single.just(txMoved));
@@ -261,8 +265,8 @@ public class TransactionDetailViewModelTest extends RxTest {
         outputs.put("addr2", BigInteger.valueOf(2000L));
         Pair pair = Pair.of(inputs, outputs);
         when(transactionHelper.filterNonChangeAddresses(any(TransactionSummary.class))).thenReturn(pair);
-        when(payloadManager.getLabelFromAddress("addr1")).thenReturn("account1");
-        when(payloadManager.getLabelFromAddress("addr2")).thenReturn("account2");
+        when(payloadDataManager.addressToLabel("addr1")).thenReturn("account1");
+        when(payloadDataManager.addressToLabel("addr2")).thenReturn("account2");
         double price = 1000.00D;
         when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
         when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
@@ -372,11 +376,7 @@ public class TransactionDetailViewModelTest extends RxTest {
     @Test
     public void getTransactionNote() throws Exception {
         // Arrange
-        Wallet mockPayload = mock(Wallet.class);
-        HashMap<String, String> notesMap = new HashMap<>();
-        notesMap.put(txSent.getHash(), "note");
-        when(mockPayload.getTxNotes()).thenReturn(notesMap);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadDataManager.getTransactionNotes(txSent.getHash())).thenReturn("note");
         subject.mTransaction = txSent;
         // Act
         String value = subject.getTransactionNote();
@@ -516,11 +516,12 @@ public class TransactionDetailViewModelTest extends RxTest {
     private class MockApiModule extends ApiModule {
         @Override
         protected PayloadManager providePayloadManager() {
-            return payloadManager;
+            return mockPayloadManager;
         }
 
         @Override
-        protected ContactsDataManager provideContactsManager(RxBus rxBus) {
+        protected ContactsDataManager provideContactsManager(PendingTransactionListStore pendingTransactionListStore,
+                                                             RxBus rxBus) {
             return contactsDataManager;
         }
     }
