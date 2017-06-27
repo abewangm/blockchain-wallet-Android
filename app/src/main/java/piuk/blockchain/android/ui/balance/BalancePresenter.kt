@@ -31,6 +31,7 @@ import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
 import piuk.blockchain.android.util.*
+import timber.log.Timber
 import java.text.DecimalFormat
 import java.util.*
 import javax.inject.Inject
@@ -175,6 +176,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                         }
                     }
                 }, {
+                    Timber.e(it)
                     view.showToast(
                             R.string.contacts_not_found_error,
                             ToastCustom.TYPE_ERROR
@@ -204,7 +206,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                                 view.showTransactionCancelDialog(fctxId)
                         }
                     }
-                }, { /* No-op */ })
+                }, { Timber.e(it) })
     }
 
     internal fun onAccountChosen(accountPosition: Int, fctxId: String) {
@@ -279,7 +281,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                     } else {
                         view.startReceiveFragment()
                     }
-                }, { it.printStackTrace() })
+                }, { Timber.e(it) })
     }
 
     internal fun disableAnnouncement() {
@@ -415,7 +417,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
                         { /* No-op */ },
-                        { throwable -> throwable.printStackTrace() })
+                        { Timber.e(it) })
     }
 
     private fun storeSwipeReceiveAddresses() {
@@ -427,7 +429,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
                         { /* No-op */ },
-                        { it.printStackTrace() })
+                        { Timber.e(it) })
     }
 
     private fun subscribeToEvents() {
@@ -485,7 +487,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
                         { view.onLoadOnboardingPages(getOnboardingPages(it)) },
-                        { it.printStackTrace() })
+                        { Timber.e(it) })
     }
 
     private fun getOnboardingPages(isBuyAllowed: Boolean): List<OnboardingPagerContent> {
@@ -546,7 +548,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                     } else {
                         view.onHideAnnouncement()
                     }
-                }, { it.printStackTrace() })
+                }, { Timber.e(it) })
     }
 
     private fun getFormattedPriceString(): String {

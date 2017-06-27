@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.stores.TransactionListStore;
@@ -111,21 +112,10 @@ public class TransactionListDataManager {
      * @return An Observable object wrapping a Tx. Will call onError if not found with a
      * NullPointerException
      */
-    public Observable<TransactionSummary> getTxFromHash(String transactionHash) {
-        return Observable.create(emitter -> {
-            //noinspection Convert2streamapi
-            for (TransactionSummary tx : getTransactionList()) {
-                if (tx.getHash().equals(transactionHash)) {
-                    if (!emitter.isDisposed()) {
-                        emitter.onNext(tx);
-                        emitter.onComplete();
-                    }
-                    return;
-                }
-            }
-
-            if (!emitter.isDisposed()) emitter.onError(new NullPointerException("Tx not found"));
-        });
+    public Single<TransactionSummary> getTxFromHash(String transactionHash) {
+        return Observable.fromIterable(getTransactionList())
+                .filter(tx -> tx.getHash().equals(transactionHash))
+                .firstOrError();
     }
 
     /**

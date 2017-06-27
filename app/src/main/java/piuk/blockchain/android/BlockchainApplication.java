@@ -39,6 +39,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
 import retrofit2.Retrofit;
+import timber.log.Timber;
 
 /**
  * Created by adambennett on 04/08/2016.
@@ -87,6 +88,10 @@ public class BlockchainApplication extends Application implements FrameworkInter
         if (BuildConfig.USE_CRASHLYTICS) {
             // Init crash reporting
             Fabric.with(this, new Crashlytics());
+        }
+        // Init Timber
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
         }
         // Init objects first
         Injector.getInstance().init(this);

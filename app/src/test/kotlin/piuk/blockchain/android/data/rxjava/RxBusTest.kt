@@ -7,15 +7,8 @@ import org.amshove.kluent.shouldHaveKey
 import org.amshove.kluent.shouldNotHaveKey
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
-import piuk.blockchain.android.BlockchainTestApplication
-import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.RxTest
 
-@Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
-@RunWith(RobolectricTestRunner::class)
 class RxBusTest : RxTest() {
 
     private lateinit var subject: RxBus

@@ -207,6 +207,7 @@ dependencies {
     // Custom fonts
     compile 'uk.co.chrisjenx:calligraphy:2.2.0'
     // Logging
+    compile 'com.jakewharton.timber:timber:4.5.1'
     releaseCompile 'org.slf4j:slf4j-nop:1.7.20'
     dogfoodCompile 'org.slf4j:slf4j-nop:1.7.20'
     debugCompile 'org.slf4j:slf4j-simple:1.7.20'
