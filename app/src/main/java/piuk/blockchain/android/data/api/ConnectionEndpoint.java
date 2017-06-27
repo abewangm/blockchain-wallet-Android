@@ -7,6 +7,6 @@ import retrofit2.http.GET;
 public interface ConnectionEndpoint {
 
     @GET
-    Observable<ResponseBody> pingWebsite();
+    Observable<ResponseBody> pingExplorer();
 
 }

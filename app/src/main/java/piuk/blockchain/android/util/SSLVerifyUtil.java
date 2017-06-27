@@ -28,13 +28,13 @@ public class SSLVerifyUtil {
     }
 
     /**
-     * Pings the website to check for a connection. If the call returns an {@link
+     * Pings the Explorer to check for a connection. If the call returns an {@link
      * IOException} or {@link SSLPeerUnverifiedException}, the {@link
      * RxPinning} object will broadcast this to the {@link BaseAuthActivity}
      * which will handle the response appropriately.
      */
     public void validateSSL() {
-        rxPinning.call(() -> connectionApi.getWebsiteConnection())
+        rxPinning.call(() -> connectionApi.getExplorerConnection())
                 .subscribeOn(Schedulers.io())
                 .subscribe(new IgnorableDefaultObserver<>());
     }

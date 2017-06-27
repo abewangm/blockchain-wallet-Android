@@ -335,7 +335,7 @@ class BalancePresenterTest {
         verify(stringUtils).getString(R.string.contacts_transaction_history)
         verifyNoMoreInteractions(stringUtils)
         verify(view).onTotalBalanceUpdated("0.0 BTC")
-        verify(view).setUiState(UiState.CONTENT)
+        verify(view, times(2)).setUiState(UiState.CONTENT)
         verify(view, times(2)).onTransactionsUpdated(any())
         verify(view).getIfContactsEnabled()
         verify(view).onContactsHashMapUpdated(HashMap(), HashMap())
