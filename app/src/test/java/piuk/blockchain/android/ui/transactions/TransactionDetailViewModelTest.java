@@ -23,6 +23,7 @@ import java.util.Locale;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.RxTest;
@@ -182,7 +183,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         when(intent.getStringExtra(KEY_TRANSACTION_HASH)).thenReturn(txHash);
         when(activity.getPageIntent()).thenReturn(intent);
         when(transactionListDataManager.getTxFromHash(txHash))
-                .thenReturn(Observable.error(new Throwable()));
+                .thenReturn(Single.error(new Throwable()));
         // Act
         subject.onViewReady();
         // Assert
@@ -252,7 +253,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         when(payloadManager.getPayload()).thenReturn(mockPayload);
         when(activity.getPageIntent()).thenReturn(mockIntent);
         when(transactionListDataManager.getTxFromHash("txMoved_hash"))
-                .thenReturn(Observable.just(txMoved));
+                .thenReturn(Single.just(txMoved));
         when(stringUtils.getString(R.string.transaction_detail_pending)).thenReturn("Pending (%1$s/%2$s Confirmations)");
         HashMap<String, BigInteger> inputs = new HashMap<>();
         HashMap<String, BigInteger> outputs = new HashMap<>();

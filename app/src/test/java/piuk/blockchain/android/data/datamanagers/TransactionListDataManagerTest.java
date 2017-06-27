@@ -7,20 +7,16 @@ import info.blockchain.wallet.payload.data.LegacyAddress;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import io.reactivex.observers.TestObserver;
-import piuk.blockchain.android.BlockchainTestApplication;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.stores.TransactionListStore;
@@ -31,8 +27,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
-@RunWith(RobolectricTestRunner.class)
 public class TransactionListDataManagerTest extends RxTest {
 
     @Mock private PayloadManager payloadManager;
@@ -250,7 +244,7 @@ public class TransactionListDataManagerTest extends RxTest {
         // Assert
         testObserver.assertTerminated();
         testObserver.assertNoValues();
-        testObserver.assertError(NullPointerException.class);
+        testObserver.assertError(NoSuchElementException.class);
     }
 
 }

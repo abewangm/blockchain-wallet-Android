@@ -10,10 +10,9 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.ui.base.BasePresenter;
+import timber.log.Timber;
 
 /**
- * Created by adambennett on 12/08/2016.
- *
  * A class for basic RxJava utilities, ie Transformer classes
  */
 
@@ -26,7 +25,7 @@ public final class RxUtil {
     public static <T> ObservableTransformer<T, T> applySchedulersToObservable() {
         return observable -> observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(Throwable::printStackTrace);
+                .doOnError(Timber::e);
     }
 
     /**
@@ -36,7 +35,7 @@ public final class RxUtil {
     public static <T> SingleTransformer<T, T> applySchedulersToSingle() {
         return observable -> observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(Throwable::printStackTrace);
+                .doOnError(Timber::e);
     }
 
     /**
@@ -46,7 +45,7 @@ public final class RxUtil {
     public static CompletableTransformer applySchedulersToCompletable() {
         return observable -> observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(Throwable::printStackTrace);
+                .doOnError(Timber::e);
     }
 
     /**
