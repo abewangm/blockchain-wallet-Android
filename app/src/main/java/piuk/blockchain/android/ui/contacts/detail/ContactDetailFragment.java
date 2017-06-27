@@ -33,9 +33,6 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-import static piuk.blockchain.android.data.access.AccessState.SHOW_BTC;
-import static piuk.blockchain.android.data.access.AccessState.SHOW_FIAT;
-
 
 public class ContactDetailFragment extends Fragment implements ContactDetailViewModel.DataListener {
 
@@ -145,9 +142,9 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
     }
 
     @Override
-    public void onTransactionsUpdated(List<Object> transactions) {
+    public void onTransactionsUpdated(List<Object> transactions, boolean isBtc) {
         if (balanceAdapter == null) {
-            setUpAdapter();
+            setUpAdapter(isBtc);
         }
 
         balanceAdapter.onContactsMapChanged(
@@ -163,18 +160,14 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
         }
     }
 
-    private void setUpAdapter() {
+    private void setUpAdapter(boolean isBtc) {
         String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
-
-        int balanceDisplayState =
-                viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-        boolean isBTC = balanceDisplayState != SHOW_FIAT;
 
         balanceAdapter = new BalanceAdapter(
                 getActivity(),
                 lastPrice,
-                isBTC,
+                isBtc,
                 new BalanceListClickListener() {
             @Override
             public void onTransactionClicked(int correctedPosition, int absolutePosition) {
@@ -183,9 +176,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
 
             @Override
             public void onValueClicked(boolean isBtc) {
-                viewModel.getPrefsUtil().setValue(
-                        PrefsUtil.KEY_BALANCE_DISPLAY_STATE,
-                        isBtc ? SHOW_BTC : SHOW_FIAT);
+                viewModel.onBtcFormatChanged(isBtc);
                 balanceAdapter.onViewFormatUpdated(isBtc);
             }
 

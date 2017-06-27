@@ -38,6 +38,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
@@ -77,9 +78,6 @@ public class SendViewModel extends BaseViewModel {
     private static final String PREF_WARN_ADVANCED_FEE = "pref_warn_advanced_fee";
     private static final String PREF_WARN_WATCH_ONLY_SPEND = "pref_warn_watch_only_spend";
 
-    public static final int SHOW_BTC = 1;
-    public static final int SHOW_FIAT = 2;
-
     @Thunk SendContract.DataListener dataListener;
 
     private MonetaryUtil monetaryUtil;
@@ -106,6 +104,7 @@ public class SendViewModel extends BaseViewModel {
     @Inject TransactionListDataManager transactionListDataManager;
     @Inject EnvironmentSettings environmentSettings;
     @Inject FeeDataManager feeDataManager;
+    @Inject AccessState accessState;
 
     SendViewModel(SendContract.DataListener dataListener, Locale locale) {
         Injector.getInstance().getDataManagerComponent().inject(this);
@@ -157,7 +156,7 @@ public class SendViewModel extends BaseViewModel {
         sendModel.btcUnit = monetaryUtil.getBTCUnit(btcUnit);
         sendModel.fiatUnit = fiatUnit;
         sendModel.btcUniti = btcUnit;
-        sendModel.isBTC = getBtcDisplayState();
+        sendModel.isBTC = accessState.isBtc();
         sendModel.exchangeRate = exchangeRate;
         sendModel.btcExchange = exchangeRateFactory.getLastPrice(sendModel.fiatUnit);
 
@@ -974,11 +973,6 @@ public class SendViewModel extends BaseViewModel {
         } else {
             showToast(R.string.invalid_private_key, ToastCustom.TYPE_ERROR);
         }
-    }
-
-    private boolean getBtcDisplayState() {
-        int BALANCE_DISPLAY_STATE = prefsUtil.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-        return BALANCE_DISPLAY_STATE != SHOW_FIAT;
     }
 
     private void showToast(@StringRes int message, @ToastCustom.ToastType String type) {

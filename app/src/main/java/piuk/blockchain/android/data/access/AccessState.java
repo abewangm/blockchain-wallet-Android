@@ -16,9 +16,9 @@ import piuk.blockchain.android.util.PrefsUtil;
 public class AccessState {
 
     public static final String LOGOUT_ACTION = "info.blockchain.wallet.LOGOUT";
-    public static final int SHOW_BTC = 1;
-    public static final int SHOW_FIAT = 2;
 
+    private static final int SHOW_BTC = 1;
+    private static final int SHOW_FIAT = 2;
     private static final long LOGOUT_TIMEOUT_MILLIS = 1000L * 30L;
 
     private static AccessState instance;

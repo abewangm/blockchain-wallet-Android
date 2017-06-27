@@ -25,6 +25,7 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
+import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.contacts.ContactTransactionModel
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
@@ -46,6 +47,7 @@ class ContactDetailViewModelTest {
     private val mockPayloadDataManager: PayloadDataManager = mock()
     private val mockPrefsUtil: PrefsUtil = mock()
     private val mockRxBus: RxBus = mock()
+    private val mockAccessState: AccessState = mock()
 
     @Before
     @Throws(Exception::class)
@@ -116,13 +118,16 @@ class ContactDetailViewModelTest {
         whenever(mockContactsManager.contactList)
                 .thenReturn(Observable.fromIterable(listOf(contact0, contact1, contact2)))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
+        whenever(mockAccessState.isBtc).thenReturn(true)
         // Act
         subject.onViewReady()
         // Assert
         verify(mockActivity).pageBundle
         verify(mockActivity).updateContactName(contactName)
-        verify(mockActivity, times(2)).onTransactionsUpdated(any())
+        verify(mockActivity, times(2)).onTransactionsUpdated(any(), eq(true))
         verifyNoMoreInteractions(mockActivity)
+        verify(mockAccessState, times(2)).isBtc
+        verifyNoMoreInteractions(mockAccessState)
         verify(mockContactsManager).contactList
         verify(mockContactsManager).fetchContacts()
         verifyNoMoreInteractions(mockContactsManager)
@@ -368,6 +373,7 @@ class ContactDetailViewModelTest {
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
         val notificationObservable = PublishSubject.create<NotificationPayload>()
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
+        whenever(mockAccessState.isBtc).thenReturn(true)
         // Act
         subject.onContactRenamed(newName)
         // Assert
@@ -376,8 +382,10 @@ class ContactDetailViewModelTest {
         verify(mockActivity).dismissProgressDialog()
         verify(mockActivity).updateContactName(oldName)
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_OK))
-        verify(mockActivity, times(2)).onTransactionsUpdated(any())
+        verify(mockActivity, times(2)).onTransactionsUpdated(any(), eq(true))
         verifyNoMoreInteractions(mockActivity)
+        verify(mockAccessState, times(2)).isBtc
+        verifyNoMoreInteractions(mockAccessState)
         verify(mockContactsManager).renameContact(contactId, newName)
         verify(mockContactsManager).contactList
         verify(mockContactsManager).fetchContacts()
@@ -774,6 +782,17 @@ class ContactDetailViewModelTest {
     }
 
     @Test
+    fun onBtcFormatChanged() {
+        // Arrange
+
+        // Act
+        subject.onBtcFormatChanged(true)
+        // Assert
+        verify(mockAccessState).setIsBtc(true)
+        verifyNoMoreInteractions(mockAccessState)
+    }
+
+    @Test
     @Throws(Exception::class)
     fun onAccountChosenShouldShowFailure() {
         // Arrange
@@ -836,11 +855,14 @@ class ContactDetailViewModelTest {
         }
         val values = listOf(fctx0, fctx1, fctx2)
         val captor = argumentCaptor<List<JvmType.Object>>()
+        whenever(mockAccessState.isBtc).thenReturn(true)
         // Act
         subject.sortAndUpdateTransactions(values)
         // Assert
-        verify(mockActivity).onTransactionsUpdated(captor.capture())
-        verifyZeroInteractions(mockActivity)
+        verify(mockActivity).onTransactionsUpdated(captor.capture(), eq(true))
+        verifyNoMoreInteractions(mockActivity)
+        verify(mockAccessState).isBtc
+        verifyNoMoreInteractions(mockAccessState)
         val list = captor.firstValue
         (list[0] as ContactTransactionModel).contactName shouldEqual contactName
         (list[1] as TransactionSummary).hash shouldEqual txHash1
@@ -859,25 +881,20 @@ class ContactDetailViewModelTest {
     }
 
     inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-        override fun providePrefsUtil(): PrefsUtil {
-            return mockPrefsUtil
-        }
+        override fun providePrefsUtil() = mockPrefsUtil
 
-        override fun provideRxBus(): RxBus {
-            return mockRxBus
-        }
+        override fun provideRxBus() = mockRxBus
+
+        override fun provideAccessState() = mockAccessState
     }
 
     inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(rxBus: RxBus?): ContactsDataManager {
-            return mockContactsManager
-        }
+        override fun provideContactsManager(rxBus: RxBus?) = mockContactsManager
     }
 
     inner class MockDataManagerModule : DataManagerModule() {
-        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?): PayloadDataManager {
-            return mockPayloadDataManager
-        }
+        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?) =
+                mockPayloadDataManager
     }
 
 }
