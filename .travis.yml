@@ -51,4 +51,5 @@ before_script:
   - adb shell input keyevent 82 &
 
 script:
-  - ./gradlew connectedCheck --no-daemon -Dpre-dex=false --stacktrace
+  - ./gradlew assembleEnvProdMinApi21Debug connectedEnvDevMinApi16DebugAndroidTest --no-daemon -Dpre-dex=false --stacktrace --console=plain
+
