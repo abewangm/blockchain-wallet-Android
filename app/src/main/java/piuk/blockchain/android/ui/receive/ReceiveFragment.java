@@ -504,7 +504,9 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
     private void showBottomSheet() {
         setupBottomSheet(uri);
-        bottomSheetDialog.show();
+        if (bottomSheetDialog != null) {
+            bottomSheetDialog.show();
+        }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
