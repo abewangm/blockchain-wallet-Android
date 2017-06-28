@@ -7,6 +7,8 @@ import dagger.Provides;
 import piuk.blockchain.android.data.settings.SettingsService;
 import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
 import piuk.blockchain.android.data.settings.datastore.SettingsMemoryStore;
+import piuk.blockchain.android.data.stores.PendingTransactionListStore;
+import piuk.blockchain.android.data.stores.TransactionListStore;
 
 @Module
 class PersistentStoreModule {
@@ -15,6 +17,18 @@ class PersistentStoreModule {
     @Singleton
     SettingsDataStore provideSettingsDataStore(SettingsService settingsService) {
         return new SettingsDataStore(new SettingsMemoryStore(), settingsService.getSettingsObservable());
+    }
+
+    @Provides
+    @Singleton
+    PendingTransactionListStore providePendingTransactionListStore() {
+        return new PendingTransactionListStore();
+    }
+
+    @Provides
+    @Singleton
+    protected TransactionListStore provideTransactionListStore() {
+        return new TransactionListStore();
     }
 
 }

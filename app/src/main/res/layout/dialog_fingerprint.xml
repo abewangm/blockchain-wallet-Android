@@ -21,7 +21,7 @@
             android:paddingLeft="24dp"
             android:paddingRight="24dp"
             android:text="@string/fingerprint_description"
-            android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
             android:textColor="?android:attr/textColorSecondary" />
 
 

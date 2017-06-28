@@ -42,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
             android:textColor="?android:attr/textColorSecondary"
             tools:text="@string/contacts_scan_instructions" />
 

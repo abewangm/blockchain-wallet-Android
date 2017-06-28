@@ -12,6 +12,7 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import okhttp3.MediaType
 import okhttp3.ResponseBody
+import org.amshove.kluent.`should equal`
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldEqual
 import org.bitcoinj.core.ECKey
@@ -676,6 +677,20 @@ class PayloadDataManagerTest : RxTest() {
         // Assert
         verify(mockPayloadManager, atLeastOnce()).payload
         result shouldEqual mockAccount
+    }
+
+    @Test
+    fun getTransactionNotes() {
+        // Arrange
+        val txHash = "TX_HASH"
+        val note = "NOTES"
+        val map = mapOf(txHash to note)
+        whenever(mockPayloadManager.payload.txNotes).thenReturn(map)
+        // Act
+        val result = subject.getTransactionNotes(txHash)
+        // Assert
+        verify(mockPayloadManager, atLeastOnce()).payload
+        result `should equal` note
     }
 
     @Test

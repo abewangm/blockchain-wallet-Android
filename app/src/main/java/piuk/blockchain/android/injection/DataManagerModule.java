@@ -195,8 +195,9 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected PromptManager providePromptManager(PrefsUtil prefsUtil, PayloadDataManager payloadDataManager,
-                                                            TransactionListDataManager transactionListDataManager) {
+    protected PromptManager providePromptManager(PrefsUtil prefsUtil,
+                                                 PayloadDataManager payloadDataManager,
+                                                 TransactionListDataManager transactionListDataManager) {
         return new PromptManager(prefsUtil, payloadDataManager, transactionListDataManager);
     }
 }

@@ -460,6 +460,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
             displayList.addAll(1, reversed)
             displayList.add(reversed.size + 1, stringUtils.getString(R.string.contacts_transaction_history))
             view.onTransactionsUpdated(displayList)
+            view.setUiState(UiState.CONTENT)
         } else {
             view.onTransactionsUpdated(displayList)
         }
