@@ -12,6 +12,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.tspoon.traceur.Traceur;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
@@ -125,6 +126,11 @@ public class BlockchainApplication extends Application implements FrameworkInter
                 // No-op
             }
         });
+
+        //Easier debugging of RxJava2 exceptions
+        if(BuildConfig.DEBUG) {
+            Traceur.enableLogging();
+        }
     }
 
     // Pass instances to JAR Framework, evaluate after object graph instantiated fully

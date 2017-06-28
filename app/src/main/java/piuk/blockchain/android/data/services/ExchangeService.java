@@ -9,6 +9,7 @@ import info.blockchain.wallet.api.trade.coinify.data.CoinifyTrade;
 import info.blockchain.wallet.api.trade.sfox.SFOXApi;
 import info.blockchain.wallet.api.trade.sfox.data.SFOXTransaction;
 import info.blockchain.wallet.metadata.Metadata;
+import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.MetadataUtil;
 
@@ -117,9 +118,15 @@ public class ExchangeService {
     private Observable<String> getPendingTradeAddresses() {
         return getExchangeData()
                 .flatMap(metadata -> Observable
-                        .fromCallable(metadata::getMetadata)
+                        .fromCallable(() -> {
+                            String exchangeData = metadata.getMetadata();
+                            return exchangeData == null ? "" : exchangeData;
+                        })
                         .compose(RxUtil.applySchedulersToObservable()))
                 .flatMapIterable(exchangeData -> {
+
+                    if(exchangeData.isEmpty())return new ArrayList<>();
+
                     ObjectMapper mapper = new ObjectMapper();
                     ExchangeData data = mapper.readValue(exchangeData, ExchangeData.class);
 
@@ -141,17 +148,20 @@ public class ExchangeService {
     }
 
     public void reloadExchangeData() {
-        Observable<Metadata> exchangeDataStream = getMetadata();
-        exchangeDataStream.subscribeWith(metadataSubject);
+        MetadataNodeFactory metadataNodeFactory = payloadManager.getMetadataNodeFactory();
+        DeterministicKey metadataNode = metadataNodeFactory.getMetadataNode();
+
+        if(metadataNode != null) {
+            Observable<Metadata> exchangeDataStream = getMetadata(metadataNode);
+            exchangeDataStream.subscribeWith(metadataSubject);
+        } else {
+            Log.e(TAG, "MetadataNode not generated yet. Wallet possibly double encrypted.");
+        }
     }
 
-    private Observable<Metadata> getMetadata() {
+    private Observable<Metadata> getMetadata(DeterministicKey node) {
         return Observable.fromCallable(() -> {
-            DeterministicKey masterKey = payloadManager
-                    .getPayload()
-                    .getHdWallets().get(0)
-                    .getMasterKey();
-            DeterministicKey metadataHDNode = MetadataUtil.deriveMetadataNode(masterKey);
+            DeterministicKey metadataHDNode = MetadataUtil.deriveMetadataNode(node);
             return new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXCHANGE).build();
         }).compose(RxUtil.applySchedulersToObservable());
     }

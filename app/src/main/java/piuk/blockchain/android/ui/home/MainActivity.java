@@ -113,7 +113,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     private MainViewModel viewModel;
     @Thunk ActivityMainBinding binding;
-    private MaterialProgressDialog fetchTransactionsProgress;
     private MaterialProgressDialog materialProgressDialog;
     private AppUtil appUtil;
     private long backPressed;
@@ -523,7 +522,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void showContactsRegistrationFailure() {
+    public void showMetadataNodeRegistrationFailure() {
         if (!isFinishing()) {
             new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
@@ -547,21 +546,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @Override
     public void kickToLauncherPage() {
         startSingleActivity(LauncherActivity.class);
-    }
-
-    @Override
-    public void onFetchTransactionsStart() {
-        fetchTransactionsProgress = new MaterialProgressDialog(this);
-        fetchTransactionsProgress.setCancelable(false);
-        fetchTransactionsProgress.setMessage(getString(R.string.please_wait));
-        fetchTransactionsProgress.show();
-    }
-
-    @Override
-    public void onFetchTransactionCompleted() {
-        if (fetchTransactionsProgress != null && fetchTransactionsProgress.isShowing()) {
-            fetchTransactionsProgress.dismiss();
-        }
     }
 
     @Override

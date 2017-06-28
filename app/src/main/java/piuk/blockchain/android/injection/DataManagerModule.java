@@ -178,12 +178,10 @@ public class DataManagerModule {
     @ViewModelScope
     protected BuyDataManager provideBuyDataManager(OnboardingDataManager onboardingDataManager,
                                                    SettingsDataManager settingsDataManager,
-                                                   PayloadDataManager payloadDataManager,
                                                    EnvironmentSettings environmentSettings) {
         return new BuyDataManager(
                 onboardingDataManager,
                 settingsDataManager,
-                payloadDataManager,
                 environmentSettings);
     }
 
