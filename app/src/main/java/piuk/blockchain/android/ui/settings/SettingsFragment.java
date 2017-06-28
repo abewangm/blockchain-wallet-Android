@@ -536,12 +536,16 @@ public class SettingsFragment extends PreferenceFragmentCompat
     public void showDialogEmailVerification() {
         // Slight delay to prevent UI blinking issues
         Handler handler = new Handler();
-        handler.postDelayed(() -> new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.verify)
-                .setMessage(R.string.verify_email_notice)
-                .setCancelable(true)
-                .setPositiveButton(android.R.string.ok, null)
-                .show(), 300);
+        handler.postDelayed(() -> {
+            if (getActivity() != null) {
+                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                        .setTitle(R.string.verify)
+                        .setMessage(R.string.verify_email_notice)
+                        .setCancelable(true)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show();
+            }
+        }, 300);
     }
 
     private void showDialogMobile() {

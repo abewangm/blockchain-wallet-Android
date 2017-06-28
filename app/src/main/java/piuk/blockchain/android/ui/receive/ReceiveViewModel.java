@@ -344,7 +344,6 @@ public class ReceiveViewModel extends BaseViewModel {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("SetWorldReadable")
-    @Nullable
     private File getQrFile() {
         String strFileName = appUtil.getReceiveQRFilename();
         File file = new File(strFileName);

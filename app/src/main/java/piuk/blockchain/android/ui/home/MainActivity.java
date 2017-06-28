@@ -386,6 +386,9 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Thunk
     Intent putWebViewState(Intent intent) {
+        if (buyWebView == null) {
+            setupBuyWebView();
+        }
         Bundle state = new Bundle();
         buyWebView.saveState(state);
         return intent.putExtra(WEB_VIEW_STATE_KEY, state);
@@ -761,10 +764,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         menu.findItem(R.id.nav_buy).setVisible(visible);
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    // Only enabled on >=API19; both warnings are irrelevant
+    @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     private void setupBuyWebView() {
-        // TODO: 17/03/2017 Check if there's a better way to improve loading time of this webview
-        if (AndroidUtils.is21orHigher()) {
+        if (AndroidUtils.is21orHigher() && BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         }
         // Setup buy WebView
