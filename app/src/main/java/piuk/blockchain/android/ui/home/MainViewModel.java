@@ -30,7 +30,6 @@ import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
-import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
@@ -71,7 +70,6 @@ public class MainViewModel extends BaseViewModel {
     @Inject protected Context applicationContext;
     @Inject protected StringUtils stringUtils;
     @Inject protected SettingsDataManager settingsDataManager;
-    @Inject protected OnboardingDataManager onboardingDataManager;
     @Inject protected BuyDataManager buyDataManager;
     @Inject protected DynamicFeeCache dynamicFeeCache;
     @Inject protected ExchangeRateFactory exchangeRateFactory;
@@ -471,7 +469,8 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void dismissAnnouncementIfOnboardingCompleted() {
-        if (prefs.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false) && prefs.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, false)) {
+        if (prefs.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
+                && prefs.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, false)) {
             prefs.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true);
         }
     }
