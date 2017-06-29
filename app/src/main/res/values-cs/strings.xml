@@ -180,7 +180,6 @@
     <string name="address_lookup_fail">Adresu se nepodařilo načíst. Prosím zadejte adresu ručně.</string>
 
     <string name="backup_write_down_words">Je důležité, abyste si slova zapsali přesně tak, jak jsou zobrazena zde a v tomto pořadí.</string>
-    <string name="backup_verify_heading">Zadáním následujících slov z fráze pro obnovení dokončíte proces zálohování.</string>
     <string name="backup_of">/</string>
     <string name="backup_confirmed">Záloha potvrzena</string>
     <string name="backup_word_mismatch">Neshoda slov</string>
@@ -214,7 +213,6 @@
     <string name="click">Kliknutím</string>
     <string name="to_start_sending_and_receiving_btc">spustíte odesílání a příjem bitcoinů.</string>
 
-    <string name="watch_only_label">(pouze ke sledování)</string>
     <string name="address_book_label">(adresář)</string>
 
     <string name="transaction_submitted">Transakce byla dokončena</string>
@@ -232,8 +230,6 @@
     <string name="upgrade_fail_heading">Upgrade peněženky se nezdařil!</string>
     <string name="upgrade_fail_info">Při upgradování Vaší peněženky došlo k chybě. Zkuste to prosím znovu později.</string>
     <string name="not_sane_error">Instalace Vaší peněženky Blockchain nebyla dokončena. Peněženku prosím znovu spárujte nebo si vytvořte novou.</string>
-
-    <string name="watchonly_address_receive_warning">Chystáte se přijmout bitcoiny z adresy pouze ke sledování. Tyto prostředky můžete použít jen tehdy, pokud máte přístup k privátnímu klíči. Pokračovat?</string>
 
     <string name="camera_unavailable">Fotoaparát nyní používá jiná aplikace. Tuto jinou aplikaci prosím ukončete a zkuste to znovu.</string>
 
@@ -295,16 +291,13 @@
     <string name="watch_only_import_warning">Chystáte se importovat adresu pouze ke sledování, tedy adresu (nebo skript veřejného klíče) uloženou v peněžence bez odpovídajícího privátního klíče. To znamená, že prostředky lze použít POUZE tehdy, pokud máte privátní klíč uložený jinde. Pokud nemáte privátní klíč uložený, NEMĚLI byste nikoho instruovat, aby Vám na adresu pouze ke sledování zasílal bitcoiny.\n\nTyto možnosti doporučujeme pouze pokročilým uživatelům. Pokračovat? </string>
     <string name="scan_private_key">Naskenovat privátní klíč</string>
     <string name="private_key_successfully_imported">Privátní klíč byl úspěšně importován.</string>
-    <string name="private_key_not_matching_address">POZNÁMKA: Naskenovaný privátní klíč neodpovídá Vaší adrese určené pouze ke sledování. Chcete-li odeslat prostředky z této adresy, naskenujte prosím správný privátní klíč.</string>
     <string name="watch_only">Pouze ke sledování</string>
     <string name="extended_public_key_description">Pokud jste prodejce, sdílejte svůj klíč xPub a pro bezpečný a privátní příjem použijte aplikaci Blockchain pro prodejce.\n\nUschovejte svůj klíč xPub do bezpečí.         Osoba s přístupem k Vašemu klíči xPub bude moci zobrazit všechny prostředky a transakce. </string>
-    <string name="watch_only_description">Toto je adresa pouze ke sledování. Chcete-li použít prostředky z této peněženky, naskenujte prosím svůj privátní klíč. </string>
     <string name="success">Úspěch</string>
     <string name="default_label">Výchozí</string>
     <string name="try_again">Zkuste to znovu</string>
     <string name="transfer">Převést</string>
     <string name="transfer_funds">Převést prostředky</string>
-    <string name="transfer_recommend">Z důvodu zabezpečení Vám doporučujeme, abyste jakýkoli zůstatek z importovaných adres převedli do své peněženky Blockchain.</string>
     <string name="spendable_addresses">použitelné adresy</string>
 
     <string name="dont_ask_again">Znovu se mě neptejte.</string>
@@ -357,8 +350,6 @@
     <string name="tor_requests">Blokovat požadavky Tor</string>
     <string name="tor_summary">Chcete zablokovat přístup k Vaší peněžence IP adresám, které jsou podle dostupných informací součástí anonymizační sítě Tor? Síť Tor často využívají hackeři, aby získali přístup k peněženkám uživatelů Blockchain.</string>
     <string name="change_password">Změnit heslo</string>
-    <string name="change_password_summary">Vaše heslo nikdy nesdílíme na našich serverech, což znamená, že pokud heslo zapomenete, nemůžeme ho obnovit. Nezapomeňte si zapsat frázi pro obnovení, pomocí které si můžete peněženku v případě zapomenutého hesla obnovit.</string>
-    <string name="verify_email_notice">Na Vaši e-mailovou adresu jsme odeslali ověřovací odkaz. Kliknutím na ověřovací odkaz ověříte svoji e-mailovou adresu.</string>
     <string name="email_notifications">E-mailová upozornění</string>
     <string name="email_notifications_summary">Buďte informováni, pokud vám někdo pošle bitcoiny.</string>
     <string name="current_password">Aktuální heslo</string>
@@ -451,7 +442,6 @@
     <string name="overview">Přehled</string>
     <string name="create_a_wallet">Vytvořit peněženku</string>
     <string name="log_in">Přihlásit</string>
-    <string name="about">Peněženka Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="wallets">Peněženky</string>
     <string name="your_transactions">Žádné transakce</string>
     <string name="archived_label">Archivováno</string>
@@ -519,13 +509,9 @@
 
     <string name="backup_again">Znovu zálohovat</string>
     <string name="backup_button_start">Spustit zálohování</string>
-    <string name="backup_complete_message">Svou Obnovovací frázi můžete použít k obnovení svých prostředků, pokud ztratíte své heslo. Kdokoliv, kdo má přístup k vaší Obnovovací frázi, může přistoupit k vašim bitcoinům. Proto ji uchovávejte offline na bezpečném místě.</string>
     <string name="backup_done">HOTOVO</string>
-    <string name="backup_explanation">Kvůli vaší bezpečnosti neuchovává Blockchain záznam o žádných heslech. Následující Obnovovací fráze, která se skládá ze 12 slov, vám poskytne přístup k obnovení vašich prostředků, pokud ztratíte své heslo. Nezapomeňte si ji napsat na papír a uchovávat ji někde na bezpečném místě. </string>
-    <string name="backup_header">Obnovovací fráze</string>
     <string name="backup_header_complete">Zálohování dokončeno</string>
     <string name="backup_last">Poslední záloha: %1$s</string>
-    <string name="backup_lost_mnemonic">Ztratili jste obnovovací frázi s 12 slovy?</string>
     <string name="backup_next_word">DALŠÍ SLOVO</string>
     <string name="backup_previous_word">PŘEDCHOZÍ SLOVO</string>
     <string name="backup_word">Slovo</string>
@@ -560,12 +546,6 @@
     <string name="contacts_loading_failed">Načítání kontaktů selhalo, zkuste to prosím znovu</string>
     <string name="contacts_name_cannot_be_empty">Neplatné jméno</string>
     <string name="contacts_name_field_hint">Jméno</string>
-    <string name="two_factor_dialog_title">Zadejte kód 2FA</string>
-    <string name="two_factor_dialog_message_authenticator">Chcete-li pokračovat, pak prosím zadejte platný kód 2FA z vaší ověřovací aplikací.</string>
-    <string name="two_factor_dialog_message_sms">Právě jsme vám poslali SMS obsahující kód 2FA. Chcete-li pokračovat, pak ho prosím zadejte zde.</string>
-    <string name="two_factor_dialog_hint">Kód 2FA</string>
-    <string name="two_factor_null_error">Kód 2FA nemůže být prázdný</string>
-    <string name="two_factor_incorrect_error">Kód 2FA nesprávný</string>
     <string name="contacts_payment_sent_success">Platba odeslána! Upozornili jsme váš kontakt, že jde dokončili transakci.</string>
     <string name="contacts_payment_sent_failed_message">Během upozornění kontaktu, že jste mu poslali transakci, nastala chyba. Zkontrolujte prosím své připojení a zkuste to znovu.</string>
     <string name="contacts_waiting_for_address_message">Váš kontakt byl informován, že si mu přejete poslat bitcoiny a potřebujete jeho adresu. Upozorníme vás, když vám pošle adresu!</string>
@@ -629,7 +609,6 @@
     <string name="creating_wallet">Probíhá vytváření peněženky</string>
     <string name="recover_funds">Obnovit prostředky</string>
     <string name="recover_funds_warning_message">Vždy byste měli provést spárování nebo se přihlásit, pokud máte přístup k ID a heslu peněženky. Obnovením prostředků vytvoříte nové ID peněženky. Chcete pokračovat?</string>
-    <string name="recover_funds_instructions">Chcete-li obnovit své prostředky a transakce, pak zadejte 12 slov pro obnovení s mezerami</string>
     <string name="done">Hotovo</string>
     <string name="transfer_confirmed">Převod potvrzen</string>
     <string name="transaction_details_unknown">Neznámé</string>
@@ -637,14 +616,68 @@
     <string name="transaction_detail_description_hint">Na co je tohle?</string>
     <string name="transaction_detail_confirmed">Potvrzeno</string>
     <string name="to_field_helper_no_dropdown">Zadejte bitcoinovou adresu</string>
-    <string name="sms_notifications_summary">Chcete-li při každém obdržení bitcoinů dostávat SMS, pak povolte upozornění. Pouze označené a importované adresy jsou oprávněné aktivovat upozornění.</string>
     <string name="share_instructions">Chcete-li zkopírovat tuto adresu, pak klepněte. Sdílejte ji s odesílatelem pomocí e-mailu nebo textové zprávy.</string>
     <string name="security_centre_two_fa_message">Zabraňte neoprávněnému přístupu k vaší peněžence. Chcete-li zvýšit zabezpečení peněženky, pak povolte dvoukrokové ověření.</string>
     <string name="security_centre_backup_title">Zálohujte své prostředky</string>
     <string name="restore_failed">Obnovení peněženky selhalo. Zkuste to prosím znovu</string>
-    <string name="recovery_passphrase">Fráze pro obnovení</string>
     <string name="password_reveal_warning">Buďte opatrní! Odhalení tohoto textu umožní zkopírování hesla do schránky, kterou mohou poté přečíst všechny aplikace na vašem zařízení. Dávejte si také pozor na lidi, kteří stojí za vámi!</string>
     <string name="password_hint_summary">Vaše peněženka Blockchain nikdy nesděluje našim serverům vaše heslo. To znamená, že vaše heslo neznáme a nemůžeme ho obnovit, pokud ho zapomenete. Vytvořte si zapamatovatelnou nápovědu k heslu, kterou vám můžeme poslat na e-mail v případě, že zapomenete své heslo.</string>
-    <string name="invalid_recovery_phrase">Neplatná obnovovací fráze. Zkuste to prosím znovu</string>
 
+
+    <string name="recover_funds_instructions">Chcete-li obnovit své prostředky a transakce, zadejte svých 12 zálohových slov s mezerami</string>
+    <string name="recovery_passphrase">Zálohová fráze</string>
+    <string name="invalid_recovery_phrase">Neplatná zálohová fráze. Zkuste to prosím znovu</string>
+    <string name="about">Peněženka Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.\nVšechna práva vyhrazena.</string>
+    <string name="watch_only_label">(pouze pro sledování)</string>
+    <string name="watchonly_address_receive_warning">Na adresu pouze pro sledování obdržíte bitcoin. Tyto prostředky můžete použít jen tehdy, pokud máte přístup k privátnímu klíči. Pokračovat?</string>
+    <string name="label_name_match">Jméno je již použito</string>
+    <string name="private_key_not_matching_address">POZNÁMKA: Naskenovaný privátní klíč neodpovídá vaší adrese pouze pro sledování. Chcete-li odeslat prostředky z této adresy, naskenujte prosím správný privátní klíč.</string>
+    <string name="watch_only_description">Toto je adresa pouze pro sledování. Chcete-li utratit své prostředky z</string>
+    <string name="transfer_recommend">Vypadá to že, že na importované adrese máte nějaké bitcoiny. Importované adresy se nezálohují pomocí vaší Zálohové fráze. Pokud chcete svoje prostředky zajistit, doporučujeme převést tyto zůstatky do zálohy.</string>
+    <string name="disable_online_only">Chcete-li zakázat 2FA, pak se prosím ve svém prohlížeči přihlaste ke své peněžence.</string>
+    <string name="change_password_summary">Vaše heslo nikdy nesdílíme na našich serverech, což znamená, že pokud heslo zapomenete, nemůžeme ho obnovit. Ujistěte se, že pomocí postranní nabídky zálohujete své prostředky, které můžete obnovit, pokud ztratíte své heslo.</string>
+    <string name="verify_email_notice">Na vaši e-mailovou adresu jsme odeslali ověřovací odkaz. Chcete-li ověřit svou e-mailovou adresu, klikněte na odkaz.</string>
+    <string name="pairing_code_log_in">Přihlásit se na webovou peněženku</string>
+    <string name="pairing_code_instruction_1">Přejděte na svém počítači na %1$s.</string>
+    <string name="pairing_code_instruction_2">Vyberte Přihlásit se pomocí mobilu</string>
+    <string name="pairing_code_instruction_3">Pomocí kamery na svém počítači naskenujte níže uvedený kód QR.</string>
+    <string name="pairing_code_show_qr">Zobrazit kód QR</string>
+    <string name="pairing_code_hide_qr">Skrýt kód QR</string>
+    <string name="pairing_code_warning_1">Tento kód nechte skrytý, až dokud nebudete připraveni.</string>
+    <string name="pairing_code_warning_2">Tento kód udržujte v bezpečí!\nNesdílejte ho s ostatními.</string>
+    <string name="sms_notifications_summary">Chcete-li dostávat SMS, vždy když obdržíte bitcoin, pak povolte oznámení.</string>
+    <string name="backup_header">Zálohová fráze</string>
+    <string name="backup_explanation">Kvůli vaší bezpečnosti neuchovává Blockchain záznam o žádných heslech. Následující 12slovní zálohová fráze vám poskytne přístup k vaším prostředkům, pokud ztratíte své heslo. Nezapomeňte si ji napsat na papír a uschovejte ji někde na bezpečném místě. </string>
+    <string name="backup_complete_message">Zálohovou frázi můžete použít, pokud ztratíte své heslo. K vašim bitcoinům může přistoupit kdokoliv, kdo má přístup k vaší zálohové frázi. Proto ji uchovávejte offline někde v bezpečí.</string>
+    <string name="backup_verify_heading">Chcete-li dokončit proces zálohování, pak zadejte následující slova.</string>
+    <string name="backup_lost_mnemonic">Ztratili jste 12slovní zálohovou frázi?</string>
+    <string name="trade_complete">Obchod dokončen</string>
+    <string name="trade_complete_details">Váš obchod nákupu bitcoinu byl dokončen!</string>
+    <string name="view_details">Zobrazit detaily</string>
+    <string name="onboarding_available_now">Dostupné nyní</string>
+    <string name="onboarding_buy_details">Nakupujte bitcoin přímo ze své mobilní peněženky. Je to jednoduché, konzistentní a zabezpečené.</string>
+    <string name="onboarding_buy_performance_warning">Zážitek z nakupování může být na vašem zařízení trochu pomalejší. Předem děkujeme za vaši trpělivost.</string>
+
+    <string name="two_factor_dialog_title">Zadejte kód 2FA</string>
+    <string name="two_factor_dialog_message_authenticator">Chcete-li pokračovat, prosím zadejte platný kód 2FA z vaší ověřovací aplikace.</string>
+    <string name="two_factor_dialog_message_sms">Právě jsme vám poslali SMS obsahující kód 2FA. Chcete-li pokračovat, zadejte ho prosím zde.</string>
+    <string name="two_factor_dialog_hint">Kód 2FA</string>
+    <string name="two_factor_null_error">Kód 2FA nemůže být prázdný</string>
+    <string name="two_factor_incorrect_error">Kód 2FA nesprávný</string>
+
+    <string name="confirm_payment_change_fee">Poplatek za změnu</string>
+    <string name="confirm_payment_fee_sync_error">Chyba při získávání možností poplatků</string>
+
+    <string name="fee_options_regular">Běžný</string>
+    <string name="fee_options_priority">Priorita</string>
+    <string name="fee_options_custom">Vlastní</string>
+    <string name="fee_options_regular_time">Více než 1 hodina</string>
+    <string name="fee_options_priority_time">~0−60 min</string>
+    <string name="fee_options_custom_warning">Pouze pokročilí uživatelé</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b</string>
+    <string name="fee_options_fee_too_low">Nízký poplatek nedoporučen</string>
+    <string name="fee_options_fee_too_high">Zbytečně vysoký poplatek</string>
+    <string name="fee_options_advanced_warning">Tato funkce je doporučena pouze pro pokročilé uživatele. Volbou vlastního poplatku riskujete, že zaplatíte příliš nebo se vaše transakce nikdy nepotvrdí.</string>
+    <string name="fee_options_sat_byte_hint">sat/b</string>
+    <string name="fee_options_sat_byte_inline_hint">Běžný: %1$s, Priorita: %2$s</string>
 </resources>

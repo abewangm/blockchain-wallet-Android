@@ -180,7 +180,6 @@
     <string name="address_lookup_fail">Nie udało się zdobyć adresu. Proszę wpisać adres ręcznie.</string>
 
     <string name="backup_write_down_words">To ważne, aby zapisać sobie te słowa dokładnie tak jak się tutaj pojawiają i w tej samej kolejności.</string>
-    <string name="backup_verify_heading">Wpisz następujące słowa ze swojego zwrotu do odzyskiwania hasła, aby zakończyć proces tworzenia kopii zapasowej.</string>
     <string name="backup_of">z</string>
     <string name="backup_confirmed">Kopia zapasowa potwierdzona</string>
     <string name="backup_word_mismatch">Słowa się nie zgadzają</string>
@@ -214,7 +213,6 @@
     <string name="click">Kliknij</string>
     <string name="to_start_sending_and_receiving_btc">aby rozpocząć wysyłanie i otrzymywanie bitcoinów.</string>
 
-    <string name="watch_only_label">(tylko do odczytu)</string>
     <string name="address_book_label">(książka adresowa)</string>
 
     <string name="transaction_submitted">Transakcja zakończona</string>
@@ -232,8 +230,6 @@
     <string name="upgrade_fail_heading">Ulepszanie portfela nieudane!</string>
     <string name="upgrade_fail_info">W trakcie ulepszania Twojego portfela wystąpił błąd. Spróbuj ponownie później.</string>
     <string name="not_sane_error">Instalacja Twojego Portfela Blockchain nie została zakończona. Proszę sparować swój portfel raz jeszcze lub stworzyć nowy.</string>
-
-    <string name="watchonly_address_receive_warning">Za chwilę otrzymasz bitcoiny na adres tylko do odczytu. Będziesz mógł wykorzystać te środki tylko, jeśli masz dostęp do klucza prywatnego. Kontynuować?</string>
 
     <string name="camera_unavailable">Aparat jest w tej chwili używany przez inną aplikację. Zamknij tę aplikację i spróbuj ponownie.</string>
 
@@ -295,16 +291,13 @@
     <string name="watch_only_import_warning">Zamierzasz importować adres tylko do odczytu, adres (lub skrypt klucza publicznego) przechowywany w portfelu bez odpowiadającego mu klucza prywatnego. Oznacza to, że środki z tego adresu możesz wydawać tylko, jeśli masz klucz prywatny przechowywany gdzie indziej. Jeśli nie masz takiego klucza, NIE podawaj adresu tylko do odczytu jako adresu do otrzymywania bitcoinów. \n\nTe opcje są zalecane tylko dla zaawansowanych użytkowników. Kontynuować? </string>
     <string name="scan_private_key">Skanuj klucz prywatny</string>
     <string name="private_key_successfully_imported">Udało się zaimportować klucz prywatny.</string>
-    <string name="private_key_not_matching_address">UWAGA: zeskanowany klucz prywatny nie odpowiada Twojemu adresowi tylko do odczytu. Aby móc wydawać środki z tego adresu, zeskanuj prawidłowy klucz prywatny.</string>
     <string name="watch_only">Tylko do odczytu</string>
     <string name="extended_public_key_description">Jeśli jesteś kupcem, pokaż swój xPub i skorzystaj z aplikacji Blockchain Merchant, by bezpiecznie i prywatnie otrzymywać środki.\n\nNie udostępniaj swojego klucza xPub.         Osoby z dostępem do Twojego klucza xPub będą miały wgląd w Twoje środki i transakcje. </string>
-    <string name="watch_only_description">To jest adres tylko do odczytu. Aby wydawać środki z tego portfela, zeskanuj swój klucz prywatny. </string>
     <string name="success">Udało się</string>
     <string name="default_label">Domyślne</string>
     <string name="try_again">Spróbuj ponownie</string>
     <string name="transfer">Prześlij</string>
     <string name="transfer_funds">Prześlij środki</string>
-    <string name="transfer_recommend">Dla Twojego bezpieczeństwa zalecamy, by przelewać wszelkie środki z adresów importowanych na swój portfel Blockchain.</string>
     <string name="spendable_addresses">adresy rozporządzalne</string>
 
     <string name="dont_ask_again">Nie pytaj mnie ponownie.</string>
@@ -357,8 +350,6 @@
     <string name="tor_requests">Zablokuj żądania Tor</string>
     <string name="tor_summary">Czy chcesz blokować adresy IP powiązane z anonimową siecią Tor przed dostępem do Twojego portfela? Sieć Tor często jest wykorzystywana przez hakerów włamujących się na portfele użytkowników Blockchain.</string>
     <string name="change_password">Zmień hasło</string>
-    <string name="change_password_summary">Twoje hasło nie jest przechowywane na naszych serwerach, co znaczy, że nie będziemy mogli Ci pomóc w jego zresetowaniu gdy go zapomnisz.  Zapisz sobie swój zwrot do odzyskiwania hasła, dzięki któremu możesz odzyskać dostęp do swojego portfela w razie zagubienia hasła.</string>
-    <string name="verify_email_notice">Wysłaliśmy link weryfikacyjny pod Twój adres e-mail. Kliknij link weryfikacyjny, by zweryfikować swój adres e-mail.</string>
     <string name="email_notifications">Powiadomienia e-mail</string>
     <string name="email_notifications_summary">Otrzymuj powiadomienie, gdy otrzymasz bitcoiny.</string>
     <string name="current_password">Obecne hasło</string>
@@ -451,7 +442,6 @@
     <string name="overview">Przegląd</string>
     <string name="create_a_wallet">Utwórz portfel</string>
     <string name="log_in">Zaloguj się</string>
-    <string name="about">Portfel Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="wallets">Portfele</string>
     <string name="your_transactions">Brak transakcji</string>
     <string name="archived_label">Zarchiwizowano</string>
@@ -519,13 +509,9 @@
 
     <string name="backup_again">Powtórz kopię zapasową</string>
     <string name="backup_button_start">Wykonaj kopię zapasową</string>
-    <string name="backup_complete_message">Możesz użyć zwrotu do odzyskiwania hasła w celu przywrócenia swoich środków w przypadku utraty hasła. Każdy, kto posiada dostęp do Twojego zwrotu do odzyskiwania hasła, może również uzyskać dostęp do Twoich bitcoinów. Pamiętaj, aby przechowywać zwrot do odzyskiwania hasła w trybie offline, w bezpiecznym miejscu.</string>
     <string name="backup_done">GOTOWE</string>
-    <string name="backup_explanation">Aby zapewnić Ci bezpieczeństwo, serwis Blockchain nie przechowuje żadnych haseł. Następujący, składający się z dwunastu słów zwrot do odzyskiwania hasła, zapewni Ci dostęp do Twoich środków na wypadek utraty hasła. Pamiętaj, aby zapisać go na kartce i przechowywać w bezpiecznym miejscu. </string>
-    <string name="backup_header">Zwrot do odzyskiwania hasła</string>
     <string name="backup_header_complete">Utworzono kopię zapasową</string>
     <string name="backup_last">Ostatnia kopia zapasowa: %1$s</string>
-    <string name="backup_lost_mnemonic">Zapomniałeś składający się z dwunastu słów zwrot do odzyskiwania hasła?</string>
     <string name="backup_next_word">NASTĘPNE SŁOWO</string>
     <string name="backup_previous_word">POPRZEDNIE SŁOWO</string>
     <string name="backup_word">Słowo</string>
@@ -560,12 +546,6 @@
     <string name="contacts_loading_failed">Wczytywanie kontaktów nie powiodło się. Spróbuj ponownie.</string>
     <string name="contacts_name_cannot_be_empty">Nieprawidłowa nazwa</string>
     <string name="contacts_name_field_hint">Nazwa</string>
-    <string name="two_factor_dialog_title">Wprowadź kod 2FA</string>
-    <string name="two_factor_dialog_message_authenticator">Aby kontynuować, wprowadź prawidłowy kod 2FA ze swojej aplikacji uwierzytelniającej.</string>
-    <string name="two_factor_dialog_message_sms">Wysłaliśmy Ci SMS-a zawierającego kod 2FA. Aby kontynuować, wprowadź go tutaj.</string>
-    <string name="two_factor_dialog_hint">Kod 2FA</string>
-    <string name="two_factor_null_error">Kod 2FA nie może być pusty</string>
-    <string name="two_factor_incorrect_error">Nieprawidłowy kod 2FA</string>
     <string name="contacts_payment_sent_success">Wysłano płatność! Powiadomiliśmy Twój kontakt o sfinalizowaniu przez Ciebie transakcji.</string>
     <string name="contacts_payment_sent_failed_message">Wystąpił błąd podczas powiadamiania Twojego kontaktu o wysłaniu mu przez Ciebie płatności.  Sprawdź połączenie sieciowe i spróbuj ponownie.</string>
     <string name="contacts_waiting_for_address_message">Twój kontakt został poinformowany o tym, że chcesz wysłać mu bitcoiny i że potrzebujesz w tym celu jego adresu. Powiadomimy Cię o wysłaniu przez Twój kontakt adresu!</string>
@@ -629,7 +609,6 @@
     <string name="creating_wallet">Tworzenie portfela</string>
     <string name="recover_funds">Odzyskaj środki</string>
     <string name="recover_funds_warning_message">Jeśli masz dostęp do swojego identyfikatora portfela i hasła, zawsze powinieneś się zalogować lub sparować. Odzyskiwanie środków spowoduje utworzenie nowego identyfikatora portfela. Czy chcesz kontynuować?</string>
-    <string name="recover_funds_instructions">Aby odzyskać środki i transakcje, wpisz swoje 12 słów ze spacjami służących do odzyskania hasła.</string>
     <string name="done">Gotowe</string>
     <string name="transfer_confirmed">Potwierdzono przelew</string>
     <string name="transaction_details_unknown">Nieznany</string>
@@ -637,14 +616,69 @@
     <string name="transaction_detail_description_hint">Do czego mi to potrzebne?</string>
     <string name="transaction_detail_confirmed">Potwierdzono</string>
     <string name="to_field_helper_no_dropdown">Wprowadź adres Bitcoin</string>
-    <string name="sms_notifications_summary">Aby odbierać SMS-y za każdym razem, gdy otrzymasz bitcoiny, włącz powiadomienia. Tylko adresy z etykietą i adresy importowane mogą wysyłać powiadomienia.</string>
     <string name="share_instructions">Dotknij, aby skopiować ten adres. Udostępnij go nadawcy poprzez e-mail lub SMS.</string>
     <string name="security_centre_two_fa_message">Zapobiegaj nieautoryzowanemu dostępowi do swojego portfela. Aby poprawić bezpieczeństwo portfela, włącz dwustopniową weryfikację.</string>
     <string name="security_centre_backup_title">Wykonaj kopię zapasową swoich środków</string>
     <string name="restore_failed">Przywracanie portfela nie powiodło się. Spróbuj ponownie</string>
-    <string name="recovery_passphrase">Zwrot do odzyskiwania hasła</string>
     <string name="password_reveal_warning">Bądź ostrożny! Ujawnienie tego tekstu umożliwi skopiowanie Twojego hasła do schowka, co z kolei zezwoli wszystkim aplikacjom na Twoim urządzeniu na jego odczytanie.  Uważaj również na wszystkie osoby za Twoimi plecami!</string>
     <string name="password_hint_summary">Aplikacja Blockchain Wallet nigdy nie przesyła Twojego hasła na nasze serwery. Oznacza to, że nie mamy pojęcia, jakie jest Twoje hasło i nie mamy możliwości jego skasowania, jeśli go zapomnisz. Stwórz łatwą do zapamiętania wskazówkę dotyczącą hasła, którą wyślemy na Twój potwierdzony adres e-mail w razie, gdy zapomnisz hasło.</string>
-    <string name="invalid_recovery_phrase">Nieprawidłowy zwrot do odzyskiwania. Spróbuj ponownie</string>
+
+
+    <string name="recover_funds_instructions">Wpisz 12 słów ze spacjami zwrotu zapasowego, by odzyskać swoje środki i transakcje.</string>
+    <string name="recovery_passphrase">Zwrot zapasowy</string>
+    <string name="invalid_recovery_phrase">Nieprawidłowy zwrot zapasowy. Spróbuj ponownie.</string>
+    <string name="about">Portfel Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.\nWszelkie prawa zastrzeżone.</string>
+    <string name="watch_only_label">(tylko do odczytu)</string>
+    <string name="watchonly_address_receive_warning">Masz zamiar otrzymać bitcoiny na adres tylko do odczytu. Możesz wydać te środki jedynie, jeśli masz dostęp do prywatnego klucza. Kontynuować?</string>
+    <string name="label_name_match">Nazwa jest już używana.</string>
+    <string name="private_key_not_matching_address">UWAGA: zeskanowany prywatny klucz nie odpowiada Twojemu adresowi tylko do odczytu. Aby móc wydać środki z tego adresu, zeskanuj prawidłowy prywatny klucz.</string>
+    <string name="watch_only_description">To jest adres tylko do odczytu. Aby móc wydać swoje środki z</string>
+    <string name="transfer_recommend">Wygląda na to, że masz nieco bitcoinów na zaimportowanych adresach. Importowane adresy nie są wspierane przez Twój zwrot zapasowy. Aby zabezpieczyć te środki, zalecamy przelanie tych sald, by zostały uwzględnione w kopii bezpieczeństwa.</string>
+    <string name="disable_online_only">Zaloguj się do swojego portfela w przeglądarce, by wyłączyć uwierzytelnianie dwustopniowe.</string>
+    <string name="change_password_summary">Twoje hasło nie jest przechowywane na naszych serwerach, co oznacza, że nie będziemy mogli Ci pomóc w jego zresetowaniu, gdy go zapomnisz. Upewnij się, że zrobiłeś kopię bezpieczeństwa swoich środków w bocznym menu, co może przywrócić dostęp do portfela w razie utraty hasła.</string>
+    <string name="verify_email_notice">Wysłaliśmy link weryfikacyjny na Twój adres e-mail. Kliknij link, by zweryfikować swój adres e-mail.</string>
+    <string name="pairing_code_log_in">Zaloguj się do Portfela internetowego</string>
+    <string name="pairing_code_instruction_1">Przejdź do %1$s na swoim komputerze.</string>
+    <string name="pairing_code_instruction_2">Wybierz Zaloguj się przy użyciu urządzenia mobilnego.</string>
+    <string name="pairing_code_instruction_3">Przy użyciu aparatu komputera zeskanuj poniższy kod QR.</string>
+    <string name="pairing_code_show_qr">Pokaż kod QR</string>
+    <string name="pairing_code_hide_qr">Ukryj kod QR</string>
+    <string name="pairing_code_warning_1">Trzymaj ten kod ukryty, aż będziesz gotowy.</string>
+    <string name="pairing_code_warning_2">Przechowuj ten kod w bezpiecznym miejscu!\nNie udostępniaj go innym.</string>
+    <string name="sms_notifications_summary">Włącz powiadomienia, by otrzymywać SMS-a, jak tylko otrzymasz bitcoiny.</string>
+    <string name="backup_header">Zwrot zapasowy</string>
+    <string name="backup_explanation">Dla Twojego bezpieczeństwa serwis Blockchain nie przechowuje żadnych haseł. Poniższy zwrot zapasowy składający się z 12 słów zapewni Ci dostęp do środków w razie utraty hasła. Pamiętaj, aby zapisać go na kartce i przechowywać w bezpiecznym miejscu. </string>
+    <string name="backup_complete_message">Możesz użyć zwrotu zapasowego do przywrócenia środków, gdy zgubisz hasło. Każdy mający dostęp do Twojego zwrotu zapasowego może uzyskać dostęp do Twoich bitcoinów, więc pamiętaj, aby był przechowywany offline w bezpiecznym miejscu.</string>
+    <string name="backup_verify_heading">Wpisz poniższe słowa ze swojego zwrotu zapasowego, by dokończyć proces tworzenia kopii zapasowej.</string>
+    <string name="backup_lost_mnemonic">Zgubiłeś swój zwrot zapasowy składający się z 12 słów?</string>
+    <string name="trade_complete">Ukończono transakcję</string>
+    <string name="trade_complete_details">Twoja transakcja kupna bitcoinów została ukończona!</string>
+    <string name="view_details">Zobacz szczegóły</string>
+    <string name="onboarding_available_now">Dostępne teraz</string>
+    <string name="onboarding_buy_details">Kupuj bitcoiny bezpośrednio ze swojego mobilnego portfela. To proste, bez zakłóceń i bezpieczne.</string>
+    <string name="onboarding_buy_performance_warning">Kupowanie może być nieco wolniejsze na Twoim urządzeniu. Z góry dziękujemy za cierpliwość.</string>
+
+    <string name="two_factor_dialog_title">Wpisz kod uwierzytelniania dwustopniowego</string>
+    <string name="two_factor_dialog_message_authenticator">Aby kontynuować, wpisz prawidłowy kod uwierzytelniania dwustopniowego z aplikacji uwierzytelniającej.</string>
+    <string name="two_factor_dialog_message_sms">Wysłaliśmy Ci SMS-a zawierającego kod uwierzytelniania dwustopniowego. Aby kontynuować, wpisz go tutaj.</string>
+    <string name="two_factor_dialog_hint">Kod uwierzytelniania dwustopniowego</string>
+    <string name="two_factor_null_error">Kod uwierzytelniania dwustopniowego nie może być pusty.</string>
+    <string name="two_factor_incorrect_error">Nieprawidłowy kod uwierzytelniania dwustopniowego.</string>
+
+    <string name="confirm_payment_change_fee">Zmień opłatę</string>
+    <string name="confirm_payment_fee_sync_error">Błąd podczas pozyskiwania opcji opłaty</string>
+
+    <string name="fee_options_regular">Standardowa</string>
+    <string name="fee_options_priority">Priorytetowa</string>
+    <string name="fee_options_custom">Indywidualna</string>
+    <string name="fee_options_regular_time">1+ godz.</string>
+    <string name="fee_options_priority_time">~0–60 min</string>
+    <string name="fee_options_custom_warning">Jedynie zaawansowani użytkownicy</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b</string>
+    <string name="fee_options_fee_too_low">Niska opłata nie jest zalecana.</string>
+    <string name="fee_options_fee_too_high">Nadmiernie wysoka opłata</string>
+    <string name="fee_options_advanced_warning">Ta funkcja polecana jest jedynie zaawansowanym użytkownikom. Wybierając indywidualną opłatę, ryzykujesz, że przepłacisz lub transakcja nie zostanie nigdy potwierdzona.</string>
+    <string name="fee_options_sat_byte_hint">sat/b</string>
+    <string name="fee_options_sat_byte_inline_hint">Zwykła: %1$s, Priorytetowa: %2$s</string>
 
 </resources>
