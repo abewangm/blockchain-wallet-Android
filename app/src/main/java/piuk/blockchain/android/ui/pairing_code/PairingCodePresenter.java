@@ -64,6 +64,6 @@ public class PairingCodePresenter extends BasePresenter<PairingCodeView> {
                 password,
                 sharedKey,
                 encryptionPhrase,
-                180);
+                600);
     }
 }
