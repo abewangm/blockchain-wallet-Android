@@ -126,11 +126,6 @@ public class BlockchainApplication extends Application implements FrameworkInter
                 // No-op
             }
         });
-
-        //Easier debugging of RxJava2 exceptions
-        if(BuildConfig.DEBUG) {
-            Traceur.enableLogging();
-        }
     }
 
     // Pass instances to JAR Framework, evaluate after object graph instantiated fully
