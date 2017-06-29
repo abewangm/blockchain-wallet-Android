@@ -94,10 +94,6 @@ public class MainViewModel extends BaseViewModel {
 
         boolean isBuySellPermitted();
 
-        void onFetchTransactionsStart();
-
-        void onFetchTransactionCompleted();
-
         void onScanInput(String strUri);
 
         void onStartContactsActivity(@Nullable String data);
@@ -112,7 +108,7 @@ public class MainViewModel extends BaseViewModel {
 
         void clearAllDynamicShortcuts();
 
-        void showContactsRegistrationFailure();
+        void showMetadataNodeRegistrationFailure();
 
         void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId, long transactionValue);
 
@@ -155,15 +151,57 @@ public class MainViewModel extends BaseViewModel {
 
     @Override
     public void onViewReady() {
-        preLaunchChecks();
-        startWebSocketService();
-        subscribeToNotifications();
-        if (dataListener.getIfContactsEnabled()) {
-            registerNodeForMetaDataService();
+
+        if (!accessState.isLoggedIn()) {
+            // This should never happen, but handle the scenario anyway by starting the launcher
+            // activity, which handles all login/auth/corruption scenarios itself
+            dataListener.kickToLauncherPage();
+        } else {
+
+            startWebSocketService();
+            logEvents();
+
+            dataListener.showProgressDialog(R.string.please_wait);
+
+            compositeDisposable.add(registerMetadataNodesCompletable()
+                    .mergeWith(feesCompletable())
+                    .doAfterTerminate(() -> {
+                                dataListener.hideProgressDialog();
+
+                                dataListener.onStartBalanceFragment(false);
+
+                                initPrompts(dataListener.getActivityContext());
+
+                                if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
+                                    String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
+                                    prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
+                                    dataListener.onScanInput(strUri);
+                                }
+                            }
+                    )
+                    .subscribe(() -> {
+                        if (dataListener.isBuySellPermitted()) {
+                            initBuyService();
+                        }
+                        if (dataListener.getIfContactsEnabled()) {
+                            initContactsService();
+                        }
+                    }, throwable -> {
+                        //noinspection StatementWithEmptyBody
+                        if (throwable instanceof InvalidCredentialsException) {
+                            // Double encrypted and not previously set up, ignore error
+                        } else {
+                            dataListener.showMetadataNodeRegistrationFailure();
+                        }
+                    }));
         }
-        if (dataListener.isBuySellPermitted()) {
-            initializeBuy();
-        }
+    }
+
+    private Completable feesCompletable() {
+        return feeDataManager.getFeeOptions()
+                .doOnNext(feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions))
+                .compose(RxUtil.applySchedulersToObservable())
+                .flatMapCompletable(feeOptions -> exchangeRateFactory.updateTicker());
     }
 
     void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
@@ -194,30 +232,19 @@ public class MainViewModel extends BaseViewModel {
     }
 
     void checkForMessages() {
-        compositeDisposable.add(
-                payloadDataManager.loadNodes()
-                        .flatMapCompletable(
-                                success -> {
-                                    if (success) {
-                                        return contactsDataManager.fetchContacts();
-                                    } else {
-                                        return Completable.error(new Throwable("Nodes not loaded"));
-                                    }
-                                })
-                        .andThen(contactsDataManager.getContactList())
-                        .toList()
-                        .flatMapObservable(contacts -> {
-                            if (!contacts.isEmpty()) {
-                                return contactsDataManager.getMessages(true);
-                            } else {
-                                return Observable.just(Collections.emptyList());
-                            }
-                        })
-                        .subscribe(
-                                messages -> {
-                                    // No-op
-                                },
-                                throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
+        compositeDisposable.add(contactsDataManager.fetchContacts()
+                .andThen(contactsDataManager.getContactList())
+                .toList()
+                .flatMapObservable(contacts -> {
+                    if (!contacts.isEmpty()) {
+                        return contactsDataManager.getMessages(true);
+                    } else {
+                        return Observable.just(Collections.emptyList());
+                    }
+                })
+                .subscribe(messages -> {
+                    // No-op
+                }, throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
     }
 
     void unPair() {
@@ -243,111 +270,6 @@ public class MainViewModel extends BaseViewModel {
                         .subscribe(
                                 notificationPayload -> checkForMessages(),
                                 Throwable::printStackTrace));
-    }
-
-    private void registerNodeForMetaDataService() {
-        String uri = null;
-        boolean fromNotification = false;
-
-        if (!prefs.getValue(PrefsUtil.KEY_METADATA_URI, "").isEmpty()) {
-            uri = prefs.getValue(PrefsUtil.KEY_METADATA_URI, "");
-            prefs.removeValue(PrefsUtil.KEY_METADATA_URI);
-        }
-
-        if (prefs.getValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION, false)) {
-            prefs.removeValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION);
-            fromNotification = true;
-        }
-
-        final String finalUri = uri;
-        if (finalUri != null || fromNotification) {
-            dataListener.showProgressDialog(R.string.please_wait);
-        }
-
-        final boolean finalFromNotification = fromNotification;
-
-        compositeDisposable.add(
-                payloadDataManager.loadNodes()
-                        .flatMap(loaded -> {
-                            if (loaded) {
-                                return payloadDataManager.getMetadataNodeFactory();
-                            } else {
-                                if (!payloadManager.getPayload().isDoubleEncryption()) {
-                                    return payloadDataManager.generateNodes(null)
-                                            .andThen(payloadDataManager.getMetadataNodeFactory());
-                                } else {
-                                    throw new InvalidCredentialsException("Payload is double encrypted");
-                                }
-                            }
-                        })
-                        .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
-                                metadataNodeFactory.getMetadataNode(),
-                                metadataNodeFactory.getSharedMetadataNode()))
-                        .doOnComplete(() -> rxBus.emitEvent(ContactsEvent.class, ContactsEvent.INIT))
-                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
-                        .subscribe(
-                                () -> registerMdid(finalUri, finalFromNotification),
-                                throwable -> {
-                                    //noinspection StatementWithEmptyBody
-                                    if (throwable instanceof InvalidCredentialsException) {
-                                        // Double encrypted and not previously set up, ignore error
-                                    } else {
-                                        dataListener.showContactsRegistrationFailure();
-                                    }
-                                }));
-
-        notificationTokenManager.resendNotificationToken();
-    }
-
-    // TODO: 30/03/2017 Move this into the registerNodeForMetaDataService function
-    private void registerMdid(@Nullable String uri, boolean fromNotification) {
-        compositeDisposable.add(
-                payloadDataManager.registerMdid()
-                        .flatMapCompletable(responseBody -> contactsDataManager.publishXpub())
-                        .subscribe(() -> {
-                            if (uri != null) {
-                                dataListener.onStartContactsActivity(uri);
-                            } else if (fromNotification) {
-                                dataListener.onStartContactsActivity(null);
-                            } else {
-                                checkForMessages();
-                            }
-                        }, throwable -> dataListener.showContactsRegistrationFailure()));
-    }
-
-    private void preLaunchChecks() {
-        if (accessState.isLoggedIn()) {
-            dataListener.onStartBalanceFragment(false);
-            dataListener.onFetchTransactionsStart();
-
-            logEvents();
-
-            compositeDisposable.add(
-                    feeDataManager.getFeeOptions()
-                            .doOnNext(feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions))
-                            .compose(RxUtil.applySchedulersToObservable())
-                            .flatMapCompletable(feeOptions -> exchangeRateFactory.updateTicker())
-                            .doAfterTerminate(() -> {
-
-                                initPrompts(dataListener.getActivityContext());
-
-                                if (dataListener != null) {
-                                    dataListener.onFetchTransactionCompleted();
-                                }
-
-                                if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
-                                    String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
-                                    prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
-                                    dataListener.onScanInput(strUri);
-                                }
-                            }).subscribe(() -> {
-                        //no op
-                    }, Throwable::printStackTrace));
-        } else {
-            // This should never happen, but handle the scenario anyway by starting the launcher
-            // activity, which handles all login/auth/corruption scenarios itself
-            dataListener.kickToLauncherPage();
-        }
     }
 
     @Override
@@ -409,20 +331,66 @@ public class MainViewModel extends BaseViewModel {
         return environmentSettings.getExplorerUrl();
     }
 
-    private void initializeBuy() {
+    private Completable registerMetadataNodesCompletable() {
+        return payloadDataManager.loadNodes()
+        .doOnNext(aBoolean -> subscribeToNotifications())
+        .flatMap(loaded -> {
+            if (loaded) {
+                return payloadDataManager.getMetadataNodeFactory();
+            } else {
+                if (!payloadManager.getPayload().isDoubleEncryption()) {
+                    return payloadDataManager.generateNodes(null)
+                            .andThen(payloadDataManager.getMetadataNodeFactory());
+                } else {
+                    throw new InvalidCredentialsException("Payload is double encrypted");
+                }
+            }
+        })
+        .flatMapCompletable(metadataNodeFactory -> contactsDataManager
+                .initContactsService(metadataNodeFactory.getMetadataNode(), metadataNodeFactory.getSharedMetadataNode()));
+    }
+
+    private void initContactsService() {
+
+        String uri = null;
+        boolean fromNotification = false;
+
+        if (!prefs.getValue(PrefsUtil.KEY_METADATA_URI, "").isEmpty()) {
+            uri = prefs.getValue(PrefsUtil.KEY_METADATA_URI, "");
+            prefs.removeValue(PrefsUtil.KEY_METADATA_URI);
+        }
+
+        if (prefs.getValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION, false)) {
+            prefs.removeValue(PrefsUtil.KEY_CONTACTS_NOTIFICATION);
+            fromNotification = true;
+        }
+
+        final String finalUri = uri;
+        if (finalUri != null || fromNotification) {
+            dataListener.showProgressDialog(R.string.please_wait);
+        }
+
+        rxBus.emitEvent(ContactsEvent.class, ContactsEvent.INIT);
+
+        if (uri != null) {
+            dataListener.onStartContactsActivity(uri);
+        } else if (fromNotification) {
+            dataListener.onStartContactsActivity(null);
+        } else {
+            checkForMessages();
+        }
+    }
+
+    private void initBuyService() {
+        dataListener.setBuySellEnabled(true);
+
         compositeDisposable.add(
-                buyDataManager.getCanBuy()
-                        .subscribe(isEnabled -> {
-                                    dataListener.setBuySellEnabled(isEnabled);
-                                    if (isEnabled) {
-                                        buyDataManager.watchPendingTrades()
-                                                .compose(RxUtil.applySchedulersToObservable())
-                                                .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace);
-                                        buyDataManager.getWebViewLoginDetails()
-                                                .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
-                                    }
-                                },
-                                throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
+                buyDataManager.watchPendingTrades()
+                        .compose(RxUtil.applySchedulersToObservable())
+                        .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace));
+        compositeDisposable.add(
+                buyDataManager.getWebViewLoginDetails()
+                        .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace));
     }
 
     private void dismissAnnouncementIfOnboardingCompleted() {

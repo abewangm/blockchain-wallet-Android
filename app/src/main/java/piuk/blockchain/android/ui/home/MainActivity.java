@@ -113,14 +113,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     private MainViewModel viewModel;
     @Thunk ActivityMainBinding binding;
-    private MaterialProgressDialog fetchTransactionsProgress;
     private MaterialProgressDialog materialProgressDialog;
     private AppUtil appUtil;
     private long backPressed;
     private Toolbar toolbar;
     private boolean paymentToContactMade = false;
     private Typeface typeface;
-    private WebView buyWebView;
     private BalanceFragment balanceFragment;
     private FrontendJavascriptManager frontendJavascriptManager;
     private WebViewLoginDetails webViewLoginDetails;
@@ -134,7 +132,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             } else if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
                 binding.bottomNavigation.setCurrentItem(2);
             } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
-                startActivity(putWebViewState(new Intent(MainActivity.this, BuyActivity.class)));
+                BuyActivity.start(MainActivity.this);
             }
         }
     };
@@ -369,15 +367,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         startSendFragment(strResult, scanRoute);
     }
 
-    @Thunk
-    Intent putWebViewState(Intent intent) {
-        Bundle state = new Bundle();
-        if (buyWebView != null) {
-            buyWebView.saveState(state);
-        }
-        return intent.putExtra(WEB_VIEW_STATE_KEY, state);
-    }
-
     public void selectDrawerItem(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.nav_backup:
@@ -387,7 +376,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 startActivityForResult(new Intent(MainActivity.this, AccountActivity.class), ACCOUNT_EDIT);
                 break;
             case R.id.nav_buy:
-                startActivity(putWebViewState(new Intent(MainActivity.this, BuyActivity.class)));
+                BuyActivity.start(this);
                 break;
             case R.id.nav_contacts:
                 ContactsListActivity.start(this, null);
@@ -523,7 +512,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void showContactsRegistrationFailure() {
+    public void showMetadataNodeRegistrationFailure() {
         if (!isFinishing()) {
             new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
@@ -547,21 +536,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @Override
     public void kickToLauncherPage() {
         startSingleActivity(LauncherActivity.class);
-    }
-
-    @Override
-    public void onFetchTransactionsStart() {
-        fetchTransactionsProgress = new MaterialProgressDialog(this);
-        fetchTransactionsProgress.setCancelable(false);
-        fetchTransactionsProgress.setMessage(getString(R.string.please_wait));
-        fetchTransactionsProgress.show();
-    }
-
-    @Override
-    public void onFetchTransactionCompleted() {
-        if (fetchTransactionsProgress != null && fetchTransactionsProgress.isShowing()) {
-            fetchTransactionsProgress.dismiss();
-        }
     }
 
     @Override
@@ -666,7 +640,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         }
         // Setup buy WebView
-        buyWebView = new WebView(this);
+        WebView buyWebView = new WebView(this);
         buyWebView.getSettings().setJavaScriptEnabled(true);
         buyWebView.loadUrl(viewModel.getCurrentServerUrl() + "wallet/#/intermediate");
 

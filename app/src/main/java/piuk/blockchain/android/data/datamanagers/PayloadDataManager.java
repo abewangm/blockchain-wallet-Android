@@ -609,4 +609,7 @@ public class PayloadDataManager {
         return activeAccounts.indexOf(getAccounts().get(accountIndex));
     }
 
+    public boolean validateSecondPassword(String secondPassword) {
+        return payloadManager.validateSecondPassword(secondPassword);
+    }
 }

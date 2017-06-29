@@ -1023,7 +1023,6 @@ class BalancePresenterTest {
         override fun provideBuyDataManager(
                 onboardingDataManager: OnboardingDataManager?,
                 settingsDataManager: SettingsDataManager?,
-                payloadDataManager: PayloadDataManager?,
                 environmentSettings: EnvironmentSettings?
         ) = buyDataManager
     }

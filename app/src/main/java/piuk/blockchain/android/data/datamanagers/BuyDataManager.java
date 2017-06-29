@@ -2,6 +2,7 @@ package piuk.blockchain.android.data.datamanagers;
 
 import info.blockchain.wallet.api.Environment;
 
+import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
@@ -16,18 +17,15 @@ public class BuyDataManager {
 
     private OnboardingDataManager onboardingDataManager;
     private SettingsDataManager settingsDataManager;
-    private PayloadDataManager payloadDataManager;
     private ExchangeService exchangeService;
     private EnvironmentSettings environmentSettings;
 
     public BuyDataManager(OnboardingDataManager onboardingDataManager,
                           SettingsDataManager settingsDataManager,
-                          PayloadDataManager payloadDataManager,
                           EnvironmentSettings environmentSettings) {
         this.onboardingDataManager = onboardingDataManager;
         this.settingsDataManager = settingsDataManager;
-        this.payloadDataManager = payloadDataManager;
-        exchangeService = ExchangeService.getInstance();
+        this.exchangeService = ExchangeService.getInstance();
         this.environmentSettings = environmentSettings;
     }
 
@@ -42,9 +40,6 @@ public class BuyDataManager {
     public synchronized Observable<Boolean> getCanBuy() {
         if (!environmentSettings.getEnvironment().equals(Environment.PRODUCTION)) {
             return Observable.just(true);
-        } else if (payloadDataManager.isDoubleEncrypted()) {
-            // TODO: 14/06/2017 In the future, use the Metadata node to restore the master seed
-            return Observable.just(false);
         } else {
             return Observable.combineLatest(
                     onboardingDataManager.isRolloutAllowed(),
