@@ -12,7 +12,6 @@ import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
-import com.tspoon.traceur.Traceur;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
