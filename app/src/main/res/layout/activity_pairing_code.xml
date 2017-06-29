@@ -96,61 +96,65 @@
 
         </LinearLayout>
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="16dp"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
+            android:layout_weight="1">
 
-            <TextView
-                android:id="@+id/tv_warning"
-                fontPath="fonts/Montserrat-Regular.ttf"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="32dp"
-                android:gravity="center"
-                android:text="@string/pairing_code_warning_1"
-                android:alpha="0.7"
-                android:textSize="14sp" />
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-            <FrameLayout
-                android:id="@+id/qr_layout"
-                android:layout_width="280dp"
-                android:layout_height="280dp"
-                android:visibility="gone"
-                android:layout_gravity="center_horizontal">
-
-                <ProgressBar
-                    android:id="@+id/progress_bar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center" />
-
-                <ImageView
-                    android:id="@+id/iv_qr"
+                <TextView
+                    android:id="@+id/tv_warning"
+                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerInside"
-                    android:layout_gravity="center" />
+                    android:layout_height="wrap_content"
+                    android:alpha="0.7"
+                    android:gravity="center"
+                    android:paddingTop="32dp"
+                    android:text="@string/pairing_code_warning_1"
+                    android:textSize="14sp" />
 
-            </FrameLayout>
+                <FrameLayout
+                    android:id="@+id/qr_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="gone">
 
-            <Button
-                android:id="@+id/btn_qr_toggle"
-                style="@style/ButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginLeft="32dp"
-                android:layout_marginRight="32dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/pairing_code_show_qr"
-                android:onClick="onClickQRToggle"
-                android:theme="@style/ButtonLightBlueTheme" />
+                    <ProgressBar
+                        android:id="@+id/progress_bar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center" />
 
-        </LinearLayout>
+                    <ImageView
+                        android:id="@+id/iv_qr"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:scaleType="centerInside" />
+
+                </FrameLayout>
+
+                <Button
+                    android:id="@+id/btn_qr_toggle"
+                    style="@style/ButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginLeft="32dp"
+                    android:layout_marginRight="32dp"
+                    android:onClick="onClickQRToggle"
+                    android:text="@string/pairing_code_show_qr"
+                    android:theme="@style/ButtonLightBlueTheme" />
+
+            </LinearLayout>
+        </ScrollView>
 
     </LinearLayout>
 </layout>
