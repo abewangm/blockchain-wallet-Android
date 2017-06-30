@@ -180,7 +180,6 @@
     <string name="address_lookup_fail">Adres alınamadı. Lütfen adresi manüel olarak girin.</string>
 
     <string name="backup_write_down_words">Lütfen sözcükleri tam olarak burada yazıldıkları şekil ve sırada yazdığınızdan emin olun.</string>
-    <string name="backup_verify_heading">Kurtarma İfadenizi aşağıdaki sözcükleri girerek yedekleme işlemini tamamlayın.</string>
     <string name="backup_of">girişi</string>
     <string name="backup_confirmed">Yedekleme Onaylandı</string>
     <string name="backup_word_mismatch">Sözcük Uyumsuzluğu</string>
@@ -214,7 +213,6 @@
     <string name="click">Tıklayarak</string>
     <string name="to_start_sending_and_receiving_btc">bitcoin göndermeye ve almaya başlayın.</string>
 
-    <string name="watch_only_label">(yalnızca izlenebilir)</string>
     <string name="address_book_label">(adres defteri)</string>
 
     <string name="transaction_submitted">İşlem tamamlandı</string>
@@ -232,8 +230,6 @@
     <string name="upgrade_fail_heading">Cüzdan yükseltmesi başarısız!</string>
     <string name="upgrade_fail_info">Cüzdanınız yükseltilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.</string>
     <string name="not_sane_error">Blockchain Cüzdanınızın kurulumu eksik. Lütfen cüzdanınızı yeniden eşleştirin veya yeni bir cüzdan oluşturun.</string>
-
-    <string name="watchonly_address_receive_warning">Yalnızca izlenebilen bir adrese bitcoin almak üzeresiniz. Bu paraları sadece özel anahtara sahipseniz harcayabilirsiniz. Devam?</string>
 
     <string name="camera_unavailable">Kamera şu an başka bir uygulama tarafından açılmış. Lütfen diğer uygulamayı kapatın ve tekrar deneyin.</string>
 
@@ -295,16 +291,13 @@
     <string name="watch_only_import_warning">Cüzdanda özel anahtar karşılığı olmayan şekilde depolanan yalnızda izlenebilen bir adres (veya ortak anahtar kodu) almak üzeresiniz. Bu da paranın SADECE özel anahtarı başka bir yerde kaydetmiş olmanız durumunda harcanabileceği anlamına gelir. Eğer özel anahtarı kaydetmemişseniz kimsenin size bu adres üzerinden para göndermesini talep ETMEMELİSİNİZ.\n\n Bu özellikler sadece ileri düzey kullanıcılar için tavsiye edilir. Devam? </string>
     <string name="scan_private_key">Özel anahtarı tara</string>
     <string name="private_key_successfully_imported">Özel anahtar başarıyla alındı.</string>
-    <string name="private_key_not_matching_address">NOT: Taranan özel anahtar yalnızca izlenebilir adresinizle eşleşmiyor. Bu adresteki paranızı harcamak için lütfen doğru özel anahtarı tarayın.</string>
     <string name="watch_only">Yalnızca İzlenebilir</string>
     <string name="extended_public_key_description">Eğer bir tacirseniz genişletilmiş ortak anahtarınızı gösterin ve Blockchain Tacir uygulamasını güvenli ve gizli şekilde para almak için kullanın .\n\nGenişletilmiş ortak anahtarınızı gizli tutun.         Genişletilmiş ortak anahtarınıza erişimi olan birisi tüm paranızı ve işlemlerinizi görebilecektir. </string>
-    <string name="watch_only_description">Bu yalnızca izlenebilir bir adrestir. Bu cüzdandan para harcamak için, lütfen özel anahtarınızı tarayın. </string>
     <string name="success">Başarılı</string>
     <string name="default_label">Varsayılan</string>
     <string name="try_again">Tekrar Dene</string>
     <string name="transfer">Transfer Et</string>
     <string name="transfer_funds">Para Transfer Et</string>
-    <string name="transfer_recommend">Güvenliğiniz için alınan adreslerinizdeki tüm bakiyenizi Blockchain cüzdanınıza transfer etmenizi tavsiye ederiz.</string>
     <string name="spendable_addresses">harcanabilir adresler</string>
 
     <string name="dont_ask_again">Bana bir daha sorma.</string>
@@ -357,8 +350,6 @@
     <string name="tor_requests">Tor Taleplerini Engelle</string>
     <string name="tor_summary">Tor anonimleştirme ağına ait olduğu bilinen IP adreslerinin cüzdanınıza erişimini engellemek ister misiniz? Tor ağı, Blochchain kullanıcı cüzdanlarına erişmek için korsanlar tarafından sıkça kullanılır.</string>
     <string name="change_password">Şifre Değiştir</string>
-    <string name="change_password_summary">Şifreniz sunucularımızla asla paylaşılmaz, bu sebeple şifrenizi unuttuğunuz zaman sıfırlamanıza yardımcı olamıyoruz.  Şifrenin kaybolması durumunda cüzdanınıza erişimi sıfırlamak için kurtarma ifadenizi not ettiğinizden emin olun.</string>
-    <string name="verify_email_notice">E-posta adresinize bir doğrulama bağlantısı gönderdik. E-posta adresinizi doğrulamak için lütfen gönderilen doğrulama bağlantısına tıklayın.</string>
     <string name="email_notifications">E-posta Bildirimleri</string>
     <string name="email_notifications_summary">Bitcoin aldığınzda bildirim alın.</string>
     <string name="current_password">Mevcut Şifre</string>
@@ -451,7 +442,6 @@
     <string name="overview">Genel bakış</string>
     <string name="create_a_wallet">Bir cüzdan oluştur</string>
     <string name="log_in">Oturum Aç</string>
-    <string name="about">Blockchain Cüzdan %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="wallets">Cüzdanlar</string>
     <string name="your_transactions">İşlem Bulunmuyor</string>
     <string name="archived_label">Arşivlendi</string>
@@ -519,13 +509,9 @@
 
     <string name="backup_again">Tekrardan yedekle</string>
     <string name="backup_button_start">Yedeklemeyi başlat</string>
-    <string name="backup_complete_message">Şifrenizi unutursanız paranızı geri almak için Kurtarma İfadenizi kullanabilirsiniz. Kurtarma İfadesine erişebilen herkes bitcoininize erişebilmektedir ve bu yüzden bunu çevrimdışı güvenli ve emniyetli bir yerde tuttuğunuzdan emin olun.</string>
     <string name="backup_done">TAMAMLANDI</string>
-    <string name="backup_explanation">Güvenliğiniz için Blockchain hiçbir şifreyi kayıt altına almamaktadır. Şu 12 sözcüklü Kurtarma İfadesi şifrenizi unutmanız durumunda paranıza erişmenizi sağlayacak. Bir kağıda yazdığınızdan ve güvenli ve emniyetli bir yerde tuttuğunuzdan emin olun. </string>
-    <string name="backup_header">Kurtarma İfadesi</string>
     <string name="backup_header_complete">Yedekleme Tamamlandı</string>
     <string name="backup_last">En son yedekleme: %1$s</string>
-    <string name="backup_lost_mnemonic">12 sözcüklü kurtarma ifadenizi mi kaybettiniz?</string>
     <string name="backup_next_word">SONRAKİ SÖZCÜK</string>
     <string name="backup_previous_word">ÖNCEKİ SÖZCÜK</string>
     <string name="backup_word">Sözcük</string>
@@ -560,12 +546,6 @@
     <string name="contacts_loading_failed">Kişileri yükleme başarısız oldu, lütfen tekrar deneyin</string>
     <string name="contacts_name_cannot_be_empty">Geçersiz ad</string>
     <string name="contacts_name_field_hint">Ad</string>
-    <string name="two_factor_dialog_title">Bir 2FA kodu gir</string>
-    <string name="two_factor_dialog_message_authenticator">Lütfen devam etmek için uygulamanızın kimlik tanıtıcısına geçerli bir 2FA kodu girin.</string>
-    <string name="two_factor_dialog_message_sms">Size 2FA kodunu içeren bir SMS mesajını şimdi gönderdik. Lütfen devam etmek için buraya girin.</string>
-    <string name="two_factor_dialog_hint">2FA kodu</string>
-    <string name="two_factor_null_error">2FA kodu boş olamaz</string>
-    <string name="two_factor_incorrect_error">2FA kodu yanlış</string>
     <string name="contacts_payment_sent_success">Ödeme gönderildi! İşlemi tamamladığınızı bildirmek için kişinize bildirim gönderdik.</string>
     <string name="contacts_payment_sent_failed_message">Kişinize bir ödeme yaptığınızı bildirirken bir hata oluştur. Bağlantınızı kontrol edin ve tekrar deneyin.</string>
     <string name="contacts_waiting_for_address_message">Kişiniz, kendisine bitcoin göndermek istediğiniz ve bunun için bir adres talep ettiğiniz konusunda bilgilendirildi. Bir adres gönderdiğinde size bildirimde bulunacağız.</string>
@@ -629,7 +609,6 @@
     <string name="creating_wallet">Cüzdan oluşturuluyor</string>
     <string name="recover_funds">Parayı Kurtar</string>
     <string name="recover_funds_warning_message">Cüzdan Kimliğinize ve şifrenize erişiminiz varsa daima eşleme yapmanız veya oturum açmanız gerekir. Paranızı geri almak yeni bir Cüzdan Kimliği oluşturacaktır. Devam etmek ister misiniz?</string>
-    <string name="recover_funds_instructions">Paranızı ve işlemlerinizi kurtarmak için 12 sözcüklü kurtarma parolanızı boşluklarla girin</string>
     <string name="done">Tamamlandı</string>
     <string name="transfer_confirmed">Transfer Onaylandı</string>
     <string name="transaction_details_unknown">Bilinmiyor</string>
@@ -637,14 +616,69 @@
     <string name="transaction_detail_description_hint">Bu niçindir?</string>
     <string name="transaction_detail_confirmed">Onaylandı</string>
     <string name="to_field_helper_no_dropdown">Bitcoin adresi gir</string>
-    <string name="sms_notifications_summary">Her bitcoin aldığınızda bir SMS almak için bildirimleri etkinleştirin. Sadece etiketli ve alınan adresler tetikleyici bildirimler almak için geçerlidir.</string>
     <string name="share_instructions">Bu adresi kopyalamak için dokunun. Göndericiyle e-posta veya metin mesajıyla paylaşın.</string>
     <string name="security_centre_two_fa_message">Cüzdanınıza yetkisiz erişimleri engelleyin. Cüzdanınızın güvenliğini artırmak için 2-Aşamalı Doğrulamayı etkinleştirin.</string>
     <string name="security_centre_backup_title">Paranızı yedekleyin</string>
     <string name="restore_failed">Cüzdan kurtarma başarısız oldu. Lütfen tekrar deneyin.</string>
-    <string name="recovery_passphrase">Kurtarma ifadesi</string>
     <string name="password_reveal_warning">Dikkatli olun! Bu metni göstermek şifrenizin not panonuza kopyalanmasına izin verir ve daha sonra cihazınızdaki tüm uygulamalar tarafından okunabilir. Ayrıca arkanızda bekleyen insanların da farkında olun!</string>
     <string name="password_hint_summary">Blockchain Cüzdanınız şifrenizi sunucularımıza asla sağlamaz. Bu da şifrenizin ne olduğunu bilmediğimiz ve unuttuğunuzda bunu yeniden ayarlamak için sıfırlayamadığımız anlamına gelir. Şifrenizi unutmanız durumunda doğrulanmış e-posta adresinize gönderebileceğimiz aklınızda kalacak bir şifre ipucu oluşturun.</string>
-    <string name="invalid_recovery_phrase">Geçersiz kurtarma ifadesi. Lütfen tekrar deneyin.</string>
+
+
+    <string name="recover_funds_instructions">Paranızı ve işlemlerinizi kurtarmak için 12 sözcüklü ve boşluklu yedekleme ifadenizi girin</string>
+    <string name="recovery_passphrase">Yedekleme ifadesi</string>
+    <string name="invalid_recovery_phrase">Geçersiz yedekleme ifadesi Lütfen tekrar deneyin.</string>
+    <string name="about">Blockchain Cüzdanı %1$s\n©%2$s Blockchain Luxembourg S.A.\nTüm hakları saklıdır.</string>
+    <string name="watch_only_label">(sadece izlenebilir)</string>
+    <string name="watchonly_address_receive_warning">Sadece izlenebilir bir adrese bitcoin almak üzeresiniz. Bu paraları sadece özel anahtara sahipseniz harcayabilirsiniz. Devam?</string>
+    <string name="label_name_match">Ad zaten kullanılmaktadır.</string>
+    <string name="private_key_not_matching_address">NOT: Taranmış özel anahtar sadece izlenebilir adresinizle eşleşmemektedir. Bu adresteki paranızı harcamak için lütfen doğru özel anahtarı tarayın.</string>
+    <string name="watch_only_description">Bu, sadece izlenebilir bir adrestir. Buradaki paranızı harcamak için:</string>
+    <string name="transfer_recommend">Alınan adreslerde bitcoininiz olduğu görünmektedir. Alınan adresler Yedekleme İfadesi tarafından yedenlenmez. Bu paraları güvende tutmak adına bu bakiyeleri yedeklemenize dahil etmek için transfer etmenizi tavsiye ederiz.</string>
+    <string name="disable_online_only">2 Faktörlü Kimlik Doğrulayıcısını devre dışı bırakmak için lütfen web tarayıcısından cüzdanınıza giriş yapın.</string>
+    <string name="change_password_summary">Şifreniz sunucularımızla asla paylaşılmaz, bu sebeple şifrenizi unuttuğunuz zaman sıfırlamanıza yardımcı olamıyoruz. Şifrenizi unutmanız durumunda cüzdanınıza olan erişiminizi geri almanızı sağlayan yan menüden paranızı yedeklediğinizden emin olun.</string>
+    <string name="verify_email_notice">E-posta adresinize bir doğrulama bağlantısı gönderdik. E-posta adresinizi doğrulamak için bağlantıya tıklayın.</string>
+    <string name="pairing_code_log_in">Web Cüzdan girişi yapın</string>
+    <string name="pairing_code_instruction_1">Bilgisayarınızda %1$s seçeneğine gidin.</string>
+    <string name="pairing_code_instruction_2">Cep telefonu üzerinden Oturum aç\'ı seçin</string>
+    <string name="pairing_code_instruction_3">Bilgisayarınızın kamerasını kullanıp aşağıdaki QR kodunu tarayın.</string>
+    <string name="pairing_code_show_qr">QR Kodunu Göster</string>
+    <string name="pairing_code_hide_qr">QR Kodunu Gizle</string>
+    <string name="pairing_code_warning_1">Hazır olana kadar bu kodu gizleyin.</string>
+    <string name="pairing_code_warning_2">Bu kodu güvende tutun!\nBaşkalarıyla paylaşmayın</string>
+    <string name="sms_notifications_summary">Bitcoin aldığınızda bir SMS almak için bildirimleri etkinleştirin.</string>
+    <string name="backup_header">Yedekleme İfadesi</string>
+    <string name="backup_explanation">Güvenliğiniz için Blockchain hiçbir şifreyi kayıt altına almamaktadır. Bu 12 sözcüklü Yedekleme İfadesi şifrenizi unutmanız durumunda paranıza erişmenizi sağlar. Bir kağıda yazdığınızdan ve güvenli ve emniyetli bir yerde tuttuğunuzdan emin olun. </string>
+    <string name="backup_complete_message">Şifrenizi unutmanız durumunda paranızı kurtarmak için Yedekleme İfadenizi kullanabilirsiniz. Yedekleme İfadenize erişebilen herkes bitcoinlerinize de erişebilir, bu yüzden çevrimdışı güvenli ve özel bir yerde tuttuğunuzdan emin olun.</string>
+    <string name="backup_verify_heading">Yedekleme işlemini tamamlamak için Yedekleme İfadenizdeki şu 12 sözcüğü girin.</string>
+    <string name="backup_lost_mnemonic">12 sözcüklü yedekleme ifadenizi kaybettiniz mi?</string>
+    <string name="trade_complete">İşlem Tamamlandı</string>
+    <string name="trade_complete_details">Bitcoin Satın Al işleminiz tamamlandı!</string>
+    <string name="view_details">Ayrıntıları görüntüle</string>
+    <string name="onboarding_available_now">Şimdi mevcut</string>
+    <string name="onboarding_buy_details">Doğrudan mobil cüzdanınız üzerinden bitcoin satın alın. Kolay, sorunsuz ve güvenlidir.</string>
+    <string name="onboarding_buy_performance_warning">Satın alma deneyimi cihazınız üzerinde biraz yavaş olabilir. Sabrınız için şimdiden teşekkürler.</string>
+
+    <string name="two_factor_dialog_title">Bir 2FA kodu gir</string>
+    <string name="two_factor_dialog_message_authenticator">Lütfen devam etmek için uygulamanızın kimlik tanıtıcısına geçerli bir 2FA kodu girin.</string>
+    <string name="two_factor_dialog_message_sms">Size 2FA kodunu içeren bir SMS mesajını şimdi gönderdik. Lütfen devam etmek için buraya girin.</string>
+    <string name="two_factor_dialog_hint">2FA kodu</string>
+    <string name="two_factor_null_error">2FA kodu boş olamaz</string>
+    <string name="two_factor_incorrect_error">2FA kodu yanlış</string>
+
+    <string name="confirm_payment_change_fee">Ücreti değiştir</string>
+    <string name="confirm_payment_fee_sync_error">Ücret seçenekleri sunma hatası</string>
+
+    <string name="fee_options_regular">Normal</string>
+    <string name="fee_options_priority">Öncelik</string>
+    <string name="fee_options_custom">Özel</string>
+    <string name="fee_options_regular_time">1+ saat</string>
+    <string name="fee_options_priority_time">~0–60 dakika</string>
+    <string name="fee_options_custom_warning">Sadece ileri kullanıcılar</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b </string>
+    <string name="fee_options_fee_too_low">Düşük ücret önerilmez</string>
+    <string name="fee_options_fee_too_high">Gereksiz yüksek ücret</string>
+    <string name="fee_options_advanced_warning">Bu özellik sadece ileri kullanıcılar için önerilir Özel bir ücret seçerek aşırı ödeme veya işleminizin asla onaylanmama riski yaşarsınız.</string>
+    <string name="fee_options_sat_byte_hint">sat/b </string>
+    <string name="fee_options_sat_byte_inline_hint">Normal: %1$s, Öncelik: %2$s</string>
 
 </resources>

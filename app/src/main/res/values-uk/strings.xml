@@ -180,7 +180,6 @@
     <string name="address_lookup_fail">Неможливо отримати адресу. Будь ласка, введіть адресу вручну.</string>
 
     <string name="backup_write_down_words">Зверніть увагу: ви повинні вписувати слова точно так, і в тому ж порядку, як вони з\'являтимуться на екрані.</string>
-    <string name="backup_verify_heading">Введіть наступні слова з вашої Фрази відновлення, щоб завершити процес повернення.</string>
     <string name="backup_of">з</string>
     <string name="backup_confirmed">Резервне копіювання підтверджено</string>
     <string name="backup_word_mismatch">Слова не співпадають</string>
@@ -214,7 +213,6 @@
     <string name="click">Натисніть,</string>
     <string name="to_start_sending_and_receiving_btc">щоб почати отримувати та відправляти bitcoin.</string>
 
-    <string name="watch_only_label">(тільки для перегляду)</string>
     <string name="address_book_label">(адресна книга)</string>
 
     <string name="transaction_submitted">Транзакцію завершено</string>
@@ -232,8 +230,6 @@
     <string name="upgrade_fail_heading">Збій оновлення гаманця!</string>
     <string name="upgrade_fail_info">Під час оновлення виникла помилка. Будь ласка, спробуйте пізніше.</string>
     <string name="not_sane_error">Інсталяцію вашого гаманця Blockchain перервано. Будь ласка, від\'єднайте та приєднайте свій гаманець і спробуйте ще раз або створіть новий гаманець.</string>
-
-    <string name="watchonly_address_receive_warning">Ви збираєтесь отримати bitcoin на адресу тільки для перегляду. Ви можете тільки витрачати ці кошти, якщо у вас є доступ до особистого ключа. Продовжити?</string>
 
     <string name="camera_unavailable">Камера використовується іншою програмою. Будь ласка, закрийте програму і спробуйте ще раз.</string>
 
@@ -295,16 +291,13 @@
     <string name="watch_only_import_warning">Ви збираєтесь імпортувати адресу лише для перегляду, адресу (чи скрипт ключа), збережені в гаманці без відповідного особистого ключа. Це означає, що кошти можуть витрачатись, ЛИШЕ якщо у вас є особистий ключ, який зберігається десь в іншому місці. Якщо ви не маєте збереженого особистого ключа, НЕ просіть відправляти вам bitcoin на адресу, яка тільки для перегляду.\n\nЦі опції лише для досвідчених користувачів. Продовжити? </string>
     <string name="scan_private_key">Сканувати особистий ключ</string>
     <string name="private_key_successfully_imported">Особистий ключ успішно імпортовано.</string>
-    <string name="private_key_not_matching_address">ПРИМІТКА: сканований особистий ключ не відповідає вашій адресі тільки для перегляду. Щоб витратити гроші із цієї адреси, будь ласка, відскануйте правильний ключ.</string>
     <string name="watch_only">Лише для перегляду</string>
     <string name="extended_public_key_description">Якщо ви підприємець, покажіть свій xPub і користуйтесь програмою Blockchain Merchant, щоб отримувати безпечно кошти.\n\nНікому не довіряйте свій xPub.         Той, хто має доступ до xPub, зможе бачити кошти та усі ваші транзакції. </string>
-    <string name="watch_only_description">Ця адреса тільки для перегляду. Щоб відправити кошти із вашого гаманця, будь ласка, відскануйте свій особистий ключ. </string>
     <string name="success">Успіх</string>
     <string name="default_label">За замовчуванням</string>
     <string name="try_again">Спробуйте ще раз</string>
     <string name="transfer">Переказ</string>
     <string name="transfer_funds">Переказ коштів</string>
-    <string name="transfer_recommend">Для вашої ж безпеки рекомендуємо перевести будь-які залишки коштів у ваших імпортованих адресах на свій гаманець Blockchain.</string>
     <string name="spendable_addresses">адреси для витрат</string>
 
     <string name="dont_ask_again">Не запитувати мене знову</string>
@@ -357,8 +350,6 @@
     <string name="tor_requests">Блокувати запити з мережі Tor</string>
     <string name="tor_summary">Бажаєте заблокувати доступ до гаманця з IP-адрес, які, як відомо, є частиною анонімної мережі Tor? Мережа Tor часто використовується хакерами, які намагаються отримати доступ до гаманців Blockchain.</string>
     <string name="change_password">Змінити пароль</string>
-    <string name="change_password_summary">Ваш пароль ніколи і нікуди не передається з наших серверів, а це значить, що ми не зможемо допомогти вам скинути пароль, навіть якщо ви його забудете чи втратите. Переконайтеся, що ви записали фразу для відновлення пароля, яка допоможе відновити доступ до вашого гаманця в разі втрати пароля.</string>
-    <string name="verify_email_notice">На вашу ел. адресу ми надіслати листа з верифікаційним посиланням. Натисніть на посилання, щоб підтвердити свою ел. адресу.</string>
     <string name="email_notifications">Сповіщення ел. поштою</string>
     <string name="email_notifications_summary">Отримайте сповіщення, коли вам надійдуть bitcoin.</string>
     <string name="current_password">Дійсний пароль</string>
@@ -451,7 +442,6 @@
     <string name="overview">Огляд</string>
     <string name="create_a_wallet">Створити гаманець</string>
     <string name="log_in">Вхід</string>
-    <string name="about">Гаманець Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="wallets">Гаманці</string>
     <string name="your_transactions">Транзакції відсутні</string>
     <string name="archived_label">Архівовано</string>
@@ -518,13 +508,9 @@
     <string name="onboarding_skip_all">Прпопустити все</string>
     <string name="backup_again">Зробити резервну копію знову</string>
     <string name="backup_button_start">Розпочати резервне копіювання</string>
-    <string name="backup_complete_message">Ви можете використати свою Фразу для відновлення доступу, щоб відновити свої кошти в разі втрати пароля. Будь-хто, у кого є Фраза для відновлення доступу, матиме доступ до ваших bitcoin, тому, не зберігайте її на своєму комп\'ютері, а десь в іншому безпечному та надійному місці.</string>
     <string name="backup_done">ВИКОНАНО</string>
-    <string name="backup_explanation">Для вашої безпеки Blockchain не зберігає паролі у файлі. Фраза для відновлення доступу із 12-слів надасть вам доступ до своїх коштів, якщо ви втратите свій пароль. Запишіть її на аркуші паперу і заховайте у безпечне місце. </string>
-    <string name="backup_header">Фраза для відновлення доступу</string>
     <string name="backup_header_complete">Резервне копіювання успішне</string>
     <string name="backup_last">Останнє резервне копіювання: %1$s</string>
-    <string name="backup_lost_mnemonic">Загубили фразу для відновлення доступу із 12-слів?</string>
     <string name="backup_next_word">НАСТУПНЕ СЛОВО</string>
     <string name="backup_previous_word">ПОПЕРЕДНЄ СЛОВО</string>
     <string name="backup_word">Слово</string>
@@ -559,12 +545,6 @@
     <string name="contacts_loading_failed">Завантаження контактів невдале, будь ласка, спробуйте ще раз.</string>
     <string name="contacts_name_cannot_be_empty">Неправильна назва</string>
     <string name="contacts_name_field_hint">Назва</string>
-    <string name="two_factor_dialog_title">Введіть код 2FA</string>
-    <string name="two_factor_dialog_message_authenticator">Будь ласка, щоб продовжити, введіть код 2FA зі свого автентифікуючого застосунку.</string>
-    <string name="two_factor_dialog_message_sms">Щойно ми відправили вам SMS з кодом 2FA. Щоб продовжити, введіть його ось тут.</string>
-    <string name="two_factor_dialog_hint">Код 2FA</string>
-    <string name="two_factor_null_error">Поле для введення коду 2FA не може бути пустим</string>
-    <string name="two_factor_incorrect_error">Код 2FA неправильний</string>
     <string name="contacts_payment_sent_success">Платіж відправлено! Ми сповістили вашого адресата, що ви завершили транзакцію.</string>
     <string name="contacts_payment_sent_failed_message">Під час сповіщення вашого адресата стався збій. Будь ласка, перевірте свою мережу і спробуйте ще раз.</string>
     <string name="contacts_waiting_for_address_message">Ваш адресат поінформовано, що ви хочете відправити йому bitcoin і що вам треба для цього адресу. Як тільки вам відправлять адресу, ми вас сповістимо!</string>
@@ -628,7 +608,6 @@
     <string name="creating_wallet">Створення гаманця</string>
     <string name="recover_funds">Відновлення коштів</string>
     <string name="recover_funds_warning_message">Ви завжди повинні бути спарені або увійти в систему, якщо у вас є доступ до свого ID гаманця і пароль. Відновлення ваших коштів створить новий ID гаманця. Бажаєте продовжити?</string>
-    <string name="recover_funds_instructions">Для відновлення ваших коштів та транзакцій, введіть Фразу для відновлення доступу із 12-слів.</string>
     <string name="done">Виконано</string>
     <string name="transfer_confirmed">Переказ підтверджено</string>
     <string name="transaction_details_unknown">Невідомо</string>
@@ -636,14 +615,68 @@
     <string name="transaction_detail_description_hint">Що це?</string>
     <string name="transaction_detail_confirmed">Підтверджено</string>
     <string name="to_field_helper_no_dropdown">Введіть адресу Bitcoin</string>
-    <string name="sms_notifications_summary">Увімкніть сповіщення і отримуйте СМС кожного разу, коли отримуєте bitcoins. Лише помічені та імпортовані адреси можуть отримувати сповіщення.</string>
     <string name="share_instructions">Торкніться, щоб скопіювати цю адресу. Поділіться адресою з відправником через ел. повідомлення чи СМС.</string>
     <string name="security_centre_two_fa_message">Попереджає несанкційований доступ до вашого гаманця. Увімкніть двофакторну автентифікацію, щоб підвищити безпеку гаманця.</string>
     <string name="security_centre_backup_title">Створити резервну копію своїх коштів</string>
     <string name="restore_failed">Збій відновлення гаманця Будь ласка, спробуйте ще раз</string>
-    <string name="recovery_passphrase">Фраза для відновлення доступу</string>
     <string name="password_reveal_warning">Будьте уважні! Розкриття цього тексту дозволяє скопіювати ваш пароль в буфер обміну, який потім зможуть зчитати всі програми на вашому пристрої. Будьте впевнені, що поруч з вами нікого немає!</string>
     <string name="password_hint_summary">Ваш гаманець Blockchain ніколи не повідомляє пароль нашим серверам. Це означає, що ми не знаємо ваш пароль, і ми не зможемо відновити його, якщо ви його забудете. Створіть підказку для нагадування пароля, яку ми зможемо відправити на вашу підтверджену адресу електронної пошти в разі, якщо ви забули свій пароль.</string>
-    <string name="invalid_recovery_phrase">Фраза для відновлення доступу невірна. Будь ласка, спробуйте ще раз</string>
+
+    <string name="recover_funds_instructions">Введіть 12 слів для відновлення доступу через пробіл, щоб відновити ваші кошти та транзакції</string>
+    <string name="recovery_passphrase">Фраза для відновлення доступу</string>
+    <string name="invalid_recovery_phrase">Неправильна фраза для відновлення доступу. Будь ласка, спробуйте ще раз</string>
+    <string name="about">Blockchain гаманець %1$s\n©%2$s Blockchain Luxembourg S.A.\nВсі права захищено.</string>
+    <string name="watch_only_label">(тільки для перегляду)</string>
+    <string name="watchonly_address_receive_warning">Ви збираєтесь отримати біткойн на адресу, яка дійсна тільки для перегляду. Ви можете витрачати ці кошти лише за умови, що у вас є доступ до особистого ключа. Продовжити?</string>
+    <string name="label_name_match">Ім\'я вже використовується</string>
+    <string name="private_key_not_matching_address">УВАГА: Відсканований особистий ключ не збігається з вашою адресою, яка дійсна тільки для перегляду. Щоб витрачати кошти з цієї адреси, будь ласка, відскануйте правильний особистий ключ.</string>
+    <string name="watch_only_description">Ця адреса дійсна тільки для перегляну. Щоб витрачати кошти з</string>
+    <string name="transfer_recommend">Схоже, у вас є біткойни в імпортованих адресах. Імпортовані адреси не захищені вашою фразою для відновлення доступу. Щоб захистити ці кошти, ми радимо перевести їх, щоб включити до вашої резервної копії.</string>
+    <string name="disable_online_only">Будь ласка, увійдіть до свого гаманця у браузері, щоб вимкнути двофакторну автентифікацію.</string>
+    <string name="change_password_summary">Ваш пароль ніколи не передається на наші сервери, а це означає, що ми не можемо допомогти вам відновити ваш пароль, навіть якщо ви його забудете чи втратите. Переконайтеся, що ви зробити резервну копію ваших коштів через бокове меню, що допоможе вам відновити доступ до свого гаманця, якщо ви втратите пароль.</string>
+    <string name="verify_email_notice">Ми надіслали вам листа з посиланням для підтвердження на вашу електронну адресу. Натисніть на посилання, щоб підтвердити свою електронну адресу.</string>
+    <string name="pairing_code_log_in">Увійдіть до веб-гаманця</string>
+    <string name="pairing_code_instruction_1">Перейдіть до %1$s на вашому комп\'ютері.</string>
+    <string name="pairing_code_instruction_2">Оберіть "Увійти через мобільний пристрій"</string>
+    <string name="pairing_code_instruction_3">Відскануйте QR-код нижче за допомогою камери на вашому комп\'ютері.</string>
+    <string name="pairing_code_show_qr">Показати QR-код</string>
+    <string name="pairing_code_hide_qr">Сховати QR-код</string>
+    <string name="pairing_code_warning_1">Тримайте цей код прихованим, доки не будете готові.</string>
+    <string name="pairing_code_warning_2">Тримайте цей код у безпеці!\nНікому не передавайте його.</string>
+    <string name="sms_notifications_summary">Увімкнути сповіщення, щоб отримувати повідомлення, коли вам надійшов біткойн.</string>
+    <string name="backup_header">Фраза для відновлення доступу</string>
+    <string name="backup_explanation">Blockchain не зберігає паролі в базі задля вашої безпеки. Ця фраза для відновлення доступу з 12-ти слів надасть вам доступ до ваших коштів, якщо ви втратите пароль. Запишіть її на аркуші паперу і заховайте у безпечне місце. </string>
+    <string name="backup_complete_message">Ви можете використати вашу фразу для відновлення доступу, щоб відновити кошти у випадку втрати паролю. Будь-хто з доступом до вашої фрази для відновлення доступу може отримати доступ до ваших біткойнів, тому не забувайте зберігати її поза мережею у безпечному місці.</string>
+    <string name="backup_verify_heading">Введіть слова з вашої фрази для відновлення доступу, щоб завершити процес відновлення.</string>
+    <string name="backup_lost_mnemonic">Втратили вашу фразу для відновлення доступу з 12-ти слів?</string>
+    <string name="trade_complete">Торгівлю завершено</string>
+    <string name="trade_complete_details">Процес купівлі біткойнів завершено!</string>
+    <string name="view_details">Переглянути деталі</string>
+    <string name="onboarding_available_now">Доступно зараз</string>
+    <string name="onboarding_buy_details">Купуйте біткойни через ваш мобільний гаманець. Це просто та безпечно.</string>
+    <string name="onboarding_buy_performance_warning">Процес купівлі може бути сповільнено на вашому пристрої. Заздалегідь дякуємо за ваше терпіння.</string>
+
+    <string name="two_factor_dialog_title">Введіть код двофакторної автентифікації</string>
+    <string name="two_factor_dialog_message_authenticator">Будь ласка, введіть код двофакторної автентифікації зі свого додатку-автентифікатора, щоб продовжити.</string>
+    <string name="two_factor_dialog_message_sms">Ми надіслали вам SMS з кодом двофакторної автентифікації. Будь ласка, введіть його тут.</string>
+    <string name="two_factor_dialog_hint">Код двофакторної автентифікації</string>
+    <string name="two_factor_null_error">Поле для введення коду двофакторної автентифікації не може бути пустим</string>
+    <string name="two_factor_incorrect_error">Неправильний код двофакторної автентифікації</string>
+
+    <string name="confirm_payment_change_fee">Комісія </string>
+    <string name="confirm_payment_fee_sync_error">Помилка отримання варіантів комісій</string>
+
+    <string name="fee_options_regular">Звичайна</string>
+    <string name="fee_options_priority">Пріоритетна</string>
+    <string name="fee_options_custom">Користувацька</string>
+    <string name="fee_options_regular_time">1+ год</string>
+    <string name="fee_options_priority_time">~0–60 хв</string>
+    <string name="fee_options_custom_warning">Лише для досвідчених користувачів</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b</string>
+    <string name="fee_options_fee_too_low">Низьку комісію не рекомендовано</string>
+    <string name="fee_options_fee_too_high">Невиправдано висока комісія</string>
+    <string name="fee_options_advanced_warning">Цю функцію рекомендовано тільки для досвідчених користувачів. Обираючи користувацьку комісію, ви ризикуєте переплатити або не підтвердити вашу транзакцію.</string>
+    <string name="fee_options_sat_byte_hint">sat/b</string>
+    <string name="fee_options_sat_byte_inline_hint">Звичайна: %1$s, Пріоритетна: %2$s</string>
 
 </resources>

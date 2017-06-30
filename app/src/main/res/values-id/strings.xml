@@ -180,7 +180,6 @@
     <string name="address_lookup_fail">Tidak dapat menerima alamat. Harap masukkan alamat secara manual.</string>
 
     <string name="backup_write_down_words">Penting untuk memastikan bahwa Anda menuliskan kata-kata Anda persis sebagaimana kata-kata tersebut muncul di sini dan dalam urutan ini.</string>
-    <string name="backup_verify_heading">Masukkan kata-kata berikut dari Frasa Pemulihan Anda untuk menyelesaikan proses pencadangan.</string>
     <string name="backup_of">dari</string>
     <string name="backup_confirmed">Pencadangan Dikonfirmasikan</string>
     <string name="backup_word_mismatch">Kata Tidak Sesuai</string>
@@ -214,7 +213,6 @@
     <string name="click">Klik</string>
     <string name="to_start_sending_and_receiving_btc">untuk mulai mengirim dan menerima bitcoin.</string>
 
-    <string name="watch_only_label">(melihat saja)</string>
     <string name="address_book_label">(buku alamat)</string>
 
     <string name="transaction_submitted">Transaksi selesai</string>
@@ -233,8 +231,6 @@
     <string name="upgrade_fail_heading">Peningkatan versi dompet gagal!</string>
     <string name="upgrade_fail_info">Terjadi eror saat meningkatkan versi dompet Anda. Mohon coba lagi nanti.</string>
     <string name="not_sane_error">Pemasangan Dompet Blockchain Anda belum selesai. Mohon pasangkan kembali dompet Anda atau buat dompet yang baru.</string>
-
-    <string name="watchonly_address_receive_warning">Anda akan menerima bitcoin ke alamat yang hanya dapat dilihat. Anda hanya dapat menghabiskan dana ini jika Anda memiliki akses terhadap kunci pribadi. Lanjutkan?</string>
 
     <string name="camera_unavailable">Kamera saat ini sedang digunakan oleh aplikasi lain. Mohon tutup aplikasi lain tersebut lalu coba lagi.</string>
 
@@ -296,16 +292,13 @@
     <string name="watch_only_import_warning">Anda akan mengimpor alamat yang hanya dapat dilihat, sebuah alamat (atau skrip kunci publik) yang disimpan di dalam dompet tanpa kunci pribadi yang sesuai. Hal ini berarti bahwa dana HANYA dapat digunakan jika Anda memiliki kunci pribadi yang disimpan di tempat lain. Jika Anda tidak memiliki kunci privat yang disimpan, JANGAN meminta siapa pun untuk mengirimkan bitcoin kepada Anda ke alamat yang hanya dapat dilihat.\n\nPilihan ini hanya disarankan untuk pengguna tingkat lanjut. Lanjutkan? </string>
     <string name="scan_private_key">Pindai kunci pribadi</string>
     <string name="private_key_successfully_imported">Kunci pribadi berhasil diimpor.</string>
-    <string name="private_key_not_matching_address">CATATAN: Kunci pribadi yang dipindai tidak sesuai dengan alamat Anda yang hanya dilihat. Untuk menggunakan dana Anda dari alamat ini, harap pindai kunci pribadi yang tepat.</string>
     <string name="watch_only">Dilihat saja</string>
     <string name="extended_public_key_description">Jika Anda seorang pedagang, tunjukkan xPub Anda dan gunakan aplikasi Pedagang Blockchain untuk menerima dana dengan aman dan pribadi.\n\nJaga xPub Anda tetap pribadi.         Seseorang yang memiliki akses ke xPub Anda akan dapat melihat semua dana dan transaksi Anda. </string>
-    <string name="watch_only_description">Ini adalah alamat yang hanya dapat dilihat. Untuk menggunakan dana dari dompet ini, harap pindai kunci pribadi Anda. </string>
     <string name="success">Berhasil</string>
     <string name="default_label">Default</string>
     <string name="try_again">Coba Lagi</string>
     <string name="transfer">Transfer</string>
     <string name="transfer_funds">Transfer Dana</string>
-    <string name="transfer_recommend">Untuk keamanan Anda, kami sarankan Anda untuk mentransfer saldo apa pun di alamat yang diimpor milik Anda ke dompet Blockchain Anda.</string>
     <string name="spendable_addresses">Alamat-alamat yang dapat digunakan untuk belanja</string>
 
     <string name="dont_ask_again">Jangan tanyai saya lagi.</string>
@@ -358,8 +351,6 @@
     <string name="tor_requests">Blok Permintaan Tor</string>
     <string name="tor_summary">Apakah Anda ingin memblokir alamat IP yang dikenal sebagai bagian dari jaringan Tor anonim dari mengakses dompet Anda? Jaringan Tor sering digunakan oleh peretas yang mencoba untuk mengakses dompet-dompet pengguna Blockchain.</string>
     <string name="change_password">Ubah Kata Sandi</string>
-    <string name="change_password_summary">Kata kata sandi Anda tidak pernah dibagikan dengan server kami, yang berarti kita tidak bisa mengatur ulang kata sandi jika Anda lupa. Pastikan Anda menuliskan frasa pemulihan Anda yang dapat mengembalikan akses ke dompet Anda jika kata sandi hilang.</string>
-    <string name="verify_email_notice">Kami telah mengirim link verifikasi ke alamat email Anda. Klik tautan verifikasi untuk memverifikasi alamat surel Anda.</string>
     <string name="email_notifications">Pemberitahuan Surel</string>
     <string name="email_notifications_summary">Dapatkan pemberitahuan ketika Anda menerima bitcoin.</string>
     <string name="current_password">Kata Sandi Terkini</string>
@@ -452,7 +443,6 @@
     <string name="overview">Ikhtisar</string>
     <string name="create_a_wallet">Buat sebuah dompet</string>
     <string name="log_in">Log in</string>
-    <string name="about">Dompet Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="wallets">Dompet</string>
     <string name="your_transactions">Tidak Ada Transaksi</string>
     <string name="archived_label">Diarsipkan</string>
@@ -520,13 +510,9 @@
 
     <string name="backup_again">Cadangkan lagi</string>
     <string name="backup_button_start">Mulai mencadangkan</string>
-    <string name="backup_complete_message">Anda dapat menggunakan Frase Pemulihan Anda untuk mengembalikan dana Anda jika Anda kehilangan kata sandi Anda. Siapapun dengan akses ke Frase Pemulihan Anda dapat mengakses bitcoin Anda jadi ingatlah untuk menyimpan secara offline di tempat yang aman dan nyaman.</string>
     <string name="backup_done">SELESAI</string>
-    <string name="backup_explanation">Untuk keamanan Anda, Blockchain tidak menyimpan setiap kata sandi pada berkas. Berikut ini 12 kata Frase Pemulihan yang akan memberikan akses ke dana Anda jika Anda kehilangan kata sandi. Pastikan untuk menulis di selembar kertas dan menyimpannya di suatu tempat yang aman dan nyaman. </string>
-    <string name="backup_header">Frasa Pemulihan</string>
     <string name="backup_header_complete">Cadangan Lengkap</string>
     <string name="backup_last">Cadangan terakhir: %1$s</string>
-    <string name="backup_lost_mnemonic">Anda kehilangan frasa 12 kata Anda?</string>
     <string name="backup_next_word">KATA BERIKUTNYA</string>
     <string name="backup_previous_word">KATA SEBELUMNYA</string>
     <string name="backup_word">Kata</string>
@@ -561,12 +547,6 @@
     <string name="contacts_loading_failed">Memuat kontak gagal, harap coba lagi</string>
     <string name="contacts_name_cannot_be_empty">Nama tidak sah</string>
     <string name="contacts_name_field_hint">Nama</string>
-    <string name="two_factor_dialog_title">Masukkan kode 2FA</string>
-    <string name="two_factor_dialog_message_authenticator">Harap masukkan kode 2FA yang sah dari aplikasi authenticator Anda untuk melanjutkan.</string>
-    <string name="two_factor_dialog_message_sms">Kami baru saja mengirimkan SMS berisi kode 2FA. Harap masukkan di sini untuk melanjutkan.</string>
-    <string name="two_factor_dialog_hint">Kode 2FA</string>
-    <string name="two_factor_null_error">Kode 2FA tidak dapat kosong</string>
-    <string name="two_factor_incorrect_error">Kode 2FA salah</string>
     <string name="contacts_payment_sent_success">Pembayaran dikirim! Kami telah memberitahu kontak Anda agar mereka tahu bahwa Anda telah menyelesaikan transaksi.</string>
     <string name="contacts_payment_sent_failed_message">Ada kesalahan memberitahukan kontak Anda bahwa Anda telah mengirim mereka pembayaran. Harap periksa koneksi Anda dan coba lagi.</string>
     <string name="contacts_waiting_for_address_message">Kontak Anda telah diberitahu bahwa Anda ingin mengirim mereka bitcoin dan bahwa Anda memerlukan alamat dari mereka. Kami akan memberitahu Anda ketika mereka telah mengirim alamat!</string>
@@ -630,7 +610,6 @@
     <string name="creating_wallet">Membuat dompet</string>
     <string name="recover_funds">Pulihkan Dana</string>
     <string name="recover_funds_warning_message">Anda harus selalu memasangkan atau masuk bila Anda memiliki akses ke ID Dompet dan kata sandi Anda. Memulihkan dana Anda akan membuat ID Dompet yang baru. Anda ingin melanjutkan?</string>
-    <string name="recover_funds_instructions">Masukkan 12 kata pemulihan Anda dengan spasi untuk memulihkan dana dan transaksi Anda</string>
     <string name="done">Selesai</string>
     <string name="transfer_confirmed">Transfer Dikonfirmasi</string>
     <string name="transaction_details_unknown">Tidak Dikenal</string>
@@ -638,14 +617,69 @@
     <string name="transaction_detail_description_hint">Untuk apa ini?</string>
     <string name="transaction_detail_confirmed">Dikonfirmasi</string>
     <string name="to_field_helper_no_dropdown">Masukkan alamat Bitcoin</string>
-    <string name="sms_notifications_summary">Aktifkan pemberitahuan untuk menerima SMS setiap kali Anda menerima Bitcoins. Hanya alamat yang berlabel dan alamat yang diimpor yang memenuhi syarat memicu pemberitahuan.</string>
     <string name="share_instructions">Ketuk untuk menyalin alamat ini. Bagikan ini dengan pengirim melalui email atau teks.</string>
     <string name="security_centre_two_fa_message">Mencegah akses tidak sah ke dompet Anda. Aktifkan Verifikasi 2 Langkah untuk meningkatkan keamanan dompet.</string>
     <string name="security_centre_backup_title">Cadangkan dana Anda</string>
     <string name="restore_failed">Memulihkan dompet gagal. Harap coba lagi</string>
-    <string name="recovery_passphrase">Pulihkan kata kunci</string>
     <string name="password_reveal_warning">Hati-hati! Mengungkapkan teks ini memungkinkan kata sandi Anda disalin ke clipboard, yang kemudian dapat dibaca oleh semua aplikasi pada perangkat Anda. Juga hati-hati dengan orang yang berdiri di belakang Anda!</string>
     <string name="password_hint_summary">Blockchain Wallet Anda tidak pernah memberitahukan kata sandi Anda ke server kami. Hal ini berarti kami tidak tahu apa kata sandi Anda dan kami tidak bisa mengatur ulang jika Anda lupa. Buatlah petunjuk kata sandi yang mudah diingat yang dapat kami kirimkan ke alamat email yang telah diverifikasi seandainya Anda lupa kata sandi Anda.</string>
-    <string name="invalid_recovery_phrase">Frase pemulihan tidak sah. Harap coba lagi</string>
+
+
+    <string name="recover_funds_instructions">Masukkan 12 kata cadangan Anda dengan spasi untuk memperoleh kembali dana &amp; transaksi Anda</string>
+    <string name="recovery_passphrase">Frasa cadangan</string>
+    <string name="invalid_recovery_phrase">Frasa cadangan tidak sah. Harap coba lagi</string>
+    <string name="about">Dompet Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.\nSemua hak dilindungi.</string>
+    <string name="watch_only_label">(untuk dilihat saja)</string>
+    <string name="watchonly_address_receive_warning">Anda akan menerima bitcoin pada alamat untuk dilihat saja. Anda hanya dapat menghabiskan dana ini jika Anda memiliki akses pada kunci pribadi. Lanjutkan?</string>
+    <string name="label_name_match">Nama sudah digunakan</string>
+    <string name="private_key_not_matching_address">CATATAN: kunci pribadi yang dipindai tidak sesuai dengan alamat Anda untuk dilihat saja. Untuk menggunakan dana Anda dari alamat ini, harap pindai kunci pribadi yang benar.</string>
+    <string name="watch_only_description">Ini adalah alamat untuk dilihat saja. Untuk menggunakan dana Anda dari</string>
+    <string name="transfer_recommend">Kelihatannya Anda memiliki sejumlah bitcoin pada alamat yang diimpor. Alamat yang diimpor tidak dicadangkan oleh Frasa Cadangan Anda. Untuk mengamankan dana ini, kami merekomendasikan untuk mentransfer saldo ini untuk menyertakan di cadangan Anda.</string>
+    <string name="disable_online_only">Harap masuk ke dompet Anda di peramban web untuk menonaktifkan 2FA.</string>
+    <string name="change_password_summary">Kata sandi Anda tidak pernah dibagikan dengan server kami, yang berarti kami tidak bisa mengatur ulang kata sandi Anda jika Anda melupakannya. Pastikan Anda mencadangkan dana Anda dari menu saming yang dapat memulihkan akses ke dompet Anda jika kata sandi hilang.</string>
+    <string name="verify_email_notice">Kami telah mengirim tautan verifikasi ke alamat email Anda. Klik tautan tersebut untuk memverifikasi alamat email Anda.</string>
+    <string name="pairing_code_log_in">Masuk ke Dompet Web</string>
+    <string name="pairing_code_instruction_1">Kunjungi %1$s di kmoputer Anda.</string>
+    <string name="pairing_code_instruction_2">Pilih Masuk lewat mobil</string>
+    <string name="pairing_code_instruction_3">Menggunakan kamera komputer Anda, pindai kode QR di bawah.</string>
+    <string name="pairing_code_show_qr">Tunjukkan kode QR</string>
+    <string name="pairing_code_hide_qr">Sembunyikan kode QR</string>
+    <string name="pairing_code_warning_1">Simpan kode ini yang tersembunyi sampai Anda siap.</string>
+    <string name="pairing_code_warning_2">Amankan kode ini!\nJangan berbagi dengan orang lain.</string>
+    <string name="sms_notifications_summary">Aktifkan pemberitahuan untuk menerima SMS kapa saja Anda menerima bitcoin.</string>
+    <string name="backup_header">Cadangkan Frasa</string>
+    <string name="backup_explanation">Untuk keamanan Anda, Blockchain tidak menyimpan kata sandi pada berkas. 12 kata Frasa Cadangan berikut akan memberi Anda akses ke dana Anda jika Anda kehilangan kata sandi Anda. Pastikan untuk menulis di selembar kertas dan menyimpannya di suatu tempat yang aman dan nyaman. </string>
+    <string name="backup_complete_message">Anda dapat menggunakan Frasa Cadangan Anda untuk mendapatkan kembali dana Anda jika Anda kehilangan kata sandi Anda. Siapa pun dengan akses pada Frasa Cadangan Anda dapat mengakses bitcoin Anda jadi ingat untuk menyimpannya offline di suatu tempat yang aman dan nyaman.</string>
+    <string name="backup_verify_heading">Masukkan kata-kata berikut dari Frasa Cadangan Anda untuk menyelesaikan proses pencadangan.</string>
+    <string name="backup_lost_mnemonic">Kehilangan 12 kata frasa cadangan Anda?</string>
+    <string name="trade_complete">Perdagangan Selesai</string>
+    <string name="trade_complete_details">Perdagangan Beli Bitcoin Anda telah diselesaikan!</string>
+    <string name="view_details">Lihat perincian</string>
+    <string name="onboarding_available_now">Tersedia sekarang</string>
+    <string name="onboarding_buy_details">Beli bitcoin secara langsung dari dompet mobil Anda. Mudah, lancar dan aman.</string>
+    <string name="onboarding_buy_performance_warning">Pengalaman beli mungkin sedikit lamban di perangkat Anda. Terima kasih sebelumnya untuk kesabaran Anda.</string>
+
+    <string name="two_factor_dialog_title">Masukkan kode 2FA</string>
+    <string name="two_factor_dialog_message_authenticator">Harap masukkan kode 2FA yang sah dari aplikasi authenticator Anda untuk melanjutkan.</string>
+    <string name="two_factor_dialog_message_sms">Kami baru saja mengirimkan SMS berisi kode 2FA. Harap masukkan di sini untuk melanjutkan.</string>
+    <string name="two_factor_dialog_hint">Kode 2FA</string>
+    <string name="two_factor_null_error">Kode 2FA tidak boleh kosong</string>
+    <string name="two_factor_incorrect_error">Kode 2FA salah</string>
+
+    <string name="confirm_payment_change_fee">Ubah biaya</string>
+    <string name="confirm_payment_fee_sync_error">Kesalaha mendapatkan opsi gratis</string>
+
+    <string name="fee_options_regular">Reguler</string>
+    <string name="fee_options_priority">Prioritas</string>
+    <string name="fee_options_custom">Penyesuaian</string>
+    <string name="fee_options_regular_time">1+ jam</string>
+    <string name="fee_options_priority_time">~0–60 menit</string>
+    <string name="fee_options_custom_warning">Pengguna lanjutan saja</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b</string>
+    <string name="fee_options_fee_too_low">Biaya rendah tidak direkomendasikan</string>
+    <string name="fee_options_fee_too_high">Biaya tinggi yang tidak perlu</string>
+    <string name="fee_options_advanced_warning">Fitur ini direkomendasikan untuk pengguna lanjutan saja. Dengan memilih biaya penyesuaian, Anda berisiko membayar lebih atau transaksi Anda tidak akan dikonfirmasikan.</string>
+    <string name="fee_options_sat_byte_hint">sat/b</string>
+    <string name="fee_options_sat_byte_inline_hint">Reguler: %1$s, Prioritas: %2$s</string>
 
 </resources>
