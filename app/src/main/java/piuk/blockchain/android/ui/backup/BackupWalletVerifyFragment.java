@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,6 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentBackupWalletVerifyBinding;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.util.BackupWalletUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 public class BackupWalletVerifyFragment extends Fragment implements BackupVerifyViewModel.DataListener {
@@ -32,23 +30,17 @@ public class BackupWalletVerifyFragment extends Fragment implements BackupVerify
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_backup_wallet_verify, container, false);
         viewModel = new BackupVerifyViewModel(this);
 
-        Bundle bundle = getArguments();
-        String secondPassword = null;
-        if (bundle != null) {
-            secondPassword = bundle.getString("second_password");
-        }
-
-        final List<Pair<Integer, String>> confirmSequence = new BackupWalletUtil().getConfirmSequence(secondPassword);
+        final List<kotlin.Pair<Integer, String>> confirmSequence = viewModel.getBackupConfirmSequence();
         String[] mnemonicRequestHint = getResources().getStringArray(R.array.mnemonic_word_requests);
 
-        binding.etFirstRequest.setHint(mnemonicRequestHint[confirmSequence.get(0).first]);
-        binding.etSecondRequest.setHint(mnemonicRequestHint[confirmSequence.get(1).first]);
-        binding.etThirdRequest.setHint(mnemonicRequestHint[confirmSequence.get(2).first]);
+        binding.etFirstRequest.setHint(mnemonicRequestHint[confirmSequence.get(0).component1()]);
+        binding.etSecondRequest.setHint(mnemonicRequestHint[confirmSequence.get(1).component1()]);
+        binding.etThirdRequest.setHint(mnemonicRequestHint[confirmSequence.get(2).component1()]);
 
         binding.verifyAction.setOnClickListener(v -> {
-            if (binding.etFirstRequest.getText().toString().trim().equals(confirmSequence.get(0).second)
-                    && binding.etSecondRequest.getText().toString().trim().equalsIgnoreCase(confirmSequence.get(1).second)
-                    && binding.etThirdRequest.getText().toString().trim().equalsIgnoreCase(confirmSequence.get(2).second)) {
+            if (binding.etFirstRequest.getText().toString().trim().equals(confirmSequence.get(0).component2())
+                    && binding.etSecondRequest.getText().toString().trim().equalsIgnoreCase(confirmSequence.get(1).component2())
+                    && binding.etThirdRequest.getText().toString().trim().equalsIgnoreCase(confirmSequence.get(2).component2())) {
 
                 viewModel.onVerifyClicked();
             } else {
@@ -57,6 +49,11 @@ public class BackupWalletVerifyFragment extends Fragment implements BackupVerify
         });
 
         return binding.getRoot();
+    }
+
+    @Override
+    public Bundle getPageBundle() {
+        return getArguments();
     }
 
     @Override

@@ -14,6 +14,8 @@ import piuk.blockchain.android.databinding.FragmentBackupStartBinding;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+import static piuk.blockchain.android.ui.backup.BackupWalletWordListFragment.ARGUMENT_SECOND_PASSWORD;
+
 public class BackupWalletStartingFragment extends Fragment {
 
     public static final String TAG = BackupWalletStartingFragment.class.getSimpleName();
@@ -40,7 +42,7 @@ public class BackupWalletStartingFragment extends Fragment {
                     public void onSecondPasswordValidated(String validateSecondPassword) {
                         Fragment fragment = new BackupWalletWordListFragment();
                         Bundle args = new Bundle();
-                        args.putString("second_password", validateSecondPassword);
+                        args.putString(ARGUMENT_SECOND_PASSWORD, validateSecondPassword);
                         fragment.setArguments(args);
                         loadFragment(fragment);
                     }
