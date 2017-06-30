@@ -15,9 +15,11 @@ class BackupWalletWordListPresenter : BasePresenter<BackupWalletWordListView>() 
     internal var secondPassword: String? = null
     private var mnemonic: List<String>? = null
 
-    override fun onViewReady() {
+    init {
         Injector.getInstance().dataManagerComponent.inject(this)
+    }
 
+    override fun onViewReady() {
         val bundle = view.getPageBundle()
         secondPassword = bundle?.getString(ARGUMENT_SECOND_PASSWORD)
 

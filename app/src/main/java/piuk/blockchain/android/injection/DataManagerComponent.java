@@ -7,7 +7,7 @@ import piuk.blockchain.android.ui.account.AccountEditViewModel;
 import piuk.blockchain.android.ui.account.AccountViewModel;
 import piuk.blockchain.android.ui.auth.PasswordRequiredViewModel;
 import piuk.blockchain.android.ui.auth.PinEntryViewModel;
-import piuk.blockchain.android.ui.backup.BackupVerifyViewModel;
+import piuk.blockchain.android.ui.backup.BackupVerifyPresenter;
 import piuk.blockchain.android.ui.backup.BackupWalletViewModel;
 import piuk.blockchain.android.ui.backup.BackupWalletWordListPresenter;
 import piuk.blockchain.android.ui.backup.ConfirmFundsTransferViewModel;
@@ -99,7 +99,7 @@ public interface DataManagerComponent {
 
     void inject(WebSocketService webSocketService);
 
-    void inject(BackupVerifyViewModel backupVerifyViewModel);
+    void inject(BackupVerifyPresenter backupVerifyViewModel);
 
     void inject(ContactPaymentDialogViewModel contactPaymentDialogViewModel);
 

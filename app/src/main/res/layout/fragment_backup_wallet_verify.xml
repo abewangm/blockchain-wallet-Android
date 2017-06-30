@@ -1,56 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="72dp"
+        android:paddingRight="72dp">
 
-        <LinearLayout
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="72dp"
-            android:paddingRight="72dp">
+            android:paddingBottom="16dp"
+            android:paddingTop="32dp"
+            android:text="@string/backup_verify_heading"
+            android:textColor="@color/primary_gray_dark"
+            android:textSize="14sp" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="16dp"
-                android:paddingTop="32dp"
-                android:text="@string/backup_verify_heading"
-                android:textColor="@color/primary_gray_dark"
-                android:textSize="14sp" />
+        <EditText
+            android:id="@+id/edittext_first_word"
+            style="@style/RecoveryPhraseEditText">
 
-            <EditText
-                android:id="@+id/etFirstRequest"
-                style="@style/RecoveryPhraseEditText">
+            <requestFocus />
+        </EditText>
 
-                <requestFocus />
-            </EditText>
+        <EditText
+            android:id="@+id/edittext_second_word"
+            style="@style/RecoveryPhraseEditText" />
 
-            <EditText
-                android:id="@+id/etSecondRequest"
-                style="@style/RecoveryPhraseEditText" />
-
-            <EditText
-                android:id="@+id/etThirdRequest"
-                style="@style/RecoveryPhraseEditText" />
-
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/verify_action"
-            style="@style/ButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginLeft="32dp"
-            android:layout_marginRight="32dp"
-            android:layout_marginTop="24dp"
-            android:text="@string/verify"
-            android:theme="@style/ButtonLightBlueTheme" />
+        <EditText
+            android:id="@+id/edittext_third_word"
+            style="@style/RecoveryPhraseEditText" />
 
     </LinearLayout>
-</layout>
+
+    <Button
+        android:id="@+id/button_verify"
+        style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:layout_marginTop="24dp"
+        android:text="@string/verify"
+        android:theme="@style/ButtonLightBlueTheme" />
+
+</LinearLayout>
