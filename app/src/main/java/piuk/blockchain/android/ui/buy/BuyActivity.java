@@ -5,6 +5,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.CookieManager;
+import android.webkit.WebViewClient;
 
 import com.facebook.device.yearclass.YearClass;
 
@@ -48,6 +49,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
 
         frontendJavascriptManager = new FrontendJavascriptManager(this, binding.webview);
 
+        binding.webview.setWebViewClient(new WebViewClient());
         binding.webview.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
         binding.webview.getSettings().setJavaScriptEnabled(true);
         binding.webview.restoreState(getIntent().getParcelableExtra(MainActivity.WEB_VIEW_STATE_KEY));

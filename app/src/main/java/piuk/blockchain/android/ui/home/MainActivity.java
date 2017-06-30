@@ -32,6 +32,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
@@ -772,6 +773,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         }
         // Setup buy WebView
         buyWebView = new WebView(this);
+        buyWebView.setWebViewClient(new WebViewClient());
         buyWebView.getSettings().setJavaScriptEnabled(true);
         buyWebView.loadUrl(viewModel.getCurrentServerUrl() + "wallet/#/intermediate");
 
