@@ -180,7 +180,6 @@
     <string name="address_lookup_fail">Não foi possível identificar o endereço. Por favor, digite o endereço.</string>
 
     <string name="backup_write_down_words">É importante anotar as palavras exatamente como aparecem aqui e nesta mesma ordem.</string>
-    <string name="backup_verify_heading">Insira as seguintes palavras de sua Frase de Recuperação para concluir o processo de backup.</string>
     <string name="backup_of">de</string>
     <string name="backup_confirmed">Backup Confirmado</string>
     <string name="backup_word_mismatch">A palavra não corresponde</string>
@@ -214,7 +213,6 @@
     <string name="click">Clique</string>
     <string name="to_start_sending_and_receiving_btc">para iniciar o envio e o recebimento de bitcoins.</string>
 
-    <string name="watch_only_label">(watch only)</string>
     <string name="address_book_label">(catálogo de endereços)</string>
 
     <string name="transaction_submitted">Transação concluída</string>
@@ -232,8 +230,6 @@
     <string name="upgrade_fail_heading">Erro na atualização da carteira!</string>
     <string name="upgrade_fail_info">Houve um erro ao atualizar sua carteira. Por favor, tente novamente mais tarde.</string>
     <string name="not_sane_error">A instalação da Carteira Blockchain está incompleta. Por favor, pareie a sua carteira novamente ou crie uma nova.</string>
-
-    <string name="watchonly_address_receive_warning">Você está prestes a receber bitcoins num endereço watch only. Você só poderá usar estes fundos se tiver acesso à chave privada. Deseja continuar?</string>
 
     <string name="camera_unavailable">A câmera está sendo usada por outro aplicativo. Por favor, feche o outro aplicativo e tente novamente.</string>
 
@@ -295,16 +291,13 @@
     <string name="watch_only_import_warning">Você está prestes a importar um endereço watch only, um endereço (ou script de chave pública) armazenado na carteira sem a chave privada correspondente. Isto significa que os fundos podem ser utilizados SOMENTE se você tiver a chave privada armazenada em algum lugar. Se você não tiver a chave privada armazenada, NÃO instrua ninguém a enviar bitcoins para o endereço watch only.\n\nEstas opções são recomendadas apenas para usuários avançados. Deseja continuar? </string>
     <string name="scan_private_key">Escanear chave privada</string>
     <string name="private_key_successfully_imported">Chave privada importada com êxito.</string>
-    <string name="private_key_not_matching_address">OBSERVAÇÃO: A chave privada escaneada não corresponde ao seu endereço watch only. Para utilizar os fundos deste endereço, escaneie a chave privada correta.</string>
     <string name="watch_only">Watch Only</string>
     <string name="extended_public_key_description">Se você é um estabelecimento, mostre seu xPub e use o Blockchain Merchant App para receber fundos de forma privada e segura. \n\nMantenha seu xPub privado.         Quem tiver acesso ao seu xPub poderá visualizar todos os seus fundos e transações. </string>
-    <string name="watch_only_description">Este endereço é watch only. Para utilizar os fundos desta carteira, escaneie sua chave privada. </string>
     <string name="success">Sucesso</string>
     <string name="default_label">Padrão</string>
     <string name="try_again">Tente Novamente</string>
     <string name="transfer">Transferir</string>
     <string name="transfer_funds">Transferir fundos</string>
-    <string name="transfer_recommend">Para sua segurança, recomendamos transferir o saldo dos endereços importados para a Carteira Blockchain.</string>
     <string name="spendable_addresses">endereços passíveis de gasto de bitcoins</string>
 
     <string name="dont_ask_again">Não pergunte novamente.</string>
@@ -357,8 +350,6 @@
     <string name="tor_requests">Bloquear solicitações Tor</string>
     <string name="tor_summary">Gostaria de bloquear IPs conhecidos por serem da rede anônima Tor de acessarem sua carteira? A rede Tor é frequentemente utilizada por hackers tentando acessar carteiras de usuários Blockchain.</string>
     <string name="change_password">Alterar Senha</string>
-    <string name="change_password_summary">Sua senha nunca é compartilhada com os nossos servidores. Por isso, nós não poderemos ajudá-lo a redefinir a senha se você esquecê-la. Certifique-se de anotar sua Frase de Recuperação, que restaura o acesso a sua carteira em caso de perda da senha.</string>
-    <string name="verify_email_notice">Enviamos ao seu e-mail um link de verificação. Clique no link de verificação para confirmar o seu endereço de e-mail.</string>
     <string name="email_notifications">Notificações por e-mail</string>
     <string name="email_notifications_summary">Seja notificado ao receber bitcoin.</string>
     <string name="current_password">Senha atual</string>
@@ -451,7 +442,6 @@
     <string name="overview">Resumo</string>
     <string name="create_a_wallet">Criar uma carteira</string>
     <string name="log_in">Entrar</string>
-    <string name="about">Carteira Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="wallets">Carteiras</string>
     <string name="your_transactions">Nenhuma Transação</string>
     <string name="archived_label">Arquivado</string>
@@ -519,13 +509,9 @@
 
     <string name="backup_again">Fazer backup novamente</string>
     <string name="backup_button_start">Iniciar backup</string>
-    <string name="backup_complete_message">Você pode usar sua Frase de Recuperação para restaurar seus fundos, caso você perca sua senha. Qualquer pessoa com acesso a sua Frase de Recuperação pode acessar seu bitcoin. Por isso, lembre-se de mantê-la em algum lugar seguro off-line.</string>
     <string name="backup_done">PRONTO</string>
-    <string name="backup_explanation">Para sua segurança, Blockchain não mantém senhas em seus arquivos. A seguinte Frase de Recuperação de 12 palavras te dará acesso a seus fundos, caso você perca sua senha. Certifique-se de escrevê-la em um papel para mantê-la em um lugar seguro. </string>
-    <string name="backup_header">Frase de Recuperação</string>
     <string name="backup_header_complete">Backup Completo</string>
     <string name="backup_last">Último backup: %1$s</string>
-    <string name="backup_lost_mnemonic">Perdeu sua Frase de Recuperação de 12 palavras?</string>
     <string name="backup_next_word">PRÓXIMA PALAVRA</string>
     <string name="backup_previous_word">PALAVRA ANTERIOR</string>
     <string name="backup_word">Palavra</string>
@@ -560,12 +546,6 @@
     <string name="contacts_loading_failed">Falha ao carregar contatos. Por favor, tente novamente</string>
     <string name="contacts_name_cannot_be_empty">Nome inválido</string>
     <string name="contacts_name_field_hint">Nome</string>
-    <string name="two_factor_dialog_title">Digite o código 2FA</string>
-    <string name="two_factor_dialog_message_authenticator">Por favor, digite um código 2FA válido a partir de seu app autenticador para prosseguir.</string>
-    <string name="two_factor_dialog_message_sms">Acabamos de enviar a você um SMS com um código 2FA. Por favor, digite-o aqui para prosseguir.</string>
-    <string name="two_factor_dialog_hint">Código 2FA</string>
-    <string name="two_factor_null_error">Código 2FA não pode estar vazio</string>
-    <string name="two_factor_incorrect_error">Código 2FA incorreto</string>
     <string name="contacts_payment_sent_success">Pagamento enviado! Enviamos uma notificação ao seu contato para informar que você concluiu a transação.</string>
     <string name="contacts_payment_sent_failed_message">Houve um erro ao informar ao seu contato que você lhe enviou um pagamento. Por favor, verifique sua conexão e tente novamente.</string>
     <string name="contacts_waiting_for_address_message">Informamos ao seu contato que você deseja lhe enviar bitcoin e está solicitando um endereço. Nós te informaremos quando ele enviar um endereço!</string>
@@ -629,7 +609,6 @@
     <string name="creating_wallet">Criando carteira</string>
     <string name="recover_funds">Recuperar fundos</string>
     <string name="recover_funds_warning_message">Você deve fazer login ou parear seu dispositivo sempre que tiver acesso ao seu ID de Carteira e senha. Ao recuperar seus fundos, um novo ID de Carteira será criado. Gostaria de continuar?</string>
-    <string name="recover_funds_instructions">Digite suas 12 palavras de recuperação, com espaços, para recuperar seus fundos e transações</string>
     <string name="done">Pronto</string>
     <string name="transfer_confirmed">Transferência Confirmada</string>
     <string name="transaction_details_unknown">Desconhecido</string>
@@ -637,14 +616,69 @@
     <string name="transaction_detail_description_hint">Para que serve isso?</string>
     <string name="transaction_detail_confirmed">Confirmado</string>
     <string name="to_field_helper_no_dropdown">Digitar endereço de Bitcoin</string>
-    <string name="sms_notifications_summary">Ative as notificações para receber um SMS sempre que receber bitcoins. Apenas endereços etiquetados e endereços importados podem gerar notificações.</string>
     <string name="share_instructions">Toque para copiar este endereço. Compartilhe-o com o remetente por e-mail ou mensagem de texto.</string>
     <string name="security_centre_two_fa_message">Evite o acesso não autorizado a sua carteira. Ative a Verificação de 2 Passos para aumentar a segurança de sua carteira.</string>
     <string name="security_centre_backup_title">Fazer backup dos fundos</string>
     <string name="restore_failed">Falha ao restaurar a carteira. Por favor, tente novamente</string>
-    <string name="recovery_passphrase">Frase de Recuperação</string>
     <string name="password_reveal_warning">Tenha cuidado! Ao revelar este texto, sua senha poderá ser copiada à área de transferência, que poderá ser lida por todos os aplicativos em seu dispositivo. Também tome cuidado com pessoas atrás de você!</string>
     <string name="password_hint_summary">Sua Carteira Blockchain nunca informa sua senha aos nossos servidores. Isso significa que nós não temos ideia de qual é a sua senha e não podemos recuperá-la se você a esquecer. Crie uma dica de senha fácil de lembrar, que você receberá no endereço de e-mail verificado, caso você esqueça sua senha.</string>
-    <string name="invalid_recovery_phrase">Frase de Recuperação inválida. Por favor, tente novamente</string>
+
+
+    <string name="recover_funds_instructions">Insira suas 12 palavras de backup com espaços para recuperar seus fundos e transações</string>
+    <string name="recovery_passphrase">Frase de backup</string>
+    <string name="invalid_recovery_phrase">Frase de backup inválida. Por favor, tente novamente</string>
+    <string name="about">Carteira Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.\nTodos os direitos reservados.</string>
+    <string name="watch_only_label">(somente visualização)</string>
+    <string name="watchonly_address_receive_warning">Você está prestes a receber bitcoin em um endereço somente visualização. Você só poderá usar estes fundos se tiver acesso à chave privada. Deseja continuar?</string>
+    <string name="label_name_match">Nome já em uso</string>
+    <string name="private_key_not_matching_address">NOTA: a chave privada escaneada não corresponde ao seu endereço somente visualização. Para utilizar os fundos deste endereço, escaneie a chave privada correta.</string>
+    <string name="watch_only_description">Esse endereço é somente visualização. Para gastar seus fundos de</string>
+    <string name="transfer_recommend">Parece que você tem alguns bitcoins em endereços importados. Endereços importados não são protegidos pela nossa Frase de Backup. Para proteger esses fundos, recomendamos transferir esses saldos para incluí-los no seu backup.</string>
+    <string name="disable_online_only">Por favor, efetue login em sua carteira no navegador de internet para desativar a 2FA.</string>
+    <string name="change_password_summary">Sua senha nunca é compartilhada com os nossos servidores. Por isso, nós não poderemos ajudá-lo a redefinir a senha se você a esquecer. Certifique-se de fazer backup dos seus fundos a partir do menu lateral, o que pode restaurar o acesso à sua carteira caso você perca a sua senha.</string>
+    <string name="verify_email_notice">Enviamos ao seu e-mail um link de verificação. Clique no link para confirmar o seu endereço de e-mail.</string>
+    <string name="pairing_code_log_in">Entrar na Carteira Web</string>
+    <string name="pairing_code_instruction_1">Acesse %1$s em seu computador.</string>
+    <string name="pairing_code_instruction_2">Selecione Entrar pelo celular</string>
+    <string name="pairing_code_instruction_3">Usando a câmera do seu computador, escaneie o código QR abaixo.</string>
+    <string name="pairing_code_show_qr">Exibir código QR</string>
+    <string name="pairing_code_hide_qr">Ocultar código QR</string>
+    <string name="pairing_code_warning_1">Mantenha esse código oculto até você estar pronto.</string>
+    <string name="pairing_code_warning_2">Mantenha esse código em segurança!\nNão o compartilhe com ninguém.</string>
+    <string name="sms_notifications_summary">Ative as notificações para receber um SMS quando receber bitcoin.</string>
+    <string name="backup_header">Frase de Recuperação</string>
+    <string name="backup_explanation">Para sua segurança, a Blockchain não mantém nenhuma senha em registro. A seguinte Frase de Backup com 12 palavras lhe dará acesso aos seus fundos caso você perca a sua senha. Certifique-se de escrevê-la em um papel para mantê-la em um lugar seguro. </string>
+    <string name="backup_complete_message">Você pode usar a sua Frase de Backup para restaurar seus fundos caso perca a sua senha. Qualquer um com acesso à sua Frase de Backup pode acessar seus bitcoins. Portanto, lembre-se de guardá-la off-line, em um lugar seguro.</string>
+    <string name="backup_verify_heading">Insira as palavras a seguir da sua Frase de Backup para completar o processo de backup.</string>
+    <string name="backup_lost_mnemonic">Perdeu a sua frase de backup com 12 palavras?</string>
+    <string name="trade_complete">Negociação Concluída</string>
+    <string name="trade_complete_details">Sua negociação de Compra de Bitcoin foi concluída!</string>
+    <string name="view_details">Ver detalhes</string>
+    <string name="onboarding_available_now">Já disponível</string>
+    <string name="onboarding_buy_details">Compre bitcoin diretamente da sua carteira móvel. É simples, fácil e seguro.</string>
+    <string name="onboarding_buy_performance_warning">A experiência de compra pode ser um pouco lenta em seu dispositivo. Agradecemos antecipadamente pela sua paciência.</string>
+
+    <string name="two_factor_dialog_title">Digite o código 2FA</string>
+    <string name="two_factor_dialog_message_authenticator">Por favor, digite um código 2FA válido a partir de seu app autenticador para prosseguir.</string>
+    <string name="two_factor_dialog_message_sms">Acabamos de enviar a você um SMS com um código 2FA. Por favor, digite-o aqui para prosseguir.</string>
+    <string name="two_factor_dialog_hint">Código 2FA</string>
+    <string name="two_factor_null_error">Código 2FA não pode estar vazio</string>
+    <string name="two_factor_incorrect_error">Código 2FA incorreto</string>
+
+    <string name="confirm_payment_change_fee">Taxa de alteração</string>
+    <string name="confirm_payment_fee_sync_error">Erro ao obter as opções de taxa</string>
+
+    <string name="fee_options_regular">Normal</string>
+    <string name="fee_options_priority">Prioritário</string>
+    <string name="fee_options_custom">Personalizado</string>
+    <string name="fee_options_regular_time">Mais de 1 hora</string>
+    <string name="fee_options_priority_time">~ 0 a 60 min</string>
+    <string name="fee_options_custom_warning">Apenas usuários avançados</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b</string>
+    <string name="fee_options_fee_too_low">Taxa baixa não recomendada</string>
+    <string name="fee_options_fee_too_high">Taxa desnecessariamente alta</string>
+    <string name="fee_options_advanced_warning">Esse recurso é recomendado apenas para usuários avançados. Ao escolher uma taxa personalizada, você arrisca pagar em excesso ou que a sua transação nunca seja confirmada.</string>
+    <string name="fee_options_sat_byte_hint">sat/b</string>
+    <string name="fee_options_sat_byte_inline_hint">Normal: %1$s, Prioritário: %2$s</string>
 
 </resources>

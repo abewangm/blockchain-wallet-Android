@@ -180,7 +180,6 @@
     <string name="address_lookup_fail">アドレスの取得ができませんでした。手動でアドレスを入力してください。</string>
 
     <string name="backup_write_down_words">画面の通り、語句が表示されている順番で書き留めることが重要です。</string>
-    <string name="backup_verify_heading">バックアッププロセスを完了するため、次の語句をリカバリーフレーズから入力してバックアッププロセスを完了してください。</string>
     <string name="backup_of">の</string>
     <string name="backup_confirmed">バックアップが確認されました</string>
     <string name="backup_word_mismatch">語句が一致しません</string>
@@ -214,7 +213,6 @@
     <string name="click">クリック</string>
     <string name="to_start_sending_and_receiving_btc">してビットコインの送受信を開始。</string>
 
-    <string name="watch_only_label">(閲覧のみ)</string>
     <string name="address_book_label">(アドレスブック)</string>
 
     <string name="transaction_submitted">取引完了</string>
@@ -232,8 +230,6 @@
     <string name="upgrade_fail_heading">財布のアップグレードに失敗しました！</string>
     <string name="upgrade_fail_info">財布のアップグレードにエラーが発生しました。後で再試行してください。</string>
     <string name="not_sane_error">ブロックチェーンウォレットのインストールが完了していません。財布のペアリングを再度行うか、新規作成を行ってください。</string>
-
-    <string name="watchonly_address_receive_warning">閲覧のみアドレスにビットコインを受信しようとしています。秘密鍵にアクセスがある場合のみこれらの資金を使用できます。続行しますか？</string>
 
     <string name="camera_unavailable">このカメラは現在別のアプリケーションで開かれています。別のアプリケーションを閉じて再試行してください。</string>
 
@@ -295,16 +291,13 @@
     <string name="watch_only_import_warning">閲覧のみアドレス、対応する秘密鍵のない、財布に保存したアドレス（もしくは秘密鍵スクリプト）をインポートしようとしています。これは秘密鍵が別の場所に保管されている場合のみ、資金を使用できるという意味です。秘密鍵が保管されていない場合、閲覧のみアドレスにビットコインが送信されないように注意してください。\n\nこれらのオプションは上級ユーザーにのみ推奨されています。続行しますか？ </string>
     <string name="scan_private_key">秘密鍵をスキャン</string>
     <string name="private_key_successfully_imported">秘密鍵のインポートに成功しました。</string>
-    <string name="private_key_not_matching_address">注意: スキャンされた秘密鍵は閲覧のみアドレスに対応しません。このアドレスから資金を使用するには、正しい秘密鍵をスキャンしてください。</string>
     <string name="watch_only">閲覧のみ</string>
     <string name="extended_public_key_description">あなたが商人である場合は、xPubを表示し、ブロックチェーンマーチャントアプリを使用して安全・プライベートに資金を受信してください。\n\nxPubのプライバシーを維持してください。あなたのxPubにアクセスのある人は、あなたの全ての資金や取引を閲覧できます。 </string>
-    <string name="watch_only_description">これは閲覧のみアドレスです。この財布から資金を使用するには秘密鍵をスキャンしてください。 </string>
     <string name="success">成功です</string>
     <string name="default_label">既定</string>
     <string name="try_again">再試行してください</string>
     <string name="transfer">移動</string>
     <string name="transfer_funds">資金の移動</string>
-    <string name="transfer_recommend">安全のため、インポートされたアドレスの残高はすべてブロックチェーンに移動することをおすすめします。</string>
     <string name="spendable_addresses">使用できるアドレス</string>
 
     <string name="dont_ask_again">今後表示しない</string>
@@ -357,8 +350,6 @@
     <string name="tor_requests">Torリクエストをブロック</string>
     <string name="tor_summary">Tor匿名ネットワークの一部として認識されているIPアドレスのあなたの財布へのアクセスをブロックしますか？Torネットワークはブロックチェーンユーザーの財布への不正アクセスに頻繁に利用されることが知られています。</string>
     <string name="change_password">パスワードを変更</string>
-    <string name="change_password_summary">あなたのパスワードが当社サーバーに共有されることはありません。よって、パスワードを忘れた場合でも当社がリセットを行うことはできません。パスワードを紛失した場合にアクセスを復元するためのリカバリーフレーズを書き留めておいてください。</string>
-    <string name="verify_email_notice">メールアドレスに認証リンクが送信されました。認証リンクをクリックしてメールアドレスを認証してください。</string>
     <string name="email_notifications">メール通知</string>
     <string name="email_notifications_summary">ビットコインを受信する際に通知を受ける。</string>
     <string name="current_password">現在のパスワード</string>
@@ -451,7 +442,6 @@
     <string name="overview">概要</string>
     <string name="create_a_wallet">ウォレットを作成</string>
     <string name="log_in">ログイン</string>
-    <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="wallets">ウォレット</string>
     <string name="your_transactions">取引なし</string>
     <string name="archived_label">アーカイブ済み</string>
@@ -519,13 +509,9 @@
 
     <string name="backup_again">再度バックアップする</string>
     <string name="backup_button_start">バックアップを開始する</string>
-    <string name="backup_complete_message">リカバリーフレーズを使用するとパスワードを紛失した場合も資金を復元できます。リカバリーフレーズを知っている人は誰でもビットコインにアクセスできるため、安全な場所に厳重に保管してください。</string>
     <string name="backup_done">完了</string>
-    <string name="backup_explanation">安全のため、Blockchainはパスワードを保管しておりません。次の12のリカバリーフレーズを使用するとパスワードを紛失した場合も資金にアクセスできます。メモ帳などに書き残し、安全な場所に厳重に保管してください。 </string>
-    <string name="backup_header">リカバリーフレーズ</string>
     <string name="backup_header_complete">バックアップ完了</string>
     <string name="backup_last">最後のバックアップ: %1$s</string>
-    <string name="backup_lost_mnemonic">12語句のリカバリーフレーズをなくしましたか？</string>
     <string name="backup_next_word">次の語句</string>
     <string name="backup_previous_word">前の語句</string>
     <string name="backup_word">語句</string>
@@ -560,12 +546,6 @@
     <string name="contacts_loading_failed">連絡先の読み込みに失敗しました。再試行してください</string>
     <string name="contacts_name_cannot_be_empty">無効な名前</string>
     <string name="contacts_name_field_hint">名称</string>
-    <string name="two_factor_dialog_title">2FAコードを入力する</string>
-    <string name="two_factor_dialog_message_authenticator">認証アプリから有効な2FAコードを入力して続行してください。</string>
-    <string name="two_factor_dialog_message_sms">2FAコードが記載されたSMSが送信されました。ここに入力して続行してください。</string>
-    <string name="two_factor_dialog_hint">2FAコード</string>
-    <string name="two_factor_null_error">2FAコードの入力は必須です</string>
-    <string name="two_factor_incorrect_error">2FAコードが間違っています</string>
     <string name="contacts_payment_sent_success">決済が送信されました！連絡先の相手に取引の完了が通知されました。</string>
     <string name="contacts_payment_sent_failed_message">連絡先の相手への取引の完了の通知が失敗しました。接続を確認して再試行してください。</string>
     <string name="contacts_waiting_for_address_message">ビットコインの送信について、さらに取引の完了にはアドレスが必要なことが連絡先の相手に通知されました。相手がアドレスを送信するとあなたに通知されます！</string>
@@ -629,7 +609,6 @@
     <string name="creating_wallet">ウォレットを作成</string>
     <string name="recover_funds">資金を復元</string>
     <string name="recover_funds_warning_message">ウォレットIDおよびパスワードにアクセスがある場合、ペアリングもしくはログインを常に行ってください。資金を復元すると新規ウォレットIDが作成されます。続行しますか？</string>
-    <string name="recover_funds_instructions">資金や取引を復元するには、12のリカバリー単語を空白を含めて入力してください</string>
     <string name="done">完了</string>
     <string name="transfer_confirmed">送金が完了しました</string>
     <string name="transaction_details_unknown">不明</string>
@@ -637,14 +616,69 @@
     <string name="transaction_detail_description_hint">これは何ですか？</string>
     <string name="transaction_detail_confirmed">確認済み</string>
     <string name="to_field_helper_no_dropdown">ビットコインアドレスを入力してください</string>
-    <string name="sms_notifications_summary">通知を有効にするとビットコインを受信する度にSMSが送信されます。ラベル付けされたアドレスやインポートされたアドレスのみ通知のトリガーに有効です。</string>
     <string name="share_instructions">タップしてこのアドレスをコピー。メールもしくはテキストで送信者と共有</string>
     <string name="security_centre_two_fa_message">ウォレットへの不正アクセスを防ぎます。2段階認証を有効にしてウォレットの安全性を向上させます。</string>
     <string name="security_centre_backup_title">資金をバックアップする</string>
     <string name="restore_failed">ウォレットの復元に失敗しました。再試行してください</string>
-    <string name="recovery_passphrase">リカバリーパスフレーズ</string>
     <string name="password_reveal_warning">ご注意ください！このテキストを表示してクリップボードへのコピーを許可すると、デバイス上のすべてのアプリで読み取りが可能となります。背後にいる人にも注意してください！</string>
     <string name="password_hint_summary">ブロックチェーンウォレットは決してパスワードをサーバーに送信することはありません。当社ではお客様のパスワードを保管しておらず、忘れた場合でもこちらからリセットを行うことはできません。覚えやすいパスワードのヒントを作成すると、パスワードを忘れた際に当社から認証済みのメールアドレスに送信されます。</string>
-    <string name="invalid_recovery_phrase">無効なリカバリーフレーズです。再試行してください</string>
+
+
+    <string name="recover_funds_instructions">資金やトランザクションを復元するにはスペースと共に12個のバックアップワードを入力してください</string>
+    <string name="recovery_passphrase">バックアップフレーズ</string>
+    <string name="invalid_recovery_phrase">無効なバックアップフレーズです。再試行してください</string>
+    <string name="about">Blockchainウォレット%1$s\n©%2$sBlockchain Luxembourg S.A.\n全著作権所有。</string>
+    <string name="watch_only_label">(読み取り専用)</string>
+    <string name="watchonly_address_receive_warning">読み取り専用アドレスにビットコインを受け取ろうとしています。これらの資金は秘密鍵にアクセスがある場合のみ使用できます。続行しますか？</string>
+    <string name="label_name_match">名前はすでに使用されています</string>
+    <string name="private_key_not_matching_address">注: スキャンした秘密鍵は読み取り専用アドレスに対応するものではありません。このアドレスから資金を使用するには、正しい秘密鍵をスキャンしてください。</string>
+    <string name="watch_only_description">これは読み取り専用アドレスです。送金するには</string>
+    <string name="transfer_recommend">インポートしたアドレスにビットコインがあるようです。インポートっしたアドレスはバックアップフレーズで保護されていません。これらの資金の安全性を確実にするには、バックアップにこれらの残高の移行を含めることを推奨します。</string>
+    <string name="disable_online_only">ウェブブラウザからウォレットにログインして2FAを無効にしてください。</string>
+    <string name="change_password_summary">パスワードは当社サーバーと共有されることはありません。よって、パスワードを忘れた場合でも当社がパスワードをリセットすることはできません。パスワードを紛失した場合もウォレットへのアクセスを復元できるよう、サイドメニューから資金をバックアップするようにしてください。</string>
+    <string name="verify_email_notice">メールアドレスに認証リンクが送信されました。リンクをクリックしてメールアドレスを認証してください。</string>
+    <string name="pairing_code_log_in">ウェブウォレットにログイン</string>
+    <string name="pairing_code_instruction_1">コンピューターから%1$sにアクセスしてください。</string>
+    <string name="pairing_code_instruction_2">モバイルからログインを選択</string>
+    <string name="pairing_code_instruction_3">コンピューターのカメラを使用して以下のQRコードをスキャンしてください。</string>
+    <string name="pairing_code_show_qr">QRコードを表示する</string>
+    <string name="pairing_code_hide_qr">QRコードを非表示にする</string>
+    <string name="pairing_code_warning_1">準備ができるまでコードを表示しないでください。</string>
+    <string name="pairing_code_warning_2">コードを安全に保管してください！\n第三者と共有しないでください。</string>
+    <string name="sms_notifications_summary">通知を有効にしてビットコインを受け取る際に毎回SMSを受け取る。</string>
+    <string name="backup_header">バックアップフレーズ</string>
+    <string name="backup_explanation">安全のため、Blockchainはパスワードを保管しておりません。次の12の単語から成るバックアップフレーズを使用するとパスワードを忘れた場合でも資金にアクセスできるようになります。メモ帳などに書き残し、安全な場所に厳重に保管してください。 </string>
+    <string name="backup_complete_message">バックアップフレーズを使用するとパスワードを忘れた場合でも資金を復元できるようになります。バックアップフレーズを使用すると誰でもビットコインにアクセスすることができます。オフラインの安全な場所に厳重に保管してください。</string>
+    <string name="backup_verify_heading">バックアップフレーズから次の単語を入力し、バックアップ処理を完了してください。</string>
+    <string name="backup_lost_mnemonic">12の単語から成るバックアップフレーズを紛失しましたか？</string>
+    <string name="trade_complete">取引完了</string>
+    <string name="trade_complete_details">ビットコイン購入の取引が完了しました！</string>
+    <string name="view_details">詳細を表示</string>
+    <string name="onboarding_available_now">現在利用可能</string>
+    <string name="onboarding_buy_details">モバイルウォレットからビットコインを直接購入。シンプル、スムーズ、安全です。</string>
+    <string name="onboarding_buy_performance_warning">お使いのデバイスでは購入処理の速度が遅くなる場合があります。お待ちいただきありがとうございます。</string>
+
+    <string name="two_factor_dialog_title">2FAコードを入力する</string>
+    <string name="two_factor_dialog_message_authenticator">認証アプリから有効な2FAコードを入力して続行してください。</string>
+    <string name="two_factor_dialog_message_sms">2FAコードが記載されたSMSが送信されました。ここに入力して続行してください。</string>
+    <string name="two_factor_dialog_hint">2FAコード</string>
+    <string name="two_factor_null_error">2FAコードの入力は必須です</string>
+    <string name="two_factor_incorrect_error">2FAコードが間違っています</string>
+
+    <string name="confirm_payment_change_fee">変更手数料</string>
+    <string name="confirm_payment_fee_sync_error">手数料オプションの取得にエラーが発生しました</string>
+
+    <string name="fee_options_regular">通常</string>
+    <string name="fee_options_priority">優先</string>
+    <string name="fee_options_custom">カスタム</string>
+    <string name="fee_options_regular_time">１時間以上</string>
+    <string name="fee_options_priority_time">0～60分</string>
+    <string name="fee_options_custom_warning">上級ユーザーのみ</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b</string>
+    <string name="fee_options_fee_too_low">低額の手数料は推奨されません</string>
+    <string name="fee_options_fee_too_high">不必要に高額な手数料です</string>
+    <string name="fee_options_advanced_warning">この機能は上級ユーザー専用です。カスタム手数料を選択すると、過払いや取引が完了しないなどのおそれがあります。</string>
+    <string name="fee_options_sat_byte_hint">sat/b</string>
+    <string name="fee_options_sat_byte_inline_hint">標準: %1$s, 優先: %2$s</string>
 
 </resources>

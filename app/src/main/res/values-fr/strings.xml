@@ -180,7 +180,6 @@
     <string name="address_lookup_fail">L\’adresse n’a pas pu être récupérée. Veuillez entrer l\'adresse manuellement.</string>
 
     <string name="backup_write_down_words">Il est important de veiller à écrire les mots exactement comme ils apparaissent ici et dans cet ordre.</string>
-    <string name="backup_verify_heading">Pour terminer le processus de récupération, saisissez les mots suivants de votre phrase de récupération.</string>
     <string name="backup_of">de</string>
     <string name="backup_confirmed">Procédure de récupération sécurisée confirmée</string>
     <string name="backup_word_mismatch">Le mot ne correspond pas</string>
@@ -214,7 +213,6 @@
     <string name="click">Cliquez</string>
     <string name="to_start_sending_and_receiving_btc">pour commencer à envoyer et recevoir des bitcoins.</string>
 
-    <string name="watch_only_label">(lecture seule)</string>
     <string name="address_book_label">(carnet d\'adresses)</string>
 
     <string name="transaction_submitted">Transaction terminée</string>
@@ -232,8 +230,6 @@
     <string name="upgrade_fail_heading">La mise à jour du portefeuille a échoué !</string>
     <string name="upgrade_fail_info">Une erreur s\'est produite lors de la mise à jour de votre portefeuille. Veuillez réessayer plus tard.</string>
     <string name="not_sane_error">L\’installation de votre portefeuille Blockchain est incomplète. Veuillez de nouveau jumeler votre portefeuille ou en créer un nouveau.</string>
-
-    <string name="watchonly_address_receive_warning">Vous êtes sur le point de recevoir des bitcoins sur une adresse en lecture seule. Vous pouvez dépenser ces fonds uniquement si vous avez accès à la clé privée. Continuer ?</string>
 
     <string name="camera_unavailable">L\’appareil photo est actuellement ouvert par une autre application. Veuillez fermer l\'autre application et réessayer.</string>
 
@@ -295,16 +291,13 @@
     <string name="watch_only_import_warning">Vous êtes sur le point d\'importer une adresse en lecture seule. C\'est une adresse (ou clé publique) stockée dans le portefeuille sans la clé privée lui correspondant. Cela signifie que les fonds pourront être utilisés UNIQUEMENT si vous détenez la clé privée dans un autre endroit. Si vous n\'avez pas enregistré la clé privée, NE demandez JAMAIS à qui que ce soit de vous envoyer des bitcoin à cette adresse en lecture seule.\n\nSeuls les utilisateurs avancés devraient utiliser ces options. Continuer ? </string>
     <string name="scan_private_key">Scannez la clé privée</string>
     <string name="private_key_successfully_imported">Clé privée importée avec succès.</string>
-    <string name="private_key_not_matching_address">REMARQUE : la clé privée qui a été scannée ne correspond pas à l\'adresse en lecture seule. Pour dépenser vos fonds depuis cette adresse, veuillez scanner la clé privée correcte.</string>
     <string name="watch_only">Lecture seule</string>
     <string name="extended_public_key_description">Si vous êtes un marchand, montrez votre xPub et utilisez l\'application « Blockchain Marchand » pour recevoir des fonds de manière sécurisée et en privé.\n\n Ne rendez pas votre xPub publique.         Une personne ayant accès à votre xPub sera en mesure de voir tous vos fonds et transactions. </string>
-    <string name="watch_only_description">Cette adresse est en mode lecture seule. Pour dépenser les fonds de ce portefeuille, veuillez scanner votre clé privée. </string>
     <string name="success">Succès</string>
     <string name="default_label">Par défaut</string>
     <string name="try_again">Réessayez</string>
     <string name="transfer">Transférer</string>
     <string name="transfer_funds">Transférer des fonds</string>
-    <string name="transfer_recommend">Pour votre sécurité, nous vous recommandons de transférer les soldes de vos adresses importées dans votre portefeuille Blockchain.</string>
     <string name="spendable_addresses">adresses disponibles</string>
 
     <string name="dont_ask_again">Ne me posez plus la question.</string>
@@ -357,8 +350,6 @@
     <string name="tor_requests">Bloquer les requêtes de Tor</string>
     <string name="tor_summary">Souhaitez-vous bloquer les adresses IP connues pour faire partie du réseau anonyme Tor pour les empêcher d\'accéder à votre portefeuille ? Le réseau Tor est fréquemment utilisé par des hackers qui tentent d\'accéder aux portefeuilles des utilisateurs de Blockchain.</string>
     <string name="change_password">Changer le mot de passe</string>
-    <string name="change_password_summary">Votre mot de passe n\'est jamais partagé avec nos serveurs, ce qui signifie que nous ne pouvons pas vous aider à le réinitialiser si vous l\'oubliez. Assurez-vous d\’écrire votre phrase de récupération grâce à laquelle vous pouvez récupérer l\'accès à votre portefeuille en cas de perte de votre mot de passe.</string>
-    <string name="verify_email_notice">Nous avons envoyé un lien de vérification à votre adresse e-mail. Cliquez sur le lien de vérification pour vérifier votre adresse e-mail.</string>
     <string name="email_notifications">Notifications par e-mail</string>
     <string name="email_notifications_summary">Soyez notifié quand vous recevez des bitcoin.</string>
     <string name="current_password">Mot de passe actuel</string>
@@ -451,7 +442,6 @@
     <string name="overview">Vue d\'ensemble</string>
     <string name="create_a_wallet">Créer un portefeuille</string>
     <string name="log_in">Se connecter</string>
-    <string name="about">Portefeuille Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="wallets">Portefeuilles</string>
     <string name="your_transactions">Pas de transactions</string>
     <string name="archived_label">Archivé</string>
@@ -519,13 +509,9 @@
 
     <string name="backup_again">Sauvegarder à nouveau</string>
     <string name="backup_button_start">Lancer la sauvegarde</string>
-    <string name="backup_complete_message">Vous pouvez utiliser votre phrase de récupération pour restaurer vos fonds au cas où vous perdriez votre mot de passe. Toute personne ayant accès à votre phrase de récupération peut accéder à vos bitcoins. Alors notez-la par écrit et conservez-la en lieu sûr.</string>
     <string name="backup_done">C\'EST FAIT</string>
-    <string name="backup_explanation">Pour votre sécurité, Blockchain ne conserve aucun mot de passe dans ses fichiers. La phrase de récupération suivante de 12 mots vous donnera accès à vos fonds si vous perdez votre mot de passe. Veillez à la noter par écrit et à la conserver en lieu sûr. </string>
-    <string name="backup_header">Phrase de récupération</string>
     <string name="backup_header_complete">Sauvegarde terminée</string>
     <string name="backup_last">Dernière sauvegarde : %1$s</string>
-    <string name="backup_lost_mnemonic">Vous avez perdu votre phrase de récupération de 12 mots ?</string>
     <string name="backup_next_word">MOT SUIVANT</string>
     <string name="backup_previous_word">MOT PRÉCÉDENT</string>
     <string name="backup_word">Mot</string>
@@ -560,12 +546,6 @@
     <string name="contacts_loading_failed">Le chargement des contacts a échoué, veuillez réessayer</string>
     <string name="contacts_name_cannot_be_empty">Nom invalide</string>
     <string name="contacts_name_field_hint">Nom</string>
-    <string name="two_factor_dialog_title">Insérer le code 2FA</string>
-    <string name="two_factor_dialog_message_authenticator">Veuillez insérer un code 2FA valide fourni par votre app d\'authentification pour continuer</string>
-    <string name="two_factor_dialog_message_sms">Nous venons de vous envoyer un SMS contenant un code 2FA. Veuillez l\'insérer ici pour continuer.</string>
-    <string name="two_factor_dialog_hint">Code 2FA</string>
-    <string name="two_factor_null_error">Le code 2FA ne peut être vide</string>
-    <string name="two_factor_incorrect_error">Code 2FA erroné</string>
     <string name="contacts_payment_sent_success">Paiement envoyé ! Nous avons notifié à votre contact que vous avez effectué la transaction.</string>
     <string name="contacts_payment_sent_failed_message">Une erreur est survenue lors de la notification à votre contact de votre envoi d\'un paiement. Veuillez vérifier votre connexion et réessayez.</string>
     <string name="contacts_waiting_for_address_message">Votre contact a été informé que vous souhaitez lui envoyer une somme en bitcoin et que vous avez besoin de son adresse. Nous vous informerons dès l\'envoi de cette adresse !</string>
@@ -629,7 +609,6 @@
     <string name="creating_wallet">Création du portefeuille</string>
     <string name="recover_funds">Récupérer les fonds</string>
     <string name="recover_funds_warning_message">Vous devriez toujours jumeler votre appareil ou vous connecter si vous avez accès à l\'identifiant de votre portefeuille et mot de passe. Un nouvel identifiant portefeuille est créé lorsque vous récupérez vos fonds. Souhaitez-vous continuer ?</string>
-    <string name="recover_funds_instructions">Pour récupérer vos fonds et vos transactions, vous devez saisir vos 12 mots de récupération avec des espaces</string>
     <string name="done">C\'est fait !</string>
     <string name="transfer_confirmed">Transfert confirmé</string>
     <string name="transaction_details_unknown">Inconnu</string>
@@ -637,15 +616,68 @@
     <string name="transaction_detail_description_hint">À quoi ça sert ?</string>
     <string name="transaction_detail_confirmed">Confirmé</string>
     <string name="to_field_helper_no_dropdown">Saisir l\'adresse Bitcoin</string>
-    <string name="sms_notifications_summary">Activez les notifications pour recevoir un SMS chaque fois que vous recevez des bitcoins. Seules les adresses libellées et les adresses importées peuvent déclencher des notifications.</string>
     <string name="share_instructions">Toucher pour copier cette adresse. Partagez-la avec l\'expéditeur par e-mail ou SMS.</string>
     <string name="security_centre_two_fa_message">Empêche tout accès non autorisé à votre portefeuille. Activez l\'authentification à 2 facteurs pour renforcer la sécurité du portefeuille.</string>
     <string name="security_centre_backup_title">Sauvegardez vos fonds</string>
     <string name="restore_failed">La restauration du portefeuille a échoué. Veuillez réessayer</string>
-    <string name="recovery_passphrase">Phrase secrète de récupération</string>
     <string name="password_reveal_warning">Soyez prudent ! Si vous révélez cette phrase, votre mot de passe peut être copié dans le presse-papier et lu ensuite par toutes les applications présentes sur votre appareil. Faites également attention aux personnes qui sont près de vous !</string>
     <string name="password_hint_summary">Votre portefeuille Blockchain ne communique jamais votre mot de passe à nos serveurs. Cela signifie que nous ne connaissons pas du tout votre mot de passe et que nous ne pouvons pas le réinitialiser si vous l\'oubliez. Créez un indice de mot de passe facile à retenir que nous pouvons envoyer à votre adresse e-mail vérifiée au cas où vous oublieriez votre mot de passe.</string>
-    <string name="invalid_recovery_phrase">Phrase de récupération erronée. Veuillez réessayer</string>
 
 
+    <string name="recover_funds_instructions">Entrez vos 12 mots de récupération avec les espaces pour récupérer vos fonds et transactions.</string>
+    <string name="recovery_passphrase">Phrase de récupération</string>
+    <string name="invalid_recovery_phrase">Phrase de récuperation non valide. Veuillez réessayer</string>
+    <string name="about">Portefeuille Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.\nTous droits réservés.</string>
+    <string name="watch_only_label">(lecture seule)</string>
+    <string name="watchonly_address_receive_warning">Vous allez recevoir des bitcoin à une adresse en lecture seule. Vous pouvez dépenser ces fonds uniquement si vous avez accès à la clé privée. Continuer ?</string>
+    <string name="label_name_match">Nom déjà utilisé</string>
+    <string name="private_key_not_matching_address">REMARQUE : La clé privée scannée ne correspond pas à votre adresse en lecture seule. Pour dépenser vos fonds depuis cette adresse, veuillez scanner la clé privée correcte.</string>
+    <string name="watch_only_description">Il s\'agit d\'une adresse en lecture seule.  Pour dépenser vos fonds depuis</string>
+    <string name="transfer_recommend">Il semble que vous ayez des bitcoins dans ces adresses importées. Les adresses importées ne sont pas sécurisées par votre Phrase de Récupération. Pour assurer ces fonds, nous vous recommandons de transférer ces soldes pour les inclure dans votre sauvegarde.</string>
+    <string name="disable_online_only">Veuillez vous connecter à votre portefeuille dans votre navigateur internet pour désactiver le 2FA.</string>
+    <string name="change_password_summary">Votre mot de passe n\'est jamais partagé avec nos serveurs, ce qui signifie que nous ne pouvons pas vous aider à le réinitialiser si vous l\'oubliez. Assurez-vous de sécuriser vos fonds depuis le menu latéral ce qui permettra de restaurer l\'accès à votre portefeuille au cas où vous perdiez le mot de passe</string>
+    <string name="verify_email_notice">Nous avons envoyé un lien de vérification à votre adresse e-mail. Cliquez sur ce lien pour vérifier votre adresse e-mail.</string>
+    <string name="pairing_code_log_in">Se connecter au Portefeuille Web</string>
+    <string name="pairing_code_instruction_1">Aller à %1$s sur votre ordinateur.</string>
+    <string name="pairing_code_instruction_2">Sélectionner Se connecter via mobile</string>
+    <string name="pairing_code_instruction_3">Avec la caméra de votre ordinateur, scannez le code QR ci-dessous.</string>
+    <string name="pairing_code_show_qr">Montrer le code QR</string>
+    <string name="pairing_code_hide_qr">Cacher le code QR</string>
+    <string name="pairing_code_warning_1">Cacher ce code jusqu\'à ce que vous soyez prêt.</string>
+    <string name="pairing_code_warning_2">Conserver ce code dans un endroit sûr. Ne le partagez avec personne.</string>
+    <string name="sms_notifications_summary">Activer les notifications pour recevoir un SMS quand vous recevez des bitcoins.</string>
+    <string name="backup_header">Phrase de récupération</string>
+    <string name="backup_explanation">Pour votre sécurité, Blockchain ne conserve aucun mot de passe dans ses fichiers. La Phrase de Récupération à 12 mots suivante vous donnera accès à vos fonds si vous perdez votre mot de passe. Veillez à la noter par écrit et à la conserver en lieu sûr. </string>
+    <string name="backup_complete_message">Vous pouvez utiliser votre Phrase de Récupération pour restaurer vos fonds si vous perdez votre mot de passe. Toute personne ayant connaissance de votre Phrase de Récupération peut accéder à vos bitcoins, souvenez-vous donc de la conserver hors-ligne dans un endroit sûr.</string>
+    <string name="backup_verify_heading">Entrez les mots suivants de votre Phrase de Récupération pour terminer le processus de sauvegarde.</string>
+    <string name="backup_lost_mnemonic">Vous avez perdu votre phrase de récupération à 12 mots ?</string>
+    <string name="trade_complete">Transaction Terminée</string>
+    <string name="trade_complete_details">Votre transaction Bitcoin est terminée !</string>
+    <string name="view_details">Voir les détails</string>
+    <string name="onboarding_available_now">Disponible dès maintenant</string>
+    <string name="onboarding_buy_details">Achetez des bitcoins directement depuis votre portefeuille mobile. C\'est simple, fluide et sûr.</string>
+    <string name="onboarding_buy_performance_warning">L\'expérience d\'achat peut être un peu lente sur votre dispositif. D-avance, merci de votre patience.</string>
+
+    <string name="two_factor_dialog_title">Insérer le code 2FA</string>
+    <string name="two_factor_dialog_message_authenticator">Veuillez insérer un code 2FA valide fourni par votre app d\'authentification pour continuer</string>
+    <string name="two_factor_dialog_message_sms">Nous venons de vous envoyer un SMS contenant un code 2FA. Veuillez l\'insérer ici pour continuer.</string>
+    <string name="two_factor_dialog_hint">Code 2FA</string>
+    <string name="two_factor_null_error">Le code 2FA ne peut être vide</string>
+    <string name="two_factor_incorrect_error">Code 2FA erroné</string>
+
+    <string name="confirm_payment_change_fee">Changer les frais</string>
+    <string name="confirm_payment_fee_sync_error">Erreur lors du chargement des options de frais</string>
+
+    <string name="fee_options_regular">Standard</string>
+    <string name="fee_options_priority">Priorité</string>
+    <string name="fee_options_custom">Personnalisé</string>
+    <string name="fee_options_regular_time">1+ heure</string>
+    <string name="fee_options_priority_time">~0–60 min</string>
+    <string name="fee_options_custom_warning">Utilisateurs avancés uniquement</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b</string>
+    <string name="fee_options_fee_too_low">Frais bas non recommandés</string>
+    <string name="fee_options_fee_too_high">Frais inutilement élevés</string>
+    <string name="fee_options_advanced_warning">Ce fonctionnalité n\'est recommandée que pour les utilisateurs avancés. En choisissant des frais personnalisés, vous risquez de payer votre transaction trop chère ou de ne pas la voir se confirmer.</string>
+    <string name="fee_options_sat_byte_hint">sat/b</string>
+    <string name="fee_options_sat_byte_inline_hint">Normal : %1$s, Priorité : %2$s</string>
 </resources>

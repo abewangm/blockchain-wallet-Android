@@ -1,7 +1,5 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import android.util.Log;
-
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.services.ExchangeService;
