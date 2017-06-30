@@ -38,22 +38,16 @@ public class BuyDataManager {
             // TODO: 14/06/2017 In the future, use the Metadata node to restore the master seed
             return Observable.just(false);
         } else {
-            return Observable.combineLatest(
-                    onboardingDataManager.isRolloutAllowed(),
-                    onboardingDataManager.getIfSepaCountry(),
-                    getIsInvited(),
-                    (allowRollout, isSepa, isInvited) -> allowRollout && (isSepa || isInvited));
-        }
-    }
 
-    private Observable<Boolean> getIsInvited() {
-        return settingsDataManager.initSettings(
-                payloadDataManager.getWallet().getGuid(),
-                payloadDataManager.getWallet().getSharedKey())
-                .map(settings -> {
-                    // TODO: implement settings.invited.sfox
-                    return false;
-                });
+            return onboardingDataManager.getIfSepaCountry()
+                    .flatMap(isSepa -> {
+                        if(isSepa) {
+                            return onboardingDataManager.isRolloutAllowed();
+                        } else {
+                            return Observable.just(false);
+                        }
+                    });
+        }
     }
 
     public void reloadExchangeData() {
