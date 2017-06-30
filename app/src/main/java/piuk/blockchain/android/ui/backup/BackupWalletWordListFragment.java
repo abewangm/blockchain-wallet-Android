@@ -4,6 +4,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,11 +12,13 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import java.util.List;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentBackupWordListBinding;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.BackupWalletUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -36,6 +39,12 @@ public class BackupWalletWordListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_backup_word_list, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         Bundle bundle = getArguments();
         if (bundle != null) {
@@ -52,6 +61,12 @@ public class BackupWalletWordListFragment extends Fragment {
         animEnterFromLeft = AnimationUtils.loadAnimation(getActivity(), R.anim.enter_from_left);
 
         mnemonic = new BackupWalletUtil().getMnemonic(secondPassword);
+        if (mnemonic == null) {
+            ToastCustom.makeText(getContext(), getString(R.string.unexpected_error), Toast.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
+            getActivity().finish();
+            return;
+        }
+
         if (currentWordIndex == mnemonic.size()) {
             currentWordIndex = 0;
         }
@@ -151,7 +166,6 @@ public class BackupWalletWordListFragment extends Fragment {
             currentWordIndex--;
         });
 
-        return binding.getRoot();
     }
 
     @Override

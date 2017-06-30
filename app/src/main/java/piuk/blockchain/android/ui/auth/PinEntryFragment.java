@@ -37,7 +37,7 @@ import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
 @SuppressWarnings("WeakerAccess")
-public class PinEntryFragment extends Fragment implements PinEntryViewModel.DataListener  {
+public class PinEntryFragment extends Fragment implements PinEntryViewModel.DataListener {
 
     public static final String KEY_VALIDATING_PIN_FOR_RESULT = "validating_pin";
     public static final String KEY_VALIDATED_PIN = "validated_pin";
@@ -166,16 +166,16 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
 
     @Override
     public void showKeyboard() {
-        if (binding.keyboard.getVisibility() == View.INVISIBLE) {
-            Animation bottomUp = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_up);
+        if (getActivity() != null && binding.keyboard.getVisibility() == View.INVISIBLE) {
+            Animation bottomUp = AnimationUtils.loadAnimation(getActivity(), R.anim.bottom_up);
             binding.keyboard.startAnimation(bottomUp);
             binding.keyboard.setVisibility(View.VISIBLE);
         }
     }
 
     private void hideKeyboard() {
-        if (binding.keyboard.getVisibility() == View.VISIBLE) {
-            Animation bottomUp = AnimationUtils.loadAnimation(getContext(), R.anim.top_down);
+        if (getActivity() != null && binding.keyboard.getVisibility() == View.VISIBLE) {
+            Animation bottomUp = AnimationUtils.loadAnimation(getActivity(), R.anim.top_down);
             binding.keyboard.startAnimation(bottomUp);
             binding.keyboard.setVisibility(View.INVISIBLE);
         }

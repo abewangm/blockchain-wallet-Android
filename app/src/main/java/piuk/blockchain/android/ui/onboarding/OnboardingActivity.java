@@ -56,20 +56,24 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
 
     @Override
     public void showFingerprintPrompt() {
-        dismissDialog();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.content_frame, FingerprintPromptFragment.newInstance())
-                .commit();
+        if (!isFinishing()) {
+            dismissDialog();
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, FingerprintPromptFragment.newInstance())
+                    .commit();
+        }
     }
 
     @Override
     public void showEmailPrompt() {
-        dismissDialog();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.content_frame, EmailPromptFragment.newInstance(viewModel.getEmail()))
-                .commit();
+        if (!isFinishing()) {
+            dismissDialog();
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, EmailPromptFragment.newInstance(viewModel.getEmail()))
+                    .commit();
+        }
     }
 
     @Override
@@ -84,36 +88,40 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
 
     @Override
     public void showFingerprintDialog(String pincode) {
-        FingerprintDialog dialog = FingerprintDialog.Companion.newInstance(pincode, FingerprintStage.REGISTER_FINGERPRINT);
-        //noinspection AnonymousInnerClassMayBeStatic
-        dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
-            @Override
-            public void onAuthenticated(String data) {
-                dialog.dismissAllowingStateLoss();
-                viewModel.setFingerprintUnlockEnabled(true);
-                showEmailPrompt();
-            }
+        if (!isFinishing()) {
+            FingerprintDialog dialog = FingerprintDialog.Companion.newInstance(pincode, FingerprintStage.REGISTER_FINGERPRINT);
+            //noinspection AnonymousInnerClassMayBeStatic
+            dialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
+                @Override
+                public void onAuthenticated(String data) {
+                    dialog.dismissAllowingStateLoss();
+                    viewModel.setFingerprintUnlockEnabled(true);
+                    showEmailPrompt();
+                }
 
-            @Override
-            public void onCanceled() {
-                dialog.dismissAllowingStateLoss();
-                viewModel.setFingerprintUnlockEnabled(true);
-            }
-        });
+                @Override
+                public void onCanceled() {
+                    dialog.dismissAllowingStateLoss();
+                    viewModel.setFingerprintUnlockEnabled(true);
+                }
+            });
 
-        dialog.show(getSupportFragmentManager(), FingerprintDialog.TAG);
+            dialog.show(getSupportFragmentManager(), FingerprintDialog.TAG);
+        }
     }
 
     @Override
     public void showEnrollFingerprintsDialog() {
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.fingerprint_no_fingerprints_added)
-                .setCancelable(true)
-                .setPositiveButton(R.string.yes, (dialog, which) ->
-                        startActivityForResult(new Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS), 0))
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        if (!isFinishing()) {
+            new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.app_name)
+                    .setMessage(R.string.fingerprint_no_fingerprints_added)
+                    .setCancelable(true)
+                    .setPositiveButton(R.string.yes, (dialog, which) ->
+                            startActivityForResult(new Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS), 0))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        }
     }
 
     @Override
