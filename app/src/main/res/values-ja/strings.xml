@@ -435,9 +435,6 @@
     <string name="swipe_receive_preference_summary">このオプションを有効にするとPIN画面で左にスワイプするだけで受信アドレスが表示され、ビットコインの受信がさらに高速になります。5つのアドレスが連続してロードされ、その後新規アドレスを表示するにはログインが必要となります。</string>
     <string name="swipe_receive_no_addresses">現在さらにアドレスを読み込むことはできません。アプリにログインするとさらに読み込むことができます。</string>
 
-    <string name="survey_message">ウォレットの使用法を改善するための簡単なアンケートへのご回答をお願いします。\n\n皆様のご意見は大変重要です！</string>
-    <string name="survey_positive_button">アンケートを受ける</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">概要</string>
     <string name="create_a_wallet">ウォレットを作成</string>

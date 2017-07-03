@@ -435,9 +435,6 @@
     <string name="swipe_receive_preference_summary">Включите этот параметр, чтобы открыть адрес получения, когда проводите по экрану PIN-кода влево. Так получение биткойнов станет еще быстрее. Будут последовательно загружены пять адресов, после чего необходимо выполнить вход в систему, чтобы были показаны новые адреса.</string>
     <string name="swipe_receive_no_addresses">В данный момент нельзя загрузить больше адресов. Чтобы загрузить больше, войдите в приложение.</string>
 
-    <string name="survey_message">Не могли бы вы принять участие в небольшом опросе, чтобы помочь нам улучшить ваш опыт взаимодействия с кошельком?\n\nМы ценим ваше мнение!</string>
-    <string name="survey_positive_button">Принять участие в опросе</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Обзор</string>
     <string name="create_a_wallet">Создать кошелек</string>

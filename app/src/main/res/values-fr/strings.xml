@@ -435,9 +435,6 @@
     <string name="swipe_receive_preference_summary">Activez cette option si vous souhaitez voir l\'adresse du destinataire lorsque vous faites glisser votre doigt à gauche de l\'écran du PIN. Cela vous permet des recevoir des bitcoin encore plus rapidement. Cinq adresses seront chargées consécutivement, après quoi vous devrez vous connecter pour afficher les nouvelles adresses.</string>
     <string name="swipe_receive_no_addresses">Aucune adresse supplémentaire ne peut être chargée actuellement. Connectez-vous à l\'appli pour charger plus d\'adresses.</string>
 
-    <string name="survey_message">Souhaitez-vous répondre à un court questionnaire pour améliorer votre expérience de portefeuille ? \n\nVos commentaires sont les bienvenus !</string>
-    <string name="survey_positive_button">Répondre au questionnaire</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Vue d\'ensemble</string>
     <string name="create_a_wallet">Créer un portefeuille</string>

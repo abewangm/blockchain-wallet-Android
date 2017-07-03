@@ -435,9 +435,6 @@
     <string name="swipe_receive_preference_summary">Włącz tę opcję, aby odkryć adres odbioru, przesuwając w lewo na ekranie kodu PIN, co przyspieszy otrzymywanie bitcoinów. Pięć adresów zostanie kolejno załadowanych, po czym wymagane będzie zalogowanie, aby wyświetlić nowe adresy.</string>
     <string name="swipe_receive_no_addresses">W tej chwili nie można załadować więcej adresów. Zaloguj się do aplikacji, aby załadować więcej.</string>
 
-    <string name="survey_message">Czy chcesz wypełnić krótką ankietę mającą na celu poprawę komfortu korzystania z portfela?\n\nTwoja opinia jest dla nas bardzo ważna!</string>
-    <string name="survey_positive_button">Wypełnij ankietę</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Przegląd</string>
     <string name="create_a_wallet">Utwórz portfel</string>

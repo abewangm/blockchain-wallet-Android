@@ -435,9 +435,6 @@
     <string name="swipe_receive_preference_summary">Bitcoin almayı daha da hızlandırmak için PIN ekranına sola dokunduğunuzda alıcı adresi almak için bu seçeneği etkinleştirin. Yeni adresleri göstermek için oturum açmanın gerekli olacağı beş adres sıralı şekilde yüklenecektir.</string>
     <string name="swipe_receive_no_addresses">Şu an daha fazla adres yüklenemiyor. Daha fazla yüklemek için uygulamada oturum açın.</string>
 
-    <string name="survey_message">Cüzdan deneyiminizi geliştirmemize yardımcı olmak için kısa bir anket doldurmak ister misiniz?\n\nGeri bildiriminize değer veriyoruz!</string>
-    <string name="survey_positive_button">Ankete katılın</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Genel bakış</string>
     <string name="create_a_wallet">Bir cüzdan oluştur</string>

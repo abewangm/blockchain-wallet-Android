@@ -436,9 +436,6 @@
     <string name="swipe_receive_preference_summary">Aktifkan opsi ini untuk mengungkapkan alamat penerima bila Anda mengusap layar PIN ke kiri, yang membuat penerimaan bitcoin menjadi lebih cepat. Lima alamat akan dimuat secara berturut-turut, yang setelahnya login diperlukan untuk menampilkan alamat baru.</string>
     <string name="swipe_receive_no_addresses">Tidak ada lagi alamat yang dapat dimuat sekarang. Masuk ke aplikasi untuk memuat lebih banyak.</string>
 
-    <string name="survey_message">Apakah Anda ingin mengisi survei singkat untuk membantu meningkatkan pengalaman dompet Anda?\n\nKami menghargai tanggapan Anda!</string>
-    <string name="survey_positive_button">Ikut survei</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Ikhtisar</string>
     <string name="create_a_wallet">Buat sebuah dompet</string>

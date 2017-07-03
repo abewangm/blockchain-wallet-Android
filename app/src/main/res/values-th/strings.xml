@@ -436,9 +436,6 @@
     <string name="swipe_receive_preference_summary">เปิดการใช้งานตัวเลือกนี้เพื่อเปิดเผยที่อยู่สำหรับที่อยู่สำหรับการรับเมื่อคุณปัดนิ้วไปทางซ้ายบนหน้าจอ PIN ทำให้การรับ bitcoin รวดเร็วยิ่งขึ้น ห้าที่อยู่ซึ่งจะได้รับการโหลดอย่างต่อเนื่องติดต่อกัน หลังจากนั้นจะจำเป็นต้องล็อกอินเพื่อแสดงที่อยู่ใหม่</string>
     <string name="swipe_receive_no_addresses">ไม่สามารถโหลดที่อยู่มากกว่านี้ได้ในตอนนี้ ล็อกอินไปยังแอปเพื่อโหลดเพิ่ม</string>
 
-    <string name="survey_message">คุณต้องการกรอกแบบสำรวจสั้น ๆ เพื่อช่วยปรับปรุงประสบการณ์การใช้กระเป๋าเงินของเราหรือไม่?\n\nเราเห็นคุณค่าของคำแนะนำติชมของคุณ!</string>
-    <string name="survey_positive_button">ทำแบบสำรวจ</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">ภาพรวม</string>
     <string name="create_a_wallet">สร้างกระเป๋าเงิน</string>

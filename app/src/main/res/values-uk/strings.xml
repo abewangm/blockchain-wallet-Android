@@ -435,9 +435,6 @@
     <string name="swipe_receive_preference_summary">Увімкніть цю опцію, щоб показати адресу, коли ви проведете пальцем вліво на екрані PIN, що пришвидшить отримання bitcoin. Послідовно буде завантажено п\'ять адрес, після входу в систему потрібно буде показати нові адреси.</string>
     <string name="swipe_receive_no_addresses">Неможливо завантажити більше адрес прямо зараз. Щоб завантажити більше, увійдіть в програму.</string>
 
-    <string name="survey_message">Чи не могли б ви заповнити коротеньку анкету, щоб допомогти нам поліпшити ваш досвід користування гаманцем?\n\nВаш відгук для нас є дуже важливим!</string>
-    <string name="survey_positive_button">Пройти анкетування</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Огляд</string>
     <string name="create_a_wallet">Створити гаманець</string>

@@ -435,9 +435,6 @@
     <string name="swipe_receive_preference_summary">Bật tùy chọn này để hiện địa chỉ nhận khi bạn trượt qua trái trên màn hình mã PIN, giúp việc nhận bitcoin thậm chí còn nhanh hơn. Năm địa chỉ này sẽ được tải liên tục, sau đó cần đăng nhập để hiện các địa chỉ mới.</string>
     <string name="swipe_receive_no_addresses">Không có địa chỉ có thể tải bây giờ. Đăng nhập vào ứng dụng để tải thêm.</string>
 
-    <string name="survey_message">Bạn có muốn thực hiện một bài khảo sát ngắn để giúp cải thiện trải nghiệm sử dụng ví của mình?\n\nChúng tôi đánh giá cao phản hồi của bạn!</string>
-    <string name="survey_positive_button">Thực hiện khảo sát</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Tổng quan</string>
     <string name="create_a_wallet">Tạo ví</string>
