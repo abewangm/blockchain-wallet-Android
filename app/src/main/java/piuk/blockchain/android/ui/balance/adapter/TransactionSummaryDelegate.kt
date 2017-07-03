@@ -28,7 +28,7 @@ class TransactionSummaryDelegate<in T>(
         var btcExchangeRate: Double,
         var isBtc: Boolean,
         val listClickListener: BalanceListClickListener
-) : AdapterDelegate<List<T>> {
+) : AdapterDelegate<T> {
 
     val stringUtils = StringUtils(activity)
     val prefsUtil = PrefsUtil(activity)

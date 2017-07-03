@@ -2,7 +2,7 @@ package piuk.blockchain.android.ui.balance.adapter
 
 import android.app.Activity
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
-import piuk.blockchain.android.ui.adapters.ListDelegationAdapter
+import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.util.extensions.autoNotify
 import kotlin.properties.Delegates
 
@@ -12,7 +12,7 @@ class BalanceAdapter(
         btcExchangeRate: Double,
         isBtc: Boolean,
         listClickListener: BalanceListClickListener
-) : ListDelegationAdapter<List<Any>>(AdapterDelegatesManager(), emptyList()) {
+) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
     val summaryDelegate = TransactionSummaryDelegate<Any>(activity, btcExchangeRate, isBtc, listClickListener)
     val fctxDelegate = FctxDelegate<Any>(activity, btcExchangeRate, isBtc, listClickListener)
