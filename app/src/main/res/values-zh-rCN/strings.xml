@@ -444,9 +444,6 @@
     <string name="swipe_receive_preference_summary">启用该选项以在 PIN 码屏幕上向左滑动时显示接收地址，使得比特币的接收甚至更加快速。将连续载入5个地址，而后需要登录以显示新地址。</string>
     <string name="swipe_receive_no_addresses">目前不能载入更多地址。登录应用以载入更多。</string>
 
-    <string name="survey_message">您想要填写一份简单的问卷调查以帮助改进您的钱包体验吗？\n\n我们非常重视您的反馈意见！</string>
-    <string name="survey_positive_button">接受调查</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">概览</string>
     <string name="create_a_wallet">创建钱包</string>

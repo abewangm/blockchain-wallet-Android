@@ -666,10 +666,6 @@
     <string name="swipe_receive_preference_summary">Enable this option to reveal a receive address when you swipe left on the PIN screen, making receiving bitcoin even faster. Five addresses will be loaded consecutively, after which logging in is required to show new addresses.</string>
     <string name="swipe_receive_no_addresses">No more addresses can be loaded right now. Log in to the app to load more.</string>
 
-    <!-- SURVEY PROMPT -->
-    <string name="survey_message">Would you like to fill out a short survey to help improve your wallet experience?\n\nWe value your feedback!</string>
-    <string name="survey_positive_button">Take survey</string>
-
     <!-- ONBOARDING -->
     <string name="onboarding_fingerprint_title">Fingerprint Login</string>
     <string name="onboarding_fingerprint_summary">Use fingerprint login instead of your PIN to authenticate and access your wallet.</string>

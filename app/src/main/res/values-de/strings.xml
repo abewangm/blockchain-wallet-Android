@@ -444,9 +444,6 @@
     <string name="swipe_receive_preference_summary">Durch die Aktivierung dieser Option bekommen Sie eine Empfangsadresse angezeigt, wenn Sie auf dem PIN-Bildschirm nach links wischen. So lässt sich Bitcoin noch schneller empfangen. Es werden fünf Adressen hintereinander geladen. Danach ist zur Anzeige neuer Adressen eine Anmeldung erforderlich.</string>
     <string name="swipe_receive_no_addresses">Derzeit können keine weiteren Adresse geladen werden. Zum Laden zusätzlicher Adressen melden Sie sich bei der App an.</string>
 
-    <string name="survey_message">Würden Sie bitte eine kurze Umfrage beantworten und so dazu beitragen, all das, was mit Ihrer Wallet zu tun hat, noch zu verbessern?\n\nWir wissen Ihr Feedback zu schätzen!</string>
-    <string name="survey_positive_button">Umfrage beantworten</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Überblick</string>
     <string name="create_a_wallet">Eine Wallet erstellen</string>
