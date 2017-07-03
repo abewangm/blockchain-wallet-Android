@@ -29,6 +29,7 @@ import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -162,6 +163,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
 
     private void setUpAdapter(boolean isBtc) {
         String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        int btcFormat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
 
         balanceAdapter = new BalanceAdapter(
@@ -177,7 +179,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
             @Override
             public void onValueClicked(boolean isBtc) {
                 viewModel.onBtcFormatChanged(isBtc);
-                balanceAdapter.onViewFormatUpdated(isBtc);
+                balanceAdapter.onViewFormatUpdated(isBtc, btcFormat);
             }
 
             @Override

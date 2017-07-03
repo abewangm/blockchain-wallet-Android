@@ -312,6 +312,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
             } catch (ClassNotFoundException | IOException e) {
                 throw new RuntimeException(e);
             }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 

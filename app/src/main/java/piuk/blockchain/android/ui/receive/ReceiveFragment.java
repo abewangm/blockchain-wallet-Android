@@ -463,6 +463,8 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 

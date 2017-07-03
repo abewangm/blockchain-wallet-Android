@@ -96,10 +96,13 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
     internal fun onResume() {
         // Here we check the Fiat and Btc formats and let the UI handle any potential updates
+        val btcUnitType = getBtcUnitType()
+        monetaryUtil.updateUnit(btcUnitType)
         val btcBalance = transactionListDataManager.getBtcBalance(chosenAccount)
         val balanceTotal = getBalanceString(accessState.isBtc, btcBalance)
         view.onTotalBalanceUpdated(balanceTotal)
-        view.onViewTypeChanged(accessState.isBtc)
+        view.onExchangeRateUpdated(getLastPrice(getFiatCurrency()), accessState.isBtc)
+        view.onViewTypeChanged(accessState.isBtc, btcUnitType)
     }
 
     internal fun onAccountChosen(position: Int) {
@@ -130,7 +133,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
     internal fun setViewType(isBtc: Boolean) {
         accessState.setIsBtc(isBtc)
-        view.onViewTypeChanged(isBtc)
+        view.onViewTypeChanged(isBtc, getBtcUnitType())
         view.onTotalBalanceUpdated(getBalanceString(isBtc, chosenAccount?.absoluteBalance ?: 0L))
     }
 
@@ -564,7 +567,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     }
 
     private fun getBalanceString(isBTC: Boolean, btcBalance: Long): String {
-        val strFiat = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+        val strFiat = getFiatCurrency()
         val fiatBalance = exchangeRateFactory.getLastPrice(strFiat) * (btcBalance / 1e8)
 
         return if (isBTC) {
