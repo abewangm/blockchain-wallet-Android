@@ -38,6 +38,9 @@ import java.util.List;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityAccountsBinding;
+import piuk.blockchain.android.ui.account.adapter.AccountAdapter;
+import piuk.blockchain.android.ui.account.adapter.AccountHeadersListener;
+import piuk.blockchain.android.ui.account.adapter.AccountItem;
 import piuk.blockchain.android.ui.backup.ConfirmFundsTransferDialogFragment;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -220,11 +223,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         List<Account> accountClone = new ArrayList<>(accounts.size());
         accountClone.addAll(accounts);
 
-        if (!accountClone.isEmpty()
-                && accountClone.get(accountClone.size() - 1) instanceof ConsolidatedAccount) {
-            accountClone.remove(accountClone.size() - 1);
-        }
-
         // Create New Wallet button at top position
         accountsAndImportedList.add(new AccountItem(AccountItem.TYPE_CREATE_NEW_WALLET_BUTTON));
 
@@ -240,14 +238,16 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             }
             if (label == null || label.isEmpty()) label = "";
 
-            accountsAndImportedList.add(new AccountItem(correctedPosition,
-                    label,
-                    null,
-                    balance,
-                    accountClone.get(i).isArchived(),
-                    false,
-                    defaultAccount.getXpub().equals(accountClone.get(i).getXpub()),
-                    AccountItem.TYPE_ACCOUNT));
+            accountsAndImportedList.add(
+                    new AccountItem(
+                            correctedPosition,
+                            label,
+                            null,
+                            balance,
+                            accountClone.get(i).isArchived(),
+                            false,
+                            defaultAccount.getXpub().equals(accountClone.get(i).getXpub()),
+                            AccountItem.TYPE_ACCOUNT));
             correctedPosition++;
         }
 
@@ -266,20 +266,21 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             if (label == null || label.isEmpty()) label = "";
             if (address == null || address.isEmpty()) address = "";
 
-            accountsAndImportedList.add(new AccountItem(correctedPosition,
-                    label,
-                    address,
-                    balance,
-                    legacy.get(j).getTag() == LegacyAddress.ARCHIVED_ADDRESS,
-                    legacy.get(j).isWatchOnly(),
-                    false,
-                    AccountItem.TYPE_ACCOUNT));
+            accountsAndImportedList.add(
+                    new AccountItem(
+                            correctedPosition,
+                            label,
+                            address,
+                            balance,
+                            legacy.get(j).getTag() == LegacyAddress.ARCHIVED_ADDRESS,
+                            legacy.get(j).isWatchOnly(),
+                            false,
+                            AccountItem.TYPE_ACCOUNT));
             correctedPosition++;
         }
 
         if (accountsAdapter == null) {
-            accountsAdapter = new AccountAdapter(accountsAndImportedList);
-            accountsAdapter.setAccountHeaderListener(new AccountAdapter.AccountHeadersListener() {
+            accountsAdapter = new AccountAdapter(new AccountHeadersListener() {
                 @Override
                 public void onCreateNewClicked() {
                     createNewAccount();
@@ -296,6 +297,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 }
             });
 
+            accountsAdapter.setItems(accountsAndImportedList);
             binding.accountsList.setAdapter(accountsAdapter);
         } else {
             // Notify adapter of items changes
