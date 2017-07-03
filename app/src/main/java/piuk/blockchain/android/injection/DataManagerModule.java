@@ -40,6 +40,7 @@ import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.ui.transactions.TransactionHelper;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.BackupWalletUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
@@ -198,4 +199,11 @@ public class DataManagerModule {
                                                  TransactionListDataManager transactionListDataManager) {
         return new PromptManager(prefsUtil, payloadDataManager, transactionListDataManager);
     }
+
+    @Provides
+    @ViewModelScope
+    protected BackupWalletUtil provideBackupWalletUtil(PayloadDataManager payloadDataManager) {
+        return new BackupWalletUtil(payloadDataManager);
+    }
+
 }
