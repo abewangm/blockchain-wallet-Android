@@ -108,8 +108,7 @@ public class BuyViewModelTest {
     private class MockDataManagerModule extends DataManagerModule {
         @Override
         protected BuyDataManager provideBuyDataManager(OnboardingDataManager onboardingDataManager,
-                                                       SettingsDataManager settingsDataManager,
-                                                       EnvironmentSettings environmentSettings) {
+                                                       PayloadDataManager payloadDataManager) {
             return buyDataManager;
         }
 
