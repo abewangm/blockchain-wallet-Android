@@ -16,8 +16,8 @@ android {
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 25
-        versionCode 263
-        versionName "6.6.0"
+        versionCode 266
+        versionName "6.6.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
@@ -224,11 +224,11 @@ dependencies {
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile "org.mockito:mockito-core:$mockitoVersion"
     androidTestCompile "com.android.support:support-annotations:$supportVersion"
-    androidTestCompile 'com.android.support.test:rules:0.6-alpha'
-    androidTestCompile('com.android.support.test:runner:0.6-alpha') {
+    androidTestCompile 'com.android.support.test:rules:0.5'
+    androidTestCompile('com.android.support.test:runner:0.5') {
         exclude module: 'support-annotations'
     }
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.3-alpha') {
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
         exclude group: 'javax.inject', module: 'support-annotations'
     }
 

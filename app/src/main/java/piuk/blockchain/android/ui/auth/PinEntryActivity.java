@@ -106,9 +106,9 @@ public class PinEntryActivity extends BaseAuthActivity implements
     public void onBackPressed() {
         if (binding.viewpager.getCurrentItem() == 1) {
             binding.viewpager.setCurrentItem(0);
-        } else if (pinEntryFragment.isValidatingPinForResult()) {
+        } else if (pinEntryFragment != null && pinEntryFragment.isValidatingPinForResult()) {
             finishWithResultCanceled();
-        } else if (pinEntryFragment.allowExit()) {
+        } else if (pinEntryFragment != null && pinEntryFragment.allowExit()) {
             if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
                 AccessState.getInstance().logout(this);
                 return;

@@ -9,22 +9,22 @@ import android.view.ViewGroup
 /**
  * Sets the visibility of a [View] to [View.VISIBLE]
  */
-fun View.visible() {
-    visibility = View.VISIBLE
+fun View?.visible() {
+    if (this != null) visibility = View.VISIBLE
 }
 
 /**
  * Sets the visibility of a [View] to [View.INVISIBLE]
  */
-fun View.invisible() {
-    visibility = View.INVISIBLE
+fun View?.invisible() {
+    if (this != null) visibility = View.INVISIBLE
 }
 
 /**
  * Sets the visibility of a [View] to [View.GONE]
  */
-fun View.gone() {
-    visibility = View.GONE
+fun View?.gone() {
+    if (this != null) visibility = View.GONE
 }
 
 /**

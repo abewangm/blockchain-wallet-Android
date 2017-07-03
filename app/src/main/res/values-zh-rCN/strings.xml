@@ -180,7 +180,6 @@
     <string name="address_lookup_fail">无法检索地址。请手动输入地址。</string>
 
     <string name="backup_write_down_words">务必以该顺序准确地写下这里显示的单词。</string>
-    <string name="backup_verify_heading">输入您的“恢复密语”中的下列词以完成备份过程。</string>
     <string name="backup_of">/</string>
     <string name="backup_confirmed">备份已确认</string>
     <string name="backup_word_mismatch">词不匹配</string>
@@ -214,7 +213,6 @@
     <string name="click">单击</string>
     <string name="to_start_sending_and_receiving_btc">开始发送和接收比特币。</string>
 
-    <string name="watch_only_label">（只读）</string>
     <string name="address_book_label">(地址簿)</string>
 
     <string name="transaction_submitted">交易完成</string>
@@ -232,8 +230,6 @@
     <string name="upgrade_fail_heading">钱包升级失败！</string>
     <string name="upgrade_fail_info">升级钱包时出错。请稍后再试。</string>
     <string name="not_sane_error">您的 Blockchain 钱包安装未完成。请重新配对您的钱包或创建一个新钱包。</string>
-
-    <string name="watchonly_address_receive_warning">您将把比特币接收到一个只读地址。您必须拥有私钥的访问权限才可以支出这些资金。继续？</string>
 
     <string name="camera_unavailable">摄像头目前由其他应用程序打开。请关闭其他应用程序并重试。</string>
 
@@ -295,16 +291,13 @@
     <string name="watch_only_import_warning">您即将导入一个只读地址，这是一种存储在钱包中但没有相应私钥的地址（或公钥脚本）。这意味着，只有您将私钥存储在其他地方，才能支出资金。如果您没有存储私钥，请勿指示任何人将比特币发送到只读地址。\n\n仅建议高级用户使用这些选项。继续？ </string>
     <string name="scan_private_key">扫描私钥</string>
     <string name="private_key_successfully_imported">私钥已成功导入。</string>
-    <string name="private_key_not_matching_address">注意：已扫描的私钥与您的只读地址不一致。若要花费此地址中的资金，请扫描正确的私钥。</string>
     <string name="watch_only">只读</string>
     <string name="extended_public_key_description">如果您是商家，请显示您的 xPub，并使用 Blockchain Merchant 应用以安全、私密地接收资金。\n\n保持您的 xPub 私密。能访问您 xPub 的人也将能够看到您的所有资金和交易。 </string>
-    <string name="watch_only_description">这是只读地址。若要花费此钱包中的资金，请扫描您的私钥。 </string>
     <string name="success">成功</string>
     <string name="default_label">默认</string>
     <string name="try_again">重试</string>
     <string name="transfer">转帐</string>
     <string name="transfer_funds">转移资金</string>
-    <string name="transfer_recommend">为了您的安全，我们建议您将导入地址中的任何余额转移到您的 Blockchain 钱包中。</string>
     <string name="spendable_addresses">可支出 的地址</string>
 
     <string name="dont_ask_again">别再问我</string>
@@ -357,8 +350,6 @@
     <string name="tor_requests">阻止 Tor 请求</string>
     <string name="tor_summary">您是否要阻止已知为 Tor 匿名网络一部分的 IP 地址访问您的钱包？Tor 网络经常被尝试访问 Blockchain 用户钱包的黑客利用。</string>
     <string name="change_password">更改密码</string>
-    <string name="change_password_summary">您的密码不会在我们的服务器上共享，这意味着如果您忘记了密码，我们将无法帮助您重置。请记录下您的恢复密语，这将帮助您在丢失密码的情况下恢复钱包的访问权限。</string>
-    <string name="verify_email_notice">我们已向您的电子邮件地址发送了验证连接。单击此验证连接，验证您的电子邮件地址。</string>
     <string name="email_notifications">电子邮件通知</string>
     <string name="email_notifications_summary">收到比特币时接收通知。</string>
     <string name="current_password">当前密码</string>
@@ -451,7 +442,6 @@
     <string name="overview">概览</string>
     <string name="create_a_wallet">创建钱包</string>
     <string name="log_in">登录</string>
-    <string name="about">Blockchain 钱包 %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="wallets">钱包</string>
     <string name="your_transactions">无交易</string>
     <string name="archived_label">已存档</string>
@@ -519,13 +509,9 @@
 
     <string name="backup_again">再次备份</string>
     <string name="backup_button_start">开始备份</string>
-    <string name="backup_complete_message">若密码丢失，您可以使用恢复密语取回您的资金。任何能够获得您的恢复密语的人都可以访问您的比特币，因此，切记应将它离线存放在一个安全可靠的地方。</string>
     <string name="backup_done">完成</string>
-    <string name="backup_explanation">为了您的安全，Blockchain 不会将任何密码存档。以下12字恢复密语会在您丢失密码时向您提供访问您的资金的权限。务必将它写在一张纸上，并且存放在一个安全可靠的地方。 </string>
-    <string name="backup_header">恢复密语</string>
     <string name="backup_header_complete">备份完成</string>
     <string name="backup_last">最后备份：%1$s</string>
-    <string name="backup_lost_mnemonic">丢失了12 个词组成的恢复密语?</string>
     <string name="backup_next_word">下一个词</string>
     <string name="backup_previous_word">上一个词</string>
     <string name="backup_word">词</string>
@@ -560,12 +546,6 @@
     <string name="contacts_loading_failed">载入联系人失败，请重试</string>
     <string name="contacts_name_cannot_be_empty">无效名称</string>
     <string name="contacts_name_field_hint">名称</string>
-    <string name="two_factor_dialog_title">输入 2FA 码</string>
-    <string name="two_factor_dialog_message_authenticator">请输入一个来自您的身份验证应用的有效 2FA 码以继续。</string>
-    <string name="two_factor_dialog_message_sms">我们刚刚向您发送了一则包含 2FA 码的短信。请在这里输入以继续。</string>
-    <string name="two_factor_dialog_hint">2FA 码</string>
-    <string name="two_factor_null_error">2FA 码不能为空</string>
-    <string name="two_factor_incorrect_error">2FA 码不正确</string>
     <string name="contacts_payment_sent_success">已发出付款！我们已经通知了您的联系人告诉他们您已完成了交易。</string>
     <string name="contacts_payment_sent_failed_message">在通知您的联系人您已经向他们发送了一笔付款时出现了错误。请检查您的连接，而后重试。</string>
     <string name="contacts_waiting_for_address_message">我们已经通知您的联系人，您希望向他们发送比特币以及您要求他们提供一个地址。我们会在他们发送了地址后通知您！</string>
@@ -629,7 +609,6 @@
     <string name="creating_wallet">创建钱包</string>
     <string name="recover_funds">恢复资金</string>
     <string name="recover_funds_warning_message">如果您能访问钱包 ID 和密码，应始终进行配对或登录。恢复您的资金将创建一个新的钱包 ID。是否要继续?</string>
-    <string name="recover_funds_instructions">输入带空格的 12个恢复词，恢复您的资金和交易记录</string>
     <string name="done">完成</string>
     <string name="transfer_confirmed">已确认转帐</string>
     <string name="transaction_details_unknown">未知</string>
@@ -637,13 +616,68 @@
     <string name="transaction_detail_description_hint">这是做什么用的？</string>
     <string name="transaction_detail_confirmed">已确认</string>
     <string name="to_field_helper_no_dropdown">输入比特币地址</string>
-    <string name="sms_notifications_summary">启用通知，从而使您在任何时候收到比特币时都收到一条短信。只有标签地址和导入地址才可以触发提醒通知。</string>
     <string name="share_instructions">点击以复制该地址。通过电子邮件或者短信与发送者分享。</string>
     <string name="security_centre_two_fa_message">防止对您的钱包的未经授权的访问。启用两步认证法以提高钱包的安全性。</string>
     <string name="security_centre_backup_title">备份您的资金</string>
     <string name="restore_failed">取回钱包失败。请重试</string>
-    <string name="recovery_passphrase">恢复密语</string>
     <string name="password_reveal_warning">小心！显示该文字可以将您的密码复制到剪贴板，从而让您的设备上的所有应用都可以读取。应始终警惕站在你身后的人！</string>
     <string name="password_hint_summary">您的 Blockchain 钱包决不会将密码传送到我们的服务器。这意味着我们无法知晓您的密码，因此，如果您忘记了密码，我们无法为您重置。请创建一个易记的密码提示，从而让我们可以在您忘记密码的情况下将其发送到您经过验证的电子邮件地址。</string>
-    <string name="invalid_recovery_phrase">无效恢复密语。请重试</string>
+
+
+    <string name="recover_funds_instructions">输入您的带空格的12个备份单词以取回您的资金和交易</string>
+    <string name="recovery_passphrase"> 备份密语</string>
+    <string name="invalid_recovery_phrase">无效备份密语。请重试</string>
+    <string name="about">Blockchain 钱包 %1$s\n©%2$s Blockchain Luxembourg S.A.\n版本所有。</string>
+    <string name="watch_only_label">（只读）</string>
+    <string name="watchonly_address_receive_warning">您即将在只读地址上收到比特币。如果您有权访问私钥，则可以只支出这些资金。继续？</string>
+    <string name="label_name_match">该名称已被使用</string>
+    <string name="private_key_not_matching_address">注意：已扫描的私钥与您的只读地址不相符。若要花费此地址中的资金，请扫描正确的私钥。</string>
+    <string name="watch_only_description">这是只读地址。从...花费您的资金</string>
+    <string name="transfer_recommend">似乎您有一些比特币在已导入的地址中。已导入地址未经过您的备份密语的备份。若要保护这些资金的安全，我们建议转移这些余额以包含在您的备份中。</string>
+    <string name="disable_online_only">请在网页浏览器中登录您的钱包以禁用双重认证。</string>
+    <string name="change_password_summary">您的密码不会在我们的服务器上共享，这意味着如果您忘记了密码，我们将无法帮助您重置。务必从侧边菜单备份您的资金，若丢失密码，您可以通过它恢复对您的钱包的访问权限。</string>
+    <string name="verify_email_notice">我们已向您的电子邮件地址发送了验证连接。点击该链接以验证您的邮箱地址。</string>
+    <string name="pairing_code_log_in">登录网页钱包</string>
+    <string name="pairing_code_instruction_1">在您的电脑上前往 %1$s。</string>
+    <string name="pairing_code_instruction_2">选择通过手机登录</string>
+    <string name="pairing_code_instruction_3">使用您的电脑的摄相头，扫描下面的二维码。</string>
+    <string name="pairing_code_show_qr">显示二维码</string>
+    <string name="pairing_code_hide_qr">隐藏二维码</string>
+    <string name="pairing_code_warning_1">在您就绪前隐藏该代码。</string>
+    <string name="pairing_code_warning_2">保护该代码的安全！\n切勿与他人分享。</string>
+    <string name="sms_notifications_summary">启用通知，从而使您在任何时候接收到比特币时收到短信。</string>
+    <string name="backup_header">备份短语</string>
+    <string name="backup_explanation">为了您的安全，Blockchain 不会将任何密码存档。以下12词备份密语能够让您在丢失密码时访问您的资金。务必将它写在一张纸上，并且存放在一个安全可靠的地方。 </string>
+    <string name="backup_complete_message">您可以在丢失密码时使用您的备份密语取回资金。任何能够访问您的备份密语的人都可以访问您的比特币，因此，务必将它离线保存在某个安全可靠的地方。</string>
+    <string name="backup_verify_heading">输入以下来自您的备份密语的单词以完成备份流程。</string>
+    <string name="backup_lost_mnemonic">丢失了您的12词备份密码？</string>
+    <string name="trade_complete">交易完成</string>
+    <string name="trade_complete_details">您的“购买比特币”交易已完成！</string>
+    <string name="view_details">查看详情</string>
+    <string name="onboarding_available_now">现在可用</string>
+    <string name="onboarding_buy_details">从您的手机钱包直接购买比特币。它简单、无缝、安全。</string>
+    <string name="onboarding_buy_performance_warning">在您的设备上的购买体验可能会有点慢。提前感谢您的耐心。</string>
+
+    <string name="two_factor_dialog_title">输入双重认证码</string>
+    <string name="two_factor_dialog_message_authenticator">请输入一个来自您的身份验证应用的有效双重认证码以继续。</string>
+    <string name="two_factor_dialog_message_sms">我们刚刚向您发送了一则包含 2FA 码的短信。请在这里输入以继续。</string>
+    <string name="two_factor_dialog_hint">双重认证码</string>
+    <string name="two_factor_null_error">双重认证码不能为空</string>
+    <string name="two_factor_incorrect_error">双重认证码不正确</string>
+
+    <string name="confirm_payment_change_fee">更改费用</string>
+    <string name="confirm_payment_fee_sync_error">获取费用选项时出错</string>
+
+    <string name="fee_options_regular">一般</string>
+    <string name="fee_options_priority">优先级</string>
+    <string name="fee_options_custom">自定义</string>
+    <string name="fee_options_regular_time">1+小时</string>
+    <string name="fee_options_priority_time">~0–60分钟</string>
+    <string name="fee_options_custom_warning">仅限高级用户</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b</string>
+    <string name="fee_options_fee_too_low">不建议低收费</string>
+    <string name="fee_options_fee_too_high">不必要的高收费</string>
+    <string name="fee_options_advanced_warning">仅建议高级用户使用该功能。选择一个自定义费用则表示存在过度支付或者您的交易永远都得不到确认的风险。</string>
+    <string name="fee_options_sat_byte_hint">sat/b</string>
+    <string name="fee_options_sat_byte_inline_hint">一般：%1$s，优先级：%2$s</string>
 </resources>

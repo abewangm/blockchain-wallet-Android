@@ -180,7 +180,6 @@
     <string name="address_lookup_fail">ไม่สามารถรับที่อยู่ได้ โปรดกรอกที่อยู่ด้วยตนเอง</string>
 
     <string name="backup_write_down_words">เป็นสิ่งสำคัญที่ต้องตรวจสอบให้แน่ใจว่าคุณได้เขียนคำของคุณลงไปอย่างแม่นยำตามที่แสดงอยู่ที่นี่และในลำดับเดียวกันนี้</string>
-    <string name="backup_verify_heading">กรอกคำต่อไปนี้จากวลีเพื่อการกู้คืนของคุณเพื่อดำเนินกระบวนการสำรองข้อมูลให้เสร็จสิ้น</string>
     <string name="backup_of">จาก</string>
     <string name="backup_confirmed">ยืนยันการสำรองข้อมูลแล้ว</string>
     <string name="backup_word_mismatch">คำไม่ตรงกัน</string>
@@ -214,7 +213,6 @@
     <string name="click">คลิก</string>
     <string name="to_start_sending_and_receiving_btc">เพื่อเริ่มส่งและรับ bitcoin</string>
 
-    <string name="watch_only_label">(ชมอย่างเดียว)</string>
     <string name="address_book_label">(สมุดที่อยู่)</string>
 
     <string name="transaction_submitted">ธุรกรรมเสร็จสิ้น</string>
@@ -232,8 +230,6 @@
     <string name="upgrade_fail_heading">การอัปเกรดกระเป๋าเงินล้มเหลว!</string>
     <string name="upgrade_fail_info">เกิดข้อผิดพลาดระหว่างการอัปเกรดกระเป๋าเงินของคุณ โปรดลองอีกครั้งในภายหลัง</string>
     <string name="not_sane_error">การติดตั้งกระเป๋าเงิน Blockchain ของคุณไม่เสร็จสมบูรณ์ โปรดจับคู่กระเป๋าเงินของคุณอีกครั้งหรือสร้างกระเป๋าเงินใหม่</string>
-
-    <string name="watchonly_address_receive_warning">คุณกำลังจะได้รับ bitcoin ไปยังที่อยู่แบบชมอย่างเดียว คุณสามารถใช้เงินเหล่านี้ได้หากคุณสามารถเข้าถึงคีย์ส่วนตัวได้เท่านั้น ดำเนินการต่อ?</string>
 
     <string name="camera_unavailable">แอปพลิเคชันอื่นกำลังเปิดใช้กล้องอยู่ โปรดปิดแอปพลิเคชันอื่นและลองอีกครั้ง</string>
 
@@ -295,16 +291,13 @@
     <string name="watch_only_import_warning">คุณกำลังจะนำเข้าที่อยู่แบบชมอย่างเดียว ที่อยู่ (หรือรหัสคีย์สาธารณะ) ซึ่งจัดเก็บในกระเป๋าเงินโดยไม่มีคีย์ส่วนตัวที่สอดคล้องกัน มันหมายความว่า คุณจะสามารถใช้เงินได้หากคุณจัดเก็บคีย์ส่วนตัวไว้ที่อื่นเท่านั้น หากคุณไม่ได้จัดเก็บคีย์ส่วนตัวไว้ อย่าขอให้ผู้ใด ๆ ส่ง bitcoin ให้คุณไปยังที่อยู่แบบชมอย่างเดียวนี้\n\nแนะนำตัวเลือกเหล่านี้สำหรับผู้ใช้ขั้นสูงเท่านั้น ดำเนินการต่อ? </string>
     <string name="scan_private_key">สแกนคีย์ส่วนตัว</string>
     <string name="private_key_successfully_imported">นำเข้าคีย์ส่วนตัวเรียบร้อยแล้ว</string>
-    <string name="private_key_not_matching_address">หมายเหตุ: คีย์ส่วนตัวที่ได้รับการสแกนไม่สอดคล้องกับที่อยู่แบบชมอย่างเดียวของคุณ เพื่อใช้เงินของคุณจากที่อยู่นี้ โปรดสแกนคีย์ส่วนตัวที่ถูกต้อง</string>
     <string name="watch_only">ชมอย่างเดียว</string>
     <string name="extended_public_key_description">หากคุณเป็นผู้ค้า โปรดแสดง xPub ของคุณและใช้แอปผู้ค้า Blockchain เพื่อรับเงินอย่างปลอดภัยและเป็นส่วนตัว         ผู้ที่มีการเข้าถึง xPub จะสามารถเห็นเงินและธุรกรรมทั้งหมดของคุณได้ </string>
-    <string name="watch_only_description">ที่อยู่นี้คือที่อยู่แบบชมอย่างเดียว เพื่อใช้จ่ายเงินของคุณจากกระเป๋าเงินนี้ โปรดสแกนคีย์ส่วนตัวของคุณ </string>
     <string name="success">สำเร็จ</string>
     <string name="default_label">ค่าเริ่มต้น</string>
     <string name="try_again">ลองอีกครั้ง</string>
     <string name="transfer">โอน</string>
     <string name="transfer_funds">โอนเงิน</string>
-    <string name="transfer_recommend">เพื่อความปลอดภัย เราแนะนำให้คุณโอนยอดคงเหลือใด ๆ ในที่อยู่ที่นำเข้าของคุณไปยังกระเป๋าเงิน Blockchain ของคุณ</string>
     <string name="spendable_addresses">ที่อยู่ที่ใช้จ่ายได้</string>
 
     <string name="dont_ask_again">ไม่ต้องถามฉันอีก</string>
@@ -357,8 +350,6 @@
     <string name="tor_requests">บล็อกการร้องขอของ Tor</string>
     <string name="tor_summary">คุณต้องการบล็อกที่อยู่ IP ซึ่งรู้ว่าเป็นส่วนหนึ่งของเครือข่ายที่ไม่เปิดเผย Tor จากการเข้าถึงกระเป๋าเงินของคุณหรือไม่? เครือข่าย Tor มักจะถูกใช้งานโดยแฮกเกอร์ซึ่งพยายามที่จะเข้าถึงกระเป๋าเงินของผู้ใช้ Blockchain</string>
     <string name="change_password">เปลี่ยนรหัสผ่าน</string>
-    <string name="change_password_summary">รหัสผ่านของคุณไม่ได้รับการแบ่งปันกับเซิร์ฟเวอร์ของเรา ซึ่งหมายความว่าเราไม่สามารถช่วยรีเซ็ตรหัสผ่านของคุณได้หากคุณลืมมัน ตรวจสอบให้แน่ใจว่าคุณได้จดวลีเพื่อการกู้คืนของคุณแล้ว เพื่อใช้กู้คืนการเข้าถึงกระเป๋าเงินของคุณในกรณีที่รหัสผ่านสูญหาย</string>
-    <string name="verify_email_notice">เราได้ส่งลิงก์ยืนยันไปยังที่อยู่อีเมลของคุณแล้ว คลิกที่ลิงก์ยืนยันเพื่อยืนยันที่อยู่อีเมลของคุณ</string>
     <string name="email_notifications">การแจ้งเตือนอีเมล</string>
     <string name="email_notifications_summary">รับการแจ้งเตือนเมื่อคุณได้รับบิตคอยน์</string>
     <string name="current_password">รหัสผ่านปัจจุบัน</string>
@@ -452,7 +443,6 @@
     <string name="overview">ภาพรวม</string>
     <string name="create_a_wallet">สร้างกระเป๋าเงิน</string>
     <string name="log_in">ล็อกอิน</string>
-    <string name="about">กระเป๋าเงิน Blockchain %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="wallets">กระเป๋าเงิน</string>
     <string name="your_transactions">ไม่มีธุรกรรม</string>
     <string name="archived_label">เก็บเอกสารแล้ว</string>
@@ -520,13 +510,9 @@
 
     <string name="backup_again">สำรองข้อมูลอีกครั้ง</string>
     <string name="backup_button_start">เริ่มสำรองข้อมูล</string>
-    <string name="backup_complete_message">คุณสามารถใช้วลีเพื่อการกู้คืนเพื่อกู้คืนเงินทุนของคุณได้หากคุณทำรหัสผ่านของคุณหาย ผู้ใดก็ตามที่สามารถเข้าถึงวลีเพื่อการกู้คืนของคุณจะสามารถเข้าถึง bitcoin ของคุณได้ ดังนั้นโปรดอย่าลืมที่จะเก็บมันไว้ทางออฟไลน์ในสถานที่ที่มั่งคงและปลอดภัย</string>
     <string name="backup_done">เสร็จแล้ว</string>
-    <string name="backup_explanation">เพื่อความปลอดภัยของคุณ Blockchain จะไม่เก็บรหัสผ่านใด ๆ ในไฟล์  วลีเพื่อการกู้คืน 12 คำต่อไปนี้จะมอบการเข้าถึงให้กับคุณไปยังเงินทุนในกรณีที่คุณทำรหัสผ่านสูญหาย  โปรดมั่นใจว่าคุณได้เขียนมันไว้ในกระดาษและเก็บมันไว้ในสถานที่ที่มั่นคงและปลอดภัย </string>
-    <string name="backup_header">วลีเพื่อการกู้คืน</string>
     <string name="backup_header_complete">การสำรองข้อมูลเสร็จสิ้น</string>
     <string name="backup_last">การสำรองข้อมูลครั้งล่าสุด: %1$s</string>
-    <string name="backup_lost_mnemonic">ทำวลีเพื่อการกู้คืน 12 คำสูญหาย?</string>
     <string name="backup_next_word">คำถัดไป</string>
     <string name="backup_previous_word">คำก่อนหน้า</string>
     <string name="backup_word">คำ</string>
@@ -561,12 +547,6 @@
     <string name="contacts_loading_failed">การโหลดผู้ติดต่อล้มเหลว โปรดลองอีกครั้ง</string>
     <string name="contacts_name_cannot_be_empty">ชื่อไม่ถูกต้อง</string>
     <string name="contacts_name_field_hint">ชื่อ</string>
-    <string name="two_factor_dialog_title">กรอกรหัส 2FA</string>
-    <string name="two_factor_dialog_message_authenticator">โปรดกรอกรหัส 2FA ที่ถูกต้องจากแอปพิสูจน์ตัวตนของคุณเพื่อดำเนินการต่อ</string>
-    <string name="two_factor_dialog_message_sms">เราเพิ่งส่ง SMS ที่ประกอบไปด้วยรหัส 2FA ให้กับคุณ โปรดกรอกมันที่นี่เพื่อดำเนินการต่อ</string>
-    <string name="two_factor_dialog_hint">รหัส 2FA</string>
-    <string name="two_factor_null_error">ห้ามเว้นว่างรหัส 2FA</string>
-    <string name="two_factor_incorrect_error">รหัส 2FA ไม่ถูกต้อง</string>
     <string name="contacts_payment_sent_success">ส่งการชำระเงินแล้ว! เราได้แจ้งให้ผู้ติดต่อของคุณทราบว่าคุณได้ดำเนินธุรกรรมเสร็จสิ้นแล้ว</string>
     <string name="contacts_payment_sent_failed_message">มีข้อผิดพลาดในการแจ้งให้ผู้ติดต่อของคุณทราบว่าคุณได้ส่งการชำระเงินให้กับพวกเขา  โปรดตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง</string>
     <string name="contacts_waiting_for_address_message">ผู้ติดต่อของคุณได้รับการแจ้งให้ทราบว่าคุรต้องการส่ง bitcoin ให้กับพวกเขา และคุณร้องขอที่อยู่จากพวกเขา  เราจะแจ้งให้คุณทราบเมื่อพวกเขาส่งที่อยู่มาแล้ว!</string>
@@ -630,7 +610,6 @@
     <string name="creating_wallet">กำลังสร้างกระเป๋าเงิน</string>
     <string name="recover_funds">กู้คืนเงินทุน</string>
     <string name="recover_funds_warning_message">คุณควรจับคู่หรือล็อกอินอยู่เสมอหากคุณสามารถเข้าถึง ID กระเป๋าเงินหรือรหัสผ่านของคุณได้ การกู้คืนเงินจะสร้าง ID กระเป๋าเงินใหม่ คุณต้องการดำเนินการต่อหรือไม่?</string>
-    <string name="recover_funds_instructions">กรอกคำเพื่อการกู้คืน 12 คำพร้อมช่องว่างเพื่อกู้คืนเงิน &amp; ธุรกรรมของคุณ</string>
     <string name="done">เสร็จ</string>
     <string name="transfer_confirmed">ยืนยันการโอน</string>
     <string name="transaction_details_unknown">ไม่ทราบ</string>
@@ -638,14 +617,68 @@
     <string name="transaction_detail_description_hint">มันมีไว้เพื่ออะไร?</string>
     <string name="transaction_detail_confirmed">ยืนยันแล้ว</string>
     <string name="to_field_helper_no_dropdown">กรอกที่อยู่ Bitcoin</string>
-    <string name="sms_notifications_summary">เปิดการแจ้งเตือนเพื่อรับ SMS เมื่อใดก็ตามที่คุณได้รับ bitcoin มีเฉพาะที่อยู่ที่มีการทำเครื่องหมายและได้รับการนำเข้าเท่านั้นที่สามารถทำให้เกิดการแจ้งเตือนนได้</string>
     <string name="share_instructions">แตะเพื่อคัดลอกที่อยู่นี้ แชร์มันกับผู้ส่งผ่านอีเมลหรือข้อความ</string>
     <string name="security_centre_two_fa_message">ป้องกันการเข้าถึงกระเป๋าเงินของคุณโดยไม่ได้รับอนุญาต  เปิดใช้งานการยืนยัน 2 ขั้นตอนเพื่อเพิ่มความปลอดภัยให้กับกระเป๋าเงินของคุณ</string>
     <string name="security_centre_backup_title">สำรองข้อมูลเงินทุนของคุณ</string>
     <string name="restore_failed">การกู้คืนกระเป๋าเงินล้มเหลว โปรดลองอีกครั้ง</string>
-    <string name="recovery_passphrase">วลีรหัสผ่านเพื่อการกู้คืน</string>
     <string name="password_reveal_warning">โปรดระวัง! การเปิดเผยข้อความนี้จะอนุญาตให้สามารถคัดลอกรหัสผ่านของคุณไปยังคลิปบอร์ดได้ ซึ่งหลังจากนั้นแอปพลิเคชันทั้งหมดบนอุปกรณ์ของคุณจะสามารถอ่านมันได้ และระวังคนที่ยืนอยู่ข้างหลังคุณด้วย!</string>
     <string name="password_hint_summary">กระเป๋าเงิน Blockchain ของคุณจะไม่สื่อสารรหัสผ่านของคุณไปยังเซิร์ฟเวอร์ของเรา มันหมายความว่าเราไม่ทราบว่ารหัสผ่านของคุณคืออะไรและเราไม่สามารถรีเซ็ตมันได้หากคุณลืมมัน โปรดสร้างคำใบ้รหัสผ่านที่จดจำได้ง่าย เพื่อที่เราจะสามารถส่งไปยังที่อยู่อีเมลที่ได้รับการยืนยันของคุณได้ในกรณีที่คุณลืมรหัสผ่านของคุณ</string>
-    <string name="invalid_recovery_phrase">วลีเพื่อการกู้คืนไม่ถูกต้อง โปรดลองอีกครั้ง</string>
+
+    <string name="recover_funds_instructions">กรอกคำเพื่อการสำรอง 12 คำพร้อมช่องว่างเพื่อกู้คืนเงิน &amp; ธุรกรรมของคุณ</string>
+    <string name="recovery_passphrase">วลีสำรอง</string>
+    <string name="invalid_recovery_phrase">โปรดลองอีกครั้ง โปรดลองอีกครั้ง</string>
+    <string name="about">กระเป๋าเงิน Blockchain %1$s\n©?%2$s Blockchain ลักเซมเบิร์กS.A.\nสงวนสิทธิ์ทั้งหมด</string>
+    <string name="watch_only_label">(ชมอย่างเดียว)</string>
+    <string name="watchonly_address_receive_warning">คุณกำลังจะได้รับ bitcoin ไปยังที่อยู่แบบชมอย่างเดียว คุณสามารถใช้เงินเหล่านี้ได้หากคุณสามารถเข้าถึงคีย์ส่วนตัวได้เท่านั้น ดำเนินการต่อ?</string>
+    <string name="label_name_match">มีการใช้ชื่ออยู่แล้ว</string>
+    <string name="private_key_not_matching_address">หมายเหตุ: คีย์ส่วนตัวที่ได้รับการสแกนไม่สอดคล้องกับที่อยู่แบบชมอย่างเดียวของคุณ เพื่อใช้เงินของคุณจากที่อยู่นี้ โปรดสแกนคีย์ส่วนตัวที่ถูกต้อง</string>
+    <string name="watch_only_description">ที่อยู่นี้คือที่อยู่แบบชมอย่างเดียว เพื่อใช้เงินของคุณจาก</string>
+    <string name="transfer_recommend">ดูเหมือนว่าคุณมี bitcoin บางส่วนอยู่ในที่อยู่ที่นำเข้า บัญชีที่นำเข้าไม่ได้รับการสำรองข้อมูลโดยวลีสำรองของคุณ เพื่อทำให้เงินเหล่านี้ปลอดภัย เราแนะนำให้คุณโอนยอดคงเหลือไปรวมในการสำรองของคุณ</string>
+    <string name="disable_online_only">โปรดล็อกอินไปยังกระเป๋าเงินของคุณในเบราว์เซอร์เว็บเพื่อปิดการใช้งาน 2FA</string>
+    <string name="change_password_summary">รหัสผ่านของคุณไม่ได้รับการแบ่งปันกับเซิร์ฟเวอร์ของเรา ซึ่งหมายความว่าเราไม่สามารถช่วยรีเซ็ตรหัสผ่านของคุณได้หากคุณลืมมัน ตรวจสอบให้แน่ใจว่าคุณได้สำรองเงินทุนของคุณจากเมนูด้านข้างแล้ว เพื่อใช้กู้คืนการเข้าถึงกระเป๋าเงินของคุณในกรณีที่รหัสผ่านสูญหาย</string>
+    <string name="verify_email_notice">เราได้ส่งลิงก์ยืนยันไปยังที่อยู่อีเมลของคุณแล้ว คลิกที่ลิงก์เพื่อยืนยันที่อยู่อีเมลของคุณ</string>
+    <string name="pairing_code_log_in">ล็อกอินไปยังกระเป๋าเงินบนเว็บ</string>
+    <string name="pairing_code_instruction_1">ไปยัง %1$s บนคอมพิวเตอร์ของคุณ</string>
+    <string name="pairing_code_instruction_2">เลือกล็อกอินผ่านมือถือ</string>
+    <string name="pairing_code_instruction_3">ใช้กล้องคอมพิวเตอร์ของคุณสแกนรหัส QR ด้านล่าง</string>
+    <string name="pairing_code_show_qr">แสดงรหัส QR</string>
+    <string name="pairing_code_hide_qr">ซ่อนรหัส QR</string>
+    <string name="pairing_code_warning_1">ซ่อนรหัสนี้ไว้จนกระทั่งคุณพร้อมแล้ว</string>
+    <string name="pairing_code_warning_2">เก็บรหัสนี้ไว้ให้ปลอดภัย!\nอย่าแบ่งปันมันกับผู้อื่น</string>
+    <string name="sms_notifications_summary">เปิดการแจ้งเตือนเพื่อรับ SMS เมื่อใดก็ตามที่คุณได้รับ bitcoin</string>
+    <string name="backup_header">วลีสำรอง</string>
+    <string name="backup_explanation">เพื่อความปลอดภัยของคุณ Blockchain จะไม่เก็บรหัสผ่านใด ๆ ในไฟล์ วลีสำรอง 12 คำต่อไปนี้จะมอบการเข้าถึงให้กับคุณไปยังเงินทุนในกรณีที่คุณทำรหัสผ่านสูญหาย โปรดมั่นใจว่าคุณได้เขียนมันไว้ในกระดาษและเก็บมันไว้ในสถานที่ที่มั่นคงและปลอดภัย </string>
+    <string name="backup_complete_message">คุณสามารถใช้วลีสำรองเพื่อกู้คืนเงินทุนของคุณได้หากคุณทำรหัสผ่านของคุณหาย ผู้ใดก็ตามที่สามารถเข้าถึงวลีสำรองของคุณจะสามารถเข้าถึง bitcoin ของคุณได้ ดังนั้นโปรดอย่าลืมที่จะเก็บมันไว้ทางออฟไลน์ในสถานที่ที่มั่งคงและปลอดภัย</string>
+    <string name="backup_verify_heading">กรอกคำต่อไปนี้จากวลีสำรองของคุณเพื่อดำเนินกระบวนการสำรองข้อมูลให้เสร็จสิ้น</string>
+    <string name="backup_lost_mnemonic">ทำวลีสำรอง 12 คำสูญหาย?</string>
+    <string name="trade_complete">การเทรดเสร็จสมบูรณ์</string>
+    <string name="trade_complete_details">การเทรดเพื่อซื้อ Bitcoin ของคุณเสร็จสมบูรณ์แล้ว!</string>
+    <string name="view_details">ชมรายละเอียด</string>
+    <string name="onboarding_available_now">มีในตอนนี้</string>
+    <string name="onboarding_buy_details">ซื้อ bitcoin โดยตรงจากกระเป๋าเงินมือถือของคุณ มันง่าย ราบรื่นและปลอดภัย</string>
+    <string name="onboarding_buy_performance_warning">ประสบการณ์ในการซื้ออาจช้าเล็กน้อยบนอุปกรณ์ของคุณ ขอบคุณล่วงหน้าสำหรับการอดทนรอของคุณ</string>
+
+    <string name="two_factor_dialog_title">กรอกรหัส 2FA</string>
+    <string name="two_factor_dialog_message_authenticator">โปรดกรอกรหัส 2FA ที่ถูกต้องจากแอปพิสูจน์ตัวตนของคุณเพื่อดำเนินการต่อ</string>
+    <string name="two_factor_dialog_message_sms">เราเพิ่งส่ง SMS ที่ประกอบไปด้วยรหัส 2FA ให้กับคุณ โปรดกรอกมันที่นี่เพื่อดำเนินการต่อ</string>
+    <string name="two_factor_dialog_hint">รหัส 2FA</string>
+    <string name="two_factor_null_error">ห้ามเว้นว่างรหัส 2FA</string>
+    <string name="two_factor_incorrect_error">รหัส 2FA ไม่ถูกต้อง</string>
+
+    <string name="confirm_payment_change_fee">เปลี่ยนค่าธรรมเนียม</string>
+    <string name="confirm_payment_fee_sync_error">ข้อผิดพลาดในการรับตัวเลือกค่าธรรมเนียม</string>
+
+    <string name="fee_options_regular">ปกติ</string>
+    <string name="fee_options_priority">ความสำคัญ</string>
+    <string name="fee_options_custom">ปรับแต่งเอง</string>
+    <string name="fee_options_regular_time">1+ ชั่วโมง</string>
+    <string name="fee_options_priority_time">~0-60 นาที</string>
+    <string name="fee_options_custom_warning">ผู้ใช้ขั้นสูงเท่านั้น</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b</string>
+    <string name="fee_options_fee_too_low">ไม่แนะนำให้ใช้ค่าธรรมเนียมต่ำ</string>
+    <string name="fee_options_fee_too_high">ค่าธรรมเนียมสูงเกินความจำเป็น</string>
+    <string name="fee_options_advanced_warning">แนะนำฟีเจอร์นี้สำหรับผู้ใช้ขั้นสูงเท่านั้น ในการเลือกค่าธรรมเนียมแบบกำหนดเอง คุณมีความเสี่ยงในการจ่ายเงินมากเกินไป หรือมิฉะนั้นธุรกรรมของคุณอาจไม่ได้รับการยืนยันเลยก็เป็นได้</string>
+    <string name="fee_options_sat_byte_hint">sat/b</string>
+    <string name="fee_options_sat_byte_inline_hint">ปกติ: %1$s, ความสำคัญ: %2$s</string>
 
 </resources>

@@ -1,10 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import info.blockchain.wallet.api.Environment;
-
-import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import io.reactivex.Observable;
-import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
@@ -16,17 +12,14 @@ import piuk.blockchain.android.data.settings.SettingsDataManager;
 public class BuyDataManager {
 
     private OnboardingDataManager onboardingDataManager;
-    private SettingsDataManager settingsDataManager;
+    private PayloadDataManager payloadDataManager;
     private ExchangeService exchangeService;
-    private EnvironmentSettings environmentSettings;
 
     public BuyDataManager(OnboardingDataManager onboardingDataManager,
-                          SettingsDataManager settingsDataManager,
-                          EnvironmentSettings environmentSettings) {
+                          PayloadDataManager payloadDataManager) {
         this.onboardingDataManager = onboardingDataManager;
-        this.settingsDataManager = settingsDataManager;
-        this.exchangeService = ExchangeService.getInstance();
-        this.environmentSettings = environmentSettings;
+        this.payloadDataManager = payloadDataManager;
+        exchangeService = ExchangeService.getInstance();
     }
 
     public Observable<WebViewLoginDetails> getWebViewLoginDetails() {
@@ -38,23 +31,20 @@ public class BuyDataManager {
     }
 
     public synchronized Observable<Boolean> getCanBuy() {
-        if (!environmentSettings.getEnvironment().equals(Environment.PRODUCTION)) {
-            return Observable.just(true);
+        if (payloadDataManager.isDoubleEncrypted()) {
+            // TODO: 14/06/2017 In the future, use the Metadata node to restore the master seed
+            return Observable.just(false);
         } else {
-            return Observable.combineLatest(
-                    onboardingDataManager.isRolloutAllowed(),
-                    onboardingDataManager.getIfSepaCountry(),
-                    getIsInvited(),
-                    (allowRollout, isSepa, isInvited) -> allowRollout && (isSepa || isInvited));
-        }
-    }
 
-    private Observable<Boolean> getIsInvited() {
-        return settingsDataManager.getSettings()
-                .map(settings -> {
-                    // TODO: implement settings.invited.sfox
-                    return false;
-                });
+            return onboardingDataManager.getIfSepaCountry()
+                    .flatMap(isSepa -> {
+                        if(isSepa) {
+                            return onboardingDataManager.isRolloutAllowed();
+                        } else {
+                            return Observable.just(false);
+                        }
+                    });
+        }
     }
 
     public void reloadExchangeData() {

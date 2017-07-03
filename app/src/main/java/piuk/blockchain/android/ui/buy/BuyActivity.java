@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.buy;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -11,9 +10,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
 import android.util.Log;
-import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
 import com.facebook.device.yearclass.YearClass;
@@ -28,7 +27,6 @@ import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
-import piuk.blockchain.android.ui.pairing_code.PairingCodeActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ViewUtils;
@@ -73,6 +71,8 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         }
 
         frontendJavascriptManager = new FrontendJavascriptManager(this, binding.webview);
+
+        binding.webview.setWebViewClient(new WebViewClient());
         binding.webview.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
         binding.webview.getSettings().setJavaScriptEnabled(true);
         binding.webview.loadUrl(viewModel.getCurrentServerUrl() + "wallet/#/intermediate");

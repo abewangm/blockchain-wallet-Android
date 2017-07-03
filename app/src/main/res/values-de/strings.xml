@@ -180,7 +180,6 @@
     <string name="address_lookup_fail">Adresse konnte nicht abgerufen werden. Bitte Adresse per Hand eingeben.</string>
 
     <string name="backup_write_down_words">Es ist wichtig, dass Sie sich Ihre Worte auf jeden Fall exakt nach Wortlaut und in dieser Reihenfolge notieren.</string>
-    <string name="backup_verify_heading">Zur Beendigung des Backup-Verfahrens geben Sie die folgenden Worte Ihres Wiederherstellungspassworts ein.</string>
     <string name="backup_of">von</string>
     <string name="backup_confirmed">Backup wurde bestätigt</string>
     <string name="backup_word_mismatch">Wort passt nicht</string>
@@ -214,7 +213,6 @@
     <string name="click">Einfach klicken</string>
     <string name="to_start_sending_and_receiving_btc">und schon können Sie Bitcoins senden und empfangen.</string>
 
-    <string name="watch_only_label">(Watch Only)</string>
     <string name="address_book_label">(Adressenbuch)</string>
 
     <string name="transaction_submitted">Transaktion wurde abgeschlossen</string>
@@ -232,8 +230,6 @@
     <string name="upgrade_fail_heading">Die Wallet-Aufrüstung ist fehlgeschlagen!</string>
     <string name="upgrade_fail_info">Beim Aufrüsten Ihrer Wallet ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.</string>
     <string name="not_sane_error">Ihre Blockchain-Wallet-Installation ist unvollständig. Bitte kombinieren Sie nochmals Ihre Wallet oder erstellen Sie eine neue.</string>
-
-    <string name="watchonly_address_receive_warning">Es werden Ihnen gleich Bitcoins an eine Watch Only-Adresse zugesandt. Dieses Guthaben können Sie nur dann ausgeben, wenn Sie über einen privaten Schlüssel verfügen. Weiter?</string>
 
     <string name="camera_unavailable">Die Kamera wird derzeit durch eine andere Anwendung genutzt. Bitte schließen Sie die entsprechende Anwendung und versuchen Sie es erneut.</string>
 
@@ -295,16 +291,13 @@
     <string name="watch_only_import_warning">Sie sind dabei, eine Watch Only Adresse - eine Adresse (oder ein öffentliches Schlüsselscript), die/das in der Wallet ohne den dazugehörigen privaten Schlüssel gespeichert wird - zu importieren. Das bedeutet, dass dieses Guthaben NUR dann ausgegeben werden kann, wenn Sie den privaten Schlüssel anderenorts aufbewahrt haben. Sollten Sie nicht über den privaten Schlüssel verfügen, geben Sie diese Watch Only Adresse NICHT zum Empfang von Bitcoin an.\n\nDiese Optionen empfehlen sich nur für erfahrene Benutzer. Weiter? </string>
     <string name="scan_private_key">Privaten Schlüssel scannen</string>
     <string name="private_key_successfully_imported">Der private Schlüssel wurde erfolgreich importiert.</string>
-    <string name="private_key_not_matching_address">HINWEIS: Der gescannte private Schlüssel gehört nicht zu Ihrer Watch Only Adresse. Zur Ausgabe Ihres unter dieser Adresse vorhandenen Guthabens scannen Sie bitte den zutreffenden privaten Schlüssel.</string>
     <string name="watch_only">Watch Only</string>
     <string name="extended_public_key_description">Sollten Sie ein Händler sein, präsentieren Sie Ihren xPub und nutzen Sie zum sicheren und persönlichen Empfang von Guthaben die Blockchain-Merchant-App.\n\nBehandeln Sie Ihren xPub vertraulich.         Jede Person mit Zugriff auf Ihren xPub kann alle Ihre Guthaben und Transaktionen einsehen. </string>
-    <string name="watch_only_description">Dies ist eine Watch Only Adresse. Zur Ausgabe Ihres in dieser Wallet vorhandenen Guthabens scannen Sie bitte Ihren privaten Schlüssel. </string>
     <string name="success">Das hat geklappt</string>
     <string name="default_label">Standard</string>
     <string name="try_again">Erneut versuchen</string>
     <string name="transfer">Überweisen</string>
     <string name="transfer_funds">Guthaben überweisen</string>
-    <string name="transfer_recommend">Zu Ihrer Sicherheit empfehlen wir Ihnen, alle unter importierten Adressen vorhandene Guthaben an Ihre Blockchain-Wallet zu überweisen.</string>
     <string name="spendable_addresses">Ausgabefähige Adressen</string>
 
     <string name="dont_ask_again">Nicht wieder nachfragen.</string>
@@ -357,8 +350,6 @@
     <string name="tor_requests">Tor-Anfragen sperren</string>
     <string name="tor_summary">Möchten Sie verhindern, dass bekannterweise dem Anonymisierungsnetzwerk Tor zugehörige IP-Adressen Zugang zu Ihrer Wallet erhalten? Hackers versuchen häufig mithilfe des Tor-Netzwerkes, Zugriff auf Wallets von Blockchain-Benutzern zu bekommen.</string>
     <string name="change_password">Passwort ändern</string>
-    <string name="change_password_summary">Ihr Passwort wird unseren Servern niemals mitgeteilt, weshalb wir Ihnen bei der Rücksetzung Ihres Passwortes - sollten Sie dieses vergessen - nicht behilflich sein können. Denken Sie daran, Ihr Wiederherstellungspasswort, das Ihnen im Falle eines Passwortverlustes einen erneuten Zugriff auf Ihre Wallet ermöglicht, aufzuschreiben.</string>
-    <string name="verify_email_notice">Wir haben an Ihre E-Mail-Adresse einen Verifizierungslink gesandt. Zur Verifizierung Ihrer E-Mail-Adresse klicken Sie bitte auf den entsprechenden Link.</string>
     <string name="email_notifications">E-Mail-Benachrichtigungen</string>
     <string name="email_notifications_summary">Erhalten Sie beim Empfang von Bitcoin eine Benachrichtigung.</string>
     <string name="current_password">Aktuelles Passwort</string>
@@ -451,7 +442,6 @@
     <string name="overview">Überblick</string>
     <string name="create_a_wallet">Eine Wallet erstellen</string>
     <string name="log_in">Anmelden</string>
-    <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="wallets">Wallets</string>
     <string name="your_transactions">Keine Transaktionen</string>
     <string name="archived_label">Archiviert</string>
@@ -519,13 +509,9 @@
 
     <string name="backup_again">Erneut sichern</string>
     <string name="backup_button_start">Backup starten</string>
-    <string name="backup_complete_message">Bei Passwortverlust lässt sich das Guthaben anhand des Wiederherstellungspassworts wiedererlangen. Jeder, der Zugang zu Ihrem Wiederherstellungspasswort hat, kann auf Ihr Bitcoin zugreifen. Deshalb sollten Sie daran denken, es offline sicher und geschützt aufzubewahren.</string>
     <string name="backup_done">FERTIG</string>
-    <string name="backup_explanation">Zu Ihrem Schutz verwahrt Blockchain keine Passwörter. Im Falle eines Passwortverlusts erhalten Sie mit Hilfe des folgenden 12 Worte umfassenden Wiederherstellungspassworts Zugang zu Ihrem Guthaben. Denken Sie daran, dieses auf einem Zettel zu notieren und an einem sicheren sowie geschützten Ort aufzubewahren. </string>
-    <string name="backup_header">Wiederherstellungspasswort</string>
     <string name="backup_header_complete">Backup abgeschlossen</string>
     <string name="backup_last">Letzter Backup: %1$s</string>
-    <string name="backup_lost_mnemonic">Haben Sie Ihr 12 Worte umfassendes Wiederherstellungspasswort verloren?</string>
     <string name="backup_next_word">NÄCHSTES WORT</string>
     <string name="backup_previous_word">VORHERIGES WORT</string>
     <string name="backup_word">Wort</string>
@@ -560,12 +546,6 @@
     <string name="contacts_loading_failed">Laden von Kontakten ist fehlgeschlagen. Bitter erneut versuchen</string>
     <string name="contacts_name_cannot_be_empty">Ungültiger Name</string>
     <string name="contacts_name_field_hint">Name</string>
-    <string name="two_factor_dialog_title">Bitte 2FA-Code eingeben</string>
-    <string name="two_factor_dialog_message_authenticator">Um fortzufahren, geben Sie bitte einen gültigen, von Ihrer Authentifizierungsapp stammenden 2FA-Code ein.</string>
-    <string name="two_factor_dialog_message_sms">Wir haben Ihnen gerade eine SMS mit einem 2FA-Code gesandt. Bitte geben Sie diesen hier ein und fahren Sie dann fort.</string>
-    <string name="two_factor_dialog_hint">2FA-Code</string>
-    <string name="two_factor_null_error">Der 2FA-Code darf nicht leer sein</string>
-    <string name="two_factor_incorrect_error">Der 2FA-Code ist unzutreffend</string>
     <string name="contacts_payment_sent_success">Zahlung wurde versandt! Wir haben Ihren Kontakt benachrichtigt und ihm mitgeteilt, dass Sie die Transaktion abgeschlossen haben.</string>
     <string name="contacts_payment_sent_failed_message">Bei der Benachrichtigung Ihres Kontakts über die von Ihnen geleistete Zahlung ist ein Fehler aufgetreten. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
     <string name="contacts_waiting_for_address_message">Ihr Kontakt wurde darüber informiert, dass Sie ihm Bitcoin senden möchten und dazu von ihm eine Adresse benötigen. Sobald eine entsprechende Adresse bereitgestellt wird, erhalten Sie von uns eine Benachrichtigung.</string>
@@ -629,7 +609,6 @@
     <string name="creating_wallet">Wallet erstellen</string>
     <string name="recover_funds">Guthaben wiederherstellen</string>
     <string name="recover_funds_warning_message">Falls Sie Zugriff auf Ihre Wallet-ID und Ihr Passwort haben, sollten Sie immer die Kombinationsoption nutzen oder sich anmelden. Durch die Wiederherstellung Ihrer Guthaben wird eine neue Wallet-ID erzeugt. Möchten Sie fortfahren?</string>
-    <string name="recover_funds_instructions">Geben Sie Ihre 12 Wiederherstellungsworte inklusive Leerzeichen zur Wiedergewinnung Ihrer Guthaben und Transaktionen ein</string>
     <string name="done">Fertig</string>
     <string name="transfer_confirmed">Die Übermittlung wurde bestätigt</string>
     <string name="transaction_details_unknown">Unbekannt</string>
@@ -637,15 +616,68 @@
     <string name="transaction_detail_description_hint">Wofür ist das?</string>
     <string name="transaction_detail_confirmed">Bestätigt</string>
     <string name="to_field_helper_no_dropdown">Bitcoin-Adresse eingeben</string>
-    <string name="sms_notifications_summary">Zum Erhalt einer SMS bei Bitcoin-Empfang aktivieren Sie die Benachrichtigungsoption. Nur Adressen mit Beschreibungen und importierte Adressen sind zur Auslösung von Benachrichtigungen zulässig.</string>
     <string name="share_instructions">Zum Kopieren diese Adresse berühren. Mit dem Sender per E-Mail oder Textnachricht teilen.</string>
     <string name="security_centre_two_fa_message">Schützen Sie Ihre Wallet vor unberechtigtem Zugriff. Zur Verbesserung des Walletschutzes aktivieren Sie die 2-Schritt-Authentifizierung.</string>
     <string name="security_centre_backup_title">Sichern Sie Ihr Guthaben</string>
     <string name="restore_failed">Die Wiederherstellung der Wallet ist fehlgeschlagen. Bitte erneut versuchen</string>
-    <string name="recovery_passphrase">Wiederherstellungspasswort</string>
     <string name="password_reveal_warning">Vorsicht! Durch die Offenlegung dieses Textes lässt sich Ihr Passwort in die Zwischenablage kopieren und kann dann von allen auf Ihrem Gerät vorhandenen Anwendungen gelesen werden. Achten Sie auch darauf, ob jemand hinter Ihnen steht!</string>
     <string name="password_hint_summary">Ihre Blockchain-Wallet teilt unseren Servern niemals Ihr Passwort mit. Deshalb haben wir auch keine Kenntnisse darüber und können Ihr Passwort - sollten Sie es vergessen - nicht zurücksetzen. Erstellen Sie einen einprägsamen Passworthinweis, den wir Ihnen an Ihre verifizierte E-Mail-Adresse zusenden können, falls Sie sich nicht mehr an Ihr Passwort erinnern.</string>
+
+
+    <string name="recover_funds_instructions">Zur Wiedererlangung Ihrer Guthaben und Transaktionen geben Sie bitte die 12 Worte Ihres Wiederherstellungspasswortes ein</string>
+    <string name="recovery_passphrase">Wiederherstellungspasswort</string>
     <string name="invalid_recovery_phrase">Ungültiges Wiederherstellungspasswort. Bitte erneut versuchen</string>
+    <string name="about">Blockchain Wallet %1$s\n©%2$s Blockchain Luxembourg S.A.\nAlle Rechte vorbehalten.</string>
+    <string name="watch_only_label">(Watch-Only)</string>
+    <string name="watchonly_address_receive_warning">In Kürze werden Sie Bitcoin über eine Watch-Only-Adresse empfangen. Dieses Guthaben können Sie nur dann ausgeben, wenn Sie Zugriff auf einen privaten Schlüssel haben. Weiter?</string>
+    <string name="label_name_match">Der Name wird bereits verwendet</string>
+    <string name="private_key_not_matching_address">HINWEIS: Der gescannte private Schlüssel entspricht nicht Ihrer Watch-Only-Adresse. Zur Ausgabe Ihres unter dieser Adresse vorhandenen Guthabens scannen Sie bitte den zutreffenden privaten Schlüssel.</string>
+    <string name="watch_only_description">Dies ist eine Watch-Only-Adresse. Zur Ausgabe Ihres Guthabens von</string>
+    <string name="transfer_recommend">Anscheinend verfügen Sie über einige Bitcoin-Beträge auf importierten Adressen. Ihr Wiederherstellungspasswort sichert keine importierten Adressen. Zur Sicherung der Guthaben und deren Einbezug in Ihr Backup raten wir dazu, diese zu überweisen.</string>
+    <string name="disable_online_only">Zur 2FA-Deaktivierung melden Sie sich bitte im Webbrowser bei Ihrer Wallet an.</string>
+    <string name="change_password_summary">Ihr Passwort wird unseren Servern niemals mitgeteilt, weshalb wir Ihnen bei der Rücksetzung Ihres Passwortes - sollten Sie dieses vergessen - nicht behilflich sein können. Vergewissern Sie sich, Ihr Guthaben über das Seitenmenü zu sichern. Auf diese Weise ist es Ihnen möglich, im Falle eines Passwortverlusts den Zugang zur Ihrer Wallet wiederherzustellen.</string>
+    <string name="verify_email_notice">Wir haben an Ihre E-Mail-Adresse einen Verifizierungslink gesandt. Zur Verifizierung Ihrer E-Mail-Adresse klicken Sie bitte auf den Link.</string>
+    <string name="pairing_code_log_in">Melden Sie sich bei der Web-Wallet an</string>
+    <string name="pairing_code_instruction_1">Gehen Sie auf Ihrem Computer zu %1$s.</string>
+    <string name="pairing_code_instruction_2">Wählen Sie eine Anmeldung per Handy</string>
+    <string name="pairing_code_instruction_3">Scannen Sie den nachfolgenden QR-Code mithilfe der Kamera Ihres Computers ein.</string>
+    <string name="pairing_code_show_qr">QR-Code anzeigen</string>
+    <string name="pairing_code_hide_qr">QR-Code verbergen</string>
+    <string name="pairing_code_warning_1">Verbergen Sie diesen Code, bis Sie soweit sind.</string>
+    <string name="pairing_code_warning_2">Bewahren Sie diesen Code sicher auf!\nTeilen Sie ihn nicht mit anderen.</string>
+    <string name="sms_notifications_summary">Wenn Sie jedes Mal per SMS vom Empfang von Bitcoin informiert werden möchten, aktivieren Sie Benachrichtigungen.</string>
+    <string name="backup_header">Wiederherstellungspasswort</string>
+    <string name="backup_explanation">Zu Ihrem Schutz bewahrt Blockchain keine Passwörter auf. Das folgende aus 12 Worten bestehende Wiederherstellungspasswort ermöglicht Ihnen im Falle eines Passwortverlusts den Zugang zu Ihrem Guthaben. Denken Sie daran, dieses auf einem Zettel zu notieren und an einem sicheren sowie geschützten Ort aufzubewahren. </string>
+    <string name="backup_complete_message">Sollten Sie Ihr Passwort verlieren, können Sie Ihr Guthaben mithilfe des Wiederherstellungspasswort wiedererlangen. Jede Person mit Zugang zu Ihrem Wiederherstellungspasswort hat die Möglichkeit, auf Ihr Bitcoin zuzugreifen. Denken Sie deshalb daran, es an einem sicheren und geschützten Ort offline aufzubewahren.</string>
+    <string name="backup_verify_heading">Zum Abschluss des Wiederherstellungsverfahrens geben Sie bitte die folgenden Worte Ihres Wiederherstellungspasswortes ein.</string>
+    <string name="backup_lost_mnemonic">Haben Sie Ihr 12 Worte umfassendes Wiederherstellungspasswort verloren?</string>
+    <string name="trade_complete">Handel wurde abgeschlossen</string>
+    <string name="trade_complete_details">Ihr Bitcoin-Handel wurde abgeschlossen!</string>
+    <string name="view_details">Details anzeigen</string>
+    <string name="onboarding_available_now">Jetzt verfügbar</string>
+    <string name="onboarding_buy_details">Kaufen Sie Bitcoin direkt von Ihrer mobilen Wallet aus. Es ist einfach, problemlos und sicher.</string>
+    <string name="onboarding_buy_performance_warning">Der Kaufvorgang kann auf Ihrem Gerät etwas mehr Zeit in Anspruch nehmen. Vielen Dank im Voraus für Ihre Geduld.</string>
 
+    <string name="two_factor_dialog_title">Bitte 2FA-Code eingeben</string>
+    <string name="two_factor_dialog_message_authenticator">Um fortzufahren, geben Sie bitte einen gültigen, von Ihrer Authentifizierungsapp stammenden 2FA-Code ein.</string>
+    <string name="two_factor_dialog_message_sms">Wir haben Ihnen gerade eine SMS mit einem 2FA-Code gesandt. Bitte geben Sie diesen hier ein und fahren Sie dann fort.</string>
+    <string name="two_factor_dialog_hint">2FA-Code</string>
+    <string name="two_factor_null_error">Der 2FA-Code darf nicht leer sein</string>
+    <string name="two_factor_incorrect_error">Der 2FA-Code ist unzutreffend</string>
 
+    <string name="confirm_payment_change_fee">Änderungsgebühr</string>
+    <string name="confirm_payment_fee_sync_error">Fehler bei Einholung der Gebührenoptionen</string>
+
+    <string name="fee_options_regular">Regulär</string>
+    <string name="fee_options_priority">Priorität</string>
+    <string name="fee_options_custom">Anpassen</string>
+    <string name="fee_options_regular_time">Mehr als 1 Stunde</string>
+    <string name="fee_options_priority_time">~0–60 Min</string>
+    <string name="fee_options_custom_warning">Nur fortgeschrittene Benutzer</string>
+    <string name="fee_options_sat_byte_formatted">%1$s Sat/B</string>
+    <string name="fee_options_fee_too_low">Niedriggebühr ist nicht zu empfehlen</string>
+    <string name="fee_options_fee_too_high">Unnötig hohe Gebühr</string>
+    <string name="fee_options_advanced_warning">Diese Funktion empfiehlt sich nur für erfahrene Benutzer. Wenn Sie sich entscheiden, Ihre Gebühr selbst zu bestimmen, laufen Sie Gefahr, zu viel für Ihre Transaktion zu bezahlen oder diese nie bestätigt zu bekommen.</string>
+    <string name="fee_options_sat_byte_hint">Sat/B</string>
+    <string name="fee_options_sat_byte_inline_hint">Regulär: %1$s, Priorität: %2$s</string>
 </resources>

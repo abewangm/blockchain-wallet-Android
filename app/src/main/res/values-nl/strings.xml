@@ -180,7 +180,6 @@
     <string name="address_lookup_fail">Kan het adres niet ophalen. Voer het adres handmatig in.</string>
 
     <string name="backup_write_down_words">Het is belangrijk om ervoor te zorgen dat u uw woorden precies opschrijft zoals ze hier verschijnen en in deze volgorde.</string>
-    <string name="backup_verify_heading">Voer de volgende woorden uit uw Herstelregel in om de back-up te voltooien.</string>
     <string name="backup_of">van</string>
     <string name="backup_confirmed">Back-up bevestigd</string>
     <string name="backup_word_mismatch">Verkeerde combinatie van woorden</string>
@@ -214,7 +213,6 @@
     <string name="click">Klik op</string>
     <string name="to_start_sending_and_receiving_btc">om te beginnen met het verzenden en ontvangen van Bitcoins.</string>
 
-    <string name="watch_only_label">(alleen-lezen)</string>
     <string name="address_book_label">(adresboek)</string>
 
     <string name="transaction_submitted">Transactie voltooid</string>
@@ -232,8 +230,6 @@
     <string name="upgrade_fail_heading">De upgrade van de portemonnee is mislukt!</string>
     <string name="upgrade_fail_info">Er is een fout opgetreden bij het upgraden van uw portemonnee. Probeer het later opnieuw.</string>
     <string name="not_sane_error">De installatie van uw Blockchain Portemonnee is onvolledig. Koppel uw portemonnee opnieuw of maak een nieuwe aan.</string>
-
-    <string name="watchonly_address_receive_warning">U staat op het punt om Bitcoins te ontvangen op een alleen-lezen-adres. U kunt deze tegoeden alleen uitgeven als u toegang heeft tot de privésleutel. Doorgaan?</string>
 
     <string name="camera_unavailable">De camera is momenteel geopend door een andere applicatie. Sluit de andere applicatie en probeer het opnieuw.</string>
 
@@ -295,16 +291,13 @@
     <string name="watch_only_import_warning">U staat op het punt om een alleen-lezen-adres te importeren, een adres (of openbare sleutelscript) dat is opgeslagen in de portemonnee zonder de bijbehorende privésleutel. Dit betekent dat de tegoeden ALLEEN kunnen worden uitgegeven als u de privésleutel elders heeft bewaard. Als u de privésleutel niet heeft opgeslagen, vraag dan NIEMAND om u Bitcoins te verzenden naar het alleen-lezen-adres.\n\nDeze opties worden alleen aanbevolen aan gevorderde gebruikers. Doorgaan? </string>
     <string name="scan_private_key">Privésleutel scannen</string>
     <string name="private_key_successfully_imported">Privésleutel met succes geïmporteerd.</string>
-    <string name="private_key_not_matching_address">OPGELET: De gescande privésleutel komt niet overeen met uw alleen-lezen-adres. Om uw tegoeden vanaf dit adres te kunnen uitgeven, dient u de juiste privésleutel te scannen.</string>
     <string name="watch_only">Alleen-lezen</string>
     <string name="extended_public_key_description">Als u een handelaar bent, laat dan uw xPub zien en gebruik de Blockchain handelaren-app om tegoeden veilig en privé te ontvangen.\n\nVertel uw xPub aan niemand.         Iemand met toegang tot uw xPub kan al uw tegoeden en transacties zien. </string>
-    <string name="watch_only_description">Dit is een alleen-lezen-adres. Om uw tegoeden uit deze portemonnee uit te geven, scant u uw privésleutel. </string>
     <string name="success">Succes</string>
     <string name="default_label">Standaard</string>
     <string name="try_again">Probeer het opnieuw</string>
     <string name="transfer">Overboeken</string>
     <string name="transfer_funds">Tegoeden overmaken</string>
-    <string name="transfer_recommend">Voor uw veiligheid raden wij u aan de eventuele saldi in uw ingevoerde adressen over te schrijven naar uw Blockchain portemonnee.</string>
     <string name="spendable_addresses">Besteedbare adressen</string>
 
     <string name="dont_ask_again">Mij niet meer vragen.</string>
@@ -357,8 +350,6 @@
     <string name="tor_requests">Tor-verzoeken blokkeren</string>
     <string name="tor_summary">Wilt u de toegang tot uw portemonnee blokkeren voor IP-adressen waarvan bekend is dat ze deel uitmaken van het anonieme Tor-netwerk. Het Tor-netwerk wordt vaak gebruikt door hackers om te proberen toegang te krijgen tot portemonnees van Blockchain-gebruikers.</string>
     <string name="change_password">Wachtwoord wijzigen</string>
-    <string name="change_password_summary">Uw wachtwoord wordt nooit gedeeld met onze servers, wat betekent dat we u niet kunnen helpen om uw wachtwoord te resetten als u het bent vergeten. Zorg ervoor dat u uw herstelregel opschrijft zodat de toegang tot uw portemonnee kan worden hersteld wanneer u uw wachtwoord kwijt bent.</string>
-    <string name="verify_email_notice">We hebben een verificatielink naar uw e-mailadres gestuurd. Klik op de verificatielink om uw e-mailadres te verifiëren.</string>
     <string name="email_notifications">E-mailmeldingen</string>
     <string name="email_notifications_summary">Krijg een melding wanneer u Bitcoins ontvangt.</string>
     <string name="current_password">Huidig wachtwoord</string>
@@ -451,7 +442,6 @@
     <string name="overview">Overzicht</string>
     <string name="create_a_wallet">Maak een portemonnee</string>
     <string name="log_in">Log in</string>
-    <string name="about">Blockchain Portemonnee %1$s\n©%2$s Blockchain Luxembourg S.A.</string>
     <string name="wallets">Portemonnees</string>
     <string name="your_transactions">Geen transacties</string>
     <string name="archived_label">Gearchiveerd</string>
@@ -519,13 +509,9 @@
 
     <string name="backup_again">Maak opnieuw een back-up</string>
     <string name="backup_button_start">Start de back-up</string>
-    <string name="backup_complete_message">U kunt uw herstelregel gebruiken om uw tegoeden te herstellen als u uw wachtwoord kwijt bent. Iedereen die toegang heeft tot uw herstelregel, heeft toegang tot uw Bitcoins, dus vergeet niet om deze offline veilig te bewaren.</string>
     <string name="backup_done">KLAAR</string>
-    <string name="backup_explanation">Voor uw veiligheid bewaart Blockchain geen wachtwoorden in haar bestand. De volgende uit 12 woorden bestaande herstelregel geeft u toegang tot uw tegoeden in het geval u uw wachtwoord kwijt bent. Zorg ervoor dat u deze op een stuk papier schrijft en ergens veilig bewaart. </string>
-    <string name="backup_header">Herstelregel</string>
     <string name="backup_header_complete">Back-up voltooid</string>
     <string name="backup_last">Laatste back-up: %1$s</string>
-    <string name="backup_lost_mnemonic">Bent u uw uit 12 woorden bestaande herstelregel vergeten?</string>
     <string name="backup_next_word">VOLGENDE WOORD</string>
     <string name="backup_previous_word">VORIGE WOORD</string>
     <string name="backup_word">Woord</string>
@@ -560,12 +546,6 @@
     <string name="contacts_loading_failed">Laden van contactpersonen is mislukt, probeer het opnieuw</string>
     <string name="contacts_name_cannot_be_empty">Ongeldige naam</string>
     <string name="contacts_name_field_hint">Naam</string>
-    <string name="two_factor_dialog_title">Voer de 2FA-code in</string>
-    <string name="two_factor_dialog_message_authenticator">Voer een geldige 2FA-code in van uw authenticator-app om door te gaan.</string>
-    <string name="two_factor_dialog_message_sms">We hebben u net een sms gestuurd met een 2FA-code. Voer hem hier in om door te gaan.</string>
-    <string name="two_factor_dialog_hint">2FA-code</string>
-    <string name="two_factor_null_error">2FA-code kan niet leeg zijn</string>
-    <string name="two_factor_incorrect_error">2FA-code onjuist</string>
     <string name="contacts_payment_sent_success">Betaling verzonden! We hebben uw contactpersoon een bericht gestuurd om deze te laten weten dat u de transactie hebt voltooid.</string>
     <string name="contacts_payment_sent_failed_message">Er is een fout opgetreden bij het op de hoogte brengen van uw contactpersoon dat u deze een betaling heeft verzonden. Controleer uw verbinding en probeer het opnieuw.</string>
     <string name="contacts_waiting_for_address_message">Uw contactpersoon is medegedeeld dat u hem/haar Bitcoins wilt verzenden en dat u een adres van hem/haar nodig heeft. Wij zullen u op de hoogte stellen wanneer hij/zij een adres heeft verstuurd!</string>
@@ -629,7 +609,6 @@
     <string name="creating_wallet">Portemonnee aan het maken</string>
     <string name="recover_funds">Tegoeden herstellen</string>
     <string name="recover_funds_warning_message">U moet altijd koppelen of inloggen als u toegang heeft tot de ID en het wachtwoord van uw portemonnee. Door uw tegoeden te herstellen zal er een nieuwe Portemonnee-ID worden aangemaakt. Wilt u doorgaan?</string>
-    <string name="recover_funds_instructions">Voer uw 12 herstelwoorden met spaties in om uw tegoeden &amp; transacties te herstellen</string>
     <string name="done">Klaar</string>
     <string name="transfer_confirmed">Overboeking bevestigd</string>
     <string name="transaction_details_unknown">Onbekend</string>
@@ -637,14 +616,68 @@
     <string name="transaction_detail_description_hint">Waar is dit voor?</string>
     <string name="transaction_detail_confirmed">Bevestigd</string>
     <string name="to_field_helper_no_dropdown">Bitcoin-adres invoeren</string>
-    <string name="sms_notifications_summary">Schakel meldingen in om een sms te ontvangen wanneer u Bitcoins ontvangt. Alleen gelabelde en geïmporteerde adressen zijn geschikt om meldingen op te roepen.</string>
     <string name="share_instructions">Tik om dit adres te kopiëren. Deel het met de afzender via e-mail of tekstbericht.</string>
     <string name="security_centre_two_fa_message">Voorkom onbevoegde toegang tot uw portemonnee. Schakel de tweeledige verificatiemethode in om de beveiliging van uw portemonnee te vergroten.</string>
     <string name="security_centre_backup_title">Maak een back-up van uw tegoeden</string>
     <string name="restore_failed">Het herstellen van uw portemonnee is mislukt. Probeer het opnieuw</string>
-    <string name="recovery_passphrase">Herstelregel</string>
     <string name="password_reveal_warning">Wees voorzichtig! Door deze tekst te onthullen kunt u uw wachtwoord kopiëren naar het klembord, dat vervolgens kan worden gelezen door alle applicaties op uw apparaat. Wees ook bewust dat er mensen achter je kunnen staan!</string>
     <string name="password_hint_summary">Uw Blockchain-portemonnee communiceert uw wachtwoord nooit naar onze servers. Dit betekent dat we geen idee hebben wat uw wachtwoord is en we het niet kunnen resetten als u het bent vergeten. Maak een wachtwoordhint aan die makkelijk te onthouden is en die we naar uw geverifieerde e-mailadres kunnen sturen als u uw wachtwoord bent vergeten.</string>
-    <string name="invalid_recovery_phrase">Ongeldige herstelregel. Probeer het opnieuw</string>
 
+
+    <string name="recover_funds_instructions">Voer uw 12 back-upwoorden in, gescheiden door een spatie, om uw geld en transacties te herstellen</string>
+    <string name="recovery_passphrase">Back-upregel</string>
+    <string name="invalid_recovery_phrase">Ongeldige back-upregel. Probeer het opnieuw</string>
+    <string name="about">Blockchain-portemonnee %1$s\n©%2$s Blockchain Luxemburg S.A.\nAlle rechten voorbehouden.</string>
+    <string name="watch_only_label">(alleen-bekijken)</string>
+    <string name="watchonly_address_receive_warning">U zult zo meteen bitcoin ontvangen op een alleen-bekijken-adres. U kunt dit saldo alleen besteden als u toegang heeft tot de privésleutel. Doorgaan?</string>
+    <string name="label_name_match">Naam reeds in gebruik</string>
+    <string name="private_key_not_matching_address">OPMERKING: De gescande privésleutel komt niet overeen met het alleen-bekijken-adres. Om uw saldo vanaf dit adres te kunnen besteden, dient u de juiste privésleutel te scannen.</string>
+    <string name="watch_only_description">Dit is een alleen-bekijken-adres. Om uw saldo te besteden van</string>
+    <string name="transfer_recommend">Zo te zien hebt u enkele bitcoins beschikbaar in de geïmporteerde adressen. Geïmporteerde adressen worden niet ondersteund door uw back-upzin. Om dit saldo te beveiligen, adviseren we u aan om dit in uw back-up op te nemen.</string>
+    <string name="disable_online_only">Log in op uw Portemonnee in de webbrowser om 2FA uit te schakelen.</string>
+    <string name="change_password_summary">Uw wachtwoord wordt nooit gedeeld met onze servers, wat betekent dat we u niet kunnen helpen bij het herstellen van uw wachtwoord indien u deze bent vergeten. Zorg ervoor dat u een back-up maakt van uw saldo via het zijmenu. Hierdoor kan de toegang tot uw portemonnee worden hersteld indien u uw wachtwoord hebt verloren.</string>
+    <string name="verify_email_notice">We hebben een verificatielink naar uw e-mailadres gestuurd. Klik op de link om uw e-mailadres te verifiëren.</string>
+    <string name="pairing_code_log_in">Log in op de webportemonnee</string>
+    <string name="pairing_code_instruction_1">Ga naar %1$s op uw computer.</string>
+    <string name="pairing_code_instruction_2">Selecteer \'Log in op mobiel\'</string>
+    <string name="pairing_code_instruction_3">Met de camera van uw computer scant u de onderstaande QR-code.</string>
+    <string name="pairing_code_show_qr">Toon QR-code</string>
+    <string name="pairing_code_hide_qr">Verberg QR-code</string>
+    <string name="pairing_code_warning_1">Verberg deze code totdat u klaar bent.</string>
+    <string name="pairing_code_warning_2">Bewaar deze code goed!\nNiet delen met anderen.</string>
+    <string name="sms_notifications_summary">Schakel de aanmeldingen aan, zodat u een SMS krijgt wanneer u bitcoin hebt ontvangen.</string>
+    <string name="backup_header">Back-upregel</string>
+    <string name="backup_explanation">Voor uw veiligheid bewaart Blockchain geen wachtwoorden in haar bestand. De volgende back-upregel bestaande uit 12 woorden biedt toegang tot uw saldo indien u uw wachtwoord hebt verloren. Zorg ervoor dat u dit op een stuk papier schrijft en ergens veilig bewaart. </string>
+    <string name="backup_complete_message">U kunt uw back-upregel gebruiken voor het herstellen van uw saldo indien u uw wachtwoord hebt verloren. Iedereen die toegang heeft tot uw back-upregel, heeft ook toegang tot uw bitcoin. Voor uw veiligheid kunt u deze daarom beter offline bewaren.</string>
+    <string name="backup_verify_heading">Voer de volgende woorden in van uw back-upregel om het back-upproces te kunnen voltooien.</string>
+    <string name="backup_lost_mnemonic">Bent u de back-upregel bestaande uit 12 woorden vergeten?</string>
+    <string name="trade_complete">Transactie voltooid</string>
+    <string name="trade_complete_details">De transactie voor het kopen van bitcoin is voltooid!</string>
+    <string name="view_details">Bekijk details</string>
+    <string name="onboarding_available_now">Nu beschikbaar</string>
+    <string name="onboarding_buy_details">Koop rechtstreeks bitcoin via uw mobiele portemonnee. Het is eenvoudig, naadloos en veilig.</string>
+    <string name="onboarding_buy_performance_warning">De transactie verloopt mogelijk wat traag op uw apparaat. Alvast bedankt voor uw geduld.</string>
+
+    <string name="two_factor_dialog_title">Voer de 2FA-code in</string>
+    <string name="two_factor_dialog_message_authenticator">Voer een geldige 2FA-code in van uw authenticator-app om door te gaan.</string>
+    <string name="two_factor_dialog_message_sms">We hebben u net een sms gestuurd met een 2FA-code. Voer deze hier in om door te gaan.</string>
+    <string name="two_factor_dialog_hint">2FA-code</string>
+    <string name="two_factor_null_error">2FA-code kan niet leeg zijn</string>
+    <string name="two_factor_incorrect_error">2FA-code onjuist</string>
+
+    <string name="confirm_payment_change_fee">Verander bedrag</string>
+    <string name="confirm_payment_fee_sync_error">Foutmelding voor het ontvangen van prijsopties</string>
+
+    <string name="fee_options_regular">Normaal</string>
+    <string name="fee_options_priority">Prioriteit</string>
+    <string name="fee_options_custom">Aangepast</string>
+    <string name="fee_options_regular_time">1+ uur</string>
+    <string name="fee_options_priority_time">~0–60 min</string>
+    <string name="fee_options_custom_warning">Alleen geavanceerde gebruikers</string>
+    <string name="fee_options_sat_byte_formatted">%1$s sat/b</string>
+    <string name="fee_options_fee_too_low">Laag bedrag wordt niet aanbevolen</string>
+    <string name="fee_options_fee_too_high">Onnodig hoog bedrag</string>
+    <string name="fee_options_advanced_warning">Deze functie wordt alleen aanbevolen voor geavanceerde gebruikers. Indien u voor een aangepast bedrag kiest, loopt u het risico dat u teveel betaald of dat uw transactie niet wordt bevestigd.</string>
+    <string name="fee_options_sat_byte_hint">sat/b</string>
+    <string name="fee_options_sat_byte_inline_hint">Normaal: %1$s, Prioritiet: %2$s</string>
 </resources>
