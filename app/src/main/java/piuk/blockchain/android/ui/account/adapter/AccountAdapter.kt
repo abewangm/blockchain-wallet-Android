@@ -1,13 +1,13 @@
 package piuk.blockchain.android.ui.account.adapter
 
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
-import piuk.blockchain.android.ui.adapters.ListDelegationAdapter
+import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.util.extensions.autoNotify
 import kotlin.properties.Delegates
 
 class AccountAdapter(
         accountHeadersListener: AccountHeadersListener
-) : ListDelegationAdapter<List<Any>>(AdapterDelegatesManager(), emptyList()) {
+) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
     val createWalletDelegate = CreateWalletDelegate<Any>(accountHeadersListener)
     val importAddressDelegate = ImportAddressDelegate<Any>(accountHeadersListener)

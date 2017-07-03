@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import kotlinx.android.synthetic.main.item_accounts_row.view.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.ui.account.AccountItem
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
@@ -14,7 +15,7 @@ import piuk.blockchain.android.util.extensions.visible
 
 class AccountDelegate<in T>(
         val listener: AccountHeadersListener
-) : AdapterDelegate<List<T>> {
+) : AdapterDelegate<T> {
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
             AccountViewHolder(parent.inflate(R.layout.item_accounts_row))

@@ -14,7 +14,10 @@ import kotlinx.android.synthetic.main.item_contact_transactions.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.ContactTransactionModel
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
-import piuk.blockchain.android.util.*
+import piuk.blockchain.android.util.MonetaryUtil
+import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.SpanFormatter
+import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.helperfunctions.consume
 
@@ -23,7 +26,7 @@ class FctxDelegate<in T>(
         var btcExchangeRate: Double,
         var isBtc: Boolean,
         val listClickListener: BalanceListClickListener
-) : AdapterDelegate<List<T>> {
+) : AdapterDelegate<T> {
 
     val stringUtils = StringUtils(activity)
     val prefsUtil = PrefsUtil(activity)

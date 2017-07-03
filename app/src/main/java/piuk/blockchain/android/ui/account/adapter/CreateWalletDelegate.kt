@@ -6,12 +6,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import kotlinx.android.synthetic.main.item_accounts_row_header.view.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.ui.account.AccountItem
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.util.extensions.inflate
 
 class CreateWalletDelegate<in T>(
         val listener: AccountHeadersListener
-) : AdapterDelegate<List<T>> {
+) : AdapterDelegate<T> {
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
             HeaderViewHolder(parent.inflate(R.layout.item_accounts_row_header))

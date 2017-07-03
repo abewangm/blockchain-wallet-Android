@@ -18,7 +18,7 @@ interface AdapterDelegate<in T> {
      * @param items     The adapter's data source
      * @param position  The current position in the data source
      */
-    fun isForViewType(items: T, position: Int): Boolean
+    fun isForViewType(items: List<T>, position: Int): Boolean
 
     /**
      * Creates the [RecyclerView.ViewHolder] for the given data source item
@@ -37,6 +37,6 @@ interface AdapterDelegate<in T> {
      *
      * @param holder The [RecyclerView.ViewHolder] to bind
      */
-    fun onBindViewHolder(items: T, position: Int, holder: RecyclerView.ViewHolder, payloads: List<*>)
+    fun onBindViewHolder(items: List<T>, position: Int, holder: RecyclerView.ViewHolder, payloads: List<*>)
 
 }

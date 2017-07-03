@@ -22,24 +22,22 @@ class AdapterDelegatesManager<T> {
      * Adds an [AdapterDelegate] to the current list of delegates and returns this
      * [AdapterDelegatesManager].
      */
-    fun addAdapterDelegate(delegate: AdapterDelegate<T>): AdapterDelegatesManager<T> {
+    fun addAdapterDelegate(delegate: AdapterDelegate<T>) {
         var viewType = delegates.size()
         while (delegates[viewType] != null) {
             viewType++
         }
 
         delegates.put(viewType, delegate)
-        return this
     }
 
     /**
      * Removes an [AdapterDelegate] from the current list of delegates and returns this
      * [AdapterDelegatesManager].
      */
-    fun removeAdapterDelegate(delegate: AdapterDelegate<T>): AdapterDelegatesManager<T> {
+    fun removeAdapterDelegate(delegate: AdapterDelegate<T>) {
         val index = delegates.indexOfValue(delegate)
         delegates.removeAt(index)
-        return this
     }
 
     /**
@@ -52,7 +50,7 @@ class AdapterDelegatesManager<T> {
      *
      * @return The item View type as an [Int]
      */
-    fun getItemViewType(items: T, position: Int): Int {
+    fun getItemViewType(items: List<T>, position: Int): Int {
         for (i in 0 until delegates.size()) {
             val delegate = delegates.get(i)
             if (delegate.isForViewType(items, position)) {
@@ -92,7 +90,7 @@ class AdapterDelegatesManager<T> {
      * @param viewHolder    The [RecyclerView.ViewHolder] for the current item
      * @param payloads      A list of payloads, sometimes provided by the [RecyclerView]
      */
-    fun onBindViewHolder(items: T, position: Int, viewHolder: RecyclerView.ViewHolder?, payloads: List<*>?) {
+    fun onBindViewHolder(items: List<T>, position: Int, viewHolder: RecyclerView.ViewHolder?, payloads: List<*>?) {
         if (viewHolder == null) throw NullPointerException("ViewHolder was null")
 
         val delegate = getDelegateForViewType(viewHolder.itemViewType)
@@ -110,7 +108,7 @@ class AdapterDelegatesManager<T> {
      * @param position      The position of the current item
      * @param viewHolder    The [RecyclerView.ViewHolder] for the current item
      */
-    fun onBindViewHolder(items: T, position: Int, viewHolder: RecyclerView.ViewHolder?) =
+    fun onBindViewHolder(items: List<T>, position: Int, viewHolder: RecyclerView.ViewHolder?) =
             onBindViewHolder(items, position, viewHolder, PAYLOADS_EMPTY_LIST)
 
     /**

@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.account.adapter
+package piuk.blockchain.android.ui.account
 
 class AccountItem {
 
