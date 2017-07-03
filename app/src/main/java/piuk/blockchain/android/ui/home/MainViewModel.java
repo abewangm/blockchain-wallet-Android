@@ -149,6 +149,8 @@ public class MainViewModel extends BaseViewModel {
         }
         if (dataListener.isBuySellPermitted()) {
             initializeBuy();
+        } else {
+            dataListener.setBuySellEnabled(false);
         }
     }
 
