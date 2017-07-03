@@ -1020,11 +1020,9 @@ class BalancePresenterTest {
                 rxBus: RxBus?
         ) = payloadDataManager
 
-        override fun provideBuyDataManager(
-                onboardingDataManager: OnboardingDataManager?,
-                settingsDataManager: SettingsDataManager?,
-                environmentSettings: EnvironmentSettings?
-        ) = buyDataManager
+        override fun provideBuyDataManager(onboardingDataManager: OnboardingDataManager?,
+                                           payloadDataManager: PayloadDataManager?):
+                BuyDataManager = buyDataManager
     }
 
     inner class MockApiModule : ApiModule() {
