@@ -444,9 +444,6 @@
     <string name="swipe_receive_preference_summary">Habilite essa opção para revelar um endereço de entrega ao deslizar a tela do PIN para a esquerda, agilizando ainda mais o recebimento de bitcoin. Cinco endereços serão carregados consecutivamente, depois dos quais será necessário efetuar login para exibir novos endereços.</string>
     <string name="swipe_receive_no_addresses">Nenhum outro endereço pode ser carregado no momento. Efetue login no app para carregar mais.</string>
 
-    <string name="survey_message">Gostaria de preencher esta pequena pesquisa para ajudar a melhorar a experiência com a sua carteira?\n\nValorizamos a sua opinião!</string>
-    <string name="survey_positive_button">Responder à pesquisa</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Resumo</string>
     <string name="create_a_wallet">Criar uma carteira</string>

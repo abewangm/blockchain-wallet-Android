@@ -442,9 +442,6 @@
     <string name="swipe_receive_preference_summary">비밀 번호 화면에서 왼쪽으로 스와이프 해서 수령 주소를 볼 수 있어 비트코인 받기가 더 빠르게 하려면 이 옵션 사용 설정을 하세요. 다섯 개 주소가 연속적으로 로딩 된 후 새 주소를 보여주기 위해 로그인이 필요합니다.</string>
     <string name="swipe_receive_no_addresses">지금은 주소를 더 로딩 할 수 없음 더 로딩 하려면 앱에 로그인 하세요</string>
 
-    <string name="survey_message">지갑 사용 체험 개선을 위한 짧은 설문에 응해 주시겠습니까?\n\n피드백 감사합니다!</string>
-    <string name="survey_positive_button">설문 조사 응하기</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">개요</string>
     <string name="create_a_wallet">지갑 만들기</string>

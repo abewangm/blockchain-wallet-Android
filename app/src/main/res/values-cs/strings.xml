@@ -444,9 +444,6 @@
     <string name="swipe_receive_preference_summary">Povolením této možnosti zjistíte přijímací adresu, pokud přejedete prstem doleva na obrazovce PINu. Díky tomu budete přijímat bitcoiny ještě rychleji. Postupně se načte pět adres, poté bude pro zobrazení nových adres vyžadováno přihlášení.</string>
     <string name="swipe_receive_no_addresses">Nyní nelze načíst další adresy. Přihlaste se do aplikace, abyste načetli další.</string>
 
-    <string name="survey_message">Chcete vyplnit krátký dotazník, abyste pomohli zlepšit svůj zážitek z peněženky?\n\nVážíme si vaší zpětné vazby!</string>
-    <string name="survey_positive_button">Vyplnit dotazník</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Přehled</string>
     <string name="create_a_wallet">Vytvořit peněženku</string>

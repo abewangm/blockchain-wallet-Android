@@ -31,7 +31,6 @@ class PromptManager(
     fun getDefaultPrompts(context: Context): Observable<List<AlertDialog>> {
         val list = mutableListOf<AlertDialog>()
 
-        if (isSurveyAllowed()) list.add(getSurveyDialog(context))
         if (isRooted()) list.add(getRootWarningDialog(context))
 
         return Observable.fromArray(list)
@@ -53,10 +52,6 @@ class PromptManager(
 
     private fun getAppVisitCount(): Int {
         return prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0)
-    }
-
-    private fun isSurveyComplete(): Boolean {
-        return prefsUtil.getValue(PrefsUtil.KEY_SURVEY_COMPLETED, false)
     }
 
     private fun getGuid(): String {
@@ -97,30 +92,6 @@ class PromptManager(
 
     private fun isVerifyEmailReminderAllowed(settings: Settings): Boolean {
         return !isFirstRun() && settings.isEmailVerified && !settings.email.isEmpty()
-    }
-
-    private fun isSurveyAllowed(): Boolean {
-        if (!isSurveyComplete()) {
-            var visitsToPageThisSession = getAppVisitCount()
-            // Trigger first time coming back to transaction tab
-            if (visitsToPageThisSession == 1) {
-                // Don't show past June 30th
-                val surveyCutoffDate = Calendar.getInstance()
-                surveyCutoffDate.set(Calendar.YEAR, 2017)
-                surveyCutoffDate.set(Calendar.MONTH, Calendar.JUNE)
-                surveyCutoffDate.set(Calendar.DAY_OF_MONTH, 30)
-
-                if (Calendar.getInstance().before(surveyCutoffDate)) {
-                    prefsUtil.setValue(PrefsUtil.KEY_SURVEY_COMPLETED, true)
-                    return true
-                }
-            } else {
-                visitsToPageThisSession++
-                prefsUtil.setValue(PrefsUtil.KEY_SURVEY_VISITS, visitsToPageThisSession)
-            }
-        }
-
-        return false
     }
 
     private fun is2FAReminderAllowed(settings: Settings): Boolean {
@@ -180,20 +151,6 @@ class PromptManager(
                         PinEntryActivity.start(context)
                     }
                 }.create()
-    }
-
-    private fun getSurveyDialog(context: Context): AlertDialog {
-        return AlertDialog.Builder(context, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.survey_message)
-                .setPositiveButton(R.string.survey_positive_button) { _, _ ->
-                    val url = "https://blockchain.co1.qualtrics.com/SE/?SID=SV_bQ8rW6DErUEzMeV"
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse(url)
-                    context.startActivity(intent)
-                }
-                .setNegativeButton(R.string.polite_no, null)
-                .create()
     }
 
     //********************************************************************************************//

@@ -444,9 +444,6 @@
     <string name="swipe_receive_preference_summary">Habilite esta opción para mostrar una dirección de recepción cuando deslice a la izquierda en la pantalla PIN, haciendo que recibir bitcoins sea aún más rápido. Se cargarán cinco direcciones de forma consecutiva, después de lo cual será necesario ingresar para mostrar las nuevas direcciones.</string>
     <string name="swipe_receive_no_addresses">No se pueden cargar más direcciones ahora mismo. Inicie sesión en la aplicación para cargar más.</string>
 
-    <string name="survey_message">¿Le gustaría completar una corta encuesta para ayudarnos a mejorar su experiencia con la billetera?\n\n¡Valoramos sus comentarios!</string>
-    <string name="survey_positive_button">Realizar encuesta</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Información general</string>
     <string name="create_a_wallet">Crear una billetera</string>

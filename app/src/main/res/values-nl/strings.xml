@@ -444,9 +444,6 @@
     <string name="swipe_receive_preference_summary">Schakel deze optie in om een ontvangadres te tonen wanneer u naar links veegt op het PIN-scherm, waardoor u nog sneller Bitcoins kunt ontvangen. Er zullen achtereenvolgens vijf adressen worden geladen, waarna het nodig is om u aan te melden om nieuwe adressen te tonen.</string>
     <string name="swipe_receive_no_addresses">Er kunnen op dit moment geen adressen meer geladen worden. Meld u aan bij de app om meer adressen te laden.</string>
 
-    <string name="survey_message">Wilt u een korte enquête invullen om te helpen uw ervaring met de portefeuille te verbeteren\n\nWe stellen uw feedback op prijs!</string>
-    <string name="survey_positive_button">Enquête invullen</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Overzicht</string>
     <string name="create_a_wallet">Maak een portemonnee</string>
