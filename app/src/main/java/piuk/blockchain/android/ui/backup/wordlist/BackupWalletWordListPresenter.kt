@@ -1,8 +1,8 @@
-package piuk.blockchain.android.ui.backup
+package piuk.blockchain.android.ui.backup.wordlist
 
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.injection.Injector
-import piuk.blockchain.android.ui.backup.BackupWalletWordListFragment.Companion.ARGUMENT_SECOND_PASSWORD
+import piuk.blockchain.android.ui.backup.wordlist.BackupWalletWordListFragment.Companion.ARGUMENT_SECOND_PASSWORD
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.util.BackupWalletUtil
 import javax.inject.Inject

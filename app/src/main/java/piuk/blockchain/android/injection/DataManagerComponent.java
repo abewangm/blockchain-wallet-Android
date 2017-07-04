@@ -7,10 +7,11 @@ import piuk.blockchain.android.ui.account.AccountEditViewModel;
 import piuk.blockchain.android.ui.account.AccountViewModel;
 import piuk.blockchain.android.ui.auth.PasswordRequiredViewModel;
 import piuk.blockchain.android.ui.auth.PinEntryViewModel;
-import piuk.blockchain.android.ui.backup.BackupVerifyPresenter;
-import piuk.blockchain.android.ui.backup.BackupWalletViewModel;
-import piuk.blockchain.android.ui.backup.BackupWalletWordListPresenter;
-import piuk.blockchain.android.ui.backup.ConfirmFundsTransferViewModel;
+import piuk.blockchain.android.ui.backup.completed.BackupWalletCompletedPresenter;
+import piuk.blockchain.android.ui.backup.start.BackupWalletStartingPresenter;
+import piuk.blockchain.android.ui.backup.transfer.ConfirmFundsTransferViewModel;
+import piuk.blockchain.android.ui.backup.verify.BackupVerifyPresenter;
+import piuk.blockchain.android.ui.backup.wordlist.BackupWalletWordListPresenter;
 import piuk.blockchain.android.ui.balance.BalancePresenter;
 import piuk.blockchain.android.ui.buy.BuyViewModel;
 import piuk.blockchain.android.ui.chooser.AccountChooserViewModel;
@@ -95,7 +96,7 @@ public interface DataManagerComponent {
 
     void inject(AccountChooserViewModel accountChooserViewModel);
 
-    void inject(BackupWalletViewModel backupWalletViewModel);
+    void inject(BackupWalletCompletedPresenter backupWalletViewModel);
 
     void inject(WebSocketService webSocketService);
 
@@ -118,4 +119,6 @@ public interface DataManagerComponent {
     void inject(BalancePresenter balancePresenter);
 
     void inject(BackupWalletWordListPresenter backupWalletWordListPresenter);
+
+    void inject(BackupWalletStartingPresenter backupWalletStartingPresenter);
 }

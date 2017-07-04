@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.backup;
+package piuk.blockchain.android.ui.backup.transfer;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
@@ -38,6 +38,7 @@ import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.account.ItemAccount;
+import piuk.blockchain.android.ui.backup.transfer.ConfirmFundsTransferViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.send.PendingTransaction;

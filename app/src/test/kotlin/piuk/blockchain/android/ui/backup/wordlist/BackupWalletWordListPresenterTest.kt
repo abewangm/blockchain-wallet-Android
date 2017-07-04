@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.backup
+package piuk.blockchain.android.ui.backup.wordlist
 
 import android.os.Bundle
 import com.nhaarman.mockito_kotlin.verify
@@ -18,7 +18,7 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.injection.*
-import piuk.blockchain.android.ui.backup.BackupWalletWordListFragment.Companion.ARGUMENT_SECOND_PASSWORD
+import piuk.blockchain.android.ui.backup.wordlist.BackupWalletWordListFragment.Companion.ARGUMENT_SECOND_PASSWORD
 import piuk.blockchain.android.util.BackupWalletUtil
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)

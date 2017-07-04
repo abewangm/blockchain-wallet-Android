@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.backup;
+package piuk.blockchain.android.ui.backup.transfer;
 
 import android.content.Intent;
 import android.os.Bundle;

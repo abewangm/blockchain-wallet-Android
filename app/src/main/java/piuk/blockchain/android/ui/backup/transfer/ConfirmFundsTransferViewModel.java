@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.backup;
+package piuk.blockchain.android.ui.backup.transfer;
 
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
