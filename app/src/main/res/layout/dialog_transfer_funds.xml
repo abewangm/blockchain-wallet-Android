@@ -88,12 +88,15 @@
                 android:textSize="14sp"
                 tools:ignore="MissingPrefix" />
 
-            <include
+            <android.support.v7.widget.AppCompatSpinner
                 android:id="@+id/spinner_destination"
-                layout="@layout/include_spinner_compat"
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="-16dp" />
+                android:layout_marginRight="-16dp"
+                android:background="?attr/selectableItemBackground"
+                android:divider="@null"
+                android:dropDownSelector="?attr/selectableItemBackground" />
 
         </LinearLayout>
 

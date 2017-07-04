@@ -71,8 +71,8 @@ class BackupWalletWordListFragment : BaseFragment<BackupWalletWordListView, Back
                 }
 
                 override fun onAnimationEnd(animation: Animation) {
-                    card_layout.startAnimation(animEnterFromRight)
-                    textview_current_word.text = presenter.getWordForIndex(currentWordIndex)
+                    card_layout?.startAnimation(animEnterFromRight)
+                    textview_current_word?.text = presenter.getWordForIndex(currentWordIndex)
                 }
             })
 
@@ -108,8 +108,8 @@ class BackupWalletWordListFragment : BaseFragment<BackupWalletWordListView, Back
             }
 
             override fun onAnimationEnd(animation: Animation) {
-                card_layout.startAnimation(animEnterFromLeft)
-                textview_current_word.text = presenter.getWordForIndex(currentWordIndex)
+                card_layout?.startAnimation(animEnterFromLeft)
+                textview_current_word?.text = presenter.getWordForIndex(currentWordIndex)
             }
         })
 
