@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.backup
 import android.support.annotation.VisibleForTesting
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.backup.BackupWalletWordListFragment.Companion.ARGUMENT_SECOND_PASSWORD
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -43,22 +44,22 @@ class BackupVerifyPresenter : BasePresenter<BackupVerifyView>() {
     internal fun updateBackupStatus() {
         payloadDataManager.wallet.hdWallets[0].isMnemonicVerified = true
 
-        compositeDisposable.add(
-                payloadDataManager.syncPayloadWithServer()
-                        .doOnSubscribe { view.showProgressDialog() }
-                        .doAfterTerminate { view.hideProgressDialog() }
-                        .subscribe({
-                            prefsUtil.setValue(
-                                    BackupWalletActivity.BACKUP_DATE_KEY,
-                                    (System.currentTimeMillis() / 1000).toInt()
-                            )
-                            view.showToast(R.string.backup_confirmed, ToastCustom.TYPE_OK)
-                            view.showCompletedFragment()
-                        }) { throwable ->
-                            Timber.e(throwable)
-                            view.showToast(R.string.api_fail, ToastCustom.TYPE_ERROR)
-                            view.showStartingFragment()
-                        })
+        payloadDataManager.syncPayloadWithServer()
+                .doOnSubscribe { view.showProgressDialog() }
+                .doAfterTerminate { view.hideProgressDialog() }
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe({
+                    prefsUtil.setValue(
+                            BackupWalletActivity.BACKUP_DATE_KEY,
+                            (System.currentTimeMillis() / 1000).toInt()
+                    )
+                    view.showToast(R.string.backup_confirmed, ToastCustom.TYPE_OK)
+                    view.showCompletedFragment()
+                }, { throwable ->
+                    Timber.e(throwable)
+                    view.showToast(R.string.api_fail, ToastCustom.TYPE_ERROR)
+                    view.showStartingFragment()
+                })
     }
 
     private fun getBackupConfirmSequence(): List<Pair<Int, String>> {

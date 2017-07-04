@@ -86,8 +86,9 @@ class BalanceHeaderAdapter extends ArrayAdapter<ItemAccount> {
         }
     }
 
-    void notifyBtcChanged(boolean isBtc) {
+    void notifyBtcChanged(boolean isBtc, int btcFormat) {
         this.isBtc = isBtc;
+        monetaryUtil.updateUnit(btcFormat);
         notifyDataSetChanged();
     }
 

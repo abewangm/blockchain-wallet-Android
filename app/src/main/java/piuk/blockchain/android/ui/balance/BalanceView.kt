@@ -35,7 +35,7 @@ interface BalanceView : View {
 
     fun setUiState(@UiState.UiStateDef uiState: Int)
 
-    fun onViewTypeChanged(isBtc: Boolean)
+    fun onViewTypeChanged(isBtc: Boolean, btcFormat: Int)
 
     fun showFctxRequiringAttention(number: Int)
 

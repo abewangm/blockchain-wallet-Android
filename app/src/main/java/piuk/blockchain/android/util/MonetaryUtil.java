@@ -1,7 +1,5 @@
 package piuk.blockchain.android.util;
 
-import android.util.Log;
-
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -26,12 +24,16 @@ public class MonetaryUtil {
     private int unit;
 
     public MonetaryUtil(int unit) {
+        updateUnit(unit);
+    }
+
+    public void updateUnit(int unit) {
         this.unit = unit;
 
         Locale defaultLocale = Locale.getDefault();
 
         //Arabic digits are not supported yet
-        if(defaultLocale.getLanguage().equals("ar")) {
+        if (defaultLocale.getLanguage().equals("ar")) {
             defaultLocale = Locale.ENGLISH;
         }
 
@@ -54,10 +56,6 @@ public class MonetaryUtil {
                 btcFormat.setMaximumFractionDigits(8);
                 break;
         }
-    }
-
-    public void updateUnit(int unit) {
-        this.unit = unit;
     }
 
     public NumberFormat getBTCFormat() {

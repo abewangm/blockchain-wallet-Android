@@ -43,9 +43,9 @@ class BalanceAdapter(
      * Notifies the adapter that the View format (ie, whether or not to show BTC) has been changed.
      * Will rebuild the entire adapter.
      */
-    fun onViewFormatUpdated(isBtc: Boolean) {
-        summaryDelegate.onViewFormatUpdated(isBtc)
-        fctxDelegate.onViewFormatUpdated(isBtc)
+    fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {
+        summaryDelegate.onViewFormatUpdated(isBtc, btcFormat)
+        fctxDelegate.onViewFormatUpdated(isBtc, btcFormat)
         notifyDataSetChanged()
     }
 

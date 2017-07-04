@@ -10,6 +10,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
+import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -23,7 +24,7 @@ public class PairingCodePresenter extends BasePresenter<PairingCodeView> {
     @Inject StringUtils stringUtils;
     @Inject PayloadDataManager payloadDataManager;
     @Inject AuthDataManager authDataManager;
-    
+
     public PairingCodePresenter() {
         Injector.getInstance().getDataManagerComponent().inject(this);
     }
@@ -33,27 +34,28 @@ public class PairingCodePresenter extends BasePresenter<PairingCodeView> {
         //no op
     }
 
-    public String getFirstStep() {
+    String getFirstStep() {
         return String.format(stringUtils.getString(R.string.pairing_code_instruction_1), WEB_WALLET_URL);
     }
 
     public void generatePairingQr() {
-
-        getCompositeDisposable().add(getPairingEncryptionPasswordObservable()
+        getPairingEncryptionPasswordObservable()
                 .doOnSubscribe(disposable -> getView().showProgressSpinner())
                 .doAfterTerminate(() -> getView().hideProgressSpinner())
                 .flatMap(encryptionPassword -> generatePairingCodeObservable(encryptionPassword.string()))
-                .subscribe(bitmap -> getView().onQrLoaded(bitmap),
-                        throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        bitmap -> getView().onQrLoaded(bitmap),
+                        throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR));
     }
 
-    Observable<ResponseBody> getPairingEncryptionPasswordObservable() {
+    private Observable<ResponseBody> getPairingEncryptionPasswordObservable() {
 
         String guid = payloadDataManager.getWallet().getGuid();
         return authDataManager.getPairingEncryptionPassword(guid);
     }
 
-    Observable<Bitmap> generatePairingCodeObservable(String encryptionPhrase) {
+    private Observable<Bitmap> generatePairingCodeObservable(String encryptionPhrase) {
 
         String guid = payloadDataManager.getWallet().getGuid();
         String sharedKey = payloadDataManager.getWallet().getSharedKey();

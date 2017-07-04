@@ -112,8 +112,9 @@ class TransactionSummaryDelegate<in T>(
         }
     }
 
-    fun onViewFormatUpdated(isBtc: Boolean) {
+    fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {
         this.isBtc = isBtc
+        monetaryUtil.updateUnit(btcFormat)
     }
 
     fun onPriceUpdated(btcExchangeRate: Double) {

@@ -312,6 +312,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         } else if (requestCode == SETTINGS_EDIT) {
             // Reset state incase of changing currency etc
             binding.bottomNavigation.setCurrentItem(1);
+            // Pass this result to balance fragment
+            for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+                fragment.onActivityResult(requestCode, resultCode, data);
+            }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
@@ -525,7 +529,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public void onPaymentInitiated(String uri, String recipientId, String mdid, String fctxId) {
+    public void onPaymentInitiated(@NonNull String uri, @NonNull String recipientId, @NonNull String mdid, @NonNull String fctxId) {
         startContactSendDialog(uri, recipientId, mdid, fctxId);
     }
 

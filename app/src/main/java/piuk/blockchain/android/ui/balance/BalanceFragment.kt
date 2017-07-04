@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.balance
 
 
-import android.app.Activity
 import android.content.*
 import android.content.pm.ShortcutManager
 import android.os.Bundle
@@ -24,7 +23,6 @@ import kotlinx.android.synthetic.main.include_onboarding_complete.*
 import kotlinx.android.synthetic.main.include_onboarding_viewpager.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.websocket.WebSocketService.ACTION_INTENT
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter
 import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener
@@ -111,9 +109,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         presenter.onPendingTransactionLongClicked(fctxId)
     }
 
-    override fun onViewTypeChanged(isBtc: Boolean) {
-        balanceAdapter?.onViewFormatUpdated(isBtc)
-        accountsAdapter?.notifyBtcChanged(isBtc)
+    override fun onViewTypeChanged(isBtc: Boolean, btcFormat: Int) {
+        balanceAdapter?.onViewFormatUpdated(isBtc, btcFormat)
+        accountsAdapter?.notifyBtcChanged(isBtc, btcFormat)
     }
 
     override fun setUiState(uiState: Int) {
@@ -175,7 +173,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             )
         }
         recyclerview.apply {
-            scrollToPosition(0)
             removeItemDecoration(spacerDecoration)
             addItemDecoration(spacerDecoration)
         }
@@ -238,7 +235,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK && requestCode == ACCOUNT_EDIT) {
+        if (requestCode == ACCOUNT_EDIT) {
             // Potentially an Account has been archived - reload all data
             onViewReady()
         } else {

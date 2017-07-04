@@ -24,13 +24,11 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.access.AuthEvent
-import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.contacts.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.ContactsEvent
 import piuk.blockchain.android.data.datamanagers.*
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.data.stores.PendingTransactionListStore
 import piuk.blockchain.android.data.stores.TransactionListStore
 import piuk.blockchain.android.injection.*
@@ -112,15 +110,16 @@ class BalancePresenterTest {
         // Assert
         verify(transactionListDataManager).getBtcBalance(itemAccount)
         verifyNoMoreInteractions(transactionListDataManager)
-        verify(accessState, times(2)).isBtc
+        verify(accessState, times(3)).isBtc
         verifyNoMoreInteractions(accessState)
-        verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+        verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+        verify(prefsUtil, times(3)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory).getLastPrice("USD")
+        verify(exchangeRateFactory, times(2)).getLastPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(view).onTotalBalanceUpdated("0.0 BTC")
-        verify(view).onViewTypeChanged(true)
+        verify(view).onViewTypeChanged(true, 0)
+        verify(view).onExchangeRateUpdated(2717.0, true)
         verifyNoMoreInteractions(view)
     }
 
@@ -357,13 +356,13 @@ class BalancePresenterTest {
         subject.setViewType(true)
         // Assert
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+        verify(prefsUtil, times(3)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(accessState).setIsBtc(true)
         verifyNoMoreInteractions(accessState)
-        verify(view).onViewTypeChanged(true)
+        verify(view).onViewTypeChanged(true, 0)
         verify(view).onTotalBalanceUpdated("0.0 BTC")
     }
 
@@ -380,14 +379,14 @@ class BalancePresenterTest {
         subject.invertViewType()
         // Assert
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+        verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(accessState).isBtc
         verify(accessState).setIsBtc(false)
         verifyNoMoreInteractions(accessState)
-        verify(view).onViewTypeChanged(false)
+        verify(view).onViewTypeChanged(false, 0)
         verify(view).onTotalBalanceUpdated("0.00 USD")
     }
 

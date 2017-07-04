@@ -113,8 +113,9 @@ class FctxDelegate<in T>(
         fctxViewHolder.subtitle.text = transaction.note
     }
 
-    fun onViewFormatUpdated(isBtc: Boolean) {
+    fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {
         this.isBtc = isBtc
+        monetaryUtil.updateUnit(btcFormat)
     }
 
     fun onPriceUpdated(btcExchangeRate: Double) {
