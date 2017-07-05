@@ -49,7 +49,7 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setNavigationOnClickListener     { dismiss() }
+        toolbar.setNavigationOnClickListener { dismiss() }
         toolbar.title = CalligraphyUtils.applyTypefaceSpan(
                 getString(R.string.transfer_confirm),
                 TypefaceUtils.load(context.assets, "fonts/Montserrat-Regular.ttf")
