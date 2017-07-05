@@ -60,8 +60,7 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
                 R.layout.spinner_item,
                 presenter.getReceiveToList(),
                 true
-        )
-        receiveToAdapter.setDropDownViewResource(R.layout.spinner_dropdown)
+        ).apply { setDropDownViewResource(R.layout.spinner_dropdown) }
         spinner_destination.adapter = receiveToAdapter
         spinner_destination.onItemSelectedListener = OnItemSelectedListener {
             spinner_destination.setSelection(spinner_destination.selectedItemPosition)
