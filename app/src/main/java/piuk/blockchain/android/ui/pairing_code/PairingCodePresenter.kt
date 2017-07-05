@@ -32,7 +32,7 @@ class PairingCodePresenter : BasePresenter<PairingCodeView>() {
     }
 
     internal val firstStep: String
-        get() = String.format(stringUtils!!.getString(R.string.pairing_code_instruction_1), WEB_WALLET_URL)
+        get() = String.format(stringUtils.getString(R.string.pairing_code_instruction_1), WEB_WALLET_URL)
 
     fun generatePairingQr() {
         pairingEncryptionPasswordObservable

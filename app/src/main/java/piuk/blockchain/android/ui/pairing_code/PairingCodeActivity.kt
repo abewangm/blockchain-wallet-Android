@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.pairing_code
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.support.v7.widget.Toolbar
 import android.view.View
 import kotlinx.android.synthetic.main.activity_pairing_code.*
 import piuk.blockchain.android.R
@@ -11,9 +10,9 @@ import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
-import android.support.v4.content.ContextCompat.startActivity
 import android.content.Intent
-
+import kotlinx.android.synthetic.main.toolbar_general.*
+import piuk.blockchain.android.util.helperfunctions.consume
 
 
 class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresenter>(), PairingCodeView {
@@ -22,8 +21,7 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pairing_code)
 
-        val toolbar = findViewById(R.id.toolbar_general) as Toolbar
-        setupToolbar(toolbar, R.string.pairing_code_log_in)
+        setupToolbar(toolbar_general, R.string.pairing_code_log_in)
 
         pairing_first_step.setText(presenter.firstStep)
 
@@ -31,8 +29,7 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
-        return true
+        consume { onBackPressed() }
     }
 
     override fun onQrLoaded(bitmap: Bitmap) {
