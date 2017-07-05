@@ -11,7 +11,6 @@ import info.blockchain.wallet.util.PrivateKeyFactory;
 import dagger.Module;
 import dagger.Provides;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
@@ -177,11 +176,8 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected BuyDataManager provideBuyDataManager(OnboardingDataManager onboardingDataManager,
-                                                   PayloadDataManager payloadDataManager) {
-        return new BuyDataManager(
-                onboardingDataManager,
-                payloadDataManager);
+    protected BuyDataManager provideBuyDataManager(OnboardingDataManager onboardingDataManager) {
+        return new BuyDataManager(onboardingDataManager);
     }
 
     @Provides

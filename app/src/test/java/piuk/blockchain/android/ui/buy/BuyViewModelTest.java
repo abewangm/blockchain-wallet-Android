@@ -2,6 +2,8 @@ package piuk.blockchain.android.ui.buy;
 
 import android.app.Application;
 
+import info.blockchain.wallet.payload.PayloadManager;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,17 +13,14 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import info.blockchain.wallet.payload.PayloadManager;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
-import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
@@ -30,7 +29,6 @@ import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.util.AppUtil;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -107,8 +105,7 @@ public class BuyViewModelTest {
 
     private class MockDataManagerModule extends DataManagerModule {
         @Override
-        protected BuyDataManager provideBuyDataManager(OnboardingDataManager onboardingDataManager,
-                                                       PayloadDataManager payloadDataManager) {
+        protected BuyDataManager provideBuyDataManager(OnboardingDataManager onboardingDataManager) {
             return buyDataManager;
         }
 
