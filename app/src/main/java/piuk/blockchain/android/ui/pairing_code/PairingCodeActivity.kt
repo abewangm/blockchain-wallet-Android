@@ -29,7 +29,7 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        consume { onBackPressed() }
+        return consume { onBackPressed() }
     }
 
     override fun onQrLoaded(bitmap: Bitmap) {
