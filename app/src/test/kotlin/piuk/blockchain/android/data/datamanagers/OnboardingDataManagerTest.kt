@@ -79,7 +79,7 @@ class OnboardingDataManagerTest: RxTest() {
     @Throws(Exception::class)
     fun getIfSepaCountry() {
         // Arrange
-        val mockWalletOptions: WalletOptions = mock()
+        val mockWalletOptions: WalletOptions = mock(defaultAnswer = RETURNS_DEEP_STUBS)
         val mockSettings: Settings = mock()
         val guid = "GUID"
         val sharedKey = "SHARED_KEY"
@@ -89,7 +89,7 @@ class OnboardingDataManagerTest: RxTest() {
         whenever(mockPayloadDataManager.wallet.sharedKey).thenReturn(sharedKey)
         whenever(mockSettingsDataManager.initSettings(guid, sharedKey))
                 .thenReturn(Observable.just(mockSettings))
-        whenever(mockWalletOptions.buySellCountries).thenReturn(listOf("GB"))
+        whenever(mockWalletOptions.partners.coinify.countries).thenReturn(listOf("GB"))
         whenever(mockWalletOptions.rolloutPercentage).thenReturn(rolloutPercent)
         whenever(mockSettings.countryCode).thenReturn("GB")
         // Act
