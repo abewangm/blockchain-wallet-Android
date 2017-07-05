@@ -83,13 +83,6 @@
                 android:background="@color/primary_gray_lightest"
                 android:orientation="vertical">
 
-                <!-- ANNOUNCEMENTS -->
-                <piuk.blockchain.android.ui.customviews.AnnouncementView
-                    android:id="@+id/announcement_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="240dp"
-                    android:visibility="gone" />
-
                 <!-- NO TRANSACTION LAYOUT -->
                 <include
                     android:id="@+id/no_transaction_include"

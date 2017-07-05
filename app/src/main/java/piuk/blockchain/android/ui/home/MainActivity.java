@@ -105,7 +105,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     public static final String EXTRA_MDID = "mdid";
     public static final String EXTRA_FCTX_ID = "fctx_id";
 
-    public static final String WEB_VIEW_STATE_KEY = "web_view_state";
     public static final int SCAN_URI = 2007;
     public static final int ACCOUNT_EDIT = 2008;
     public static final int SETTINGS_EDIT = 2009;
@@ -609,7 +608,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     @SuppressWarnings("ConstantConditions")
     @Override
     public boolean isBuySellPermitted() {
-        return BuildConfig.BUY_BITCOIN_ENABLED && AndroidUtils.is19orHigher();
+        return AndroidUtils.is19orHigher();
     }
 
     @Override

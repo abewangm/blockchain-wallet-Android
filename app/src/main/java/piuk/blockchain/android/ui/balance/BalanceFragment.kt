@@ -9,7 +9,6 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.AppCompatSpinner
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.SimpleItemAnimator
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -18,7 +17,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.fragment_balance.*
 import kotlinx.android.synthetic.main.include_no_transaction_message.*
-import kotlinx.android.synthetic.main.include_no_transaction_message.view.*
 import kotlinx.android.synthetic.main.include_onboarding_complete.*
 import kotlinx.android.synthetic.main.include_onboarding_viewpager.*
 import piuk.blockchain.android.BuildConfig
@@ -89,7 +87,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
 
         initOnboardingPager()
-        setupAnnouncement()
         onViewReady()
     }
 
@@ -328,17 +325,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
-    override fun onShowAnnouncement() {
-        announcement_view.visible()
-        button_get_bitcoin.gone()
-    }
-
-    override fun onHideAnnouncement() {
-        announcement_view.gone()
-        button_get_bitcoin.visible()
-    }
-
     override fun getIfContactsEnabled(): Boolean = BuildConfig.CONTACTS_ENABLED
+
+    override fun getIfShouldShowBuy() = AndroidUtils.is19orHigher()
 
     override fun createPresenter(): BalancePresenter = BalancePresenter()
 
@@ -371,9 +360,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             framelayout_onboarding.visible()
         } else {
             framelayout_onboarding.gone()
-            if (announcement_view.visibility == View.VISIBLE) {
-                button_get_bitcoin.visible()
-            }
         }
     }
 
@@ -417,31 +403,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     private fun dismissOnboarding() {
-        if (announcement_view.visibility != View.VISIBLE) {
-            button_get_bitcoin.visible()
-        }
-
         framelayout_onboarding.gone()
         presenter.setOnboardingComplete(true)
-    }
-
-    private fun setupAnnouncement() {
-        announcement_view.apply {
-            setTitle(R.string.onboarding_available_now)
-            setContent(R.string.onboarding_buy_details)
-            setLink(R.string.onboarding_buy_bitcoin)
-            setImage(R.drawable.vector_wallet_offset)
-            setEmoji(R.drawable.celebration_emoji)
-            setLinkOnclickListener({
-                startBuyActivity()
-                presenter.disableAnnouncement()
-            })
-            setCloseOnclickListener({
-                gone()
-                no_transaction_include.button_get_bitcoin.visible()
-                presenter.disableAnnouncement()
-            })
-        }
     }
 
     private fun onContentLoaded() {
@@ -460,11 +423,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         val layoutManager = LinearLayoutManager(context)
         recyclerview.layoutManager = layoutManager
         recyclerview.adapter = balanceAdapter
-        // Disable blinking animations in RecyclerView
-        val animator = recyclerview.itemAnimator
-        if (animator is SimpleItemAnimator) {
-            animator.supportsChangeAnimations = false
-        }
     }
 
     private fun goToTransactionDetail(position: Int) {

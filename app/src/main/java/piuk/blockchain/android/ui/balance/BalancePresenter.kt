@@ -81,6 +81,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                     getTransactionsListObservable(it),
                     getUpdateTickerObservable()
             ).compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .doOnError { Timber.e(it) }
                     .subscribe(
                             { /* No-op */ },
                             { view.setUiState(UiState.FAILURE) })
@@ -112,6 +113,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                     getBalanceObservable(it),
                     getTransactionsListObservable(it)
             ).compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .doOnError { Timber.e(it) }
                     .subscribe(
                             { /* No-op */ },
                             { view.setUiState(UiState.FAILURE) })
@@ -125,6 +127,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                     getTransactionsListObservable(it),
                     getFacilitatedTransactionsObservable()
             ).compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .doOnError { Timber.e(it) }
                     .subscribe(
                             { /* No-op */ },
                             { view.setUiState(UiState.FAILURE) })
@@ -237,6 +240,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 }
                 .doAfterTerminate { view.dismissProgressDialog() }
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnError { Timber.e(it) }
                 .subscribe(
                         {
                             view.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK)
@@ -251,6 +255,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 .doOnError { contactsDataManager.fetchContacts() }
                 .doAfterTerminate(this::refreshFacilitatedTransactions)
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnError { Timber.e(it) }
                 .subscribe(
                         { view.showToast(R.string.contacts_pending_transaction_decline_success, ToastCustom.TYPE_OK) },
                         { view.showToast(R.string.contacts_pending_transaction_decline_failure, ToastCustom.TYPE_ERROR) })
@@ -262,6 +267,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                 .doOnError { contactsDataManager.fetchContacts() }
                 .doAfterTerminate(this::refreshFacilitatedTransactions)
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnError { Timber.e(it) }
                 .subscribe(
                         { view.showToast(R.string.contacts_pending_transaction_cancel_success, ToastCustom.TYPE_OK) },
                         { view.showToast(R.string.contacts_pending_transaction_cancel_failure, ToastCustom.TYPE_ERROR) })
@@ -360,6 +366,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                     .doOnNext {
                         displayList.removeAll { it is TransactionSummary }
                         displayList.addAll(it)
+                        checkLatestAnnouncement(displayList)
 
                         when {
                             it.isEmpty() -> view.setUiState(UiState.EMPTY)
@@ -403,7 +410,6 @@ class BalancePresenter : BasePresenter<BalanceView>() {
                     .onErrorReturnItem(emptyList())
                     .toObservable()
                     .doOnNext {
-                        checkLatestAnnouncement(it)
                         handlePendingTransactions(it)
                         view.onContactsHashMapUpdated(
                                 contactsDataManager.contactsTransactionMap,
@@ -536,23 +542,48 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         return pages
     }
 
-    private fun checkLatestAnnouncement(txList: MutableList<ContactTransactionModel>) {
+    private fun checkLatestAnnouncement(txList: MutableList<Any>) {
         // If user hasn't completed onboarding, ignore announcements
         buyDataManager.canBuy
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({ buyAllowed ->
-                    if (isOnboardingComplete() && buyAllowed) {
+                    if (buyAllowed && view.getIfShouldShowBuy() && isOnboardingComplete()) {
                         if (!prefsUtil.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, false)
                                 && txList.isNotEmpty()) {
                             prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, true)
-                            view.onShowAnnouncement()
+                            showAnnouncement()
                         } else {
-                            view.onHideAnnouncement()
+                            dismissAnnouncement()
                         }
                     } else {
-                        view.onHideAnnouncement()
+                        dismissAnnouncement()
                     }
                 }, { Timber.e(it) })
+    }
+
+    private fun showAnnouncement() {
+        // Don't add the announcement to an empty UI state, don't add it if there already is one
+        if (displayList.isNotEmpty() && displayList.filter { it is AnnouncementData }.isEmpty()) {
+            // In the future, the announcement data may be parsed from an endpoint. For now, here is fine
+            val announcementData = AnnouncementData(
+                    title = R.string.onboarding_available_now,
+                    description = R.string.onboarding_buy_details,
+                    link = R.string.onboarding_buy_bitcoin,
+                    image = R.drawable.vector_wallet_offset,
+                    emoji = "🎉",
+                    closeFunction = { dismissAnnouncement() },
+                    linkFunction = { view.startBuyActivity() }
+            )
+            displayList.add(0, announcementData)
+            view.onTransactionsUpdated(displayList)
+        }
+    }
+
+    fun dismissAnnouncement() {
+        if (displayList.filter { it is AnnouncementData }.isNotEmpty()) {
+            displayList.removeAll { it is AnnouncementData }
+            view.onTransactionsUpdated(displayList)
+        }
     }
 
     private fun getFormattedPriceString(): String {
