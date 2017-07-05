@@ -7,7 +7,6 @@ import android.support.v4.app.DialogFragment
 import android.support.v4.content.LocalBroadcastManager
 import android.view.*
 import kotlinx.android.synthetic.main.dialog_transfer_funds.*
-import kotlinx.android.synthetic.main.include_spinner_compat.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.ui.account.SecondPasswordHandler
 import piuk.blockchain.android.ui.balance.BalanceFragment
@@ -16,7 +15,6 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.send.AddressAdapter
 import piuk.blockchain.android.util.extensions.gone
-import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.OnItemSelectedListener
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils
@@ -31,7 +29,7 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
             inflater: LayoutInflater?,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ) = inflater!!.inflate(R.layout.dialog_transfer_funds, container, false).apply {
+    ) = inflater?.inflate(R.layout.dialog_transfer_funds, container, false)?.apply {
         isFocusableInTouchMode = true
         requestFocus()
     }
@@ -51,7 +49,7 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setNavigationOnClickListener { dismiss() }
+        toolbar.setNavigationOnClickListener     { dismiss() }
         toolbar.title = CalligraphyUtils.applyTypefaceSpan(
                 getString(R.string.transfer_confirm),
                 TypefaceUtils.load(context.assets, "fonts/Montserrat-Regular.ttf")
@@ -66,15 +64,15 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
         receiveToAdapter.setDropDownViewResource(R.layout.spinner_dropdown)
         spinner_destination.adapter = receiveToAdapter
         spinner_destination.onItemSelectedListener = OnItemSelectedListener {
-            spinner_destination.setSelection(spinner_destination.spinner.selectedItemPosition)
-            presenter.accountSelected(spinner_destination.spinner.selectedItemPosition)
+            spinner_destination.setSelection(spinner_destination.selectedItemPosition)
+            presenter.accountSelected(spinner_destination.selectedItemPosition)
         }
 
         spinner_destination.viewTreeObserver.addOnGlobalLayoutListener(
                 object : ViewTreeObserver.OnGlobalLayoutListener {
                     override fun onGlobalLayout() {
                         spinner_destination.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                        spinner_destination.dropDownWidth = spinner_destination.spinner.width
+                        spinner_destination.dropDownWidth = spinner_destination.width
                     }
                 })
 
@@ -114,7 +112,7 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
     }
 
     override fun onUiUpdated() {
-        button_transfer_all.gone()
+        loading_layout.gone()
     }
 
     override fun updateFromLabel(label: String) {
@@ -141,9 +139,7 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
         button_transfer_all.isEnabled = enabled
     }
 
-    override fun getIfArchiveChecked(): Boolean {
-        return checkbox_archive.isChecked
-    }
+    override fun getIfArchiveChecked() = checkbox_archive.isChecked
 
     override fun dismissDialog() {
         val intent = Intent(BalanceFragment.ACTION_INTENT)
