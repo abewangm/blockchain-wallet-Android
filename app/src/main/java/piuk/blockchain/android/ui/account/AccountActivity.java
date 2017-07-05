@@ -40,7 +40,7 @@ import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityAccountsBinding;
 import piuk.blockchain.android.ui.account.adapter.AccountAdapter;
 import piuk.blockchain.android.ui.account.adapter.AccountHeadersListener;
-import piuk.blockchain.android.ui.backup.ConfirmFundsTransferDialogFragment;
+import piuk.blockchain.android.ui.backup.transfer.ConfirmFundsTransferDialogFragment;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;

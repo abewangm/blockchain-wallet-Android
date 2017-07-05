@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.backup
+package piuk.blockchain.android.ui.backup.verify
 
 import android.app.Application
 import com.nhaarman.mockito_kotlin.*
@@ -18,6 +18,7 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.injection.*
+import piuk.blockchain.android.ui.backup.BackupWalletActivity
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.BackupWalletUtil
 import piuk.blockchain.android.util.PrefsUtil

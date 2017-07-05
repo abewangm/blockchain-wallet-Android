@@ -1,37 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:padding="32dp">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/backup_header"
+        style="@style/TextAppearance.AppCompat.Headline"
+        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:orientation="vertical"
-        android:padding="32dp">
+        android:layout_height="wrap_content"
+        android:paddingBottom="24dp"
+        android:text="@string/backup_header"
+        tools:ignore="MissingPrefix" />
 
-        <TextView
-            android:id="@+id/backup_header"
-            style="@style/TextAppearance.AppCompat.Headline"
-            fontPath="fonts/Montserrat-Regular.ttf"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="24dp"
-            android:text="@string/backup_header" />
+    <TextView
+        android:id="@+id/backup_subheader"
+        style="@style/TextAppearance.AppCompat.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/backup_explanation" />
 
-        <TextView
-            android:id="@+id/backup_subheader"
-            style="@style/TextAppearance.AppCompat.Small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/backup_explanation" />
-
-        <Button
-            android:id="@+id/backup_wallet_action"
-            style="@style/ButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/backup_button_start"
-            android:theme="@style/ButtonLightBlueTheme" />
-    </LinearLayout>
-
-</layout>
+    <Button
+        android:id="@+id/button_start"
+        style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/backup_button_start"
+        android:theme="@style/ButtonLightBlueTheme" />
+</LinearLayout>

@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.backup
+package piuk.blockchain.android.ui.backup.wordlist
 
 import android.app.FragmentTransaction
 import android.content.Context
@@ -11,6 +11,7 @@ import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import kotlinx.android.synthetic.main.fragment_backup_word_list.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.ui.backup.verify.BackupWalletVerifyFragment
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.invisible
@@ -70,8 +71,8 @@ class BackupWalletWordListFragment : BaseFragment<BackupWalletWordListView, Back
                 }
 
                 override fun onAnimationEnd(animation: Animation) {
-                    card_layout.startAnimation(animEnterFromRight)
-                    textview_current_word.text = presenter.getWordForIndex(currentWordIndex)
+                    card_layout?.startAnimation(animEnterFromRight)
+                    textview_current_word?.text = presenter.getWordForIndex(currentWordIndex)
                 }
             })
 
@@ -107,8 +108,8 @@ class BackupWalletWordListFragment : BaseFragment<BackupWalletWordListView, Back
             }
 
             override fun onAnimationEnd(animation: Animation) {
-                card_layout.startAnimation(animEnterFromLeft)
-                textview_current_word.text = presenter.getWordForIndex(currentWordIndex)
+                card_layout?.startAnimation(animEnterFromLeft)
+                textview_current_word?.text = presenter.getWordForIndex(currentWordIndex)
             }
         })
 

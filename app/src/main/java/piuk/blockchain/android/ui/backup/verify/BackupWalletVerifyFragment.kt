@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.backup
+package piuk.blockchain.android.ui.backup.verify
 
 import android.content.Context
 import android.os.Bundle
@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import kotlinx.android.synthetic.main.fragment_backup_wallet_verify.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.ui.backup.completed.BackupWalletCompletedFragment
+import piuk.blockchain.android.ui.backup.start.BackupWalletStartingFragment
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.util.extensions.inflate

@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.backup
+package piuk.blockchain.android.ui.backup.verify
 
 import android.os.Bundle
 import android.support.annotation.StringRes
