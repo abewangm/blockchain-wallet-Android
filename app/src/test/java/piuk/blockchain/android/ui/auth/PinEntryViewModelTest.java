@@ -406,6 +406,25 @@ public class PinEntryViewModelTest {
     }
 
     @Test
+    public void padClickedVerifyPinValidateCalledReturnsServerError() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "133";
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, ""))
+                .thenReturn("1234567890");
+        when(authDataManager.validatePin(anyString()))
+                .thenReturn(Observable.error(new ServerConnectionException()));
+        // Act
+        subject.onPadClicked("7");
+        // Assert
+        verify(activity).setTitleVisibility(View.INVISIBLE);
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).validatePin(anyString());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).restartPageAndClearTop();
+    }
+
+    @Test
     public void padClickedVerifyPinValidateCalledReturnsInvalidCipherText() throws Exception {
         // Arrange
         subject.mUserEnteredPin = "133";
