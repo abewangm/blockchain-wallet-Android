@@ -392,8 +392,6 @@ public class MainViewModel extends BaseViewModel {
                                         buyDataManager.getWebViewLoginDetails()
                                                 .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
                                     }
-
-                                    dataListener.setBuySellEnabled(isEnabled);
                                 },
                                 throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
     }
