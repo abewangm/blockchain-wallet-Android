@@ -1,5 +1,7 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import android.util.Log;
+
 import org.bitcoinj.core.Sha256Hash;
 import org.spongycastle.util.encoders.Hex;
 
@@ -42,9 +44,16 @@ public class OnboardingDataManager {
                 .flatMap(walletOptions -> settingsDataManager.initSettings(
                         payloadDataManager.getWallet().getGuid(),
                         payloadDataManager.getWallet().getSharedKey())
-                        .map(settings -> walletOptions.getBuySellCountries().contains(settings.getCountryCode()))
-                        .doOnNext(sepaCountry -> accessState.setInSepaCountry(sepaCountry))
-                        .doOnNext(ignored -> accessState.setBuySellRolloutPercent(walletOptions.getRolloutPercentage())));
+                        .map(settings -> {
+
+                            boolean isInCoinifyCountry = walletOptions.getPartners()
+                                    .getCoinify().getCountries().contains(settings.getCountryCode());
+                            accessState.setInSepaCountry(isInCoinifyCountry);
+                            return isInCoinifyCountry;
+                        })
+                        .doOnNext(ignored -> {
+                            accessState.setBuySellRolloutPercent(walletOptions.getRolloutPercentage());
+                        }));
     }
 
     /**
