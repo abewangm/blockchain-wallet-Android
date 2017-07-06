@@ -5,6 +5,7 @@ import android.support.annotation.VisibleForTesting;
 import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Wallet;
 
@@ -256,6 +257,12 @@ public class AuthDataManager {
         String encryptedPassword = prefsUtil.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
         return walletService.validateAccess(key, passedPin)
                 .map(response -> {
+
+                    /*
+                    Note: Server side issue - If the incorrect PIN is supplied the server will respond
+                    with a 500 { code: 1, error: "Incorrect PIN you have x attempts left" }
+                     */
+
                     if (response.isSuccessful()) {
                         appUtil.setNewlyCreated(false);
                         String decryptionKey = response.body().getSuccess();
@@ -264,8 +271,12 @@ public class AuthDataManager {
                                 decryptionKey,
                                 AESUtil.PIN_PBKDF2_ITERATIONS);
                     } else {
-                        // Invalid PIN
-                        throw new InvalidCredentialsException("Validate access failed");
+                        if(response.code() == 500) {
+                            // Invalid PIN
+                            throw new InvalidCredentialsException("Validate access failed");
+                        } else {
+                            throw new ServerConnectionException(response.code()+" "+response.message());
+                        }
                     }
                 });
     }

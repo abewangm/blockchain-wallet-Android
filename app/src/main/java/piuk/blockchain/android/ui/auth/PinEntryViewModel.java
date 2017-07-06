@@ -433,7 +433,7 @@ public class PinEntryViewModel extends BaseViewModel {
                     if (throwable instanceof InvalidCredentialsException) {
                         handleValidateFailure();
                     } else {
-                        showErrorToast(R.string.unexpected_error);
+                        showErrorToast(R.string.api_fail);
                         mDataListener.restartPageAndClearTop();
                     }
                 });
