@@ -13,6 +13,8 @@ interface BalanceView : View {
 
     fun getIfContactsEnabled(): Boolean
 
+    fun getIfShouldShowBuy(): Boolean
+
     fun onTransactionsUpdated(displayObjects: List<Any>)
 
     fun onTotalBalanceUpdated(balance: String)
@@ -61,10 +63,6 @@ interface BalanceView : View {
     fun startBuyActivity()
 
     fun startReceiveFragment()
-
-    fun onShowAnnouncement()
-
-    fun onHideAnnouncement()
 
     fun onLoadOnboardingPages(pages: List<OnboardingPagerContent>)
 
