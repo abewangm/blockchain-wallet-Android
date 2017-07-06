@@ -98,7 +98,6 @@ class BalancePresenterTest {
         // Arrange
         val itemAccount = ItemAccount()
         subject.chosenAccount = itemAccount
-        whenever(transactionListDataManager.getBtcBalance(itemAccount)).thenReturn(0L)
         whenever(accessState.isBtc).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
@@ -108,16 +107,13 @@ class BalancePresenterTest {
         // Act
         subject.onResume()
         // Assert
-        verify(transactionListDataManager).getBtcBalance(itemAccount)
-        verifyNoMoreInteractions(transactionListDataManager)
-        verify(accessState, times(3)).isBtc
+        verify(accessState, times(2)).isBtc
         verifyNoMoreInteractions(accessState)
-        verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, times(3)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+        verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+        verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory, times(2)).getLastPrice("USD")
+        verify(exchangeRateFactory).getLastPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
-        verify(view).onTotalBalanceUpdated("0.0 BTC")
         verify(view).onViewTypeChanged(true, 0)
         verify(view).onExchangeRateUpdated(2717.0, true)
         verifyNoMoreInteractions(view)

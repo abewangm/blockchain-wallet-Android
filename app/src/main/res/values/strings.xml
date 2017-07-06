@@ -469,7 +469,7 @@
     <string name="forget_wallet">Forget wallet</string>
     <string name="forget_wallet_warning">This will erase all wallet data on this device. Please confirm you have your wallet information saved elsewhere otherwise any bitcoin in this wallet will be inaccessible!!</string>
 
-    <string name="api_fail">Unable connect to server. Please try again later.</string>
+    <string name="api_fail">Unable to connect to server. Please try again later.</string>
 
     <!-- FEE WARNING -->
     <string name="large_tx_warning">This is an oversized bitcoin transaction. Your wallet needs to

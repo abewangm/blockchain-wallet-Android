@@ -57,7 +57,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == ACTION_INTENT && activity != null) {
-                presenter.onViewReady()
+                onViewReady()
                 recyclerview.scrollToPosition(0)
             }
         }
@@ -87,7 +87,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
 
         initOnboardingPager()
-        onViewReady()
+        setUiState(UiState.LOADING)
     }
 
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
@@ -207,6 +207,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     override fun onResume() {
         super.onResume()
         presenter.onResume()
+        onViewReady()
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
         }
@@ -229,15 +230,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         interactionListener = activity as OnFragmentInteractionListener?
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == ACCOUNT_EDIT) {
-            // Potentially an Account has been archived - reload all data
-            onViewReady()
-        } else {
-            super.onActivityResult(requestCode, resultCode, data)
-        }
     }
 
     override fun showFctxRequiringAttention(number: Int) {

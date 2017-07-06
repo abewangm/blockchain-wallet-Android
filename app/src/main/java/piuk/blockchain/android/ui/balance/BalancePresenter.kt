@@ -66,8 +66,6 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     }
 
     override fun onViewReady() {
-        view.setUiState(UiState.LOADING)
-
         subscribeToEvents()
         storeSwipeReceiveAddresses()
 
@@ -99,9 +97,6 @@ class BalancePresenter : BasePresenter<BalanceView>() {
         // Here we check the Fiat and Btc formats and let the UI handle any potential updates
         val btcUnitType = getBtcUnitType()
         monetaryUtil.updateUnit(btcUnitType)
-        val btcBalance = transactionListDataManager.getBtcBalance(chosenAccount)
-        val balanceTotal = getBalanceString(accessState.isBtc, btcBalance)
-        view.onTotalBalanceUpdated(balanceTotal)
         view.onExchangeRateUpdated(getLastPrice(getFiatCurrency()), accessState.isBtc)
         view.onViewTypeChanged(accessState.isBtc, btcUnitType)
     }
