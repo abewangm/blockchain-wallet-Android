@@ -331,21 +331,21 @@ public class MainViewModel extends BaseViewModel {
 
     private Completable registerMetadataNodesCompletable() {
         return payloadDataManager.loadNodes()
-        .doOnNext(aBoolean -> subscribeToNotifications())
-        .flatMap(loaded -> {
-            if (loaded) {
-                return payloadDataManager.getMetadataNodeFactory();
-            } else {
-                if (!payloadManager.getPayload().isDoubleEncryption()) {
-                    return payloadDataManager.generateNodes(null)
-                            .andThen(payloadDataManager.getMetadataNodeFactory());
-                } else {
-                    throw new InvalidCredentialsException("Payload is double encrypted");
-                }
-            }
-        })
-        .flatMapCompletable(metadataNodeFactory -> contactsDataManager
-                .initContactsService(metadataNodeFactory.getMetadataNode(), metadataNodeFactory.getSharedMetadataNode()));
+                .doOnNext(aBoolean -> subscribeToNotifications())
+                .flatMap(loaded -> {
+                    if (loaded) {
+                        return payloadDataManager.getMetadataNodeFactory();
+                    } else {
+                        if (!payloadManager.getPayload().isDoubleEncryption()) {
+                            return payloadDataManager.generateNodes(null)
+                                    .andThen(payloadDataManager.getMetadataNodeFactory());
+                        } else {
+                            throw new InvalidCredentialsException("Payload is double encrypted");
+                        }
+                    }
+                })
+                .flatMapCompletable(metadataNodeFactory -> contactsDataManager
+                        .initContactsService(metadataNodeFactory.getMetadataNode(), metadataNodeFactory.getSharedMetadataNode()));
     }
 
     private void initContactsService() {
@@ -380,15 +380,22 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void initBuyService() {
-        dataListener.setBuySellEnabled(true);
+        compositeDisposable.add(
+                buyDataManager.getCanBuy()
+                        .subscribe(isEnabled -> {
+                                    dataListener.setBuySellEnabled(isEnabled);
+                                    if (isEnabled) {
+                                        buyDataManager.watchPendingTrades()
+                                                .compose(RxUtil.applySchedulersToObservable())
+                                                .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace);
 
-        compositeDisposable.add(
-                buyDataManager.watchPendingTrades()
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace));
-        compositeDisposable.add(
-                buyDataManager.getWebViewLoginDetails()
-                        .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace));
+                                        buyDataManager.getWebViewLoginDetails()
+                                                .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
+                                    }
+
+                                    dataListener.setBuySellEnabled(isEnabled);
+                                },
+                                throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
     }
 
     private void dismissAnnouncementIfOnboardingCompleted() {
