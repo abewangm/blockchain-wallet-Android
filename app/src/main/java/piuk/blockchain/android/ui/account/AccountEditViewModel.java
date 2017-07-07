@@ -392,7 +392,7 @@ public class AccountEditViewModel extends BaseViewModel {
         }
 
         compositeDisposable.add(
-                accountEditDataManager.submitPayment(pendingTransaction.unspentOutputBundle,
+                sendDataManager.submitPayment(pendingTransaction.unspentOutputBundle,
                         keys,
                         pendingTransaction.receivingAddress,
                         changeAddress,

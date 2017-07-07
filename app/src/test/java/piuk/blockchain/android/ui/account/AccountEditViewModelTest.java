@@ -324,7 +324,7 @@ public class AccountEditViewModelTest {
         when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(payloadDataManager.getAddressECKey(legacyAddress, null))
                 .thenReturn(mock(ECKey.class));
-        when(accountEditDataManager.submitPayment(
+        when(sendDataManager.submitPayment(
                 any(SpendableUnspentOutputs.class),
                 anyList(),
                 isNull(),
@@ -358,7 +358,7 @@ public class AccountEditViewModelTest {
         when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(payloadDataManager.getAddressECKey(eq(legacyAddress), anyString()))
                 .thenReturn(mock(ECKey.class));
-        when(accountEditDataManager.submitPayment(
+        when(sendDataManager.submitPayment(
                 any(SpendableUnspentOutputs.class),
                 anyList(),
                 isNull(),

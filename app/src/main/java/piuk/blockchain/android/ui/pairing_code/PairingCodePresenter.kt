@@ -1,9 +1,6 @@
 package piuk.blockchain.android.ui.pairing_code
 
 import android.graphics.Bitmap
-
-import javax.inject.Inject
-
 import io.reactivex.Observable
 import okhttp3.ResponseBody
 import piuk.blockchain.android.R
@@ -15,6 +12,7 @@ import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.StringUtils
+import javax.inject.Inject
 
 class PairingCodePresenter : BasePresenter<PairingCodeView>() {
 
@@ -36,28 +34,28 @@ class PairingCodePresenter : BasePresenter<PairingCodeView>() {
 
     fun generatePairingQr() {
         pairingEncryptionPasswordObservable
-                .doOnSubscribe { disposable -> view.showProgressSpinner() }
+                .doOnSubscribe { view.showProgressSpinner() }
                 .doAfterTerminate { view.hideProgressSpinner() }
                 .flatMap { encryptionPassword -> generatePairingCodeObservable(encryptionPassword.string()) }
                 .compose(RxUtil.addObservableToCompositeDisposable<Bitmap>(this))
                 .subscribe(
-                        { bitmap -> view.onQrLoaded(bitmap) }
-                ) { throwable -> view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) }
+                        { bitmap -> view.onQrLoaded(bitmap) },
+                        { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
     }
 
     private val pairingEncryptionPasswordObservable: Observable<ResponseBody>
         get() {
-            val guid = payloadDataManager!!.wallet.guid
-            return authDataManager!!.getPairingEncryptionPassword(guid)
+            val guid = payloadDataManager.wallet.guid
+            return authDataManager.getPairingEncryptionPassword(guid)
         }
 
     private fun generatePairingCodeObservable(encryptionPhrase: String): Observable<Bitmap> {
 
-        val guid = payloadDataManager!!.wallet.guid
-        val sharedKey = payloadDataManager!!.wallet.sharedKey
-        val password = payloadDataManager!!.tempPassword
+        val guid = payloadDataManager.wallet.guid
+        val sharedKey = payloadDataManager.wallet.sharedKey
+        val password = payloadDataManager.tempPassword
 
-        return qrCodeDataManager!!.generatePairingCode(
+        return qrCodeDataManager.generatePairingCode(
                 guid,
                 password,
                 sharedKey,

@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigInteger;
-import java.util.Collections;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
@@ -23,7 +22,6 @@ import piuk.blockchain.android.ui.send.PendingTransaction;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -67,30 +65,6 @@ public class AccountEditDataManagerTest extends RxTest {
         testObserver.assertComplete();
         testObserver.assertNoErrors();
         assertEquals(PendingTransaction.class, testObserver.values().get(0).getClass());
-    }
-
-    @Test
-    public void submitPayment() throws Exception {
-        // Arrange
-        when(sendDataManager.submitPayment(
-                any(SpendableUnspentOutputs.class),
-                anyList(),
-                anyString(),
-                anyString(),
-                any(BigInteger.class),
-                any(BigInteger.class))).thenReturn(Observable.just("hash"));
-        // Act
-        TestObserver<String> testObserver = subject.submitPayment(mock(
-                SpendableUnspentOutputs.class),
-                Collections.emptyList(),
-                "",
-                "",
-                mock(BigInteger.class),
-                mock(BigInteger.class)).test();
-        // Assert
-        testObserver.assertComplete();
-        testObserver.assertNoErrors();
-        testObserver.assertValue("hash");
     }
 
 }
