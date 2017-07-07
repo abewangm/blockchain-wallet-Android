@@ -81,6 +81,7 @@ import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
+import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 import static android.databinding.DataBindingUtil.inflate;
@@ -724,7 +725,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.bip38_password_entry)
-                .setView(password)
+                .setView(ViewUtils.getAlertDialogPaddedView(getContext(), password))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
                         viewModel.spendFromWatchOnlyBIP38(password.getText().toString(), scanData))

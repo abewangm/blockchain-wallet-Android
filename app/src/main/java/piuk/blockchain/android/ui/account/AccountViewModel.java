@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
@@ -35,6 +34,7 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.LabelUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
+import timber.log.Timber;
 
 @SuppressWarnings("WeakerAccess")
 public class AccountViewModel extends BaseViewModel {
@@ -196,7 +196,7 @@ public class AccountViewModel extends BaseViewModel {
             ECKey key = bip38.decrypt(password);
             handlePrivateKey(key, doubleEncryptionPassword);
         } catch (Exception e) {
-            Log.e(TAG, "importBip38Address: ", e);
+            Timber.e("importBip38Address: ", e);
             dataListener.showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR);
         } finally {
             dataListener.dismissProgressDialog();
@@ -223,6 +223,7 @@ public class AccountViewModel extends BaseViewModel {
                 importWatchOnlyAddress(data);
             }
         } catch (Exception e) {
+            Timber.e(e);
             dataListener.showToast(R.string.privkey_error, ToastCustom.TYPE_ERROR);
         }
     }
