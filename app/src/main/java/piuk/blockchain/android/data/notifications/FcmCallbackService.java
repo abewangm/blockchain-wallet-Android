@@ -42,7 +42,7 @@ public class FcmCallbackService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // Check if message contains a data payload.
-        if (remoteMessage.getData().size() > 0) {
+        if (!remoteMessage.getData().isEmpty()) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
 
             // Parse data, emit events

@@ -17,6 +17,7 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.account.ItemAccount;

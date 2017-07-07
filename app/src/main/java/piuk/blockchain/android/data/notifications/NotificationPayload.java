@@ -7,6 +7,8 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
+import timber.log.Timber;
+
 public class NotificationPayload {
 
     private String title;
@@ -73,7 +75,7 @@ public class NotificationPayload {
                     address = jsonObject.getString("address");
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
+                Timber.e(e);
             }
         }
 

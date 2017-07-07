@@ -38,7 +38,7 @@ import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.datamanagers.SendDataManager;
+import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseViewModel;

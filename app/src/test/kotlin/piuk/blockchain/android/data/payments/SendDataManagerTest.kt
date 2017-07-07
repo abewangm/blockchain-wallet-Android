@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.datamanagers
+package piuk.blockchain.android.data.payments
 
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.verify
@@ -15,7 +15,8 @@ import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.data.services.PaymentService
+import piuk.blockchain.android.data.payments.PaymentService
+import piuk.blockchain.android.data.payments.SendDataManager
 import java.math.BigInteger
 
 class SendDataManagerTest : RxTest() {

@@ -28,7 +28,7 @@ import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.datamanagers.SendDataManager;
+import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BaseViewModel;

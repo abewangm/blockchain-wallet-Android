@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.services;
+package piuk.blockchain.android.data.payments;
 
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
@@ -23,6 +23,7 @@ import java.util.List;
 import io.reactivex.observers.TestObserver;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.payments.PaymentService;
 import retrofit2.Call;
 import retrofit2.Response;
 
