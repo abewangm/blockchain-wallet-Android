@@ -66,7 +66,7 @@ public class SendDataManager {
      */
     public Observable<ECKey> getEcKeyFromBip38(String password, String scanData, NetworkParameters networkParameters) {
         return Observable.fromCallable(() -> {
-            BIP38PrivateKey bip38 = new BIP38PrivateKey(networkParameters, scanData);
+            BIP38PrivateKey bip38 = BIP38PrivateKey.fromBase58(networkParameters, scanData);
             return bip38.decrypt(password);
         }).compose(RxUtil.applySchedulersToObservable());
     }

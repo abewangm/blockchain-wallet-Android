@@ -192,7 +192,7 @@ public class AccountViewModel extends BaseViewModel {
     void importBip38Address(String data, String password) {
         dataListener.showProgressDialog(R.string.please_wait);
         try {
-            BIP38PrivateKey bip38 = new BIP38PrivateKey(environmentSettings.getNetworkParameters(), data);
+            BIP38PrivateKey bip38 = BIP38PrivateKey.fromBase58(environmentSettings.getNetworkParameters(), data);
             ECKey key = bip38.decrypt(password);
             handlePrivateKey(key, doubleEncryptionPassword);
         } catch (Exception e) {

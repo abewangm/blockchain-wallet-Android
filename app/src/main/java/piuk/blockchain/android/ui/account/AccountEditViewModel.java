@@ -702,7 +702,7 @@ public class AccountEditViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
 
         try {
-            BIP38PrivateKey bip38 = new BIP38PrivateKey(MainNetParams.get(), data);
+            BIP38PrivateKey bip38 = BIP38PrivateKey.fromBase58(MainNetParams.get(), data);
             final ECKey key = bip38.decrypt(pw);
 
             if (key != null && key.hasPrivKey()) {
