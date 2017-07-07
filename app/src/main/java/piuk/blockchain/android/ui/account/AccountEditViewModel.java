@@ -20,6 +20,7 @@ import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
@@ -32,10 +33,10 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.Completable;
+import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
-import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.SendDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
@@ -63,7 +64,6 @@ public class AccountEditViewModel extends BaseViewModel {
 
     @Inject PrefsUtil prefsUtil;
     @Inject StringUtils stringUtils;
-    @Inject AccountEditDataManager accountEditDataManager;
     @Inject PayloadDataManager payloadDataManager;
     @Inject ExchangeRateFactory exchangeRateFactory;
     @Inject SendDataManager sendDataManager;
@@ -307,7 +307,7 @@ public class AccountEditViewModel extends BaseViewModel {
         dataListener.showProgressDialog(R.string.please_wait);
 
         compositeDisposable.add(
-                accountEditDataManager.getPendingTransactionForLegacyAddress(legacyAddress)
+                getPendingTransactionForLegacyAddress(legacyAddress)
                         .doAfterTerminate(() -> dataListener.dismissProgressDialog())
                         .doOnNext(pending -> pendingTransaction = pending)
                         .subscribe(pendingTransaction -> {
@@ -739,6 +739,41 @@ public class AccountEditViewModel extends BaseViewModel {
                             dataListener.sendBroadcast("address", legacyAddress.getAddress());
                             dataListener.setActivityResult(Activity.RESULT_OK);
                         }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
+    }
+
+    /**
+     * Generates a {@link PendingTransaction} object for a given legacy address, where the output is
+     * the default account in the user's wallet
+     *
+     * @param legacyAddress The {@link LegacyAddress} you wish to transfer funds from
+     * @return An {@link Observable <PendingTransaction>}
+     */
+    private Observable<PendingTransaction> getPendingTransactionForLegacyAddress(LegacyAddress legacyAddress) {
+        PendingTransaction pendingTransaction = new PendingTransaction();
+
+        return sendDataManager.getUnspentOutputs(legacyAddress.getAddress())
+                .flatMap(unspentOutputs -> {
+                    BigInteger suggestedFeePerKb =
+                            BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000);
+
+                    Pair<BigInteger, BigInteger> sweepableCoins =
+                            sendDataManager.getSweepableCoins(unspentOutputs, suggestedFeePerKb);
+                    BigInteger sweepAmount = sweepableCoins.getLeft();
+
+                    // To default account
+                    Account defaultAccount = payloadDataManager.getDefaultAccount();
+                    pendingTransaction.sendingObject = new ItemAccount(legacyAddress.getLabel(), sweepAmount.toString(), "", sweepAmount.longValue(), legacyAddress, legacyAddress.getAddress());
+                    pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", sweepAmount.longValue(), defaultAccount, null);
+                    pendingTransaction.unspentOutputBundle = sendDataManager.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
+                    pendingTransaction.bigIntAmount = sweepAmount;
+                    pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee();
+
+                    return payloadDataManager.getNextReceiveAddress(defaultAccount);
+                })
+                .map(receivingAddress -> {
+                    pendingTransaction.receivingAddress = receivingAddress;
+                    return pendingTransaction;
+                });
     }
 
     public PayloadDataManager getPayloadDataManager() {

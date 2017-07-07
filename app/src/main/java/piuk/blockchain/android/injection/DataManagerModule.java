@@ -13,7 +13,6 @@ import dagger.Provides;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
-import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
@@ -129,17 +128,6 @@ public class DataManagerModule {
                                                              SettingsDataStore settingsDataStore,
                                                              RxBus rxBus) {
         return new SettingsDataManager(settingsService, settingsDataStore, rxBus);
-    }
-
-    @Provides
-    @ViewModelScope
-    protected AccountEditDataManager provideAccountEditDataManager(PayloadDataManager payloadDataManager,
-                                                                   SendDataManager sendDataManager,
-                                                                   DynamicFeeCache dynamicFeeCache) {
-        return new AccountEditDataManager(
-                payloadDataManager,
-                sendDataManager,
-                dynamicFeeCache);
     }
 
     @Provides
