@@ -83,6 +83,7 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
+import timber.log.Timber;
 
 import static android.databinding.DataBindingUtil.inflate;
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_ITEM;
@@ -455,7 +456,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     case 0:
                     case 1:
                         binding.buttonSend.setEnabled(true);
-                        updateTotals(viewModel.getSendingItemAccount());
                         binding.textviewFeeAbsolute.setVisibility(View.VISIBLE);
                         binding.textviewFeeTime.setVisibility(View.VISIBLE);
                         binding.textInputLayout.setVisibility(View.GONE);
@@ -551,7 +551,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         }
 
         viewModel.setSendingAddress(itemAccount);
-        updateTotals(itemAccount);
         binding.from.setText(itemAccount.getLabel());
 
         binding.from.setOnClickListener(v -> startFromFragment());
