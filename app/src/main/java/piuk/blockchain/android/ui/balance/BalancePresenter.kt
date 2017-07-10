@@ -575,6 +575,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     }
 
     fun dismissAnnouncement() {
+        prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
         if (displayList.filter { it is AnnouncementData }.isNotEmpty()) {
             displayList.removeAll { it is AnnouncementData }
             view.onTransactionsUpdated(displayList)
