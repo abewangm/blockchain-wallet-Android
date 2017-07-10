@@ -58,7 +58,7 @@ class CredentialsFragment : BaseFragment<CredentialsView, CredentialsPresenter>(
         wallet_pass.setOnFocusChangeListener(this)
         wallet_pass.addTextChangedListener(this)
 
-        command_next.setOnClickListener{ v -> onNextClicked()}
+        command_next.setOnClickListener { onNextClicked() }
 
         val text = getString(R.string.agree_terms_of_service) + " "
         val text2 = getString(R.string.blockchain_tos)
@@ -67,8 +67,10 @@ class CredentialsFragment : BaseFragment<CredentialsView, CredentialsPresenter>(
         spannable.setSpan(ForegroundColorSpan(ContextCompat.getColor(activity, R.color.primary_blue_accent)),
                 text.length, text.length + text2.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         tos.setText(spannable, TextView.BufferType.SPANNABLE)
-        tos.setOnClickListener({ v -> startActivity(Intent(Intent.ACTION_VIEW,
-                Uri.parse(SettingsFragment.URL_TOS_POLICY))) })
+        tos.setOnClickListener({
+            startActivity(Intent(Intent.ACTION_VIEW,
+                    Uri.parse(SettingsFragment.URL_TOS_POLICY)))
+        })
 
         hideEntropyContainer()
 
@@ -110,7 +112,7 @@ class CredentialsFragment : BaseFragment<CredentialsView, CredentialsPresenter>(
     }
 
     override fun onFocusChange(v: View?, hasFocus: Boolean) {
-        if(hasFocus) {
+        if (hasFocus) {
             showEntropyContainer()
         } else {
             hideEntropyContainer()
@@ -160,14 +162,14 @@ class CredentialsFragment : BaseFragment<CredentialsView, CredentialsPresenter>(
                 .setMessage(R.string.weak_password)
                 .setPositiveButton(android.R.string.yes, { dialog, whichButton ->
                     wallet_pass.setText("")
-                    wallet_pass_confirm.setText("");
+                    wallet_pass_confirm.setText("")
                     wallet_pass.requestFocus()
                 })
                 .setNegativeButton(android.R.string.no, { dialog, whichButton ->
                     startNextActivity(email, password)
                 })
 
-            builder.setNegativeButton(android.R.string.cancel, null)
+        builder.setNegativeButton(android.R.string.cancel, null)
         builder.show()
     }
 
