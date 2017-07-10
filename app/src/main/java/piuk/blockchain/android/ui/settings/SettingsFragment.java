@@ -34,6 +34,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mukesh.countrypicker.fragments.CountryPicker;
@@ -756,7 +757,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         AppCompatEditText newPassword = (AppCompatEditText) pwLayout.findViewById(R.id.new_password);
         AppCompatEditText newPasswordConfirmation = (AppCompatEditText) pwLayout.findViewById(R.id.confirm_password);
 
-        LinearLayout entropyMeter = (LinearLayout) pwLayout.findViewById(R.id.entropy_meter);
+        RelativeLayout entropyMeter = (RelativeLayout) pwLayout.findViewById(R.id.entropy_meter);
         ProgressBar passStrengthBar = (ProgressBar) pwLayout.findViewById(R.id.pass_strength_bar);
         passStrengthBar.setMax(100);
         TextView passStrengthVerdict = (TextView) pwLayout.findViewById(R.id.pass_strength_verdict);

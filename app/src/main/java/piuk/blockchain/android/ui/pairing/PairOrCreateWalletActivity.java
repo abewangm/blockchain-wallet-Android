@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.pairing;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
@@ -10,7 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.ui.auth.CreateWalletFragment;
+import piuk.blockchain.android.ui.auth.CredentialsFragment;
 import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -34,18 +33,17 @@ public class PairOrCreateWalletActivity extends BaseAuthActivity implements Pair
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
         setSupportActionBar(toolbar);
 
-        Fragment fragment;
-
         if (getIntent().getIntExtra("starting_fragment", 1) == 1) {
-            fragment = new PairWalletFragment();
+            Fragment fragment = new PairWalletFragment();
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.content_frame, fragment)
+                    .commit();
         } else {
-            fragment = new CreateWalletFragment();
+            CredentialsFragment fragmentv4 = new CredentialsFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.content_frame, fragmentv4)
+                    .commit();
         }
-
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.content_frame, fragment)
-                .commit();
 
         viewModel.onViewReady();
     }

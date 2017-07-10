@@ -13,8 +13,8 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
-import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_EMAIL;
-import static piuk.blockchain.android.ui.auth.CreateWalletFragment.KEY_INTENT_PASSWORD;
+import static piuk.blockchain.android.ui.auth.CredentialsFragment.KEY_INTENT_EMAIL;
+import static piuk.blockchain.android.ui.auth.CredentialsFragment.KEY_INTENT_PASSWORD;
 
 public class RecoverFundsViewModel extends BaseViewModel {
 
