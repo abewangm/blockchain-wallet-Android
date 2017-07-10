@@ -61,7 +61,7 @@ public class PayloadService {
      * @param walletName The name of the wallet, usually a default name localised by region
      * @param email      The user's email address, preferably not associated with another account
      * @param password   The user's choice of password
-     * @return An {@link Observable < Wallet >}
+     * @return An {@link Observable<Wallet>}
      */
     @WebRequest
     public Observable<Wallet> restoreHdWallet(String mnemonic, String walletName, String email, String password) {

@@ -1,7 +1,5 @@
 package piuk.blockchain.android.data.services;
 
-import android.util.Log;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.wallet.api.trade.coinify.CoinifyApi;
@@ -31,6 +29,7 @@ import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketReceiveEvent;
 import piuk.blockchain.android.injection.Injector;
+import timber.log.Timber;
 
 /**
  * Created by justin on 5/1/17.
@@ -40,8 +39,6 @@ import piuk.blockchain.android.injection.Injector;
 public class ExchangeService {
     private static ExchangeService instance;
     private static final int METADATA_TYPE_EXCHANGE = 3;
-
-    public static final String TAG = ExchangeService.class.getSimpleName();
 
     private PayloadManager payloadManager;
     private ReplaySubject<Metadata> metadataSubject;
@@ -109,7 +106,7 @@ public class ExchangeService {
 
         return getPendingTradeAddresses()
                 .doOnNext(address ->
-                        Log.d(TAG, "watchPendingTrades: watching receive address: " + address))
+                        Timber.d("watchPendingTrades: watching receive address: " + address))
                 .flatMap(address -> receiveEvents
                         .filter(event -> event.getAddress().equals(address))
                         .map(WebSocketReceiveEvent::getHash));
@@ -155,7 +152,7 @@ public class ExchangeService {
             Observable<Metadata> exchangeDataStream = getMetadata(metadataNode);
             exchangeDataStream.subscribeWith(metadataSubject);
         } else {
-            Log.e(TAG, "MetadataNode not generated yet. Wallet possibly double encrypted.");
+            Timber.e("MetadataNode not generated yet. Wallet possibly double encrypted.");
         }
     }
 

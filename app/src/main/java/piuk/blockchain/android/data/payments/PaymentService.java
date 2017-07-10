@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.services;
+package piuk.blockchain.android.data.payments;
 
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.exceptions.ApiException;
@@ -40,12 +40,12 @@ public class PaymentService {
      * @return An {@link Observable<String>} where the String is the transaction hash
      */
     @WebRequest
-    public Observable<String> submitPayment(SpendableUnspentOutputs unspentOutputBundle,
-                                            List<ECKey> keys,
-                                            String toAddress,
-                                            String changeAddress,
-                                            BigInteger bigIntFee,
-                                            BigInteger bigIntAmount) {
+    Observable<String> submitPayment(SpendableUnspentOutputs unspentOutputBundle,
+                                     List<ECKey> keys,
+                                     String toAddress,
+                                     String changeAddress,
+                                     BigInteger bigIntFee,
+                                     BigInteger bigIntAmount) {
 
         return Observable.create(observableOnSubscribe -> {
             HashMap<String, BigInteger> receivers = new HashMap<>();
@@ -82,7 +82,7 @@ public class PaymentService {
      * @return An {@link Observable<UnspentOutputs>}
      */
     @WebRequest
-    public Observable<UnspentOutputs> getUnspentOutputs(String address) {
+    Observable<UnspentOutputs> getUnspentOutputs(String address) {
         return Observable.fromCallable(() -> {
             Response<UnspentOutputs> response = payment.getUnspentCoins(Collections.singletonList(address)).execute();
 
@@ -109,9 +109,9 @@ public class PaymentService {
      * @return An {@link SpendableUnspentOutputs} object, which wraps a list of spendable outputs
      * for the given inputs
      */
-    public SpendableUnspentOutputs getSpendableCoins(UnspentOutputs unspentCoins,
-                                                     BigInteger paymentAmount,
-                                                     BigInteger feePerKb) throws UnsupportedEncodingException {
+    SpendableUnspentOutputs getSpendableCoins(UnspentOutputs unspentCoins,
+                                              BigInteger paymentAmount,
+                                              BigInteger feePerKb) throws UnsupportedEncodingException {
         return payment.getSpendableCoins(unspentCoins, paymentAmount, feePerKb);
     }
 
@@ -125,8 +125,8 @@ public class PaymentService {
      * @return A {@link Pair} object, where left = the sweepable amount as a {@link BigInteger},
      * right = the absolute fee needed to sweep those coins, also as a {@link BigInteger}
      */
-    public Pair<BigInteger, BigInteger> getSweepableCoins(UnspentOutputs unspentCoins,
-                                                          BigInteger feePerKb) {
+    Pair<BigInteger, BigInteger> getSweepableCoins(UnspentOutputs unspentCoins,
+                                                   BigInteger feePerKb) {
         return payment.getSweepableCoins(unspentCoins, feePerKb);
     }
 
@@ -139,7 +139,7 @@ public class PaymentService {
      * @param absoluteFee The absolute fee as a {@link BigInteger}
      * @return True if the fee is adequate, false if not
      */
-    public boolean isAdequateFee(int inputs, int outputs, BigInteger absoluteFee) {
+    boolean isAdequateFee(int inputs, int outputs, BigInteger absoluteFee) {
         return payment.isAdequateFee(inputs, outputs, absoluteFee);
     }
 
@@ -150,7 +150,7 @@ public class PaymentService {
      * @param outputs The number of outputs
      * @return The estimated size of the transaction in kB
      */
-    public int estimateSize(int inputs, int outputs) {
+    int estimateSize(int inputs, int outputs) {
         return payment.estimatedSize(inputs, outputs);
     }
 
@@ -163,7 +163,7 @@ public class PaymentService {
      * @param feePerKb The current fee per kB om the network
      * @return A {@link BigInteger} representing the absolute fee
      */
-    public BigInteger estimateFee(int inputs, int outputs, BigInteger feePerKb) {
+    BigInteger estimateFee(int inputs, int outputs, BigInteger feePerKb) {
         return payment.estimatedFee(inputs, outputs, feePerKb);
     }
 

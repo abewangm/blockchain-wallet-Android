@@ -25,6 +25,7 @@ import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PasswordUtil;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.databinding.FragmentCreateWalletBinding;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.pairing.PairOrCreateWalletActivity;
@@ -32,6 +33,7 @@ import piuk.blockchain.android.ui.recover.RecoverFundsActivity;
 import piuk.blockchain.android.ui.settings.SettingsFragment;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+// TODO: 07/07/2017 Move me into a ViewModel
 public class CreateWalletFragment extends Fragment {
 
     public static final String KEY_INTENT_EMAIL = "intent_email";
@@ -50,6 +52,8 @@ public class CreateWalletFragment extends Fragment {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_create_wallet, container, false);
 
         mRecoveringFunds = getActivity().getIntent().getBooleanExtra(LandingActivity.KEY_INTENT_RECOVERING_FUNDS, false);
+        // Clear PIN here just incase app was force quit
+        AccessState.getInstance().setPIN(null);
 
         int title;
         if (mRecoveringFunds) {

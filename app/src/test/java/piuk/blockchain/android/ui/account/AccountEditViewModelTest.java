@@ -5,7 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 
-import info.blockchain.api.data.UnspentOutput;
+import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
@@ -15,6 +15,7 @@ import info.blockchain.wallet.payload.data.Wallet;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
@@ -41,9 +42,8 @@ import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
-import piuk.blockchain.android.data.datamanagers.AccountEditDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.datamanagers.SendDataManager;
+import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.ApiModule;
 import piuk.blockchain.android.injection.ApplicationModule;
@@ -69,7 +69,6 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
@@ -82,7 +81,6 @@ public class AccountEditViewModelTest {
     @Mock private PayloadDataManager payloadDataManager;
     @Mock private PrefsUtil prefsUtil;
     @Mock private StringUtils stringUtils;
-    @Mock private AccountEditDataManager accountEditDataManager;
     @Mock private ExchangeRateFactory exchangeRateFactory;
     @Mock private AccountEditModel accountEditModel;
     @Mock private SwipeToReceiveHelper swipeToReceiveHelper;
@@ -234,23 +232,27 @@ public class AccountEditViewModelTest {
         verify(accountEditModel).setTransferFundsVisibility(anyInt());
     }
 
-
     @Test
     public void onClickTransferFundsSuccess() throws Exception {
         // Arrange
         LegacyAddress legacyAddress = new LegacyAddress();
+        legacyAddress.setAddress("");
+        legacyAddress.setLabel("");
         subject.legacyAddress = legacyAddress;
-        PendingTransaction pendingTransaction = new PendingTransaction();
-        pendingTransaction.sendingObject = new ItemAccount("", "", "", 100L, legacyAddress, null);
-        pendingTransaction.bigIntAmount = BigInteger.TEN;
-        pendingTransaction.bigIntFee = BigInteger.TEN;
-        pendingTransaction.receivingObject = new ItemAccount("", "", "", 100L, legacyAddress, null);
-        SpendableUnspentOutputs spendableUnspentOutputs = new SpendableUnspentOutputs();
-        spendableUnspentOutputs.setConsumedAmount(BigInteger.TEN);
-        spendableUnspentOutputs.setSpendableOutputs(Collections.singletonList(new UnspentOutput()));
-        pendingTransaction.unspentOutputBundle = spendableUnspentOutputs;
-        when(accountEditDataManager.getPendingTransactionForLegacyAddress(legacyAddress))
-                .thenReturn(Observable.just(pendingTransaction));
+        Pair<BigInteger, BigInteger> sweepableCoins = Pair.of(BigInteger.ONE, BigInteger.TEN);
+        when(dynamicFeeCache.getFeeOptions().getRegularFee()).thenReturn(100L);
+        when(payloadDataManager.getDefaultAccount()).thenReturn(mock(Account.class));
+        when(payloadDataManager.getNextReceiveAddress(any(Account.class)))
+                .thenReturn(Observable.just("address"));
+        when(sendDataManager.getUnspentOutputs(legacyAddress.getAddress()))
+                .thenReturn(Observable.just(mock(UnspentOutputs.class)));
+        when(sendDataManager.getSweepableCoins(any(UnspentOutputs.class), any(BigInteger.class)))
+                .thenReturn(sweepableCoins);
+        SpendableUnspentOutputs spendableUnspentOutputs = mock(SpendableUnspentOutputs.class);
+        when(spendableUnspentOutputs.getAbsoluteFee()).thenReturn(BigInteger.TEN);
+        when(spendableUnspentOutputs.getConsumedAmount()).thenReturn(BigInteger.TEN);
+        when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
+                .thenReturn(spendableUnspentOutputs);
         when(exchangeRateFactory.getLastPrice(anyString())).thenReturn(100.0d);
         when(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD");
@@ -261,18 +263,26 @@ public class AccountEditViewModelTest {
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
         verify(activity).showPaymentDetails(any(PaymentConfirmationDetails.class));
-        assertEquals(pendingTransaction, subject.pendingTransaction);
     }
 
     @Test
     public void onClickTransferFundsSuccessTransactionEmpty() throws Exception {
         // Arrange
         LegacyAddress legacyAddress = new LegacyAddress();
+        legacyAddress.setAddress("");
+        legacyAddress.setLabel("");
         subject.legacyAddress = legacyAddress;
-        PendingTransaction pendingTransaction = new PendingTransaction();
-        pendingTransaction.bigIntAmount = BigInteger.ZERO;
-        when(accountEditDataManager.getPendingTransactionForLegacyAddress(legacyAddress))
-                .thenReturn(Observable.just(pendingTransaction));
+        Pair<BigInteger, BigInteger> sweepableCoins = Pair.of(BigInteger.ZERO, BigInteger.TEN);
+        when(dynamicFeeCache.getFeeOptions().getRegularFee()).thenReturn(100L);
+        when(payloadDataManager.getDefaultAccount()).thenReturn(mock(Account.class));
+        when(payloadDataManager.getNextReceiveAddress(any(Account.class)))
+                .thenReturn(Observable.just("address"));
+        when(sendDataManager.getUnspentOutputs(legacyAddress.getAddress()))
+                .thenReturn(Observable.just(mock(UnspentOutputs.class)));
+        when(sendDataManager.getSweepableCoins(any(UnspentOutputs.class), any(BigInteger.class)))
+                .thenReturn(sweepableCoins);
+        when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
+                .thenReturn(mock(SpendableUnspentOutputs.class));
         // Act
         subject.onClickTransferFunds();
         // Assert
@@ -286,10 +296,10 @@ public class AccountEditViewModelTest {
     public void onClickTransferFundsError() throws Exception {
         // Arrange
         LegacyAddress legacyAddress = new LegacyAddress();
+        legacyAddress.setAddress("");
+        legacyAddress.setLabel("");
         subject.legacyAddress = legacyAddress;
-        PendingTransaction pendingTransaction = new PendingTransaction();
-        pendingTransaction.bigIntAmount = BigInteger.ZERO;
-        when(accountEditDataManager.getPendingTransactionForLegacyAddress(legacyAddress))
+        when(sendDataManager.getUnspentOutputs(legacyAddress.getAddress()))
                 .thenReturn(Observable.error(new Throwable()));
         // Act
         subject.onClickTransferFunds();
@@ -324,7 +334,7 @@ public class AccountEditViewModelTest {
         when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(payloadDataManager.getAddressECKey(legacyAddress, null))
                 .thenReturn(mock(ECKey.class));
-        when(accountEditDataManager.submitPayment(
+        when(sendDataManager.submitPayment(
                 any(SpendableUnspentOutputs.class),
                 anyList(),
                 isNull(),
@@ -358,7 +368,7 @@ public class AccountEditViewModelTest {
         when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(payloadDataManager.getAddressECKey(eq(legacyAddress), anyString()))
                 .thenReturn(mock(ECKey.class));
-        when(accountEditDataManager.submitPayment(
+        when(sendDataManager.submitPayment(
                 any(SpendableUnspentOutputs.class),
                 anyList(),
                 isNull(),
@@ -394,7 +404,6 @@ public class AccountEditViewModelTest {
         verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
-        verifyZeroInteractions(accountEditDataManager);
     }
 
     @Test
@@ -900,13 +909,6 @@ public class AccountEditViewModelTest {
         @Override
         protected SendDataManager provideSendDataManager(RxBus rxBus) {
             return sendDataManager;
-        }
-
-        @Override
-        protected AccountEditDataManager provideAccountEditDataManager(PayloadDataManager payloadDataManager,
-                                                                       SendDataManager sendDataManager,
-                                                                       DynamicFeeCache dynamicFeeCache) {
-            return accountEditDataManager;
         }
     }
 
