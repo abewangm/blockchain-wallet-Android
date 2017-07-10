@@ -10,9 +10,9 @@ interface CredentialsView : View {
 
     fun setNextText(text : Int)
 
-    fun setEntopyStrength(score: Int)
+    fun setEntropyStrength(score: Int)
 
-    fun setEntopyLevel(level: Int)
+    fun setEntropyLevel(level: Int)
 
     fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)
 

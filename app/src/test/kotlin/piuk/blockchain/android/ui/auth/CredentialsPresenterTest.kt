@@ -66,8 +66,8 @@ class CredentialsPresenterTest {
         // Act
         subject.calculateEntropy("password")
         // Assert
-        verify(view).setEntopyStrength(8)
-        verify(view).setEntopyLevel(0)
+        verify(view).setEntropyStrength(8)
+        verify(view).setEntropyLevel(0)
         verifyNoMoreInteractions(view)
     }
 
@@ -78,8 +78,8 @@ class CredentialsPresenterTest {
         // Act
         subject.calculateEntropy("MyWallet")
         // Assert
-        verify(view).setEntopyStrength(46)
-        verify(view).setEntopyLevel(1)
+        verify(view).setEntropyStrength(46)
+        verify(view).setEntropyLevel(1)
         verifyNoMoreInteractions(view)
     }
 
@@ -90,8 +90,8 @@ class CredentialsPresenterTest {
         // Act
         subject.calculateEntropy("MyTestWallet")
         // Assert
-        verify(view).setEntopyStrength(69)
-        verify(view).setEntopyLevel(2)
+        verify(view).setEntropyStrength(69)
+        verify(view).setEntropyLevel(2)
         verifyNoMoreInteractions(view)
     }
 
@@ -102,8 +102,8 @@ class CredentialsPresenterTest {
         // Act
         subject.calculateEntropy("MyTestWallet!@!ASD@!")
         // Assert
-        verify(view).setEntopyStrength(100)
-        verify(view).setEntopyLevel(3)
+        verify(view).setEntropyStrength(100)
+        verify(view).setEntropyLevel(3)
         verifyNoMoreInteractions(view)
     }
 

@@ -29,13 +29,13 @@ class CredentialsPresenter : BasePresenter<CredentialsView>() {
 
     fun calculateEntropy(password: String) {
         passwordStrength = Math.round(PasswordUtil.getStrength(password)).toInt()
-        view.setEntopyStrength(passwordStrength)
+        view.setEntropyStrength(passwordStrength)
 
         when (passwordStrength) {
-            in 0..25 -> view.setEntopyLevel(0)
-            in 26..50 -> view.setEntopyLevel(1)
-            in 51..75 -> view.setEntopyLevel(2)
-            in 76..100 -> view.setEntopyLevel(3)
+            in 0..25 -> view.setEntropyLevel(0)
+            in 26..50 -> view.setEntropyLevel(1)
+            in 51..75 -> view.setEntropyLevel(2)
+            in 76..100 -> view.setEntropyLevel(3)
         }
     }
 
