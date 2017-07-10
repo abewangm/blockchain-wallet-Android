@@ -391,14 +391,11 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                     String label = editText.getText().toString();
                     if (!label.trim().isEmpty()) {
                         address.setLabel(label);
-                    } else {
-                        address.setLabel(address.getAddress());
                     }
 
                     remoteSaveNewAddress(address);
                 })
                 .setNegativeButton(R.string.polite_no, (dialog, whichButton) -> {
-                    address.setLabel(address.getAddress());
                     remoteSaveNewAddress(address);
                 }).show();
     }
