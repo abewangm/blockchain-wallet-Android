@@ -395,7 +395,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 startActivityForResult(new Intent(MainActivity.this, SettingsActivity.class), SETTINGS_EDIT);
                 break;
             case R.id.nav_support:
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(SUPPORT_URI)));
+                onSupportClicked();
                 break;
             case R.id.nav_logout:
                 new AlertDialog.Builder(this, R.style.AlertDialogStyle)
@@ -407,6 +407,16 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 break;
         }
         binding.drawerLayout.closeDrawers();
+    }
+
+    private void onSupportClicked() {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.support_leaving_app_warning)
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(SUPPORT_URI))))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     @Override
