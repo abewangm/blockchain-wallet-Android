@@ -27,7 +27,10 @@ import android.support.v7.preference.SwitchPreferenceCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -861,9 +864,12 @@ public class SettingsFragment extends PreferenceFragmentCompat
             twoStepVerificationPref.setChecked(false);
             showDialogMobile();
         } else {
+            SpannableString spannable = new SpannableString(getString(R.string.two_fa_summary));
+            Linkify.addLinks(spannable, Linkify.WEB_URLS);
+
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setTitle(R.string.two_fa)
-                    .setMessage(R.string.two_fa_summary)
+                    .setMessage(spannable)
                     .setNeutralButton(android.R.string.cancel, (dialogInterface, i) ->
                             twoStepVerificationPref.setChecked(viewModel.getAuthType() != Settings.AUTH_TYPE_OFF));
 
@@ -874,9 +880,10 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 alertDialogBuilder.setPositiveButton(R.string.enable, (dialogInterface, i) ->
                         viewModel.updateTwoFa(Settings.AUTH_TYPE_SMS));
             }
-            alertDialogBuilder
-                    .create()
-                    .show();
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+            ((TextView)alertDialog.findViewById(android.R.id.message))
+                    .setMovementMethod(LinkMovementMethod.getInstance());
         }
     }
 
