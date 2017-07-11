@@ -207,7 +207,11 @@ public class PinEntryViewModel extends BaseViewModel {
 
         // Append tapped #
         mUserEnteredPin = mUserEnteredPin + string;
-        mDataListener.getPinBoxArray()[mUserEnteredPin.length() - 1].setImageResource(R.drawable.rounded_view_dark_blue);
+
+        for (int i = 0; i < mUserEnteredPin.length(); i++) {
+            // Ensures that all necessary dots are filled
+            mDataListener.getPinBoxArray()[i].setImageResource(R.drawable.rounded_view_dark_blue);
+        }
 
         // Perform appropriate action if PIN_LENGTH has been reached
         if (mUserEnteredPin.length() == PIN_LENGTH) {
