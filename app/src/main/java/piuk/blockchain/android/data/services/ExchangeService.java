@@ -172,4 +172,22 @@ public class ExchangeService {
         return sfoxApi.getTransactions(accountToken)
                 .compose(RxUtil.applySchedulersToObservable());
     }
+
+    public Observable<Boolean> hasCoinifyAccount() {
+        return getExchangeData()
+                .flatMap(metadata -> Observable
+                        .fromCallable(() -> {
+                            String exchangeData = metadata.getMetadata();
+                            return exchangeData == null ? "" : exchangeData;
+                        })
+                        .compose(RxUtil.applySchedulersToObservable()))
+                .map(exchangeData -> {
+                    if (exchangeData.isEmpty()) return false;
+
+                    ObjectMapper mapper = new ObjectMapper();
+                    ExchangeData data = mapper.readValue(exchangeData, ExchangeData.class);
+
+                    return data.getCoinify().getUser() != 0;
+                });
+    }
 }

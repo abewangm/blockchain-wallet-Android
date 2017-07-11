@@ -16,7 +16,6 @@ import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
-import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
@@ -25,6 +24,7 @@ import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
 import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.services.PayloadService;
 import piuk.blockchain.android.data.payments.PaymentService;
 import piuk.blockchain.android.data.services.WalletService;
@@ -151,21 +151,15 @@ public class DataManagerModule {
 
     @Provides
     @ViewModelScope
-    protected OnboardingDataManager provideOnboardingDataManager(SettingsDataManager settingsDataManager,
-                                                                 AuthDataManager authDataManager,
-                                                                 PayloadDataManager payloadDataManager,
-                                                                 AccessState accessState) {
-        return new OnboardingDataManager(
-                settingsDataManager,
+    protected BuyDataManager provideBuyDataManager(SettingsDataManager settingsDataManager,
+                                                   AuthDataManager authDataManager,
+                                                   PayloadDataManager payloadDataManager,
+                                                   AccessState accessState) {
+        return new BuyDataManager(settingsDataManager,
                 authDataManager,
                 payloadDataManager,
-                accessState);
-    }
-
-    @Provides
-    @ViewModelScope
-    protected BuyDataManager provideBuyDataManager(OnboardingDataManager onboardingDataManager) {
-        return new BuyDataManager(onboardingDataManager);
+                accessState,
+                ExchangeService.getInstance());
     }
 
     @Provides
