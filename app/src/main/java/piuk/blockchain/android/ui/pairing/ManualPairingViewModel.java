@@ -230,6 +230,7 @@ public class ManualPairingViewModel extends BaseViewModel {
         dataListener.dismissProgressDialog();
         dataListener.resetPasswordField();
         dataListener.showToast(message, ToastCustom.TYPE_ERROR);
+        appUtil.clearCredentials();
     }
 
     private void showErrorToastAndRestartApp(@StringRes int message) {

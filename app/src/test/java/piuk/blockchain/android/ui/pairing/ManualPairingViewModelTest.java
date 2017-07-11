@@ -21,6 +21,7 @@ import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
@@ -323,7 +324,7 @@ public class ManualPairingViewModelTest {
         verify(mActivity).showToast(anyInt(), anyString());
         verify(mActivity).resetPasswordField();
         verify(mActivity).dismissProgressDialog();
-        verify(mAppUtil).clearCredentialsAndRestart();
+        verify(mAppUtil).clearCredentials();
     }
 
 
@@ -347,7 +348,7 @@ public class ManualPairingViewModelTest {
         verify(mActivity).showToast(anyInt(), anyString());
         verify(mActivity).resetPasswordField();
         verify(mActivity).dismissProgressDialog();
-        verify(mAppUtil).clearCredentialsAndRestart();
+        verify(mAppUtil).clearCredentials();
     }
 
     /**
@@ -375,7 +376,7 @@ public class ManualPairingViewModelTest {
         // noinspection WrongConstant
         verify(mActivity).showToast(anyInt(), anyString());
         verify(mActivity).resetPasswordField();
-        verify(mAppUtil).clearCredentialsAndRestart();
+        verify(mAppUtil).clearCredentials();
     }
 
     /**
@@ -402,7 +403,7 @@ public class ManualPairingViewModelTest {
         // Act
         mSubject.onContinueClicked();
         // Assert
-        verify(mAuthDataManager).initializeFromPayload(anyString(), anyString());
+        verify(mActivity).showToast(R.string.invalid_guid, ToastCustom.TYPE_ERROR);
     }
 
     /**
@@ -459,7 +460,7 @@ public class ManualPairingViewModelTest {
         // noinspection WrongConstant
         verify(mActivity).showToast(anyInt(), anyString());
         verify(mActivity).resetPasswordField();
-        verify(mAppUtil).clearCredentialsAndRestart();
+        verify(mAppUtil).clearCredentials();
     }
 
     /**
@@ -485,9 +486,7 @@ public class ManualPairingViewModelTest {
         mSubject.onContinueClicked();
         // Assert
         // noinspection WrongConstant
-        verify(mActivity, times(2)).showToast(anyInt(), anyString());
-        verify(mActivity, times(2)).resetPasswordField();
-        verify(mAppUtil, times(2)).clearCredentialsAndRestart();
+        verify(mActivity, times(1)).showToast(R.string.invalid_guid, ToastCustom.TYPE_ERROR);
     }
 
     @Test
