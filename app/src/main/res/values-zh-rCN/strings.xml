@@ -356,7 +356,6 @@
     <string name="new_password">新密码</string>
     <string name="sms_verified">手机号码已验证</string>
     <string name="preferences">首选项</string>
-    <string name="two_fa_summary">通过启用 2 步验证，保护您的钱包免遭未经授权的访问。您可以选择使用手机号码保护您的钱包。在您尝试通过网页浏览器访问您的钱包时会要求该代码。\n\n若要使用其它验证方式，请登录我们的网络钱包。</string>
 
     <string name="rate_title">给 Blockchain 钱包打分</string>
     <string name="rate_message">喜欢 Blockchain 钱包？请花一些时间在 Google Play 上留下评论，让其他人知道。</string>

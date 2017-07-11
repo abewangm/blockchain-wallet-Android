@@ -356,7 +356,6 @@
     <string name="new_password">Yeni Şifre</string>
     <string name="sms_verified">Cep telefonu numarası doğrulandı</string>
     <string name="preferences">Tercihler</string>
-    <string name="two_fa_summary">2-Aşamalı Doğrulamayı etkinleştirerek cüzdanınızı yetkisiz erişime karşı koruyun.  Cüzdanınızı güvende tutmak için cep telefonu numaranızı kullanabilirsiniz. Bu kod, cüzdanınıza web tarayıcısıyla erişmeyi denediğinizde istenilecektir.\n\nBunun yerine başka kimlik doğrulama yöntemi kullanmak için, lütfen web cüzdanımıza giriş yapın.</string>
 
     <string name="rate_title">Blockchain Cüzdanına Puan Verin</string>
     <string name="rate_message">Blockchain Cüzdanını Beğeniyor Musunuz? Lütfen Google Play\'de bir inceleme yazmak için biraz zamanınızı ayırın ve diğerlerinin de bundan haberdar olmasını sağlayın.</string>

@@ -358,7 +358,6 @@
     <string name="new_password">Nuova password</string>
     <string name="sms_verified">Numero di cellulare verificato</string>
     <string name="preferences">Preferenze</string>
-    <string name="two_fa_summary">Proteggi il tuo portafogli da accessi non autorizzati abilitando la Verifica in 2-Fasi. Puoi scegliere di usare il tuo numero di telefono cellulare per mettere al sicuro il tuo portafoglio. Questo codice ti verrà richiesto quando tenti di accedere al tuo portafoglio tramite il browser web.\n\nPer usare altri metodi di autenticazione, accedi al nostro portafoglio web.</string>
 
     <string name="rate_title">Vota il Portafoglio Blockchain</string>
     <string name="rate_message">Ti piace il Portafoglio Blockchain? Per favore, spendi un momento per lasciare una recensione su Google Play e farlo sapere agli altri.</string>

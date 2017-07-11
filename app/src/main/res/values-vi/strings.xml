@@ -356,7 +356,6 @@
     <string name="new_password">Mật khẩu mới</string>
     <string name="sms_verified">Số điện thoại đã xác minh</string>
     <string name="preferences">Ưu tiên</string>
-    <string name="two_fa_summary">Bảo vệ ví của bạn khỏi các truy cập trái phép bằng Xác minh 2 bước. Bạn có thể lựa chọn sử dụng số điện thoại để bảo vệ ví của mình. Mã này sẽ được yêu cầu khi bạn truy cập vào ví của mình thông qua trình duyệt web.\n\nĐể sử dụng các phương pháp xác thực thay thế khác, vui lòng đăng nhập ví trên trang web của chúng tôi.</string>
 
     <string name="rate_title">Đánh giá Ví Blockchain</string>
     <string name="rate_message">Bạn có thích Ví Blockchain? Hãy để lại nhận xét trên Google Play.</string>

@@ -356,7 +356,6 @@
     <string name="new_password">Nouveau mot de passe</string>
     <string name="sms_verified">Numéro de téléphone portable vérifié</string>
     <string name="preferences">Préférences</string>
-    <string name="two_fa_summary">Protégez votre portefeuille contre tout accès non autorisé en activant la validation en 2 étapes. Vous pouvez choisir d\’utiliser votre numéro de téléphone portable pour sécuriser votre portefeuille. Ce code vous sera demandé lorsque vous essayerez d\'accéder à votre portefeuille par le biais du serveur web.\n\nAfin d\'utiliser d\'autres méthodes d\'authentification, vous devez vous connecter à notre portefeuille web.</string>
 
     <string name="rate_title">Noter le portefeuille Blockchain</string>
     <string name="rate_message">Vous aimez utiliser le portefeuille Blockchain ? Prenez quelques instants pour laisser un commentaire sur Google Play et partagez-le avec d\'autres personnes.</string>

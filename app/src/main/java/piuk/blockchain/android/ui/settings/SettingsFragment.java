@@ -26,8 +26,13 @@ import android.support.v7.preference.PreferenceScreen;
 import android.support.v7.preference.SwitchPreferenceCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
+import android.text.Html;
 import android.text.InputType;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -75,6 +80,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     public static final String EXTRA_SHOW_ADD_EMAIL_DIALOG = "show_add_email_dialog";
     public static final String URL_TOS_POLICY = "https://blockchain.com/terms";
     public static final String URL_PRIVACY_POLICY = "https://blockchain.com/privacy";
+    public static final String URL_LOGIN = "<a href=\"https://blockchain.info/wallet/login/\">blockchain.info/wallet/login</a>";
 
     // Profile
     private Preference guidPref;
@@ -861,9 +867,13 @@ public class SettingsFragment extends PreferenceFragmentCompat
             twoStepVerificationPref.setChecked(false);
             showDialogMobile();
         } else {
+            Spanned message = Html.fromHtml(getString(R.string.two_fa_description, URL_LOGIN));
+            SpannableString spannable = new SpannableString(message);
+            Linkify.addLinks(spannable, Linkify.WEB_URLS);
+
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setTitle(R.string.two_fa)
-                    .setMessage(R.string.two_fa_summary)
+                    .setMessage(spannable)
                     .setNeutralButton(android.R.string.cancel, (dialogInterface, i) ->
                             twoStepVerificationPref.setChecked(viewModel.getAuthType() != Settings.AUTH_TYPE_OFF));
 
@@ -874,9 +884,10 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 alertDialogBuilder.setPositiveButton(R.string.enable, (dialogInterface, i) ->
                         viewModel.updateTwoFa(Settings.AUTH_TYPE_SMS));
             }
-            alertDialogBuilder
-                    .create()
-                    .show();
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+            ((TextView)alertDialog.findViewById(android.R.id.message))
+                    .setMovementMethod(LinkMovementMethod.getInstance());
         }
     }
 

@@ -356,7 +356,6 @@
     <string name="new_password">Nueva contraseña</string>
     <string name="sms_verified">Número de teléfono celular verificado</string>
     <string name="preferences">Preferencias</string>
-    <string name="two_fa_summary">Protege tu monedero de accesos no autorizados habilitando la verificación de 2 pasos. Puedes elegir utilizar tu número de celular para asegurar tu monedero. Se te pedirá este código cuando intentes acceder a tu monedero con el navegador web.\n\nPara poder usar otros métodos de autentificación en lugar de éste, inicia sesión en nuestro monedero web.</string>
 
     <string name="rate_title">Califica al monedero Blockchain</string>
     <string name="rate_message">¿Estás disfrutando de tu monedero Blockchain? Por favor tómate un momento para dejar una reseña en Google Play para que así otros la conozcan.</string>

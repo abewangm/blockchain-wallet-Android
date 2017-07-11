@@ -356,7 +356,6 @@
     <string name="new_password">Neues Passwort</string>
     <string name="sms_verified">Handynummer wurde verifiziert</string>
     <string name="preferences">Voreinstellungen</string>
-    <string name="two_fa_summary">Schützen Sie durch die Aktivierung der 2-Schritt-Verifizierung Ihre Wallet vor unberechtigten Zugriffen. Sie können zur Sicherung Ihrer Wallet wahlweise eine kostenlose App oder Ihre Handynummer verwenden. Wenn Sie über den Webbrowser auf Ihre Wallet zugreifen möchten, wird nach diesem Code gefragt.\n\nZur Verwendung einer anderen Authentifizierungsmethode, melden Sie sich bitte bei unserer Web-Wallet an.</string>
 
     <string name="rate_title">Blockchain Wallet bewerten</string>
     <string name="rate_message">Gefällt Ihnen die Blockchain Wallet? Bitte nehmen Sie sich einen Moment Zeit, um bei Google Play eine Bewertung zu hinterlassen und andere darüber zu informieren.</string>

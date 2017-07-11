@@ -356,7 +356,6 @@
     <string name="new_password">Nové heslo</string>
     <string name="sms_verified">Mobilní číslo ověřeno</string>
     <string name="preferences">Předvolby</string>
-    <string name="two_fa_summary">Chraňte svoji peněženku před neoprávněným přístupem povolením dvoufázového ověření. Svoji peněženku můžete zabezpečit pomocí čísla mobilního telefonu. Kód bude vyžadován, pokud se pokusíte otevřít peněženku přes webové rozhraní.\n\nInPokud chcete využít jiné způsoby autentikace, přihlaste se k naší webové peněžence.</string>
 
     <string name="rate_title">Ohodnoťte peněženku Blockchain</string>
     <string name="rate_message">Líbí se Vám peněženka Blockchain? Napište nám recenzi na webu Google Play a podělte se o své zkušenosti s ostatními.</string>

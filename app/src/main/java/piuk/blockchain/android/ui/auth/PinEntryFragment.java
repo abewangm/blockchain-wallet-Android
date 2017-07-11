@@ -52,6 +52,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     private FragmentPinEntryBinding binding;
     private FingerprintDialog fingerprintDialog;
     private OnPinEntryFragmentInteractionListener listener;
+    private ClearPinNumberRunnable clearPinNumberRunnable = new ClearPinNumberRunnable();
     private boolean isPaused = false;
     @Thunk PinEntryViewModel viewModel;
 
@@ -235,7 +236,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
 
     @Override
     public void clearPinBoxes() {
-        HANDLER.postDelayed(new ClearPinNumberRunnable(), 200);
+        HANDLER.postDelayed(clearPinNumberRunnable, 200);
     }
 
     @Override

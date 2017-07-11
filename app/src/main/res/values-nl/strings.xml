@@ -356,7 +356,6 @@
     <string name="new_password">Nieuw wachtwoord</string>
     <string name="sms_verified">Mobiel telefoonnummer geverifieerd</string>
     <string name="preferences">Voorkeuren</string>
-    <string name="two_fa_summary">Bescherm uw portemonnee tegen onbevoegde toegang door de 2-ledige verificatie in te schakelen. U kunt ervoor kiezen om uw mobiele telefoonnummer te gebruiken om uw portemonnee te beveiligen. Deze code wordt gevraagd wanneer u uw portemonnee probeert te openen via de webbrowser.\n\nOm in plaats daarvan andere authenticatiemethoden te gebruiken, kunt u inloggen op onze webportemonnee.</string>
 
     <string name="rate_title">Blockchain Portemonnee beoordelen</string>
     <string name="rate_message">Geniet u van de Blockchain Portemonnee? Neem even de tijd om een recensie te schrijven op Google Play en vertel het anderen.</string>
