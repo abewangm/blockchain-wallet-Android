@@ -404,7 +404,9 @@ public class SendViewModel extends BaseViewModel {
                             if (listener != null) listener.onReady();
                         }, throwable -> {
                             // No unspent outputs
+                            sendModel.absoluteSuggestedFee = BigInteger.ZERO;
                             updateMaxAvailable(0);
+                            updateFeeField();
                             sendModel.pendingTransaction.unspentOutputBundle = null;
                         });
     }
