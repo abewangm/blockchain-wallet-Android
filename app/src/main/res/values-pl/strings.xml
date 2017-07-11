@@ -356,7 +356,6 @@
     <string name="new_password">Nowe hasło</string>
     <string name="sms_verified">Numer telefonu komórkowego zweryfikowany</string>
     <string name="preferences">Preferencje</string>
-    <string name="two_fa_summary">Chroń swój portfel przed nieautoryzowanym dostępem poprzez włączenie Uwierzytelniania Dwustopniowego.  Możesz korzystać z darmowej aplikacji lub numeru telefonu komórkowego, by chronić swój portfel. Ten kod będzie Ci potrzebny, gdy będziesz próbować otrzymać dostęp do portfela przez przeglądarkę sieciową.\n\nAby skorzystać z innych metod autoryzacyjnych, zaloguj się do naszego portfela sieciowego.</string>
 
     <string name="rate_title">Oceń Portfel Blockchain</string>
     <string name="rate_message">Podoba Ci się Portfel Blockchain? Poświęć chwilę na wystawienie nam recenzji w Google Play i daj znać innym.</string>

@@ -357,7 +357,6 @@
     <string name="new_password">Kata Sandi Baru</string>
     <string name="sms_verified">Nomor ponsel terverifikasi</string>
     <string name="preferences">Preferensi</string>
-    <string name="two_fa_summary">Lindungi dompet Anda dari akses yang tidak diizinkan dengan mengaktifkan Verifikasi 2 Langkah. Anda dapat memilih untuk menggunakan nomor ponsel Anda untuk mengamankan dompet Anda. Kode ini akan diminta ketika Anda mencoba untuk mengakses dompet Anda melalui peramban web.\n\nUntuk menggunakan metode otentikasi lain sebagai gantinya, silahkan masuk ke dompet web kami.</string>
 
     <string name="rate_title">Beri Nilai Dompet Blockchain</string>
     <string name="rate_message">Menikmati Dompet Blockchain? Harap luangkan waktu untuk meninggalkan ulasan di Google Play dan biarkan orang lain tahu tentang hal itu.</string>

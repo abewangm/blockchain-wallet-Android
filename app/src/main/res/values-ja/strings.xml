@@ -356,7 +356,6 @@
     <string name="new_password">新規パスワード</string>
     <string name="sms_verified">携帯電話番号が認証されました。</string>
     <string name="preferences">環境設定</string>
-    <string name="two_fa_summary">2段階認証を有効にして財布を不正アクセスから保護しましょう。財布を保護するために携帯電話番号を使用することができます。このコードはウェブブラウザで財布にアクセスしようとする際に要求されます。\n\n別の認証方法を使用するには当社のウェブ財布にログインしてください。</string>
 
     <string name="rate_title">ブロックチェーンウォレットを評価</string>
     <string name="rate_message">ブロックチェーンウォレットをお楽しみいただいていますか？ブロックチェーンウォレットをもっと知ってもらうためにGoogle Playでのレビューをお願いします。</string>

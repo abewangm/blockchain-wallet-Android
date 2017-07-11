@@ -356,7 +356,6 @@
     <string name="new_password">Nova senha</string>
     <string name="sms_verified">Número de celular verificado</string>
     <string name="preferences">Preferências</string>
-    <string name="two_fa_summary">Proteja sua carteira contra acesso não autorizado ativando a Verificação em 2 Passos. Você pode usar o seu número de celular para proteger sua carteira. Este código será solicitado quando você tentar acessar sua carteira pelo navegador.\n\nPara utilizar outras formas de autenticação em vez dessa, acesse nossa carteira web.</string>
 
     <string name="rate_title">Avaliar a Carteira Blockchain</string>
     <string name="rate_message">Gostando da Carteira Blockchain? Por favor, reserve um momento para deixar uma avaliação no Google Play e contar às pessoas sobre a carteira.</string>
