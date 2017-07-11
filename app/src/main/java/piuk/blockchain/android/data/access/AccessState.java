@@ -31,6 +31,7 @@ public class AccessState {
     private boolean isLoggedIn = false;
     private boolean inSepaCountry = false;
     private double buySellRolloutPercent = 0.0D;
+    private boolean canAutoLogout = true;
 
     public void initAccessState(Context context, PrefsUtil prefs, RxBus rxBus) {
         this.prefs = prefs;
@@ -60,8 +61,10 @@ public class AccessState {
      * Called from {@link BaseAuthActivity#onPause()}
      */
     public void startLogoutTimer(Context context) {
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + LOGOUT_TIMEOUT_MILLIS, logoutPendingIntent);
+        if (canAutoLogout) {
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + LOGOUT_TIMEOUT_MILLIS, logoutPendingIntent);
+        }
     }
 
     /**
@@ -130,4 +133,11 @@ public class AccessState {
         rxBus.emitEvent(AuthEvent.class, AuthEvent.UNPAIR);
     }
 
+    public void disableAutoLogout() {
+        this.canAutoLogout = false;
+    }
+
+    public void enableAutoLogout() {
+        this.canAutoLogout = true;
+    }
 }

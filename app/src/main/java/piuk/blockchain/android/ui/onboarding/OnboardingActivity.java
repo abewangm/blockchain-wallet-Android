@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
@@ -16,6 +17,8 @@ import piuk.blockchain.android.util.annotations.Thunk;
 public class OnboardingActivity extends BaseAuthActivity implements OnboardingViewModel.DataListener,
         FingerprintPromptFragment.OnFragmentInteractionListener,
         EmailPromptFragment.OnFragmentInteractionListener {
+
+    private static final int EMAIL_CLIENT_REQUEST = 5400;
 
     /**
      * Flag for showing only the email verification prompt. This is for use when signup was
@@ -126,6 +129,7 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
 
     @Override
     public void onVerifyEmailClicked() {
+        AccessState.getInstance().disableAutoLogout();
         emailLaunched = true;
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_APP_EMAIL);
@@ -141,7 +145,7 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
         dismissDialog();
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        startActivityForResult(intent, EMAIL_CLIENT_REQUEST);
     }
 
     private void dismissDialog() {
@@ -150,4 +154,9 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
         }
     }
 
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == EMAIL_CLIENT_REQUEST) {
+            AccessState.getInstance().enableAutoLogout();
+        }
+    }
 }
