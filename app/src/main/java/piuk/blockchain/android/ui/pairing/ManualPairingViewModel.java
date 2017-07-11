@@ -6,6 +6,8 @@ import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
@@ -120,37 +122,46 @@ public class ManualPairingViewModel extends BaseViewModel {
                         .subscribe(response -> handleResponse(password, guid, response),
                                 throwable -> {
                                     Log.e(TAG, "verifyPassword: ", throwable);
-                                    showErrorToastAndRestartApp(R.string.auth_failed);
+                                    showErrorToast(R.string.auth_failed);
                                 }));
     }
 
     private void handleResponse(String password, String guid, Response<ResponseBody> response) throws IOException, JSONException {
         String errorBody = response.errorBody() != null ? response.errorBody().string() : "";
-        if (errorBody.contains(KEY_AUTH_REQUIRED)) {
-            showCheckEmailDialog();
+        if (response.isSuccessful()) {
+            if (errorBody.contains(KEY_AUTH_REQUIRED)) {
+                //2FA
+                showCheckEmailDialog();
 
-            compositeDisposable.add(
-                    authDataManager.startPollingAuthStatus(guid, sessionId)
-                            .subscribe(payloadResponse -> {
-                                waitingForAuth = false;
+                compositeDisposable.add(
+                        authDataManager.startPollingAuthStatus(guid, sessionId)
+                                .subscribe(payloadResponse -> {
+                                    waitingForAuth = false;
 
-                                if (payloadResponse == null || payloadResponse.contains(KEY_AUTH_REQUIRED)) {
-                                    showErrorToastAndRestartApp(R.string.auth_failed);
-                                    return;
-                                }
+                                    if (payloadResponse == null || payloadResponse.contains(KEY_AUTH_REQUIRED)) {
+                                        showErrorToast(R.string.auth_failed);
+                                        return;
+                                    }
 
-                                ResponseBody responseBody = ResponseBody.create(
-                                        MediaType.parse("application/json"),
-                                        payloadResponse);
-                                checkTwoFactor(password, guid, Response.success(responseBody));
-                            }, throwable -> {
-                                Log.e(TAG, "handleResponse: ", throwable);
-                                waitingForAuth = false;
-                                showErrorToastAndRestartApp(R.string.auth_failed);
-                            }));
+                                    ResponseBody responseBody = ResponseBody.create(
+                                            MediaType.parse("application/json"),
+                                            payloadResponse);
+                                    checkTwoFactor(password, guid, Response.success(responseBody));
+                                }, throwable -> {
+                                    waitingForAuth = false;
+                                    showErrorToast(R.string.auth_failed);
+                                }));
+            } else {
+                //No 2FA
+                waitingForAuth = false;
+                checkTwoFactor(password, guid, response);
+            }
         } else {
-            waitingForAuth = false;
-            checkTwoFactor(password, guid, response);
+            if (response.code() == 500) {
+                showErrorToast(R.string.invalid_guid);
+            } else {
+                showErrorToast(R.string.unexpected_error);
+            }
         }
     }
 
