@@ -31,6 +31,7 @@ import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
 import piuk.blockchain.android.util.*
+import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.text.DecimalFormat
 import java.util.*
@@ -57,9 +58,7 @@ class BalancePresenter : BasePresenter<BalanceView>() {
 
     @VisibleForTesting internal val activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
     private val displayList: MutableList<Any> = mutableListOf()
-    private val monetaryUtil: MonetaryUtil by lazy(LazyThreadSafetyMode.NONE) {
-        MonetaryUtil(getBtcUnitType())
-    }
+    private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
 
     init {
         Injector.getInstance().dataManagerComponent.inject(this)

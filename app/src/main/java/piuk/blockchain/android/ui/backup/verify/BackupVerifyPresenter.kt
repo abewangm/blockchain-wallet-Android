@@ -11,6 +11,7 @@ import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.BackupWalletUtil
 import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -20,7 +21,7 @@ class BackupVerifyPresenter : BasePresenter<BackupVerifyView>() {
     @Inject lateinit var prefsUtil: PrefsUtil
     @Inject lateinit var backupWalletUtil: BackupWalletUtil
 
-    private val sequence by lazy(LazyThreadSafetyMode.NONE) { getBackupConfirmSequence() }
+    private val sequence by unsafeLazy { getBackupConfirmSequence() }
 
     init {
         Injector.getInstance().dataManagerComponent.inject(this)
