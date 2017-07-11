@@ -33,8 +33,8 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.cache.DynamicFeeCache
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager
+import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.account.ItemAccount
@@ -204,7 +204,7 @@ class ConfirmFundsTransferPresenterTest {
     @Throws(Exception::class)
     fun getReceiveToList() {
         // Arrange
-        whenever(walletAccountHelper.getAccountItems(anyBoolean())).thenReturn(mutableListOf())
+        whenever(walletAccountHelper.getAccountItems(anyBoolean())).thenReturn(listOf())
         // Act
         val value = subject.getReceiveToList()
         // Assert

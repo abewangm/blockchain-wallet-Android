@@ -19,14 +19,14 @@ import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
-import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
+import piuk.blockchain.android.data.payments.PaymentService;
+import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.services.PayloadService;
-import piuk.blockchain.android.data.payments.PaymentService;
 import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.settings.SettingsService;
@@ -79,7 +79,7 @@ public class DataManagerModule {
                                                              PrefsUtil prefsUtil,
                                                              StringUtils stringUtils,
                                                              ExchangeRateFactory exchangeRateFactory) {
-        return new WalletAccountHelper(payloadManager, prefsUtil, stringUtils, exchangeRateFactory);
+        return new WalletAccountHelper(payloadManager, stringUtils, prefsUtil, exchangeRateFactory);
     }
 
     @Provides

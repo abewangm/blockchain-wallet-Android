@@ -16,16 +16,17 @@ import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.visible
+import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 
 class BackupWalletWordListFragment : BaseFragment<BackupWalletWordListView, BackupWalletWordListPresenter>(),
         BackupWalletWordListView {
 
-    private val animEnterFromRight: Animation by lazy { AnimationUtils.loadAnimation(activity, R.anim.enter_from_right) }
-    private val animEnterFromLeft: Animation by lazy { AnimationUtils.loadAnimation(activity, R.anim.enter_from_left) }
-    private val animExitToLeft: Animation by lazy { AnimationUtils.loadAnimation(activity, R.anim.exit_to_left) }
-    private val animExitToRight: Animation by lazy { AnimationUtils.loadAnimation(activity, R.anim.exit_to_right) }
-    private val word: String by lazy { getString(R.string.backup_word) }
-    private val of: String by lazy { getString(R.string.backup_of) }
+    private val animEnterFromRight: Animation by unsafeLazy { AnimationUtils.loadAnimation(activity, R.anim.enter_from_right) }
+    private val animEnterFromLeft: Animation by unsafeLazy { AnimationUtils.loadAnimation(activity, R.anim.enter_from_left) }
+    private val animExitToLeft: Animation by unsafeLazy { AnimationUtils.loadAnimation(activity, R.anim.exit_to_left) }
+    private val animExitToRight: Animation by unsafeLazy { AnimationUtils.loadAnimation(activity, R.anim.exit_to_right) }
+    private val word: String by unsafeLazy { getString(R.string.backup_word) }
+    private val of: String by unsafeLazy { getString(R.string.backup_of) }
 
     var currentWordIndex = 0
 
