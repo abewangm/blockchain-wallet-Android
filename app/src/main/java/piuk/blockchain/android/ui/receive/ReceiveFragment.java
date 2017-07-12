@@ -48,7 +48,6 @@ import org.bitcoinj.uri.BitcoinURI;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.List;
@@ -68,6 +67,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
+import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_ITEM;
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE;
@@ -220,7 +220,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                viewModel.updateFiatTextField(s.toString());
+                viewModel.updateFiatTextField(s.toString().replace(".", getDefaultDecimalSeparator()));
 
                 displayQRCode(selectedAccountPosition);
                 textChangeAllowed = true;
@@ -255,7 +255,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                viewModel.updateBtcTextField(s.toString());
+                viewModel.updateBtcTextField(s.toString().replace(".", getDefaultDecimalSeparator()));
 
                 displayQRCode(selectedAccountPosition);
                 textChangeAllowed = true;
@@ -276,7 +276,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     @Thunk
     Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
         try {
-            if (input.contains(getDefaultDecimalSeparator())) {
+            if (input.contains(String.valueOf(getDefaultDecimalSeparator()))) {
                 String dec = input.substring(input.indexOf(getDefaultDecimalSeparator()));
                 if (!dec.isEmpty()) {
                     dec = dec.substring(1);
@@ -288,9 +288,14 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 }
             }
         } catch (NumberFormatException e) {
-            Log.e(TAG, "afterTextChanged: ", e);
+            Timber.e(e);
         }
         return s;
+    }
+
+    @Thunk
+    String getDefaultDecimalSeparator() {
+        return String.valueOf(DecimalFormatSymbols.getInstance().getDecimalSeparator());
     }
 
     public int getSelectedAccountPosition() {
@@ -532,12 +537,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
             alertDialog.show();
         }
-    }
-
-    private String getDefaultDecimalSeparator() {
-        DecimalFormat format = (DecimalFormat) DecimalFormat.getInstance(Locale.getDefault());
-        DecimalFormatSymbols symbols = format.getDecimalFormatSymbols();
-        return Character.toString(symbols.getDecimalSeparator());
     }
 
     @Override

@@ -27,7 +27,6 @@ import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.text.method.DigitsKeyListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -48,7 +47,6 @@ import info.blockchain.wallet.payload.data.LegacyAddress;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -722,10 +720,9 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
 
     @Thunk
     Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
-        char separator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
         try {
-            if (input.contains(String.valueOf(separator))) {
-                String dec = input.substring(input.indexOf(separator));
+            if (input.contains(getDefaultDecimalSeparator())) {
+                String dec = input.substring(input.indexOf(getDefaultDecimalSeparator()));
                 if (!dec.isEmpty()) {
                     dec = dec.substring(1);
                     if (dec.length() > maxLength) {
@@ -736,7 +733,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                 }
             }
         } catch (NumberFormatException e) {
-            Timber.e("afterTextChanged: ", e);
+            Timber.e(e);
         }
         return s;
     }
@@ -767,12 +764,17 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                viewModel.updateFiatTextField(s.toString());
+                viewModel.updateFiatTextField(s.toString().replace(".", getDefaultDecimalSeparator()));
 
                 textChangeAllowed = true;
             }
         }
     };
+
+    @Thunk
+    String getDefaultDecimalSeparator() {
+        return String.valueOf(DecimalFormatSymbols.getInstance().getDecimalSeparator());
+    }
 
     private TextWatcher fiatTextWatcher = new TextWatcher() {
         @Override
@@ -801,7 +803,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                viewModel.updateBtcTextField(s.toString());
+                viewModel.updateBtcTextField(s.toString().replace(".", getDefaultDecimalSeparator()));
                 textChangeAllowed = true;
             }
         }
