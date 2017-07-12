@@ -198,7 +198,7 @@
                                 <TextView
                                     android:id="@+id/textview_fee_type"
                                     fontPath="fonts/Montserrat-Regular.ttf"
-                                    android:layout_width="match_parent"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="center_vertical"
                                     android:textColor="@color/black"
@@ -208,7 +208,7 @@
                                 <TextView
                                     android:id="@+id/textview_fee_time"
                                     fontPath="fonts/Montserrat-Regular.ttf"
-                                    android:layout_width="match_parent"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="center_vertical"
                                     android:layout_marginBottom="16dp"
