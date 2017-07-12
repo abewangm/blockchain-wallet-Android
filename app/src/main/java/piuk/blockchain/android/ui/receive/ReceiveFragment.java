@@ -34,7 +34,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -65,8 +64,6 @@ import piuk.blockchain.android.databinding.FragmentReceiveBinding;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
-import piuk.blockchain.android.ui.customviews.CustomKeypad;
-import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.util.PermissionUtil;
@@ -75,7 +72,7 @@ import piuk.blockchain.android.util.annotations.Thunk;
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_ITEM;
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE;
 
-public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataListener, CustomKeypadCallback {
+public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataListener {
 
     private static final String TAG = ReceiveFragment.class.getSimpleName();
     private static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
@@ -83,7 +80,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
     @Thunk ReceiveViewModel viewModel;
     @Thunk FragmentReceiveBinding binding;
-    private CustomKeypad customKeypad;
     private BottomSheetDialog bottomSheetDialog;
     private OnReceiveFragmentInteractionListener listener;
 
@@ -162,8 +158,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     }
 
     private void setupLayout() {
-        setCustomKeypad();
-
         if (viewModel.getReceiveToList().size() == 1) {
             binding.fromRow.setVisibility(View.GONE);
             binding.dividerFromRow.setVisibility(View.GONE);
@@ -171,13 +165,13 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
         // BTC Field
         binding.amountContainer.amountBtc.setKeyListener(
-                DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
+                DigitsKeyListener.getInstance(false, true));
         binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
         binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
 
         // Fiat Field
         binding.amountContainer.amountFiat.setKeyListener(
-                DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
+                DigitsKeyListener.getInstance(false, true));
         binding.amountContainer.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
         binding.amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher);
 
@@ -231,7 +225,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 displayQRCode(selectedAccountPosition);
                 textChangeAllowed = true;
             }
-            setKeyListener(s, binding.amountContainer.amountBtc);
         }
 
         @Override
@@ -267,7 +260,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 displayQRCode(selectedAccountPosition);
                 textChangeAllowed = true;
             }
-            setKeyListener(s, binding.amountContainer.amountFiat);
         }
 
         @Override
@@ -280,15 +272,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
             // No-op
         }
     };
-
-    @Thunk
-    void setKeyListener(Editable s, EditText editText) {
-        if (s.toString().contains(getDefaultDecimalSeparator())) {
-            editText.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
-        } else {
-            editText.setKeyListener(DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
-        }
-    }
 
     @Thunk
     Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
@@ -312,19 +295,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
     public int getSelectedAccountPosition() {
         return selectedAccountPosition;
-    }
-
-    private void setCustomKeypad() {
-        customKeypad = binding.keyboard;
-        customKeypad.setCallback(this);
-        customKeypad.setDecimalSeparator(getDefaultDecimalSeparator());
-
-        // Enable custom keypad and disables default keyboard from popping up
-        customKeypad.enableOnView(binding.amountContainer.amountBtc);
-        customKeypad.enableOnView(binding.amountContainer.amountFiat);
-
-        binding.amountContainer.amountBtc.setText("");
-        binding.amountContainer.amountBtc.requestFocus();
     }
 
     private void selectAccount(int position) {
@@ -400,7 +370,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void onResume() {
         super.onResume();
         setupToolbar();
-        closeKeypad();
         viewModel.updateAccountList();
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
     }
@@ -487,8 +456,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     }
 
     private void onShareClicked() {
-        closeKeypad();
-
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.receive_address_to_share)
@@ -608,14 +575,10 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     }
 
     public void onBackPressed() {
-        if (customKeypad.isVisible()) {
-            closeKeypad();
-        } else {
-            handleBackPressed();
-        }
+        handleBackPressed();
     }
 
-    public void handleBackPressed() {
+    private void handleBackPressed() {
         if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
             AccessState.getInstance().logout(getContext());
             return;
@@ -640,44 +603,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void onDestroy() {
         super.onDestroy();
         viewModel.destroy();
-    }
-
-    private void closeKeypad() {
-        customKeypad.setNumpadVisibility(View.GONE);
-    }
-
-    @Override
-    public void onKeypadClose() {
-        // Show bottom nav
-        ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
-        // Resize activity back to initial state
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-
-        layoutParams.addRule(RelativeLayout.ABOVE, 0);
-        layoutParams.setMargins(
-                0, 0, 0, (int) getResources().getDimension(R.dimen.action_bar_height));
-
-        binding.scrollView.setLayoutParams(layoutParams);
-    }
-
-    @Override
-    public void onKeypadOpen() {
-        // Hide bottom nav
-        ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
-    }
-
-    @Override
-    public void onKeypadOpenCompleted() {
-        // Resize activity around keyboard view
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-
-        layoutParams.addRule(RelativeLayout.ABOVE, R.id.keyboard);
-
-        binding.scrollView.setLayoutParams(layoutParams);
     }
 
     public void finishPage() {

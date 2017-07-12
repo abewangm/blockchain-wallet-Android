@@ -197,7 +197,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             onboardingPagerAdapter!!.notifyPagesChanged(pages)
 
             pager_onboarding.post({
-                progress_bar.visibility = View.GONE
+                progress_bar.gone()
             })
 
             indicator.setViewPager(pager_onboarding)
