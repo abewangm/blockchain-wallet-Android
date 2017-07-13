@@ -68,6 +68,7 @@ public class RecoverFundsViewModel extends BaseViewModel {
             }
 
         } catch (Exception e) {
+            //This should never happen
             e.printStackTrace();
             dataListener.showToast(R.string.restore_failed, ToastCustom.TYPE_ERROR);
         }
