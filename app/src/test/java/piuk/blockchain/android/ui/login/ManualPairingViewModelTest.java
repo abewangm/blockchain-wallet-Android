@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.pairing;
+package piuk.blockchain.android.ui.login;
 
 import android.app.Application;
 

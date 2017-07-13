@@ -208,6 +208,10 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
         }
     }
 
+    override fun getDefaultAccountName(): String {
+        return getString(R.string.default_wallet_name)
+    }
+
     companion object {
         const val KEY_INTENT_EMAIL = "intent_email"
         const val KEY_INTENT_PASSWORD = "intent_password"

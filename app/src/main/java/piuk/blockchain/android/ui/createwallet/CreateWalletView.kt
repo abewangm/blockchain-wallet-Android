@@ -23,4 +23,6 @@ interface CreateWalletView : View {
     fun showProgressDialog(message: Int)
 
     fun dismissProgressDialog()
+
+    fun  getDefaultAccountName(): String
 }

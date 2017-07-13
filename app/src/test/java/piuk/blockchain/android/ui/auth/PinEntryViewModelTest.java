@@ -73,7 +73,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.createwallet.CreateWalletActivity.KEY_INTENT_EMAIL;
 import static piuk.blockchain.android.ui.createwallet.CreateWalletActivity.KEY_INTENT_PASSWORD;
-import static piuk.blockchain.android.ui.auth.LandingActivity.KEY_INTENT_RECOVERING_FUNDS;
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 
 @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
@@ -170,25 +169,6 @@ public class PinEntryViewModelTest {
     }
 
     @Test
-    public void onViewReadyRecoveringFunds() throws Exception {
-        // Arrange
-        String email = "example@email.com";
-        String password = "1234567890";
-        Intent intent = new Intent();
-        intent.putExtra(KEY_INTENT_EMAIL, email);
-        intent.putExtra(KEY_INTENT_PASSWORD, password);
-        intent.putExtra(KEY_INTENT_RECOVERING_FUNDS, true);
-        when(activity.getPageIntent()).thenReturn(intent);
-        when(authDataManager.createHdWallet(anyString(), anyString(), eq(email)))
-                .thenReturn(just(new Wallet()));
-        // Act
-        subject.onViewReady();
-        // Assert
-        assertEquals(false, subject.allowExit());
-        verifyNoMoreInteractions(payloadManager);
-    }
-
-    @Test
     public void onViewReadyMaxAttemptsExceeded() throws Exception {
         // Arrange
         when(activity.getPageIntent()).thenReturn(new Intent());
@@ -209,7 +189,6 @@ public class PinEntryViewModelTest {
     public void checkFingerprintStatusShouldShowDialog() throws Exception {
         // Arrange
         subject.mValidatingPinForResult = false;
-        subject.mRecoveringFunds = false;
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("1234");
         when(fingerprintHelper.isFingerprintUnlockEnabled()).thenReturn(true);
         when(fingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn(null);

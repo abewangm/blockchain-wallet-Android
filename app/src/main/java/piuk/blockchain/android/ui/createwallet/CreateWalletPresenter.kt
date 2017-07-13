@@ -82,7 +82,7 @@ class CreateWalletPresenter : BasePresenter<CreateWalletView>() {
     fun createWallet(email: String, password: String) {
         appUtil.applyPRNGFixes()
 
-        authDataManager.createHdWallet(password, stringUtils.getString(R.string.default_wallet_name), email)
+        authDataManager.createHdWallet(password, view.getDefaultAccountName(), email)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnSubscribe({ view.showProgressDialog(R.string.creating_wallet) })
                 .doAfterTerminate({ view.dismissProgressDialog() })
