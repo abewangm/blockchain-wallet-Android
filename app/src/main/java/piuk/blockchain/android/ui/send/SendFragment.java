@@ -25,10 +25,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.text.method.DigitsKeyListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,7 +37,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.rxbinding2.widget.RxTextView;
@@ -50,7 +48,6 @@ import info.blockchain.wallet.payload.data.LegacyAddress;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -72,14 +69,14 @@ import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
-import piuk.blockchain.android.ui.customviews.CustomKeypad;
-import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.CommaEnabledDigitsKeyListener;
+import piuk.blockchain.android.util.EditTextUtils;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -90,7 +87,7 @@ import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SE
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE;
 
 
-public class SendFragment extends Fragment implements SendContract.DataListener, CustomKeypadCallback {
+public class SendFragment extends Fragment implements SendContract.DataListener {
 
     private static final String TAG = SendFragment.class.getSimpleName();
 
@@ -110,7 +107,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     @Thunk AlertDialog transactionSuccessDialog;
     @Thunk boolean textChangeAllowed = true;
     private OnSendFragmentInteractionListener listener;
-    private CustomKeypad customKeypad;
     private MaterialProgressDialog progressDialog;
     private AlertDialog largeTxWarning;
     private ConfirmPaymentDialog confirmPaymentDialog;
@@ -169,7 +165,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        setCustomKeypad();
         setupViews();
         setupFeesView();
         viewModel.onViewReady();
@@ -186,7 +181,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     public void onResume() {
         super.onResume();
         setupToolbar();
-        closeKeypad();
         IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
         viewModel.updateUI();
@@ -319,19 +313,11 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         }
     }
 
-    public boolean isKeyboardVisible() {
-        return customKeypad.isVisible();
-    }
-
     public void onBackPressed() {
-        if (isKeyboardVisible()) {
-            closeKeypad();
-        } else {
-            handleBackPressed();
-        }
+        handleBackPressed();
     }
 
-    public void handleBackPressed() {
+    private void handleBackPressed() {
         if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
             AccessState.getInstance().logout(getContext());
             return;
@@ -360,45 +346,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         }
     }
 
-    private void closeKeypad() {
-        customKeypad.setNumpadVisibility(View.GONE);
-    }
-
-    @Override
-    public void onKeypadClose() {
-        // Show bottom nav if applicable
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
-        }
-        // Resize activity back to initial state
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-
-        layoutParams.addRule(RelativeLayout.ABOVE, 0);
-        binding.scrollView.setLayoutParams(layoutParams);
-    }
-
-    @Override
-    public void onKeypadOpen() {
-        // Hide bottom nav if applicable
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
-        }
-    }
-
-    @Override
-    public void onKeypadOpenCompleted() {
-        // Resize activity around keyboard view
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-
-        layoutParams.addRule(RelativeLayout.ABOVE, R.id.keyboard);
-
-        binding.scrollView.setLayoutParams(layoutParams);
-    }
-
     private void startScanActivity(int code) {
         if (!new AppUtil(getActivity()).isCameraOpen()) {
             Intent intent = new Intent(getActivity(), CaptureActivity.class);
@@ -406,20 +353,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
         } else {
             showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
         }
-    }
-
-    private void setCustomKeypad() {
-        customKeypad = binding.keyboard;
-        customKeypad.setCallback(this);
-        customKeypad.setDecimalSeparator(getDefaultDecimalSeparator());
-
-        //Enable custom keypad and disables default keyboard from popping up
-        customKeypad.enableOnView(binding.amountRow.amountBtc);
-        customKeypad.enableOnView(binding.amountRow.amountFiat);
-        customKeypad.enableOnView(binding.edittextCustomFee);
-
-        binding.amountRow.amountBtc.setText("");
-        binding.amountRow.amountBtc.requestFocus();
     }
 
     private void setupViews() {
@@ -434,7 +367,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                 viewModel.spendAllClicked(viewModel.getSendingItemAccount(), getFeePriority()));
 
         binding.buttonSend.setOnClickListener(v -> {
-            customKeypad.setNumpadVisibility(View.GONE);
             if (ConnectivityStatus.hasConnectivity(getActivity())) {
                 requestSendPayment();
             } else {
@@ -534,12 +466,6 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
                     }
                 })
                 .subscribe(new IgnorableDefaultObserver<>());
-
-        binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus && customKeypad != null) {
-                customKeypad.setNumpadVisibility(View.GONE);
-            }
-        });
     }
 
     private void setupSendFromView() {
@@ -773,20 +699,20 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     private void setupBtcTextField() {
         binding.amountRow.amountBtc.setSelectAllOnFocus(true);
         binding.amountRow.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
-
-        binding.amountRow.amountBtc.setKeyListener(
-                DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
+        binding.amountRow.amountBtc.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountRow.amountBtc.addTextChangedListener(btcTextWatcher);
+        binding.amountRow.amountBtc.setKeyListener(
+                CommaEnabledDigitsKeyListener.getInstance(false, true));
     }
 
     // Fiat Field
     private void setupFiatTextField() {
         binding.amountRow.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
+        binding.amountRow.amountFiat.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountRow.amountFiat.setSelectAllOnFocus(true);
-
-        binding.amountRow.amountFiat.setKeyListener(
-                DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
         binding.amountRow.amountFiat.addTextChangedListener(fiatTextWatcher);
+        binding.amountRow.amountFiat.setKeyListener(
+                CommaEnabledDigitsKeyListener.getInstance(false, true));
     }
 
     @Override
@@ -800,30 +726,28 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
     }
 
     @Thunk
-    void setKeyListener(Editable s, EditText editText) {
-        if (s.toString().contains(getDefaultDecimalSeparator())) {
-            editText.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
-        } else {
-            editText.setKeyListener(DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
-        }
-    }
-
-    @Thunk
     Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
         try {
-            if (input.contains(getDefaultDecimalSeparator())) {
-                String dec = input.substring(input.indexOf(getDefaultDecimalSeparator()));
-                if (!dec.isEmpty()) {
-                    dec = dec.substring(1);
-                    if (dec.length() > maxLength) {
-                        editText.setText(input.substring(0, input.length() - 1));
-                        editText.setSelection(editText.getText().length());
-                        s = editText.getEditableText();
-                    }
-                }
+            if (input.contains(".")) {
+                return getEditable(s, input, maxLength, editText, input.indexOf("."));
+            } else if (input.contains(",")) {
+                return getEditable(s, input, maxLength, editText, input.indexOf(","));
             }
         } catch (NumberFormatException e) {
-            Log.e(TAG, "afterTextChanged: ", e);
+            Timber.e(e);
+        }
+        return s;
+    }
+
+    private Editable getEditable(Editable s, String input, int maxLength, EditText editText, int index) {
+        String dec = input.substring(index);
+        if (!dec.isEmpty()) {
+            dec = dec.substring(1);
+            if (dec.length() > maxLength) {
+                editText.setText(input.substring(0, input.length() - 1));
+                editText.setSelection(editText.getText().length());
+                s = editText.getEditableText();
+            }
         }
         return s;
     }
@@ -854,13 +778,20 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                viewModel.updateFiatTextField(s.toString());
+                // Remove any possible decimal separators and replace with the localised version
+                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
+                        .replace(",", getDefaultDecimalSeparator());
+                viewModel.updateFiatTextField(sanitisedString);
 
                 textChangeAllowed = true;
             }
-            setKeyListener(s, binding.amountRow.amountBtc);
         }
     };
+
+    @Thunk
+    String getDefaultDecimalSeparator() {
+        return String.valueOf(DecimalFormatSymbols.getInstance().getDecimalSeparator());
+    }
 
     private TextWatcher fiatTextWatcher = new TextWatcher() {
         @Override
@@ -889,18 +820,14 @@ public class SendFragment extends Fragment implements SendContract.DataListener,
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                viewModel.updateBtcTextField(s.toString());
+                // Remove any possible decimal separators and replace with the localised version
+                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
+                        .replace(",", getDefaultDecimalSeparator());
+                viewModel.updateBtcTextField(sanitisedString);
                 textChangeAllowed = true;
             }
-            setKeyListener(s, binding.amountRow.amountFiat);
         }
     };
-
-    private String getDefaultDecimalSeparator() {
-        DecimalFormat format = (DecimalFormat) DecimalFormat.getInstance(Locale.getDefault());
-        DecimalFormatSymbols symbols = format.getDecimalFormatSymbols();
-        return Character.toString(symbols.getDecimalSeparator());
-    }
 
     @Override
     public void onShowPaymentDetails(PaymentConfirmationDetails details) {

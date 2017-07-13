@@ -46,8 +46,8 @@ import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
+import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.data.services.WalletService;
@@ -64,6 +64,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
+import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_ID;
 import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_MDID;
@@ -403,6 +404,7 @@ public class SendViewModel extends BaseViewModel {
 
                             if (listener != null) listener.onReady();
                         }, throwable -> {
+                            Timber.e(throwable);
                             // No unspent outputs
                             sendModel.absoluteSuggestedFee = BigInteger.ZERO;
                             updateMaxAvailable(0);
@@ -796,7 +798,7 @@ public class SendViewModel extends BaseViewModel {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "submitPayment: ", e);
+            Timber.e(e);
             dataListener.dismissProgressDialog();
             showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR);
             return;
@@ -918,7 +920,7 @@ public class SendViewModel extends BaseViewModel {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "handleScannedDataForWatchOnlySpend: ", e);
+            Timber.e(e);
         }
     }
 
@@ -930,7 +932,7 @@ public class SendViewModel extends BaseViewModel {
 
         } catch (Exception e) {
             showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
-            Log.e(TAG, "spendFromWatchOnlyNonBIP38: ", e);
+            Timber.e(e);
         }
     }
 
