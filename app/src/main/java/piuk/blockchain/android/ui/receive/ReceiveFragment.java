@@ -24,8 +24,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextWatcher;
-import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -65,6 +65,8 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
+import piuk.blockchain.android.util.CommaEnabledDigitsKeyListener;
+import piuk.blockchain.android.util.EditTextUtils;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import timber.log.Timber;
@@ -165,14 +167,16 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
         // BTC Field
         binding.amountContainer.amountBtc.setKeyListener(
-                DigitsKeyListener.getInstance(false, true));
+                CommaEnabledDigitsKeyListener.getInstance(false, true));
         binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
+        binding.amountContainer.amountBtc.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
 
         // Fiat Field
-        binding.amountContainer.amountFiat.setKeyListener(
-                DigitsKeyListener.getInstance(false, true));
         binding.amountContainer.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
+        binding.amountContainer.amountFiat.setKeyListener(
+                CommaEnabledDigitsKeyListener.getInstance(false, true));
+        binding.amountContainer.amountFiat.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher);
 
         // Units
@@ -220,7 +224,10 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                viewModel.updateFiatTextField(s.toString().replace(".", getDefaultDecimalSeparator()));
+                // Remove any possible decimal separators and replace with the localised version
+                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
+                        .replace(",", getDefaultDecimalSeparator());
+                viewModel.updateFiatTextField(sanitisedString);
 
                 displayQRCode(selectedAccountPosition);
                 textChangeAllowed = true;
@@ -255,7 +262,10 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                viewModel.updateBtcTextField(s.toString().replace(".", getDefaultDecimalSeparator()));
+                // Remove any possible decimal separators and replace with the localised version
+                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
+                        .replace(",", getDefaultDecimalSeparator());
+                viewModel.updateBtcTextField(sanitisedString);
 
                 displayQRCode(selectedAccountPosition);
                 textChangeAllowed = true;
@@ -276,19 +286,26 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     @Thunk
     Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
         try {
-            if (input.contains(String.valueOf(getDefaultDecimalSeparator()))) {
-                String dec = input.substring(input.indexOf(getDefaultDecimalSeparator()));
-                if (!dec.isEmpty()) {
-                    dec = dec.substring(1);
-                    if (dec.length() > maxLength) {
-                        editText.setText(input.substring(0, input.length() - 1));
-                        editText.setSelection(editText.getText().length());
-                        s = editText.getEditableText();
-                    }
-                }
+            if (input.contains(".")) {
+                return getEditable(s, input, maxLength, editText, input.indexOf("."));
+            } else if (input.contains(",")) {
+                return getEditable(s, input, maxLength, editText, input.indexOf(","));
             }
         } catch (NumberFormatException e) {
             Timber.e(e);
+        }
+        return s;
+    }
+
+    private Editable getEditable(Editable s, String input, int maxLength, EditText editText, int index) {
+        String dec = input.substring(index);
+        if (!dec.isEmpty()) {
+            dec = dec.substring(1);
+            if (dec.length() > maxLength) {
+                editText.setText(input.substring(0, input.length() - 1));
+                editText.setSelection(editText.getText().length());
+                s = editText.getEditableText();
+            }
         }
         return s;
     }

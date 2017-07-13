@@ -25,6 +25,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -74,6 +75,8 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.CommaEnabledDigitsKeyListener;
+import piuk.blockchain.android.util.EditTextUtils;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -694,18 +697,22 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
 
     // BTC Field
     private void setupBtcTextField() {
-        char separator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
         binding.amountRow.amountBtc.setSelectAllOnFocus(true);
-        binding.amountRow.amountBtc.setHint("0" + separator + "00");
+        binding.amountRow.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
+        binding.amountRow.amountBtc.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountRow.amountBtc.addTextChangedListener(btcTextWatcher);
+        binding.amountRow.amountBtc.setKeyListener(
+                CommaEnabledDigitsKeyListener.getInstance(false, true));
     }
 
     // Fiat Field
     private void setupFiatTextField() {
-        char separator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
-        binding.amountRow.amountFiat.setHint("0" + separator + "00");
+        binding.amountRow.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
+        binding.amountRow.amountFiat.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountRow.amountFiat.setSelectAllOnFocus(true);
         binding.amountRow.amountFiat.addTextChangedListener(fiatTextWatcher);
+        binding.amountRow.amountFiat.setKeyListener(
+                CommaEnabledDigitsKeyListener.getInstance(false, true));
     }
 
     @Override
@@ -721,19 +728,26 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
     @Thunk
     Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
         try {
-            if (input.contains(getDefaultDecimalSeparator())) {
-                String dec = input.substring(input.indexOf(getDefaultDecimalSeparator()));
-                if (!dec.isEmpty()) {
-                    dec = dec.substring(1);
-                    if (dec.length() > maxLength) {
-                        editText.setText(input.substring(0, input.length() - 1));
-                        editText.setSelection(editText.getText().length());
-                        s = editText.getEditableText();
-                    }
-                }
+            if (input.contains(".")) {
+                return getEditable(s, input, maxLength, editText, input.indexOf("."));
+            } else if (input.contains(",")) {
+                return getEditable(s, input, maxLength, editText, input.indexOf(","));
             }
         } catch (NumberFormatException e) {
             Timber.e(e);
+        }
+        return s;
+    }
+
+    private Editable getEditable(Editable s, String input, int maxLength, EditText editText, int index) {
+        String dec = input.substring(index);
+        if (!dec.isEmpty()) {
+            dec = dec.substring(1);
+            if (dec.length() > maxLength) {
+                editText.setText(input.substring(0, input.length() - 1));
+                editText.setSelection(editText.getText().length());
+                s = editText.getEditableText();
+            }
         }
         return s;
     }
@@ -764,7 +778,10 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                viewModel.updateFiatTextField(s.toString().replace(".", getDefaultDecimalSeparator()));
+                // Remove any possible decimal separators and replace with the localised version
+                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
+                        .replace(",", getDefaultDecimalSeparator());
+                viewModel.updateFiatTextField(sanitisedString);
 
                 textChangeAllowed = true;
             }
@@ -803,7 +820,10 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                viewModel.updateBtcTextField(s.toString().replace(".", getDefaultDecimalSeparator()));
+                // Remove any possible decimal separators and replace with the localised version
+                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
+                        .replace(",", getDefaultDecimalSeparator());
+                viewModel.updateBtcTextField(sanitisedString);
                 textChangeAllowed = true;
             }
         }
