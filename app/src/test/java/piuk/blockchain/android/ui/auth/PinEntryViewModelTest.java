@@ -71,8 +71,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static piuk.blockchain.android.ui.createwallet.CreateWalletActivity.KEY_INTENT_EMAIL;
-import static piuk.blockchain.android.ui.createwallet.CreateWalletActivity.KEY_INTENT_PASSWORD;
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 
 @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
@@ -111,29 +109,6 @@ public class PinEntryViewModelTest {
     }
 
     @Test
-    public void onViewReadyEmailAndPasswordInIntentCreateWalletSuccessful() throws Exception {
-        // Arrange
-        String email = "example@email.com";
-        String password = "1234567890";
-        Intent intent = new Intent();
-        intent.putExtra(KEY_INTENT_EMAIL, email);
-        intent.putExtra(KEY_INTENT_PASSWORD, password);
-        when(activity.getPageIntent()).thenReturn(intent);
-        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-        when(fingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn("");
-        when(authDataManager.createHdWallet(anyString(), anyString(), eq(email)))
-                .thenReturn(just(new Wallet()));
-        // Act
-        subject.onViewReady();
-        // Assert
-        assertEquals(false, subject.allowExit());
-        verify(authDataManager).createHdWallet(anyString(), anyString(), eq(email));
-        verify(activity).showProgressDialog(anyInt(), anyString());
-        verify(activity).dismissProgressDialog();
-        verify(prefsUtil).setValue(PrefsUtil.KEY_EMAIL, email);
-    }
-
-    @Test
     public void onViewReadyValidatingPinForResult() throws Exception {
         // Arrange
         Intent intent = new Intent();
@@ -143,29 +118,6 @@ public class PinEntryViewModelTest {
         subject.onViewReady();
         // Assert
         assertEquals(true, subject.isForValidatingPinForResult());
-    }
-
-    @Test
-    public void onViewReadyEmailAndPasswordInIntentCreateWalletThrowsError() throws Exception {
-        // Arrange
-        String email = "example@email.com";
-        String password = "1234567890";
-        Intent intent = new Intent();
-        intent.putExtra(KEY_INTENT_EMAIL, email);
-        intent.putExtra(KEY_INTENT_PASSWORD, password);
-        when(activity.getPageIntent()).thenReturn(intent);
-        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
-        when(fingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn("");
-        when(authDataManager.createHdWallet(anyString(), anyString(), eq(email)))
-                .thenReturn(Observable.error(new Throwable()));
-        // Act
-        subject.onViewReady();
-        // Assert
-        assertEquals(false, subject.allowExit());
-        verify(activity).showProgressDialog(anyInt(), anyString());
-        verify(activity, times(2)).dismissProgressDialog();
-        //noinspection WrongConstant
-        verify(activity).showToast(anyInt(), anyString());
     }
 
     @Test

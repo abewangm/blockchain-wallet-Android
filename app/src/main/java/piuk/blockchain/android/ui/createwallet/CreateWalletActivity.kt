@@ -159,15 +159,6 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
         presenter.validateCredentials(email, password1, password2)
     }
 
-    private fun getNextActivityIntent(email: String, password: String): Intent {
-        return Intent(this, PinEntryActivity::class.java)
-                .apply {
-                    putExtras(intent)
-                    putExtra(KEY_INTENT_EMAIL, email)
-                    putExtra(KEY_INTENT_PASSWORD, password)
-                }
-    }
-
     override fun showToast(message: Int, toastType: String) {
         toast(message, toastType)
     }
@@ -211,10 +202,4 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
     override fun getDefaultAccountName(): String {
         return getString(R.string.default_wallet_name)
     }
-
-    companion object {
-        const val KEY_INTENT_EMAIL = "intent_email"
-        const val KEY_INTENT_PASSWORD = "intent_password"
-    }
-
 }
