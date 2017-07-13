@@ -1,10 +1,10 @@
-package piuk.blockchain.android.ui.auth
+package piuk.blockchain.android.ui.createwallet
 
 import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 
-interface CredentialsView : View {
+interface CreateWalletView : View {
 
     fun setTitleText(text : Int)
 
@@ -18,5 +18,9 @@ interface CredentialsView : View {
 
     fun showWeakPasswordDialog(email: String, password: String)
 
-    fun startNextActivity(email: String, password: String)
+    fun startPinEntryActivity()
+
+    fun showProgressDialog(message: Int)
+
+    fun dismissProgressDialog()
 }

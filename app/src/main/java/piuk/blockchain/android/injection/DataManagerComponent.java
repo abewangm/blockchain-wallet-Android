@@ -5,6 +5,8 @@ import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.account.AccountEditViewModel;
 import piuk.blockchain.android.ui.account.AccountViewModel;
+import piuk.blockchain.android.ui.createwallet.CreateWalletPresenter;
+import piuk.blockchain.android.ui.login.LoginPresenter;
 import piuk.blockchain.android.ui.auth.PasswordRequiredViewModel;
 import piuk.blockchain.android.ui.auth.PinEntryViewModel;
 import piuk.blockchain.android.ui.backup.completed.BackupWalletCompletedPresenter;
@@ -27,8 +29,7 @@ import piuk.blockchain.android.ui.fingerprint.FingerprintDialogViewModel;
 import piuk.blockchain.android.ui.home.MainViewModel;
 import piuk.blockchain.android.ui.launcher.LauncherPresenter;
 import piuk.blockchain.android.ui.onboarding.OnboardingViewModel;
-import piuk.blockchain.android.ui.pairing.ManualPairingViewModel;
-import piuk.blockchain.android.ui.pairing.PairingViewModel;
+import piuk.blockchain.android.ui.login.ManualPairingViewModel;
 import piuk.blockchain.android.ui.pairing_code.PairingCodePresenter;
 import piuk.blockchain.android.ui.receive.ReceiveQrViewModel;
 import piuk.blockchain.android.ui.receive.ReceiveViewModel;
@@ -59,8 +60,6 @@ public interface DataManagerComponent {
     void inject(PinEntryViewModel pinEntryViewModel);
 
     void inject(MainViewModel mainViewModel);
-
-    void inject(PairingViewModel pairingViewModel);
 
     void inject(AccountEditViewModel accountEditViewModel);
 
@@ -121,4 +120,8 @@ public interface DataManagerComponent {
     void inject(BackupWalletWordListPresenter backupWalletWordListPresenter);
 
     void inject(BackupWalletStartingPresenter backupWalletStartingPresenter);
+
+    void inject(LoginPresenter loginPresenter);
+
+    void inject(CreateWalletPresenter createWalletPresenter);
 }

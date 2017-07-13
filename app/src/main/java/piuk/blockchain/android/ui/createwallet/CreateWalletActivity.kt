@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.auth
+package piuk.blockchain.android.ui.createwallet
 
 import android.animation.ObjectAnimator
 import android.content.Intent
@@ -6,32 +6,32 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ForegroundColorSpan
-import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
-import kotlinx.android.synthetic.main.fragment_credentials.*
+import kotlinx.android.synthetic.main.activity_create_wallet.*
 import kotlinx.android.synthetic.main.include_entropy_meter.view.*
+import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
-import piuk.blockchain.android.ui.base.BaseFragment
-import piuk.blockchain.android.ui.pairing.PairOrCreateWalletActivity
-import piuk.blockchain.android.ui.recover.RecoverFundsActivity
+import piuk.blockchain.android.ui.auth.PinEntryActivity
+import piuk.blockchain.android.ui.base.BaseMvpActivity
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.settings.SettingsFragment
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.gone
-import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
 
-class CredentialsFragment : BaseFragment<CredentialsView, CredentialsPresenter>(), CredentialsView, TextWatcher, View.OnFocusChangeListener {
+class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPresenter>(), CreateWalletView, TextWatcher, View.OnFocusChangeListener {
+
+    private var progressDialog: MaterialProgressDialog? = null
 
     private val strengthVerdicts = intArrayOf(
             R.string.strength_weak,
@@ -46,16 +46,11 @@ class CredentialsFragment : BaseFragment<CredentialsView, CredentialsPresenter>(
             R.drawable.progress_green
     )
 
-    override fun onCreateView(
-            inflater: LayoutInflater?,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View? = container!!.inflate(R.layout.fragment_credentials)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_create_wallet)
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        presenter.parseExtras(activity.intent)
+        presenter.parseExtras(intent)
 
         tos.movementMethod = LinkMovementMethod.getInstance() //make link clickable
         command_next.isClickable = false
@@ -71,7 +66,7 @@ class CredentialsFragment : BaseFragment<CredentialsView, CredentialsPresenter>(
 
         val spannable = SpannableString(text + text2)
         spannable.setSpan(
-                ForegroundColorSpan(ContextCompat.getColor(activity, R.color.primary_blue_accent)),
+                ForegroundColorSpan(ContextCompat.getColor(this, R.color.primary_blue_accent)),
                 text.length,
                 text.length + text2.length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -88,13 +83,19 @@ class CredentialsFragment : BaseFragment<CredentialsView, CredentialsPresenter>(
         onViewReady()
     }
 
-    override fun createPresenter() = CredentialsPresenter()
+    override fun getView(): CreateWalletView = this
 
-    override fun getMvpView() = this
+    override fun createPresenter() = CreateWalletPresenter()
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            android.R.id.home -> onBackPressed()
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
     override fun setTitleText(text: Int) {
-        (activity as PairOrCreateWalletActivity).setupToolbar(
-                (activity as AppCompatActivity).supportActionBar, text)
+        setupToolbar(toolbar_general, text)
     }
 
     override fun setNextText(text: Int) {
@@ -146,7 +147,7 @@ class CredentialsFragment : BaseFragment<CredentialsView, CredentialsPresenter>(
     override fun setEntropyLevel(level: Int) {
         entropy_container.pass_strength_verdict.setText(strengthVerdicts[level])
         entropy_container.pass_strength_bar.progressDrawable =
-                ContextCompat.getDrawable(activity, strengthColors[level])
+                ContextCompat.getDrawable(this, strengthColors[level])
         entropy_container.pass_strength_verdict.setText(strengthVerdicts[level])
     }
 
@@ -159,27 +160,20 @@ class CredentialsFragment : BaseFragment<CredentialsView, CredentialsPresenter>(
     }
 
     private fun getNextActivityIntent(email: String, password: String): Intent {
-        return Intent(activity, getNextActivity())
+        return Intent(this, PinEntryActivity::class.java)
                 .apply {
+                    putExtras(intent)
                     putExtra(KEY_INTENT_EMAIL, email)
                     putExtra(KEY_INTENT_PASSWORD, password)
-                    putExtra(
-                            LandingActivity.KEY_INTENT_RECOVERING_FUNDS,
-                            presenter.recoveringFunds
-                    )
                 }
     }
 
-    private fun getNextActivity(): Class<*> {
-        return if (presenter.recoveringFunds) RecoverFundsActivity::class.java else PinEntryActivity::class.java
-    }
-
     override fun showToast(message: Int, toastType: String) {
-        context.toast(message, toastType)
+        toast(message, toastType)
     }
 
     override fun showWeakPasswordDialog(email: String, password: String) {
-        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+        AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.weak_password)
                 .setPositiveButton(android.R.string.yes, { _, _ ->
@@ -188,13 +182,30 @@ class CredentialsFragment : BaseFragment<CredentialsView, CredentialsPresenter>(
                     wallet_pass.requestFocus()
                 })
                 .setNegativeButton(android.R.string.no, { _, _ ->
-                    startNextActivity(email, password)
+                    presenter.createWallet(email, password)
                 }).show()
     }
 
-    override fun startNextActivity(email: String, password: String) {
-        ViewUtils.hideKeyboard(activity)
-        activity.startActivity(getNextActivityIntent(email, password))
+    override fun startPinEntryActivity() {
+        ViewUtils.hideKeyboard(this)
+        this.startActivity(Intent(this, PinEntryActivity::class.java))
+    }
+
+    override fun showProgressDialog(message: Int) {
+        dismissProgressDialog()
+        progressDialog = MaterialProgressDialog(this).apply {
+            setCancelable(false)
+            setMessage(getString(message))
+            if(!isFinishing)show()
+        }
+    }
+
+    override fun dismissProgressDialog() {
+
+        progressDialog?.apply {
+            dismiss()
+            progressDialog = null
+        }
     }
 
     companion object {

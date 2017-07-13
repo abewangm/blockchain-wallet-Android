@@ -31,6 +31,8 @@ import piuk.blockchain.android.injection.ApplicationModule;
 import piuk.blockchain.android.injection.DataManagerModule;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.injection.InjectorTestUtils;
+import piuk.blockchain.android.ui.login.ManualPairingActivity;
+import piuk.blockchain.android.ui.login.ManualPairingViewModel;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
@@ -50,7 +52,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static piuk.blockchain.android.ui.pairing.ManualPairingViewModel.KEY_AUTH_REQUIRED;
+import static piuk.blockchain.android.ui.login.ManualPairingViewModel.KEY_AUTH_REQUIRED;
 
 
 @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")

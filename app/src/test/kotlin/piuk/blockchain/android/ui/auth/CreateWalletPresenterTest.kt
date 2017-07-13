@@ -13,18 +13,20 @@ import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
+import piuk.blockchain.android.ui.createwallet.CreateWalletPresenter
+import piuk.blockchain.android.ui.createwallet.CreateWalletView
 import piuk.blockchain.android.ui.customviews.ToastCustom
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
-class CredentialsPresenterTest {
+class CreateWalletPresenterTest {
 
-    private lateinit var subject: CredentialsPresenter
-    private var view: CredentialsView = mock()
+    private lateinit var subject: CreateWalletPresenter
+    private var view: CreateWalletView = mock()
 
     @Before
     fun setUp() {
-        subject = CredentialsPresenter()
+        subject = CreateWalletPresenter()
         subject.initView(view)
     }
 
