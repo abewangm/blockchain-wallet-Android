@@ -35,9 +35,9 @@ class CreateWalletPresenter : BasePresenter<CreateWalletView>() {
 
     fun parseExtras(intent: Intent) {
 
-        val meh = intent.getStringExtra(RecoverFundsActivity.RECOVERY_PHRASE)
+        val mnemonic = intent.getStringExtra(RecoverFundsActivity.RECOVERY_PHRASE)
 
-        if(meh != null)recoveryPhrase = meh
+        if(mnemonic != null)recoveryPhrase = mnemonic
 
         if (!recoveryPhrase.isEmpty()) {
             view.setTitleText(R.string.recover_funds)
