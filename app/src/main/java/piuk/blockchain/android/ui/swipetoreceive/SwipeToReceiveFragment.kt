@@ -64,7 +64,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
     }
 
     override fun displayReceiveAccount(accountName: String) {
-        edittext_account.text = accountName
+        edittext_account?.text = accountName
     }
 
     override fun setUiState(uiState: Int) {

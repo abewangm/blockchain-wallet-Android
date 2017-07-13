@@ -305,7 +305,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         TestObserver<String> observer =
                 subject.getTransactionValueString("USD", txSent).test();
         // Assert
-        assertEquals("Value when sent: $1000.00", observer.values().get(0));
+        assertEquals("Value when sent: $1,000.00", observer.values().get(0));
         observer.onComplete();
         observer.assertNoErrors();
     }
@@ -322,7 +322,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Act
         TestObserver<String> observer = subject.getTransactionValueString("USD", txReceived).test();
         // Assert
-        assertEquals("Value when received: $1000.00", observer.values().get(0));
+        assertEquals("Value when received: $1,000.00", observer.values().get(0));
         observer.onComplete();
         observer.assertNoErrors();
     }
@@ -339,7 +339,7 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Act
         TestObserver<String> observer = subject.getTransactionValueString("USD", txSent).test();
         // Assert
-        assertEquals("Value when transferred: $1000.00", observer.values().get(0));
+        assertEquals("Value when transferred: $1,000.00", observer.values().get(0));
         observer.onComplete();
         observer.assertNoErrors();
     }
