@@ -22,16 +22,17 @@ class LoginPresenter : BasePresenter<LoginView>() {
     }
 
     override fun onViewReady() {
+        // No-op
     }
 
-    fun pairWithQR(raw: String?) {
+    internal fun pairWithQR(raw: String?) {
         appUtil.clearCredentials()
 
         payloadDataManager.handleQrCode(raw)
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .doOnSubscribe({ view.showProgressDialog(R.string.please_wait) })
-                .doOnComplete({ appUtil.sharedKey = payloadDataManager.wallet.sharedKey })
-                .doAfterTerminate({ view.dismissProgressDialog() })
+                .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
+                .doOnComplete { appUtil.sharedKey = payloadDataManager.wallet.sharedKey }
+                .doAfterTerminate { view.dismissProgressDialog() }
                 .subscribe({
                     prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.wallet.guid)
                     prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true)
@@ -46,7 +47,6 @@ class LoginPresenter : BasePresenter<LoginView>() {
                         appUtil.clearCredentialsAndRestart()
                     }
                 })
-
-
     }
+
 }

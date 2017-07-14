@@ -2,6 +2,8 @@ package piuk.blockchain.android.ui.recover;
 
 import android.support.annotation.StringRes;
 
+import info.blockchain.wallet.bip44.HDWalletFactory;
+
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
 
@@ -13,7 +15,6 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
-import info.blockchain.wallet.bip44.HDWalletFactory;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.injection.Injector;
@@ -76,16 +77,15 @@ public class RecoverFundsViewModel extends BaseViewModel {
 
     /**
      * We only support US english mnemonics atm
-     * @throws MnemonicException.MnemonicWordException
      */
     private boolean isValidMnemonic(String recoveryPhrase) throws MnemonicException.MnemonicWordException, IOException {
 
         List<String> words = Arrays.asList(recoveryPhrase.trim().split("\\s+"));
 
         InputStream wis = HDWalletFactory.class.getClassLoader()
-                .getResourceAsStream("wordlist/" + new Locale("en", "US").toString() + ".txt");
+                .getResourceAsStream("wordlist/" + new Locale("en", "US") + ".txt");
 
-        if(wis == null){
+        if (wis == null) {
             throw new MnemonicException.MnemonicWordException("cannot read BIP39 word list");
         }
 

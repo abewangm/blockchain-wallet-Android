@@ -56,20 +56,20 @@ class LoginPresenterTest {
         // Act
         subject.pairWithQR(qrCode)
         // Assert
-        verify(view).showProgressDialog(any());
-        verify(view).dismissProgressDialog();
-        verify(view).startPinEntryActivity();
-        verifyNoMoreInteractions(view);
-        verify(appUtil).clearCredentials();
-        verify(appUtil).setSharedKey(sharedKey);
-        verifyNoMoreInteractions(appUtil);
-        verify(prefsUtil).setValue(PrefsUtil.KEY_GUID, guid);
-        verify(prefsUtil).setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
-        verify(prefsUtil).setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, true);
-        verifyNoMoreInteractions(prefsUtil);
-        verify(payloadDataManager).handleQrCode(qrCode);
-        verify(payloadDataManager, atLeastOnce()).getWallet();
-        verifyNoMoreInteractions(payloadDataManager);
+        verify(view).showProgressDialog(any())
+        verify(view).dismissProgressDialog()
+        verify(view).startPinEntryActivity()
+        verifyNoMoreInteractions(view)
+        verify(appUtil).clearCredentials()
+        verify(appUtil).sharedKey = sharedKey
+        verifyNoMoreInteractions(appUtil)
+        verify(prefsUtil).setValue(PrefsUtil.KEY_GUID, guid)
+        verify(prefsUtil).setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true)
+        verify(prefsUtil).setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, true)
+        verifyNoMoreInteractions(prefsUtil)
+        verify(payloadDataManager).handleQrCode(qrCode)
+        verify(payloadDataManager, atLeastOnce()).wallet
+        verifyNoMoreInteractions(payloadDataManager)
     }
 
     @Test
@@ -80,17 +80,17 @@ class LoginPresenterTest {
         // Act
         subject.pairWithQR(qrCode)
         // Assert
-        verify(view).showProgressDialog(any());
-        verify(view).dismissProgressDialog();
+        verify(view).showProgressDialog(any())
+        verify(view).dismissProgressDialog()
         //noinspection WrongConstant
-        verify(view).showToast(any(), eq(ToastCustom.TYPE_ERROR));
-        verifyNoMoreInteractions(view);
-        verify(appUtil).clearCredentials();
-        verify(appUtil).clearCredentialsAndRestart();
-        verifyNoMoreInteractions(appUtil);
-        verifyZeroInteractions(prefsUtil);
-        verify(payloadDataManager).handleQrCode(qrCode);
-        verifyNoMoreInteractions(payloadDataManager);
+        verify(view).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        verifyNoMoreInteractions(view)
+        verify(appUtil).clearCredentials()
+        verify(appUtil).clearCredentialsAndRestart()
+        verifyNoMoreInteractions(appUtil)
+        verifyZeroInteractions(prefsUtil)
+        verify(payloadDataManager).handleQrCode(qrCode)
+        verifyNoMoreInteractions(payloadDataManager)
     }
 
     @Test
@@ -101,28 +101,28 @@ class LoginPresenterTest {
         // Act
         subject.pairWithQR(qrCode)
         // Assert
-        verify(view).showProgressDialog(any());
-        verify(view).dismissProgressDialog();
-        verifyNoMoreInteractions(view);
-        verify(appUtil, times(2)).clearCredentials();
-        verifyNoMoreInteractions(appUtil);
-        verifyZeroInteractions(prefsUtil);
-        verify(payloadDataManager).handleQrCode(qrCode);
-        verifyNoMoreInteractions(payloadDataManager);
-        verify(view).showProgressDialog(any());
-        verify(view).dismissProgressDialog();
-        verifyNoMoreInteractions(appUtil);
+        verify(view).showProgressDialog(any())
+        verify(view).dismissProgressDialog()
+        verifyNoMoreInteractions(view)
+        verify(appUtil, times(2)).clearCredentials()
+        verifyNoMoreInteractions(appUtil)
+        verifyZeroInteractions(prefsUtil)
+        verify(payloadDataManager).handleQrCode(qrCode)
+        verifyNoMoreInteractions(payloadDataManager)
+        verify(view).showProgressDialog(any())
+        verify(view).dismissProgressDialog()
+        verifyNoMoreInteractions(appUtil)
     }
 
     inner class MockDataManagerModule : DataManagerModule() {
 
-        override fun providePayloadDataManager(payloadManager: PayloadManager?,
-                                               rxBus: RxBus?
+        override fun providePayloadDataManager(
+                payloadManager: PayloadManager?,
+                rxBus: RxBus?
         ) = payloadDataManager
     }
 
-    inner class MockApiModule : ApiModule() {
-    }
+    inner class MockApiModule : ApiModule()
 
     inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
 

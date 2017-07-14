@@ -15,6 +15,7 @@ import android.text.style.ForegroundColorSpan
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.DecelerateInterpolator
+import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_create_wallet.*
 import kotlinx.android.synthetic.main.include_entropy_meter.view.*
@@ -28,8 +29,12 @@ import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
+import piuk.blockchain.android.util.helperfunctions.consume
 
-class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPresenter>(), CreateWalletView, TextWatcher, View.OnFocusChangeListener {
+class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPresenter>(),
+        CreateWalletView,
+        TextWatcher,
+        View.OnFocusChangeListener {
 
     private var progressDialog: MaterialProgressDialog? = null
 
@@ -78,12 +83,16 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
             )
         })
 
+        wallet_pass_confirm.setOnEditorActionListener({ _, i, _ ->
+            consume { if (i == EditorInfo.IME_ACTION_GO) onNextClicked() }
+        })
+
         hideEntropyContainer()
 
         onViewReady()
     }
 
-    override fun getView(): CreateWalletView = this
+    override fun getView() = this
 
     override fun createPresenter() = CreateWalletPresenter()
 
@@ -151,14 +160,6 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
         entropy_container.pass_strength_verdict.setText(strengthVerdicts[level])
     }
 
-    private fun onNextClicked() {
-        val email = email_address.text.toString().trim()
-        val password1 = wallet_pass.text.toString()
-        val password2 = wallet_pass_confirm.text.toString()
-
-        presenter.validateCredentials(email, password1, password2)
-    }
-
     override fun showToast(message: Int, toastType: String) {
         toast(message, toastType)
     }
@@ -187,12 +188,11 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
         progressDialog = MaterialProgressDialog(this).apply {
             setCancelable(false)
             setMessage(getString(message))
-            if(!isFinishing)show()
+            if (!isFinishing) show()
         }
     }
 
     override fun dismissProgressDialog() {
-
         progressDialog?.apply {
             dismiss()
             progressDialog = null
@@ -202,4 +202,13 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
     override fun getDefaultAccountName(): String {
         return getString(R.string.default_wallet_name)
     }
+
+    private fun onNextClicked() {
+        val email = email_address.text.toString().trim()
+        val password1 = wallet_pass.text.toString()
+        val password2 = wallet_pass_confirm.text.toString()
+
+        presenter.validateCredentials(email, password1, password2)
+    }
+
 }

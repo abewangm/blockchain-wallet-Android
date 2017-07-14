@@ -25,9 +25,9 @@ class LauncherActivity : BaseMvpActivity<LauncherView, LauncherPresenter>(), Lau
         handler.postDelayed(DelayStartRunnable(this), 500)
     }
 
-    override fun createPresenter(): LauncherPresenter = LauncherPresenter()
+    override fun createPresenter() = LauncherPresenter()
 
-    override fun getView(): LauncherView = this
+    override fun getView() = this
 
     override fun getPageIntent(): Intent = intent
 

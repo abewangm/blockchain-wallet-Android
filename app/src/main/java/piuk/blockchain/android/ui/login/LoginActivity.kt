@@ -25,43 +25,21 @@ class LoginActivity : BaseMvpActivity<LoginView, LoginPresenter>(), LoginView {
 
     private var progressDialog: MaterialProgressDialog? = null
 
-    override fun createPresenter(): LoginPresenter = LoginPresenter()
-
-    override fun getView(): LoginView = this
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
         setupToolbar(toolbar_general, R.string.pair_your_wallet)
 
-        pairingFirstStep.setText(getString(R.string.pair_wallet_step_1, EnvironmentSettings().explorerUrl + "wallet"))
+        pairingFirstStep.text = getString(R.string.pair_wallet_step_1, EnvironmentSettings().explorerUrl + "wallet")
     }
 
-    fun onClickQRPair(view: View) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            PermissionUtil.requestCameraPermissionFromActivity(mainLayout, this)
-        } else {
-            startScanActivity()
-        }
-    }
+    override fun createPresenter() = LoginPresenter()
 
-    fun onClickManualPair(view: View) {
-        startActivity(Intent(this, ManualPairingActivity::class.java));
-    }
-
-    private fun startScanActivity() {
-        if (!AppUtil(this).isCameraOpen) {
-            val intent = Intent(this, CaptureActivity::class.java)
-            intent.putExtra("SCAN_FORMATS", "QR_CODE")
-            startActivityForResult(intent, PAIRING_QR)
-        } else {
-            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR)
-        }
-    }
+    override fun getView() = this
 
     override fun startLogoutTimer() {
-        // no-op
+        // No-op
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -99,12 +77,11 @@ class LoginActivity : BaseMvpActivity<LoginView, LoginPresenter>(), LoginView {
         progressDialog = MaterialProgressDialog(this).apply {
             setCancelable(false)
             setMessage(getString(message))
-            if(!isFinishing)show()
+            if (!isFinishing) show()
         }
     }
 
     override fun dismissProgressDialog() {
-
         progressDialog?.apply {
             dismiss()
             progressDialog = null
@@ -117,7 +94,31 @@ class LoginActivity : BaseMvpActivity<LoginView, LoginPresenter>(), LoginView {
         startActivity(intent)
     }
 
+    @Suppress("UNUSED_PARAMETER")
+    fun onClickQRPair(view: View) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            PermissionUtil.requestCameraPermissionFromActivity(mainLayout, this)
+        } else {
+            startScanActivity()
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onClickManualPair(view: View) {
+        startActivity(Intent(this, ManualPairingActivity::class.java))
+    }
+
+    private fun startScanActivity() {
+        if (!AppUtil(this).isCameraOpen) {
+            val intent = Intent(this, CaptureActivity::class.java)
+            intent.putExtra("SCAN_FORMATS", "QR_CODE")
+            startActivityForResult(intent, PAIRING_QR)
+        } else {
+            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR)
+        }
+    }
+
     companion object {
-        const val PAIRING_QR = 2005;
+        const val PAIRING_QR = 2005
     }
 }

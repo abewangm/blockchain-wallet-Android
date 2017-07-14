@@ -13,6 +13,7 @@ import android.text.InputType;
 import android.text.method.DigitsKeyListener;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 
 import info.blockchain.wallet.api.data.Settings;
@@ -43,6 +44,13 @@ public class ManualPairingActivity extends BaseAuthActivity implements ManualPai
         setupToolbar(toolbar, R.string.manual_pairing);
 
         mBinding.commandNext.setOnClickListener(v -> mViewModel.onContinueClicked());
+
+        mBinding.walletPass.setOnEditorActionListener((textView, i, keyEvent) -> {
+            if (i == EditorInfo.IME_ACTION_GO) {
+                mViewModel.onContinueClicked();
+            }
+            return true;
+        });
 
         mViewModel.onViewReady();
     }
