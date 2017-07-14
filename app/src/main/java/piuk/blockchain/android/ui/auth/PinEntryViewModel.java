@@ -41,9 +41,6 @@ import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-import static piuk.blockchain.android.ui.auth.CredentialsFragment.KEY_INTENT_EMAIL;
-import static piuk.blockchain.android.ui.auth.CredentialsFragment.KEY_INTENT_PASSWORD;
-import static piuk.blockchain.android.ui.auth.LandingActivity.KEY_INTENT_RECOVERING_FUNDS;
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 
 @SuppressWarnings("WeakerAccess")
@@ -62,9 +59,6 @@ public class PinEntryViewModel extends BaseViewModel {
     @Inject protected FingerprintHelper mFingerprintHelper;
     @Inject protected AccessState mAccessState;
 
-    private String mEmail;
-    private String mPassword;
-    @VisibleForTesting boolean mRecoveringFunds = false;
     @VisibleForTesting boolean mCanShowFingerprintDialog = true;
     @VisibleForTesting boolean mValidatingPinForResult = false;
     @VisibleForTesting String mUserEnteredPin = "";
@@ -126,35 +120,9 @@ public class PinEntryViewModel extends BaseViewModel {
         if (mDataListener.getPageIntent() != null) {
             Bundle extras = mDataListener.getPageIntent().getExtras();
             if (extras != null) {
-                if (extras.containsKey(KEY_INTENT_EMAIL)) {
-                    mEmail = extras.getString(KEY_INTENT_EMAIL);
-                }
-
-                if (extras.containsKey(KEY_INTENT_PASSWORD)) {
-                    //noinspection ConstantConditions
-                    mPassword = extras.getString(KEY_INTENT_PASSWORD);
-                }
-
-                if (extras.containsKey(KEY_INTENT_RECOVERING_FUNDS)) {
-                    mRecoveringFunds = extras.getBoolean(KEY_INTENT_RECOVERING_FUNDS);
-                }
 
                 if (extras.containsKey(KEY_VALIDATING_PIN_FOR_RESULT)) {
                     mValidatingPinForResult = extras.getBoolean(KEY_VALIDATING_PIN_FOR_RESULT);
-                }
-
-                if (mPassword != null && !mPassword.isEmpty() && mEmail != null && !mEmail.isEmpty()) {
-                    // Previous page was CredentialsFragment
-                    bAllowExit = false;
-
-                    mPrefsUtil.setValue(PrefsUtil.KEY_EMAIL, mEmail);
-
-                    if (!mRecoveringFunds) {
-                        // If funds recovered, wallet already restored, no need to overwrite payload
-                        // with another new wallet
-                        mDataListener.showProgressDialog(R.string.create_wallet, "...");
-                        createWallet();
-                    }
                 }
             }
         }
@@ -177,7 +145,7 @@ public class PinEntryViewModel extends BaseViewModel {
     }
 
     public boolean getIfShouldShowFingerprintLogin() {
-        return !(mValidatingPinForResult || mRecoveringFunds || isCreatingNewPin())
+        return !(mValidatingPinForResult || isCreatingNewPin())
                 && mFingerprintHelper.isFingerprintUnlockEnabled()
                 && mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE) != null;
     }
@@ -487,16 +455,6 @@ public class PinEntryViewModel extends BaseViewModel {
 
             mPayloadManager.getPayload().getHdWallets().get(0).getAccounts().get(0).setLabel(mStringUtils.getString(R.string.default_wallet_name));
         }
-    }
-
-    private void createWallet() {
-        mAppUtil.applyPRNGFixes();
-        compositeDisposable.add(
-                mAuthDataManager.createHdWallet(mPassword, mStringUtils.getString(R.string.default_wallet_name), mEmail)
-                        .doAfterTerminate(() -> mDataListener.dismissProgressDialog())
-                        .subscribe(payload -> {
-                            // No-op
-                        }, throwable -> showErrorToastAndRestartApp(R.string.hd_error)));
     }
 
     private boolean isPinCommon(String pin) {

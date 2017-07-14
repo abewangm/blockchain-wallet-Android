@@ -10,12 +10,14 @@ import android.view.inputmethod.EditorInfo;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityRecoverFundsBinding;
-import piuk.blockchain.android.ui.auth.PinEntryActivity;
+import piuk.blockchain.android.ui.createwallet.CreateWalletActivity;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 public class RecoverFundsActivity extends BaseAuthActivity implements RecoverFundsViewModel.DataListener {
+
+    public static final String RECOVERY_PHRASE = "RECOVERY_PHRASE";
 
     private RecoverFundsViewModel mViewModel;
     private ActivityRecoverFundsBinding mBinding;
@@ -44,17 +46,10 @@ public class RecoverFundsActivity extends BaseAuthActivity implements RecoverFun
     }
 
     @Override
-    public void goToPinEntryPage() {
-        // Grabs intent from previous page containing Password and Email and then passes it
-        // to the PIN entry page
-        Intent intent = new Intent(this, PinEntryActivity.class);
-        intent.putExtras(getIntent().getExtras());
+    public void gotoCredentialsActivity(String recoveryPhrase) {
+        Intent intent = new Intent(this, CreateWalletActivity.class);
+        intent.putExtra(RECOVERY_PHRASE, recoveryPhrase);
         startActivity(intent);
-    }
-
-    @Override
-    public Intent getPageIntent() {
-        return getIntent();
     }
 
     @Override
@@ -66,12 +61,6 @@ public class RecoverFundsActivity extends BaseAuthActivity implements RecoverFun
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Take user back to landing page
-        mViewModel.getAppUtil().restartApp();
     }
 
     @Override

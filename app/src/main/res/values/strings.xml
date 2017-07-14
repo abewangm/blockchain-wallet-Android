@@ -94,6 +94,7 @@
     <string name="invalid_recovery_phrase">Invalid backup phrase. Please try again</string>
     <string name="creating_wallet">Creating wallet</string>
     <string name="restore_failed">Restoring wallet failed. Please try again</string>
+    <string name="restoring_wallet">Restoring wallet.</string>
 
     <string name="password">Password</string>
     <string name="email">Email</string>

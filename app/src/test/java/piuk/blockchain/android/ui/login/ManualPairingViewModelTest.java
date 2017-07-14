@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.pairing;
+package piuk.blockchain.android.ui.login;
 
 import android.app.Application;
 
@@ -50,7 +50,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static piuk.blockchain.android.ui.pairing.ManualPairingViewModel.KEY_AUTH_REQUIRED;
+import static piuk.blockchain.android.ui.login.ManualPairingViewModel.KEY_AUTH_REQUIRED;
 
 
 @SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
