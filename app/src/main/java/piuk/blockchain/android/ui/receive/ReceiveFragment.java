@@ -52,12 +52,16 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.subjects.PublishSubject;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentReceiveBinding;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
@@ -88,6 +92,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     @Thunk boolean textChangeAllowed = true;
     private String uri;
     private long backPressed;
+    PublishSubject<Integer> textChangeSubject = PublishSubject.create();
     @Thunk int selectedAccountPosition = -1;
 
     private IntentFilter intentFilter = new IntentFilter(BalanceFragment.ACTION_INTENT);
@@ -206,6 +211,12 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         } else {
             binding.buttonSendToContact.setVisibility(View.GONE);
         }
+
+        textChangeSubject.debounce(300, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(this::displayQRCode)
+                .subscribe(new IgnorableDefaultObserver<>());
     }
 
     private TextWatcher btcTextWatcher = new TextWatcher() {
@@ -229,7 +240,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                         .replace(",", getDefaultDecimalSeparator());
                 viewModel.updateFiatTextField(sanitisedString);
 
-                displayQRCode(selectedAccountPosition);
+                textChangeSubject.onNext(selectedAccountPosition);
                 textChangeAllowed = true;
             }
         }
@@ -267,7 +278,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                         .replace(",", getDefaultDecimalSeparator());
                 viewModel.updateBtcTextField(sanitisedString);
 
-                displayQRCode(selectedAccountPosition);
+                textChangeSubject.onNext(selectedAccountPosition);
                 textChangeAllowed = true;
             }
         }
