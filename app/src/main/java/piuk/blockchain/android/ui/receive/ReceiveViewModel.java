@@ -97,7 +97,7 @@ public class ReceiveViewModel extends BaseViewModel {
     }
 
     ReceiveViewModel(DataListener listener, Locale locale) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         dataListener = listener;
 
         int btcUnitType = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);

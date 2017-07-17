@@ -60,7 +60,7 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
     }
 
     ContactsPaymentRequestViewModel(DataListener dataListener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         this.dataListener = dataListener;
     }
 

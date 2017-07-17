@@ -45,7 +45,7 @@ public class RecoverFundsViewModel extends BaseViewModel {
     }
 
     RecoverFundsViewModel(DataListener listener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         dataListener = listener;
     }
 

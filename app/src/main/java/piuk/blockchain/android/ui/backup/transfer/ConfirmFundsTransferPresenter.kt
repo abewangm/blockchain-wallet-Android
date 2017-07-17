@@ -6,7 +6,6 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -18,19 +17,16 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import javax.inject.Inject
 
-class ConfirmFundsTransferPresenter : BasePresenter<ConfirmFundsTransferView>() {
+class ConfirmFundsTransferPresenter @Inject constructor(
+        private val walletAccountHelper: WalletAccountHelper,
+        private val fundsDataManager: TransferFundsDataManager,
+        private val payloadDataManager: PayloadDataManager,
+        private val prefsUtil: PrefsUtil,
+        private val stringUtils: StringUtils,
+        private val exchangeRateFactory: ExchangeRateFactory
+) : BasePresenter<ConfirmFundsTransferView>() {
 
-    @Inject lateinit var walletAccountHelper: WalletAccountHelper
-    @Inject lateinit var fundsDataManager: TransferFundsDataManager
-    @Inject lateinit var payloadDataManager: PayloadDataManager
-    @Inject lateinit var prefsUtil: PrefsUtil
-    @Inject lateinit var stringUtils: StringUtils
-    @Inject lateinit var exchangeRateFactory: ExchangeRateFactory
     @VisibleForTesting internal var pendingTransactions: MutableList<PendingTransaction> = mutableListOf()
-
-    init {
-        Injector.getInstance().dataManagerComponent.inject(this)
-    }
 
     override fun onViewReady() {
         updateToAddress(payloadDataManager.defaultAccountIndex)

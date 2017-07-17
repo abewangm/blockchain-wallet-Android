@@ -41,7 +41,7 @@ public class ReceiveQrViewModel extends BaseViewModel {
 
     ReceiveQrViewModel(DataListener dataListener) {
         this.dataListener = dataListener;
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     @Override

@@ -108,7 +108,7 @@ public class SendViewModel extends BaseViewModel {
     @Inject AccessState accessState;
 
     SendViewModel(SendContract.DataListener dataListener, Locale locale) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         this.locale = locale;
         this.dataListener = dataListener;
 

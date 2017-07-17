@@ -41,7 +41,7 @@ public class ContactsInvitationBuilderViewModel extends BaseViewModel {
     }
 
     ContactsInvitationBuilderViewModel(DataListener dataListener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         this.dataListener = dataListener;
     }
 

@@ -43,7 +43,7 @@ public class OnboardingViewModel extends BaseViewModel {
     }
 
     OnboardingViewModel(DataListener dataListener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         this.dataListener = dataListener;
     }
 

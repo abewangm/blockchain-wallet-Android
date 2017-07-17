@@ -95,7 +95,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
 
     public TransactionDetailViewModel(DataListener listener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         mDataListener = listener;
         mMonetaryUtil = new MonetaryUtil(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
 

@@ -58,7 +58,7 @@ public class ContactsListViewModel extends BaseViewModel {
     }
 
     ContactsListViewModel(DataListener dataListener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         this.dataListener = dataListener;
     }
 

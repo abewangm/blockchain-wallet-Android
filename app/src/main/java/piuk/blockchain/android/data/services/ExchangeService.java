@@ -54,7 +54,7 @@ public class ExchangeService {
         metadataSubject = ReplaySubject.create(1);
         coinifyApi = new CoinifyApi();
         sfoxApi = new SFOXApi();
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     public static ExchangeService getInstance() {

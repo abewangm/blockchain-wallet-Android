@@ -12,7 +12,7 @@ public enum Injector {
     INSTANCE;
 
     private ApplicationComponent applicationComponent;
-    private PresenterComponent dataManagerComponent;
+    private PresenterComponent presenterComponent;
 
     public static Injector getInstance() {
         return INSTANCE;
@@ -34,21 +34,21 @@ public enum Injector {
                 .apiModule(apiModule)
                 .build();
 
-        dataManagerComponent = applicationComponent.plus(managerModule);
+        presenterComponent = applicationComponent.plus(managerModule);
     }
 
     public ApplicationComponent getAppComponent() {
         return applicationComponent;
     }
 
-    public PresenterComponent getDataManagerComponent() {
-        if (dataManagerComponent == null) {
-            dataManagerComponent = applicationComponent.plus(new DataManagerModule());
+    public PresenterComponent getPresenterComponent() {
+        if (presenterComponent == null) {
+            presenterComponent = applicationComponent.plus(new DataManagerModule());
         }
-        return dataManagerComponent;
+        return presenterComponent;
     }
 
     public void releaseViewModelScope() {
-        dataManagerComponent = null;
+        presenterComponent = null;
     }
 }

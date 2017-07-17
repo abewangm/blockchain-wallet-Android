@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.buy;
 
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.util.Log;
 
 import javax.inject.Inject;
 
@@ -44,7 +43,7 @@ public class BuyViewModel extends BaseViewModel {
     }
 
     BuyViewModel(DataListener dataListener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         this.dataListener = dataListener;
     }
 

@@ -25,7 +25,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
     @Inject lateinit var swipeToReceivePresenter: SwipeToReceivePresenter
 
     init {
-        Injector.getInstance().dataManagerComponent.inject(this)
+        Injector.getInstance().presenterComponent.inject(this)
     }
 
     private val broadcastReceiver = object : BroadcastReceiver() {

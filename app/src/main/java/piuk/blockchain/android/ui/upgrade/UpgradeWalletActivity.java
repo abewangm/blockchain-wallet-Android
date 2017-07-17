@@ -37,7 +37,7 @@ public class UpgradeWalletActivity extends BaseMvpActivity<UpgradeWalletView, Up
     @Inject UpgradeWalletPresenter upgradeWalletPresenter;
 
     {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     @Override

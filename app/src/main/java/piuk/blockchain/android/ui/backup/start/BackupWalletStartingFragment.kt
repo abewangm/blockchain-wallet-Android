@@ -20,7 +20,7 @@ class BackupWalletStartingFragment : BaseFragment<BackupWalletStartingView, Back
     @Inject lateinit var backupWalletStartingPresenter: BackupWalletStartingPresenter
 
     init {
-        Injector.getInstance().dataManagerComponent.inject(this)
+        Injector.getInstance().presenterComponent.inject(this)
     }
 
     override fun onCreateView(

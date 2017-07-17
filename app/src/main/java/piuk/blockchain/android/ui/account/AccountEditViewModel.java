@@ -121,7 +121,7 @@ public class AccountEditViewModel extends BaseViewModel {
     }
 
     AccountEditViewModel(AccountEditModel accountModel, DataListener dataListener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         this.dataListener = dataListener;
 
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));

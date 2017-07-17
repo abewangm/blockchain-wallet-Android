@@ -108,7 +108,7 @@ public class PinEntryViewModel extends BaseViewModel {
     }
 
     public PinEntryViewModel(DataListener listener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         mDataListener = listener;
     }
 

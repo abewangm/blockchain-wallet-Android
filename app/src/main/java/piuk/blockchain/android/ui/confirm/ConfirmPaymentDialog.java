@@ -36,7 +36,7 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
     private OnConfirmDialogInteractionListener listener;
 
     {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     public static ConfirmPaymentDialog newInstance(PaymentConfirmationDetails details,

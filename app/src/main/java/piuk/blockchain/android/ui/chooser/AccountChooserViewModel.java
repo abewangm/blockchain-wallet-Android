@@ -55,7 +55,7 @@ public class AccountChooserViewModel extends BaseViewModel {
     }
 
     AccountChooserViewModel(DataListener dataListener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         this.dataListener = dataListener;
     }
 

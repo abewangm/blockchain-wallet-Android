@@ -30,7 +30,7 @@ class FingerprintDialog : BaseDialogFragment<FingerprintView, FingerprintPresent
     private var authCallback: FingerprintAuthCallback? = null
 
     init {
-        Injector.getInstance().dataManagerComponent.inject(this)
+        Injector.getInstance().presenterComponent.inject(this)
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

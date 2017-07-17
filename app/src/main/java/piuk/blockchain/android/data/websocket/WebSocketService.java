@@ -52,7 +52,7 @@ public class WebSocketService extends Service {
     };
 
     {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     @Override

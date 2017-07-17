@@ -98,7 +98,7 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
     }
 
     ContactPaymentDialogViewModel(DataListener dataListener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         this.dataListener = dataListener;
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
         currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault());

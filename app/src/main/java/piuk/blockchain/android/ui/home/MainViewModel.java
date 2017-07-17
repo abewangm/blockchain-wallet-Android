@@ -128,7 +128,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public MainViewModel(DataListener dataListener) {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
         this.dataListener = dataListener;
         osUtil = new OSUtil(applicationContext);
     }

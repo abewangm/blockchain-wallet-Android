@@ -35,7 +35,7 @@ class BackupWalletWordListFragment : BaseFragment<BackupWalletWordListView, Back
     var currentWordIndex = 0
 
     init {
-        Injector.getInstance().dataManagerComponent.inject(this)
+        Injector.getInstance().presenterComponent.inject(this)
     }
 
     override fun onCreateView(

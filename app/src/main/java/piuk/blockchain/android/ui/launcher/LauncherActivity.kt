@@ -22,7 +22,7 @@ class LauncherActivity : BaseMvpActivity<LauncherView, LauncherPresenter>(), Lau
     @Inject lateinit var launcherPresenter: LauncherPresenter
 
     init {
-        Injector.getInstance().dataManagerComponent.inject(this)
+        Injector.getInstance().presenterComponent.inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

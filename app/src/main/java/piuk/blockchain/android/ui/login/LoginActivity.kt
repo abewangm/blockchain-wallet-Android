@@ -30,7 +30,7 @@ class LoginActivity : BaseMvpActivity<LoginView, LoginPresenter>(), LoginView {
     private var progressDialog: MaterialProgressDialog? = null
 
     init {
-        Injector.getInstance().dataManagerComponent.inject(this)
+        Injector.getInstance().presenterComponent.inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

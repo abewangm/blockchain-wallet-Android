@@ -8,6 +8,7 @@ import android.support.v4.content.LocalBroadcastManager
 import android.view.*
 import kotlinx.android.synthetic.main.dialog_transfer_funds.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.SecondPasswordHandler
 import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseDialogFragment
@@ -19,11 +20,18 @@ import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.OnItemSelectedListener
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils
 import uk.co.chrisjenx.calligraphy.TypefaceUtils
+import javax.inject.Inject
 
 class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransferView, ConfirmFundsTransferPresenter>(),
         ConfirmFundsTransferView {
 
+    @Inject lateinit var confirmFundsTransferPresenter: ConfirmFundsTransferPresenter
+
     private var progressDialog: MaterialProgressDialog? = null
+
+    init {
+        Injector.getInstance().presenterComponent.inject(this)
+    }
 
     override fun onCreateView(
             inflater: LayoutInflater?,
@@ -150,7 +158,7 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
         activity?.toast(message, toastType)
     }
 
-    override fun createPresenter() = ConfirmFundsTransferPresenter()
+    override fun createPresenter() = confirmFundsTransferPresenter
 
     override fun getMvpView() = this
 

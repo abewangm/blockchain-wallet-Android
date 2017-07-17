@@ -11,7 +11,8 @@ import piuk.blockchain.android.ui.auth.PasswordRequiredViewModel;
 import piuk.blockchain.android.ui.auth.PinEntryViewModel;
 import piuk.blockchain.android.ui.backup.completed.BackupWalletCompletedFragment;
 import piuk.blockchain.android.ui.backup.start.BackupWalletStartingFragment;
-import piuk.blockchain.android.ui.backup.transfer.ConfirmFundsTransferPresenter;
+import piuk.blockchain.android.ui.backup.transfer.ConfirmFundsTransferDialogFragment;
+import piuk.blockchain.android.ui.backup.verify.BackupWalletVerifyFragment;
 import piuk.blockchain.android.ui.backup.wordlist.BackupWalletWordListFragment;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.buy.BuyViewModel;
@@ -66,8 +67,6 @@ public interface PresenterComponent {
 
     @Deprecated void inject(TransactionDetailViewModel transactionDetailViewModel);
 
-    @Deprecated void inject(ConfirmFundsTransferPresenter confirmFundsTransferViewModel);
-
     @Deprecated void inject(AccountViewModel accountViewModel);
 
     @Deprecated void inject(SettingsViewModel settingsViewModel);
@@ -120,4 +119,8 @@ public interface PresenterComponent {
     void inject(@NotNull BackupWalletCompletedFragment backupWalletCompletedFragment);
 
     void inject(@NotNull FingerprintDialog fingerprintDialog);
+
+    void inject(@NotNull BackupWalletVerifyFragment backupWalletVerifyFragment);
+
+    void inject(@NotNull ConfirmFundsTransferDialogFragment confirmFundsTransferDialogFragment);
 }
