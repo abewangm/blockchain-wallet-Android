@@ -89,8 +89,6 @@ import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SE
 
 public class SendFragment extends Fragment implements SendContract.DataListener {
 
-    private static final String TAG = SendFragment.class.getSimpleName();
-
     public static final String ARGUMENT_SCAN_DATA = "scan_data";
     public static final String ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     public static final String ARGUMENT_CONTACT_ID = "contact_id";
@@ -347,12 +345,13 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
     }
 
     private void startScanActivity(int code) {
-        if (!new AppUtil(getActivity()).isCameraOpen()) {
-            Intent intent = new Intent(getActivity(), CaptureActivity.class);
-            startActivityForResult(intent, code);
-        } else {
-            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
-        }
+        // STOPSHIP: 14/07/2017 Fix me
+//        if (!new AppUtil(getActivity()).isCameraOpen()) {
+//            Intent intent = new Intent(getActivity(), CaptureActivity.class);
+//            startActivityForResult(intent, code);
+//        } else {
+//            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
+//        }
     }
 
     private void setupViews() {

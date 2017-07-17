@@ -14,6 +14,7 @@ import piuk.blockchain.android.ui.onboarding.OnboardingActivity
 import piuk.blockchain.android.ui.onboarding.OnboardingActivity.EXTRAS_EMAIL_ONLY
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity
 import piuk.blockchain.android.util.extensions.toast
+import javax.inject.Inject
 
 class LauncherActivity : BaseMvpActivity<LauncherView, LauncherPresenter>(), LauncherView {
 
@@ -45,7 +46,7 @@ class LauncherActivity : BaseMvpActivity<LauncherView, LauncherPresenter>(), Lau
                 .setMessage(getString(R.string.not_sane_error))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, { _, _ ->
-                    presenter.appUtil.clearCredentialsAndRestart()
+                    presenter.clearCredentialsAndRestart()
                 })
                 .show()
     }

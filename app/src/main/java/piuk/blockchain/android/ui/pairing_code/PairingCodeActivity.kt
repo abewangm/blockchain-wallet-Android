@@ -1,20 +1,21 @@
 package piuk.blockchain.android.ui.pairing_code
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
 import kotlinx.android.synthetic.main.activity_pairing_code.*
+import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
-import android.content.Intent
-import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.util.helperfunctions.consume
 
 
+@Suppress("UNUSED_PARAMETER")
 class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresenter>(), PairingCodeView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,7 +24,7 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
 
         setupToolbar(toolbar_general, R.string.pairing_code_log_in)
 
-        pairing_first_step.setText(presenter.firstStep)
+        pairing_first_step.text = presenter.firstStep
 
         onViewReady()
     }

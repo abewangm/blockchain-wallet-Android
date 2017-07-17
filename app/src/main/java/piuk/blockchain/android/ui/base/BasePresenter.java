@@ -36,14 +36,14 @@ public abstract class BasePresenter<VIEW extends View> implements Presenter<VIEW
     @CallSuper
     @Override
     public void onViewDestroyed() {
-        /** Clear all subscriptions so that:
+        /* Clear all subscriptions so that:
          * 1) all processes are cancelled
          * 2) processes don't try to update a null View
          * 3) background processes don't leak memory
          */
         getCompositeDisposable().clear();
 
-        /**
+        /*
          * Clear DataManagerComponent, thereby releasing all objects with a
          * {@link piuk.blockchain.android.injection.ViewModelScope} annotation for GC
          */

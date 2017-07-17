@@ -48,7 +48,6 @@ import timber.log.Timber;
 public class BlockchainApplication extends Application implements FrameworkInterface {
 
     public static final String RX_ERROR_TAG = "RxJava Error";
-    @Thunk static final String TAG = BlockchainApplication.class.getSimpleName();
 
     @Inject
     @Named("api")
@@ -63,9 +62,10 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Named("coinify")
     protected Lazy<Retrofit> coinify;
 
-    @Inject protected PrefsUtil prefsUtil;
-    @Inject protected RxBus rxBus;
-    @Inject protected EnvironmentSettings environmentSettings;
+    @Inject PrefsUtil prefsUtil;
+    @Inject RxBus rxBus;
+    @Inject EnvironmentSettings environmentSettings;
+    @Inject AppUtil appUtil;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -103,8 +103,6 @@ public class BlockchainApplication extends Application implements FrameworkInter
         new LoggingExceptionHandler();
 
         RxJavaPlugins.setErrorHandler(throwable -> Log.e(RX_ERROR_TAG, throwable.getMessage(), throwable));
-
-        AppUtil appUtil = new AppUtil(this);
 
         AccessState.getInstance().initAccessState(this, prefsUtil, rxBus);
 
@@ -193,7 +191,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
         ProviderInstaller.installIfNeededAsync(this, new ProviderInstaller.ProviderInstallListener() {
             @Override
             public void onProviderInstalled() {
-                Log.i(TAG, "Security Provider installed");
+                Timber.i("Security Provider installed");
             }
 
             @Override
@@ -216,7 +214,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Thunk
     void showError(int errorCode) {
         // TODO: 05/08/2016 Decide if we should alert users here or not
-        Log.e(TAG, "Security Provider install failed with recoverable error: " +
+        Timber.e("Security Provider install failed with recoverable error: " +
                 GoogleApiAvailability.getInstance().getErrorString(errorCode));
     }
 
@@ -227,6 +225,6 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Thunk
     void onProviderInstallerNotAvailable() {
         // TODO: 05/08/2016 Decide if we should take action here or not
-        Log.wtf(TAG, "Security Provider Installer not available");
+        Timber.wtf("Security Provider Installer not available");
     }
 }

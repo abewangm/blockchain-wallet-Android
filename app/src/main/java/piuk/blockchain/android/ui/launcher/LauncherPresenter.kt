@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.launcher
 
 import android.content.Intent
-import android.util.Log
 import info.blockchain.wallet.api.data.Settings
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
@@ -10,11 +9,9 @@ import piuk.blockchain.android.data.notifications.FcmCallbackService.EXTRA_CONTA
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.injection.Injector
-import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.AppUtil
-import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import javax.inject.Inject
 
@@ -77,6 +74,8 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
         }
     }
 
+    internal fun clearCredentialsAndRestart() = appUtil.clearCredentialsAndRestart()
+
     private fun promptUpgrade() {
         accessState.setIsLoggedIn(true)
         view.onRequestUpgrade()
@@ -111,7 +110,7 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
         }
     }
 
-    fun checkIfOnboardingNeeded() {
+    private fun checkIfOnboardingNeeded() {
         var visits = prefsUtil.getValue(PrefsUtil.KEY_APP_VISITS, 0)
         // Nag user to verify email after second login
         when (visits) {
@@ -124,8 +123,7 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
     }
 
     private fun setCurrencyUnits(settings: Settings) {
-
-        when (settings.btcCurrency){
+        when (settings.btcCurrency) {
             Settings.UNIT_BTC -> prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, 0)
             Settings.UNIT_MBC -> prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, 1)
             Settings.UNIT_UBC -> prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, 2)

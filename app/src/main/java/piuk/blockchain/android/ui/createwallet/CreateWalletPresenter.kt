@@ -89,7 +89,7 @@ class CreateWalletPresenter : BasePresenter<CreateWalletView>() {
                 .subscribe({
                     prefsUtil.setValue(PrefsUtil.KEY_EMAIL, email)
                     view.startPinEntryActivity()
-                }, { throwable ->
+                }, {
                     view.showToast(R.string.hd_error, ToastCustom.TYPE_ERROR)
                     appUtil.clearCredentialsAndRestart()
                 })
@@ -109,7 +109,7 @@ class CreateWalletPresenter : BasePresenter<CreateWalletView>() {
                 }, { throwable ->
                     throwable.printStackTrace()
                     view.showToast(R.string.restore_failed, ToastCustom.TYPE_ERROR)
-                });
+                })
 
     }
 }

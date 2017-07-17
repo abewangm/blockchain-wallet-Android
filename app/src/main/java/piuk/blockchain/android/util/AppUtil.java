@@ -15,6 +15,7 @@ import java.security.Security;
 
 import javax.inject.Inject;
 
+import dagger.Lazy;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.injection.Injector;
@@ -27,8 +28,8 @@ public class AppUtil {
 
     private static final String REGEX_UUID = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
 
-    @Inject protected PrefsUtil prefs;
-    @Inject protected PayloadManager payloadManager;
+    @Inject PrefsUtil prefs;
+    @Inject Lazy<PayloadManager> payloadManager;
     private Context context;
     private AlertDialog alertDialog;
     private String receiveQRFileName;
@@ -40,7 +41,7 @@ public class AppUtil {
     }
 
     public void clearCredentials() {
-        payloadManager.wipe();
+        payloadManager.get().wipe();
         prefs.clear();
     }
 
