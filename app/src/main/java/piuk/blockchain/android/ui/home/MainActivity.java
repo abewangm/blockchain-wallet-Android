@@ -44,6 +44,8 @@ import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 import io.reactivex.Observable;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
@@ -53,10 +55,11 @@ import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.AccountActivity;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.buy.BuyActivity;
 import piuk.blockchain.android.ui.buy.FrontendJavascript;
 import piuk.blockchain.android.ui.buy.FrontendJavascriptManager;
@@ -81,8 +84,9 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
 
-public class MainActivity extends BaseAuthActivity implements BalanceFragment.OnFragmentInteractionListener,
-        MainViewModel.DataListener,
+public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> implements
+        BalanceFragment.OnFragmentInteractionListener,
+        MainView,
         SendFragment.OnSendFragmentInteractionListener,
         ReceiveFragment.OnReceiveFragmentInteractionListener,
         ContactPaymentRequestNotesFragment.FragmentInteractionListener,
@@ -111,7 +115,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Thunk boolean drawerIsOpen = false;
 
-    private MainViewModel viewModel;
+    @Inject MainPresenter mainPresenter;
     @Thunk ActivityMainBinding binding;
     private MaterialProgressDialog materialProgressDialog;
     private AppUtil appUtil;
@@ -137,6 +141,10 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         }
     };
 
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
+
     @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,7 +160,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBuy);
 
         appUtil = new AppUtil(this);
-        viewModel = new MainViewModel(this);
         balanceFragment = BalanceFragment.newInstance(false);
 
         binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
@@ -185,7 +192,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         ViewUtils.setElevation(toolbar, 0F);
 
         // Notify ViewModel that page is setup
-        viewModel.onViewReady();
+        onViewReady();
 
         // Create items
         AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.white);
@@ -229,9 +236,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
         handleIncomingIntent();
         applyFontToNavDrawer();
-        if (!BuildConfig.CONTACTS_ENABLED) {
-            hideContacts();
-        }
     }
 
     @SuppressLint("NewApi")
@@ -239,13 +243,12 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     protected void onResume() {
         super.onResume();
         appUtil.deleteQR();
-        viewModel.updateTicker();
+        getPresenter().updateTicker();
         resetNavigationDrawer();
     }
 
     @Override
     protected void onDestroy() {
-        viewModel.destroy();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         super.onDestroy();
     }
@@ -401,7 +404,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                         .setTitle(R.string.unpair_wallet)
                         .setMessage(R.string.ask_you_sure_unpair)
-                        .setPositiveButton(R.string.unpair, (dialog, which) -> viewModel.unPair())
+                        .setPositiveButton(R.string.unpair, (dialog, which) -> getPresenter().unPair())
                         .setNegativeButton(android.R.string.cancel, null)
                         .show();
                 break;
@@ -426,7 +429,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         MenuItem backUpMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_backup);
         MenuItem upgradeMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_upgrade);
 
-        if (viewModel.getPayloadManager().isNotUpgraded()) {
+        if (getPresenter().getPayloadManager().isNotUpgraded()) {
             //Legacy
             upgradeMenuItem.setVisible(true);
             backUpMenuItem.setVisible(false);
@@ -531,7 +534,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
                     .setMessage(R.string.contacts_register_nodes_failure)
-                    .setPositiveButton(R.string.retry, (dialog, which) -> viewModel.checkForMessages())
+                    .setPositiveButton(R.string.retry, (dialog, which) -> getPresenter().checkForMessages())
                     .create()
                     .show();
         }
@@ -580,11 +583,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
     }
 
     @Override
-    public boolean getIfContactsEnabled() {
-        return BuildConfig.CONTACTS_ENABLED;
-    }
-
-    @Override
     public void onScanInput(String strUri) {
         doScanInput(strUri, EventService.EVENT_TX_INPUT_FROM_URI);
     }
@@ -608,11 +606,6 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
             MenuItem menuItem = menu.getItem(i);
             applyFontToMenuItem(menuItem);
         }
-    }
-
-    private void hideContacts() {
-        Menu menu = binding.navigationView.getMenu();
-        menu.findItem(R.id.nav_contacts).setVisible(false);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -657,7 +650,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
         WebView buyWebView = new WebView(this);
         buyWebView.setWebViewClient(new WebViewClient());
         buyWebView.getSettings().setJavaScriptEnabled(true);
-        buyWebView.loadUrl(viewModel.getCurrentServerUrl() + "wallet/#/intermediate");
+        buyWebView.loadUrl(getPresenter().getCurrentServerUrl() + "wallet/#/intermediate");
 
         frontendJavascriptManager = new FrontendJavascriptManager(this, buyWebView);
         buyWebView.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
@@ -726,7 +719,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_payment_sent_failed_message)
                 .setPositiveButton(R.string.retry, (dialog, which) ->
-                        viewModel.broadcastPaymentSuccess(mdid, txHash, facilitatedTxId, transactionValue))
+                        getPresenter().broadcastPaymentSuccess(mdid, txHash, facilitatedTxId, transactionValue))
                 .setCancelable(false)
                 .create()
                 .show();
@@ -754,7 +747,7 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue) {
-        viewModel.broadcastPaymentSuccess(mdid, transactionHash, fctxId, transactionValue);
+        getPresenter().broadcastPaymentSuccess(mdid, transactionHash, fctxId, transactionValue);
     }
 
     @Override
@@ -861,6 +854,16 @@ public class MainActivity extends BaseAuthActivity implements BalanceFragment.On
 
     @Override
     public Context getActivityContext() {
+        return this;
+    }
+
+    @Override
+    protected MainPresenter createPresenter() {
+        return mainPresenter;
+    }
+
+    @Override
+    protected MainView getView() {
         return this;
     }
 }

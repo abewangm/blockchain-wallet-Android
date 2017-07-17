@@ -2,11 +2,6 @@ package piuk.blockchain.android.ui.home;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatDialogFragment;
-import android.util.Log;
 
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
@@ -31,11 +26,7 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
-import piuk.blockchain.android.data.payments.SendDataManager;
-import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
-import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
-import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
@@ -43,153 +34,125 @@ import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
+import timber.log.Timber;
 
-@SuppressWarnings("WeakerAccess")
-public class MainViewModel extends BaseViewModel {
+public class MainPresenter extends BasePresenter<MainView> {
 
-    private static final String TAG = MainViewModel.class.getSimpleName();
-
-    private DataListener dataListener;
     private OSUtil osUtil;
     private Observable<NotificationPayload> notificationObservable;
-    @Inject protected PrefsUtil prefs;
-    @Inject protected AppUtil appUtil;
-    @Inject protected AccessState accessState;
-    @Inject protected PayloadManager payloadManager;
-    @Inject protected PayloadDataManager payloadDataManager;
-    @Inject protected ContactsDataManager contactsDataManager;
-    @Inject protected SendDataManager sendDataManager;
-    @Inject protected NotificationTokenManager notificationTokenManager;
-    @Inject protected Context applicationContext;
-    @Inject protected StringUtils stringUtils;
-    @Inject protected SettingsDataManager settingsDataManager;
-    @Inject protected BuyDataManager buyDataManager;
-    @Inject protected DynamicFeeCache dynamicFeeCache;
-    @Inject protected ExchangeRateFactory exchangeRateFactory;
-    @Inject protected RxBus rxBus;
-    @Inject protected FeeDataManager feeDataManager;
-    @Inject protected EnvironmentSettings environmentSettings;
-    @Inject protected TransactionListDataManager transactionListDataManager;
-    @Inject protected PromptManager promptManager;
+    private PrefsUtil prefs;
+    private AppUtil appUtil;
+    private AccessState accessState;
+    private PayloadManager payloadManager;
+    private PayloadDataManager payloadDataManager;
+    private ContactsDataManager contactsDataManager;
+    private Context applicationContext;
+    private StringUtils stringUtils;
+    private SettingsDataManager settingsDataManager;
+    private BuyDataManager buyDataManager;
+    private DynamicFeeCache dynamicFeeCache;
+    private ExchangeRateFactory exchangeRateFactory;
+    private RxBus rxBus;
+    private FeeDataManager feeDataManager;
+    private EnvironmentSettings environmentSettings;
+    private PromptManager promptManager;
 
-    public interface DataListener {
+    @Inject
+    MainPresenter(PrefsUtil prefs,
+                         AppUtil appUtil,
+                         AccessState accessState,
+                         PayloadManager payloadManager,
+                         PayloadDataManager payloadDataManager,
+                         ContactsDataManager contactsDataManager,
+                         Context applicationContext,
+                         StringUtils stringUtils,
+                         SettingsDataManager settingsDataManager,
+                         BuyDataManager buyDataManager,
+                         DynamicFeeCache dynamicFeeCache,
+                         ExchangeRateFactory exchangeRateFactory,
+                         RxBus rxBus,
+                         FeeDataManager feeDataManager,
+                         EnvironmentSettings environmentSettings,
+                         PromptManager promptManager) {
 
-        /**
-         * We can't simply call BuildConfig.CONTACTS_ENABLED in this class as it would make it
-         * impossible to test, as it's reliant on the build.gradle config. Passing it here
-         * allows us to change the response via mocking the DataListener.
-         *
-         * TODO: This should be removed once/if Contacts ships
-         */
-        boolean getIfContactsEnabled();
-
-        boolean isBuySellPermitted();
-
-        void onScanInput(String strUri);
-
-        void onStartContactsActivity(@Nullable String data);
-
-        void onStartBalanceFragment(boolean paymentToContactMade);
-
-        void kickToLauncherPage();
-
-        void showProgressDialog(@StringRes int message);
-
-        void hideProgressDialog();
-
-        void clearAllDynamicShortcuts();
-
-        void showMetadataNodeRegistrationFailure();
-
-        void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId, long transactionValue);
-
-        void showBroadcastSuccessDialog();
-
-        void updateCurrentPrice(String price);
-
-        void setBuySellEnabled(boolean enabled);
-
-        void onTradeCompleted(String txHash);
-
-        void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails);
-
-        void showDefaultPrompt(AlertDialog alertDialog);
-
-        void showCustomPrompt(AppCompatDialogFragment alertFragment);
-
-        Context getActivityContext();
-    }
-
-    public MainViewModel(DataListener dataListener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        this.dataListener = dataListener;
+        this.prefs = prefs;
+        this.appUtil = appUtil;
+        this.accessState = accessState;
+        this.payloadManager = payloadManager;
+        this.payloadDataManager = payloadDataManager;
+        this.contactsDataManager = contactsDataManager;
+        this.applicationContext = applicationContext;
+        this.stringUtils = stringUtils;
+        this.settingsDataManager = settingsDataManager;
+        this.buyDataManager = buyDataManager;
+        this.dynamicFeeCache = dynamicFeeCache;
+        this.exchangeRateFactory = exchangeRateFactory;
+        this.rxBus = rxBus;
+        this.feeDataManager = feeDataManager;
+        this.environmentSettings = environmentSettings;
+        this.promptManager = promptManager;
         osUtil = new OSUtil(applicationContext);
     }
 
-    public void initPrompts(Context context) {
-
-        compositeDisposable.add(
+    private void initPrompts(Context context) {
+        getCompositeDisposable().add(
                 promptManager.getDefaultPrompts(context)
                         .flatMap(Observable::fromIterable)
-                        .forEach(dataListener::showDefaultPrompt));
+                        .forEach(getView()::showDefaultPrompt));
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 settingsDataManager.getSettings()
                         .flatMap(settings -> promptManager.getCustomPrompts(context, settings))
                         .flatMap(Observable::fromIterable)
-                        .forEach(dataListener::showCustomPrompt));
+                        .forEach(getView()::showCustomPrompt));
     }
 
     @Override
     public void onViewReady() {
-
         if (!accessState.isLoggedIn()) {
             // This should never happen, but handle the scenario anyway by starting the launcher
             // activity, which handles all login/auth/corruption scenarios itself
-            dataListener.kickToLauncherPage();
+            getView().kickToLauncherPage();
         } else {
 
             startWebSocketService();
             logEvents();
 
-            dataListener.showProgressDialog(R.string.please_wait);
+            getView().showProgressDialog(R.string.please_wait);
 
-            compositeDisposable.add(registerMetadataNodesCompletable()
+            getCompositeDisposable().add(registerMetadataNodesCompletable()
                     .mergeWith(feesCompletable())
                     .doAfterTerminate(() -> {
-                                dataListener.hideProgressDialog();
+                                getView().hideProgressDialog();
 
-                                dataListener.onStartBalanceFragment(false);
+                                getView().onStartBalanceFragment(false);
 
-                                initPrompts(dataListener.getActivityContext());
+                                initPrompts(getView().getActivityContext());
 
                                 if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
                                     String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
                                     prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
-                                    dataListener.onScanInput(strUri);
+                                    getView().onScanInput(strUri);
                                 }
                             }
                     )
                     .subscribe(() -> {
-                        if (dataListener.isBuySellPermitted()) {
+                        if (getView().isBuySellPermitted()) {
                             initBuyService();
                         }
-                        if (dataListener.getIfContactsEnabled()) {
-                            initContactsService();
-                        }
+                        initContactsService();
                     }, throwable -> {
                         //noinspection StatementWithEmptyBody
                         if (throwable instanceof InvalidCredentialsException) {
                             // Double encrypted and not previously set up, ignore error
                         } else {
-                            dataListener.showMetadataNodeRegistrationFailure();
+                            getView().showMetadataNodeRegistrationFailure();
                         }
                     }));
         }
@@ -203,7 +166,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 // Get contacts
                 contactsDataManager.getContactList()
                         // Find contact by MDID
@@ -215,12 +178,12 @@ public class MainViewModel extends BaseViewModel {
                             // Broadcast payment to shared metadata service
                             return contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
                                     // Show successfully broadcast
-                                    .doOnComplete(() -> dataListener.showBroadcastSuccessDialog())
+                                    .doOnComplete(() -> getView().showBroadcastSuccessDialog())
                                     // Show retry dialog if broadcast failed
-                                    .doOnError(throwable -> dataListener.showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
+                                    .doOnError(throwable -> getView().showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
                         })
-                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
-                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.contacts_broadcasting_payment))
+                        .doAfterTerminate(() -> getView().hideProgressDialog())
+                        .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.contacts_broadcasting_payment))
                         .subscribe(
                                 () -> {
                                     // No-op
@@ -230,7 +193,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     void checkForMessages() {
-        compositeDisposable.add(contactsDataManager.fetchContacts()
+        getCompositeDisposable().add(contactsDataManager.fetchContacts()
                 .andThen(contactsDataManager.getContactList())
                 .toList()
                 .flatMapObservable(contacts -> {
@@ -242,11 +205,11 @@ public class MainViewModel extends BaseViewModel {
                 })
                 .subscribe(messages -> {
                     // No-op
-                }, throwable -> Log.e(TAG, "checkForMessages: ", throwable)));
+                }, Timber::e));
     }
 
     void unPair() {
-        dataListener.clearAllDynamicShortcuts();
+        getView().clearAllDynamicShortcuts();
         payloadManager.wipe();
         prefs.logOut();
         accessState.unpairWallet();
@@ -262,7 +225,7 @@ public class MainViewModel extends BaseViewModel {
     private void subscribeToNotifications() {
         notificationObservable = rxBus.register(NotificationPayload.class);
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 notificationObservable
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(
@@ -271,18 +234,18 @@ public class MainViewModel extends BaseViewModel {
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
+    public void onViewDestroyed() {
+        super.onViewDestroyed();
         rxBus.unregister(NotificationPayload.class, notificationObservable);
         appUtil.deleteQR();
         dismissAnnouncementIfOnboardingCompleted();
     }
 
-    public void updateTicker() {
-        compositeDisposable.add(
+    void updateTicker() {
+        getCompositeDisposable().add(
                 exchangeRateFactory.updateTicker()
                         .subscribe(
-                                () -> dataListener.updateCurrentPrice(getFormattedPriceString()),
+                                () -> getView().updateCurrentPrice(getFormattedPriceString()),
                                 Throwable::printStackTrace));
     }
 
@@ -321,7 +284,7 @@ public class MainViewModel extends BaseViewModel {
                 handler.logLegacyEvent(importedAddressesBalance.longValue() > 0L);
             }
         } catch (Exception e) {
-            Log.e(TAG, "logEvents: ", e);
+            Timber.e(e);
         }
     }
 
@@ -349,7 +312,6 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private void initContactsService() {
-
         String uri = null;
         boolean fromNotification = false;
 
@@ -365,35 +327,35 @@ public class MainViewModel extends BaseViewModel {
 
         final String finalUri = uri;
         if (finalUri != null || fromNotification) {
-            dataListener.showProgressDialog(R.string.please_wait);
+            getView().showProgressDialog(R.string.please_wait);
         }
 
         rxBus.emitEvent(ContactsEvent.class, ContactsEvent.INIT);
 
         if (uri != null) {
-            dataListener.onStartContactsActivity(uri);
+            getView().onStartContactsActivity(uri);
         } else if (fromNotification) {
-            dataListener.onStartContactsActivity(null);
+            getView().onStartContactsActivity(null);
         } else {
             checkForMessages();
         }
     }
 
     private void initBuyService() {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 buyDataManager.getCanBuy()
                         .subscribe(isEnabled -> {
-                                    dataListener.setBuySellEnabled(isEnabled);
+                                    getView().setBuySellEnabled(isEnabled);
                                     if (isEnabled) {
                                         buyDataManager.watchPendingTrades()
                                                 .compose(RxUtil.applySchedulersToObservable())
-                                                .subscribe(dataListener::onTradeCompleted, Throwable::printStackTrace);
+                                                .subscribe(getView()::onTradeCompleted, Throwable::printStackTrace);
 
                                         buyDataManager.getWebViewLoginDetails()
-                                                .subscribe(dataListener::setWebViewLoginDetails, Throwable::printStackTrace);
+                                                .subscribe(getView()::setWebViewLoginDetails, Throwable::printStackTrace);
                                     }
                                 },
-                                throwable -> Log.e(TAG, "preLaunchChecks: ", throwable)));
+                                Timber::e));
     }
 
     private void dismissAnnouncementIfOnboardingCompleted() {

@@ -1,10 +1,8 @@
 package piuk.blockchain.android.ui.auth;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.DecryptionException;
@@ -20,57 +18,34 @@ import javax.inject.Inject;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.annotations.Thunk;
 import retrofit2.Response;
+import timber.log.Timber;
 
-@SuppressWarnings("WeakerAccess")
-public class PasswordRequiredViewModel extends BaseViewModel {
+public class PasswordRequiredPresenter extends BasePresenter<PasswordRequiredView> {
 
     @VisibleForTesting static final String KEY_AUTH_REQUIRED = "authorization_required";
-    private static final String TAG = PasswordRequiredViewModel.class.getSimpleName();
 
-    @Inject protected AppUtil appUtil;
-    @Inject protected PrefsUtil prefsUtil;
-    @Inject protected AuthDataManager authDataManager;
-    @Inject protected AccessState accessState;
-    private DataListener dataListener;
+    @Thunk AppUtil appUtil;
+    private PrefsUtil prefsUtil;
+    private AuthDataManager authDataManager;
     private String sessionId;
     @VisibleForTesting boolean waitingForAuth = false;
 
-    public interface DataListener {
+    @Inject
+    PasswordRequiredPresenter(AppUtil appUtil,
+                              PrefsUtil prefsUtil,
+                              AuthDataManager authDataManager) {
 
-        String getPassword();
-
-        void resetPasswordField();
-
-        void goToPinPage();
-
-        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void restartPage();
-
-        void updateWaitingForAuthDialog(int secondsRemaining);
-
-        void showProgressDialog(@StringRes int messageId, @Nullable String suffix, boolean cancellable);
-
-        void dismissProgressDialog();
-
-        void showForgetWalletWarning(DialogButtonCallback callback);
-
-        void showTwoFactorCodeNeededDialog(JSONObject responseObject, String sessionId, int authType, String password);
-
-    }
-
-    PasswordRequiredViewModel(DataListener listener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        dataListener = listener;
+        this.appUtil = appUtil;
+        this.prefsUtil = prefsUtil;
+        this.authDataManager = authDataManager;
     }
 
     @Override
@@ -79,16 +54,16 @@ public class PasswordRequiredViewModel extends BaseViewModel {
     }
 
     void onContinueClicked() {
-        if (dataListener.getPassword().length() > 1) {
-            verifyPassword(dataListener.getPassword());
+        if (getView().getPassword().length() > 1) {
+            verifyPassword(getView().getPassword());
         } else {
-            dataListener.showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
-            dataListener.restartPage();
+            getView().showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
+            getView().restartPage();
         }
     }
 
     void onForgetWalletClicked() {
-        dataListener.showForgetWalletWarning(new DialogButtonCallback() {
+        getView().showForgetWalletWarning(new DialogButtonCallback() {
             @Override
             public void onPositiveClicked() {
                 appUtil.clearCredentialsAndRestart();
@@ -103,13 +78,13 @@ public class PasswordRequiredViewModel extends BaseViewModel {
 
     void submitTwoFactorCode(JSONObject responseObject, String sessionId, String password, String code) {
         if (code == null || code.isEmpty()) {
-            dataListener.showToast(R.string.two_factor_null_error, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.two_factor_null_error, ToastCustom.TYPE_ERROR);
         } else {
             String guid = prefsUtil.getValue(PrefsUtil.KEY_GUID, "");
-            compositeDisposable.add(
+            getCompositeDisposable().add(
                     authDataManager.submitTwoFactorCode(sessionId, guid, code)
-                            .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.please_wait, null, false))
-                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                            .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.please_wait, null, false))
+                            .doAfterTerminate(() -> getView().dismissProgressDialog())
                             .subscribe(response -> {
                                         // This is slightly hacky, but if the user requires 2FA login,
                                         // the payload comes in two parts. Here we combine them and
@@ -130,14 +105,14 @@ public class PasswordRequiredViewModel extends BaseViewModel {
         String guid = prefsUtil.getValue(PrefsUtil.KEY_GUID, "");
         waitingForAuth = true;
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 authDataManager.getSessionId(guid)
-                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.validating_password, null, false))
+                        .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.validating_password, null, false))
                         .doOnNext(s -> sessionId = s)
                         .flatMap(sessionId -> authDataManager.getEncryptedPayload(guid, sessionId))
                         .subscribe(response -> handleResponse(password, guid, response),
                                 throwable -> {
-                                    Log.e(TAG, "verifyPassword: ", throwable);
+                                    Timber.e("verifyPassword: ", throwable);
                                     showErrorToastAndRestartApp(R.string.auth_failed);
                                 }));
     }
@@ -147,7 +122,7 @@ public class PasswordRequiredViewModel extends BaseViewModel {
         if (errorBody.contains(KEY_AUTH_REQUIRED)) {
             showCheckEmailDialog();
 
-            compositeDisposable.add(
+            getCompositeDisposable().add(
                     authDataManager.startPollingAuthStatus(guid, sessionId)
                             .subscribe(payloadResponse -> {
                                 waitingForAuth = false;
@@ -162,7 +137,7 @@ public class PasswordRequiredViewModel extends BaseViewModel {
                                         payloadResponse);
                                 checkTwoFactor(password, Response.success(responseBody));
                             }, throwable -> {
-                                Log.e(TAG, "handleResponse: ", throwable);
+                                Timber.e("handleResponse: ", throwable);
                                 waitingForAuth = false;
                                 showErrorToastAndRestartApp(R.string.auth_failed);
                             }));
@@ -183,8 +158,8 @@ public class PasswordRequiredViewModel extends BaseViewModel {
                 && (jsonObject.getInt("auth_type") == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR
                 || jsonObject.getInt("auth_type") == Settings.AUTH_TYPE_SMS)) {
 
-            dataListener.dismissProgressDialog();
-            dataListener.showTwoFactorCodeNeededDialog(jsonObject,
+            getView().dismissProgressDialog();
+            getView().showTwoFactorCodeNeededDialog(jsonObject,
                     sessionId,
                     jsonObject.getInt("auth_type"),
                     password);
@@ -194,9 +169,9 @@ public class PasswordRequiredViewModel extends BaseViewModel {
     }
 
     private void attemptDecryptPayload(String password, String payload) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 authDataManager.initializeFromPayload(payload, password)
-                        .subscribe(() -> dataListener.goToPinPage(),
+                        .subscribe(() -> getView().goToPinPage(),
                                 throwable -> {
                                     if (throwable instanceof HDWalletException) {
                                         showErrorToast(R.string.pairing_failed);
@@ -209,16 +184,16 @@ public class PasswordRequiredViewModel extends BaseViewModel {
     }
 
     private void showCheckEmailDialog() {
-        dataListener.showProgressDialog(R.string.check_email_to_auth_login, "120", true);
+        getView().showProgressDialog(R.string.check_email_to_auth_login, "120", true);
 
-        compositeDisposable.add(authDataManager.createCheckEmailTimer()
+        getCompositeDisposable().add(authDataManager.createCheckEmailTimer()
                 .takeUntil(integer -> !waitingForAuth)
                 .subscribe(integer -> {
                     if (integer <= 0) {
                         // Only called if timer has run out
                         showErrorToastAndRestartApp(R.string.pairing_failed);
                     } else {
-                        dataListener.updateWaitingForAuthDialog(integer);
+                        getView().updateWaitingForAuthDialog(integer);
                     }
                 }, throwable -> {
                     showErrorToast(R.string.auth_failed);
@@ -228,19 +203,19 @@ public class PasswordRequiredViewModel extends BaseViewModel {
 
     void onProgressCancelled() {
         waitingForAuth = false;
-        destroy();
+        onViewDestroyed();
     }
 
     private void showErrorToast(@StringRes int message) {
-        dataListener.dismissProgressDialog();
-        dataListener.resetPasswordField();
-        dataListener.showToast(message, ToastCustom.TYPE_ERROR);
+        getView().dismissProgressDialog();
+        getView().resetPasswordField();
+        getView().showToast(message, ToastCustom.TYPE_ERROR);
     }
 
     private void showErrorToastAndRestartApp(@StringRes int message) {
-        dataListener.resetPasswordField();
-        dataListener.dismissProgressDialog();
-        dataListener.showToast(message, ToastCustom.TYPE_ERROR);
+        getView().resetPasswordField();
+        getView().dismissProgressDialog();
+        getView().showToast(message, ToastCustom.TYPE_ERROR);
         appUtil.clearCredentialsAndRestart();
     }
 

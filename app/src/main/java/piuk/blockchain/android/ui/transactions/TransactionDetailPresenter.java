@@ -1,8 +1,6 @@
 package piuk.blockchain.android.ui.transactions;
 
 import android.content.Intent;
-import android.support.annotation.ColorRes;
-import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.multiaddress.TransactionSummary;
@@ -16,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -28,8 +25,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -40,101 +36,76 @@ import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
 @SuppressWarnings("WeakerAccess")
-public class TransactionDetailViewModel extends BaseViewModel {
+public class TransactionDetailPresenter extends BasePresenter<TransactionDetailView> {
 
     private static final int REQUIRED_CONFIRMATIONS = 3;
 
-    private DataListener mDataListener;
     private MonetaryUtil mMonetaryUtil;
-    @Inject TransactionHelper transactionHelper;
-    @Inject PrefsUtil mPrefsUtil;
-    @Inject PayloadDataManager mPayloadDataManager;
-    @Inject StringUtils mStringUtils;
-    @Inject TransactionListDataManager mTransactionListDataManager;
-    @Inject ExchangeRateFactory mExchangeRateFactory;
-    @Inject ContactsDataManager mContactsDataManager;
+    private TransactionHelper transactionHelper;
+    private PrefsUtil mPrefsUtil;
+    private PayloadDataManager mPayloadDataManager;
+    private StringUtils mStringUtils;
+    private TransactionListDataManager mTransactionListDataManager;
+    private ExchangeRateFactory mExchangeRateFactory;
+    private ContactsDataManager mContactsDataManager;
 
     private String mFiatType;
 
     @VisibleForTesting TransactionSummary mTransaction;
 
-    public interface DataListener {
+    @Inject
+    public TransactionDetailPresenter(TransactionHelper transactionHelper,
+                                      PrefsUtil mPrefsUtil,
+                                      PayloadDataManager mPayloadDataManager,
+                                      StringUtils mStringUtils,
+                                      TransactionListDataManager mTransactionListDataManager,
+                                      ExchangeRateFactory mExchangeRateFactory,
+                                      ContactsDataManager mContactsDataManager) {
 
-        Intent getPageIntent();
-
-        void pageFinish();
-
-        void setTransactionType(Direction type);
-
-        void setTransactionValueBtc(String value);
-
-        void setTransactionValueFiat(String fiat);
-
-        void setToAddresses(List<RecipientModel> addresses);
-
-        void setFromAddress(String address);
-
-        void setStatus(String status, String hash);
-
-        void setFee(String fee);
-
-        void setDate(String date);
-
-        void setDescription(String description);
-
-        void setIsDoubleSpend(boolean isDoubleSpend);
-
-        void setTransactionNote(String note);
-
-        void setTransactionColour(@ColorRes int colour);
-
-        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void onDataLoaded();
-
-    }
-
-    public TransactionDetailViewModel(DataListener listener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        mDataListener = listener;
+        this.transactionHelper = transactionHelper;
         mMonetaryUtil = new MonetaryUtil(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
-
         mFiatType = mPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        this.mPrefsUtil = mPrefsUtil;
+        this.mPayloadDataManager = mPayloadDataManager;
+        this.mStringUtils = mStringUtils;
+        this.mTransactionListDataManager = mTransactionListDataManager;
+        this.mExchangeRateFactory = mExchangeRateFactory;
+        this.mContactsDataManager = mContactsDataManager;
     }
 
     @Override
     public void onViewReady() {
-        Intent pageIntent = mDataListener.getPageIntent();
+        Intent pageIntent = getView().getPageIntent();
         if (pageIntent != null && pageIntent.hasExtra(KEY_TRANSACTION_LIST_POSITION)) {
             int transactionPosition = pageIntent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1);
             if (transactionPosition != -1) {
                 mTransaction = mTransactionListDataManager.getTransactionList().get(transactionPosition);
                 updateUiFromTransaction(mTransaction);
             } else {
-                mDataListener.pageFinish();
+                getView().pageFinish();
             }
         } else if (pageIntent != null && pageIntent.hasExtra(KEY_TRANSACTION_HASH)) {
-            compositeDisposable.add(
+            getCompositeDisposable().add(
                     mTransactionListDataManager.getTxFromHash(pageIntent.getStringExtra(KEY_TRANSACTION_HASH))
                             .subscribe(
                                     this::updateUiFromTransaction,
-                                    throwable -> mDataListener.pageFinish()));
+                                    throwable -> getView().pageFinish()));
         } else {
-            mDataListener.pageFinish();
+            getView().pageFinish();
         }
     }
 
     public void updateTransactionNote(String description) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 mPayloadDataManager.updateTransactionNotes(mTransaction.getHash(), description)
                         .subscribe(() -> {
-                            mDataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
-                            mDataListener.setDescription(description);
-                        }, throwable -> mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+                            getView().showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
+                            getView().setDescription(description);
+                        }, throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
     }
 
     private void updateUiFromTransaction(TransactionSummary transactionSummary) {
-        mDataListener.setTransactionType(transactionSummary.getDirection());
+        getView().setTransactionType(transactionSummary.getDirection());
         setTransactionColor(transactionSummary);
         setTransactionAmountInBtc(transactionSummary.getTotal());
         setConfirmationStatus(transactionSummary.getHash(), transactionSummary.getConfirmations());
@@ -165,7 +136,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
         }
 
         // TODO: 14/03/2017 Change this to dropdown like outputs, as a list of addresses looks terrible
-        mDataListener.setFromAddress(inputMapString);
+        getView().setFromAddress(inputMapString);
 
         // To Address
         HashMap<String, BigInteger> outputMap = pair.getRight();
@@ -186,26 +157,26 @@ public class TransactionDetailViewModel extends BaseViewModel {
             recipients.add(recipientModel);
         }
 
-        mDataListener.setToAddresses(recipients);
+        getView().setToAddresses(recipients);
 
         if (mContactsDataManager.getNotesTransactionMap().containsKey(transactionSummary.getHash())) {
             String note = mContactsDataManager.getNotesTransactionMap().get(transactionSummary.getHash());
-            mDataListener.setTransactionNote(note);
+            getView().setTransactionNote(note);
         }
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 getTransactionValueString(mFiatType, transactionSummary)
                         .subscribe(
-                                value -> mDataListener.setTransactionValueFiat(value),
-                                throwable -> mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+                                value -> getView().setTransactionValueFiat(value),
+                                throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
 
-        mDataListener.onDataLoaded();
-        mDataListener.setIsDoubleSpend(transactionSummary.isDoubleSpend());
+        getView().onDataLoaded();
+        getView().setIsDoubleSpend(transactionSummary.isDoubleSpend());
     }
 
     private void setFee(BigInteger fee) {
         String formattedFee = (mMonetaryUtil.getDisplayAmountWithFormatting(fee.longValue()) + " " + getDisplayUnits());
-        mDataListener.setFee(formattedFee);
+        getView().setFee(formattedFee);
     }
 
     private void setTransactionAmountInBtc(BigInteger total) {
@@ -215,12 +186,12 @@ public class TransactionDetailViewModel extends BaseViewModel {
                         + " "
                         + getDisplayUnits());
 
-        mDataListener.setTransactionValueBtc(amountBtc);
+        getView().setTransactionValueBtc(amountBtc);
     }
 
     private void setTransactionNote(String txHash) {
         String notes = mPayloadDataManager.getTransactionNotes(txHash);
-        mDataListener.setDescription(notes);
+        getView().setDescription(notes);
     }
 
     public String getTransactionNote() {
@@ -234,11 +205,11 @@ public class TransactionDetailViewModel extends BaseViewModel {
     @VisibleForTesting
     void setConfirmationStatus(String txHash, long confirmations) {
         if (confirmations >= REQUIRED_CONFIRMATIONS) {
-            mDataListener.setStatus(mStringUtils.getString(R.string.transaction_detail_confirmed), txHash);
+            getView().setStatus(mStringUtils.getString(R.string.transaction_detail_confirmed), txHash);
         } else {
             String pending = mStringUtils.getString(R.string.transaction_detail_pending);
             pending = String.format(Locale.getDefault(), pending, confirmations, REQUIRED_CONFIRMATIONS);
-            mDataListener.setStatus(pending, txHash);
+            getView().setStatus(pending, txHash);
         }
     }
 
@@ -251,19 +222,19 @@ public class TransactionDetailViewModel extends BaseViewModel {
         String dateText = dateFormat.format(date);
         String timeText = timeFormat.format(date);
 
-        mDataListener.setDate(dateText + " @ " + timeText);
+        getView().setDate(dateText + " @ " + timeText);
     }
 
     @VisibleForTesting
     void setTransactionColor(TransactionSummary transaction) {
         if (transaction.getDirection() == Direction.TRANSFERRED) {
-            mDataListener.setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
+            getView().setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
                     ? R.color.product_gray_transferred_50 : R.color.product_gray_transferred);
         } else if (transaction.getDirection() == Direction.SENT) {
-            mDataListener.setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
+            getView().setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
                     ? R.color.product_red_sent_50 : R.color.product_red_sent);
         } else {
-            mDataListener.setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
+            getView().setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
                     ? R.color.product_green_received_50 : R.color.product_green_received);
         }
     }

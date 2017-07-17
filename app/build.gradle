@@ -21,9 +21,6 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
-
-        // Flag for Contacts feature
-        buildConfigField "boolean", "CONTACTS_ENABLED", "false"
     }
     buildTypes {
         release {

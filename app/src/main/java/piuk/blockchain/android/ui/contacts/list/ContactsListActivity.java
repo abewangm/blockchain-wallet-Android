@@ -20,7 +20,6 @@ import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactsBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -54,10 +53,6 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contacts);
         viewModel = new ContactsListViewModel(this);
-
-        if (!BuildConfig.CONTACTS_ENABLED) {
-            throw new RuntimeException("Someone attempted to load ContactsListActivity despite Contacts being disabled.");
-        }
 
         setupToolbar(binding.toolbar, R.string.contacts_title);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);

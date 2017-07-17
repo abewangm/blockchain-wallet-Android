@@ -20,39 +20,46 @@ import info.blockchain.wallet.api.data.Settings;
 
 import org.json.JSONObject;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityManualPairingBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.auth.PinEntryActivity;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ViewUtils;
 
-public class ManualPairingActivity extends BaseAuthActivity implements ManualPairingViewModel.DataListener {
+public class ManualPairingActivity extends BaseMvpActivity<ManualPairingView, ManualPairingPresenter>
+        implements ManualPairingView {
 
+    @Inject ManualPairingPresenter manualPairingPresenter;
     private MaterialProgressDialog mProgressDialog;
     private ActivityManualPairingBinding mBinding;
-    private ManualPairingViewModel mViewModel;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_manual_pairing);
-        mViewModel = new ManualPairingViewModel(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.manual_pairing);
 
-        mBinding.commandNext.setOnClickListener(v -> mViewModel.onContinueClicked());
+        mBinding.commandNext.setOnClickListener(v -> getPresenter().onContinueClicked());
 
         mBinding.walletPass.setOnEditorActionListener((textView, i, keyEvent) -> {
             if (i == EditorInfo.IME_ACTION_GO) {
-                mViewModel.onContinueClicked();
+                getPresenter().onContinueClicked();
             }
             return true;
         });
 
-        mViewModel.onViewReady();
+        onViewReady();
     }
 
     @Override
@@ -105,7 +112,7 @@ public class ManualPairingActivity extends BaseAuthActivity implements ManualPai
                 .setMessage(message)
                 .setView(ViewUtils.getAlertDialogPaddedView(this, editText))
                 .setPositiveButton(android.R.string.ok, (dialog, which) ->
-                        mViewModel.submitTwoFactorCode(responseObject, sessionId, guid, password, editText.getText().toString()))
+                        getPresenter().submitTwoFactorCode(responseObject, sessionId, guid, password, editText.getText().toString()))
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
@@ -121,7 +128,7 @@ public class ManualPairingActivity extends BaseAuthActivity implements ManualPai
         } else {
             mProgressDialog.setMessage(getString(messageId));
         }
-        mProgressDialog.setOnCancelListener(dialogInterface -> mViewModel.onProgressCancelled());
+        mProgressDialog.setOnCancelListener(dialogInterface -> getPresenter().onProgressCancelled());
 
         if (!isFinishing()) mProgressDialog.show();
     }
@@ -155,7 +162,6 @@ public class ManualPairingActivity extends BaseAuthActivity implements ManualPai
         if (getCurrentFocus() != null) {
             imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         }
-        mViewModel.destroy();
         dismissProgressDialog();
         super.onDestroy();
     }
@@ -163,11 +169,21 @@ public class ManualPairingActivity extends BaseAuthActivity implements ManualPai
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         // Test for screen overlays before user enters PIN
-        return mViewModel.getAppUtil().detectObscuredWindow(this, event) || super.dispatchTouchEvent(event);
+        return getPresenter().getAppUtil().detectObscuredWindow(this, event) || super.dispatchTouchEvent(event);
     }
 
     @Override
     protected void startLogoutTimer() {
         // No-op
+    }
+
+    @Override
+    protected ManualPairingPresenter createPresenter() {
+        return manualPairingPresenter;
+    }
+
+    @Override
+    protected ManualPairingView getView() {
+        return this;
     }
 }

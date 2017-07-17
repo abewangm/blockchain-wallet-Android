@@ -1,42 +1,24 @@
 package piuk.blockchain.android.ui.auth;
 
-import android.app.Application;
-
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
-import piuk.blockchain.android.BlockchainTestApplication;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.RxTest;
-import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.injection.ApiModule;
-import piuk.blockchain.android.injection.ApplicationModule;
-import piuk.blockchain.android.injection.DataManagerModule;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.StringUtils;
 import retrofit2.Response;
 
 import static junit.framework.Assert.assertFalse;
@@ -53,12 +35,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static piuk.blockchain.android.ui.auth.PasswordRequiredViewModel.KEY_AUTH_REQUIRED;
+import static piuk.blockchain.android.ui.auth.PasswordRequiredPresenter.KEY_AUTH_REQUIRED;
 
 
-@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
-@RunWith(RobolectricTestRunner.class)
-public class PasswordRequiredViewModelTest extends RxTest {
+public class PasswordRequiredPresenterTest extends RxTest {
 
     private static final String KEY_AUTH_REQUIRED_JSON = "{\n" +
             "  \"authorization_required\": true\n" +
@@ -68,7 +48,7 @@ public class PasswordRequiredViewModelTest extends RxTest {
             "  \"auth_type\": 5\n" +
             "}";
 
-    private PasswordRequiredViewModel subject;
+    private PasswordRequiredPresenter subject;
     @Mock private PasswordRequiredActivity activity;
     @Mock private AppUtil appUtil;
     @Mock private PrefsUtil prefsUtil;
@@ -79,13 +59,8 @@ public class PasswordRequiredViewModelTest extends RxTest {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                new MockApplicationModule(RuntimeEnvironment.application),
-                new ApiModule(),
-                new MockDataManagerModule());
-
-        subject = new PasswordRequiredViewModel(activity);
+        subject = new PasswordRequiredPresenter(appUtil, prefsUtil, authDataManager);
+        subject.initView(activity);
     }
 
     /**
@@ -544,7 +519,7 @@ public class PasswordRequiredViewModelTest extends RxTest {
         subject.onProgressCancelled();
         // Assert
         assertFalse(subject.waitingForAuth);
-        assertEquals(0, subject.compositeDisposable.size());
+        assertEquals(0, subject.getCompositeDisposable().size());
     }
 
     @Test
@@ -595,36 +570,4 @@ public class PasswordRequiredViewModelTest extends RxTest {
         assertTrue(true);
     }
 
-    @SuppressWarnings({"SyntheticAccessorCall", "PrivateMemberAccessBetweenOuterAndInnerClass"})
-    private class MockApplicationModule extends ApplicationModule {
-
-        MockApplicationModule(Application application) {
-            super(application);
-        }
-
-        @Override
-        protected PrefsUtil providePrefsUtil() {
-            return prefsUtil;
-        }
-
-        @Override
-        protected AppUtil provideAppUtil() {
-            return appUtil;
-        }
-    }
-
-    @SuppressWarnings({"SyntheticAccessorCall", "PrivateMemberAccessBetweenOuterAndInnerClass"})
-    private class MockDataManagerModule extends DataManagerModule {
-
-        @Override
-        protected AuthDataManager provideAuthDataManager(PayloadDataManager payloadDataManager,
-                                                         PrefsUtil prefsUtil,
-                                                         AppUtil appUtil,
-                                                         AccessState accessState,
-                                                         StringUtils stringUtils,
-                                                         AESUtilWrapper aesUtilWrapper,
-                                                         RxBus rxBus) {
-            return authDataManager;
-        }
-    }
 }

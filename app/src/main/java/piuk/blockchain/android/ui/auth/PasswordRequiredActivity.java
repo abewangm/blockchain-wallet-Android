@@ -16,9 +16,12 @@ import info.blockchain.wallet.api.data.Settings;
 
 import org.json.JSONObject;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityPasswordRequiredBinding;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
@@ -29,27 +32,31 @@ import piuk.blockchain.android.util.ViewUtils;
  * Created by adambennett on 09/08/2016.
  */
 
-public class PasswordRequiredActivity extends BaseAuthActivity implements PasswordRequiredViewModel.DataListener {
+public class PasswordRequiredActivity extends BaseMvpActivity<PasswordRequiredView, PasswordRequiredPresenter>
+        implements PasswordRequiredView {
 
-    private PasswordRequiredViewModel mViewModel;
+    @Inject PasswordRequiredPresenter passwordRequiredPresenter;
     private ActivityPasswordRequiredBinding mBinding;
     private MaterialProgressDialog mProgressDialog;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_password_required);
-        mViewModel = new PasswordRequiredViewModel(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.confirm_password);
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
-        mBinding.buttonContinue.setOnClickListener(view -> mViewModel.onContinueClicked());
-        mBinding.buttonForget.setOnClickListener(view -> mViewModel.onForgetWalletClicked());
+        mBinding.buttonContinue.setOnClickListener(view -> getPresenter().onContinueClicked());
+        mBinding.buttonForget.setOnClickListener(view -> getPresenter().onForgetWalletClicked());
 
-        mViewModel.onViewReady();
+        onViewReady();
     }
 
     @Override
@@ -120,7 +127,7 @@ public class PasswordRequiredActivity extends BaseAuthActivity implements Passwo
                 .setMessage(message)
                 .setView(ViewUtils.getAlertDialogPaddedView(this, editText))
                 .setPositiveButton(android.R.string.ok, (dialog, which) ->
-                        mViewModel.submitTwoFactorCode(responseObject, sessionId, password, editText.getText().toString()))
+                        getPresenter().submitTwoFactorCode(responseObject, sessionId, password, editText.getText().toString()))
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
@@ -136,7 +143,7 @@ public class PasswordRequiredActivity extends BaseAuthActivity implements Passwo
         } else {
             mProgressDialog.setMessage(getString(messageId));
         }
-        mProgressDialog.setOnCancelListener(dialogInterface -> mViewModel.onProgressCancelled());
+        mProgressDialog.setOnCancelListener(dialogInterface -> getPresenter().onProgressCancelled());
 
         if (!isFinishing()) mProgressDialog.show();
     }
@@ -152,14 +159,23 @@ public class PasswordRequiredActivity extends BaseAuthActivity implements Passwo
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mViewModel.destroy();
         dismissProgressDialog();
+    }
+
+    @Override
+    protected PasswordRequiredPresenter createPresenter() {
+        return passwordRequiredPresenter;
+    }
+
+    @Override
+    protected PasswordRequiredView getView() {
+        return this;
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         // Test for screen overlays before user enters PIN
-        return mViewModel.getAppUtil().detectObscuredWindow(this, event) || super.dispatchTouchEvent(event);
+        return getPresenter().getAppUtil().detectObscuredWindow(this, event) || super.dispatchTouchEvent(event);
     }
 
     @Override

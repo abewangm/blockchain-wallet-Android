@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.ActivityAccountChooserBinding;
@@ -80,9 +79,10 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
         return paymentRequestType;
     }
 
+    // TODO: 17/07/2017 Remove me
     @Override
     public boolean getIfContactsEnabled() {
-        return BuildConfig.CONTACTS_ENABLED;
+        return true;
     }
 
     @Override

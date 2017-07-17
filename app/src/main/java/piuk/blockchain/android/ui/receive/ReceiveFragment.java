@@ -56,7 +56,6 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.subjects.PublishSubject;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
@@ -205,12 +204,9 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
                         PaymentRequestType.REQUEST));
 
-        if (BuildConfig.CONTACTS_ENABLED) {
-            binding.buttonSendToContact.setOnClickListener(v ->
-                    viewModel.onSendToContactClicked(binding.amountContainer.amountBtc.getText().toString()));
-        } else {
-            binding.buttonSendToContact.setVisibility(View.GONE);
-        }
+
+        binding.buttonSendToContact.setOnClickListener(v ->
+                viewModel.onSendToContactClicked(binding.amountContainer.amountBtc.getText().toString()));
 
         textChangeSubject.debounce(300, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())

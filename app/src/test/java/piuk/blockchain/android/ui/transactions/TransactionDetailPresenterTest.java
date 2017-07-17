@@ -1,11 +1,9 @@
 package piuk.blockchain.android.ui.transactions;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
 import android.content.Intent;
 
 import info.blockchain.wallet.multiaddress.TransactionSummary;
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -13,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RuntimeEnvironment;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -30,14 +27,6 @@ import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
-import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.stores.PendingTransactionListStore;
-import piuk.blockchain.android.data.stores.TransactionListStore;
-import piuk.blockchain.android.injection.ApiModule;
-import piuk.blockchain.android.injection.ApplicationModule;
-import piuk.blockchain.android.injection.DataManagerModule;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -58,19 +47,15 @@ import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
 @SuppressWarnings({"PrivateMemberAccessBetweenOuterAndInnerClass", "WeakerAccess"})
-public class TransactionDetailViewModelTest extends RxTest {
+public class TransactionDetailPresenterTest extends RxTest {
 
-    private TransactionDetailViewModel subject;
+    private TransactionDetailPresenter subject;
     @Mock TransactionHelper transactionHelper;
     @Mock PrefsUtil prefsUtil;
-    /**
-     * This can be removed once providesPayloadManager is removed from the API module
-     */
-    @Mock PayloadManager mockPayloadManager;
     @Mock PayloadDataManager payloadDataManager;
     @Mock StringUtils stringUtils;
     @Mock TransactionListDataManager transactionListDataManager;
-    @Mock TransactionDetailViewModel.DataListener activity;
+    @Mock TransactionDetailView activity;
     @Mock ExchangeRateFactory exchangeRateFactory;
     @Mock ContactsDataManager contactsDataManager;
 
@@ -88,12 +73,6 @@ public class TransactionDetailViewModelTest extends RxTest {
         when(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(MonetaryUtil.UNIT_BTC);
         when(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)).thenReturn(PrefsUtil.DEFAULT_CURRENCY);
 
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                new MockApplicationModule(RuntimeEnvironment.application),
-                new MockApiModule(),
-                new MockDataManagerModule());
-
         // Fees are realistic for current block size
         txMoved.setDirection(TransactionSummary.Direction.TRANSFERRED);
         txMoved.setTotal(BigInteger.TEN);
@@ -109,7 +88,14 @@ public class TransactionDetailViewModelTest extends RxTest {
         txReceived.setHash("txReceived_hash");
         txList = Arrays.asList(txMoved, txSent, txReceived);
         Locale.setDefault(new Locale("EN", "US"));
-        subject = new TransactionDetailViewModel(activity);
+        subject = new TransactionDetailPresenter(transactionHelper,
+                prefsUtil,
+                payloadDataManager,
+                stringUtils,
+                transactionListDataManager,
+                exchangeRateFactory,
+                contactsDataManager);
+        subject.initView(activity);
     }
 
     @Test
@@ -490,59 +476,6 @@ public class TransactionDetailViewModelTest extends RxTest {
         // Assert
         verify(activity).setTransactionColour(R.color.product_green_received);
         verifyNoMoreInteractions(activity);
-    }
-
-    private class MockApplicationModule extends ApplicationModule {
-        MockApplicationModule(Application application) {
-            super(application);
-        }
-
-        @Override
-        protected PrefsUtil providePrefsUtil() {
-            return prefsUtil;
-        }
-
-        @Override
-        protected StringUtils provideStringUtils() {
-            return stringUtils;
-        }
-
-        @Override
-        protected ExchangeRateFactory provideExchangeRateFactory() {
-            return exchangeRateFactory;
-        }
-    }
-
-    private class MockApiModule extends ApiModule {
-        @Override
-        protected PayloadManager providePayloadManager() {
-            return mockPayloadManager;
-        }
-
-        @Override
-        protected ContactsDataManager provideContactsManager(PendingTransactionListStore pendingTransactionListStore,
-                                                             RxBus rxBus) {
-            return contactsDataManager;
-        }
-    }
-
-    private class MockDataManagerModule extends DataManagerModule {
-        @Override
-        protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
-                                                                               TransactionListStore transactionListStore,
-                                                                               RxBus rxBus) {
-            return transactionListDataManager;
-        }
-
-        @Override
-        protected TransactionHelper provideTransactionHelper(PayloadDataManager payloadDataManager) {
-            return transactionHelper;
-        }
-
-        @Override
-        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager, RxBus rxBus) {
-            return payloadDataManager;
-        }
     }
 
 }

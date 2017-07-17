@@ -323,7 +323,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
-    override fun getIfContactsEnabled(): Boolean = BuildConfig.CONTACTS_ENABLED
+    // TODO: Remove me, but I break lots of tests
+    override fun getIfContactsEnabled() = true
 
     override fun getIfShouldShowBuy() = AndroidUtils.is19orHigher()
 

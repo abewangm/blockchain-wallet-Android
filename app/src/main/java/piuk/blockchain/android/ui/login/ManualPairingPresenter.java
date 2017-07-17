@@ -1,10 +1,8 @@
 package piuk.blockchain.android.ui.login;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.exceptions.DecryptionException;
@@ -21,50 +19,29 @@ import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import retrofit2.Response;
+import timber.log.Timber;
 
 @SuppressWarnings("WeakerAccess")
-public class ManualPairingViewModel extends BaseViewModel {
+public class ManualPairingPresenter extends BasePresenter<ManualPairingView> {
 
     @VisibleForTesting static final String KEY_AUTH_REQUIRED = "authorization_required";
-    private static final String TAG = ManualPairingViewModel.class.getSimpleName();
 
-    private DataListener dataListener;
     private String sessionId;
-    @Inject protected AppUtil appUtil;
-    @Inject protected AuthDataManager authDataManager;
+    private AppUtil appUtil;
+    private AuthDataManager authDataManager;
     @VisibleForTesting boolean waitingForAuth = false;
 
-    public interface DataListener {
+    @Inject
+    ManualPairingPresenter(AppUtil appUtil,
+                           AuthDataManager authDataManager) {
 
-        String getGuid();
-
-        String getPassword();
-
-        void goToPinPage();
-
-        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void updateWaitingForAuthDialog(int secondsRemaining);
-
-        void showProgressDialog(@StringRes int messageId, @Nullable String suffix, boolean cancellable);
-
-        void dismissProgressDialog();
-
-        void resetPasswordField();
-
-        void showTwoFactorCodeNeededDialog(JSONObject responseObject, String sessionId, int authType, String guid, String password);
-
-    }
-
-    ManualPairingViewModel(DataListener listener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        dataListener = listener;
+        this.appUtil = appUtil;
+        this.authDataManager = authDataManager;
     }
 
     @Override
@@ -73,8 +50,8 @@ public class ManualPairingViewModel extends BaseViewModel {
     }
 
     void onContinueClicked() {
-        String guid = dataListener.getGuid();
-        String password = dataListener.getPassword();
+        String guid = getView().getGuid();
+        String password = getView().getPassword();
 
         if (guid == null || guid.isEmpty()) {
             showErrorToast(R.string.invalid_guid);
@@ -87,12 +64,12 @@ public class ManualPairingViewModel extends BaseViewModel {
 
     void submitTwoFactorCode(JSONObject responseObject, String sessionId, String guid, String password, String code) {
         if (code == null || code.isEmpty()) {
-            dataListener.showToast(R.string.two_factor_null_error, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.two_factor_null_error, ToastCustom.TYPE_ERROR);
         } else {
-            compositeDisposable.add(
+            getCompositeDisposable().add(
                     authDataManager.submitTwoFactorCode(sessionId, guid, code)
-                            .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.please_wait, null, false))
-                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                            .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.please_wait, null, false))
+                            .doAfterTerminate(() -> getView().dismissProgressDialog())
                             .subscribe(response -> {
                                         // This is slightly hacky, but if the user requires 2FA login,
                                         // the payload comes in two parts. Here we combine them and
@@ -112,14 +89,14 @@ public class ManualPairingViewModel extends BaseViewModel {
     private void verifyPassword(String password, String guid) {
         waitingForAuth = true;
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 authDataManager.getSessionId(guid)
-                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.validating_password, null, false))
+                        .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.validating_password, null, false))
                         .doOnNext(s -> sessionId = s)
                         .flatMap(sessionId -> authDataManager.getEncryptedPayload(guid, sessionId))
                         .subscribe(response -> handleResponse(password, guid, response),
                                 throwable -> {
-                                    Log.e(TAG, "verifyPassword: ", throwable);
+                                    Timber.e("verifyPassword: ", throwable);
                                     showErrorToast(R.string.auth_failed);
                                 }));
     }
@@ -131,7 +108,7 @@ public class ManualPairingViewModel extends BaseViewModel {
                 //2FA
                 showCheckEmailDialog();
 
-                compositeDisposable.add(
+                getCompositeDisposable().add(
                         authDataManager.startPollingAuthStatus(guid, sessionId)
                                 .subscribe(payloadResponse -> {
                                     waitingForAuth = false;
@@ -174,8 +151,8 @@ public class ManualPairingViewModel extends BaseViewModel {
                 && (jsonObject.getInt("auth_type") == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR
                 || jsonObject.getInt("auth_type") == Settings.AUTH_TYPE_SMS)) {
 
-            dataListener.dismissProgressDialog();
-            dataListener.showTwoFactorCodeNeededDialog(jsonObject,
+            getView().dismissProgressDialog();
+            getView().showTwoFactorCodeNeededDialog(jsonObject,
                     sessionId,
                     jsonObject.getInt("auth_type"),
                     guid,
@@ -186,9 +163,9 @@ public class ManualPairingViewModel extends BaseViewModel {
     }
 
     private void attemptDecryptPayload(String password, String payload) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 authDataManager.initializeFromPayload(payload, password)
-                        .subscribe(() -> dataListener.goToPinPage(),
+                        .subscribe(() -> getView().goToPinPage(),
                                 throwable -> {
                                     if (throwable instanceof HDWalletException) {
                                         showErrorToast(R.string.pairing_failed);
@@ -201,16 +178,16 @@ public class ManualPairingViewModel extends BaseViewModel {
     }
 
     private void showCheckEmailDialog() {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 authDataManager.createCheckEmailTimer()
-                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.check_email_to_auth_login, "120", true))
+                        .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.check_email_to_auth_login, "120", true))
                         .takeUntil(integer -> !waitingForAuth)
                         .subscribe(integer -> {
                             if (integer <= 0) {
                                 // Only called if timer has run out
                                 showErrorToastAndRestartApp(R.string.pairing_failed);
                             } else {
-                                dataListener.updateWaitingForAuthDialog(integer);
+                                getView().updateWaitingForAuthDialog(integer);
                             }
                         }, throwable -> {
                             showErrorToast(R.string.auth_failed);
@@ -220,21 +197,21 @@ public class ManualPairingViewModel extends BaseViewModel {
 
     void onProgressCancelled() {
         waitingForAuth = false;
-        destroy();
+        onViewDestroyed();
     }
 
     @Thunk
     private void showErrorToast(@StringRes int message) {
-        dataListener.dismissProgressDialog();
-        dataListener.resetPasswordField();
-        dataListener.showToast(message, ToastCustom.TYPE_ERROR);
+        getView().dismissProgressDialog();
+        getView().resetPasswordField();
+        getView().showToast(message, ToastCustom.TYPE_ERROR);
         appUtil.clearCredentials();
     }
 
     private void showErrorToastAndRestartApp(@StringRes int message) {
-        dataListener.resetPasswordField();
-        dataListener.dismissProgressDialog();
-        dataListener.showToast(message, ToastCustom.TYPE_ERROR);
+        getView().resetPasswordField();
+        getView().dismissProgressDialog();
+        getView().showToast(message, ToastCustom.TYPE_ERROR);
         appUtil.clearCredentialsAndRestart();
     }
 

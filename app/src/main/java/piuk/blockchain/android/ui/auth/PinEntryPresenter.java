@@ -1,9 +1,7 @@
 package piuk.blockchain.android.ui.auth;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.UiThread;
 import android.support.annotation.VisibleForTesting;
@@ -29,8 +27,7 @@ import javax.inject.Inject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.util.AppUtil;
@@ -38,26 +35,23 @@ import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
-import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 
-@SuppressWarnings("WeakerAccess")
-public class PinEntryViewModel extends BaseViewModel {
+public class PinEntryPresenter extends BasePresenter<PinEntryView> {
 
     private static final int PIN_LENGTH = 4;
     private static final int MAX_ATTEMPTS = 4;
 
-    private DataListener mDataListener;
-    @Inject protected AuthDataManager mAuthDataManager;
-    @Inject protected AppUtil mAppUtil;
-    @Inject protected PrefsUtil mPrefsUtil;
-    @Inject protected PayloadManager mPayloadManager;
-    @Inject protected StringUtils mStringUtils;
-    @Inject protected SSLVerifyUtil mSSLVerifyUtil;
-    @Inject protected FingerprintHelper mFingerprintHelper;
-    @Inject protected AccessState mAccessState;
+    private AuthDataManager mAuthDataManager;
+    private AppUtil mAppUtil;
+    private PrefsUtil mPrefsUtil;
+    private PayloadManager mPayloadManager;
+    private StringUtils mStringUtils;
+    private SSLVerifyUtil mSSLVerifyUtil;
+    private FingerprintHelper mFingerprintHelper;
+    private AccessState mAccessState;
 
     @VisibleForTesting boolean mCanShowFingerprintDialog = true;
     @VisibleForTesting boolean mValidatingPinForResult = false;
@@ -65,51 +59,24 @@ public class PinEntryViewModel extends BaseViewModel {
     @VisibleForTesting String mUserEnteredConfirmationPin;
     @VisibleForTesting boolean bAllowExit = true;
 
-    public interface DataListener {
+    @Inject
+    PinEntryPresenter(AuthDataManager mAuthDataManager,
+                      AppUtil mAppUtil,
+                      PrefsUtil mPrefsUtil,
+                      PayloadManager mPayloadManager,
+                      StringUtils mStringUtils,
+                      SSLVerifyUtil mSSLVerifyUtil,
+                      FingerprintHelper mFingerprintHelper,
+                      AccessState mAccessState) {
 
-        Intent getPageIntent();
-
-        ImageView[] getPinBoxArray();
-
-        void showProgressDialog(@StringRes int messageId, @Nullable String suffix);
-
-        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void dismissProgressDialog();
-
-        void showMaxAttemptsDialog();
-
-        void showValidationDialog();
-
-        void showCommonPinWarning(DialogButtonCallback callback);
-
-        void showWalletVersionNotSupportedDialog(String walletVersion);
-
-        void goToUpgradeWalletActivity();
-
-        void restartPageAndClearTop();
-
-        void setTitleString(@StringRes int title);
-
-        void setTitleVisibility(@ViewUtils.Visibility int visibility);
-
-        void clearPinBoxes();
-
-        void goToPasswordRequiredActivity();
-
-        void finishWithResultOk(String pin);
-
-        void showFingerprintDialog(String pincode);
-
-        void showKeyboard();
-
-        void showAccountLockedDialog();
-
-    }
-
-    public PinEntryViewModel(DataListener listener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        mDataListener = listener;
+        this.mAuthDataManager = mAuthDataManager;
+        this.mAppUtil = mAppUtil;
+        this.mPrefsUtil = mPrefsUtil;
+        this.mPayloadManager = mPayloadManager;
+        this.mStringUtils = mStringUtils;
+        this.mSSLVerifyUtil = mSSLVerifyUtil;
+        this.mFingerprintHelper = mFingerprintHelper;
+        this.mAccessState = mAccessState;
     }
 
     @Override
@@ -117,8 +84,8 @@ public class PinEntryViewModel extends BaseViewModel {
         mSSLVerifyUtil.validateSSL();
         mAppUtil.applyPRNGFixes();
 
-        if (mDataListener.getPageIntent() != null) {
-            Bundle extras = mDataListener.getPageIntent().getExtras();
+        if (getView().getPageIntent() != null) {
+            Bundle extras = getView().getPageIntent().getExtras();
             if (extras != null) {
 
                 if (extras.containsKey(KEY_VALIDATING_PIN_FOR_RESULT)) {
@@ -131,44 +98,44 @@ public class PinEntryViewModel extends BaseViewModel {
         checkFingerprintStatus();
     }
 
-    public void checkFingerprintStatus() {
+    void checkFingerprintStatus() {
         if (getIfShouldShowFingerprintLogin()) {
-            mDataListener.showFingerprintDialog(
+            getView().showFingerprintDialog(
                     mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE));
         } else {
-            mDataListener.showKeyboard();
+            getView().showKeyboard();
         }
     }
 
-    public boolean canShowFingerprintDialog() {
+    boolean canShowFingerprintDialog() {
         return mCanShowFingerprintDialog;
     }
 
-    public boolean getIfShouldShowFingerprintLogin() {
+    boolean getIfShouldShowFingerprintLogin() {
         return !(mValidatingPinForResult || isCreatingNewPin())
                 && mFingerprintHelper.isFingerprintUnlockEnabled()
                 && mFingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE) != null;
     }
 
-    public void loginWithDecryptedPin(String pincode) {
+    void loginWithDecryptedPin(String pincode) {
         mCanShowFingerprintDialog = false;
-        for (ImageView view : mDataListener.getPinBoxArray()) {
+        for (ImageView view : getView().getPinBoxArray()) {
             view.setImageResource(R.drawable.rounded_view_dark_blue);
         }
         validatePIN(pincode);
     }
 
-    public void onDeleteClicked() {
+    void onDeleteClicked() {
         if (!mUserEnteredPin.isEmpty()) {
             // Remove last char from pin string
             mUserEnteredPin = mUserEnteredPin.substring(0, mUserEnteredPin.length() - 1);
 
             // Clear last box
-            mDataListener.getPinBoxArray()[mUserEnteredPin.length()].setImageResource(R.drawable.rounded_view_blue_white_border);
+            getView().getPinBoxArray()[mUserEnteredPin.length()].setImageResource(R.drawable.rounded_view_blue_white_border);
         }
     }
 
-    public void onPadClicked(String string) {
+    void onPadClicked(String string) {
         if (mUserEnteredPin.length() == PIN_LENGTH) {
             return;
         }
@@ -178,7 +145,7 @@ public class PinEntryViewModel extends BaseViewModel {
 
         for (int i = 0; i < mUserEnteredPin.length(); i++) {
             // Ensures that all necessary dots are filled
-            mDataListener.getPinBoxArray()[i].setImageResource(R.drawable.rounded_view_dark_blue);
+            getView().getPinBoxArray()[i].setImageResource(R.drawable.rounded_view_dark_blue);
         }
 
         // Perform appropriate action if PIN_LENGTH has been reached
@@ -189,14 +156,14 @@ public class PinEntryViewModel extends BaseViewModel {
                 showErrorToast(R.string.zero_pin);
                 clearPinViewAndReset();
                 if (isCreatingNewPin()) {
-                    mDataListener.setTitleString(R.string.create_pin);
+                    getView().setTitleString(R.string.create_pin);
                 }
                 return;
             }
 
             // Only show warning on first entry and if user is creating a new PIN
             if (isCreatingNewPin() && isPinCommon(mUserEnteredPin) && mUserEnteredConfirmationPin == null) {
-                mDataListener.showCommonPinWarning(new DialogButtonCallback() {
+                getView().showCommonPinWarning(new DialogButtonCallback() {
                     @Override
                     public void onPositiveClicked() {
                         clearPinViewAndReset();
@@ -221,16 +188,16 @@ public class PinEntryViewModel extends BaseViewModel {
     }
 
     @Thunk
-    void validateAndConfirmPin() {
+    private void validateAndConfirmPin() {
         // Validate
         if (!mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "").isEmpty()) {
-            mDataListener.setTitleVisibility(View.INVISIBLE);
+            getView().setTitleVisibility(View.INVISIBLE);
             validatePIN(mUserEnteredPin);
         } else if (mUserEnteredConfirmationPin == null) {
             // End of Create -  Change to Confirm
             mUserEnteredConfirmationPin = mUserEnteredPin;
             mUserEnteredPin = "";
-            mDataListener.setTitleString(R.string.confirm_pin);
+            getView().setTitleString(R.string.confirm_pin);
             clearPinBoxes();
         } else if (mUserEnteredConfirmationPin.equals(mUserEnteredPin)) {
             // End of Confirm - Pin is confirmed
@@ -238,7 +205,7 @@ public class PinEntryViewModel extends BaseViewModel {
         } else {
             // End of Confirm - Pin Mismatch
             showErrorToast(R.string.pin_mismatch_error);
-            mDataListener.setTitleString(R.string.create_pin);
+            getView().setTitleString(R.string.create_pin);
             clearPinViewAndReset();
         }
     }
@@ -247,28 +214,28 @@ public class PinEntryViewModel extends BaseViewModel {
      * Resets the view without restarting the page
      */
     @Thunk
-    void clearPinViewAndReset() {
+    private void clearPinViewAndReset() {
         clearPinBoxes();
         mUserEnteredConfirmationPin = null;
         checkFingerprintStatus();
     }
 
-    public void clearPinBoxes() {
+    void clearPinBoxes() {
         mUserEnteredPin = "";
-        mDataListener.clearPinBoxes();
+        getView().clearPinBoxes();
     }
 
     @VisibleForTesting
     void updatePayload(String password) {
-        mDataListener.showProgressDialog(R.string.decrypting_wallet, null);
+        getView().showProgressDialog(R.string.decrypting_wallet, null);
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 mAuthDataManager.updatePayload(
                         mPrefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""),
                         mPrefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
                         password)
                         .doAfterTerminate(() -> {
-                            mDataListener.dismissProgressDialog();
+                            getView().dismissProgressDialog();
                             mCanShowFingerprintDialog = true;
                         })
                         .subscribe(() -> {
@@ -277,7 +244,7 @@ public class PinEntryViewModel extends BaseViewModel {
                             setAccountLabelIfNecessary();
 
                             if (!mPayloadManager.getPayload().isUpgraded()) {
-                                mDataListener.goToUpgradeWalletActivity();
+                                getView().goToUpgradeWalletActivity();
                             } else {
                                 mAppUtil.restartAppWithVerifiedPin();
                             }
@@ -285,95 +252,95 @@ public class PinEntryViewModel extends BaseViewModel {
                         }, throwable -> {
 
                             if (throwable instanceof InvalidCredentialsException) {
-                                mDataListener.goToPasswordRequiredActivity();
+                                getView().goToPasswordRequiredActivity();
 
                             } else if (throwable instanceof ServerConnectionException) {
-                                mDataListener.showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+                                getView().showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
                                 mAppUtil.restartApp();
 
                             } else if (throwable instanceof UnsupportedVersionException) {
-                                mDataListener.showWalletVersionNotSupportedDialog(throwable.getMessage());
+                                getView().showWalletVersionNotSupportedDialog(throwable.getMessage());
 
                             } else if (throwable instanceof DecryptionException) {
-                                mDataListener.goToPasswordRequiredActivity();
+                                getView().goToPasswordRequiredActivity();
 
                             } else if (throwable instanceof PayloadException) {
                                 //This shouldn't happen - Payload retrieved from server couldn't be parsed
-                                mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                                getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
                                 mAppUtil.restartApp();
 
                             } else if (throwable instanceof HDWalletException) {
                                 //This shouldn't happen. HD fatal error - not safe to continue - don't clear credentials
-                                mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                                getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
                                 mAppUtil.restartApp();
 
                             } else if (throwable instanceof InvalidCipherTextException) {
                                 // Password changed on web, needs re-pairing
-                                mDataListener.showToast(R.string.password_changed_explanation, ToastCustom.TYPE_ERROR);
+                                getView().showToast(R.string.password_changed_explanation, ToastCustom.TYPE_ERROR);
                                 mAccessState.setPIN(null);
                                 mAppUtil.clearCredentialsAndRestart();
 
                             } else if (throwable instanceof AccountLockedException) {
-                                mDataListener.showAccountLockedDialog();
+                                getView().showAccountLockedDialog();
 
                             } else {
-                                mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                                getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
                                 mAppUtil.clearCredentialsAndRestart();
                             }
 
                         }));
     }
 
-    public boolean isForValidatingPinForResult() {
+    boolean isForValidatingPinForResult() {
         return mValidatingPinForResult;
     }
 
-    public void validatePassword(String password) {
-        mDataListener.showProgressDialog(R.string.validating_password, null);
+    void validatePassword(String password) {
+        getView().showProgressDialog(R.string.validating_password, null);
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 mAuthDataManager.updatePayload(
                         mPrefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""),
                         mPrefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
                         password)
-                        .doAfterTerminate(() -> mDataListener.dismissProgressDialog())
+                        .doAfterTerminate(() -> getView().dismissProgressDialog())
                         .subscribe(() -> {
-                            mDataListener.showToast(R.string.pin_4_strikes_password_accepted, ToastCustom.TYPE_OK);
+                            getView().showToast(R.string.pin_4_strikes_password_accepted, ToastCustom.TYPE_OK);
                             mPrefsUtil.removeValue(PrefsUtil.KEY_PIN_FAILS);
                             mPrefsUtil.removeValue(PrefsUtil.KEY_PIN_IDENTIFIER);
-                            mDataListener.restartPageAndClearTop();
+                            getView().restartPageAndClearTop();
                         }, throwable -> {
 
                             if (throwable instanceof ServerConnectionException) {
-                                mDataListener.showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+                                getView().showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
                             } else if (throwable instanceof PayloadException) {
                                 //This shouldn't happen - Payload retrieved from server couldn't be parsed
-                                mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                                getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
                                 mAppUtil.restartApp();
 
                             } else if (throwable instanceof HDWalletException) {
                                 //This shouldn't happen. HD fatal error - not safe to continue - don't clear credentials
-                                mDataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                                getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
                                 mAppUtil.restartApp();
 
                             } else if (throwable instanceof AccountLockedException) {
-                                mDataListener.showAccountLockedDialog();
+                                getView().showAccountLockedDialog();
 
                             } else {
                                 showErrorToast(R.string.invalid_password);
-                                mDataListener.showValidationDialog();
+                                getView().showValidationDialog();
                             }
 
                         }));
     }
 
     private void createNewPin(String pin) {
-        mDataListener.showProgressDialog(R.string.creating_pin, null);
+        getView().showProgressDialog(R.string.creating_pin, null);
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 mAuthDataManager.createPin(mPayloadManager.getTempPassword(), pin)
                         .subscribe(() -> {
-                            mDataListener.dismissProgressDialog();
+                            getView().dismissProgressDialog();
                             mFingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
                             mFingerprintHelper.setFingerprintUnlockEnabled(false);
                             mPrefsUtil.setValue(PrefsUtil.KEY_PIN_FAILS, 0);
@@ -386,14 +353,14 @@ public class PinEntryViewModel extends BaseViewModel {
     }
 
     private void validatePIN(String pin) {
-        mDataListener.showProgressDialog(R.string.validating_pin, null);
+        getView().showProgressDialog(R.string.validating_pin, null);
 
         mAuthDataManager.validatePin(pin)
                 .subscribe(password -> {
-                    mDataListener.dismissProgressDialog();
+                    getView().dismissProgressDialog();
                     if (password != null) {
                         if (mValidatingPinForResult) {
-                            mDataListener.finishWithResultOk(pin);
+                            getView().finishWithResultOk(pin);
                         } else {
                             updatePayload(password);
                         }
@@ -406,7 +373,7 @@ public class PinEntryViewModel extends BaseViewModel {
                         handleValidateFailure();
                     } else {
                         showErrorToast(R.string.api_fail);
-                        mDataListener.restartPageAndClearTop();
+                        getView().restartPageAndClearTop();
                     }
                 });
     }
@@ -424,18 +391,18 @@ public class PinEntryViewModel extends BaseViewModel {
         mPrefsUtil.setValue(PrefsUtil.KEY_PIN_FAILS, ++fails);
         showErrorToast(R.string.invalid_pin);
         mUserEnteredPin = "";
-        for (ImageView textView : mDataListener.getPinBoxArray()) {
+        for (ImageView textView : getView().getPinBoxArray()) {
             textView.setImageResource(R.drawable.rounded_view_blue_white_border);
         }
-        mDataListener.setTitleVisibility(View.VISIBLE);
-        mDataListener.setTitleString(R.string.pin_entry);
+        getView().setTitleVisibility(View.VISIBLE);
+        getView().setTitleString(R.string.pin_entry);
     }
 
-    public void incrementFailureCountAndRestart() {
+    void incrementFailureCountAndRestart() {
         int fails = mPrefsUtil.getValue(PrefsUtil.KEY_PIN_FAILS, 0);
         mPrefsUtil.setValue(PrefsUtil.KEY_PIN_FAILS, ++fails);
         showErrorToast(R.string.invalid_pin);
-        mDataListener.restartPageAndClearTop();
+        getView().restartPageAndClearTop();
     }
 
     // Check user's password if PIN fails >= 4
@@ -443,7 +410,7 @@ public class PinEntryViewModel extends BaseViewModel {
         int fails = mPrefsUtil.getValue(PrefsUtil.KEY_PIN_FAILS, 0);
         if (fails >= MAX_ATTEMPTS) {
             showErrorToast(R.string.pin_4_strikes);
-            mDataListener.showMaxAttemptsDialog();
+            getView().showMaxAttemptsDialog();
         }
     }
 
@@ -462,15 +429,15 @@ public class PinEntryViewModel extends BaseViewModel {
         return commonPins.contains(pin);
     }
 
-    public void resetApp() {
+    void resetApp() {
         mAppUtil.clearCredentialsAndRestart();
     }
 
-    public boolean allowExit() {
+    boolean allowExit() {
         return bAllowExit;
     }
 
-    public boolean isCreatingNewPin() {
+    boolean isCreatingNewPin() {
         return mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "").isEmpty();
     }
 
@@ -482,15 +449,8 @@ public class PinEntryViewModel extends BaseViewModel {
 
     @UiThread
     private void showErrorToast(@StringRes int message) {
-        mDataListener.dismissProgressDialog();
-        mDataListener.showToast(message, ToastCustom.TYPE_ERROR);
-    }
-
-    @UiThread
-    private void showErrorToastAndRestartApp(@StringRes int message) {
-        mDataListener.dismissProgressDialog();
-        mDataListener.showToast(message, ToastCustom.TYPE_ERROR);
-        resetApp();
+        getView().dismissProgressDialog();
+        getView().showToast(message, ToastCustom.TYPE_ERROR);
     }
 
     @NonNull
