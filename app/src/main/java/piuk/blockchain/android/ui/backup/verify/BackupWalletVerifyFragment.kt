@@ -16,9 +16,12 @@ import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.toast
+import javax.inject.Inject
 
 class BackupWalletVerifyFragment : BaseFragment<BackupVerifyView, BackupVerifyPresenter>(),
         BackupVerifyView {
+
+    @Inject lateinit var backupVerifyPresenter: BackupVerifyPresenter
 
     private var progressDialog: MaterialProgressDialog? = null
 
@@ -50,7 +53,7 @@ class BackupWalletVerifyFragment : BaseFragment<BackupVerifyView, BackupVerifyPr
 
     override fun getPageBundle(): Bundle? = arguments
 
-    override fun createPresenter() = BackupVerifyPresenter()
+    override fun createPresenter() = backupVerifyPresenter
 
     override fun getMvpView() = this
 

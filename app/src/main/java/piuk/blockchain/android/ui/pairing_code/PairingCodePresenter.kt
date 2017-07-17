@@ -8,29 +8,24 @@ import piuk.blockchain.android.data.datamanagers.AuthDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.StringUtils
 import javax.inject.Inject
 
-class PairingCodePresenter : BasePresenter<PairingCodeView>() {
-
-    @Inject lateinit var qrCodeDataManager: QrCodeDataManager
-    @Inject lateinit var stringUtils: StringUtils
-    @Inject lateinit var payloadDataManager: PayloadDataManager
-    @Inject lateinit var authDataManager: AuthDataManager
-
-    init {
-        Injector.getInstance().dataManagerComponent.inject(this)
-    }
+class PairingCodePresenter @Inject constructor(
+        private val qrCodeDataManager: QrCodeDataManager,
+        stringUtils: StringUtils,
+        private val payloadDataManager: PayloadDataManager,
+        private val authDataManager: AuthDataManager
+) : BasePresenter<PairingCodeView>() {
 
     override fun onViewReady() {
-        //no op
+        // No op
     }
 
-    internal val firstStep: String
-        get() = String.format(stringUtils.getString(R.string.pairing_code_instruction_1), WEB_WALLET_URL)
+    internal val firstStep =
+            String.format(stringUtils.getString(R.string.pairing_code_instruction_1), WEB_WALLET_URL)
 
     fun generatePairingQr() {
         pairingEncryptionPasswordObservable
@@ -50,7 +45,6 @@ class PairingCodePresenter : BasePresenter<PairingCodeView>() {
         }
 
     private fun generatePairingCodeObservable(encryptionPhrase: String): Observable<Bitmap> {
-
         val guid = payloadDataManager.wallet.guid
         val sharedKey = payloadDataManager.wallet.sharedKey
         val password = payloadDataManager.tempPassword
@@ -64,7 +58,6 @@ class PairingCodePresenter : BasePresenter<PairingCodeView>() {
     }
 
     companion object {
-
         private val WEB_WALLET_URL = "blockchain.info/wallet/login"
     }
 }

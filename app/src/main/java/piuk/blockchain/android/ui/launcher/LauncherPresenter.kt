@@ -8,7 +8,6 @@ import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.notifications.FcmCallbackService.EXTRA_CONTACT_ACCEPTED
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.settings.SettingsDataManager
-import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.AppUtil
@@ -16,17 +15,13 @@ import piuk.blockchain.android.util.PrefsUtil
 import javax.inject.Inject
 
 
-class LauncherPresenter : BasePresenter<LauncherView>() {
-
-    init {
-        Injector.getInstance().dataManagerComponent.inject(this)
-    }
-
-    @Inject lateinit var appUtil: AppUtil
-    @Inject lateinit var payloadDataManager: PayloadDataManager
-    @Inject lateinit var prefsUtil: PrefsUtil
-    @Inject lateinit var accessState: AccessState
-    @Inject lateinit var settingsDataManager: SettingsDataManager
+class LauncherPresenter @Inject constructor(
+        private val appUtil: AppUtil,
+        private val payloadDataManager: PayloadDataManager,
+        private val prefsUtil: PrefsUtil,
+        private val accessState: AccessState,
+        private val settingsDataManager: SettingsDataManager
+) : BasePresenter<LauncherView>() {
 
     override fun onViewReady() {
         val intent = view.getPageIntent()
@@ -74,7 +69,7 @@ class LauncherPresenter : BasePresenter<LauncherView>() {
         }
     }
 
-    internal fun clearCredentialsAndRestart() = appUtil.clearCredentialsAndRestart()
+    fun clearCredentialsAndRestart() = appUtil.clearCredentialsAndRestart()
 
     private fun promptUpgrade() {
         accessState.setIsLoggedIn(true)

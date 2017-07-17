@@ -1,33 +1,19 @@
 package piuk.blockchain.android.ui.swipetoreceive;
 
-import android.app.Application;
 import android.graphics.Bitmap;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
-import piuk.blockchain.android.BlockchainTestApplication;
-import piuk.blockchain.android.BuildConfig;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
-import piuk.blockchain.android.injection.ApiModule;
-import piuk.blockchain.android.injection.ApplicationModule;
-import piuk.blockchain.android.injection.DataManagerModule;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.base.UiState;
-import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -36,8 +22,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
-@RunWith(RobolectricTestRunner.class)
 public class SwipeToReceivePresenterTest {
 
     private SwipeToReceivePresenter subject;
@@ -49,13 +33,7 @@ public class SwipeToReceivePresenterTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                new MockApplicationModule(RuntimeEnvironment.application),
-                new ApiModule(),
-                new MockDataManagerModule());
-
-        subject = new SwipeToReceivePresenter();
+        subject = new SwipeToReceivePresenter(qrCodeDataManager, swipeToReceiveHelper);
         subject.initView(activity);
     }
 
@@ -103,24 +81,4 @@ public class SwipeToReceivePresenterTest {
         verify(activity).displayReceiveAddress("addr0");
     }
 
-    private static class MockApplicationModule extends ApplicationModule {
-        public MockApplicationModule(Application application) {
-            super(application);
-        }
-    }
-
-    @SuppressWarnings("SyntheticAccessorCall")
-    private class MockDataManagerModule extends DataManagerModule {
-
-        @Override
-        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadDataManager payloadDataManager,
-                                                                   PrefsUtil prefsUtil) {
-            return swipeToReceiveHelper;
-        }
-
-        @Override
-        protected QrCodeDataManager provideQrDataManager() {
-            return qrCodeDataManager;
-        }
-    }
 }

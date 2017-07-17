@@ -1,30 +1,18 @@
 package piuk.blockchain.android.ui.backup.verify
 
-import android.app.Application
 import com.nhaarman.mockito_kotlin.*
-import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.HDWallet
 import io.reactivex.Completable
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
-import org.robolectric.annotation.Config
-import piuk.blockchain.android.BlockchainTestApplication
-import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.backup.BackupWalletActivity
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.BackupWalletUtil
 import piuk.blockchain.android.util.PrefsUtil
 
-@Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
-@RunWith(RobolectricTestRunner::class)
 class BackupVerifyPresenterTest {
 
     private lateinit var subject: BackupVerifyPresenter
@@ -36,14 +24,7 @@ class BackupVerifyPresenterTest {
     @Before
     @Throws(Exception::class)
     fun setUp() {
-
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                MockApplicationModule(RuntimeEnvironment.application),
-                ApiModule(),
-                MockDataManagerModule())
-
-        subject = BackupVerifyPresenter()
+        subject = BackupVerifyPresenter(payloadDataManager, prefsUtil, backupWalletUtil)
         subject.initView(view)
     }
 
@@ -152,22 +133,6 @@ class BackupVerifyPresenterTest {
         verify(view).showStartingFragment()
         verifyNoMoreInteractions(view)
         verifyZeroInteractions(prefsUtil)
-    }
-
-    inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-        override fun providePrefsUtil(): PrefsUtil {
-            return prefsUtil
-        }
-    }
-
-    inner class MockDataManagerModule : DataManagerModule() {
-        override fun providePayloadDataManager(
-                payloadManager: PayloadManager?,
-                rxBus: RxBus?
-        ) = payloadDataManager
-
-        override fun provideBackupWalletUtil(payloadDataManager: PayloadDataManager?) =
-                backupWalletUtil
     }
 
 }

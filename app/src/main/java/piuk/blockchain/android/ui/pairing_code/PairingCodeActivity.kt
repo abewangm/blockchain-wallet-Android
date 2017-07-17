@@ -13,10 +13,13 @@ import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
+import javax.inject.Inject
 
 
 @Suppress("UNUSED_PARAMETER")
 class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresenter>(), PairingCodeView {
+
+    @Inject lateinit var pairingCodePresenter: PairingCodePresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +59,7 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
         progress_bar.gone()
     }
 
-    override fun createPresenter(): PairingCodePresenter = PairingCodePresenter()
+    override fun createPresenter() = pairingCodePresenter
 
     override fun getView(): PairingCodeView = this
 

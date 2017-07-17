@@ -22,7 +22,6 @@ import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.base.UiState
@@ -37,19 +36,19 @@ import java.text.DecimalFormat
 import java.util.*
 import javax.inject.Inject
 
-class BalancePresenter : BasePresenter<BalanceView>() {
-
-    @Inject lateinit var exchangeRateFactory: ExchangeRateFactory
-    @Inject lateinit var transactionListDataManager: TransactionListDataManager
-    @Inject lateinit var contactsDataManager: ContactsDataManager
-    @Inject lateinit var swipeToReceiveHelper: SwipeToReceiveHelper
-    @Inject lateinit var payloadDataManager: PayloadDataManager
-    @Inject lateinit var buyDataManager: BuyDataManager
-    @Inject lateinit var stringUtils: StringUtils
-    @Inject lateinit var prefsUtil: PrefsUtil
-    @Inject lateinit var accessState: AccessState
-    @Inject lateinit var rxBus: RxBus
-    @Inject lateinit var appUtil: AppUtil
+class BalancePresenter @Inject constructor(
+        private val exchangeRateFactory: ExchangeRateFactory,
+        private val transactionListDataManager: TransactionListDataManager,
+        private val contactsDataManager: ContactsDataManager,
+        private val swipeToReceiveHelper: SwipeToReceiveHelper,
+        internal val payloadDataManager: PayloadDataManager,
+        private val buyDataManager: BuyDataManager,
+        private val stringUtils: StringUtils,
+        private val prefsUtil: PrefsUtil,
+        private val accessState: AccessState,
+        private val rxBus: RxBus,
+        private val appUtil: AppUtil
+) : BasePresenter<BalanceView>() {
 
     @VisibleForTesting var contactsEventObservable: Observable<ContactsEvent>? = null
     @VisibleForTesting var notificationObservable: Observable<NotificationPayload>? = null
@@ -59,10 +58,6 @@ class BalancePresenter : BasePresenter<BalanceView>() {
     @VisibleForTesting internal val activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
     private val displayList: MutableList<Any> = mutableListOf()
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
-
-    init {
-        Injector.getInstance().dataManagerComponent.inject(this)
-    }
 
     override fun onViewReady() {
         subscribeToEvents()

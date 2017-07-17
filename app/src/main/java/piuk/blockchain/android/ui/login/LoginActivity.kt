@@ -12,6 +12,7 @@ import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.api.EnvironmentSettings
+import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.auth.PinEntryActivity
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
@@ -20,10 +21,17 @@ import piuk.blockchain.android.ui.zxing.CaptureActivity
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PermissionUtil
 import piuk.blockchain.android.util.extensions.toast
+import javax.inject.Inject
 
 class LoginActivity : BaseMvpActivity<LoginView, LoginPresenter>(), LoginView {
 
+    @Inject lateinit var loginPresenter: LoginPresenter
+
     private var progressDialog: MaterialProgressDialog? = null
+
+    init {
+        Injector.getInstance().dataManagerComponent.inject(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +42,7 @@ class LoginActivity : BaseMvpActivity<LoginView, LoginPresenter>(), LoginView {
         pairingFirstStep.text = getString(R.string.pair_wallet_step_1, EnvironmentSettings().explorerUrl + "wallet")
     }
 
-    override fun createPresenter() = LoginPresenter()
+    override fun createPresenter() = loginPresenter
 
     override fun getView() = this
 

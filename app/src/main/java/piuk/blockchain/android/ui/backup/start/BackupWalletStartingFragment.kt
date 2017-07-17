@@ -7,13 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_backup_start.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.SecondPasswordHandler
 import piuk.blockchain.android.ui.backup.wordlist.BackupWalletWordListFragment
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.util.extensions.inflate
+import javax.inject.Inject
 
 class BackupWalletStartingFragment : BaseFragment<BackupWalletStartingView, BackupWalletStartingPresenter>(),
         BackupWalletStartingView {
+
+    @Inject lateinit var backupWalletStartingPresenter: BackupWalletStartingPresenter
+
+    init {
+        Injector.getInstance().dataManagerComponent.inject(this)
+    }
 
     override fun onCreateView(
             inflater: LayoutInflater?,
@@ -49,7 +57,7 @@ class BackupWalletStartingFragment : BaseFragment<BackupWalletStartingView, Back
         }
     }
 
-    override fun createPresenter() = BackupWalletStartingPresenter()
+    override fun createPresenter() = backupWalletStartingPresenter
 
     override fun getMvpView() = this
 

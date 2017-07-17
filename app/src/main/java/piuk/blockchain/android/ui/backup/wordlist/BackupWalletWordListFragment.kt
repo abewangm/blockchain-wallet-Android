@@ -11,15 +11,19 @@ import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import kotlinx.android.synthetic.main.fragment_backup_word_list.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.backup.verify.BackupWalletVerifyFragment
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import javax.inject.Inject
 
 class BackupWalletWordListFragment : BaseFragment<BackupWalletWordListView, BackupWalletWordListPresenter>(),
         BackupWalletWordListView {
+
+    @Inject lateinit var backupWalletWordListPresenter: BackupWalletWordListPresenter
 
     private val animEnterFromRight: Animation by unsafeLazy { AnimationUtils.loadAnimation(activity, R.anim.enter_from_right) }
     private val animEnterFromLeft: Animation by unsafeLazy { AnimationUtils.loadAnimation(activity, R.anim.enter_from_left) }
@@ -29,6 +33,10 @@ class BackupWalletWordListFragment : BaseFragment<BackupWalletWordListView, Back
     private val of: String by unsafeLazy { getString(R.string.backup_of) }
 
     var currentWordIndex = 0
+
+    init {
+        Injector.getInstance().dataManagerComponent.inject(this)
+    }
 
     override fun onCreateView(
             inflater: LayoutInflater?,
@@ -49,7 +57,7 @@ class BackupWalletWordListFragment : BaseFragment<BackupWalletWordListView, Back
 
     override fun getPageBundle(): Bundle? = arguments
 
-    override fun createPresenter() = BackupWalletWordListPresenter()
+    override fun createPresenter() = backupWalletWordListPresenter
 
     override fun getMvpView() = this
 
