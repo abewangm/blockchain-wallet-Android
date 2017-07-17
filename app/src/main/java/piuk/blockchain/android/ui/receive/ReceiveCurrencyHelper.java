@@ -5,24 +5,25 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
-import javax.inject.Inject;
-
-import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
 public class ReceiveCurrencyHelper {
 
-    private MonetaryUtil mMonetaryUtil;
-    private Locale mLocale;
-    @Inject PrefsUtil mPrefsUtil;
-    @Inject ExchangeRateFactory mExchangeRateFactory;
+    private MonetaryUtil monetaryUtil;
+    private Locale locale;
+    private final PrefsUtil prefsUtil;
+    private final ExchangeRateFactory exchangeRateFactory;
 
-    public ReceiveCurrencyHelper(MonetaryUtil monetaryUtil, Locale locale) {
-        Injector.getInstance().getAppComponent().inject(this);
-        mMonetaryUtil = monetaryUtil;
-        mLocale = locale;
+    public ReceiveCurrencyHelper(MonetaryUtil monetaryUtil,
+                                 Locale locale,
+                                 PrefsUtil prefsUtil,
+                                 ExchangeRateFactory exchangeRateFactory) {
+        this.monetaryUtil = monetaryUtil;
+        this.locale = locale;
+        this.prefsUtil = prefsUtil;
+        this.exchangeRateFactory = exchangeRateFactory;
     }
 
     /**
@@ -31,7 +32,7 @@ public class ReceiveCurrencyHelper {
      * @return The saved BTC unit
      */
     public String getBtcUnit() {
-        return mMonetaryUtil.getBTCUnit(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
+        return monetaryUtil.getBTCUnit(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
     }
 
     /**
@@ -40,7 +41,7 @@ public class ReceiveCurrencyHelper {
      * @return The saved Fiat unit
      */
     public String getFiatUnit() {
-        return mPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        return prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
     }
 
     /**
@@ -49,7 +50,7 @@ public class ReceiveCurrencyHelper {
      * @return A double exchange rate
      */
     public double getLastPrice() {
-        return mExchangeRateFactory.getLastPrice(getFiatUnit());
+        return exchangeRateFactory.getLastPrice(getFiatUnit());
     }
 
     /**
@@ -59,7 +60,7 @@ public class ReceiveCurrencyHelper {
      * @return A region formatted BTC string for the saved unit
      */
     public String getFormattedBtcString(double amount) {
-        return mMonetaryUtil.getBTCFormat().format(getDenominatedBtcAmount(amount));
+        return monetaryUtil.getBTCFormat().format(getDenominatedBtcAmount(amount));
     }
 
     /**
@@ -69,7 +70,7 @@ public class ReceiveCurrencyHelper {
      * @return A region formatted string
      */
     public String getFormattedFiatString(double amount) {
-        return mMonetaryUtil.getFiatFormat(getFiatUnit()).format(amount);
+        return monetaryUtil.getFiatFormat(getFiatUnit()).format(amount);
     }
 
     /**
@@ -79,7 +80,7 @@ public class ReceiveCurrencyHelper {
      * @return The amount of Bitcoin as a {@link BigInteger} value
      */
     public BigInteger getUndenominatedAmount(long amount) {
-        return mMonetaryUtil.getUndenominatedAmount(amount);
+        return monetaryUtil.getUndenominatedAmount(amount);
     }
 
     /**
@@ -89,7 +90,7 @@ public class ReceiveCurrencyHelper {
      * @return The amount of BTC/mBits/bits as a double
      */
     public double getUndenominatedAmount(double amount) {
-        return mMonetaryUtil.getUndenominatedAmount(amount);
+        return monetaryUtil.getUndenominatedAmount(amount);
     }
 
     /**
@@ -99,7 +100,7 @@ public class ReceiveCurrencyHelper {
      * @return The amount of bitcoin in BTC
      */
     public Double getDenominatedBtcAmount(double amount) {
-        return mMonetaryUtil.getDenominatedAmount(amount);
+        return monetaryUtil.getDenominatedAmount(amount);
     }
 
     /**
@@ -108,7 +109,7 @@ public class ReceiveCurrencyHelper {
      * @return The max number of allowed decimal points
      */
     public int getMaxBtcDecimalLength() {
-        int unit = mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
+        int unit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         int maxLength;
         switch (unit) {
             case MonetaryUtil.MICRO_BTC:
@@ -132,7 +133,7 @@ public class ReceiveCurrencyHelper {
      */
     public long getLongAmount(String amount) {
         try {
-            return Math.round(NumberFormat.getInstance(mLocale).parse(amount).doubleValue() * 1e8);
+            return Math.round(NumberFormat.getInstance(locale).parse(amount).doubleValue() * 1e8);
         } catch (ParseException e) {
             return 0L;
         }
@@ -146,7 +147,7 @@ public class ReceiveCurrencyHelper {
      */
     public double getDoubleAmount(String amount) {
         try {
-            return NumberFormat.getInstance(mLocale).parse(amount).doubleValue();
+            return NumberFormat.getInstance(locale).parse(amount).doubleValue();
         } catch (ParseException e) {
             return 0D;
         }

@@ -1,10 +1,9 @@
 package piuk.blockchain.android.ui.receive;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
+import android.content.Context;
 import android.graphics.Bitmap;
 
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.HDWallet;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -16,28 +15,18 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-
-import javax.inject.Named;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
-import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.injection.ApiModule;
-import piuk.blockchain.android.injection.ApplicationModule;
-import piuk.blockchain.android.injection.DataManagerModule;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
@@ -45,7 +34,6 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
-import retrofit2.Retrofit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -60,14 +48,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static piuk.blockchain.android.ui.receive.ReceiveViewModel.KEY_WARN_WATCH_ONLY_SPEND;
+import static piuk.blockchain.android.ui.receive.ReceivePresenter.KEY_WARN_WATCH_ONLY_SPEND;
 
-@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
-public class ReceiveViewModelTest {
+public class ReceivePresenterTest {
 
-    private ReceiveViewModel subject;
+    private ReceivePresenter subject;
     @Mock private PayloadDataManager payloadDataManager;
     @Mock private AppUtil appUtil;
     @Mock private PrefsUtil prefsUtil;
@@ -76,19 +63,23 @@ public class ReceiveViewModelTest {
     @Mock private ExchangeRateFactory exchangeRateFactory;
     @Mock private WalletAccountHelper walletAccountHelper;
     @Mock private SSLVerifyUtil sslVerifyUtil;
-    @Mock private ReceiveViewModel.DataListener activity;
+    @Mock private ReceiveView activity;
+    @Mock private Context applicationContext;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                new MockApplicationModule(RuntimeEnvironment.application),
-                new MockApiModule(),
-                new MockDataManagerModule());
-
-        subject = new ReceiveViewModel(activity, Locale.UK);
+        subject = new ReceivePresenter(appUtil,
+                prefsUtil,
+                stringUtils,
+                qrCodeDataManager,
+                walletAccountHelper,
+                sslVerifyUtil,
+                applicationContext,
+                payloadDataManager,
+                exchangeRateFactory);
+        subject.initView(activity);
     }
 
     @Test
@@ -331,59 +322,4 @@ public class ReceiveViewModelTest {
 
     }
 
-    private class MockApplicationModule extends ApplicationModule {
-
-        MockApplicationModule(Application application) {
-            super(application);
-        }
-
-        @Override
-        protected PrefsUtil providePrefsUtil() {
-            return prefsUtil;
-        }
-
-        @Override
-        protected AppUtil provideAppUtil() {
-            return appUtil;
-        }
-
-        @Override
-        protected StringUtils provideStringUtils() {
-            return stringUtils;
-        }
-
-        @Override
-        protected ExchangeRateFactory provideExchangeRateFactory() {
-            return exchangeRateFactory;
-        }
-    }
-
-    private class MockApiModule extends ApiModule {
-        @Override
-        protected SSLVerifyUtil provideSSlVerifyUtil(@Named("explorer") Retrofit retrofit,
-                                                     RxBus rxBus) {
-            return sslVerifyUtil;
-        }
-    }
-
-    private class MockDataManagerModule extends DataManagerModule {
-        @Override
-        protected QrCodeDataManager provideQrDataManager() {
-            return qrCodeDataManager;
-        }
-
-        @Override
-        protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager,
-                                                                 PrefsUtil prefsUtil,
-                                                                 StringUtils stringUtils,
-                                                                 ExchangeRateFactory exchangeRateFactory) {
-            return walletAccountHelper;
-        }
-
-        @Override
-        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager,
-                                                               RxBus rxBus) {
-            return payloadDataManager;
-        }
-    }
 }

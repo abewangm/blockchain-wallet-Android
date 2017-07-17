@@ -32,8 +32,8 @@ import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.login.LoginActivity;
 import piuk.blockchain.android.ui.login.ManualPairingActivity;
 import piuk.blockchain.android.ui.onboarding.OnboardingViewModel;
+import piuk.blockchain.android.ui.receive.ReceiveFragment;
 import piuk.blockchain.android.ui.receive.ReceiveQrViewModel;
-import piuk.blockchain.android.ui.receive.ReceiveViewModel;
 import piuk.blockchain.android.ui.recover.RecoverFundsActivity;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsViewModel;
@@ -48,8 +48,6 @@ import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 @PresenterScope
 @Subcomponent(modules = DataManagerModule.class)
 public interface PresenterComponent {
-
-    @Deprecated void inject(ReceiveViewModel receiveViewModel);
 
     @Deprecated void inject(AccountViewModel accountViewModel);
 
@@ -124,4 +122,5 @@ public interface PresenterComponent {
 
     void inject(@NotNull RecoverFundsActivity recoverFundsActivity);
 
+    void inject(@NotNull ReceiveFragment receiveFragment);
 }

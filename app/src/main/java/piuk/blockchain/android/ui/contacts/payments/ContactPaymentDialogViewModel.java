@@ -101,7 +101,7 @@ public class ContactPaymentDialogViewModel extends BaseViewModel {
         Injector.getInstance().getPresenterComponent().inject(this);
         this.dataListener = dataListener;
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
-        currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault());
+        currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault(), prefsUtil, exchangeRateFactory);
         getSuggestedFee();
     }
 

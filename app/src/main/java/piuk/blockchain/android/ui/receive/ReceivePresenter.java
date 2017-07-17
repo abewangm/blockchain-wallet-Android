@@ -14,7 +14,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
 import android.util.Pair;
 import android.util.SparseIntArray;
 import android.webkit.MimeTypeMap;
@@ -41,68 +40,61 @@ import javax.inject.Inject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
-import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.BitcoinLinkGenerator;
+import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
+import timber.log.Timber;
 
-@SuppressWarnings("WeakerAccess")
-public class ReceiveViewModel extends BaseViewModel {
+public class ReceivePresenter extends BasePresenter<ReceiveView> {
 
-    public static final String TAG = ReceiveViewModel.class.getSimpleName();
     @VisibleForTesting static final String KEY_WARN_WATCH_ONLY_SPEND = "warn_watch_only_spend";
     private static final int DIMENSION_QR_CODE = 600;
 
-    private DataListener dataListener;
     private ReceiveCurrencyHelper currencyHelper;
 
-    @Inject AppUtil appUtil;
-    @Inject PrefsUtil prefsUtil;
-    @Inject StringUtils stringUtils;
-    @Inject QrCodeDataManager qrCodeDataManager;
-    @Inject WalletAccountHelper walletAccountHelper;
-    @Inject SSLVerifyUtil sslVerifyUtil;
-    @Inject Context applicationContext;
-    @Inject PayloadDataManager payloadDataManager;
+    private AppUtil appUtil;
+    private PrefsUtil prefsUtil;
+    private StringUtils stringUtils;
+    private QrCodeDataManager qrCodeDataManager;
+    private WalletAccountHelper walletAccountHelper;
+    private SSLVerifyUtil sslVerifyUtil;
+    private Context applicationContext;
+    private PayloadDataManager payloadDataManager;
     @VisibleForTesting HashBiMap<Integer, Object> accountMap;
     @VisibleForTesting SparseIntArray spinnerIndexMap;
 
-    public interface DataListener {
+    @Inject
+    ReceivePresenter(
+            AppUtil appUtil,
+            PrefsUtil prefsUtil,
+            StringUtils stringUtils,
+            QrCodeDataManager qrCodeDataManager,
+            WalletAccountHelper walletAccountHelper,
+            SSLVerifyUtil sslVerifyUtil,
+            Context applicationContext,
+            PayloadDataManager payloadDataManager,
+            ExchangeRateFactory exchangeRateFactory) {
 
-        Bitmap getQrBitmap();
-
-        void onAccountDataChanged();
-
-        void showQrLoading();
-
-        void showQrCode(@Nullable Bitmap bitmap);
-
-        void showToast(String message, @ToastCustom.ToastType String toastType);
-
-        void updateFiatTextField(String text);
-
-        void updateBtcTextField(String text);
-
-        void startContactSelectionActivity();
-
-        void updateReceiveAddress(String address);
-
-    }
-
-    ReceiveViewModel(DataListener listener, Locale locale) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        dataListener = listener;
+        this.appUtil = appUtil;
+        this.prefsUtil = prefsUtil;
+        this.stringUtils = stringUtils;
+        this.qrCodeDataManager = qrCodeDataManager;
+        this.walletAccountHelper = walletAccountHelper;
+        this.sslVerifyUtil = sslVerifyUtil;
+        this.applicationContext = applicationContext;
+        this.payloadDataManager = payloadDataManager;
 
         int btcUnitType = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         MonetaryUtil monetaryUtil = new MonetaryUtil(btcUnitType);
-        currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, locale);
+        currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault(), prefsUtil, exchangeRateFactory);
 
         accountMap = HashBiMap.create();
         spinnerIndexMap = new SparseIntArray();
@@ -117,9 +109,9 @@ public class ReceiveViewModel extends BaseViewModel {
     void onSendToContactClicked(String btcAmount) {
         long amountLong = currencyHelper.getLongAmount(btcAmount);
         if (amountLong > 0) {
-            dataListener.startContactSelectionActivity();
+            getView().startContactSelectionActivity();
         } else {
-            dataListener.showToast(stringUtils.getString(R.string.invalid_amount), ToastCustom.TYPE_ERROR);
+            getView().showToast(stringUtils.getString(R.string.invalid_amount), ToastCustom.TYPE_ERROR);
         }
     }
 
@@ -202,17 +194,17 @@ public class ReceiveViewModel extends BaseViewModel {
             spinnerIndex++;
         }
 
-        dataListener.onAccountDataChanged();
+        getView().onAccountDataChanged();
     }
 
     void generateQrCode(String uri) {
-        dataListener.showQrLoading();
-        compositeDisposable.clear();
-        compositeDisposable.add(
+        getView().showQrLoading();
+        getCompositeDisposable().clear();
+        getCompositeDisposable().add(
                 qrCodeDataManager.generateQrCode(uri, DIMENSION_QR_CODE)
                         .subscribe(
-                                qrCode -> dataListener.showQrCode(qrCode),
-                                throwable -> dataListener.showQrCode(null)));
+                                qrCode -> getView().showQrCode(qrCode),
+                                throwable -> getView().showQrCode(null)));
     }
 
     int getDefaultAccountPosition() {
@@ -236,22 +228,22 @@ public class ReceiveViewModel extends BaseViewModel {
         if (bitcoin.isEmpty()) bitcoin = "0";
         double btcAmount = currencyHelper.getUndenominatedAmount(currencyHelper.getDoubleAmount(bitcoin));
         double fiatAmount = currencyHelper.getLastPrice() * btcAmount;
-        dataListener.updateFiatTextField(currencyHelper.getFormattedFiatString(fiatAmount));
+        getView().updateFiatTextField(currencyHelper.getFormattedFiatString(fiatAmount));
     }
 
     void updateBtcTextField(String fiat) {
         if (fiat.isEmpty()) fiat = "0";
         double fiatAmount = currencyHelper.getDoubleAmount(fiat);
         double btcAmount = fiatAmount / currencyHelper.getLastPrice();
-        dataListener.updateBtcTextField(currencyHelper.getFormattedBtcString(btcAmount));
+        getView().updateBtcTextField(currencyHelper.getFormattedBtcString(btcAmount));
     }
 
     void getV3ReceiveAddress(Account account) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 payloadDataManager.getNextReceiveAddress(account)
                         .subscribe(
-                                address -> dataListener.updateReceiveAddress(address),
-                                throwable -> dataListener.showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR)));
+                                address -> getView().updateReceiveAddress(address),
+                                throwable -> getView().showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR)));
     }
 
     @Nullable
@@ -261,14 +253,14 @@ public class ReceiveViewModel extends BaseViewModel {
         outputStream = getFileOutputStream(file);
 
         if (outputStream != null) {
-            Bitmap bitmap = dataListener.getQrBitmap();
+            Bitmap bitmap = getView().getQrBitmap();
             bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
 
             try {
                 outputStream.close();
             } catch (IOException e) {
-                Log.e(TAG, "getIntentDataList: ", e);
-                dataListener.showToast(e.getMessage(), ToastCustom.TYPE_ERROR);
+                Timber.e(e);
+                getView().showToast(e.getMessage(), ToastCustom.TYPE_ERROR);
                 return null;
             }
 
@@ -283,7 +275,7 @@ public class ReceiveViewModel extends BaseViewModel {
             if (getFormattedEmailLink(uri) != null) {
                 emailIntent.setData(getFormattedEmailLink(uri));
             } else {
-                dataListener.showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
+                getView().showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
                 return null;
             }
 
@@ -337,7 +329,7 @@ public class ReceiveViewModel extends BaseViewModel {
             return dataList;
 
         } else {
-            dataListener.showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
+            getView().showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
             return null;
         }
     }
@@ -351,7 +343,7 @@ public class ReceiveViewModel extends BaseViewModel {
             try {
                 file.createNewFile();
             } catch (Exception e) {
-                Log.e(TAG, "getQrFile: ", e);
+                Timber.e(e);
             }
         }
         file.setReadable(true, false);
@@ -364,7 +356,7 @@ public class ReceiveViewModel extends BaseViewModel {
         try {
             fos = new FileOutputStream(file);
         } catch (FileNotFoundException e) {
-            Log.e(TAG, "getFileOutputStream: ", e);
+            Timber.e(e);
         }
         return fos;
     }
@@ -389,7 +381,7 @@ public class ReceiveViewModel extends BaseViewModel {
             return Uri.parse(builder);
 
         } catch (BitcoinURIParseException e) {
-            Log.e(TAG, "getFormattedEmailLink: ", e);
+            Timber.e(e);
             return null;
         }
     }
