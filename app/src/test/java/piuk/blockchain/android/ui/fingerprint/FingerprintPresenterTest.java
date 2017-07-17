@@ -1,25 +1,13 @@
 package piuk.blockchain.android.ui.fingerprint;
 
-import android.content.Context;
 import android.os.Bundle;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
-import piuk.blockchain.android.BlockchainTestApplication;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.injection.ApiModule;
-import piuk.blockchain.android.injection.ApplicationModule;
-import piuk.blockchain.android.injection.DataManagerModule;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.mockito.Matchers.any;
@@ -27,38 +15,30 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.fingerprint.FingerprintDialog.KEY_BUNDLE_PIN_CODE;
 import static piuk.blockchain.android.ui.fingerprint.FingerprintDialog.KEY_BUNDLE_STAGE;
 
-@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
-@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
-@RunWith(RobolectricTestRunner.class)
-public class FingerprintDialogViewModelTest {
+public class FingerprintPresenterTest {
 
-    private FingerprintDialogViewModel subject;
+    private FingerprintPresenter subject;
     @Mock private FingerprintHelper fingerprintHelper;
-    @Mock private FingerprintDialogViewModel.DataListener activity;
+    @Mock private FingerprintView activity;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                new ApplicationModule(RuntimeEnvironment.application),
-                new ApiModule(),
-                new MockDataManagerModule());
-
-        subject = new FingerprintDialogViewModel(activity);
+        subject = new FingerprintPresenter(fingerprintHelper);
+        subject.initView(activity);
     }
 
     @Test
     public void onViewReadyKeysNull() throws Exception {
         // Arrange
-        when(activity.getBundle()).thenReturn(new Bundle());
+        when(activity.getBundle()).thenReturn(mock(Bundle.class));
         // Act
         subject.onViewReady();
         // Assert
@@ -68,10 +48,10 @@ public class FingerprintDialogViewModelTest {
     @Test
     public void onViewReadyRegister() throws Exception {
         // Arrange
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.REGISTER_FINGERPRINT.name());
+        Bundle bundle = mock(Bundle.class);
+        when(bundle.getString(KEY_BUNDLE_STAGE)).thenReturn(FingerprintStage.REGISTER_FINGERPRINT.name());
         String pincode = "1234";
-        bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
+        when(bundle.getString(KEY_BUNDLE_PIN_CODE)).thenReturn(pincode);
         when(activity.getBundle()).thenReturn(bundle);
         // Act
         subject.onViewReady();
@@ -84,9 +64,10 @@ public class FingerprintDialogViewModelTest {
     @Test
     public void onViewReadyAuthenticate() throws Exception {
         // Arrange
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.AUTHENTICATE.name());
+        Bundle bundle = mock(Bundle.class);
+        when(bundle.getString(KEY_BUNDLE_STAGE)).thenReturn(FingerprintStage.AUTHENTICATE.name());
         String pincode = "1234";
+        when(bundle.getString(KEY_BUNDLE_PIN_CODE)).thenReturn(pincode);
         bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
         when(activity.getBundle()).thenReturn(bundle);
         // Act
@@ -98,10 +79,10 @@ public class FingerprintDialogViewModelTest {
 
     @Test
     public void onFailure() throws Exception {
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.REGISTER_FINGERPRINT.name());
+        Bundle bundle = mock(Bundle.class);
+        when(bundle.getString(KEY_BUNDLE_STAGE)).thenReturn(FingerprintStage.REGISTER_FINGERPRINT.name());
         String pincode = "1234";
-        bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
+        when(bundle.getString(KEY_BUNDLE_PIN_CODE)).thenReturn(pincode);
         when(activity.getBundle()).thenReturn(bundle);
         doAnswer(invocation -> {
             ((FingerprintHelper.AuthCallback) invocation.getArguments()[2]).onFailure();
@@ -119,11 +100,11 @@ public class FingerprintDialogViewModelTest {
 
     @Test
     public void onHelp() throws Exception {
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.REGISTER_FINGERPRINT.name());
+        Bundle bundle = mock(Bundle.class);
+        when(bundle.getString(KEY_BUNDLE_STAGE)).thenReturn(FingerprintStage.REGISTER_FINGERPRINT.name());
         String pincode = "1234";
+        when(bundle.getString(KEY_BUNDLE_PIN_CODE)).thenReturn(pincode);
         String message = "help";
-        bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
         when(activity.getBundle()).thenReturn(bundle);
         doAnswer(invocation -> {
             ((FingerprintHelper.AuthCallback) invocation.getArguments()[2]).onHelp(message);
@@ -141,11 +122,11 @@ public class FingerprintDialogViewModelTest {
 
     @Test
     public void onAuthenticated() throws Exception {
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.REGISTER_FINGERPRINT.name());
+        Bundle bundle = mock(Bundle.class);
+        when(bundle.getString(KEY_BUNDLE_STAGE)).thenReturn(FingerprintStage.REGISTER_FINGERPRINT.name());
         String pincode = "1234";
+        when(bundle.getString(KEY_BUNDLE_PIN_CODE)).thenReturn(pincode);
         String data = "";
-        bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
         when(activity.getBundle()).thenReturn(bundle);
         doAnswer(invocation -> {
             ((FingerprintHelper.AuthCallback) invocation.getArguments()[2]).onAuthenticated(data);
@@ -164,10 +145,10 @@ public class FingerprintDialogViewModelTest {
 
     @Test
     public void onKeyInvalidated() throws Exception {
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.REGISTER_FINGERPRINT.name());
+        Bundle bundle = mock(Bundle.class);
+        when(bundle.getString(KEY_BUNDLE_STAGE)).thenReturn(FingerprintStage.REGISTER_FINGERPRINT.name());
         String pincode = "1234";
-        bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
+        when(bundle.getString(KEY_BUNDLE_PIN_CODE)).thenReturn(pincode);
         when(activity.getBundle()).thenReturn(bundle);
         doAnswer(invocation -> {
             ((FingerprintHelper.AuthCallback) invocation.getArguments()[2]).onKeyInvalidated();
@@ -188,10 +169,10 @@ public class FingerprintDialogViewModelTest {
 
     @Test
     public void onFatalErrorWhilstRegistering() throws Exception {
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.REGISTER_FINGERPRINT.name());
+        Bundle bundle = mock(Bundle.class);
+        when(bundle.getString(KEY_BUNDLE_STAGE)).thenReturn(FingerprintStage.REGISTER_FINGERPRINT.name());
         String pincode = "1234";
-        bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
+        when(bundle.getString(KEY_BUNDLE_PIN_CODE)).thenReturn(pincode);
         when(activity.getBundle()).thenReturn(bundle);
         doAnswer(invocation -> {
             ((FingerprintHelper.AuthCallback) invocation.getArguments()[2]).onFatalError();
@@ -212,10 +193,10 @@ public class FingerprintDialogViewModelTest {
 
     @Test
     public void onFatalErrorWhilstAuthenticating() throws Exception {
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_BUNDLE_STAGE, FingerprintStage.AUTHENTICATE.name());
+        Bundle bundle = mock(Bundle.class);
+        when(bundle.getString(KEY_BUNDLE_STAGE)).thenReturn(FingerprintStage.AUTHENTICATE.name());
         String pincode = "1234";
-        bundle.putString(KEY_BUNDLE_PIN_CODE, pincode);
+        when(bundle.getString(KEY_BUNDLE_PIN_CODE)).thenReturn(pincode);
         when(activity.getBundle()).thenReturn(bundle);
         doAnswer(invocation -> {
             ((FingerprintHelper.AuthCallback) invocation.getArguments()[2]).onFatalError();
@@ -239,16 +220,9 @@ public class FingerprintDialogViewModelTest {
         // Arrange
 
         // Act
-        subject.destroy();
+        subject.onViewDestroyed();
         // Assert
         verify(fingerprintHelper).releaseFingerprintReader();
-    }
-
-    private class MockDataManagerModule extends DataManagerModule {
-        @Override
-        protected FingerprintHelper provideFingerprintHelper(Context applicationContext, PrefsUtil prefsUtil) {
-            return fingerprintHelper;
-        }
     }
 
 }

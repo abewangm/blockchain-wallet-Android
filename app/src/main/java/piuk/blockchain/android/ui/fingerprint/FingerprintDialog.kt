@@ -16,15 +16,22 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import kotlinx.android.synthetic.main.dialog_fingerprint.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.injection.Injector
+import piuk.blockchain.android.ui.base.BaseDialogFragment
+import javax.inject.Inject
 
 private const val ERROR_TIMEOUT_MILLIS: Long = 1500
 private const val SUCCESS_DELAY_MILLIS: Long = 600
 private const val FATAL_ERROR_TIMEOUT_MILLIS: Long = 3500
 
-class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.DataListener {
+class FingerprintDialog : BaseDialogFragment<FingerprintView, FingerprintPresenter>(), FingerprintView {
 
-    private lateinit var viewModel: FingerprintDialogViewModel
+    @Inject lateinit var fingerprintPresenter: FingerprintPresenter
     private var authCallback: FingerprintAuthCallback? = null
+
+    init {
+        Injector.getInstance().dataManagerComponent.inject(this)
+    }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,10 +57,9 @@ class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        button_cancel.setOnClickListener { _ -> authCallback!!.onCanceled() }
+        button_cancel.setOnClickListener { authCallback!!.onCanceled() }
 
-        viewModel = FingerprintDialogViewModel(this)
-        viewModel.onViewReady()
+        onViewReady()
     }
 
     fun setAuthCallback(authCallback: FingerprintAuthCallback) {
@@ -104,10 +110,9 @@ class FingerprintDialog : AppCompatDialogFragment(), FingerprintDialogViewModel.
         authCallback!!.onCanceled()
     }
 
-    override fun onDismiss(dialog: DialogInterface?) {
-        viewModel.destroy()
-        super.onDismiss(dialog)
-    }
+    override fun createPresenter() = fingerprintPresenter
+
+    override fun getMvpView() = this
 
     override fun onSaveInstanceState(outState: Bundle?) {
         // This is to fix a long-standing bug in the Android framework

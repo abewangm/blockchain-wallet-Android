@@ -31,7 +31,7 @@ import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
 })
 public interface ApplicationComponent {
 
-    DataManagerComponent plus(DataManagerModule userModule);
+    PresenterComponent plus(DataManagerModule userModule);
 
     void inject(AppUtil appUtil);
 

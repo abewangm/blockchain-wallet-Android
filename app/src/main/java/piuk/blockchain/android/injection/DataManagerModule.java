@@ -48,7 +48,7 @@ import piuk.blockchain.android.util.StringUtils;
 public class DataManagerModule {
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected AuthDataManager provideAuthDataManager(PayloadDataManager payloadDataManager,
                                                      PrefsUtil prefsUtil,
                                                      AppUtil appUtil,
@@ -68,13 +68,13 @@ public class DataManagerModule {
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected QrCodeDataManager provideQrDataManager() {
         return new QrCodeDataManager();
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager,
                                                              PrefsUtil prefsUtil,
                                                              StringUtils stringUtils,
@@ -83,7 +83,7 @@ public class DataManagerModule {
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
                                                                            TransactionListStore transactionListStore,
                                                                            RxBus rxBus) {
@@ -94,7 +94,7 @@ public class DataManagerModule {
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected TransferFundsDataManager provideTransferFundsDataManager(PayloadDataManager payloadDataManager,
                                                                        SendDataManager sendDataManager,
                                                                        DynamicFeeCache dynamicFeeCache) {
@@ -102,13 +102,13 @@ public class DataManagerModule {
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager, RxBus rxBus) {
         return new PayloadDataManager(new PayloadService(payloadManager), payloadManager, rxBus);
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
                                                            PrivateKeyFactory privateKeyFactory,
                                                            RxBus rxBus) {
@@ -116,14 +116,14 @@ public class DataManagerModule {
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected FingerprintHelper provideFingerprintHelper(Context applicationContext,
                                                          PrefsUtil prefsUtil) {
         return new FingerprintHelper(applicationContext, prefsUtil, new FingerprintAuthImpl());
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected SettingsDataManager provideSettingsDataManager(SettingsService settingsService,
                                                              SettingsDataStore settingsDataStore,
                                                              RxBus rxBus) {
@@ -131,26 +131,26 @@ public class DataManagerModule {
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadDataManager payloadDataManager,
                                                                PrefsUtil prefsUtil) {
         return new SwipeToReceiveHelper(payloadDataManager, prefsUtil);
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected SendDataManager provideSendDataManager(RxBus rxBus) {
         return new SendDataManager(new PaymentService(new Payment()), rxBus);
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected TransactionHelper provideTransactionHelper(PayloadDataManager payloadDataManager) {
         return new TransactionHelper(payloadDataManager);
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected BuyDataManager provideBuyDataManager(SettingsDataManager settingsDataManager,
                                                    AuthDataManager authDataManager,
                                                    PayloadDataManager payloadDataManager,
@@ -163,13 +163,13 @@ public class DataManagerModule {
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected FeeDataManager provideFeeDataManager(RxBus rxBus) {
         return new FeeDataManager(new FeeApi(), rxBus);
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected PromptManager providePromptManager(PrefsUtil prefsUtil,
                                                  PayloadDataManager payloadDataManager,
                                                  TransactionListDataManager transactionListDataManager) {
@@ -177,7 +177,7 @@ public class DataManagerModule {
     }
 
     @Provides
-    @ViewModelScope
+    @PresenterScope
     protected BackupWalletUtil provideBackupWalletUtil(PayloadDataManager payloadDataManager) {
         return new BackupWalletUtil(payloadDataManager);
     }

@@ -1,64 +1,29 @@
 package piuk.blockchain.android.ui.fingerprint
 
-import android.os.Bundle
-import android.support.annotation.ColorRes
-import android.support.annotation.DrawableRes
 import android.support.annotation.StringRes
 import android.support.annotation.VisibleForTesting
 import piuk.blockchain.android.R
-import piuk.blockchain.android.injection.Injector
-import piuk.blockchain.android.ui.base.BaseViewModel
+import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog.Companion.KEY_BUNDLE_PIN_CODE
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog.Companion.KEY_BUNDLE_STAGE
 import piuk.blockchain.android.util.PrefsUtil
 import javax.inject.Inject
 
-class FingerprintDialogViewModel internal constructor(
-        private val dataListener: FingerprintDialogViewModel.DataListener?
-) : BaseViewModel(), FingerprintHelper.AuthCallback {
-
-    init {
-        Injector.getInstance().dataManagerComponent.inject(this)
-    }
+class FingerprintPresenter @Inject constructor(
+        private val fingerprintHelper: FingerprintHelper
+) : BasePresenter<FingerprintView>(), FingerprintHelper.AuthCallback {
 
     @VisibleForTesting var currentStage: FingerprintStage? = null
     @VisibleForTesting var pincode: String? = null
-    @Inject lateinit var fingerprintHelper: FingerprintHelper
-
-    interface DataListener {
-
-        fun getBundle(): Bundle
-
-        fun setCancelButtonText(@StringRes text: Int)
-
-        fun setDescriptionText(@StringRes text: Int)
-
-        fun setStatusText(@StringRes text: Int)
-
-        fun setStatusText(text: String)
-
-        fun setStatusTextColor(@ColorRes color: Int)
-
-        fun setIcon(@DrawableRes drawable: Int)
-
-        fun onFatalError()
-
-        fun onAuthenticated(data: String?)
-
-        fun onRecoverableError()
-
-        fun onCanceled()
-
-    }
 
     override fun onViewReady() {
-        val stageString = dataListener?.getBundle()?.getString(KEY_BUNDLE_STAGE)
-        pincode = dataListener?.getBundle()?.getString(KEY_BUNDLE_PIN_CODE)
+        val stageString = view.getBundle()?.getString(KEY_BUNDLE_STAGE)
+        pincode = view.getBundle()?.getString(KEY_BUNDLE_PIN_CODE)
 
         if (!stageString.isNullOrEmpty() && !pincode.isNullOrEmpty()) {
             currentStage = FingerprintStage.valueOf(stageString!!)
         } else {
-            dataListener?.onCanceled()
+            view.onCanceled()
             return
         }
 
@@ -72,21 +37,21 @@ class FingerprintDialogViewModel internal constructor(
     // Fingerprint not recognised
     override fun onFailure() {
         setFailureState(R.string.fingerprint_not_recognized, null)
-        dataListener?.onRecoverableError()
+        view.onRecoverableError()
     }
 
     // Some error occurred
     override fun onHelp(message: String) {
         setFailureState(null, null)
-        dataListener?.setStatusText(message)
-        dataListener?.onRecoverableError()
+        view.setStatusText(message)
+        view.onRecoverableError()
     }
 
     override fun onAuthenticated(data: String?) {
-        dataListener?.setIcon(R.drawable.vector_fingerprint_success)
-        dataListener?.setStatusTextColor(R.color.primary_blue_accent)
-        dataListener?.setStatusText(R.string.fingerprint_success)
-        dataListener?.onAuthenticated(data)
+        view.setIcon(R.drawable.vector_fingerprint_success)
+        view.setStatusTextColor(R.color.primary_blue_accent)
+        view.setStatusText(R.string.fingerprint_success)
+        view.onAuthenticated(data)
 
         if (currentStage == FingerprintStage.REGISTER_FINGERPRINT && data != null) {
             fingerprintHelper.storeEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE, data)
@@ -101,8 +66,8 @@ class FingerprintDialogViewModel internal constructor(
         setFailureState(
                 R.string.fingerprint_key_invalidated_brief,
                 R.string.fingerprint_key_invalidated_description)
-        dataListener?.setCancelButtonText(R.string.fingerprint_use_pin)
-        dataListener?.onFatalError()
+        view.setCancelButtonText(R.string.fingerprint_use_pin)
+        view.onFatalError()
 
         fingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)
         fingerprintHelper.setFingerprintUnlockEnabled(false)
@@ -118,32 +83,32 @@ class FingerprintDialogViewModel internal constructor(
                     R.string.fingerprint_fatal_error_brief,
                     R.string.fingerprint_fatal_error_authenticate_description)
         }
-        dataListener?.onFatalError()
+        view.onFatalError()
 
         fingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)
         fingerprintHelper.setFingerprintUnlockEnabled(false)
     }
 
     private fun setFailureState(@StringRes status: Int?, @StringRes description: Int?) {
-        dataListener?.setIcon(R.drawable.vector_fingerprint_error)
-        dataListener?.setStatusTextColor(R.color.product_red_medium)
-        if (status != null) dataListener?.setStatusText(status)
-        if (description != null) dataListener?.setDescriptionText(description)
+        view.setIcon(R.drawable.vector_fingerprint_error)
+        view.setStatusTextColor(R.color.product_red_medium)
+        if (status != null) view.setStatusText(status)
+        if (description != null) view.setDescriptionText(description)
     }
 
     private fun authenticateFingerprint() {
-        dataListener?.setCancelButtonText(R.string.fingerprint_use_pin)
+        view.setCancelButtonText(R.string.fingerprint_use_pin)
         fingerprintHelper.decryptString(PrefsUtil.KEY_ENCRYPTED_PIN_CODE, pincode!!, this)
     }
 
     private fun registerFingerprint() {
-        dataListener?.setCancelButtonText(android.R.string.cancel)
-        dataListener?.setDescriptionText(R.string.fingerprint_prompt)
+        view.setCancelButtonText(android.R.string.cancel)
+        view.setDescriptionText(R.string.fingerprint_prompt)
         fingerprintHelper.encryptString(PrefsUtil.KEY_ENCRYPTED_PIN_CODE, pincode!!, this)
     }
 
-    override fun destroy() {
-        super.destroy()
+    override fun onViewDestroyed() {
+        super.onViewDestroyed()
         fingerprintHelper.releaseFingerprintReader()
     }
 

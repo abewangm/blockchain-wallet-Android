@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.backup.completed
 
-import android.app.Application
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
 import com.nhaarman.mockito_kotlin.verifyZeroInteractions
@@ -9,23 +8,11 @@ import io.reactivex.Observable
 import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
-import org.robolectric.annotation.Config
-import piuk.blockchain.android.BlockchainTestApplication
-import piuk.blockchain.android.BuildConfig
-import piuk.blockchain.android.data.cache.DynamicFeeCache
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager
-import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.backup.BackupWalletActivity
 import piuk.blockchain.android.ui.send.PendingTransaction
 import piuk.blockchain.android.util.PrefsUtil
 
-@Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
-@RunWith(RobolectricTestRunner::class)
 class BackupWalletCompletedPresenterTest {
 
     private lateinit var subject: BackupWalletCompletedPresenter
@@ -35,14 +22,7 @@ class BackupWalletCompletedPresenterTest {
 
     @Before
     fun setUp() {
-
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                MockApplicationModule(RuntimeEnvironment.application),
-                ApiModule(),
-                MockDataManagerModule())
-
-        subject = BackupWalletCompletedPresenter()
+        subject = BackupWalletCompletedPresenter(transferFundsDataManager, prefsUtil)
         subject.initView(view)
     }
 
@@ -101,18 +81,6 @@ class BackupWalletCompletedPresenterTest {
         verify(transferFundsDataManager).transferableFundTransactionListForDefaultAccount
         verifyNoMoreInteractions(transferFundsDataManager)
         verifyZeroInteractions(view)
-    }
-
-    inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-        override fun providePrefsUtil() = prefsUtil
-    }
-
-    inner class MockDataManagerModule : DataManagerModule() {
-        override fun provideTransferFundsDataManager(
-                payloadDataManager: PayloadDataManager?,
-                sendDataManager: SendDataManager?,
-                dynamicFeeCache: DynamicFeeCache?
-        ) = transferFundsDataManager
     }
 
 }

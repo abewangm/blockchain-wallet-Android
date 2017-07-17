@@ -9,7 +9,7 @@ import piuk.blockchain.android.ui.account.AccountEditViewModel;
 import piuk.blockchain.android.ui.account.AccountViewModel;
 import piuk.blockchain.android.ui.auth.PasswordRequiredViewModel;
 import piuk.blockchain.android.ui.auth.PinEntryViewModel;
-import piuk.blockchain.android.ui.backup.completed.BackupWalletCompletedPresenter;
+import piuk.blockchain.android.ui.backup.completed.BackupWalletCompletedFragment;
 import piuk.blockchain.android.ui.backup.start.BackupWalletStartingFragment;
 import piuk.blockchain.android.ui.backup.transfer.ConfirmFundsTransferPresenter;
 import piuk.blockchain.android.ui.backup.wordlist.BackupWalletWordListFragment;
@@ -25,7 +25,7 @@ import piuk.blockchain.android.ui.contacts.pairing.ContactsQrViewModel;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialogViewModel;
 import piuk.blockchain.android.ui.contacts.payments.ContactsPaymentRequestViewModel;
 import piuk.blockchain.android.ui.createwallet.CreateWalletActivity;
-import piuk.blockchain.android.ui.fingerprint.FingerprintDialogViewModel;
+import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.home.MainViewModel;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.login.LoginActivity;
@@ -44,9 +44,9 @@ import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
  * Subcomponents have access to all upstream objects in the graph but can have their own scope -
  * they don't need to explicitly state their dependencies as they have access anyway
  */
-@ViewModelScope
+@PresenterScope
 @Subcomponent(modules = DataManagerModule.class)
-public interface DataManagerComponent {
+public interface PresenterComponent {
 
     @Deprecated void inject(PasswordRequiredViewModel passwordRequiredViewModel);
 
@@ -72,8 +72,6 @@ public interface DataManagerComponent {
 
     @Deprecated void inject(SettingsViewModel settingsViewModel);
 
-    @Deprecated void inject(FingerprintDialogViewModel fingerprintDialogViewModel);
-
     @Deprecated void inject(ReceiveQrViewModel receiveQrViewModel);
 
     @Deprecated void inject(ContactsListViewModel contactsListViewModel);
@@ -89,8 +87,6 @@ public interface DataManagerComponent {
     @Deprecated void inject(ContactsPaymentRequestViewModel contactsPaymentRequestViewModel);
 
     @Deprecated void inject(AccountChooserViewModel accountChooserViewModel);
-
-    @Deprecated void inject(BackupWalletCompletedPresenter backupWalletCompletedPresenter);
 
     @Deprecated void inject(WebSocketService webSocketService);
 
@@ -120,4 +116,8 @@ public interface DataManagerComponent {
     void inject(@NotNull BackupWalletWordListFragment backupWalletWordListFragment);
 
     void inject(@NotNull ConfirmPaymentDialog confirmPaymentDialog);
+
+    void inject(@NotNull BackupWalletCompletedFragment backupWalletCompletedFragment);
+
+    void inject(@NotNull FingerprintDialog fingerprintDialog);
 }

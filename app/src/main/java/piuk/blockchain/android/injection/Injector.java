@@ -12,7 +12,7 @@ public enum Injector {
     INSTANCE;
 
     private ApplicationComponent applicationComponent;
-    private DataManagerComponent dataManagerComponent;
+    private PresenterComponent dataManagerComponent;
 
     public static Injector getInstance() {
         return INSTANCE;
@@ -41,7 +41,7 @@ public enum Injector {
         return applicationComponent;
     }
 
-    public DataManagerComponent getDataManagerComponent() {
+    public PresenterComponent getDataManagerComponent() {
         if (dataManagerComponent == null) {
             dataManagerComponent = applicationComponent.plus(new DataManagerModule());
         }
