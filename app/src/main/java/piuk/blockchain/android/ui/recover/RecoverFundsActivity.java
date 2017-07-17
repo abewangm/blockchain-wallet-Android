@@ -8,41 +8,48 @@ import android.support.annotation.StringRes;
 import android.support.v7.widget.Toolbar;
 import android.view.inputmethod.EditorInfo;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityRecoverFundsBinding;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.createwallet.CreateWalletActivity;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
-public class RecoverFundsActivity extends BaseAuthActivity implements RecoverFundsViewModel.DataListener {
+public class RecoverFundsActivity extends BaseMvpActivity<RecoverFundsView, RecoverFundsPresenter>
+        implements RecoverFundsView {
 
     public static final String RECOVERY_PHRASE = "RECOVERY_PHRASE";
 
-    private RecoverFundsViewModel mViewModel;
-    private ActivityRecoverFundsBinding mBinding;
-    private MaterialProgressDialog mProgressDialog;
+    @Inject RecoverFundsPresenter recoverFundsPresenter;
+    private ActivityRecoverFundsBinding binding;
+    private MaterialProgressDialog materialProgressDialog;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_recover_funds);
-        mViewModel = new RecoverFundsViewModel(this);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_recover_funds);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.recover_funds);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mBinding.buttonContinue.setOnClickListener(view -> mViewModel.onContinueClicked());
-        mBinding.fieldPassphrase.setOnEditorActionListener((textView, i, keyEvent) -> {
+        binding.buttonContinue.setOnClickListener(view -> getPresenter().onContinueClicked());
+        binding.fieldPassphrase.setOnEditorActionListener((textView, i, keyEvent) -> {
             if (i == EditorInfo.IME_ACTION_GO) {
-                mViewModel.onContinueClicked();
+                getPresenter().onContinueClicked();
             }
             return true;
         });
 
-        mViewModel.onViewReady();
+        onViewReady();
     }
 
     @Override
@@ -54,7 +61,7 @@ public class RecoverFundsActivity extends BaseAuthActivity implements RecoverFun
 
     @Override
     public String getRecoveryPhrase() {
-        return mBinding.fieldPassphrase.getText().toString();
+        return binding.fieldPassphrase.getText().toString();
     }
 
     @Override
@@ -77,25 +84,34 @@ public class RecoverFundsActivity extends BaseAuthActivity implements RecoverFun
     protected void onDestroy() {
         super.onDestroy();
         dismissProgressDialog();
-        mViewModel.destroy();
     }
 
     @Override
     public void showProgressDialog(@StringRes int messageId) {
         dismissProgressDialog();
-        mProgressDialog = new MaterialProgressDialog(this);
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.setMessage(getString(messageId));
+        materialProgressDialog = new MaterialProgressDialog(this);
+        materialProgressDialog.setCancelable(false);
+        materialProgressDialog.setMessage(getString(messageId));
 
-        if (!isFinishing()) mProgressDialog.show();
+        if (!isFinishing()) materialProgressDialog.show();
     }
 
     @Override
     public void dismissProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-            mProgressDialog = null;
+        if (materialProgressDialog != null && materialProgressDialog.isShowing()) {
+            materialProgressDialog.dismiss();
+            materialProgressDialog = null;
         }
+    }
+
+    @Override
+    protected RecoverFundsPresenter createPresenter() {
+        return recoverFundsPresenter;
+    }
+
+    @Override
+    protected RecoverFundsView getView() {
+        return this;
     }
 
 }

@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.recover;
 
-import android.support.annotation.StringRes;
-
 import info.blockchain.wallet.bip44.HDWalletFactory;
 
 import org.bitcoinj.crypto.MnemonicCode;
@@ -16,37 +14,15 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.datamanagers.AuthDataManager;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.PrefsUtil;
+import timber.log.Timber;
 
-public class RecoverFundsViewModel extends BaseViewModel {
+public class RecoverFundsPresenter extends BasePresenter<RecoverFundsView> {
 
-    private DataListener dataListener;
-    @Inject AuthDataManager authDataManager;
-    @Inject AppUtil appUtil;
-    @Inject PrefsUtil prefsUtil;
-
-    public interface DataListener {
-
-        String getRecoveryPhrase();
-
-        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void showProgressDialog(@StringRes int messageId);
-
-        void dismissProgressDialog();
-
-        void gotoCredentialsActivity(String recoveryPhrase);
-
-    }
-
-    RecoverFundsViewModel(DataListener listener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        dataListener = listener;
+    @Inject
+    RecoverFundsPresenter() {
+        // Constructor intentionally empty
     }
 
     @Override
@@ -55,23 +31,22 @@ public class RecoverFundsViewModel extends BaseViewModel {
     }
 
     void onContinueClicked() {
-        String recoveryPhrase = dataListener.getRecoveryPhrase();
+        String recoveryPhrase = getView().getRecoveryPhrase();
         if (recoveryPhrase == null || recoveryPhrase.isEmpty()) {
-            dataListener.showToast(R.string.invalid_recovery_phrase, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.invalid_recovery_phrase, ToastCustom.TYPE_ERROR);
             return;
         }
 
         try {
             if (isValidMnemonic(recoveryPhrase)) {
-                dataListener.gotoCredentialsActivity(recoveryPhrase);
+                getView().gotoCredentialsActivity(recoveryPhrase);
             } else {
-                dataListener.showToast(R.string.invalid_recovery_phrase, ToastCustom.TYPE_ERROR);
+                getView().showToast(R.string.invalid_recovery_phrase, ToastCustom.TYPE_ERROR);
             }
-
         } catch (Exception e) {
-            //This should never happen
-            e.printStackTrace();
-            dataListener.showToast(R.string.restore_failed, ToastCustom.TYPE_ERROR);
+            // This should never happen
+            Timber.wtf(e);
+            getView().showToast(R.string.restore_failed, ToastCustom.TYPE_ERROR);
         }
     }
 
@@ -79,7 +54,6 @@ public class RecoverFundsViewModel extends BaseViewModel {
      * We only support US english mnemonics atm
      */
     private boolean isValidMnemonic(String recoveryPhrase) throws MnemonicException.MnemonicWordException, IOException {
-
         List<String> words = Arrays.asList(recoveryPhrase.trim().split("\\s+"));
 
         InputStream wis = HDWalletFactory.class.getClassLoader()

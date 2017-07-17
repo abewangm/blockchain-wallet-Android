@@ -1,13 +1,11 @@
 package piuk.blockchain.android.ui.account;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.api.data.Fee;
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Options;
@@ -27,7 +25,6 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.math.BigInteger;
@@ -44,12 +41,6 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
-import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.injection.ApiModule;
-import piuk.blockchain.android.injection.ApplicationModule;
-import piuk.blockchain.android.injection.DataManagerModule;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
@@ -71,13 +62,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
-public class AccountEditViewModelTest {
+public class AccountEditPresenterTest {
 
-    private AccountEditViewModel subject;
-    @Mock private AccountEditViewModel.DataListener activity;
+    private AccountEditPresenter subject;
+    @Mock private AccountEditView activity;
     @Mock private PayloadDataManager payloadDataManager;
     @Mock private PrefsUtil prefsUtil;
     @Mock private StringUtils stringUtils;
@@ -92,13 +82,16 @@ public class AccountEditViewModelTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                new MockApplicationModule(RuntimeEnvironment.application),
-                new ApiModule(),
-                new MockDataManagerModule());
-
-        subject = new AccountEditViewModel(accountEditModel, activity);
+        subject = new AccountEditPresenter(prefsUtil,
+                stringUtils,
+                payloadDataManager,
+                exchangeRateFactory,
+                sendDataManager,
+                privateKeyFactory,
+                swipeToReceiveHelper,
+                dynamicFeeCache);
+        subject.initView(activity);
+        subject.setAccountModel(accountEditModel);
     }
 
     @Test
@@ -859,57 +852,6 @@ public class AccountEditViewModelTest {
         // Assert
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
         verify(activity).privateKeyImportMismatch();
-    }
-
-    private class MockApplicationModule extends ApplicationModule {
-        public MockApplicationModule(Application application) {
-            super(application);
-        }
-
-        @Override
-        protected StringUtils provideStringUtils() {
-            return stringUtils;
-        }
-
-        @Override
-        protected PrefsUtil providePrefsUtil() {
-            return prefsUtil;
-        }
-
-        @Override
-        protected ExchangeRateFactory provideExchangeRateFactory() {
-            return exchangeRateFactory;
-        }
-
-        @Override
-        protected DynamicFeeCache provideDynamicFeeCache() {
-            return dynamicFeeCache;
-        }
-
-        @Override
-        protected PrivateKeyFactory privateKeyFactory() {
-            return privateKeyFactory;
-        }
-    }
-
-    private class MockDataManagerModule extends DataManagerModule {
-
-        @Override
-        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager,
-                                                               RxBus rxBus) {
-            return payloadDataManager;
-        }
-
-        @Override
-        protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadDataManager payloadDataManager,
-                                                                   PrefsUtil prefsUtil) {
-            return swipeToReceiveHelper;
-        }
-
-        @Override
-        protected SendDataManager provideSendDataManager(RxBus rxBus) {
-            return sendDataManager;
-        }
     }
 
 }

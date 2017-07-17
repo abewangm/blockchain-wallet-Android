@@ -1,24 +1,9 @@
 package piuk.blockchain.android.ui.recover;
 
-import android.app.Application;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
-
-import piuk.blockchain.android.BlockchainTestApplication;
-import piuk.blockchain.android.BuildConfig;
-import piuk.blockchain.android.injection.ApiModule;
-import piuk.blockchain.android.injection.ApplicationModule;
-import piuk.blockchain.android.injection.DataManagerModule;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.injection.InjectorTestUtils;
-import piuk.blockchain.android.util.AppUtil;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
@@ -27,26 +12,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
-@RunWith(RobolectricTestRunner.class)
-public class RecoverFundsViewModelTest {
+public class RecoverFundsPresenterTest {
 
-    private RecoverFundsViewModel mSubject;
+    private RecoverFundsPresenter mSubject;
 
     @Mock private RecoverFundsActivity mActivity;
-    @Mock private AppUtil mAppUtil;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                new MockApplicationModule(RuntimeEnvironment.application),
-                new ApiModule(),
-                new MockDataManagerModule());
-
-        mSubject = new RecoverFundsViewModel(mActivity);
+        mSubject = new RecoverFundsPresenter();
+        mSubject.initView(mActivity);
     }
 
     /**
@@ -117,23 +93,6 @@ public class RecoverFundsViewModelTest {
         mSubject.onViewReady();
         // Assert
         assertTrue(true);
-    }
-
-    @SuppressWarnings({"SyntheticAccessorCall", "PrivateMemberAccessBetweenOuterAndInnerClass"})
-    private class MockApplicationModule extends ApplicationModule {
-
-        MockApplicationModule(Application application) {
-            super(application);
-        }
-
-        @Override
-        protected AppUtil provideAppUtil() {
-            return mAppUtil;
-        }
-    }
-
-    @SuppressWarnings({"SyntheticAccessorCall", "PrivateMemberAccessBetweenOuterAndInnerClass"})
-    private class MockDataManagerModule extends DataManagerModule {
     }
 
 }

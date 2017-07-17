@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import dagger.Subcomponent;
 import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
-import piuk.blockchain.android.ui.account.AccountEditViewModel;
+import piuk.blockchain.android.ui.account.AccountEditActivity;
 import piuk.blockchain.android.ui.account.AccountViewModel;
 import piuk.blockchain.android.ui.auth.PasswordRequiredActivity;
 import piuk.blockchain.android.ui.auth.PinEntryFragment;
@@ -34,7 +34,7 @@ import piuk.blockchain.android.ui.login.ManualPairingActivity;
 import piuk.blockchain.android.ui.onboarding.OnboardingViewModel;
 import piuk.blockchain.android.ui.receive.ReceiveQrViewModel;
 import piuk.blockchain.android.ui.receive.ReceiveViewModel;
-import piuk.blockchain.android.ui.recover.RecoverFundsViewModel;
+import piuk.blockchain.android.ui.recover.RecoverFundsActivity;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsViewModel;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveFragment;
@@ -48,10 +48,6 @@ import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 @PresenterScope
 @Subcomponent(modules = DataManagerModule.class)
 public interface PresenterComponent {
-
-    @Deprecated void inject(AccountEditViewModel accountEditViewModel);
-
-    @Deprecated void inject(RecoverFundsViewModel recoverFundsViewModel);
 
     @Deprecated void inject(ReceiveViewModel receiveViewModel);
 
@@ -123,4 +119,9 @@ public interface PresenterComponent {
     void inject(@NotNull MainActivity mainActivity);
 
     void inject(@NotNull PinEntryFragment pinEntryFragment);
+
+    void inject(@NotNull AccountEditActivity accountEditActivity);
+
+    void inject(@NotNull RecoverFundsActivity recoverFundsActivity);
+
 }
