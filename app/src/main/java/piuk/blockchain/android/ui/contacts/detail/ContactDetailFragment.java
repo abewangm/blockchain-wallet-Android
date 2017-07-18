@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatSpinner;
@@ -22,10 +21,14 @@ import android.widget.FrameLayout;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentContactDetailBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter;
 import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener;
+import piuk.blockchain.android.ui.base.BaseFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -35,18 +38,19 @@ import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 
-public class ContactDetailFragment extends Fragment implements ContactDetailViewModel.DataListener {
+public class ContactDetailFragment extends BaseFragment<ContactDetailView, ContactDetailPresenter>
+        implements ContactDetailView {
 
     private static final String ARGUMENT_CONTACT_ID = "contact_id";
 
-    @Thunk ContactDetailViewModel viewModel;
+    @Inject ContactDetailPresenter contactDetailPresenter;
     @Thunk BalanceAdapter balanceAdapter;
     private FragmentContactDetailBinding binding;
     private MaterialProgressDialog progressDialog;
     private OnFragmentInteractionListener listener;
 
-    public ContactDetailFragment() {
-        // Required empty public constructor
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     public static ContactDetailFragment newInstance(String contactId) {
@@ -68,12 +72,11 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ContactDetailViewModel(this);
 
-        binding.buttonDelete.setOnClickListener(v -> viewModel.onDeleteContactClicked());
-        binding.buttonRename.setOnClickListener(v -> viewModel.onRenameContactClicked());
+        binding.buttonDelete.setOnClickListener(v -> getPresenter().onDeleteContactClicked());
+        binding.buttonRename.setOnClickListener(v -> getPresenter().onRenameContactClicked());
 
-        viewModel.onViewReady();
+        onViewReady();
     }
 
     @Override
@@ -101,7 +104,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setView(ViewUtils.getAlertDialogPaddedView(getActivity(), editText))
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.onContactRenamed(editText.getText().toString()))
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().onContactRenamed(editText.getText().toString()))
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
@@ -112,7 +115,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.contacts_delete)
                 .setMessage(R.string.contacts_delete_message)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.onDeleteContactConfirmed())
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().onDeleteContactConfirmed())
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
@@ -124,7 +127,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_decline_pending_transaction)
                 .setPositiveButton(android.R.string.ok, (dialog, which) ->
-                        viewModel.confirmDeclineTransaction(fctxId))
+                        getPresenter().confirmDeclineTransaction(fctxId))
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
@@ -136,7 +139,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_cancel_pending_transaction)
                 .setPositiveButton(android.R.string.ok, (dialog, which) ->
-                        viewModel.confirmCancelTransaction(fctxId))
+                        getPresenter().confirmCancelTransaction(fctxId))
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
@@ -149,8 +152,8 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
         }
 
         balanceAdapter.onContactsMapChanged(
-                viewModel.getContactsTransactionMap(),
-                viewModel.getNotesTransactionMap());
+                getPresenter().getContactsTransactionMap(),
+                getPresenter().getNotesTransactionMap());
         balanceAdapter.setItems(transactions);
         if (!transactions.isEmpty()) {
             binding.recyclerView.setVisibility(View.VISIBLE);
@@ -162,8 +165,8 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
     }
 
     private void setUpAdapter(boolean isBtc) {
-        String fiatString = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        int btcFormat = viewModel.getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
+        String fiatString = getPresenter().getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        int btcFormat = getPresenter().getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
 
         balanceAdapter = new BalanceAdapter(
@@ -171,27 +174,27 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
                 lastPrice,
                 isBtc,
                 new BalanceListClickListener() {
-            @Override
-            public void onTransactionClicked(int correctedPosition, int absolutePosition) {
-                viewModel.onCompletedTransactionClicked(absolutePosition);
-            }
+                    @Override
+                    public void onTransactionClicked(int correctedPosition, int absolutePosition) {
+                        getPresenter().onCompletedTransactionClicked(absolutePosition);
+                    }
 
-            @Override
-            public void onValueClicked(boolean isBtc) {
-                viewModel.onBtcFormatChanged(isBtc);
-                balanceAdapter.onViewFormatUpdated(isBtc, btcFormat);
-            }
+                    @Override
+                    public void onValueClicked(boolean isBtc) {
+                        getPresenter().onBtcFormatChanged(isBtc);
+                        balanceAdapter.onViewFormatUpdated(isBtc, btcFormat);
+                    }
 
-            @Override
-            public void onFctxClicked(@NonNull String fctxId) {
-                viewModel.onTransactionClicked(fctxId);
-            }
+                    @Override
+                    public void onFctxClicked(@NonNull String fctxId) {
+                        getPresenter().onTransactionClicked(fctxId);
+                    }
 
-            @Override
-            public void onFctxLongClicked(@NonNull String fctxId) {
-                viewModel.onTransactionLongClicked(fctxId);
-            }
-        });
+                    @Override
+                    public void onFctxLongClicked(@NonNull String fctxId) {
+                        getPresenter().onTransactionLongClicked(fctxId);
+                    }
+                });
 
         binding.recyclerView.setAdapter(balanceAdapter);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -242,7 +245,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_choose_account_message)
                 .setView(frameLayout)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.onAccountChosen(selection[0], fctxId))
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().onAccountChosen(selection[0], fctxId))
                 .create()
                 .show();
     }
@@ -252,7 +255,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_send_address_message)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.onAccountChosen(0, fctxId))
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().onAccountChosen(0, fctxId))
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show();
@@ -300,6 +303,16 @@ public class ContactDetailFragment extends Fragment implements ContactDetailView
     @Override
     public Bundle getPageBundle() {
         return getArguments();
+    }
+
+    @Override
+    protected ContactDetailPresenter createPresenter() {
+        return contactDetailPresenter;
+    }
+
+    @Override
+    protected ContactDetailView getMvpView() {
+        return this;
     }
 
     @Override

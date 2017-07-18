@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.contacts.pairing;
 
 import android.content.Intent;
-import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.contacts.data.Contact;
@@ -10,39 +9,20 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 
-@SuppressWarnings("WeakerAccess")
-public class ContactsInvitationBuilderViewModel extends BaseViewModel {
+public class ContactsInvitationBuilderPresenter extends BasePresenter<ContactsInvitationBuilderView> {
 
-    private DataListener dataListener;
-    @Inject ContactsDataManager contactManager;
+    private ContactsDataManager contactManager;
     @VisibleForTesting Contact recipient;
     @VisibleForTesting Contact sender;
     @VisibleForTesting String uri;
 
-    interface DataListener {
-
-        void showProgressDialog();
-
-        void dismissProgressDialog();
-
-        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void onLinkGenerated(Intent intent);
-
-        void onUriGenerated(String uri, String recipientName);
-
-        void finishPage();
-
-    }
-
-    ContactsInvitationBuilderViewModel(DataListener dataListener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        this.dataListener = dataListener;
+    @Inject
+    ContactsInvitationBuilderPresenter(ContactsDataManager contactManager) {
+        this.contactManager = contactManager;
     }
 
     @Override
@@ -62,38 +42,38 @@ public class ContactsInvitationBuilderViewModel extends BaseViewModel {
 
     void onQrCodeSelected() {
         if (uri == null) {
-            dataListener.showProgressDialog();
+            getView().showProgressDialog();
 
-            compositeDisposable.add(
+            getCompositeDisposable().add(
                     contactManager.createInvitation(sender, recipient)
                             .map(Contact::createURI)
-                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                            .doAfterTerminate(() -> getView().dismissProgressDialog())
                             .subscribe(
                                     uri -> {
                                         this.uri = uri;
-                                        dataListener.onUriGenerated(uri, recipient.getName());
+                                        getView().onUriGenerated(uri, recipient.getName());
                                     },
-                                    throwable -> dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+                                    throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
         } else {
             // Prevents contact being added more than once, as well as unnecessary web calls
-            dataListener.onUriGenerated(uri, recipient.getName());
+            getView().onUriGenerated(uri, recipient.getName());
         }
     }
 
     void onLinkClicked() {
         if (uri == null) {
-            dataListener.showProgressDialog();
+            getView().showProgressDialog();
 
-            compositeDisposable.add(
+            getCompositeDisposable().add(
                     contactManager.createInvitation(sender, recipient)
                             .map(Contact::createURI)
-                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                            .doAfterTerminate(() -> getView().dismissProgressDialog())
                             .subscribe(
                                     uri -> {
                                         this.uri = uri;
                                         generateIntent(uri);
                                     },
-                                    throwable -> dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+                                    throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
         } else {
             // Prevents contact being added more than once, as well as unnecessary web calls
             generateIntent(uri);
@@ -102,16 +82,16 @@ public class ContactsInvitationBuilderViewModel extends BaseViewModel {
 
     void onDoneSelected() {
         if (uri == null) {
-            dataListener.finishPage();
+            getView().finishPage();
         } else {
             // Check status of sent invitation
-            dataListener.showProgressDialog();
-            compositeDisposable.add(
+            getView().showProgressDialog();
+            getCompositeDisposable().add(
                     contactManager.readInvitationSent(recipient)
-                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                            .doAfterTerminate(() -> getView().dismissProgressDialog())
                             .subscribe(
-                                    success -> dataListener.finishPage(),
-                                    throwable -> dataListener.finishPage()));
+                                    success -> getView().finishPage(),
+                                    throwable -> getView().finishPage()));
         }
     }
 
@@ -120,6 +100,6 @@ public class ContactsInvitationBuilderViewModel extends BaseViewModel {
         intent.setAction(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_TEXT, uri);
         intent.setType("text/plain");
-        dataListener.onLinkGenerated(intent);
+        getView().onLinkGenerated(intent);
     }
 }

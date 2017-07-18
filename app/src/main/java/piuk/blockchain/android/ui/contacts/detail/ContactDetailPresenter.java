@@ -1,9 +1,7 @@
 package piuk.blockchain.android.ui.contacts.detail;
 
 import android.os.Bundle;
-import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
@@ -32,73 +30,40 @@ import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.StringUtils;
+import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID;
 
 
-@SuppressWarnings("WeakerAccess")
-public class ContactDetailViewModel extends BaseViewModel {
+public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
 
-    private static final String TAG = ContactDetailViewModel.class.getSimpleName();
-
-    private DataListener dataListener;
     private Observable<NotificationPayload> notificationObservable;
     @VisibleForTesting List<Object> displayList = new ArrayList<>();
     @VisibleForTesting Contact contact;
-    @Inject ContactsDataManager contactsDataManager;
-    @Inject PayloadDataManager payloadDataManager;
-    @Inject PrefsUtil prefsUtil;
-    @Inject RxBus rxBus;
-    @Inject StringUtils stringUtils;
-    @Inject TransactionListDataManager transactionListDataManager;
-    @Inject AccessState accessState;
+    private ContactsDataManager contactsDataManager;
+    private PayloadDataManager payloadDataManager;
+    private PrefsUtil prefsUtil;
+    private RxBus rxBus;
+    private TransactionListDataManager transactionListDataManager;
+    private AccessState accessState;
 
-    interface DataListener {
+    @Inject
+    ContactDetailPresenter(ContactsDataManager contactsDataManager,
+                           PayloadDataManager payloadDataManager,
+                           PrefsUtil prefsUtil,
+                           RxBus rxBus,
+                           TransactionListDataManager transactionListDataManager,
+                           AccessState accessState) {
 
-        Bundle getPageBundle();
-
-        void updateContactName(String name);
-
-        void finishPage();
-
-        void showRenameDialog(String name);
-
-        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void showProgressDialog();
-
-        void dismissProgressDialog();
-
-        void showDeleteUserDialog();
-
-        void onTransactionsUpdated(List<Object> transactions, boolean isBtc);
-
-        void showAccountChoiceDialog(List<String> accounts, String fctxId);
-
-        void initiatePayment(String uri, String recipientId, String mdid, String fctxId);
-
-        void showWaitingForPaymentDialog();
-
-        void showWaitingForAddressDialog();
-
-        void showTransactionDetail(String txHash);
-
-        void showSendAddressDialog(String fctxId);
-
-        void showTransactionDeclineDialog(String fctxId);
-
-        void showTransactionCancelDialog(String fctxId);
-
-    }
-
-    ContactDetailViewModel(DataListener dataListener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        this.dataListener = dataListener;
+        this.contactsDataManager = contactsDataManager;
+        this.payloadDataManager = payloadDataManager;
+        this.prefsUtil = prefsUtil;
+        this.rxBus = rxBus;
+        this.transactionListDataManager = transactionListDataManager;
+        this.accessState = accessState;
     }
 
     @Override
@@ -120,23 +85,23 @@ public class ContactDetailViewModel extends BaseViewModel {
     }
 
     void onDeleteContactClicked() {
-        dataListener.showDeleteUserDialog();
+        getView().showDeleteUserDialog();
     }
 
     void onDeleteContactConfirmed() {
-        dataListener.showProgressDialog();
-        compositeDisposable.add(
+        getView().showProgressDialog();
+        getCompositeDisposable().add(
                 contactsDataManager.removeContact(contact)
-                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .doAfterTerminate(() -> getView().dismissProgressDialog())
                         .subscribe(() -> {
                             // Quit page, show toast
-                            dataListener.showToast(R.string.contacts_delete_contact_success, ToastCustom.TYPE_OK);
-                            dataListener.finishPage();
-                        }, throwable -> dataListener.showToast(R.string.contacts_delete_contact_failed, ToastCustom.TYPE_ERROR)));
+                            getView().showToast(R.string.contacts_delete_contact_success, ToastCustom.TYPE_OK);
+                            getView().finishPage();
+                        }, throwable -> getView().showToast(R.string.contacts_delete_contact_failed, ToastCustom.TYPE_ERROR)));
     }
 
     void onRenameContactClicked() {
-        dataListener.showRenameDialog(contact.getName());
+        getView().showRenameDialog(contact.getName());
     }
 
     void onContactRenamed(String name) {
@@ -144,19 +109,19 @@ public class ContactDetailViewModel extends BaseViewModel {
         if (name.equals(contact.getName())) {
             // No problem here
         } else if (name.isEmpty()) {
-            dataListener.showToast(R.string.contacts_rename_invalid_name, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.contacts_rename_invalid_name, ToastCustom.TYPE_ERROR);
         } else {
-            dataListener.showProgressDialog();
+            getView().showProgressDialog();
 
-            compositeDisposable.add(
+            getCompositeDisposable().add(
                     contactsDataManager.renameContact(contact.getId(), name)
-                            .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                            .doAfterTerminate(() -> getView().dismissProgressDialog())
                             .subscribe(
                                     () -> {
                                         onViewReady();
-                                        dataListener.showToast(R.string.contacts_rename_success, ToastCustom.TYPE_OK);
+                                        getView().showToast(R.string.contacts_rename_success, ToastCustom.TYPE_OK);
                                     },
-                                    throwable -> dataListener.showToast(R.string.contacts_rename_failed, ToastCustom.TYPE_ERROR)));
+                                    throwable -> getView().showToast(R.string.contacts_rename_failed, ToastCustom.TYPE_ERROR)));
         }
     }
 
@@ -164,20 +129,20 @@ public class ContactDetailViewModel extends BaseViewModel {
         FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
 
         if (transaction == null) {
-            dataListener.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
         } else {
 
             // Payment request sent, waiting for address from recipient
             if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
                     && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
 
-                dataListener.showWaitingForAddressDialog();
+                getView().showWaitingForAddressDialog();
 
                 // Payment request sent, waiting for payment
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
                     && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
 
-                dataListener.showWaitingForPaymentDialog();
+                getView().showWaitingForPaymentDialog();
 
                 // Received payment request, need to send address to sender
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
@@ -193,17 +158,17 @@ public class ContactDetailViewModel extends BaseViewModel {
 
                 if (accountNames.size() == 1) {
                     // Only one account, ask if you want to send an address
-                    dataListener.showSendAddressDialog(fctxId);
+                    getView().showSendAddressDialog(fctxId);
                 } else {
                     // Show dialog allowing user to select which account they want to use
-                    dataListener.showAccountChoiceDialog(accountNames, fctxId);
+                    getView().showAccountChoiceDialog(accountNames, fctxId);
                 }
 
                 // Waiting for payment
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
                     && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
 
-                dataListener.initiatePayment(
+                getView().initiatePayment(
                         transaction.toBitcoinURI(),
                         contact.getId(),
                         contact.getMdid(),
@@ -215,12 +180,12 @@ public class ContactDetailViewModel extends BaseViewModel {
     void onCompletedTransactionClicked(int position) {
         if (displayList.get(position) instanceof TransactionSummary) {
             TransactionSummary summary = (TransactionSummary) displayList.get(position);
-            dataListener.showTransactionDetail(summary.getHash());
+            getView().showTransactionDetail(summary.getHash());
         }
     }
 
     void onTransactionLongClicked(String fctxId) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 contactsDataManager.getFacilitatedTransactions()
                         .filter(contactTransactionModel -> contactTransactionModel.getFacilitatedTransaction().getId().equals(fctxId))
                         .subscribe(contactTransactionModel -> {
@@ -228,62 +193,62 @@ public class ContactDetailViewModel extends BaseViewModel {
 
                             if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
                                 if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-                                    dataListener.showTransactionDeclineDialog(fctxId);
+                                    getView().showTransactionDeclineDialog(fctxId);
                                 } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
-                                    dataListener.showTransactionCancelDialog(fctxId);
+                                    getView().showTransactionCancelDialog(fctxId);
                                 }
 
                             } else if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
                                 if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-                                    dataListener.showTransactionDeclineDialog(fctxId);
+                                    getView().showTransactionDeclineDialog(fctxId);
                                 } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
-                                    dataListener.showTransactionCancelDialog(fctxId);
+                                    getView().showTransactionCancelDialog(fctxId);
                                 }
                             }
                         }, throwable -> showErrorAndQuitPage()));
     }
 
     void confirmDeclineTransaction(String fctxId) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 contactsDataManager.getContactFromFctxId(fctxId)
                         .flatMapCompletable(contact -> contactsDataManager.sendPaymentDeclinedResponse(contact.getMdid(), fctxId))
                         .doOnError(throwable -> contactsDataManager.fetchContacts())
                         .doAfterTerminate(this::setupViewModel)
                         .subscribe(
-                                () -> dataListener.showToast(R.string.contacts_pending_transaction_decline_success, ToastCustom.TYPE_OK),
-                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_decline_failure, ToastCustom.TYPE_ERROR)));
+                                () -> getView().showToast(R.string.contacts_pending_transaction_decline_success, ToastCustom.TYPE_OK),
+                                throwable -> getView().showToast(R.string.contacts_pending_transaction_decline_failure, ToastCustom.TYPE_ERROR)));
     }
 
     void confirmCancelTransaction(String fctxId) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 contactsDataManager.getContactFromFctxId(fctxId)
                         .flatMapCompletable(contact -> contactsDataManager.sendPaymentCancelledResponse(contact.getMdid(), fctxId))
                         .doOnError(throwable -> contactsDataManager.fetchContacts())
                         .doAfterTerminate(this::setupViewModel)
                         .subscribe(
-                                () -> dataListener.showToast(R.string.contacts_pending_transaction_cancel_success, ToastCustom.TYPE_OK),
-                                throwable -> dataListener.showToast(R.string.contacts_pending_transaction_cancel_failure, ToastCustom.TYPE_ERROR)));
+                                () -> getView().showToast(R.string.contacts_pending_transaction_cancel_success, ToastCustom.TYPE_OK),
+                                throwable -> getView().showToast(R.string.contacts_pending_transaction_cancel_failure, ToastCustom.TYPE_ERROR)));
     }
 
     void onAccountChosen(int accountPosition, String fctxId) {
-        dataListener.showProgressDialog();
+        getView().showProgressDialog();
         FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
 
         PaymentRequest paymentRequest = new PaymentRequest();
         paymentRequest.setIntendedAmount(transaction.getIntendedAmount());
         paymentRequest.setId(fctxId);
 
-        compositeDisposable.add(
-                payloadDataManager.getNextReceiveAddressAndReserve(payloadDataManager.getPositionOfAccountInActiveList(accountPosition), "Payment request "+ fctxId)
+        getCompositeDisposable().add(
+                payloadDataManager.getNextReceiveAddressAndReserve(payloadDataManager.getPositionOfAccountInActiveList(accountPosition), "Payment request " + fctxId)
                         .doOnNext(paymentRequest::setAddress)
                         .flatMapCompletable(s -> contactsDataManager.sendPaymentRequestResponse(contact.getMdid(), paymentRequest, fctxId))
-                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .doAfterTerminate(() -> getView().dismissProgressDialog())
                         .subscribe(
                                 () -> {
-                                    dataListener.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK);
+                                    getView().showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK);
                                     setupViewModel();
                                 },
-                                throwable -> dataListener.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
+                                throwable -> getView().showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
 
     }
 
@@ -294,7 +259,7 @@ public class ContactDetailViewModel extends BaseViewModel {
 
     private void subscribeToNotifications() {
         notificationObservable = rxBus.register(NotificationPayload.class);
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 notificationObservable
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(
@@ -304,15 +269,15 @@ public class ContactDetailViewModel extends BaseViewModel {
                                         setupViewModel();
                                     }
                                 },
-                                throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
+                                Timber::e));
     }
 
     private void setupViewModel() {
-        Bundle bundle = dataListener.getPageBundle();
+        Bundle bundle = getView().getPageBundle();
         if (bundle != null && bundle.getString(KEY_BUNDLE_CONTACT_ID) != null) {
             String id = bundle.getString(KEY_BUNDLE_CONTACT_ID);
 
-            compositeDisposable.add(
+            getCompositeDisposable().add(
                     // Get contacts list
                     contactsDataManager.getContactList()
                             // Find current contact
@@ -322,7 +287,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                             // Update UI
                             .doOnSuccess(contact -> {
                                 this.contact = contact;
-                                dataListener.updateContactName(contact.getName());
+                                getView().updateContactName(contact.getName());
                                 sortAndUpdateTransactions(contact.getFacilitatedTransactions().values());
                             })
                             // Contact not found, quit page
@@ -333,7 +298,7 @@ public class ContactDetailViewModel extends BaseViewModel {
                                     // Update with FacilitatedTransactions, UI handles diff
                                     () -> sortAndUpdateTransactions(contact.getFacilitatedTransactions().values()),
                                     // Show error if updating contacts failed
-                                    throwable -> dataListener.showToast(R.string.contacts_digesting_messages_failed, ToastCustom.TYPE_ERROR)));
+                                    throwable -> getView().showToast(R.string.contacts_digesting_messages_failed, ToastCustom.TYPE_ERROR)));
         } else {
             showErrorAndQuitPage();
         }
@@ -373,17 +338,18 @@ public class ContactDetailViewModel extends BaseViewModel {
             }
         }
 
-        dataListener.onTransactionsUpdated(displayList, accessState.isBtc());
+        getView().onTransactionsUpdated(displayList, accessState.isBtc());
     }
 
     private void showErrorAndQuitPage() {
-        dataListener.showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
-        dataListener.finishPage();
+        getView().showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
+        getView().finishPage();
     }
 
     @Override
-    public void destroy() {
+    public void onViewDestroyed() {
+        super.onViewDestroyed();
         rxBus.unregister(NotificationPayload.class, notificationObservable);
-        super.destroy();
     }
+
 }

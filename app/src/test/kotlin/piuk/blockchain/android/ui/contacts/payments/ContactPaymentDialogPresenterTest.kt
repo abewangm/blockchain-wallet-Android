@@ -1,13 +1,11 @@
 package piuk.blockchain.android.ui.contacts.payments
 
-import android.app.Application
 import android.os.Bundle
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.api.data.UnspentOutput
 import info.blockchain.api.data.UnspentOutputs
 import info.blockchain.wallet.api.data.FeeOptions
 import info.blockchain.wallet.contacts.data.Contact
-import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.Wallet
 import info.blockchain.wallet.payment.SpendableUnspentOutputs
@@ -20,7 +18,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
@@ -29,9 +26,6 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.FeeDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.payments.SendDataManager
-import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.data.stores.PendingTransactionListStore
-import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog.ARGUMENT_CONTACT_ID
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog.ARGUMENT_URI
@@ -40,7 +34,6 @@ import piuk.blockchain.android.ui.receive.WalletAccountHelper
 import piuk.blockchain.android.ui.send.PendingTransaction
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.PrefsUtil
-import piuk.blockchain.android.util.StringUtils
 import java.math.BigInteger
 import java.util.*
 import kotlin.test.assertFalse
@@ -49,9 +42,9 @@ import kotlin.test.assertTrue
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
-class ContactPaymentDialogViewModelTest {
+class ContactPaymentDialogPresenterTest {
 
-    private lateinit var subject: ContactPaymentDialogViewModel
+    private lateinit var subject: ContactPaymentDialogPresenter
     private val mockContactsDataManager: ContactsDataManager = mock()
     private val mockPrefsUtil: PrefsUtil = mock()
     private val mockExchangeRateFactory: ExchangeRateFactory = mock()
@@ -60,22 +53,25 @@ class ContactPaymentDialogViewModelTest {
     private val mockSendDataManager: SendDataManager = mock()
     private val mockDynamicFeeCache: DynamicFeeCache = mock()
     private val mockFeeDataManager: FeeDataManager = mock()
-    private val mockActivity: ContactPaymentDialogViewModel.DataListener = mock()
+    private val mockActivity: ContactPaymentDialogView = mock()
     private val mockFeeOptions: FeeOptions = mock(defaultAnswer = RETURNS_DEEP_STUBS)
 
     @Before
     @Throws(Exception::class)
     fun setUp() {
-
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                MockApplicationModule(RuntimeEnvironment.application),
-                MockApiModule(),
-                MockDataManagerModule())
-
         whenever(mockFeeDataManager.feeOptions).thenReturn(Observable.just(mockFeeOptions))
         whenever(mockDynamicFeeCache.feeOptions).thenReturn(mockFeeOptions)
-        subject = ContactPaymentDialogViewModel(mockActivity)
+        subject = ContactPaymentDialogPresenter(
+                mockContactsDataManager,
+                mockPrefsUtil,
+                mockExchangeRateFactory,
+                mockWalletAccountHelper,
+                mockPayloadDataManager,
+                mockSendDataManager,
+                mockDynamicFeeCache,
+                mockFeeDataManager
+        )
+        subject.initView(mockActivity)
     }
 
     @Test
@@ -493,41 +489,6 @@ class ContactPaymentDialogViewModelTest {
         // Assert
         verifyZeroInteractions(mockActivity)
         assertTrue(result)
-    }
-
-    inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-        override fun providePrefsUtil(): PrefsUtil {
-            return mockPrefsUtil
-        }
-
-        override fun provideExchangeRateFactory(): ExchangeRateFactory {
-            return mockExchangeRateFactory
-        }
-
-        override fun provideDynamicFeeCache(): DynamicFeeCache {
-            return mockDynamicFeeCache
-        }
-    }
-
-    inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(
-                pendingTransactionListStore: PendingTransactionListStore?,
-                rxBus: RxBus?
-        ) = mockContactsDataManager
-    }
-
-    inner class MockDataManagerModule : DataManagerModule() {
-        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?) =
-                mockPayloadDataManager
-
-        override fun provideSendDataManager(rxBus: RxBus?) = mockSendDataManager
-
-        override fun provideWalletAccountHelper(
-                payloadManager: PayloadManager?,
-                prefsUtil: PrefsUtil?,
-                stringUtils: StringUtils?,
-                exchangeRateFactory: ExchangeRateFactory?
-        ) = mockWalletAccountHelper
     }
 
 }

@@ -1,13 +1,11 @@
 package piuk.blockchain.android.ui.contacts.detail
 
-import android.app.Application
 import android.os.Bundle
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.multiaddress.TransactionSummary
-import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.HDWallet
 import info.blockchain.wallet.payload.data.Wallet
@@ -21,7 +19,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
@@ -29,10 +26,9 @@ import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.contacts.ContactTransactionModel
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.data.stores.PendingTransactionListStore
-import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.PrefsUtil
@@ -40,27 +36,29 @@ import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
-class ContactDetailViewModelTest {
+class ContactDetailPresenterTest {
 
-    private lateinit var subject: ContactDetailViewModel
-    private val mockActivity: ContactDetailViewModel.DataListener = mock()
+    private lateinit var subject: ContactDetailPresenter
+    private val mockActivity: ContactDetailView = mock()
     private val mockContactsManager: ContactsDataManager = mock()
     private val mockPayloadDataManager: PayloadDataManager = mock()
     private val mockPrefsUtil: PrefsUtil = mock()
     private val mockRxBus: RxBus = mock()
     private val mockAccessState: AccessState = mock()
+    private val mockTransactionListDataManager: TransactionListDataManager = mock()
 
     @Before
     @Throws(Exception::class)
     fun setUp() {
-
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                MockApplicationModule(RuntimeEnvironment.application),
-                MockApiModule(),
-                MockDataManagerModule())
-
-        subject = ContactDetailViewModel(mockActivity)
+        subject = ContactDetailPresenter(
+                mockContactsManager,
+                mockPayloadDataManager,
+                mockPrefsUtil,
+                mockRxBus,
+                mockTransactionListDataManager,
+                mockAccessState
+        )
+        subject.initView(mockActivity)
     }
 
     @Test
@@ -872,33 +870,13 @@ class ContactDetailViewModelTest {
 
     @Test
     @Throws(Exception::class)
-    fun destroy() {
+    fun onViewDestroyed() {
         // Arrange
 
         // Act
-        subject.destroy()
+        subject.onViewDestroyed()
         // Assert
         verify(mockRxBus).unregister(eq(NotificationPayload::class.java), anyOrNull())
-    }
-
-    inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-        override fun providePrefsUtil() = mockPrefsUtil
-
-        override fun provideRxBus() = mockRxBus
-
-        override fun provideAccessState() = mockAccessState
-    }
-
-    inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(
-                pendingTransactionListStore: PendingTransactionListStore?,
-                rxBus: RxBus?
-        ) = mockContactsManager
-    }
-
-    inner class MockDataManagerModule : DataManagerModule() {
-        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?) =
-                mockPayloadDataManager
     }
 
 }

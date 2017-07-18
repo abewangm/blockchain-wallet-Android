@@ -9,36 +9,27 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager
-import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.data.stores.PendingTransactionListStore
-import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
-class ContactsInvitationBuilderViewModelTest {
+class ContactsInvitationBuilderPresenterTest {
 
-    private lateinit var subject: ContactsInvitationBuilderViewModel
-    private val mockActivity: ContactsInvitationBuilderViewModel.DataListener = mock()
+    private lateinit var subject: ContactsInvitationBuilderPresenter
+    private val mockActivity: ContactsInvitationBuilderView = mock()
     private val mockContactManager: ContactsDataManager = mock()
 
     @Before
     @Throws(Exception::class)
     fun setUp() {
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                ApplicationModule(RuntimeEnvironment.application),
-                MockApiModule(),
-                DataManagerModule())
-
-        subject = ContactsInvitationBuilderViewModel(mockActivity)
+        subject = ContactsInvitationBuilderPresenter(mockContactManager)
+        subject.initView(mockActivity)
     }
 
     @Test
@@ -267,13 +258,6 @@ class ContactsInvitationBuilderViewModelTest {
         verify(mockActivity).finishPage()
         verifyNoMoreInteractions(mockActivity)
         assertNull(subject.uri)
-    }
-
-    inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(
-                pendingTransactionListStore: PendingTransactionListStore?,
-                rxBus: RxBus?
-        ) = mockContactManager
     }
 
 }

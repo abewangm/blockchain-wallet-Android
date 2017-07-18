@@ -11,7 +11,6 @@ import android.support.annotation.StringRes;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,27 +22,31 @@ import android.widget.AdapterView;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.DialogPayContactBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
+import piuk.blockchain.android.ui.base.BaseDialogFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.AddressAdapter;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 
-public class ContactPaymentDialog extends AppCompatDialogFragment
-        implements ContactPaymentDialogViewModel.DataListener {
+public class ContactPaymentDialog extends BaseDialogFragment<ContactPaymentDialogView, ContactPaymentDialogPresenter>
+        implements ContactPaymentDialogView {
 
     public static final String ARGUMENT_URI = "uri";
     public static final String ARGUMENT_CONTACT_ID = "contact_id";
     public static final String ARGUMENT_CONTACT_MDID = "contact_mdid";
     public static final String ARGUMENT_FCTX_ID = "fctx_id";
 
+    @Inject ContactPaymentDialogPresenter paymentDialogPresenter;
     private OnContactPaymentDialogInteractionListener listener;
     private MaterialProgressDialog progressDialog;
-    @Thunk ContactPaymentDialogViewModel viewModel;
     @Thunk DialogPayContactBinding binding;
     @Thunk AlertDialog transactionSuccessDialog;
     private final Handler dialogHandler = new Handler();
@@ -56,8 +59,8 @@ public class ContactPaymentDialog extends AppCompatDialogFragment
         }
     };
 
-    public ContactPaymentDialog() {
-        // Required empty constructor
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     public static ContactPaymentDialog newInstance(String uri,
@@ -106,22 +109,21 @@ public class ContactPaymentDialog extends AppCompatDialogFragment
                 TypefaceUtils.load(getContext().getAssets(), "fonts/Montserrat-Regular.ttf"));
         binding.toolbar.setTitle(charSequence);
 
-        viewModel = new ContactPaymentDialogViewModel(this);
-        viewModel.onViewReady();
+        onViewReady();
 
         AddressAdapter receiveToAdapter = new AddressAdapter(
                 getActivity(),
                 R.layout.spinner_item,
-                viewModel.getSendFromList(),
+                getPresenter().getSendFromList(),
                 true);
         receiveToAdapter.setDropDownViewResource(R.layout.spinner_dropdown);
         binding.spinnerFrom.spinner.setAdapter(receiveToAdapter);
-        binding.spinnerFrom.spinner.setSelection(viewModel.getDefaultAccountPosition());
+        binding.spinnerFrom.spinner.setSelection(getPresenter().getDefaultAccountPosition());
         binding.spinnerFrom.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                 binding.spinnerFrom.spinner.setSelection(binding.spinnerFrom.spinner.getSelectedItemPosition());
-                viewModel.accountSelected(binding.spinnerFrom.spinner.getSelectedItemPosition());
+                getPresenter().accountSelected(binding.spinnerFrom.spinner.getSelectedItemPosition());
             }
 
             @Override
@@ -230,9 +232,13 @@ public class ContactPaymentDialog extends AppCompatDialogFragment
     }
 
     @Override
-    public void onDestroy() {
-        viewModel.destroy();
-        super.onDestroy();
+    protected ContactPaymentDialogPresenter createPresenter() {
+        return paymentDialogPresenter;
+    }
+
+    @Override
+    protected ContactPaymentDialogView getMvpView() {
+        return this;
     }
 
     @Override
@@ -256,12 +262,12 @@ public class ContactPaymentDialog extends AppCompatDialogFragment
         handler.validate(new SecondPasswordHandler.ResultListener() {
             @Override
             public void onNoSecondPassword() {
-                viewModel.onSendClicked(null);
+                getPresenter().onSendClicked(null);
             }
 
             @Override
             public void onSecondPasswordValidated(String validatedSecondPassword) {
-                viewModel.onSendClicked(validatedSecondPassword);
+                getPresenter().onSendClicked(validatedSecondPassword);
             }
         });
     }

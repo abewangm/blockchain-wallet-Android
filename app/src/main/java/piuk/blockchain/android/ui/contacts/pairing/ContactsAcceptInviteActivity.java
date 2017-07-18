@@ -11,25 +11,32 @@ import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactsAcceptInviteBinding;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.PermissionUtil;
 
 
-public class ContactsAcceptInviteActivity extends BaseAuthActivity implements ContactPairingMethodViewModel.DataListener {
+public class ContactsAcceptInviteActivity extends BaseMvpActivity<ContactsPairingMethodView, ContactPairingMethodPresenter>
+        implements ContactsPairingMethodView {
 
     public static final int SCAN_URI = 2007;
 
+    @Inject ContactPairingMethodPresenter contactPairingMethodPresenter;
     private ActivityContactsAcceptInviteBinding binding;
-    private ContactPairingMethodViewModel viewModel;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ContactPairingMethodViewModel(this);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contacts_accept_invite);
 
         setupToolbar(binding.toolbar.toolbarGeneral, R.string.contacts_accept_invite_title);
@@ -45,7 +52,7 @@ public class ContactsAcceptInviteActivity extends BaseAuthActivity implements Co
                         .create()
                         .show());
 
-        viewModel.onViewReady();
+        onViewReady();
     }
 
     @Override
@@ -61,7 +68,7 @@ public class ContactsAcceptInviteActivity extends BaseAuthActivity implements Co
                 && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
 
             String extra = data.getStringExtra(CaptureActivity.SCAN_RESULT);
-            if (extra != null) viewModel.handleScanInput(extra);
+            if (extra != null) getPresenter().handleScanInput(extra);
 
         } else if (resultCode != RESULT_CANCELED && requestCode == SCAN_URI) {
             showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
@@ -97,19 +104,13 @@ public class ContactsAcceptInviteActivity extends BaseAuthActivity implements Co
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        viewModel.destroy();
-    }
-
-    @Override
     public void onBackPressed() {
         setResult(RESULT_CANCELED);
         super.onBackPressed();
     }
 
     private void startScanActivity() {
-        if (!viewModel.isCameraOpen()) {
+        if (!getPresenter().isCameraOpen()) {
             Intent intent = new Intent(this, CaptureActivity.class);
             startActivityForResult(intent, SCAN_URI);
         } else {
@@ -122,4 +123,15 @@ public class ContactsAcceptInviteActivity extends BaseAuthActivity implements Co
         onBackPressed();
         return true;
     }
+
+    @Override
+    protected ContactPairingMethodPresenter createPresenter() {
+        return contactPairingMethodPresenter;
+    }
+
+    @Override
+    protected ContactsPairingMethodView getView() {
+        return this;
+    }
+
 }

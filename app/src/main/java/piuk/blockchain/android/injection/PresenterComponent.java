@@ -16,15 +16,15 @@ import piuk.blockchain.android.ui.backup.verify.BackupWalletVerifyFragment;
 import piuk.blockchain.android.ui.backup.wordlist.BackupWalletWordListFragment;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.buy.BuyViewModel;
-import piuk.blockchain.android.ui.chooser.AccountChooserViewModel;
+import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
-import piuk.blockchain.android.ui.contacts.detail.ContactDetailViewModel;
-import piuk.blockchain.android.ui.contacts.list.ContactsListViewModel;
-import piuk.blockchain.android.ui.contacts.pairing.ContactPairingMethodViewModel;
-import piuk.blockchain.android.ui.contacts.pairing.ContactsInvitationBuilderViewModel;
-import piuk.blockchain.android.ui.contacts.pairing.ContactsQrViewModel;
-import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialogViewModel;
-import piuk.blockchain.android.ui.contacts.payments.ContactsPaymentRequestViewModel;
+import piuk.blockchain.android.ui.contacts.detail.ContactDetailFragment;
+import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
+import piuk.blockchain.android.ui.contacts.pairing.ContactsAcceptInviteActivity;
+import piuk.blockchain.android.ui.contacts.pairing.ContactsInvitationBuilderActivity;
+import piuk.blockchain.android.ui.contacts.pairing.ContactsInvitationBuilderQrFragment;
+import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
+import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment;
 import piuk.blockchain.android.ui.createwallet.CreateWalletActivity;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.home.MainActivity;
@@ -45,6 +45,7 @@ import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
  * Subcomponents have access to all upstream objects in the graph but can have their own scope -
  * they don't need to explicitly state their dependencies as they have access anyway
  */
+@SuppressWarnings("NullableProblems")
 @PresenterScope
 @Subcomponent(modules = DataManagerModule.class)
 public interface PresenterComponent {
@@ -55,23 +56,7 @@ public interface PresenterComponent {
 
     @Deprecated void inject(ReceiveQrViewModel receiveQrViewModel);
 
-    @Deprecated void inject(ContactsListViewModel contactsListViewModel);
-
-    @Deprecated void inject(ContactPairingMethodViewModel contactPairingMethodViewModel);
-
-    @Deprecated void inject(ContactsInvitationBuilderViewModel contactsInvitationBuilderViewModel);
-
-    @Deprecated void inject(ContactsQrViewModel contactsQrViewModel);
-
-    @Deprecated void inject(ContactDetailViewModel contactDetailViewModel);
-
-    @Deprecated void inject(ContactsPaymentRequestViewModel contactsPaymentRequestViewModel);
-
-    @Deprecated void inject(AccountChooserViewModel accountChooserViewModel);
-
     @Deprecated void inject(WebSocketService webSocketService);
-
-    @Deprecated void inject(ContactPaymentDialogViewModel contactPaymentDialogViewModel);
 
     @Deprecated void inject(OnboardingViewModel onboardingViewModel);
 
@@ -123,4 +108,20 @@ public interface PresenterComponent {
     void inject(@NotNull RecoverFundsActivity recoverFundsActivity);
 
     void inject(@NotNull ReceiveFragment receiveFragment);
+
+    void inject(@NotNull ContactsAcceptInviteActivity contactsAcceptInviteActivity);
+
+    void inject(@NotNull ContactsInvitationBuilderQrFragment contactsInvitationBuilderQrFragment);
+    
+    void inject(@NotNull ContactsListActivity contactsListActivity);
+
+    void inject(@NotNull ContactDetailFragment contactDetailFragment);
+
+    void inject(@NotNull ContactsInvitationBuilderActivity contactsInvitationBuilderActivity);
+
+    void inject(@NotNull ContactPaymentRequestNotesFragment contactPaymentRequestNotesFragment);
+
+    void inject(@NotNull ContactPaymentDialog contactPaymentDialog);
+
+    void inject(@NotNull AccountChooserActivity accountChooserActivity);
 }

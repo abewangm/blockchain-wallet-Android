@@ -1,8 +1,6 @@
 package piuk.blockchain.android.ui.contacts.payments;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.contacts.data.Contact;
@@ -16,8 +14,7 @@ import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 import static piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.ARGUMENT_ACCOUNT_POSITION;
@@ -26,47 +23,26 @@ import static piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequest
 import static piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.ARGUMENT_SATOSHIS;
 
 
-@SuppressWarnings("WeakerAccess")
-public class ContactsPaymentRequestViewModel extends BaseViewModel {
+public class ContactsPaymentRequestPresenter extends BasePresenter<ContactPaymentRequestView> {
 
-    private DataListener dataListener;
-    @Inject protected ContactsDataManager contactsDataManager;
-    @Inject protected PayloadDataManager payloadDataManager;
+    private ContactsDataManager contactsDataManager;
+    private PayloadDataManager payloadDataManager;
     @VisibleForTesting Contact recipient;
     @VisibleForTesting long satoshis;
     @VisibleForTesting int accountPosition;
     @VisibleForTesting PaymentRequestType paymentRequestType;
 
-    interface DataListener {
+    @Inject
+    ContactsPaymentRequestPresenter(ContactsDataManager contactsDataManager,
+                                    PayloadDataManager payloadDataManager) {
 
-        Bundle getFragmentBundle();
-
-        @Nullable
-        String getNote();
-
-        void finishPage();
-
-        void contactLoaded(String name, PaymentRequestType paymentRequestType);
-
-        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void showProgressDialog();
-
-        void dismissProgressDialog();
-
-        void showSendSuccessfulDialog(String name);
-
-        void showRequestSuccessfulDialog();
-    }
-
-    ContactsPaymentRequestViewModel(DataListener dataListener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        this.dataListener = dataListener;
+        this.contactsDataManager = contactsDataManager;
+        this.payloadDataManager = payloadDataManager;
     }
 
     @Override
     public void onViewReady() {
-        Bundle fragmentBundle = dataListener.getFragmentBundle();
+        Bundle fragmentBundle = getView().getFragmentBundle();
         String contactId = fragmentBundle.getString(ARGUMENT_CONTACT_ID);
         satoshis = fragmentBundle.getLong(ARGUMENT_SATOSHIS, -1L);
         accountPosition = fragmentBundle.getInt(ARGUMENT_ACCOUNT_POSITION, -1);
@@ -81,55 +57,55 @@ public class ContactsPaymentRequestViewModel extends BaseViewModel {
 
     void sendRequest() {
         if (satoshis <= 0) {
-            dataListener.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR);
         } else {
-            dataListener.showProgressDialog();
+            getView().showProgressDialog();
 
             if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
 
-                PaymentRequest paymentRequest = new PaymentRequest(satoshis, dataListener.getNote());
+                PaymentRequest paymentRequest = new PaymentRequest(satoshis, getView().getNote());
 
-                compositeDisposable.add(
+                getCompositeDisposable().add(
                         payloadDataManager.getNextReceiveAddress(accountPosition)
                                 .doOnNext(paymentRequest::setAddress)
-                                 // Request that the other person sends payment
+                                // Request that the other person sends payment
                                 .flatMapCompletable(s -> contactsDataManager.requestSendPayment(recipient.getMdid(), paymentRequest))
-                                .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                                .doAfterTerminate(() -> getView().dismissProgressDialog())
                                 .subscribe(
-                                        () -> dataListener.showSendSuccessfulDialog(recipient.getName()),
-                                        throwable -> dataListener.showToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR)));
+                                        () -> getView().showSendSuccessfulDialog(recipient.getName()),
+                                        throwable -> getView().showToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR)));
 
             } else {
-                RequestForPaymentRequest request = new RequestForPaymentRequest(satoshis, dataListener.getNote());
-                compositeDisposable.add(
+                RequestForPaymentRequest request = new RequestForPaymentRequest(satoshis, getView().getNote());
+                getCompositeDisposable().add(
                         // Request that the other person receives payment
                         contactsDataManager.requestReceivePayment(recipient.getMdid(), request)
-                                .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                                .doAfterTerminate(() -> getView().dismissProgressDialog())
                                 .subscribe(
-                                        () -> dataListener.showRequestSuccessfulDialog(),
-                                        throwable -> dataListener.showToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR)));
+                                        () -> getView().showRequestSuccessfulDialog(),
+                                        throwable -> getView().showToast(R.string.contacts_error_sending_payment_request, ToastCustom.TYPE_ERROR)));
             }
         }
     }
 
     private void loadContact(String contactId) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 contactsDataManager.getContactList()
                         .filter(ContactsPredicates.filterById(contactId))
                         .subscribe(
                                 contact -> {
                                     recipient = contact;
-                                    dataListener.contactLoaded(recipient.getName(), paymentRequestType);
+                                    getView().contactLoaded(recipient.getName(), paymentRequestType);
                                 },
                                 throwable -> {
-                                    dataListener.showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
-                                    dataListener.finishPage();
+                                    getView().showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
+                                    getView().finishPage();
                                 },
                                 () -> {
                                     if (recipient == null) {
                                         // Wasn't found via filter, show not found
-                                        dataListener.showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
-                                        dataListener.finishPage();
+                                        getView().showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR);
+                                        getView().finishPage();
                                     }
                                 }));
     }

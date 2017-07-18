@@ -1,8 +1,6 @@
 package piuk.blockchain.android.ui.contacts.pairing
 
-import android.app.Application
 import android.app.NotificationManager
-import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
 import com.nhaarman.mockito_kotlin.*
@@ -12,23 +10,21 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.injection.*
-import piuk.blockchain.android.ui.contacts.pairing.ContactsQrViewModel.DIMENSION_QR_CODE
+import piuk.blockchain.android.ui.contacts.pairing.ContactsQrPresenter.DIMENSION_QR_CODE
 import piuk.blockchain.android.ui.customviews.ToastCustom
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
-class ContactsQrViewModelTest {
+class ContactsQrPresenterTest {
 
-    private lateinit var subject: ContactsQrViewModel
-    private val mockActivity: ContactsQrViewModel.DataListener = mock()
+    private lateinit var subject: ContactsQrPresenter
+    private val mockActivity: ContactsQrView = mock()
     private val mockQrCodeDataManager: QrCodeDataManager = mock()
     private val mockNotificationManager: NotificationManager = mock()
     private val mockRxBus: RxBus = mock()
@@ -36,15 +32,8 @@ class ContactsQrViewModelTest {
     @Before
     @Throws(Exception::class)
     fun setUp() {
-
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                MockApplicationModule(RuntimeEnvironment.application),
-                ApiModule(),
-                MockDataManagerModule())
-
-        subject = ContactsQrViewModel(mockActivity)
-
+        subject = ContactsQrPresenter(mockQrCodeDataManager, mockNotificationManager, mockRxBus)
+        subject.initView(mockActivity)
     }
 
     @Test
@@ -205,30 +194,13 @@ class ContactsQrViewModelTest {
 
     @Test
     @Throws(Exception::class)
-    fun destroy() {
+    fun onViewDestroyed() {
         // Arrange
 
         // Act
-        subject.destroy()
+        subject.onViewDestroyed()
         // Assert
         verify(mockRxBus).unregister(eq(NotificationPayload::class.java), anyOrNull())
-    }
-
-    inner class MockDataManagerModule : DataManagerModule() {
-        override fun provideQrDataManager(): QrCodeDataManager {
-            return mockQrCodeDataManager
-        }
-
-    }
-
-    inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-        override fun provideNotificationManager(context: Context?): NotificationManager {
-            return mockNotificationManager
-        }
-
-        override fun provideRxBus(): RxBus {
-            return mockRxBus
-        }
     }
 
 }

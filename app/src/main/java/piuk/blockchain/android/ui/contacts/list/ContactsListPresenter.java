@@ -1,11 +1,8 @@
 package piuk.blockchain.android.ui.contacts.list;
 
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.exceptions.DecryptionException;
@@ -22,44 +19,26 @@ import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import timber.log.Timber;
 
-@SuppressWarnings("WeakerAccess")
-public class ContactsListViewModel extends BaseViewModel {
+public class ContactsListPresenter extends BasePresenter<ContactsListView> {
 
-    private static final String TAG = ContactsListViewModel.class.getSimpleName();
-
-    private DataListener dataListener;
     private Observable<NotificationPayload> notificationObservable;
     @VisibleForTesting String link;
-    @Inject protected ContactsDataManager contactsDataManager;
-    @Inject protected PayloadDataManager payloadDataManager;
-    @Inject protected RxBus rxBus;
+    private ContactsDataManager contactsDataManager;
+    private PayloadDataManager payloadDataManager;
+    private RxBus rxBus;
 
-    interface DataListener {
-
-        Intent getPageIntent();
-
-        void onContactsLoaded(@NonNull List<ContactsListItem> contacts);
-
-        void setUiState(@UiState.UiStateDef int uiState);
-
-        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void showProgressDialog();
-
-        void dismissProgressDialog();
-
-        void showSecondPasswordDialog();
-
-    }
-
-    ContactsListViewModel(DataListener dataListener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        this.dataListener = dataListener;
+    @Inject
+    ContactsListPresenter(ContactsDataManager contactsDataManager,
+                          PayloadDataManager payloadDataManager,
+                          RxBus rxBus) {
+        this.contactsDataManager = contactsDataManager;
+        this.payloadDataManager = payloadDataManager;
+        this.rxBus = rxBus;
     }
 
     @Override
@@ -69,7 +48,7 @@ public class ContactsListViewModel extends BaseViewModel {
         // Set up page if Metadata initialized
         attemptPageSetup(true);
 
-        Intent intent = dataListener.getPageIntent();
+        Intent intent = getView().getPageIntent();
         if (intent != null && intent.hasExtra(ContactsListActivity.EXTRA_METADATA_URI)) {
             link = intent.getStringExtra(ContactsListActivity.EXTRA_METADATA_URI);
             intent.removeExtra(ContactsListActivity.EXTRA_METADATA_URI);
@@ -77,8 +56,8 @@ public class ContactsListViewModel extends BaseViewModel {
     }
 
     void initContactsService(@Nullable String secondPassword) {
-        dataListener.setUiState(UiState.LOADING);
-        compositeDisposable.add(
+        getView().setUiState(UiState.LOADING);
+        getCompositeDisposable().add(
                 payloadDataManager.generateNodes(secondPassword)
                         .andThen(payloadDataManager.getMetadataNodeFactory())
                         .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
@@ -86,48 +65,48 @@ public class ContactsListViewModel extends BaseViewModel {
                                 metadataNodeFactory.getSharedMetadataNode()))
                         .subscribe(this::registerMdid,
                                 throwable -> {
-                                    dataListener.setUiState(UiState.FAILURE);
+                                    getView().setUiState(UiState.FAILURE);
                                     if (throwable instanceof DecryptionException) {
-                                        dataListener.showToast(R.string.password_mismatch_error, ToastCustom.TYPE_ERROR);
+                                        getView().showToast(R.string.password_mismatch_error, ToastCustom.TYPE_ERROR);
                                     } else {
-                                        dataListener.showToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
+                                        getView().showToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
                                     }
                                 }));
     }
 
     // TODO: 30/03/2017 Move this into the registerNodeForMetaDataService function
     private void registerMdid() {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 payloadDataManager.registerMdid()
                         .flatMapCompletable(responseBody -> contactsDataManager.publishXpub())
                         .subscribe(
                                 () -> attemptPageSetup(false),
                                 throwable -> {
-                                    dataListener.setUiState(UiState.FAILURE);
-                                    dataListener.showToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
+                                    getView().setUiState(UiState.FAILURE);
+                                    getView().showToast(R.string.contacts_error_getting_messages, ToastCustom.TYPE_ERROR);
                                 }));
     }
 
     @VisibleForTesting
     void refreshContacts() {
-        dataListener.setUiState(UiState.LOADING);
-        compositeDisposable.add(
+        getView().setUiState(UiState.LOADING);
+        getCompositeDisposable().add(
                 contactsDataManager.fetchContacts()
                         .andThen(contactsDataManager.getContactList())
                         .toList()
                         .subscribe(
                                 this::handleContactListUpdate,
-                                throwable -> dataListener.setUiState(UiState.FAILURE)));
+                                throwable -> getView().setUiState(UiState.FAILURE)));
     }
 
     private void loadContacts() {
-        dataListener.setUiState(UiState.LOADING);
-        compositeDisposable.add(
+        getView().setUiState(UiState.LOADING);
+        getCompositeDisposable().add(
                 contactsDataManager.getContactList()
                         .toList()
                         .subscribe(
                                 this::handleContactListUpdate,
-                                throwable -> dataListener.setUiState(UiState.FAILURE)));
+                                throwable -> getView().setUiState(UiState.FAILURE)));
     }
 
     // TODO: 19/01/2017 This is pretty gross and I'm certain it can be Rx-ified in the future
@@ -135,7 +114,7 @@ public class ContactsListViewModel extends BaseViewModel {
         List<ContactsListItem> list = new ArrayList<>();
         List<Contact> pending = new ArrayList<>();
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 contactsDataManager.getContactsWithUnreadPaymentRequests()
                         .toList()
                         .subscribe(actionRequired -> {
@@ -158,18 +137,18 @@ public class ContactsListViewModel extends BaseViewModel {
                             updateUI(list);
 
                         }, throwable -> {
-                            dataListener.onContactsLoaded(new ArrayList<>());
-                            dataListener.setUiState(UiState.FAILURE);
+                            getView().onContactsLoaded(new ArrayList<>());
+                            getView().setUiState(UiState.FAILURE);
                         }));
     }
 
     private void updateUI(List<ContactsListItem> list) {
         if (!list.isEmpty()) {
-            dataListener.setUiState(UiState.CONTENT);
-            dataListener.onContactsLoaded(list);
+            getView().setUiState(UiState.CONTENT);
+            getView().onContactsLoaded(list);
         } else {
-            dataListener.onContactsLoaded(new ArrayList<>());
-            dataListener.setUiState(UiState.EMPTY);
+            getView().onContactsLoaded(new ArrayList<>());
+            getView().setUiState(UiState.EMPTY);
         }
     }
 
@@ -186,7 +165,7 @@ public class ContactsListViewModel extends BaseViewModel {
     void checkStatusOfPendingContacts(List<Contact> pending) {
         for (int i = 0; i < pending.size(); i++) {
             final Contact contact = pending.get(i);
-            compositeDisposable.add(
+            getCompositeDisposable().add(
                     contactsDataManager.readInvitationSent(contact)
                             .subscribe(
                                     success -> {
@@ -201,33 +180,33 @@ public class ContactsListViewModel extends BaseViewModel {
     private void subscribeToNotifications() {
         notificationObservable = rxBus.register(NotificationPayload.class);
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 notificationObservable
                         .compose(RxUtil.applySchedulersToObservable())
                         .subscribe(
                                 notificationPayload -> refreshContacts(),
-                                throwable -> Log.e(TAG, "subscribeToNotifications: ", throwable)));
+                                Timber::e));
     }
 
     @VisibleForTesting
     void handleLink(String data) {
-        dataListener.showProgressDialog();
-        compositeDisposable.add(
+        getView().showProgressDialog();
+        getCompositeDisposable().add(
                 contactsDataManager.acceptInvitation(data)
-                        .doAfterTerminate(() -> dataListener.dismissProgressDialog())
+                        .doAfterTerminate(() -> getView().dismissProgressDialog())
                         .subscribe(
                                 contact -> {
                                     link = null;
                                     refreshContacts();
-                                    dataListener.showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
-                                }, throwable -> dataListener.showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR)));
+                                    getView().showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
+                                }, throwable -> getView().showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR)));
 
     }
 
     private void attemptPageSetup(boolean firstAttempt) {
         if (firstAttempt) {
-            dataListener.setUiState(UiState.LOADING);
-            compositeDisposable.add(
+            getView().setUiState(UiState.LOADING);
+            getCompositeDisposable().add(
                     payloadDataManager.loadNodes()
                             .subscribe(
                                     success -> {
@@ -240,21 +219,22 @@ public class ContactsListViewModel extends BaseViewModel {
                                         } else {
                                             // Not set up, most likely has a second password enabled
                                             if (payloadDataManager.isDoubleEncrypted()) {
-                                                dataListener.showSecondPasswordDialog();
-                                                dataListener.setUiState(UiState.FAILURE);
+                                                getView().showSecondPasswordDialog();
+                                                getView().setUiState(UiState.FAILURE);
                                             } else {
                                                 initContactsService(null);
                                             }
                                         }
-                                    }, throwable -> dataListener.setUiState(UiState.FAILURE)));
+                                    }, throwable -> getView().setUiState(UiState.FAILURE)));
         } else {
-            dataListener.setUiState(UiState.FAILURE);
+            getView().setUiState(UiState.FAILURE);
         }
     }
 
     @Override
-    public void destroy() {
+    public void onViewDestroyed() {
+        super.onViewDestroyed();
         rxBus.unregister(NotificationPayload.class, notificationObservable);
-        super.destroy();
     }
+
 }

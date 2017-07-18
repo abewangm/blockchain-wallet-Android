@@ -13,7 +13,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
@@ -22,7 +21,8 @@ import piuk.blockchain.android.data.datamanagers.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.stores.PendingTransactionListStore
-import piuk.blockchain.android.injection.*
+import piuk.blockchain.android.injection.ApiModule
+import piuk.blockchain.android.injection.DataManagerModule
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_ID
@@ -30,24 +30,18 @@ import kotlin.test.assertNull
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
-class ContactsPaymentRequestViewModelTest {
+class ContactsPaymentRequestPresenterTest {
 
-    private lateinit var subject: ContactsPaymentRequestViewModel
-    private val mockActivity: ContactsPaymentRequestViewModel.DataListener = mock()
+    private lateinit var subject: ContactsPaymentRequestPresenter
+    private val mockActivity: ContactPaymentRequestView = mock()
     private val mockContactsManager: ContactsDataManager = mock()
     private val mockPayloadDataManager: PayloadDataManager = mock()
 
     @Before
     @Throws(Exception::class)
     fun setUp() {
-
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                ApplicationModule(RuntimeEnvironment.application),
-                MockApiModule(),
-                MockDataManagerModule())
-
-        subject = ContactsPaymentRequestViewModel(mockActivity)
+        subject = ContactsPaymentRequestPresenter(mockContactsManager, mockPayloadDataManager)
+        subject.initView(mockActivity)
     }
 
     @Test(expected = AssertionError::class)
@@ -336,18 +330,6 @@ class ContactsPaymentRequestViewModelTest {
         verify(mockActivity).dismissProgressDialog()
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         verifyNoMoreInteractions(mockActivity)
-    }
-
-    inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(
-                pendingTransactionListStore: PendingTransactionListStore?,
-                rxBus: RxBus?
-        ) = mockContactsManager
-    }
-
-    inner class MockDataManagerModule : DataManagerModule() {
-        override fun providePayloadDataManager(payloadManager: PayloadManager?, rxBus: RxBus?) =
-                mockPayloadDataManager
     }
 
 }

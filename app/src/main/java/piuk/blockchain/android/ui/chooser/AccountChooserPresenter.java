@@ -14,65 +14,43 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
-import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
-import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
 
-@SuppressWarnings("WeakerAccess")
-public class AccountChooserViewModel extends BaseViewModel {
+public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
 
-    private DataListener dataListener;
-
-    @Inject PrefsUtil prefsUtil;
-    @Inject WalletAccountHelper walletAccountHelper;
-    @Inject StringUtils stringUtils;
-    @Inject ContactsDataManager contactsDataManager;
-    @Inject AccessState accessState;
+    private WalletAccountHelper walletAccountHelper;
+    private StringUtils stringUtils;
+    private ContactsDataManager contactsDataManager;
+    private AccessState accessState;
 
     private List<ItemAccount> itemAccounts = new ArrayList<>();
 
-    interface DataListener {
+    @Inject
+    AccountChooserPresenter(WalletAccountHelper walletAccountHelper,
+                            StringUtils stringUtils,
+                            ContactsDataManager contactsDataManager,
+                            AccessState accessState) {
 
-        PaymentRequestType getPaymentRequestType();
-
-        /**
-         * We can't simply call BuildConfig.CONTACTS_ENABLED in this class as it would make it
-         * impossible to test, as it's reliant on the build.gradle config. Passing it here
-         * allows us to change the response via mocking the DataListener.
-         *
-         * TODO: This should be removed once/if Contacts ships
-         */
-        boolean getIfContactsEnabled();
-
-        void updateUi(List<ItemAccount> items);
-
-        void showNoContacts();
-
-    }
-
-    AccountChooserViewModel(DataListener dataListener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        this.dataListener = dataListener;
+        this.walletAccountHelper = walletAccountHelper;
+        this.stringUtils = stringUtils;
+        this.contactsDataManager = contactsDataManager;
+        this.accessState = accessState;
     }
 
     @Override
     public void onViewReady() {
-        PaymentRequestType paymentRequestType = dataListener.getPaymentRequestType();
+        PaymentRequestType paymentRequestType = getView().getPaymentRequestType();
 
         if (paymentRequestType == null) {
             throw new RuntimeException("Payment request type must be passed to the Account Chooser activity");
         }
 
         if (paymentRequestType.equals(PaymentRequestType.SEND)) {
-            if (dataListener.getIfContactsEnabled()) {
-                loadReceiveAccountsAndContacts();
-            } else {
-                loadReceiveAccountsOnly();
-            }
+            loadReceiveAccountsAndContacts();
         } else if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
             loadReceiveAccountsOnly();
         } else {
@@ -81,33 +59,33 @@ public class AccountChooserViewModel extends BaseViewModel {
     }
 
     private void loadReceiveAccountsAndContacts() {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 parseContactsList()
                         .flatMapObservable(contacts -> parseAccountList())
                         .flatMap(accounts -> parseImportedList())
                         .subscribe(
-                                items -> dataListener.updateUi(itemAccounts),
+                                items -> getView().updateUi(itemAccounts),
                                 Throwable::printStackTrace));
     }
 
     private void loadReceiveAccountsOnly() {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 parseAccountList()
                         .flatMap(accounts -> parseImportedList())
                         .subscribe(
-                                list -> dataListener.updateUi(itemAccounts),
+                                list -> getView().updateUi(itemAccounts),
                                 Throwable::printStackTrace));
     }
 
     private void loadContactsOnly() {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 parseContactsList()
                         .subscribe(
                                 items -> {
                                     if (!items.isEmpty()) {
-                                        dataListener.updateUi(itemAccounts);
+                                        getView().updateUi(itemAccounts);
                                     } else {
-                                        dataListener.showNoContacts();
+                                        getView().showNoContacts();
                                     }
                                 },
                                 Throwable::printStackTrace));

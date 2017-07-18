@@ -20,9 +20,12 @@ import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactsBinding;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.ui.contacts.detail.ContactDetailActivity;
 import piuk.blockchain.android.ui.contacts.pairing.ContactInviteActivity;
@@ -37,32 +40,37 @@ import static piuk.blockchain.android.ui.base.UiState.FAILURE;
 import static piuk.blockchain.android.ui.base.UiState.LOADING;
 
 
-public class ContactsListActivity extends BaseAuthActivity implements ContactsListViewModel.DataListener {
+public class ContactsListActivity extends BaseMvpActivity<ContactsListView, ContactsListPresenter>
+        implements ContactsListView {
 
     public static final String EXTRA_METADATA_URI = "metadata_uri";
     public static final String KEY_BUNDLE_CONTACT_ID = "contact_id";
 
     private static final int REQUEST_PAIRING = 98;
+
+    @Inject ContactsListPresenter contactsListPresenter;
     private ActivityContactsBinding binding;
-    private ContactsListViewModel viewModel;
     private ContactsListAdapter contactsListAdapter;
     private MaterialProgressDialog progressDialog;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contacts);
-        viewModel = new ContactsListViewModel(this);
 
         setupToolbar(binding.toolbar, R.string.contacts_title);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Buttons
         binding.fab.setOnClickListener(view -> ContactInviteActivity.start(this));
-        binding.buttonRetry.setOnClickListener(view -> viewModel.onViewReady());
+        binding.buttonRetry.setOnClickListener(view -> getPresenter().onViewReady());
         // Swipe to refresh layout
         binding.swipeRefreshLayout.setColorSchemeResources(R.color.primary_blue_accent);
-        binding.swipeRefreshLayout.setOnRefreshListener(() -> viewModel.onViewReady());
+        binding.swipeRefreshLayout.setOnRefreshListener(() -> getPresenter().onViewReady());
         // Contacts list
         contactsListAdapter = new ContactsListAdapter(new ArrayList<>(), new StringUtils(this));
         contactsListAdapter.setContactsClickListener(id -> {
@@ -81,7 +89,7 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.onViewReady();
+        onViewReady();
     }
 
     @Override
@@ -113,14 +121,8 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_PAIRING && resultCode == RESULT_OK) {
-            viewModel.onViewReady();
+            getPresenter().onViewReady();
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        viewModel.destroy();
     }
 
     @Override
@@ -139,7 +141,7 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_second_password_prompt)
                 .setView(frameLayout)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> viewModel.initContactsService(editText.getText().toString()))
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().initContactsService(editText.getText().toString()))
                 .create()
                 .show();
     }
@@ -185,4 +187,15 @@ public class ContactsListActivity extends BaseAuthActivity implements ContactsLi
                 break;
         }
     }
+
+    @Override
+    protected ContactsListPresenter createPresenter() {
+        return contactsListPresenter;
+    }
+
+    @Override
+    protected ContactsListView getView() {
+        return this;
+    }
+
 }
