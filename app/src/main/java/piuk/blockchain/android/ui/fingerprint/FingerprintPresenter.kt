@@ -30,7 +30,7 @@ class FingerprintPresenter @Inject constructor(
         when (currentStage) {
             FingerprintStage.REGISTER_FINGERPRINT -> registerFingerprint()
             FingerprintStage.AUTHENTICATE -> authenticateFingerprint()
-            else -> throw RuntimeException("Unknown stage passed to ViewModel")
+            else -> throw RuntimeException("Unknown stage passed to Presenter")
         }
     }
 

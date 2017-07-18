@@ -17,6 +17,7 @@ import org.robolectric.annotation.Config;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
@@ -35,8 +36,7 @@ import static org.mockito.Mockito.when;
 /**
  * Created by adambennett on 09/08/2016.
  */
-@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
-@Config(sdk = 23, constants = piuk.blockchain.android.BuildConfig.class, application = BlockchainTestApplication.class)
+@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class LauncherPresenterTest {
 

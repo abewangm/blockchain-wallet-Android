@@ -191,7 +191,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         setSupportActionBar(toolbar);
         ViewUtils.setElevation(toolbar, 0F);
 
-        // Notify ViewModel that page is setup
+        // Notify Presenter that page is setup
         onViewReady();
 
         // Create items

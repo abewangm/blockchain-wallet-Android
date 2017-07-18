@@ -154,12 +154,13 @@ public class DataManagerModule {
     protected BuyDataManager provideBuyDataManager(SettingsDataManager settingsDataManager,
                                                    AuthDataManager authDataManager,
                                                    PayloadDataManager payloadDataManager,
-                                                   AccessState accessState) {
+                                                   AccessState accessState,
+                                                   ExchangeService exchangeService) {
         return new BuyDataManager(settingsDataManager,
                 authDataManager,
                 payloadDataManager,
                 accessState,
-                ExchangeService.getInstance());
+                exchangeService);
     }
 
     @Provides

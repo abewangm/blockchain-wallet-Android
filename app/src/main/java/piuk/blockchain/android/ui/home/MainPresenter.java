@@ -30,7 +30,6 @@ import piuk.blockchain.android.data.notifications.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
-import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
@@ -215,7 +214,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         accessState.unpairWallet();
         appUtil.restartApp();
         accessState.setPIN(null);
-        ExchangeService.getInstance().wipe();
+        buyDataManager.wipe();
     }
 
     PayloadManager getPayloadManager() {

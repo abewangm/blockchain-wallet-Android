@@ -6,14 +6,19 @@ import info.blockchain.wallet.settings.SettingsManager;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import piuk.blockchain.android.BlockchainTestApplication;
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
@@ -37,6 +42,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
+@RunWith(RobolectricTestRunner.class)
 public class SettingsPresenterTest {
 
     private SettingsPresenter subject;

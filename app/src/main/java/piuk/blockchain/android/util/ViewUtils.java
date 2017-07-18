@@ -91,7 +91,7 @@ public class ViewUtils {
 
     /**
      * These annotations are hidden in the Android Jar for some reason. Defining them here instead
-     * for use in ViewModel callbacks etc.
+     * for use in {@link piuk.blockchain.android.ui.base.View} interfaces etc.
      */
     @IntDef({VISIBLE, INVISIBLE, GONE})
     @Retention(RetentionPolicy.SOURCE)
@@ -101,7 +101,7 @@ public class ViewUtils {
 
     /**
      * These annotations are hidden in the Android Jar for some reason. Defining them here instead
-     * for use in ViewModel callbacks etc.
+     * for use in {@link piuk.blockchain.android.ui.base.View} interfaces etc.
      */
     @IntDef({LENGTH_SHORT, LENGTH_LONG, LENGTH_INDEFINITE})
     @Retention(RetentionPolicy.SOURCE)

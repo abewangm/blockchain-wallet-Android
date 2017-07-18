@@ -3,7 +3,6 @@ package piuk.blockchain.android.injection;
 import org.jetbrains.annotations.NotNull;
 
 import dagger.Subcomponent;
-import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.account.AccountActivity;
 import piuk.blockchain.android.ui.account.AccountEditActivity;
@@ -51,8 +50,6 @@ import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 public interface PresenterComponent {
 
     void inject(WebSocketService webSocketService);
-
-    @Deprecated void inject(ExchangeService exchangeService);
 
     // Activity/Fragment injection
     void inject(@NotNull LauncherActivity launcherActivity);
